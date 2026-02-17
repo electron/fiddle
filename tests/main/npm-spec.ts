@@ -5,7 +5,7 @@ import {
   getIsPackageManagerInstalled,
   packageRun,
 } from '../../src/main/npm';
-import { exec } from '../../src/main/utils/exec';
+import { exec, execFile } from '../../src/main/utils/exec';
 import { overridePlatform, resetPlatform } from '../utils';
 vi.mock('../../src/main/utils/exec');
 
@@ -127,19 +127,21 @@ describe('npm', () => {
           'thing',
         );
 
-        expect(exec).toHaveBeenCalledWith(
-          '/my/directory',
-          'npm install -S say thing',
-        );
+        expect(execFile).toHaveBeenCalledWith('/my/directory', 'npm', [
+          'install',
+          '-S',
+          'say',
+          'thing',
+        ]);
       });
 
-      it('attempts to installs all modules', async () => {
+      it('attempts to install all modules', async () => {
         addModules({ dir: '/my/directory', packageManager: 'npm' });
 
-        expect(exec).toHaveBeenCalledWith(
-          '/my/directory',
-          'npm install --also=dev --prod',
-        );
+        expect(execFile).toHaveBeenCalledWith('/my/directory', 'npm', [
+          'install',
+          '-S',
+        ]);
       });
     });
 
@@ -151,16 +153,19 @@ describe('npm', () => {
           'thing',
         );
 
-        expect(exec).toHaveBeenCalledWith(
-          '/my/directory',
-          'yarn add say thing',
-        );
+        expect(execFile).toHaveBeenCalledWith('/my/directory', 'yarn', [
+          'add',
+          'say',
+          'thing',
+        ]);
       });
 
       it('attempts to installs all modules', async () => {
         addModules({ dir: '/my/directory', packageManager: 'yarn' });
 
-        expect(exec).toHaveBeenCalledWith('/my/directory', 'yarn install');
+        expect(execFile).toHaveBeenCalledWith('/my/directory', 'yarn', [
+          'install',
+        ]);
       });
     });
   });
