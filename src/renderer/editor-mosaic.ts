@@ -287,6 +287,18 @@ export class EditorMosaic {
       throw new Error(`Cannot add file "${id}": File already exists`);
     }
 
+    if (id.includes('/') || id.includes('\\')) {
+      throw new Error(
+        `Invalid filename "${id}": filenames cannot include path separators`,
+      );
+    }
+
+    if (!isSupportedFile(id)) {
+      throw new Error(
+        `Invalid filename "${id}": Must be a file ending in .cjs, .js, .mjs, .html, .css, or .json`,
+      );
+    }
+
     const entryPoint = this.mainEntryPointFile();
 
     if (isMainEntryPoint(id) && entryPoint) {
@@ -306,6 +318,27 @@ export class EditorMosaic {
 
     if (this.files.has(newId)) {
       throw new Error(`Cannot rename file to "${newId}": File already exists`);
+    }
+
+    if (newId.includes('/') || newId.includes('\\')) {
+      throw new Error(
+        `Invalid filename "${newId}": filenames cannot include path separators`,
+      );
+    }
+
+    if (
+      newId.endsWith('.json') &&
+      [PACKAGE_NAME, 'package-lock.json'].includes(newId)
+    ) {
+      throw new Error(
+        `Cannot add ${PACKAGE_NAME} or package-lock.json as custom files`,
+      );
+    }
+
+    if (!isSupportedFile(newId)) {
+      throw new Error(
+        `Invalid filename "${newId}": Must be a file ending in .cjs, .js, .mjs, .html, .css, or .json`,
+      );
     }
 
     const entryPoint = this.mainEntryPointFile();
