@@ -1,6 +1,12 @@
 import * as React from 'react';
 
-import { Button, Callout, Checkbox, FormGroup } from '@blueprintjs/core';
+import {
+  Button,
+  ButtonGroup,
+  Callout,
+  Checkbox,
+  FormGroup,
+} from '@blueprintjs/core';
 import { observer } from 'mobx-react';
 
 import { AppState } from '../state';
@@ -55,7 +61,11 @@ export const GitHubSettings = observer(
             personal access token you gave us, we logged you into GitHub as{' '}
             <code>{gitHubLogin}</code>.
           </p>
-          <Button onClick={signOut} icon="log-out" text="Sign out" />
+
+          <ButtonGroup>
+            <Button onClick={this.signIn} icon="log-in" text="Update token" />
+            <Button onClick={signOut} icon="log-out" text="Sign out" />
+          </ButtonGroup>
         </Callout>
       );
     }
