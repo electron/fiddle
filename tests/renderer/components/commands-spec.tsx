@@ -1,28 +1,28 @@
 import * as React from 'react';
 
-import { Button, ControlGroup } from '@blueprintjs/core';
-import { shallow } from 'enzyme';
+import { render, screen } from '@testing-library/react';
+import { userEvent } from '@testing-library/user-event';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
+import { renderClassComponentWithInstanceRef } from '../../../rtl-spec/test-utils/renderClassComponentWithInstanceRef';
 import { Commands } from '../../../src/renderer/components/commands';
-import { BisectHandler } from '../../../src/renderer/components/commands-bisect';
 import { AppState } from '../../../src/renderer/state';
 import { overrideRendererPlatform, resetRendererPlatform } from '../../utils';
 
 vi.mock('../../../src/renderer/components/commands-runner', () => ({
-  Runner: 'runner',
+  Runner: () => <div data-testid="runner" />,
 }));
 
 vi.mock('../../../src/renderer/components/commands-version-chooser', () => ({
-  VersionChooser: 'version-chooser',
+  VersionChooser: () => <div data-testid="version-chooser" />,
 }));
 
 vi.mock('../../../src/renderer/components/commands-address-bar', () => ({
-  AddressBar: 'address-bar',
+  AddressBar: () => <div data-testid="address-bar" />,
 }));
 
 vi.mock('../../../src/renderer/components/commands-action-button', () => ({
-  GistActionButton: 'action-button',
+  GistActionButton: () => <div data-testid="action-button" />,
 }));
 
 describe('Commands component', () => {
@@ -39,38 +39,47 @@ describe('Commands component', () => {
 
   it('renders when system is darwin', () => {
     overrideRendererPlatform('darwin');
-    const wrapper = shallow(<Commands appState={store} />);
-    expect(wrapper).toMatchSnapshot();
+    const { container } = render(<Commands appState={store} />);
+    expect(container.querySelector('.commands')).toBeInTheDocument();
+    expect(container.querySelector('.commands.is-mac')).toBeInTheDocument();
   });
 
   it('renders when system not is darwin', () => {
     overrideRendererPlatform('win32');
-    const wrapper = shallow(<Commands appState={store} />);
-    expect(wrapper).toMatchSnapshot();
+    const { container } = render(<Commands appState={store} />);
+    expect(container.querySelector('.commands')).toBeInTheDocument();
+    expect(container.querySelector('.commands.is-mac')).not.toBeInTheDocument();
   });
 
   it('can show the bisect command tools', () => {
     store.isBisectCommandShowing = true;
-    const wrapper = shallow(<Commands appState={store} />);
-
-    expect(wrapper.find(BisectHandler).length).toBe(1);
+    render(<Commands appState={store} />);
+    // BisectHandler is not mocked, so it renders directly.
+    // The mock store has Bisector set, so active bisect buttons appear.
+    expect(
+      screen.getByRole('button', { name: 'Cancel bisect' }),
+    ).toBeInTheDocument();
   });
 
   it('handleDoubleClick()', () => {
-    const wrapper = shallow(<Commands appState={store} />);
-    const instance: any = wrapper.instance();
+    const { instance } = renderClassComponentWithInstanceRef(Commands, {
+      appState: store,
+    });
 
     const tag = { tagName: 'DIV' };
-    instance.handleDoubleClick({ target: tag, currentTarget: tag });
+    // handleDoubleClick is private — cast needed to test it directly
+    (instance as any).handleDoubleClick({ target: tag, currentTarget: tag });
 
     expect(window.ElectronFiddle.macTitlebarClicked).toHaveBeenCalled();
   });
 
   it('handleDoubleClick() should not handle input tag', () => {
-    const wrapper = shallow(<Commands appState={store} />);
-    const instance: any = wrapper.instance();
+    const { instance } = renderClassComponentWithInstanceRef(Commands, {
+      appState: store,
+    });
 
-    instance.handleDoubleClick({
+    // handleDoubleClick is private — cast needed to test it directly
+    (instance as any).handleDoubleClick({
       target: { tagName: 'INPUT' },
       currentTarget: { tagName: 'DIV' },
     });
@@ -78,10 +87,13 @@ describe('Commands component', () => {
     expect(window.ElectronFiddle.macTitlebarClicked).toHaveBeenCalledTimes(0);
   });
 
-  it('show setting', () => {
-    const wrapper = shallow(<Commands appState={store} />);
+  it('show setting', async () => {
+    const user = userEvent.setup();
+    render(<Commands appState={store} />);
 
-    wrapper.find(ControlGroup).at(0).find(Button).simulate('click');
+    // The settings button has icon="cog" and title="Setting"
+    const settingsButton = screen.getByTitle('Setting');
+    await user.click(settingsButton);
 
     expect(store.toggleSettings).toHaveBeenCalled();
   });
