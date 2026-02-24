@@ -2,7 +2,7 @@
   "name": "electron-fiddle",
   "private": true,
   "productName": "Electron Fiddle",
-  "version": "0.38.0",
+  "version": "0.38.1",
   "description": "The easiest way to get started with Electron",
   "repository": "https://github.com/electron/fiddle",
   "homepage": "https://electronjs.org/fiddle",
