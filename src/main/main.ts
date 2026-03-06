@@ -225,7 +225,10 @@ export function main(argv_in: string[]) {
   app.on('before-quit', onBeforeQuit);
   app.on('window-all-closed', onWindowsAllClosed);
   app.on('activate', () => {
-    app.whenReady().then(getOrCreateMainWindow);
+    app.whenReady().then(async () => {
+      const win = await getOrCreateMainWindow();
+      win.show();
+    });
   });
 }
 
