@@ -63,7 +63,8 @@ describe('ElectronSettings component', () => {
       {
         source: VersionSource.local,
         state: InstallState.installed,
-        version: '3.0.0',
+        version: '0.0.0-local.123',
+        name: 'My Local Build',
       },
       {
         source: VersionSource.remote,
@@ -86,16 +87,18 @@ describe('ElectronSettings component', () => {
   });
 
   it('handles removing a version', async () => {
-    store.versions['3.0.0-nightly.1'] = {
+    store.versions['0.0.0-local.1'] = {
       state: InstallState.installed,
-      version: '3.0.0-nightly.1',
+      version: '0.0.0-local.1',
       source: VersionSource.local,
+      name: 'Build One',
     };
 
-    store.versions['3.0.0'] = {
+    store.versions['0.0.0-local.2'] = {
       state: InstallState.installed,
-      version: '3.0.0',
+      version: '0.0.0-local.2',
       source: VersionSource.local,
+      name: 'Build Two',
     };
 
     const wrapper = mount(
@@ -133,11 +136,12 @@ describe('ElectronSettings component', () => {
   });
 
   it('handles missing local versions', () => {
-    const version = '99999.0.0';
+    const version = '0.0.0-local.999';
     const ver = {
       source: VersionSource.local,
       state: InstallState.missing,
       version,
+      name: 'Missing Build',
     };
     store.versions = { version: ver };
     store.versionsToShow = [ver];

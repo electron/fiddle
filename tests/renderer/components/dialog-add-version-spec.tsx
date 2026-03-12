@@ -24,7 +24,7 @@ describe('AddVersionDialog component', () => {
     const wrapper = shallow(<AddVersionDialog appState={store} />);
 
     wrapper.setState({
-      isValidVersion: true,
+      isValidName: true,
       isValidElectron: true,
       folderPath: mockFile,
     });
@@ -32,7 +32,7 @@ describe('AddVersionDialog component', () => {
     expect(wrapper).toMatchSnapshot();
 
     wrapper.setState({
-      isValidVersion: false,
+      isValidName: false,
       isValidElectron: true,
       folderPath: mockFile,
     });
@@ -40,7 +40,7 @@ describe('AddVersionDialog component', () => {
     expect(wrapper).toMatchSnapshot();
 
     wrapper.setState({
-      isValidVersion: true,
+      isValidName: true,
       isValidElectron: true,
       existingLocalVersion: {
         version: '2.2.2',
@@ -76,30 +76,44 @@ describe('AddVersionDialog component', () => {
       expect(wrapper.state('isValidElectron')).toBe(true);
       expect(wrapper.state('folderPath')).toBe('/test/');
       expect(wrapper.state('localName')).toBe('Test');
+      expect(wrapper.state('name')).toBe('Test');
+      expect(wrapper.state('isValidName')).toBe(true);
     });
   });
 
-  describe('onChangeVersion()', () => {
+  describe('onChangeName()', () => {
     it('handles valid input', () => {
       const wrapper = shallow(<AddVersionDialog appState={store} />);
 
-      (wrapper.instance() as any).onChangeVersion({
-        target: { value: '3.3.3' },
+      (wrapper.instance() as any).onChangeName({
+        target: { value: 'My Build' },
       });
-      expect(wrapper.state('isValidVersion')).toBe(true);
-      expect(wrapper.state('version')).toBe('3.3.3');
+      expect(wrapper.state('isValidName')).toBe(true);
+      expect(wrapper.state('name')).toBe('My Build');
     });
 
-    it('handles invalid input', () => {
+    it('handles empty input', () => {
       const wrapper = shallow(<AddVersionDialog appState={store} />);
 
-      (wrapper.instance() as any).onChangeVersion({ target: { value: 'foo' } });
-      expect(wrapper.state('isValidVersion')).toBe(false);
-      expect(wrapper.state('version')).toBe('foo');
+      (wrapper.instance() as any).onChangeName({ target: { value: '' } });
+      expect(wrapper.state('isValidName')).toBe(false);
+      expect(wrapper.state('name')).toBe('');
+    });
 
-      (wrapper.instance() as any).onChangeVersion({ target: {} });
-      expect(wrapper.state('isValidVersion')).toBe(false);
-      expect(wrapper.state('version')).toBe('');
+    it('handles whitespace-only input', () => {
+      const wrapper = shallow(<AddVersionDialog appState={store} />);
+
+      (wrapper.instance() as any).onChangeName({ target: { value: '   ' } });
+      expect(wrapper.state('isValidName')).toBe(false);
+      expect(wrapper.state('name')).toBe('   ');
+    });
+
+    it('handles missing value', () => {
+      const wrapper = shallow(<AddVersionDialog appState={store} />);
+
+      (wrapper.instance() as any).onChangeName({ target: {} });
+      expect(wrapper.state('isValidName')).toBe(false);
+      expect(wrapper.state('name')).toBe('');
     });
   });
 
@@ -116,8 +130,10 @@ describe('AddVersionDialog component', () => {
       const wrapper = shallow(<AddVersionDialog appState={store} />);
 
       wrapper.setState({
-        version: '3.3.3',
+        name: 'My Custom Build',
         folderPath: '/test/path',
+        isValidElectron: true,
+        isValidName: true,
       });
 
       await (wrapper.instance() as any).onSubmit();
@@ -126,7 +142,8 @@ describe('AddVersionDialog component', () => {
       expect(store.addLocalVersion).toHaveBeenCalledWith(
         expect.objectContaining({
           localPath: '/test/path',
-          version: '3.3.3',
+          version: expect.stringMatching(/^0\.0\.0-local\.\d+$/),
+          name: 'My Custom Build',
         }),
       );
     });
@@ -137,7 +154,8 @@ describe('AddVersionDialog component', () => {
       wrapper.setState({
         isValidElectron: true,
         folderPath: '/test/path',
-        version: '3.3.3',
+        name: 'My Build',
+        isValidName: true,
         existingLocalVersion: {
           version: '2.2.2',
           localPath: '/test/path',

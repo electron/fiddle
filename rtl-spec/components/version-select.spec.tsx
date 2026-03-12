@@ -12,6 +12,7 @@ import {
 import {
   VersionSelect,
   filterItems,
+  getItemDisplayText,
   getItemIcon,
   getItemLabel,
   renderItem,
@@ -80,9 +81,52 @@ describe('VersionSelect component', () => {
 
       expect(queryAllByTestId('disabled-menu-item')).toHaveLength(0);
     });
+    it('does not disable local versions even when disableDownload returns true', () => {
+      vi.mocked(disableDownload).mockReturnValueOnce(true);
+
+      const localVersion: RunnableVersion = {
+        ...mockVersion1,
+        source: local,
+        state: installed,
+        name: 'My Build',
+      };
+
+      const item = renderItem(localVersion, {
+        handleClick: () => ({}),
+        index: 0,
+        modifiers: { active: true, disabled: false, matchesPredicate: true },
+        query: '',
+      })!;
+
+      const { queryAllByTestId } = render(item);
+
+      expect(queryAllByTestId('disabled-menu-item')).toHaveLength(0);
+    });
   });
 
-  describe('getItemLabel()', () => {
+  describe('getItemDisplayText()', () => {
+    it('returns name for local versions', () => {
+      const input: RunnableVersion = {
+        ...mockVersion1,
+        source: local,
+        state: installed,
+        name: 'My Debug Build',
+      };
+      expect(getItemDisplayText(input)).toBe('My Debug Build');
+    });
+
+    it('returns "Local Build" for local versions without a name', () => {
+      const input: RunnableVersion = {
+        ...mockVersion1,
+        source: local,
+        state: installed,
+      };
+      expect(getItemDisplayText(input)).toBe('Local Build');
+    });
+
+    it('returns version string for remote versions', () => {
+      expect(getItemDisplayText(mockVersion1)).toBe(mockVersion1.version);
+    });
     it('returns the correct label for an available local version', () => {
       const input: RunnableVersion = {
         ...mockVersion1,
@@ -90,8 +134,7 @@ describe('VersionSelect component', () => {
         source: local,
       };
 
-      expect(getItemLabel(input)).toBe('Local');
-      expect(getItemLabel({ ...input, name: 'Hi' })).toBe('Hi');
+      expect(getItemLabel(input)).toBe('Local Build');
     });
 
     it('returns the correct label for an unavailable local version', () => {
@@ -165,6 +208,41 @@ describe('VersionSelect component', () => {
       ] as RunnableVersion[];
 
       expect(filterItems('3', versions)).toEqual(expected);
+    });
+
+    it('sorts local versions before remote versions', () => {
+      const localVer = {
+        version: '0.0.0-local.123',
+        source: local,
+        name: 'My Build',
+      } as RunnableVersion;
+
+      const versions = [
+        { version: '14.3.0' },
+        localVer,
+        { version: '3.0.0' },
+      ] as RunnableVersion[];
+
+      const result = filterItems('build', versions);
+      // Only the local version matches 'build' (via name)
+      expect(result).toEqual([localVer]);
+    });
+
+    it('matches local versions by name', () => {
+      const localVer = {
+        version: '0.0.0-local.123',
+        source: local,
+        name: 'My Debug Build',
+      } as RunnableVersion;
+
+      const versions = [
+        { version: '14.3.0' },
+        localVer,
+        { version: '3.0.0' },
+      ] as RunnableVersion[];
+
+      const result = filterItems('debug', versions);
+      expect(result).toEqual([localVer]);
     });
 
     it('sorts in descending order when the query is non-numeric', () => {

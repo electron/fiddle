@@ -166,6 +166,94 @@ exports[`ElectronSettings component > renders 1`] = `
       className="electron-versions-table"
     >
       <div
+        className="electron-versions-section-header local"
+      >
+        <Blueprint3.Icon
+          icon="desktop"
+          iconSize={12}
+        />
+        <span>
+          Local Builds
+        </span>
+      </div>
+      <div
+        className="electron-versions-header"
+      >
+        <div
+          className="version-col"
+        >
+          Name
+        </div>
+        <div
+          className="status-col"
+        >
+          Status
+        </div>
+        <div
+          className="action-col"
+        >
+          Action
+        </div>
+      </div>
+      <FixedSizeList
+        className="electron-versions-list"
+        height={40}
+        itemCount={1}
+        itemData={
+          {
+            "appState": {
+              "channelsToShow": [
+                "Stable",
+                "Beta",
+              ],
+              "currentElectronVersion": "2.0.1 remote installed",
+              "version": "2.0.1",
+              "versions": [
+                "2.0.3 remote installed",
+                "2.0.2 remote installed",
+                "2.0.1 remote installed",
+                "2.0.0 remote installed",
+                "1.8.7 remote installed",
+                "0.0.0-local.123 local installed",
+                "3.0.0-nightly.1 remote installed",
+              ],
+              "versionsToShow": [
+                "3.0.0-nightly.1 remote installed",
+                "0.0.0-local.123 local installed",
+                "2.0.3 remote installed",
+                "2.0.2 remote downloading",
+                "2.0.1 remote missing",
+                "2.0.0 remote installing",
+                "1.8.7 remote installed",
+              ],
+            },
+            "versions": [
+              {
+                "name": "My Local Build",
+                "source": "local",
+                "state": "installed",
+                "version": "0.0.0-local.123",
+              },
+            ],
+          }
+        }
+        itemSize={40}
+        width="100%"
+      >
+        <Component />
+      </FixedSizeList>
+      <div
+        className="electron-versions-section-header remote"
+      >
+        <Blueprint3.Icon
+          icon="cloud"
+          iconSize={12}
+        />
+        <span>
+          Releases
+        </span>
+      </div>
+      <div
         className="electron-versions-header"
       >
         <div
@@ -187,7 +275,7 @@ exports[`ElectronSettings component > renders 1`] = `
       <FixedSizeList
         className="electron-versions-list"
         height={400}
-        itemCount={7}
+        itemCount={6}
         itemData={
           {
             "appState": {
@@ -203,12 +291,12 @@ exports[`ElectronSettings component > renders 1`] = `
                 "2.0.1 remote installed",
                 "2.0.0 remote installed",
                 "1.8.7 remote installed",
-                "3.0.0 local installed",
+                "0.0.0-local.123 local installed",
                 "3.0.0-nightly.1 remote installed",
               ],
               "versionsToShow": [
                 "3.0.0-nightly.1 remote installed",
-                "3.0.0 local installed",
+                "0.0.0-local.123 local installed",
                 "2.0.3 remote installed",
                 "2.0.2 remote downloading",
                 "2.0.1 remote missing",
@@ -221,11 +309,6 @@ exports[`ElectronSettings component > renders 1`] = `
                 "source": "remote",
                 "state": "installed",
                 "version": "3.0.0-nightly.1",
-              },
-              {
-                "source": "local",
-                "state": "installed",
-                "version": "3.0.0",
               },
               {
                 "source": "remote",

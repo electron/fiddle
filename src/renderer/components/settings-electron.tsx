@@ -119,7 +119,7 @@ const ElectronVersionRow = observer(({ index, style, data }: RowProps) => {
           />
         </Tooltip2>
       );
-    } else if (disableDownload(version)) {
+    } else if (!isLocal && disableDownload(version)) {
       return (
         <Tooltip2
           position="auto"
@@ -139,12 +139,16 @@ const ElectronVersionRow = observer(({ index, style, data }: RowProps) => {
     return <Button {...buttonProps} type={undefined} />;
   };
 
+  const isLocal = item.source === VersionSource.local;
+
   return (
     <div
-      className={`electron-version-row ${index % 2 === 0 ? 'even' : 'odd'}`}
+      className={`electron-version-row ${index % 2 === 0 ? 'even' : 'odd'} ${isLocal ? 'local' : 'remote'}`}
       style={style}
     >
-      <div className="version-col">{item.version}</div>
+      <div className="version-col">
+        {isLocal ? item.name || 'Local Build' : item.version}
+      </div>
       <div className="status-col">{renderHumanState(item)}</div>
       <div className="action-col">{renderAction(item)}</div>
     </div>
@@ -277,9 +281,18 @@ export const ElectronSettings = observer(
       if (!filterQuery) return versionsToShow;
 
       const query = filterQuery.toLowerCase();
-      return versionsToShow.filter((ver) =>
-        ver.version.toLowerCase().includes(query),
-      );
+      return versionsToShow.filter((ver) => {
+        // Search by version string
+        if (ver.version.toLowerCase().includes(query)) return true;
+        // Also search by name for local builds
+        if (
+          ver.source === VersionSource.local &&
+          ver.name &&
+          ver.name.toLowerCase().includes(query)
+        )
+          return true;
+        return false;
+      });
     }
 
     public render() {
@@ -449,31 +462,68 @@ export const ElectronSettings = observer(
     }
 
     /**
-     * Renders the table with Electron versions.
+     * Renders the table with Electron versions, separating local builds
+     * from remote releases.
      */
     private renderVersionsTable(): JSX.Element {
       const versions = this.filteredVersions;
-      const itemData = {
-        versions,
-        appState: this.props.appState,
-      };
+      const localVersions = versions.filter(
+        (v) => v.source === VersionSource.local,
+      );
+      const remoteVersions = versions.filter(
+        (v) => v.source !== VersionSource.local,
+      );
+      const { appState } = this.props;
 
       return (
         <div className="electron-versions-table">
+          {localVersions.length > 0 && (
+            <>
+              <div className="electron-versions-section-header local">
+                <Icon icon="desktop" iconSize={12} />
+                <span>Local Builds</span>
+              </div>
+              <div className="electron-versions-header">
+                <div className="version-col">Name</div>
+                <div className="status-col">Status</div>
+                <div className="action-col">Action</div>
+              </div>
+              <List
+                height={Math.min(localVersions.length * 40, 160)}
+                itemCount={localVersions.length}
+                itemSize={40}
+                width="100%"
+                itemData={{
+                  versions: localVersions,
+                  appState,
+                }}
+                className="electron-versions-list"
+              >
+                {ElectronVersionRow}
+              </List>
+            </>
+          )}
+          <div className="electron-versions-section-header remote">
+            <Icon icon="cloud" iconSize={12} />
+            <span>Releases</span>
+          </div>
           <div className="electron-versions-header">
             <div className="version-col">Version</div>
             <div className="status-col">Status</div>
             <div className="action-col">Action</div>
           </div>
-          {versions.length === 0 ? (
+          {remoteVersions.length === 0 ? (
             <div className="no-versions">No versions match your filter</div>
           ) : (
             <List
               height={400}
-              itemCount={versions.length}
+              itemCount={remoteVersions.length}
               itemSize={40}
               width="100%"
-              itemData={itemData}
+              itemData={{
+                versions: remoteVersions,
+                appState,
+              }}
               className="electron-versions-list"
             >
               {ElectronVersionRow}

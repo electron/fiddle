@@ -270,6 +270,38 @@ describe('AppState', () => {
       appState.showUndownloadedVersions = true;
       expect(appState.versionsToShow.length).toEqual(mockVersionsArray.length);
     });
+
+    it('always includes local versions regardless of filters', () => {
+      const localVersion: RunnableVersion = {
+        source: VersionSource.local,
+        state: InstallState.installed,
+        version: '0.0.0-local.123',
+        name: 'My Build',
+      };
+
+      appState.versions['0.0.0-local.123'] = localVersion;
+
+      // Local versions should appear even when channels exclude everything
+      appState.channelsToShow = ['Unsupported' as any];
+      const versions = appState.versionsToShow;
+      expect(versions).toContainEqual(localVersion);
+      expect(versions.length).toEqual(1);
+    });
+
+    it('lists local versions before remote versions', () => {
+      const localVersion: RunnableVersion = {
+        source: VersionSource.local,
+        state: InstallState.installed,
+        version: '0.0.0-local.123',
+        name: 'My Build',
+      };
+
+      appState.versions['0.0.0-local.123'] = localVersion;
+      appState.channelsToShow = [ElectronReleaseChannel.stable];
+
+      const versions = appState.versionsToShow;
+      expect(versions[0]).toEqual(localVersion);
+    });
   });
 
   describe('showChannels()', () => {
