@@ -1039,14 +1039,16 @@ export class AppState {
     });
   }
 
-  public async showErrorDialog(label: string | JSX.Element): Promise<void> {
+  public showErrorDialog = async (
+    label: string | JSX.Element,
+  ): Promise<void> => {
     await this.showGenericDialog({
       label,
       ok: 'Close',
       type: GenericDialogType.warning,
       wantsInput: false,
     });
-  }
+  };
 
   /**
    * Ensure that any buffered console output is
