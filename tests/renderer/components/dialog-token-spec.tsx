@@ -131,7 +131,9 @@ describe('TokenDialog component', () => {
     });
 
     act(() => {
-      instance.handleChange({ target: { value: 'hi' } } as any);
+      instance.handleChange({
+        target: { value: 'hi' },
+      } as React.ChangeEvent<HTMLInputElement>);
     });
 
     expect(instance.state.tokenInput).toBe('hi');

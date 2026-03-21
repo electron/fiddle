@@ -41,8 +41,7 @@ describe('SidebarPackageManager component', () => {
       SidebarPackageManager,
       { appState: store },
     );
-    // Bypass Readonly<S> to set state without triggering a re-render
-    (instance as any).state = {
+    instance.state = {
       suggestions: [],
       versionsCache: new Map(),
     };

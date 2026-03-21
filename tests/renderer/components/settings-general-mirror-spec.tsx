@@ -66,23 +66,23 @@ describe('MirrorSettings component', () => {
     it('order should is default -> china -> custom', () => {
       render(<MirrorSettings appState={store} />);
 
-      const radios = screen.getAllByRole('radio');
+      const radios = screen.getAllByRole<HTMLInputElement>('radio');
 
       // Verify order by checking positional values
-      expect((radios[0] as HTMLInputElement).value).toEqual('DEFAULT');
-      expect((radios[1] as HTMLInputElement).value).toEqual('CHINA');
-      expect((radios[2] as HTMLInputElement).value).toEqual('CUSTOM');
+      expect(radios[0].value).toEqual('DEFAULT');
+      expect(radios[1].value).toEqual('CHINA');
+      expect(radios[2].value).toEqual('CUSTOM');
 
       // Verify label-value associations
-      expect(
-        (screen.getByLabelText('Default') as HTMLInputElement).value,
-      ).toEqual('DEFAULT');
-      expect(
-        (screen.getByLabelText('China') as HTMLInputElement).value,
-      ).toEqual('CHINA');
-      expect(
-        (screen.getByLabelText('Custom') as HTMLInputElement).value,
-      ).toEqual('CUSTOM');
+      expect(screen.getByLabelText<HTMLInputElement>('Default').value).toEqual(
+        'DEFAULT',
+      );
+      expect(screen.getByLabelText<HTMLInputElement>('China').value).toEqual(
+        'CHINA',
+      );
+      expect(screen.getByLabelText<HTMLInputElement>('Custom').value).toEqual(
+        'CUSTOM',
+      );
     });
   });
 

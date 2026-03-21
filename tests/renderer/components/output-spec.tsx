@@ -1,37 +1,42 @@
-import * as React from 'react';
-
-import { render } from '@testing-library/react';
 import type * as MonacoType from 'monaco-editor';
-import { MosaicContext } from 'react-mosaic-component';
+import type { MosaicContext } from 'react-mosaic-component';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
+import { renderClassComponentWithInstanceRef } from '../../../rtl-spec/test-utils/renderClassComponentWithInstanceRef';
 import { Output } from '../../../src/renderer/components/output';
+import { WrapperEditorId } from '../../../src/renderer/components/output-editors-wrapper';
 import { AppState } from '../../../src/renderer/state';
 import { MonacoMock } from '../../mocks/mocks';
 
-const mockMosaicActions = {
-  expand: vi.fn(),
-  remove: vi.fn(),
-  hide: vi.fn(),
-  replaceWith: vi.fn(),
-  updateTree: vi.fn(),
-  getRoot: vi.fn(),
-};
+const mockContext = vi.hoisted(
+  () =>
+    ({
+      mosaicActions: {
+        expand: vi.fn(),
+        remove: vi.fn(),
+        hide: vi.fn(),
+        replaceWith: vi.fn(),
+        updateTree: vi.fn(),
+        getRoot: vi.fn(),
+      },
+      mosaicId: 'output',
+    }) as unknown as MosaicContext<WrapperEditorId>,
+);
 
-const mockContextValue = {
-  mosaicActions: mockMosaicActions,
-  mosaicId: 'output',
-} as any;
-
-function renderOutput(store: AppState, monaco: typeof MonacoType) {
-  const ref = React.createRef<any>();
-  const renderResult = render(
-    <MosaicContext.Provider value={mockContextValue}>
-      <Output appState={store} monaco={monaco} monacoOptions={{}} ref={ref} />
-    </MosaicContext.Provider>,
+// Provide a default value for MosaicContext so that the component's
+// `static contextType = MosaicContext` picks up `mockContext` without
+// needing a Provider in the render tree.
+vi.mock('react-mosaic-component', async () => {
+  const React = await import('react');
+  const actual = await vi.importActual<typeof import('react-mosaic-component')>(
+    'react-mosaic-component',
   );
-  return { instance: ref.current!, renderResult };
-}
+
+  return {
+    ...actual,
+    MosaicContext: React.createContext(mockContext),
+  };
+});
 
 describe('Output component', () => {
   let store: AppState;
@@ -40,26 +45,40 @@ describe('Output component', () => {
   beforeEach(() => {
     monaco = window.monaco;
     ({ state: store } = window.app);
-    vi.clearAllMocks();
+    vi.mocked(mockContext.mosaicActions.replaceWith).mockClear();
+    vi.mocked(mockContext.mosaicActions.getRoot).mockReset();
   });
 
   it('renders the output container', () => {
-    const { renderResult } = renderOutput(store, monaco);
+    const { renderResult } = renderClassComponentWithInstanceRef(Output, {
+      appState: store,
+      monaco,
+      monacoOptions: {},
+    });
     const outputDiv = renderResult.container.querySelector('.output');
     expect(outputDiv).toBeInTheDocument();
     expect(outputDiv).toHaveStyle('display: inline-block');
   });
 
   it('correctly sets the language', () => {
-    const { instance } = renderOutput(store, monaco);
+    const { instance } = renderClassComponentWithInstanceRef(Output, {
+      appState: store,
+      monaco,
+      monacoOptions: {},
+    });
     expect(instance.language).toBe('consoleOutputLanguage');
   });
 
   describe('initMonaco()', () => {
     it('attempts to create an editor', async () => {
-      const { instance } = renderOutput(store, monaco);
+      const { instance } = renderClassComponentWithInstanceRef(Output, {
+        appState: store,
+        monaco,
+        monacoOptions: {},
+      });
 
-      instance.outputRef.current = 'ref' as any;
+      // outputRef is private — cast needed to test initMonaco directly
+      (instance as any).outputRef.current = 'ref';
       await instance.initMonaco();
 
       expect(monaco.editor.create).toHaveBeenCalled();
@@ -68,9 +87,14 @@ describe('Output component', () => {
   });
 
   it('componentWillUnmount() attempts to dispose the editor', async () => {
-    const { instance } = renderOutput(store, monaco);
+    const { instance } = renderClassComponentWithInstanceRef(Output, {
+      appState: store,
+      monaco,
+      monacoOptions: {},
+    });
 
-    instance.outputRef.current = 'ref' as any;
+    // outputRef is private
+    (instance as any).outputRef.current = 'ref';
     await instance.initMonaco();
     instance.componentWillUnmount();
 
@@ -80,22 +104,25 @@ describe('Output component', () => {
   });
 
   it('hides the console with react-mosaic-component', async () => {
-    const { instance } = renderOutput(store, monaco);
-
     // direction is required to be recognized as a valid root node
-    mockMosaicActions.getRoot.mockReturnValue({
+    vi.mocked(mockContext.mosaicActions.getRoot).mockReturnValue({
       splitPercentage: 25,
       direction: 'row',
+    } as ReturnType<typeof mockContext.mosaicActions.getRoot>);
+
+    const { instance } = renderClassComponentWithInstanceRef(Output, {
+      appState: store,
+      monaco,
+      monacoOptions: {},
     });
 
-    instance.outputRef.current = 'ref' as any;
+    // outputRef is private
+    (instance as any).outputRef.current = 'ref';
     await instance.initMonaco();
-
-    // Trigger toggleConsole explicitly
     instance.toggleConsole();
 
-    expect(mockMosaicActions.replaceWith).toHaveBeenCalled();
-    expect(mockMosaicActions.replaceWith).toHaveBeenCalledWith(
+    expect(mockContext.mosaicActions.replaceWith).toHaveBeenCalled();
+    expect(mockContext.mosaicActions.replaceWith).toHaveBeenCalledWith(
       [],
       expect.objectContaining({ splitPercentage: 25 }),
     );
@@ -114,12 +141,16 @@ describe('Output component', () => {
       },
     ];
 
-    const { instance } = renderOutput(store, monaco);
+    const { instance } = renderClassComponentWithInstanceRef(Output, {
+      appState: store,
+      monaco,
+      monacoOptions: {},
+    });
 
-    instance.outputRef.current = 'ref' as any;
+    // outputRef and updateModel are private
+    (instance as any).outputRef.current = 'ref';
     await instance.initMonaco();
-    // updateModel is private — cast needed to test it directly
-    (instance as any).updateModel();
+    await (instance as any).updateModel();
 
     expect(monaco.editor.createModel).toHaveBeenCalled();
     expect(instance.editor?.revealLine).toHaveBeenCalled();
@@ -133,15 +164,19 @@ describe('Output component', () => {
       },
     ];
 
-    const { instance } = renderOutput(store, monaco);
+    const { instance } = renderClassComponentWithInstanceRef(Output, {
+      appState: store,
+      monaco,
+      monacoOptions: {},
+    });
     // updateModel is private — cast needed to spy on it
     const spy = vi.spyOn(instance as any, 'updateModel');
 
-    instance.outputRef.current = 'ref' as any;
+    // outputRef is private
+    (instance as any).outputRef.current = 'ref';
     await instance.initMonaco();
 
-    // updateModel is private
-    (instance as any).updateModel();
+    await (instance as any).updateModel();
 
     // new output
     store.output = [
@@ -159,13 +194,17 @@ describe('Output component', () => {
   });
 
   it('handles componentDidUpdate', async () => {
-    const { instance } = renderOutput(store, monaco);
+    const { instance } = renderClassComponentWithInstanceRef(Output, {
+      appState: store,
+      monaco,
+      monacoOptions: {},
+    });
     const spy = vi.spyOn(instance, 'toggleConsole');
 
-    instance.outputRef.current = 'ref' as any;
+    // outputRef and updateModel are private
+    (instance as any).outputRef.current = 'ref';
     await instance.initMonaco();
 
-    // updateModel is private
     await (instance as any).updateModel();
     expect(spy).toHaveBeenCalled();
   });

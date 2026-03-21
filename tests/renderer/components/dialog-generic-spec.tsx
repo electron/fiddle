@@ -33,26 +33,32 @@ describe('GenericDialog component', () => {
       renderDialogWithType(GenericDialogType.warning);
       expect(screen.getByText('Test label')).toBeInTheDocument();
       expect(screen.getByText('Okay')).toBeInTheDocument();
+      expect(
+        document.querySelector('[icon="warning-sign"]'),
+      ).toBeInTheDocument();
     });
 
     it('confirmation', () => {
       renderDialogWithType(GenericDialogType.confirm);
       expect(screen.getByText('Test label')).toBeInTheDocument();
       expect(screen.getByText('Okay')).toBeInTheDocument();
+      expect(document.querySelector('[icon="help"]')).toBeInTheDocument();
     });
 
     it('success', () => {
       renderDialogWithType(GenericDialogType.success);
       expect(screen.getByText('Test label')).toBeInTheDocument();
       expect(screen.getByText('Okay')).toBeInTheDocument();
+      expect(document.querySelector('[icon="info-sign"]')).toBeInTheDocument();
     });
 
     it('with an input prompt', () => {
       store.genericDialogOptions.wantsInput = true;
       renderDialogWithType(GenericDialogType.confirm);
-      expect(screen.getByText('Test label')).toBeInTheDocument();
+      const label = screen.getByText('Test label');
+      expect(label).toBeInTheDocument();
       // The InputGroup renders an input element with id="input"
-      expect(document.getElementById('input')).toBeInTheDocument();
+      expect(label.parentNode?.querySelector('input')).toBeInTheDocument();
     });
 
     it('with an input prompt and placeholder', () => {
@@ -85,7 +91,7 @@ describe('GenericDialog component', () => {
     store.genericDialogOptions.wantsInput = true;
     render(<GenericDialog appState={store} />);
 
-    const input = document.getElementById('input') as HTMLInputElement;
+    const input = document.getElementById('input')!;
     expect(input).toBeInTheDocument();
 
     // Focus the input and press Enter

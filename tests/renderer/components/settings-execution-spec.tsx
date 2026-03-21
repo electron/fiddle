@@ -1,10 +1,14 @@
 import * as React from 'react';
 
-import { render, screen } from '@testing-library/react';
+import { act, render, screen } from '@testing-library/react';
 import { userEvent } from '@testing-library/user-event';
 import { beforeEach, describe, expect, it } from 'vitest';
 
-import { ExecutionSettings } from '../../../src/renderer/components/settings-execution';
+import { renderClassComponentWithInstanceRef } from '../../../rtl-spec/test-utils/renderClassComponentWithInstanceRef';
+import {
+  ExecutionSettings,
+  SettingItemType,
+} from '../../../src/renderer/components/settings-execution';
 import { AppState } from '../../../src/renderer/state';
 
 describe('ExecutionSettings component', () => {
@@ -18,8 +22,8 @@ describe('ExecutionSettings component', () => {
   });
 
   it('renders', () => {
-    const { container } = render(<ExecutionSettings appState={store} />);
-    expect(container.querySelector('h1')).toHaveTextContent('Execution');
+    render(<ExecutionSettings appState={store} />);
+    expect(screen.getByText('Execution')).toBeInTheDocument();
   });
 
   describe('handleDeleteDataChange()', () => {
@@ -63,31 +67,79 @@ describe('ExecutionSettings component', () => {
   describe('handleItemSettingsChange()', () => {
     describe('with executionFlags', () => {
       it('updates when new flags are added', async () => {
-        const user = userEvent.setup();
-        render(<ExecutionSettings appState={store} />);
+        const { instance } = renderClassComponentWithInstanceRef(
+          ExecutionSettings,
+          { appState: store },
+        );
 
-        const flagInput = screen.getByLabelText('Set user-provided flags');
         const lang = '--lang=es';
+        const flags = '--js-flags=--expose-gc';
 
-        await user.type(flagInput, lang);
+        act(() => {
+          instance.handleSettingsItemChange(
+            {
+              currentTarget: { name: '0', value: lang },
+            } as React.ChangeEvent<HTMLInputElement>,
+            SettingItemType.Flags,
+          );
+        });
 
+        expect(instance.state.executionFlags).toEqual({ '0': lang });
         expect(store.executionFlags).toEqual([lang]);
+
+        act(() => {
+          instance.handleSettingsItemChange(
+            {
+              currentTarget: { name: '1', value: flags },
+            } as React.ChangeEvent<HTMLInputElement>,
+            SettingItemType.Flags,
+          );
+        });
+
+        expect(instance.state.executionFlags).toEqual({
+          '0': lang,
+          '1': flags,
+        });
+        expect(store.executionFlags).toEqual([lang, flags]);
       });
     });
 
     describe('with environmentVariables', () => {
       it('updates when new env vars are added', async () => {
-        const user = userEvent.setup();
-        render(<ExecutionSettings appState={store} />);
-
-        const envInput = screen.getByLabelText(
-          'Set user-provided environment variables',
+        const { instance } = renderClassComponentWithInstanceRef(
+          ExecutionSettings,
+          { appState: store },
         );
+
         const debug = 'ELECTRON_DEBUG_DRAG_REGIONS=1';
+        const trash = 'ELECTRON_TRASH=trash-cli';
 
-        await user.type(envInput, debug);
+        act(() => {
+          instance.handleSettingsItemChange(
+            {
+              currentTarget: { name: '0', value: debug },
+            } as React.ChangeEvent<HTMLInputElement>,
+            SettingItemType.EnvVars,
+          );
+        });
 
+        expect(instance.state.environmentVariables).toEqual({ '0': debug });
         expect(store.environmentVariables).toEqual([debug]);
+
+        act(() => {
+          instance.handleSettingsItemChange(
+            {
+              currentTarget: { name: '1', value: trash },
+            } as React.ChangeEvent<HTMLInputElement>,
+            SettingItemType.EnvVars,
+          );
+        });
+
+        expect(instance.state.environmentVariables).toEqual({
+          '0': debug,
+          '1': trash,
+        });
+        expect(store.environmentVariables).toEqual([debug, trash]);
       });
     });
   });

@@ -51,15 +51,16 @@ describe('AppearanceSettings component', () => {
 
   it('renders the correct selected theme', async () => {
     store.theme = 'defaultDark';
-    render(
-      <AppearanceSettings
-        appState={store}
-        toggleHasPopoverOpen={doNothingFunc}
-      />,
+    const { instance } = renderClassComponentWithInstanceRef(
+      AppearanceSettings,
+      {
+        appState: store,
+        toggleHasPopoverOpen: doNothingFunc,
+      },
     );
 
     await waitFor(() => {
-      expect(screen.getByText('defaultDark')).toBeInTheDocument();
+      expect(instance.state.selectedTheme?.name).toBe('defaultDark');
     });
   });
 
@@ -86,8 +87,8 @@ describe('AppearanceSettings component', () => {
       <AppearanceSettings appState={store} toggleHasPopoverOpen={toggleFunc} />,
     );
 
-    // Find the button by its id
-    const button = document.getElementById('open-theme-selector')!;
+    // Find the button
+    const button = screen.getByRole('button', { name: 'Choose your theme' });
 
     // Simulate opening the theme selector
     await user.click(button);
@@ -259,7 +260,7 @@ describe('AppearanceSettings component', () => {
 
       expect(result).not.toBe(null);
       // Verify it's a React element with the expected text
-      expect((result as any).props.text).toContain('foo');
+      expect(result!.props.text).toContain('foo');
     });
   });
 });

@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import { act, render, screen } from '@testing-library/react';
+import { act, fireEvent, render, screen } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { renderClassComponentWithInstanceRef } from '../../../rtl-spec/test-utils/renderClassComponentWithInstanceRef';
@@ -73,18 +73,21 @@ describe('AddVersionDialog component', () => {
 
     // The FileInput has id="custom-electron-version" with an onClick that
     // calls selectLocalVersion and preventDefault
-    const fileInput = document.querySelector(
-      '#custom-electron-version input[type="file"]',
-    ) as HTMLInputElement;
+    const fileInput = screen.getByLabelText(
+      'Select the folder containing Electron.app...',
+      { selector: 'input' },
+    );
     expect(fileInput).toBeInTheDocument();
 
     const preventDefault = vi.fn();
-    fileInput.dispatchEvent(
+    fireEvent(
+      fileInput,
       Object.assign(new MouseEvent('click', { bubbles: true }), {
         preventDefault,
       }),
     );
 
+    expect(preventDefault).toHaveBeenCalled();
     expect(window.ElectronFiddle.selectLocalVersion).toHaveBeenCalled();
   });
 

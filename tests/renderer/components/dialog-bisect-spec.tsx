@@ -180,8 +180,7 @@ describe.each([8, 15])('BisectDialog component', (numVersions) => {
       await instance.onSubmit();
       expect(Bisector).not.toHaveBeenCalled();
 
-      // Restore valid state for clean teardown
-      (instance as any).state = origState;
+      instance.state = origState;
     });
   });
 
@@ -233,8 +232,7 @@ describe.each([8, 15])('BisectDialog component', (numVersions) => {
       await instance.onAuto();
       expect(Bisector).not.toHaveBeenCalled();
 
-      // Restore valid state for clean teardown
-      (instance as any).state = origState;
+      instance.state = origState;
     });
   });
 

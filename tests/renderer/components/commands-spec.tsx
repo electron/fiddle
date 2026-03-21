@@ -10,19 +10,19 @@ import { AppState } from '../../../src/renderer/state';
 import { overrideRendererPlatform, resetRendererPlatform } from '../../utils';
 
 vi.mock('../../../src/renderer/components/commands-runner', () => ({
-  Runner: () => <div data-testid="runner" />,
+  Runner: 'runner',
 }));
 
 vi.mock('../../../src/renderer/components/commands-version-chooser', () => ({
-  VersionChooser: () => <div data-testid="version-chooser" />,
+  VersionChooser: 'version-chooser',
 }));
 
 vi.mock('../../../src/renderer/components/commands-address-bar', () => ({
-  AddressBar: () => <div data-testid="address-bar" />,
+  AddressBar: 'address-bar',
 }));
 
 vi.mock('../../../src/renderer/components/commands-action-button', () => ({
-  GistActionButton: () => <div data-testid="action-button" />,
+  GistActionButton: 'action-button',
 }));
 
 describe('Commands component', () => {

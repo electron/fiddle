@@ -292,10 +292,9 @@ describe('ElectronSettings component', () => {
       );
       store.hideChannels.mockImplementation((ids: ElectronReleaseChannel[]) =>
         runInAction(() => {
-          for (const id of ids) {
-            const idx = store.channelsToShow.indexOf(id);
-            if (idx !== -1) store.channelsToShow.splice(idx, 1);
-          }
+          store.channelsToShow = store.channelsToShow.filter(
+            (id: ElectronReleaseChannel) => !ids.includes(id),
+          );
         }),
       );
 
@@ -340,7 +339,7 @@ describe('ElectronSettings component', () => {
 
       const disabledVersions = container.querySelectorAll('.disabled-version');
       expect(disabledVersions).toHaveLength(1);
-      expect(disabledVersions[0]).toHaveClass('bp3-disabled');
+      expect(disabledVersions[0]).toHaveAttribute('disabled');
     });
   });
 });
