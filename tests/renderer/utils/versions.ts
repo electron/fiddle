@@ -2,9 +2,9 @@ import {
   ElectronReleaseChannel,
   InstallState,
   VersionSource,
-} from '../../src/interfaces';
-import { VersionsMock } from '../../tests/mocks/electron-versions';
-import { StateMock } from '../../tests/mocks/state';
+} from '../../../src/interfaces';
+import { VersionsMock } from '../../mocks/electron-versions';
+import { StateMock } from '../../mocks/state';
 
 const { missing } = InstallState;
 const { remote } = VersionSource;

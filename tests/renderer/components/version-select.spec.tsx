@@ -8,21 +8,21 @@ import {
   InstallState,
   RunnableVersion,
   VersionSource,
-} from '../../src/interfaces';
+} from '../../../src/interfaces';
 import {
   VersionSelect,
   filterItems,
   getItemIcon,
   getItemLabel,
   renderItem,
-} from '../../src/renderer/components/version-select';
-import { disableDownload } from '../../src/renderer/utils/disable-download';
-import { mockVersion1, prepareAppState } from '../test-utils/versions';
+} from '../../../src/renderer/components/version-select';
+import { disableDownload } from '../../../src/renderer/utils/disable-download';
+import { mockVersion1, prepareAppState } from '../utils/versions';
 
 const { downloading, installed, missing, installing } = InstallState;
 const { local } = VersionSource;
 
-vi.mock('../../src/renderer/utils/disable-download.ts');
+vi.mock('../../../src/renderer/utils/disable-download.ts');
 
 describe('VersionSelect component', () => {
   function renderVersionSelect() {

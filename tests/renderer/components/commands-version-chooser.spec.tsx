@@ -4,9 +4,9 @@ import { render, screen, waitFor } from '@testing-library/react';
 import { userEvent } from '@testing-library/user-event';
 import { beforeEach, describe, expect, it } from 'vitest';
 
-import { VersionChooser } from '../../src/renderer/components/commands-version-chooser';
-import { AppState } from '../../src/renderer/state';
-import { mockVersion1, prepareAppState } from '../test-utils/versions';
+import { VersionChooser } from '../../../src/renderer/components/commands-version-chooser';
+import { AppState } from '../../../src/renderer/state';
+import { mockVersion1, prepareAppState } from '../utils/versions';
 
 describe('VersionSelect component', () => {
   let appState: AppState;

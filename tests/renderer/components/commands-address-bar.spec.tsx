@@ -5,9 +5,9 @@ import { userEvent } from '@testing-library/user-event';
 import { runInAction } from 'mobx';
 import { beforeEach, describe, expect, it } from 'vitest';
 
-import { GistActionState } from '../../src/interfaces';
-import { AddressBar } from '../../src/renderer/components/commands-address-bar';
-import { AppState } from '../../src/renderer/state';
+import { GistActionState } from '../../../src/interfaces';
+import { AddressBar } from '../../../src/renderer/components/commands-address-bar';
+import { AppState } from '../../../src/renderer/state';
 
 describe('AddressBar component', () => {
   let store: AppState;

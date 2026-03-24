@@ -5,7 +5,6 @@ import { userEvent } from '@testing-library/user-event';
 import { runInAction } from 'mobx';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { renderClassComponentWithInstanceRef } from '../../../rtl-spec/test-utils/renderClassComponentWithInstanceRef';
 import {
   ElectronReleaseChannel,
   InstallState,
@@ -16,6 +15,7 @@ import { ElectronSettings } from '../../../src/renderer/components/settings-elec
 import { AppState } from '../../../src/renderer/state';
 import { disableDownload } from '../../../src/renderer/utils/disable-download';
 import { AppMock, StateMock, VersionsMock } from '../../mocks/mocks';
+import { renderClassComponentWithInstanceRef } from '../utils/renderClassComponentWithInstanceRef';
 
 vi.mock('../../../src/renderer/utils/disable-download.ts');
 

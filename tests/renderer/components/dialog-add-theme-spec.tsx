@@ -3,11 +3,11 @@ import * as React from 'react';
 import { act, render, screen } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { renderClassComponentWithInstanceRef } from '../../../rtl-spec/test-utils/renderClassComponentWithInstanceRef';
 import { AddThemeDialog } from '../../../src/renderer/components/dialog-add-theme';
 import { AppState } from '../../../src/renderer/state';
 import { LoadedFiddleTheme, defaultLight } from '../../../src/themes-defaults';
 import { overrideRendererPlatform } from '../../utils';
+import { renderClassComponentWithInstanceRef } from '../utils/renderClassComponentWithInstanceRef';
 
 class FileMock extends Blob {
   public lastModified: number;

@@ -1,7 +1,6 @@
 import { act, screen } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { renderClassComponentWithInstanceRef } from '../../../rtl-spec/test-utils/renderClassComponentWithInstanceRef';
 import {
   ElectronReleaseChannel,
   InstallState,
@@ -13,6 +12,7 @@ import { BisectDialog } from '../../../src/renderer/components/dialog-bisect';
 import { Runner } from '../../../src/renderer/runner';
 import { AppState } from '../../../src/renderer/state';
 import { StateMock } from '../../mocks/mocks';
+import { renderClassComponentWithInstanceRef } from '../utils/renderClassComponentWithInstanceRef';
 
 vi.mock('../../../src/renderer/bisect');
 

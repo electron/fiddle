@@ -2,13 +2,13 @@ import { userEvent } from '@testing-library/user-event';
 import { MosaicContext, MosaicWindowContext } from 'react-mosaic-component';
 import { beforeAll, describe, expect, it, vi } from 'vitest';
 
-import { EditorId, MAIN_JS } from '../../src/interfaces';
+import { EditorId, MAIN_JS } from '../../../src/interfaces';
 import {
   MaximizeButton,
   RemoveButton,
-} from '../../src/renderer/components/editors-toolbar-button';
-import { AppState } from '../../src/renderer/state';
-import { renderClassComponentWithInstanceRef } from '../test-utils/renderClassComponentWithInstanceRef';
+} from '../../../src/renderer/components/editors-toolbar-button';
+import { AppState } from '../../../src/renderer/state';
+import { renderClassComponentWithInstanceRef } from '../utils/renderClassComponentWithInstanceRef';
 
 let mockContext = {} as MosaicWindowContext & MosaicContext<string>;
 

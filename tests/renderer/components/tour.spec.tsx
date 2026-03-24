@@ -4,8 +4,8 @@ import { render } from '@testing-library/react';
 import { userEvent } from '@testing-library/user-event';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { Tour, TourScriptStep } from '../../src/renderer/components/tour';
-import { overrideRendererPlatform } from '../../tests/utils';
+import { Tour, TourScriptStep } from '../../../src/renderer/components/tour';
+import { overrideRendererPlatform } from '../../../tests/utils';
 
 describe('Tour component', () => {
   const oldQuerySelector = document.querySelector;

@@ -7,8 +7,8 @@ import { type Mock, beforeEach, describe, expect, it, vi } from 'vitest';
 import {
   WelcomeTour,
   getWelcomeTour,
-} from '../../src/renderer/components/tour-welcome';
-import { AppState } from '../../src/renderer/state';
+} from '../../../src/renderer/components/tour-welcome';
+import { AppState } from '../../../src/renderer/state';
 
 describe('Header component', () => {
   let appState: AppState;

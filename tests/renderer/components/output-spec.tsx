@@ -2,11 +2,11 @@ import type * as MonacoType from 'monaco-editor';
 import type { MosaicContext } from 'react-mosaic-component';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { renderClassComponentWithInstanceRef } from '../../../rtl-spec/test-utils/renderClassComponentWithInstanceRef';
 import { Output } from '../../../src/renderer/components/output';
 import { WrapperEditorId } from '../../../src/renderer/components/output-editors-wrapper';
 import { AppState } from '../../../src/renderer/state';
 import { MonacoMock } from '../../mocks/mocks';
+import { renderClassComponentWithInstanceRef } from '../utils/renderClassComponentWithInstanceRef';
 
 const mockContext = vi.hoisted(
   () =>

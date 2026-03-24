@@ -72,9 +72,7 @@ const config = {
     ],
     'tsdoc/syntax': 'error',
   },
-  overrides: [
-    { files: ['rtl-spec/**', 'tests/**'], rules: { 'tsdoc/syntax': 'off' } },
-  ],
+  overrides: [{ files: ['tests/**'], rules: { 'tsdoc/syntax': 'off' } }],
   // the static folder is linted by standard
   ignorePatterns: ['/out', '/.webpack', '/coverage', '/static'],
 };

@@ -2,20 +2,20 @@
 import { MosaicNode } from 'react-mosaic-component';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { EditorId, EditorValues, MAIN_JS } from '../../src/interfaces';
-import { App } from '../../src/renderer/app';
-import { Editors } from '../../src/renderer/components/editors';
-import { Editor, EditorMosaic } from '../../src/renderer/editor-mosaic';
-import { AppState } from '../../src/renderer/state';
+import { EditorId, EditorValues, MAIN_JS } from '../../../src/interfaces';
+import { App } from '../../../src/renderer/app';
+import { Editors } from '../../../src/renderer/components/editors';
+import { Editor, EditorMosaic } from '../../../src/renderer/editor-mosaic';
+import { AppState } from '../../../src/renderer/state';
 import {
   MonacoEditorMock,
   StateMock,
   createEditorValues,
-} from '../../tests/mocks/mocks';
-import { emitEvent } from '../../tests/utils';
-import { renderClassComponentWithInstanceRef } from '../test-utils/renderClassComponentWithInstanceRef';
+} from '../../mocks/mocks';
+import { emitEvent } from '../../utils';
+import { renderClassComponentWithInstanceRef } from '../utils/renderClassComponentWithInstanceRef';
 
-vi.mock('../../src/renderer/components/editor', () => ({
+vi.mock('../../../src/renderer/components/editor', () => ({
   Editor: () => 'EditorComponent',
 }));
 

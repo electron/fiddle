@@ -4,8 +4,8 @@ import { render } from '@testing-library/react';
 import { userEvent } from '@testing-library/user-event';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { RenderNonIdealState } from '../../src/renderer/components/editors-non-ideal-state';
-import { EditorMosaic } from '../../src/renderer/editor-mosaic';
+import { RenderNonIdealState } from '../../../src/renderer/components/editors-non-ideal-state';
+import { EditorMosaic } from '../../../src/renderer/editor-mosaic';
 
 describe('RenderNonIdealState component', () => {
   let editorMosaic: EditorMosaic;
