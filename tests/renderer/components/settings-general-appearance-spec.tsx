@@ -1,9 +1,11 @@
 import * as React from 'react';
 
 import { IItemRendererProps } from '@blueprintjs/select';
-import { shallow } from 'enzyme';
+import { render, screen, waitFor } from '@testing-library/react';
+import { userEvent } from '@testing-library/user-event';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
+import { renderClassComponentWithInstanceRef } from '../../../rtl-spec/test-utils/renderClassComponentWithInstanceRef';
 import {
   AppearanceSettings,
   filterItem,
@@ -34,82 +36,91 @@ describe('AppearanceSettings component', () => {
   });
 
   it('renders', () => {
-    const wrapper = shallow(
+    render(
       <AppearanceSettings
         appState={store}
         toggleHasPopoverOpen={doNothingFunc}
       />,
     );
 
-    expect(wrapper).toMatchSnapshot();
+    expect(screen.getByText('Appearance')).toBeInTheDocument();
+    expect(
+      screen.getByLabelText('Sync theme with system setting'),
+    ).toBeInTheDocument();
   });
 
   it('renders the correct selected theme', async () => {
     store.theme = 'defaultDark';
-    const wrapper = shallow(
-      <AppearanceSettings
-        appState={store}
-        toggleHasPopoverOpen={doNothingFunc}
-      />,
+    const { instance } = renderClassComponentWithInstanceRef(
+      AppearanceSettings,
+      {
+        appState: store,
+        toggleHasPopoverOpen: doNothingFunc,
+      },
     );
 
-    await new Promise(process.nextTick);
-    expect((wrapper.state() as any).selectedTheme?.name).toBe('defaultDark');
+    await waitFor(() => {
+      expect(instance.state.selectedTheme?.name).toBe('defaultDark');
+    });
   });
 
   it('handles a theme change', () => {
-    const wrapper = shallow(
-      <AppearanceSettings
-        appState={store}
-        toggleHasPopoverOpen={doNothingFunc}
-      />,
+    const { instance } = renderClassComponentWithInstanceRef(
+      AppearanceSettings,
+      {
+        appState: store,
+        toggleHasPopoverOpen: doNothingFunc,
+      },
     );
-    const instance: any = wrapper.instance();
-    instance.handleChange({ file: 'defaultLight' } as LoadedFiddleTheme);
+    instance.handleChange({
+      file: 'defaultLight',
+    } as LoadedFiddleTheme);
 
     expect(store.setTheme).toHaveBeenCalledWith('defaultLight');
   });
 
-  it('toggles popover toggle event', () => {
+  it('toggles popover toggle event', async () => {
+    const user = userEvent.setup();
     const toggleFunc = vi.fn();
-    const wrapper = shallow(
+    store.isUsingSystemTheme = false;
+    render(
       <AppearanceSettings appState={store} toggleHasPopoverOpen={toggleFunc} />,
     );
 
     // Find the button
-    const button = wrapper.find('#open-theme-selector');
+    const button = screen.getByRole('button', { name: 'Choose your theme' });
 
     // Simulate opening the theme selector
-    button.simulate('click');
+    await user.click(button);
     expect(toggleFunc).toHaveBeenCalledTimes(1);
 
     // Simulate closing the theme selector
-    button.simulate('click');
+    await user.click(button);
     expect(toggleFunc).toHaveBeenCalledTimes(2);
   });
 
   describe('openThemeFolder()', () => {
     it('attempts to open the folder', async () => {
-      const wrapper = shallow(
-        <AppearanceSettings
-          appState={store}
-          toggleHasPopoverOpen={doNothingFunc}
-        />,
+      const { instance } = renderClassComponentWithInstanceRef(
+        AppearanceSettings,
+        {
+          appState: store,
+          toggleHasPopoverOpen: doNothingFunc,
+        },
       );
-      const instance: any = wrapper.instance();
       await instance.openThemeFolder();
 
       expect(window.ElectronFiddle.openThemeFolder).toHaveBeenCalled();
     });
 
     it('handles an error', async () => {
-      const wrapper = shallow(
-        <AppearanceSettings
-          appState={store}
-          toggleHasPopoverOpen={doNothingFunc}
-        />,
+      const { instance } = renderClassComponentWithInstanceRef(
+        AppearanceSettings,
+        {
+          appState: store,
+          toggleHasPopoverOpen: doNothingFunc,
+        },
       );
-      const instance: any = wrapper.instance();
       vi.mocked(window.ElectronFiddle.openThemeFolder).mockRejectedValue(
         new Error('Bwap'),
       );
@@ -120,13 +131,13 @@ describe('AppearanceSettings component', () => {
 
   describe('createNewThemeFromCurrent()', () => {
     it('creates a new file from the current theme', async () => {
-      const wrapper = shallow(
-        <AppearanceSettings
-          appState={store}
-          toggleHasPopoverOpen={doNothingFunc}
-        />,
+      const { instance } = renderClassComponentWithInstanceRef(
+        AppearanceSettings,
+        {
+          appState: store,
+          toggleHasPopoverOpen: doNothingFunc,
+        },
       );
-      const instance: any = wrapper.instance();
       await instance.createNewThemeFromCurrent();
 
       expect(window.ElectronFiddle.createThemeFile).toHaveBeenCalledWith(
@@ -152,26 +163,32 @@ describe('AppearanceSettings component', () => {
           return loadedTheme;
         },
       );
-      const wrapper = shallow(
-        <AppearanceSettings
-          appState={store}
-          toggleHasPopoverOpen={doNothingFunc}
-        />,
+      const { instance } = renderClassComponentWithInstanceRef(
+        AppearanceSettings,
+        {
+          appState: store,
+          toggleHasPopoverOpen: doNothingFunc,
+        },
       );
-      expect(wrapper.state('themes')).toHaveLength(0);
-      const instance: any = wrapper.instance();
+
+      // Initially no themes
+      expect(instance.state.themes).toHaveLength(0);
+
       await instance.createNewThemeFromCurrent();
-      expect(wrapper.state('themes')).toHaveLength(1);
+
+      await waitFor(() => {
+        expect(instance.state.themes).toHaveLength(1);
+      });
     });
 
     it('handles an error', async () => {
-      const wrapper = shallow(
-        <AppearanceSettings
-          appState={store}
-          toggleHasPopoverOpen={doNothingFunc}
-        />,
+      const { instance } = renderClassComponentWithInstanceRef(
+        AppearanceSettings,
+        {
+          appState: store,
+          toggleHasPopoverOpen: doNothingFunc,
+        },
       );
-      const instance: any = wrapper.instance();
       vi.mocked(window.ElectronFiddle.createThemeFile).mockRejectedValue(
         new Error('Bwap'),
       );
@@ -187,14 +204,14 @@ describe('AppearanceSettings component', () => {
       vi.mocked(window.ElectronFiddle.getAvailableThemes).mockResolvedValue(
         arr,
       );
-      const wrapper = shallow(
-        <AppearanceSettings
-          appState={store}
-          toggleHasPopoverOpen={doNothingFunc}
-        />,
+      const { instance } = renderClassComponentWithInstanceRef(
+        AppearanceSettings,
+        {
+          appState: store,
+          toggleHasPopoverOpen: doNothingFunc,
+        },
       );
       expect(window.ElectronFiddle.getAvailableThemes).toHaveBeenCalledTimes(1);
-      const instance: any = wrapper.instance();
       const promise = instance.handleAddTheme();
       store.isTokenDialogShowing = false;
       await promise;
@@ -241,7 +258,9 @@ describe('AppearanceSettings component', () => {
         ...mockItemProps,
       });
 
-      expect(result).toMatchSnapshot();
+      expect(result).not.toBe(null);
+      // Verify it's a React element with the expected text
+      expect(result!.props.text).toContain('foo');
     });
   });
 });

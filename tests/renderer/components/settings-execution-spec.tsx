@@ -1,8 +1,10 @@
 import * as React from 'react';
 
-import { shallow } from 'enzyme';
+import { act, render, screen } from '@testing-library/react';
+import { userEvent } from '@testing-library/user-event';
 import { beforeEach, describe, expect, it } from 'vitest';
 
+import { renderClassComponentWithInstanceRef } from '../../../rtl-spec/test-utils/renderClassComponentWithInstanceRef';
 import {
   ExecutionSettings,
   SettingItemType,
@@ -20,71 +22,79 @@ describe('ExecutionSettings component', () => {
   });
 
   it('renders', () => {
-    const wrapper = shallow(<ExecutionSettings appState={store} />);
-    expect(wrapper).toMatchSnapshot();
+    render(<ExecutionSettings appState={store} />);
+    expect(screen.getByText('Execution')).toBeInTheDocument();
   });
 
   describe('handleDeleteDataChange()', () => {
     it('handles a new selection', async () => {
-      const wrapper = shallow(<ExecutionSettings appState={store} />);
-      const instance: any = wrapper.instance();
-      instance.handleDeleteDataChange({
-        currentTarget: { checked: false },
-      } as React.FormEvent<HTMLInputElement>);
+      const user = userEvent.setup();
+      render(<ExecutionSettings appState={store} />);
 
-      expect(store.isKeepingUserDataDirs).toBe(false);
+      const checkbox = screen.getByLabelText(
+        'Do not delete user data directories.',
+      );
 
-      instance.handleDeleteDataChange({
-        currentTarget: { checked: true },
-      } as React.FormEvent<HTMLInputElement>);
-
+      // Click to check
+      await user.click(checkbox);
       expect(store.isKeepingUserDataDirs).toBe(true);
+
+      // Click to uncheck
+      await user.click(checkbox);
+      expect(store.isKeepingUserDataDirs).toBe(false);
     });
   });
 
   describe('handleElectronLoggingChange()', () => {
     it('handles a new selection', async () => {
-      const wrapper = shallow(<ExecutionSettings appState={store} />);
-      const instance: any = wrapper.instance();
-      instance.handleElectronLoggingChange({
-        currentTarget: { checked: false },
-      } as React.FormEvent<HTMLInputElement>);
+      const user = userEvent.setup();
+      render(<ExecutionSettings appState={store} />);
 
-      expect(store.isEnablingElectronLogging).toBe(false);
+      const checkbox = screen.getByLabelText(
+        'Enable advanced Electron logging.',
+      );
 
-      instance.handleElectronLoggingChange({
-        currentTarget: { checked: true },
-      } as React.FormEvent<HTMLInputElement>);
-
+      // Click to check
+      await user.click(checkbox);
       expect(store.isEnablingElectronLogging).toBe(true);
+
+      // Click to uncheck
+      await user.click(checkbox);
+      expect(store.isEnablingElectronLogging).toBe(false);
     });
   });
 
   describe('handleItemSettingsChange()', () => {
     describe('with executionFlags', () => {
       it('updates when new flags are added', async () => {
-        const wrapper = shallow(<ExecutionSettings appState={store} />);
-        const instance: any = wrapper.instance();
+        const { instance } = renderClassComponentWithInstanceRef(
+          ExecutionSettings,
+          { appState: store },
+        );
 
         const lang = '--lang=es';
         const flags = '--js-flags=--expose-gc';
 
-        instance.handleSettingsItemChange(
-          {
-            currentTarget: { name: '0', value: lang },
-          } as React.ChangeEvent<HTMLInputElement>,
-          SettingItemType.Flags,
-        );
+        act(() => {
+          instance.handleSettingsItemChange(
+            {
+              currentTarget: { name: '0', value: lang },
+            } as React.ChangeEvent<HTMLInputElement>,
+            SettingItemType.Flags,
+          );
+        });
 
         expect(instance.state.executionFlags).toEqual({ '0': lang });
         expect(store.executionFlags).toEqual([lang]);
 
-        instance.handleSettingsItemChange(
-          {
-            currentTarget: { name: '1', value: flags },
-          } as React.ChangeEvent<HTMLInputElement>,
-          SettingItemType.Flags,
-        );
+        act(() => {
+          instance.handleSettingsItemChange(
+            {
+              currentTarget: { name: '1', value: flags },
+            } as React.ChangeEvent<HTMLInputElement>,
+            SettingItemType.Flags,
+          );
+        });
 
         expect(instance.state.executionFlags).toEqual({
           '0': lang,
@@ -95,32 +105,35 @@ describe('ExecutionSettings component', () => {
     });
 
     describe('with environmentVariables', () => {
-      it('updates when new flags are added', async () => {
-        const wrapper = shallow(<ExecutionSettings appState={store} />);
-        const instance: any = wrapper.instance();
+      it('updates when new env vars are added', async () => {
+        const { instance } = renderClassComponentWithInstanceRef(
+          ExecutionSettings,
+          { appState: store },
+        );
 
         const debug = 'ELECTRON_DEBUG_DRAG_REGIONS=1';
         const trash = 'ELECTRON_TRASH=trash-cli';
 
-        instance.handleSettingsItemChange(
-          {
-            currentTarget: {
-              name: '0',
-              value: debug,
-            },
-          } as React.ChangeEvent<HTMLInputElement>,
-          SettingItemType.EnvVars,
-        );
+        act(() => {
+          instance.handleSettingsItemChange(
+            {
+              currentTarget: { name: '0', value: debug },
+            } as React.ChangeEvent<HTMLInputElement>,
+            SettingItemType.EnvVars,
+          );
+        });
 
         expect(instance.state.environmentVariables).toEqual({ '0': debug });
         expect(store.environmentVariables).toEqual([debug]);
 
-        instance.handleSettingsItemChange(
-          {
-            currentTarget: { name: '1', value: trash },
-          } as React.ChangeEvent<HTMLInputElement>,
-          SettingItemType.EnvVars,
-        );
+        act(() => {
+          instance.handleSettingsItemChange(
+            {
+              currentTarget: { name: '1', value: trash },
+            } as React.ChangeEvent<HTMLInputElement>,
+            SettingItemType.EnvVars,
+          );
+        });
 
         expect(instance.state.environmentVariables).toEqual({
           '0': debug,

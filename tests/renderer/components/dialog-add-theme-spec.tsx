@@ -1,8 +1,9 @@
 import * as React from 'react';
 
-import { shallow } from 'enzyme';
+import { act, render, screen } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
+import { renderClassComponentWithInstanceRef } from '../../../rtl-spec/test-utils/renderClassComponentWithInstanceRef';
 import { AddThemeDialog } from '../../../src/renderer/components/dialog-add-theme';
 import { AppState } from '../../../src/renderer/state';
 import { LoadedFiddleTheme, defaultLight } from '../../../src/themes-defaults';
@@ -39,21 +40,45 @@ describe('AddThemeDialog component', () => {
     ({ state: store } = window.app);
   });
 
-  // TODO(dsanders11): Update this test to be accurate
   it('renders', () => {
-    const wrapper = shallow(<AddThemeDialog appState={store} />);
+    store.isThemeDialogShowing = true;
+    render(<AddThemeDialog appState={store} />);
 
-    wrapper.setState({
-      file: '/test/file',
+    expect(screen.getByText('Add theme')).toBeInTheDocument();
+    expect(screen.getByText('Add')).toBeInTheDocument();
+    expect(screen.getByText('Cancel')).toBeInTheDocument();
+    // Add button should be disabled when no file is selected
+    expect(screen.getByRole('button', { name: 'Add' })).toBeDisabled();
+  });
+
+  it('renders with a file selected', () => {
+    store.isThemeDialogShowing = true;
+    const { instance } = renderClassComponentWithInstanceRef(AddThemeDialog, {
+      appState: store,
     });
 
-    expect(wrapper).toMatchSnapshot();
+    act(() => {
+      instance.setState({
+        file: new FileMock(
+          ['{}'],
+          'theme.json',
+          '/test/theme.json',
+          'application/json',
+        ),
+      });
+    });
+
+    // File name should be displayed and Add button should be enabled
+    expect(screen.getByText('theme.json')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Add' })).not.toBeDisabled();
   });
 
   describe('createNewThemeFromMonaco()', () => {
     it('handles invalid input', async () => {
-      const wrapper = shallow(<AddThemeDialog appState={store} />);
-      const instance: any = wrapper.instance();
+      store.isThemeDialogShowing = true;
+      const { instance } = renderClassComponentWithInstanceRef(AddThemeDialog, {
+        appState: store,
+      });
 
       try {
         await instance.createNewThemeFromMonaco('', {} as LoadedFiddleTheme);
@@ -65,15 +90,20 @@ describe('AddThemeDialog component', () => {
     });
 
     it('handles valid input', async () => {
-      const wrapper = shallow(<AddThemeDialog appState={store} />);
-      const instance: any = wrapper.instance();
-      wrapper.setState({
-        file: new FileMock(
-          [JSON.stringify(defaultLight.editor)],
-          'file.json',
-          '/test/file.json',
-          'application/json',
-        ),
+      store.isThemeDialogShowing = true;
+      const { instance } = renderClassComponentWithInstanceRef(AddThemeDialog, {
+        appState: store,
+      });
+
+      act(() => {
+        instance.setState({
+          file: new FileMock(
+            [JSON.stringify(defaultLight.editor)],
+            'file.json',
+            '/test/file.json',
+            'application/json',
+          ),
+        });
       });
 
       const themePath = '~/.electron-fiddle/themes/testingLight';
@@ -97,8 +127,10 @@ describe('AddThemeDialog component', () => {
 
   describe('onSubmit()', () => {
     it('does nothing if there is no file currently set', async () => {
-      const wrapper = shallow(<AddThemeDialog appState={store} />);
-      const instance: any = wrapper.instance();
+      store.isThemeDialogShowing = true;
+      const { instance } = renderClassComponentWithInstanceRef(AddThemeDialog, {
+        appState: store,
+      });
 
       instance.createNewThemeFromMonaco = vi.fn();
       instance.onClose = vi.fn();
@@ -110,8 +142,10 @@ describe('AddThemeDialog component', () => {
     });
 
     it('loads a theme if a file is currently set', async () => {
-      const wrapper = shallow(<AddThemeDialog appState={store} />);
-      const instance: any = wrapper.instance();
+      store.isThemeDialogShowing = true;
+      const { instance } = renderClassComponentWithInstanceRef(AddThemeDialog, {
+        appState: store,
+      });
 
       const file = new FileMock(
         [JSON.stringify(defaultLight.editor)],
@@ -120,7 +154,9 @@ describe('AddThemeDialog component', () => {
         'application/json',
       );
       const spy = vi.spyOn(file, 'text');
-      wrapper.setState({ file });
+      act(() => {
+        instance.setState({ file });
+      });
 
       instance.createNewThemeFromMonaco = vi.fn();
       instance.onClose = vi.fn();
@@ -134,8 +170,10 @@ describe('AddThemeDialog component', () => {
 
     it('shows an error dialog for a malformed theme', async () => {
       store.showErrorDialog = vi.fn().mockResolvedValueOnce(true);
-      const wrapper = shallow(<AddThemeDialog appState={store} />);
-      const instance: any = wrapper.instance();
+      store.isThemeDialogShowing = true;
+      const { instance } = renderClassComponentWithInstanceRef(AddThemeDialog, {
+        appState: store,
+      });
 
       const file = new FileMock(
         [JSON.stringify(defaultLight.editor)],
@@ -144,7 +182,9 @@ describe('AddThemeDialog component', () => {
         'application/json',
       );
       const spy = vi.spyOn(file, 'text').mockResolvedValue('{}');
-      wrapper.setState({ file });
+      act(() => {
+        instance.setState({ file });
+      });
 
       instance.onClose = vi.fn();
 
@@ -159,22 +199,30 @@ describe('AddThemeDialog component', () => {
 
   describe('onChangeFile()', () => {
     it('handles valid input', async () => {
-      const wrapper = shallow(<AddThemeDialog appState={store} />);
+      store.isThemeDialogShowing = true;
+      const { instance } = renderClassComponentWithInstanceRef(AddThemeDialog, {
+        appState: store,
+      });
 
       const files = ['one', 'two'];
-      await (wrapper.instance() as any).onChangeFile({
-        target: { files } as unknown as EventTarget,
-      } as React.FormEvent<HTMLInputElement>);
-      expect(wrapper.state('file')).toBe(files[0]);
+      act(() => {
+        instance.onChangeFile({
+          target: { files } as unknown as EventTarget,
+        } as React.FormEvent<HTMLInputElement>);
+      });
+      expect(instance.state.file).toBe(files[0]);
     });
 
     it('handles no input', () => {
-      const wrapper = shallow(<AddThemeDialog appState={store} />);
+      store.isThemeDialogShowing = true;
+      const { instance } = renderClassComponentWithInstanceRef(AddThemeDialog, {
+        appState: store,
+      });
 
-      (wrapper.instance() as any).onChangeFile({
+      instance.onChangeFile({
         target: { files: null } as unknown as EventTarget,
       } as React.FormEvent<HTMLInputElement>);
-      expect(wrapper.state('file')).toBeUndefined();
+      expect(instance.state.file).toBeUndefined();
     });
   });
 });

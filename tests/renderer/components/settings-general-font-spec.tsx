@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import { shallow } from 'enzyme';
+import { fireEvent, render, screen } from '@testing-library/react';
 import { beforeEach, describe, expect, it } from 'vitest';
 
 import { FontSettings } from '../../../src/renderer/components/settings-general-font';
@@ -17,61 +17,50 @@ describe('FontSettings component', () => {
   });
 
   it('renders', () => {
-    const wrapper = shallow(<FontSettings appState={store} />);
-    expect(wrapper).toMatchSnapshot();
+    const { container } = render(<FontSettings appState={store} />);
+    expect(container).toBeInTheDocument();
+    expect(screen.getByText('Font Settings')).toBeInTheDocument();
+    expect(screen.getByLabelText('Font Family')).toBeInTheDocument();
+    expect(screen.getByLabelText('Font Size')).toBeInTheDocument();
   });
 
   describe('handleSetFontFamily()', () => {
     it('handles a new selection', async () => {
-      const wrapper = shallow(<FontSettings appState={store} />);
-      const instance: any = wrapper.instance();
+      render(<FontSettings appState={store} />);
+
+      const input = screen.getByLabelText('Font Family');
 
       const CALIBRI = 'Calibri';
       const VERDANA = 'Verdana';
-      instance.handleSetFontFamily({
-        currentTarget: { value: CALIBRI },
-      } as React.FormEvent<HTMLInputElement>);
 
+      fireEvent.change(input, { target: { value: CALIBRI } });
       expect(store.fontFamily).toBe(CALIBRI);
-      expect(instance.state.fontFamily).toEqual(CALIBRI);
 
-      instance.handleSetFontFamily({
-        currentTarget: { value: VERDANA },
-      } as React.FormEvent<HTMLInputElement>);
-
+      fireEvent.change(input, { target: { value: VERDANA } });
       expect(store.fontFamily).toBe(VERDANA);
-      expect(instance.state.fontFamily).toEqual(VERDANA);
     });
   });
 
   describe('handleSetFontSize()', () => {
     it('handles a new selection', async () => {
-      const wrapper = shallow(<FontSettings appState={store} />);
-      const instance: any = wrapper.instance();
-      instance.handleSetFontSize({
-        currentTarget: { value: '12' },
-      } as React.FormEvent<HTMLInputElement>);
+      render(<FontSettings appState={store} />);
 
+      const input = screen.getByLabelText('Font Size');
+
+      fireEvent.change(input, { target: { value: '12' } });
       expect(store.fontSize).toBe(12);
-      expect(instance.state.fontSize).toEqual(12);
 
-      instance.handleSetFontSize({
-        currentTarget: { value: '10' },
-      } as React.FormEvent<HTMLInputElement>);
-
+      fireEvent.change(input, { target: { value: '10' } });
       expect(store.fontSize).toBe(10);
-      expect(instance.state.fontSize).toEqual(10);
     });
 
     it('handles being cleared', async () => {
-      const wrapper = shallow(<FontSettings appState={store} />);
-      const instance: any = wrapper.instance();
-      instance.handleSetFontSize({
-        currentTarget: { value: '' },
-      } as React.FormEvent<HTMLInputElement>);
+      render(<FontSettings appState={store} />);
 
+      const input = screen.getByLabelText('Font Size');
+
+      fireEvent.change(input, { target: { value: '' } });
       expect(store.fontSize).toBeUndefined();
-      expect(instance.state.fontSize).toBeUndefined();
     });
   });
 });
