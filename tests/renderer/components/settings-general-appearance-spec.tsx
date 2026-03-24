@@ -5,7 +5,6 @@ import { render, screen, waitFor } from '@testing-library/react';
 import { userEvent } from '@testing-library/user-event';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { renderClassComponentWithInstanceRef } from '../../../rtl-spec/test-utils/renderClassComponentWithInstanceRef';
 import {
   AppearanceSettings,
   filterItem,
@@ -13,6 +12,7 @@ import {
 } from '../../../src/renderer/components/settings-general-appearance';
 import { AppState } from '../../../src/renderer/state';
 import { FiddleTheme, LoadedFiddleTheme } from '../../../src/themes-defaults';
+import { renderClassComponentWithInstanceRef } from '../utils/renderClassComponentWithInstanceRef';
 
 const mockThemes = [
   {

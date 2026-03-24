@@ -4,13 +4,13 @@ import { Octokit } from '@octokit/rest';
 import { render, screen, waitFor } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { GistRevision } from '../../src/interfaces';
-import { App } from '../../src/renderer/app';
-import { GistHistoryDialog } from '../../src/renderer/components/history';
-import { AppState } from '../../src/renderer/state';
-import { getOctokit } from '../../src/renderer/utils/octokit';
+import { GistRevision } from '../../../src/interfaces';
+import { App } from '../../../src/renderer/app';
+import { GistHistoryDialog } from '../../../src/renderer/components/history';
+import { AppState } from '../../../src/renderer/state';
+import { getOctokit } from '../../../src/renderer/utils/octokit';
 
-vi.mock('../../src/renderer/utils/octokit');
+vi.mock('../../../src/renderer/utils/octokit');
 
 describe('GistHistoryDialog component', () => {
   let app: App;
@@ -49,7 +49,9 @@ describe('GistHistoryDialog component', () => {
     vi.mocked(getOctokit).mockResolvedValue({} as unknown as Octokit);
   });
 
-  function renderDialog(props: Partial<React.ComponentProps<typeof GistHistoryDialog>> = {}) {
+  function renderDialog(
+    props: Partial<React.ComponentProps<typeof GistHistoryDialog>> = {},
+  ) {
     return render(
       <GistHistoryDialog
         appState={state}

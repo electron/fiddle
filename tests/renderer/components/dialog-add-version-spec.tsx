@@ -3,10 +3,10 @@ import * as React from 'react';
 import { act, fireEvent, render, screen } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { renderClassComponentWithInstanceRef } from '../../../rtl-spec/test-utils/renderClassComponentWithInstanceRef';
 import { AddVersionDialog } from '../../../src/renderer/components/dialog-add-version';
 import { AppState } from '../../../src/renderer/state';
 import { overrideRendererPlatform } from '../../utils';
+import { renderClassComponentWithInstanceRef } from '../utils/renderClassComponentWithInstanceRef';
 
 describe('AddVersionDialog component', () => {
   let store: AppState;

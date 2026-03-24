@@ -4,10 +4,10 @@ import { render, screen } from '@testing-library/react';
 import { userEvent } from '@testing-library/user-event';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { renderClassComponentWithInstanceRef } from '../../../rtl-spec/test-utils/renderClassComponentWithInstanceRef';
 import { Commands } from '../../../src/renderer/components/commands';
 import { AppState } from '../../../src/renderer/state';
 import { overrideRendererPlatform, resetRendererPlatform } from '../../utils';
+import { renderClassComponentWithInstanceRef } from '../utils/renderClassComponentWithInstanceRef';
 
 vi.mock('../../../src/renderer/components/commands-runner', () => ({
   Runner: 'runner',

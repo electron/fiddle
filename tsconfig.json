@@ -21,6 +21,6 @@
     "typeRoots": ["./node_modules/@types"],
     "baseUrl": "."
   },
-  "include": ["rtl-spec/**/*", "src/**/*", "tests/**/*"],
+  "include": ["src/**/*", "tests/**/*"],
   "exclude": ["node_modules/**/*"]
 }

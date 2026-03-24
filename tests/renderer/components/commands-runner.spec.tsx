@@ -1,11 +1,11 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { InstallState } from '../../src/interfaces';
-import { Runner } from '../../src/renderer/components/commands-runner';
-import { AppState } from '../../src/renderer/state';
-import { renderClassComponentWithInstanceRef } from '../test-utils/renderClassComponentWithInstanceRef';
+import { InstallState } from '../../../src/interfaces';
+import { Runner } from '../../../src/renderer/components/commands-runner';
+import { AppState } from '../../../src/renderer/state';
+import { renderClassComponentWithInstanceRef } from '../utils/renderClassComponentWithInstanceRef';
 
-vi.mock('../../src/renderer/file-manager');
+vi.mock('../../../src/renderer/file-manager');
 
 describe('Runner component', () => {
   let store: AppState;

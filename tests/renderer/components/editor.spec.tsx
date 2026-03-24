@@ -1,9 +1,9 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { EditorId, MAIN_JS } from '../../src/interfaces';
-import { Editor } from '../../src/renderer/components/editor';
-import { AppState } from '../../src/renderer/state';
-import { renderClassComponentWithInstanceRef } from '../test-utils/renderClassComponentWithInstanceRef';
+import { EditorId, MAIN_JS } from '../../../src/interfaces';
+import { Editor } from '../../../src/renderer/components/editor';
+import { AppState } from '../../../src/renderer/state';
+import { renderClassComponentWithInstanceRef } from '../utils/renderClassComponentWithInstanceRef';
 
 type DidMount = () => void;
 

@@ -4,9 +4,9 @@ import { act, render, screen } from '@testing-library/react';
 import { userEvent } from '@testing-library/user-event';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { renderClassComponentWithInstanceRef } from '../../../rtl-spec/test-utils/renderClassComponentWithInstanceRef';
 import { Settings } from '../../../src/renderer/components/settings';
 import { AppState } from '../../../src/renderer/state';
+import { renderClassComponentWithInstanceRef } from '../utils/renderClassComponentWithInstanceRef';
 
 vi.mock('../../../src/renderer/components/settings-general', () => ({
   GeneralSettings: () => <div data-testid="settings-general" />,

@@ -4,11 +4,11 @@ import { Octokit } from '@octokit/rest';
 import { act, render, screen } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { renderClassComponentWithInstanceRef } from '../../../rtl-spec/test-utils/renderClassComponentWithInstanceRef';
 import { TokenDialog } from '../../../src/renderer/components/dialog-token';
 import { AppState } from '../../../src/renderer/state';
 import { getOctokit } from '../../../src/renderer/utils/octokit';
 import { overrideRendererPlatform } from '../../utils';
+import { renderClassComponentWithInstanceRef } from '../utils/renderClassComponentWithInstanceRef';
 
 vi.mock('../../../src/renderer/utils/octokit');
 

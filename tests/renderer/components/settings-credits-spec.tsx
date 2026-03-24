@@ -2,9 +2,9 @@ import { act, screen } from '@testing-library/react';
 import { userEvent } from '@testing-library/user-event';
 import { beforeEach, describe, expect, it } from 'vitest';
 
-import { renderClassComponentWithInstanceRef } from '../../../rtl-spec/test-utils/renderClassComponentWithInstanceRef';
 import { CreditsSettings } from '../../../src/renderer/components/settings-credits';
 import { AppState } from '../../../src/renderer/state';
+import { renderClassComponentWithInstanceRef } from '../utils/renderClassComponentWithInstanceRef';
 
 describe('CreditsSettings component', () => {
   const mockContributors = [

@@ -4,9 +4,9 @@ import { render } from '@testing-library/react';
 import { userEvent } from '@testing-library/user-event';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { InstallState, VersionSource } from '../../src/interfaces';
-import { BisectHandler } from '../../src/renderer/components/commands-bisect';
-import { AppState } from '../../src/renderer/state';
+import { InstallState, VersionSource } from '../../../src/interfaces';
+import { BisectHandler } from '../../../src/renderer/components/commands-bisect';
+import { AppState } from '../../../src/renderer/state';
 
 describe('Bisect commands component', () => {
   let store: AppState;

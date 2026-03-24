@@ -4,12 +4,12 @@ import { act, render, screen } from '@testing-library/react';
 import { userEvent } from '@testing-library/user-event';
 import { beforeEach, describe, expect, it } from 'vitest';
 
-import { renderClassComponentWithInstanceRef } from '../../../rtl-spec/test-utils/renderClassComponentWithInstanceRef';
 import {
   ExecutionSettings,
   SettingItemType,
 } from '../../../src/renderer/components/settings-execution';
 import { AppState } from '../../../src/renderer/state';
+import { renderClassComponentWithInstanceRef } from '../utils/renderClassComponentWithInstanceRef';
 
 describe('ExecutionSettings component', () => {
   let store: AppState;
