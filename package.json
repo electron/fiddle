@@ -110,7 +110,7 @@
     "@typescript-eslint/eslint-plugin": "^6.0.0",
     "@typescript-eslint/parser": "^6.0.0",
     "@vercel/webpack-asset-relocator-loader": "^1.7.2",
-    "@vitest/coverage-v8": "3.2.4",
+    "@vitest/coverage-v8": "4.1.0",
     "copy-webpack-plugin": "^11.0.0",
     "css-loader": "^6.7.1",
     "electron": "^40.1.0",
@@ -140,7 +140,7 @@
     "terser-webpack-plugin": "^5.3.3",
     "ts-loader": "^9.4.4",
     "typescript": "^5.8.3",
-    "vitest": "^3.2.4",
+    "vitest": "^4.1.0",
     "webpack": "^5.104.1"
   },
   "lint-staged": {

@@ -131,9 +131,11 @@ describe.each([8, 15])('BisectDialog component', (numVersions) => {
   describe('onSubmit()', () => {
     it('initiates a bisect instance and sets a version', async () => {
       const version = '1.0.0';
-      vi.mocked(Bisector).mockReturnValue({
-        getCurrentVersion: () => ({ version }),
-      } as any);
+      vi.mocked(Bisector).mockImplementation(
+        class {
+          getCurrentVersion = () => ({ version });
+        } as any,
+      );
 
       const versions = generateVersionRange(numVersions);
 
