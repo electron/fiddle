@@ -146,18 +146,18 @@
   "lint-staged": {
     "./**/*.js": [
       "npm run lint:js -- --fix",
-      "npx prettier --write --experimental-cli"
+      "prettier --write --experimental-cli"
     ],
     "./**/*.{ts,tsx}": [
       "npm run lint:ts -- --fix",
-      "npx prettier --write --experimental-cli"
+      "prettier --write --experimental-cli"
     ],
     "./static/**/*.js": [
       "npm run lint:templates -- --fix"
     ],
     "./src/less/*.less": [
       "npm run lint:style -- --fix",
-      "npx prettier --write --experimental-cli"
+      "prettier --write --experimental-cli"
     ]
   },
   "resolutions": {
