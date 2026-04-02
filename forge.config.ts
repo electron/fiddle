@@ -70,7 +70,10 @@ const config: ForgeConfig = {
   packagerConfig: {
     name: 'Electron Fiddle',
     executableName: 'electron-fiddle',
-    asar: true,
+    // Unpack the embedded sfw script so system Node can spawn it — it can't
+    // be executed from inside an asar archive. The `.webpack` segment must
+    // be explicit because minimatch globstar skips dot-prefixed directories.
+    asar: { unpack: '**/.webpack/sfw/**' },
     icon: path.resolve(__dirname, 'assets', 'icons', 'fiddle'),
     appBundleId: 'com.electron.fiddle',
     usageDescription: {

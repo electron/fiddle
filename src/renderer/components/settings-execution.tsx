@@ -377,8 +377,8 @@ export const ExecutionSettings = observer(
                 protects against supply chain attacks by scanning packages
                 during installation. When enabled, Fiddle runs npm/yarn installs
                 through the sfw CLI, which blocks malicious dependencies before
-                they can execute. Requires <code>npm install -g sfw</code> to be
-                installed.
+                they can execute. The sfw CLI is bundled with Fiddle, so no
+                extra install is required.
               </p>
               <Checkbox
                 checked={isUsingSocketFirewall}

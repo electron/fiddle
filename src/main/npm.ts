@@ -56,8 +56,17 @@ export async function getIsPackageManagerInstalled(
 export function getSfwPath(): string | null {
   if (sfwPath !== null) return sfwPath;
 
-  // Embedded sfw script copied by webpack CopyPlugin
-  const embeddedPath = path.resolve(__dirname, '../sfw/sfw.mjs');
+  // Embedded sfw script copied by webpack CopyPlugin.
+  // Mirrors the original node_modules/sfw/ layout (dist/sfw.mjs + package.json)
+  // because sfw.mjs reads "../package.json" at runtime for its version.
+  // In a packaged app the sfw directory is asar-unpacked (see forge.config.ts)
+  // so system Node can read it — translate the virtual asar path accordingly.
+  const embeddedPath = path
+    .resolve(__dirname, '../sfw/dist/sfw.mjs')
+    .replace(
+      `${path.sep}app.asar${path.sep}`,
+      `${path.sep}app.asar.unpacked${path.sep}`,
+    );
   if (fs.existsSync(embeddedPath)) {
     sfwPath = embeddedPath;
     return sfwPath;
