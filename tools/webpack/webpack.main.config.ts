@@ -32,6 +32,7 @@ export const mainConfig: Configuration = {
         },
         { from: 'static/show-me', to: '../static/show-me' },
         { from: 'assets/icons/fiddle.png', to: '../assets/icons/fiddle.png' },
+        { from: 'node_modules/sfw/dist/sfw.mjs', to: '../sfw/sfw.mjs' },
       ],
     }),
   ],

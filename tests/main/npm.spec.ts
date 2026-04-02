@@ -1,14 +1,21 @@
+import * as fs from 'node:fs';
+
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import {
   addModules,
   getIsPackageManagerInstalled,
   getIsSfwInstalled,
+  getSfwPath,
   packageRun,
-} from '../../src/main/npm';
+} from '../../src/main/npm.js';
 import { exec, execFile } from '../../src/main/utils/exec';
 import { overridePlatform, resetPlatform } from '../utils';
 vi.mock('../../src/main/utils/exec');
+vi.mock('node:fs', async () => {
+  const actual = await vi.importActual<typeof fs>('node:fs');
+  return { ...actual, existsSync: vi.fn() };
+});
 
 describe('npm', () => {
   describe('getIsPackageManagerInstalled()', () => {
@@ -119,56 +126,28 @@ describe('npm', () => {
     });
   });
 
-  describe('getIsSfwInstalled()', () => {
-    beforeEach(() => {
+  describe('getIsSfwInstalled() / getSfwPath()', () => {
+    it('returns true when the embedded sfw script exists', async () => {
       vi.resetModules();
+      vi.mocked(fs.existsSync).mockReturnValueOnce(true);
+
+      const { getIsSfwInstalled: fresh, getSfwPath: freshPath } = await import(
+        '../../src/main/npm.js'
+      );
+
+      expect(fresh()).toBe(true);
+      expect(freshPath()).toMatch(/sfw\.mjs$/);
     });
 
-    afterEach(() => resetPlatform());
+    it('returns false when the embedded sfw script does not exist', async () => {
+      vi.resetModules();
+      vi.mocked(fs.existsSync).mockReturnValueOnce(false);
 
-    it('returns true if sfw installed on darwin', async () => {
-      overridePlatform('darwin');
+      const { getIsSfwInstalled: fresh } = await import(
+        '../../src/main/npm.js'
+      );
 
-      vi.mocked(exec).mockResolvedValueOnce('/usr/local/bin/sfw');
-
-      const result = await getIsSfwInstalled(true);
-
-      expect(result).toBe(true);
-      expect(exec).toBeCalledWith(expect.anything(), 'which sfw');
-    });
-
-    it('returns true if sfw installed on win32', async () => {
-      overridePlatform('win32');
-
-      vi.mocked(exec).mockResolvedValueOnce('C:\\Program Files\\sfw.exe');
-
-      const result = await getIsSfwInstalled(true);
-
-      expect(result).toBe(true);
-      expect(exec).toBeCalledWith(expect.anything(), 'where.exe sfw');
-    });
-
-    it('returns false if sfw not installed', async () => {
-      overridePlatform('darwin');
-
-      vi.mocked(exec).mockRejectedValueOnce(new Error('not found'));
-
-      const result = await getIsSfwInstalled(true);
-
-      expect(result).toBe(false);
-      expect(exec).toBeCalledWith(expect.anything(), 'which sfw');
-    });
-
-    it('uses the cache', async () => {
-      vi.mocked(exec).mockResolvedValueOnce('/usr/local/bin/sfw');
-
-      const one = await getIsSfwInstalled(true);
-      expect(one).toBe(true);
-      expect(exec).toHaveBeenCalledTimes(1);
-
-      const two = await getIsSfwInstalled();
-      expect(two).toBe(true);
-      expect(exec).toHaveBeenCalledTimes(1);
+      expect(fresh()).toBe(false);
     });
   });
 
@@ -224,15 +203,13 @@ describe('npm', () => {
     });
 
     describe('with socket firewall', () => {
-      afterEach(() => resetPlatform());
-
-      it('uses sfw when enabled and available for npm', async () => {
+      it('uses sfw when enabled and embedded script exists', async () => {
         vi.resetModules();
+        vi.mocked(fs.existsSync).mockReturnValueOnce(true);
+
         const { addModules: addModulesFresh } = await import(
-          '../../src/main/npm'
+          '../../src/main/npm.js'
         );
-        overridePlatform('darwin');
-        vi.mocked(exec).mockResolvedValueOnce('/usr/local/bin/sfw');
 
         await addModulesFresh(
           {
@@ -243,21 +220,26 @@ describe('npm', () => {
           'lodash',
         );
 
-        expect(execFile).toHaveBeenCalledWith('/my/directory', 'sfw', [
-          'npm',
-          'install',
-          '-S',
-          'lodash',
-        ]);
+        expect(execFile).toHaveBeenCalledWith(
+          '/my/directory',
+          'node',
+          expect.arrayContaining([
+            expect.stringMatching(/sfw\.mjs$/),
+            'npm',
+            'install',
+            '-S',
+            'lodash',
+          ]),
+        );
       });
 
       it('uses sfw when enabled and available for yarn', async () => {
         vi.resetModules();
+        vi.mocked(fs.existsSync).mockReturnValueOnce(true);
+
         const { addModules: addModulesFresh } = await import(
-          '../../src/main/npm'
+          '../../src/main/npm.js'
         );
-        overridePlatform('darwin');
-        vi.mocked(exec).mockResolvedValueOnce('/usr/local/bin/sfw');
 
         await addModulesFresh(
           {
@@ -268,20 +250,25 @@ describe('npm', () => {
           'lodash',
         );
 
-        expect(execFile).toHaveBeenCalledWith('/my/directory', 'sfw', [
-          'yarn',
-          'add',
-          'lodash',
-        ]);
+        expect(execFile).toHaveBeenCalledWith(
+          '/my/directory',
+          'node',
+          expect.arrayContaining([
+            expect.stringMatching(/sfw\.mjs$/),
+            'yarn',
+            'add',
+            'lodash',
+          ]),
+        );
       });
 
-      it('falls back to direct npm when sfw not available', async () => {
+      it('falls back to direct npm when sfw script not found', async () => {
         vi.resetModules();
+        vi.mocked(fs.existsSync).mockReturnValueOnce(false);
+
         const { addModules: addModulesFresh } = await import(
-          '../../src/main/npm'
+          '../../src/main/npm.js'
         );
-        overridePlatform('darwin');
-        vi.mocked(exec).mockRejectedValueOnce(new Error('not found'));
 
         await addModulesFresh(
           {

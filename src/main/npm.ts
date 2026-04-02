@@ -1,3 +1,4 @@
+import * as fs from 'node:fs';
 import * as path from 'node:path';
 
 import { IpcMainInvokeEvent, shell } from 'electron';
@@ -9,7 +10,7 @@ import { IpcEvents } from '../ipc-events';
 
 let isNpmInstalled: boolean | null = null;
 let isYarnInstalled: boolean | null = null;
-let isSfwInstalled: boolean | null = null;
+let sfwPath: string | null = null;
 
 /**
  * Checks if package manager is installed by checking if a binary
@@ -49,24 +50,28 @@ export async function getIsPackageManagerInstalled(
 }
 
 /**
- * Checks if sfw (Socket Firewall) is installed.
+ * Returns the path to the embedded sfw script, or null if not found.
+ * The sfw CLI is bundled with the app via webpack CopyPlugin.
  */
-export async function getIsSfwInstalled(
-  ignoreCache?: boolean,
-): Promise<boolean> {
-  if (isSfwInstalled !== null && !ignoreCache) return isSfwInstalled;
+export function getSfwPath(): string | null {
+  if (sfwPath !== null) return sfwPath;
 
-  const command = process.platform === 'win32' ? 'where.exe sfw' : 'which sfw';
-
-  try {
-    await exec(process.cwd(), command);
-    isSfwInstalled = true;
-    return true;
-  } catch (error) {
-    console.warn(`getIsSfwInstalled: "${command}" failed.`, error);
-    isSfwInstalled = false;
-    return false;
+  // Embedded sfw script copied by webpack CopyPlugin
+  const embeddedPath = path.resolve(__dirname, '../sfw/sfw.mjs');
+  if (fs.existsSync(embeddedPath)) {
+    sfwPath = embeddedPath;
+    return sfwPath;
   }
+
+  sfwPath = '';
+  return null;
+}
+
+/**
+ * Checks if sfw (Socket Firewall) is available (embedded with the app).
+ */
+export function getIsSfwInstalled(): boolean {
+  return getSfwPath() !== null;
 }
 
 /**
@@ -86,12 +91,12 @@ export async function addModules(
 
   // Use Socket Firewall if enabled and available
   if (useSocketFirewall) {
-    const sfwAvailable = await getIsSfwInstalled();
-    if (sfwAvailable) {
-      // sfw wraps the package manager: sfw npm install ...
-      return await execFile(dir, 'sfw', [pm, ...pmArgs]);
+    const sfwScript = getSfwPath();
+    if (sfwScript) {
+      // Run the embedded sfw script via system node: node sfw.mjs npm install ...
+      return await execFile(dir, 'node', [sfwScript, pm, ...pmArgs]);
     }
-    console.warn('Socket Firewall requested but sfw is not installed');
+    console.warn('Socket Firewall requested but sfw script was not found');
   }
 
   return await execFile(dir, pm, pmArgs);
