@@ -100,7 +100,7 @@ declare global {
         listener: (types: string, version: string) => void,
       ): void;
       addModules(
-        { dir, packageManager }: PMOperationOptions,
+        { dir, packageManager, useSocketFirewall }: PMOperationOptions,
         ...names: Array<string>
       ): Promise<string>;
       arch: string;
@@ -123,6 +123,7 @@ declare global {
         packageManager: IPackageManager,
         ignoreCache?: boolean,
       ): Promise<boolean>;
+      getIsSfwInstalled(): Promise<boolean>;
       getProjectName(localPath?: string): Promise<string>;
       getTemplate(version: string): Promise<EditorValues>;
       getTemplateValues: (name: string) => Promise<EditorValues>;

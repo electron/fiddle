@@ -213,6 +213,7 @@ export type IPackageManager = 'npm' | 'yarn';
 export interface PMOperationOptions {
   dir: string;
   packageManager: IPackageManager;
+  useSocketFirewall?: boolean;
 }
 
 export interface GistRevision {
@@ -243,6 +244,7 @@ export enum GlobalSetting {
   isEnablingElectronLogging = 'isEnablingElectronLogging',
   isKeepingUserDataDirs = 'isKeepingUserDataDirs',
   isPublishingGistAsRevision = 'isPublishingGistAsRevision',
+  isUsingSocketFirewall = 'isUsingSocketFirewall',
   isUsingSystemTheme = 'isUsingSystemTheme',
   knownVersion = 'known-electron-versions',
   localVersion = 'local-electron-versions',

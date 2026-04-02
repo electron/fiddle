@@ -99,6 +99,9 @@ export class AppState {
   public isPublishingGistAsRevision = !!(
     this.retrieve(GlobalSetting.isPublishingGistAsRevision) ?? true
   );
+  public isUsingSocketFirewall = !!(
+    this.retrieve(GlobalSetting.isUsingSocketFirewall) ?? true
+  );
   public executionFlags: Array<string> =
     (this.retrieve(GlobalSetting.executionFlags) as Array<string>) === null
       ? []
@@ -243,6 +246,7 @@ export class AppState {
       isKeepingUserDataDirs: observable,
       isOnline: observable,
       isPublishingGistAsRevision: observable,
+      isUsingSocketFirewall: observable,
       isQuitting: observable,
       isRunning: observable,
       isSettingsShowing: observable,
@@ -424,6 +428,7 @@ export class AppState {
           case GlobalSetting.isKeepingUserDataDirs:
           case GlobalSetting.isPublishingGistAsRevision:
           case GlobalSetting.isShowingGistHistory:
+          case GlobalSetting.isUsingSocketFirewall:
           case GlobalSetting.isUsingSystemTheme:
           case GlobalSetting.packageAuthor:
           case GlobalSetting.packageManager:
@@ -497,6 +502,12 @@ export class AppState {
       this.save(
         GlobalSetting.isPublishingGistAsRevision,
         this.isPublishingGistAsRevision,
+      ),
+    );
+    autorun(() =>
+      this.save(
+        GlobalSetting.isUsingSocketFirewall,
+        this.isUsingSocketFirewall,
       ),
     );
     autorun(() =>

@@ -3,6 +3,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import {
   addModules,
   getIsPackageManagerInstalled,
+  getIsSfwInstalled,
   packageRun,
 } from '../../src/main/npm';
 import { exec, execFile } from '../../src/main/utils/exec';
@@ -118,6 +119,59 @@ describe('npm', () => {
     });
   });
 
+  describe('getIsSfwInstalled()', () => {
+    beforeEach(() => {
+      vi.resetModules();
+    });
+
+    afterEach(() => resetPlatform());
+
+    it('returns true if sfw installed on darwin', async () => {
+      overridePlatform('darwin');
+
+      vi.mocked(exec).mockResolvedValueOnce('/usr/local/bin/sfw');
+
+      const result = await getIsSfwInstalled(true);
+
+      expect(result).toBe(true);
+      expect(exec).toBeCalledWith(expect.anything(), 'which sfw');
+    });
+
+    it('returns true if sfw installed on win32', async () => {
+      overridePlatform('win32');
+
+      vi.mocked(exec).mockResolvedValueOnce('C:\\Program Files\\sfw.exe');
+
+      const result = await getIsSfwInstalled(true);
+
+      expect(result).toBe(true);
+      expect(exec).toBeCalledWith(expect.anything(), 'where.exe sfw');
+    });
+
+    it('returns false if sfw not installed', async () => {
+      overridePlatform('darwin');
+
+      vi.mocked(exec).mockRejectedValueOnce(new Error('not found'));
+
+      const result = await getIsSfwInstalled(true);
+
+      expect(result).toBe(false);
+      expect(exec).toBeCalledWith(expect.anything(), 'which sfw');
+    });
+
+    it('uses the cache', async () => {
+      vi.mocked(exec).mockResolvedValueOnce('/usr/local/bin/sfw');
+
+      const one = await getIsSfwInstalled(true);
+      expect(one).toBe(true);
+      expect(exec).toHaveBeenCalledTimes(1);
+
+      const two = await getIsSfwInstalled();
+      expect(two).toBe(true);
+      expect(exec).toHaveBeenCalledTimes(1);
+    });
+  });
+
   describe('addModules()', () => {
     describe('npm', () => {
       it('attempts to install a single module', async () => {
@@ -165,6 +219,100 @@ describe('npm', () => {
 
         expect(execFile).toHaveBeenCalledWith('/my/directory', 'yarn', [
           'install',
+        ]);
+      });
+    });
+
+    describe('with socket firewall', () => {
+      afterEach(() => resetPlatform());
+
+      it('uses sfw when enabled and available for npm', async () => {
+        vi.resetModules();
+        const { addModules: addModulesFresh } = await import(
+          '../../src/main/npm'
+        );
+        overridePlatform('darwin');
+        vi.mocked(exec).mockResolvedValueOnce('/usr/local/bin/sfw');
+
+        await addModulesFresh(
+          {
+            dir: '/my/directory',
+            packageManager: 'npm',
+            useSocketFirewall: true,
+          },
+          'lodash',
+        );
+
+        expect(execFile).toHaveBeenCalledWith('/my/directory', 'sfw', [
+          'npm',
+          'install',
+          '-S',
+          'lodash',
+        ]);
+      });
+
+      it('uses sfw when enabled and available for yarn', async () => {
+        vi.resetModules();
+        const { addModules: addModulesFresh } = await import(
+          '../../src/main/npm'
+        );
+        overridePlatform('darwin');
+        vi.mocked(exec).mockResolvedValueOnce('/usr/local/bin/sfw');
+
+        await addModulesFresh(
+          {
+            dir: '/my/directory',
+            packageManager: 'yarn',
+            useSocketFirewall: true,
+          },
+          'lodash',
+        );
+
+        expect(execFile).toHaveBeenCalledWith('/my/directory', 'sfw', [
+          'yarn',
+          'add',
+          'lodash',
+        ]);
+      });
+
+      it('falls back to direct npm when sfw not available', async () => {
+        vi.resetModules();
+        const { addModules: addModulesFresh } = await import(
+          '../../src/main/npm'
+        );
+        overridePlatform('darwin');
+        vi.mocked(exec).mockRejectedValueOnce(new Error('not found'));
+
+        await addModulesFresh(
+          {
+            dir: '/my/directory',
+            packageManager: 'npm',
+            useSocketFirewall: true,
+          },
+          'lodash',
+        );
+
+        expect(execFile).toHaveBeenCalledWith('/my/directory', 'npm', [
+          'install',
+          '-S',
+          'lodash',
+        ]);
+      });
+
+      it('does not use sfw when disabled', async () => {
+        addModules(
+          {
+            dir: '/my/directory',
+            packageManager: 'npm',
+            useSocketFirewall: false,
+          },
+          'lodash',
+        );
+
+        expect(execFile).toHaveBeenCalledWith('/my/directory', 'npm', [
+          'install',
+          '-S',
+          'lodash',
         ]);
       });
     });
