@@ -4,6 +4,8 @@ on:
   issues:
     types:
       - opened
+  # zizmor: ignore[dangerous-triggers] needed for access to secrets to add
+  # newly-opened PRs to the project board; does not check out PR code.
   pull_request_target:
     types:
       - opened
