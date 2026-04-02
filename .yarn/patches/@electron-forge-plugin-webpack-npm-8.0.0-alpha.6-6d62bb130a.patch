@@ -1,0 +1,28 @@
+diff --git a/dist/WebpackConfig.js b/dist/WebpackConfig.js
+index e1fa82328f112953f963fb7c066f4951611d32cb..4b3422f76253e4470b8ddc522037fa3e5b851c4a 100644
+--- a/dist/WebpackConfig.js
++++ b/dist/WebpackConfig.js
+@@ -1,7 +1,8 @@
+ import path from 'node:path';
+ import debug from 'debug';
+ import HtmlWebpackPlugin from 'html-webpack-plugin';
+-import { DefinePlugin, ExternalsPlugin } from 'webpack';
++import webpackPkg from 'webpack';
++const { DefinePlugin, ExternalsPlugin } = webpackPkg;
+ import { merge as webpackMerge } from 'webpack-merge';
+ import AssetRelocatorPatch from './util/AssetRelocatorPatch.js';
+ import processConfig from './util/processConfig.js';
+diff --git a/dist/WebpackPlugin.js b/dist/WebpackPlugin.js
+index a42103888da89eb836f4205b5d15aa5e081ee849..dd5ad4c6067b46921cc48e0d921cff886cf60ed1 100644
+--- a/dist/WebpackPlugin.js
++++ b/dist/WebpackPlugin.js
+@@ -9,7 +9,8 @@ import debug from 'debug';
+ import glob from 'fast-glob';
+ import fs from 'fs-extra';
+ import { PRESET_TIMER } from 'listr2';
+-import * as webpack from 'webpack';
++import webpackDefault from 'webpack';
++const webpack = { webpack: webpackDefault };
+ import WebpackDevServer from 'webpack-dev-server';
+ import { merge } from 'webpack-merge';
+ import ElectronForgeLoggingPlugin from './util/ElectronForgeLogging.js';

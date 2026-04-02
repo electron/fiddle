@@ -18,7 +18,7 @@ monaco.languages.registerDocumentFormattingEditProvider('javascript', {
       singleQuote: true,
       parser: 'babel',
       trailingComma: 'none',
-      plugins: [prettierPluginBabel, prettierPluginESTree],
+      plugins: [prettierPluginBabel, prettierPluginESTree as never],
     });
     return [
       {
@@ -37,7 +37,7 @@ monaco.languages.registerDocumentRangeFormattingEditProvider('javascript', {
       singleQuote: true,
       parser: 'babel',
       trailingComma: 'none',
-      plugins: [prettierPluginBabel, prettierPluginESTree],
+      plugins: [prettierPluginBabel, prettierPluginESTree as never],
     });
     return [
       {
