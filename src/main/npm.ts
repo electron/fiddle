@@ -1,4 +1,3 @@
-import * as fs from 'node:fs';
 import * as path from 'node:path';
 
 import { IpcMainInvokeEvent, shell } from 'electron';
@@ -10,7 +9,6 @@ import { IpcEvents } from '../ipc-events';
 
 let isNpmInstalled: boolean | null = null;
 let isYarnInstalled: boolean | null = null;
-let sfwPath: string | null = null;
 
 /**
  * Checks if package manager is installed by checking if a binary
@@ -50,37 +48,20 @@ export async function getIsPackageManagerInstalled(
 }
 
 /**
- * Returns the path to the embedded sfw script, or null if not found.
+ * Returns the path to the embedded sfw script.
  * The sfw CLI is bundled with the app via webpack CopyPlugin.
+ * Mirrors the original node_modules/sfw/ layout (dist/sfw.mjs + package.json)
+ * because sfw.mjs reads "../package.json" at runtime for its version.
+ * In a packaged app the sfw directory is asar-unpacked (see forge.config.ts)
+ * so system Node can read it — translate the virtual asar path accordingly.
  */
-export function getSfwPath(): string | null {
-  if (sfwPath !== null) return sfwPath;
-
-  // Embedded sfw script copied by webpack CopyPlugin.
-  // Mirrors the original node_modules/sfw/ layout (dist/sfw.mjs + package.json)
-  // because sfw.mjs reads "../package.json" at runtime for its version.
-  // In a packaged app the sfw directory is asar-unpacked (see forge.config.ts)
-  // so system Node can read it — translate the virtual asar path accordingly.
-  const embeddedPath = path
+export function getSfwPath(): string {
+  return path
     .resolve(__dirname, '../sfw/dist/sfw.mjs')
     .replace(
       `${path.sep}app.asar${path.sep}`,
       `${path.sep}app.asar.unpacked${path.sep}`,
     );
-  if (fs.existsSync(embeddedPath)) {
-    sfwPath = embeddedPath;
-    return sfwPath;
-  }
-
-  sfwPath = '';
-  return null;
-}
-
-/**
- * Checks if sfw (Socket Firewall) is available (embedded with the app).
- */
-export function getIsSfwInstalled(): boolean {
-  return getSfwPath() !== null;
 }
 
 /**
@@ -98,14 +79,10 @@ export async function addModules(
         ? ['add', ...names]
         : ['install'];
 
-  // Use Socket Firewall if enabled and available
+  // Use Socket Firewall if enabled
   if (useSocketFirewall) {
-    const sfwScript = getSfwPath();
-    if (sfwScript) {
-      // Run the embedded sfw script via system node: node sfw.mjs npm install ...
-      return await execFile(dir, 'node', [sfwScript, pm, ...pmArgs]);
-    }
-    console.warn('Socket Firewall requested but sfw script was not found');
+    // Run the embedded sfw script via system node: node sfw.mjs npm install ...
+    return await execFile(dir, 'node', [getSfwPath(), pm, ...pmArgs]);
   }
 
   return await execFile(dir, pm, pmArgs);
@@ -141,9 +118,6 @@ export async function setupNpm() {
       packageManager: IPackageManager,
       ignoreCache?: boolean,
     ) => getIsPackageManagerInstalled(packageManager, ignoreCache),
-  );
-  ipcMainManager.handle(IpcEvents.NPM_IS_SFW_INSTALLED, () =>
-    getIsSfwInstalled(),
   );
   ipcMainManager.handle(
     IpcEvents.NPM_PACKAGE_RUN,

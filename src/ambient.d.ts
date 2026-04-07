@@ -123,7 +123,6 @@ declare global {
         packageManager: IPackageManager,
         ignoreCache?: boolean,
       ): Promise<boolean>;
-      getIsSfwInstalled(): Promise<boolean>;
       getProjectName(localPath?: string): Promise<string>;
       getTemplate(version: string): Promise<EditorValues>;
       getTemplateValues: (name: string) => Promise<EditorValues>;

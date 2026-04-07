@@ -141,9 +141,6 @@ export async function setupFiddleGlobal() {
         ignoreCache,
       );
     },
-    getIsSfwInstalled() {
-      return ipcRenderer.invoke(IpcEvents.NPM_IS_SFW_INSTALLED);
-    },
     getNodeTypes(version: string) {
       return ipcRenderer.invoke(IpcEvents.GET_NODE_TYPES, version);
     },

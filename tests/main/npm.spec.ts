@@ -1,21 +1,14 @@
-import * as fs from 'node:fs';
-
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import {
   addModules,
   getIsPackageManagerInstalled,
-  getIsSfwInstalled,
   getSfwPath,
   packageRun,
 } from '../../src/main/npm.js';
 import { exec, execFile } from '../../src/main/utils/exec';
 import { overridePlatform, resetPlatform } from '../utils';
 vi.mock('../../src/main/utils/exec');
-vi.mock('node:fs', async () => {
-  const actual = await vi.importActual<typeof fs>('node:fs');
-  return { ...actual, existsSync: vi.fn() };
-});
 
 describe('npm', () => {
   describe('getIsPackageManagerInstalled()', () => {
@@ -126,28 +119,9 @@ describe('npm', () => {
     });
   });
 
-  describe('getIsSfwInstalled() / getSfwPath()', () => {
-    it('returns true when the embedded sfw script exists', async () => {
-      vi.resetModules();
-      vi.mocked(fs.existsSync).mockReturnValueOnce(true);
-
-      const { getIsSfwInstalled: fresh, getSfwPath: freshPath } = await import(
-        '../../src/main/npm.js'
-      );
-
-      expect(fresh()).toBe(true);
-      expect(freshPath()).toMatch(/sfw\.mjs$/);
-    });
-
-    it('returns false when the embedded sfw script does not exist', async () => {
-      vi.resetModules();
-      vi.mocked(fs.existsSync).mockReturnValueOnce(false);
-
-      const { getIsSfwInstalled: fresh } = await import(
-        '../../src/main/npm.js'
-      );
-
-      expect(fresh()).toBe(false);
+  describe('getSfwPath()', () => {
+    it('returns the path to the embedded sfw script', () => {
+      expect(getSfwPath()).toMatch(/sfw\.mjs$/);
     });
   });
 
@@ -203,15 +177,8 @@ describe('npm', () => {
     });
 
     describe('with socket firewall', () => {
-      it('uses sfw when enabled and embedded script exists', async () => {
-        vi.resetModules();
-        vi.mocked(fs.existsSync).mockReturnValueOnce(true);
-
-        const { addModules: addModulesFresh } = await import(
-          '../../src/main/npm.js'
-        );
-
-        await addModulesFresh(
+      it('uses sfw when enabled for npm', async () => {
+        await addModules(
           {
             dir: '/my/directory',
             packageManager: 'npm',
@@ -233,15 +200,8 @@ describe('npm', () => {
         );
       });
 
-      it('uses sfw when enabled and available for yarn', async () => {
-        vi.resetModules();
-        vi.mocked(fs.existsSync).mockReturnValueOnce(true);
-
-        const { addModules: addModulesFresh } = await import(
-          '../../src/main/npm.js'
-        );
-
-        await addModulesFresh(
+      it('uses sfw when enabled for yarn', async () => {
+        await addModules(
           {
             dir: '/my/directory',
             packageManager: 'yarn',
@@ -262,32 +222,8 @@ describe('npm', () => {
         );
       });
 
-      it('falls back to direct npm when sfw script not found', async () => {
-        vi.resetModules();
-        vi.mocked(fs.existsSync).mockReturnValueOnce(false);
-
-        const { addModules: addModulesFresh } = await import(
-          '../../src/main/npm.js'
-        );
-
-        await addModulesFresh(
-          {
-            dir: '/my/directory',
-            packageManager: 'npm',
-            useSocketFirewall: true,
-          },
-          'lodash',
-        );
-
-        expect(execFile).toHaveBeenCalledWith('/my/directory', 'npm', [
-          'install',
-          '-S',
-          'lodash',
-        ]);
-      });
-
       it('does not use sfw when disabled', async () => {
-        addModules(
+        await addModules(
           {
             dir: '/my/directory',
             packageManager: 'npm',
