@@ -202,9 +202,9 @@ export const AddVersionDialog = observer(
       const canSwitch = isValidElectron && existingLocalVersion;
 
       if (canSwitch)
-        return `This folder is already in use as version "${
-          existingLocalVersion!.version
-        }". Would you like to switch to that version now?`;
+        return `This folder is already in use as "${
+          existingLocalVersion.name ?? existingLocalVersion.version
+        }". Would you like to switch to that local build now?`;
 
       if (isValidElectron)
         return `We found an ${getElectronNameForPlatform()} in this folder.`;

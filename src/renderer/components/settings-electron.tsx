@@ -71,7 +71,7 @@ const ElectronVersionRow = observer(({ index, style, data }: RowProps) => {
   };
 
   const renderAction = (ver: RunnableVersion): JSX.Element => {
-    const { state, source, version } = ver;
+    const { name, state, source, version } = ver;
     const isLocal = source === VersionSource.local;
     const buttonProps: ButtonProps = {
       small: true,
@@ -109,7 +109,7 @@ const ElectronVersionRow = observer(({ index, style, data }: RowProps) => {
         <Tooltip2
           position="auto"
           intent="primary"
-          content={`Can't remove currently active Electron version (${version})`}
+          content={`Can't remove currently active Electron version (${name ?? version})`}
         >
           <AnchorButton
             className={'disabled-version'}
