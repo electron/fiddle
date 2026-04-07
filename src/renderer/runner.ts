@@ -12,6 +12,7 @@ import {
   PackageJsonOptions,
   RunResult,
   RunnableVersion,
+  VersionSource,
 } from '../interfaces';
 
 export enum ForgeCommands {
@@ -161,6 +162,7 @@ export class Runner {
     }
 
     if (
+      ver.source !== VersionSource.local &&
       semver.lt(ver.version, '28.0.0') &&
       !ver.version.startsWith('28.0.0-nightly')
     ) {
