@@ -71,7 +71,7 @@ jobs:
           echo "SM_CLIENT_CERT_FILE=D:\\cert.p12" >> "$GITHUB_ENV" 
       - name: Sync cert (Windows)
         if: ${{ startsWith(matrix.os, 'windows-') }}
-        shell: cmd
+        shell: pwsh
         env:
           CERT_FINGERPRINT: ${{ secrets.CERT_FINGERPRINT }}
           KEYPAIR_ALIAS: ${{ secrets.KEYPAIR_ALIAS }}
@@ -81,13 +81,13 @@ jobs:
           SM_HOST: ${{ secrets.SM_HOST }}
         run: |
           smksp_registrar list
-          smctl windows certsync --keypair-alias=%KEYPAIR_ALIAS%
+          smctl windows certsync --keypair-alias=$env:KEYPAIR_ALIAS
       - name: Build (macOS)
         if: ${{ startsWith(matrix.os, 'macos-') }}
         env:
           APPLE_ID: ${{ secrets.APPLE_ID }}
           APPLE_ID_PASSWORD: ${{ secrets.APPLE_ID_PASSWORD }}
-        run: yarn run publish --arch=${{ matrix.arch }} --dry-run
+        run: yarn run publish --arch=${{ matrix.arch }} --dry-run # zizmor: ignore[use-trusted-publishing]
       - name: Build (Windows)
         if: ${{ startsWith(matrix.os, 'windows-') }}
         env:
@@ -97,10 +97,10 @@ jobs:
           SM_CLIENT_CERT_FILE: ${{ env.SM_CLIENT_CERT_FILE }}
           SM_CLIENT_CERT_PASSWORD: ${{ secrets.SM_CLIENT_CERT_PASSWORD }}
           SM_HOST: ${{ secrets.SM_HOST }}
-        run: yarn run publish --arch=${{ matrix.arch }} --dry-run
+        run: yarn run publish --arch=${{ matrix.arch }} --dry-run # zizmor: ignore[use-trusted-publishing]
       - name: Build (Linux)
         if: ${{ startsWith(matrix.os, 'ubuntu-') }}
-        run: yarn run publish --arch=${{ matrix.arch }} --dry-run
+        run: yarn run publish --arch=${{ matrix.arch }} --dry-run # zizmor: ignore[use-trusted-publishing]
       - uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
         with:
           name: build-artifacts-${{ matrix.os }}-${{ matrix.arch }}

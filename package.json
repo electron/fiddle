@@ -114,7 +114,7 @@
     "@vitest/coverage-v8": "4.1.0",
     "copy-webpack-plugin": "^11.0.0",
     "css-loader": "^6.7.1",
-    "electron": "^40.1.0",
+    "electron": "^40.8.4",
     "eslint": "^8.45.0",
     "eslint-config-prettier": "^8.8.0",
     "eslint-import-resolver-typescript": "^3.5.5",
