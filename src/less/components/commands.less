@@ -8,12 +8,12 @@ header {
   background-color: @background-3;
   -webkit-app-region: drag;
 
-  #version-chooser .bp3-button-text::before {
+  #version-chooser:not([data-local]) .bp3-button-text::before {
     content: 'Electron v';
   }
 
   @media (max-width: 980px) {
-    #version-chooser .bp3-button-text::before {
+    #version-chooser:not([data-local]) .bp3-button-text::before {
       content: 'v';
     }
   }

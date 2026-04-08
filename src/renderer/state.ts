@@ -603,7 +603,8 @@ export class AppState {
 
   /**
    * Returns an array of Electron versions to show given the
-   * current settings for states and channels to display
+   * current settings for states and channels to display.
+   * Local builds are always shown and listed before remote versions.
    */
   get versionsToShow(): Array<RunnableVersion> {
     const {
@@ -614,8 +615,14 @@ export class AppState {
     } = this;
     const oldest = window.ElectronFiddle.getOldestSupportedMajor();
 
-    const filter = (ver: RunnableVersion) =>
+    const allVersions = Object.values(versions);
+    const localVersions = allVersions.filter(
+      (ver) => ver && ver.source === VersionSource.local,
+    );
+
+    const remoteFilter = (ver: RunnableVersion) =>
       ver &&
+      ver.source !== VersionSource.local &&
       (showUndownloadedVersions ||
         ver.state === InstallState.installing ||
         ver.state === InstallState.installed ||
@@ -625,7 +632,9 @@ export class AppState {
         oldest <= Number.parseInt(ver.version)) &&
       channelsToShow.includes(getReleaseChannel(ver));
 
-    return sortVersions(Object.values(versions).filter(filter));
+    const remoteVersions = sortVersions(allVersions.filter(remoteFilter));
+
+    return [...localVersions, ...remoteVersions];
   }
 
   /**
