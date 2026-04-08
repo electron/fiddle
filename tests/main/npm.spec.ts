@@ -5,7 +5,7 @@ import {
   getIsPackageManagerInstalled,
   getSfwPath,
   packageRun,
-} from '../../src/main/npm.js';
+} from '../../src/main/npm';
 import { exec, execFile } from '../../src/main/utils/exec';
 import { overridePlatform, resetPlatform } from '../utils';
 vi.mock('../../src/main/utils/exec');
