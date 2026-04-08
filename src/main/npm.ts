@@ -48,21 +48,44 @@ export async function getIsPackageManagerInstalled(
 }
 
 /**
+ * Returns the path to the embedded sfw script.
+ * The sfw CLI is bundled with the app via webpack CopyPlugin.
+ * Mirrors the original node_modules/sfw/ layout (dist/sfw.mjs + package.json)
+ * because sfw.mjs reads "../package.json" at runtime for its version.
+ * In a packaged app the sfw directory is asar-unpacked (see forge.config.ts)
+ * so system Node can read it — translate the virtual asar path accordingly.
+ */
+export function getSfwPath(): string {
+  return path
+    .resolve(__dirname, '../sfw/dist/sfw.mjs')
+    .replace(
+      `${path.sep}app.asar${path.sep}`,
+      `${path.sep}app.asar.unpacked${path.sep}`,
+    );
+}
+
+/**
  * Installs given modules to a given folder.
  */
 export async function addModules(
-  { dir, packageManager }: PMOperationOptions,
+  { dir, packageManager, useSocketFirewall }: PMOperationOptions,
   ...names: Array<string>
 ): Promise<string> {
-  const cmd = packageManager === 'npm' ? 'npm' : 'yarn';
-  const args =
+  const pm = packageManager === 'npm' ? 'npm' : 'yarn';
+  const pmArgs =
     packageManager === 'npm'
       ? ['install', '-S', ...names]
       : names.length > 0
         ? ['add', ...names]
         : ['install'];
 
-  return await execFile(dir, cmd, args);
+  // Use Socket Firewall if enabled
+  if (useSocketFirewall) {
+    // Run the embedded sfw script via system node: node sfw.mjs npm install ...
+    return await execFile(dir, 'node', [getSfwPath(), pm, ...pmArgs]);
+  }
+
+  return await execFile(dir, pm, pmArgs);
 }
 
 /**
@@ -84,9 +107,9 @@ export async function setupNpm() {
     IpcEvents.NPM_ADD_MODULES,
     (
       _: IpcMainInvokeEvent,
-      { dir, packageManager }: PMOperationOptions,
+      { dir, packageManager, useSocketFirewall }: PMOperationOptions,
       ...names: Array<string>
-    ) => addModules({ dir, packageManager }, ...names),
+    ) => addModules({ dir, packageManager, useSocketFirewall }, ...names),
   );
   ipcMainManager.handle(
     IpcEvents.NPM_IS_PM_INSTALLED,

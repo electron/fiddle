@@ -76,12 +76,12 @@ export async function setupFiddleGlobal() {
       }
     },
     addModules(
-      { dir, packageManager }: PMOperationOptions,
+      { dir, packageManager, useSocketFirewall }: PMOperationOptions,
       ...names: Array<string>
     ) {
       return ipcRenderer.invoke(
         IpcEvents.NPM_ADD_MODULES,
-        { dir, packageManager },
+        { dir, packageManager, useSocketFirewall },
         ...names,
       );
     },
