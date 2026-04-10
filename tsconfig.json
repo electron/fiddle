@@ -1,6 +1,8 @@
 {
   "extends": "@tsconfig/node22/tsconfig.json",
   "compilerOptions": {
+    "module": "preserve",
+    "moduleResolution": "bundler",
     "allowJs": true,
     "experimentalDecorators": true,
     "resolveJsonModule": true,
@@ -18,8 +20,9 @@
     "importHelpers": true,
     "noEmitHelpers": true,
     "jsx": "react",
-    "typeRoots": ["./node_modules/@types"],
-    "baseUrl": "."
+    "paths": {
+      "src/*": ["./src/*"]
+    }
   },
   "include": ["src/**/*", "tests/**/*"],
   "exclude": ["node_modules/**/*"]

@@ -1,13 +1,8 @@
-// eslint-disable-next-line import/order -- this needs to happen first in execution
-import { initSentry } from './sentry';
-initSentry();
-
-// eslint-disable-next-line import/order -- Devtron needs to be imported and installed before any ipcMain calls are set up.
-import { isDevMode } from './utils/devmode';
-if (isDevMode()) {
-  // `install` returns a Promise, but we don't have access to top-level await in CommonJS
-  void require('@electron/devtron').devtron.install();
-}
+// These imports have side effects that must run before any ipcMain handlers
+// are registered. ESM hoists all static imports, so side effects must live
+// in the imported modules themselves, not in interleaved body code.
+import './sentry';
+import './devtron';
 
 import {
   BrowserWindow,
@@ -32,6 +27,7 @@ import { shouldQuit } from './squirrel';
 import { setupTemplates } from './templates';
 import { setupThemes } from './themes';
 import { setupUpdates } from './update';
+import { isDevMode } from './utils/devmode';
 import { getProjectName } from './utils/get-project-name';
 import { getUsername } from './utils/get-username';
 import { setupVersions } from './versions';
@@ -229,7 +225,4 @@ export function main(argv_in: string[]) {
   });
 }
 
-// only call main() if this is the main module
-if (typeof module !== 'undefined' && require.main === module) {
-  main(process.argv);
-}
+main(process.argv);

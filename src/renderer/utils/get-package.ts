@@ -1,4 +1,4 @@
-import * as fiddlePackageJSON from '../../../package.json';
+import fiddlePackageJSON from '../../../package.json';
 import { MAIN_JS, PackageJsonOptions } from '../../interfaces';
 import { AppState } from '../../renderer/state';
 
