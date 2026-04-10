@@ -29,7 +29,7 @@ describe('AddVersionDialog component', () => {
 
     act(() => {
       instance.setState({
-        isValidVersion: true,
+        isValidName: true,
         isValidElectron: true,
         folderPath: mockFile,
       });
@@ -41,7 +41,7 @@ describe('AddVersionDialog component', () => {
 
     act(() => {
       instance.setState({
-        isValidVersion: false,
+        isValidName: false,
         isValidElectron: true,
         folderPath: mockFile,
       });
@@ -53,7 +53,7 @@ describe('AddVersionDialog component', () => {
 
     act(() => {
       instance.setState({
-        isValidVersion: true,
+        isValidName: true,
         isValidElectron: true,
         existingLocalVersion: {
           version: '2.2.2',
@@ -111,7 +111,7 @@ describe('AddVersionDialog component', () => {
     });
   });
 
-  describe('onChangeVersion()', () => {
+  describe('onChangeName()', () => {
     it('handles valid input', () => {
       store.isAddVersionDialogShowing = true;
       const { instance } = renderClassComponentWithInstanceRef(
@@ -120,12 +120,12 @@ describe('AddVersionDialog component', () => {
       );
 
       act(() => {
-        instance.onChangeVersion({
+        instance.onChangeName({
           target: { value: '3.3.3' },
         } as any);
       });
-      expect(instance.state.isValidVersion).toBe(true);
-      expect(instance.state.version).toBe('3.3.3');
+      expect(instance.state.isValidName).toBe(true);
+      expect(instance.state.name).toBe('3.3.3');
     });
 
     it('handles invalid input', () => {
@@ -136,16 +136,16 @@ describe('AddVersionDialog component', () => {
       );
 
       act(() => {
-        instance.onChangeVersion({ target: { value: 'foo' } } as any);
+        instance.onChangeName({ target: { value: '   ' } } as any);
       });
-      expect(instance.state.isValidVersion).toBe(false);
-      expect(instance.state.version).toBe('foo');
+      expect(instance.state.isValidName).toBe(false);
+      expect(instance.state.name).toBe('   ');
 
       act(() => {
-        instance.onChangeVersion({ target: {} } as any);
+        instance.onChangeName({ target: {} } as any);
       });
-      expect(instance.state.isValidVersion).toBe(false);
-      expect(instance.state.version).toBe('');
+      expect(instance.state.isValidName).toBe(false);
+      expect(instance.state.name).toBe('');
     });
   });
 
@@ -171,7 +171,7 @@ describe('AddVersionDialog component', () => {
 
       act(() => {
         instance.setState({
-          version: '3.3.3',
+          name: '3.3.3',
           folderPath: '/test/path',
         });
       });
@@ -182,7 +182,7 @@ describe('AddVersionDialog component', () => {
       expect(store.addLocalVersion).toHaveBeenCalledWith(
         expect.objectContaining({
           localPath: '/test/path',
-          version: '3.3.3',
+          name: '3.3.3',
         }),
       );
     });
@@ -198,7 +198,7 @@ describe('AddVersionDialog component', () => {
         instance.setState({
           isValidElectron: true,
           folderPath: '/test/path',
-          version: '3.3.3',
+          name: '3.3.3',
           existingLocalVersion: {
             version: '2.2.2',
             localPath: '/test/path',

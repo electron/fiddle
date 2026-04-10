@@ -12,6 +12,7 @@ import {
   PackageJsonOptions,
   RunResult,
   RunnableVersion,
+  VersionSource,
 } from '../interfaces';
 
 export enum ForgeCommands {
@@ -161,6 +162,7 @@ export class Runner {
     }
 
     if (
+      ver.source !== VersionSource.local &&
       semver.lt(ver.version, '28.0.0') &&
       !ver.version.startsWith('28.0.0-nightly')
     ) {
@@ -181,11 +183,12 @@ export class Runner {
 
     const dir = await this.saveToTemp(options);
     const packageManager = appState.packageManager;
+    const useSocketFirewall = appState.isUsingSocketFirewall;
 
     if (!dir) return RunResult.INVALID;
 
     try {
-      await this.installModules({ dir, packageManager });
+      await this.installModules({ dir, packageManager, useSocketFirewall });
     } catch (error: any) {
       console.error('Runner: Could not install modules', error);
 
@@ -247,6 +250,7 @@ export class Runner {
     pushOutput(`📦 ${strings[0]} current Fiddle...`);
 
     const packageManager = this.appState.packageManager;
+    const useSocketFirewall = this.appState.isUsingSocketFirewall;
     const pmInstalled =
       await window.ElectronFiddle.getIsPackageManagerInstalled(packageManager);
     if (!pmInstalled) {
@@ -264,7 +268,10 @@ export class Runner {
     if (!dir) return false;
 
     // Files are now saved to temp, let's install Forge and dependencies
-    if (!(await this.packageInstall({ dir, packageManager }))) return false;
+    if (
+      !(await this.packageInstall({ dir, packageManager, useSocketFirewall }))
+    )
+      return false;
 
     // Cool, let's run "package"
     try {

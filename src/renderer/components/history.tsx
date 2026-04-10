@@ -145,7 +145,7 @@ export class GistHistoryDialog extends React.Component<
     );
   }
 
-  private renderRevisionItem = (revision: GistRevision, index: number) => {
+  private renderRevisionItem = (revision: GistRevision) => {
     const date = new Date(revision.date).toLocaleString();
     const shortSha = revision.sha.substring(0, 7);
     const isActive = this.props.activeRevision === revision.sha;

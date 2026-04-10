@@ -57,6 +57,8 @@ export const ExecutionSettings = observer(
       this.handleDeleteDataChange = this.handleDeleteDataChange.bind(this);
       this.handleElectronLoggingChange =
         this.handleElectronLoggingChange.bind(this);
+      this.handleSocketFirewallChange =
+        this.handleSocketFirewallChange.bind(this);
 
       this.handleSettingsItemChange = this.handleSettingsItemChange.bind(this);
       this.addNewSettingsItem = this.addNewSettingsItem.bind(this);
@@ -91,6 +93,16 @@ export const ExecutionSettings = observer(
     ) {
       const { checked } = event.currentTarget;
       this.props.appState.isEnablingElectronLogging = checked;
+    }
+
+    /**
+     * Handles a change on whether or not to use Socket Firewall for npm installs
+     */
+    public handleSocketFirewallChange(
+      event: React.FormEvent<HTMLInputElement>,
+    ) {
+      const { checked } = event.currentTarget;
+      this.props.appState.isUsingSocketFirewall = checked;
     }
 
     /**
@@ -243,8 +255,11 @@ export const ExecutionSettings = observer(
     }
 
     public render() {
-      const { isKeepingUserDataDirs, isEnablingElectronLogging } =
-        this.props.appState;
+      const {
+        isKeepingUserDataDirs,
+        isEnablingElectronLogging,
+        isUsingSocketFirewall,
+      } = this.props.appState;
 
       return (
         <div>
@@ -346,6 +361,29 @@ export const ExecutionSettings = observer(
                 <Radio label="npm" value="npm" />
                 <Radio label="yarn" value="yarn" />
               </RadioGroup>
+            </FormGroup>
+          </Callout>
+          <br />
+          <Callout>
+            <FormGroup>
+              <p>
+                <a
+                  href="https://github.com/SocketDev/sfw-free"
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  Socket Firewall
+                </a>{' '}
+                protects against supply chain attacks by scanning packages
+                during installation. When enabled, Fiddle runs npm/yarn installs
+                through the sfw CLI, which blocks malicious dependencies before
+                they can execute.
+              </p>
+              <Checkbox
+                checked={isUsingSocketFirewall}
+                label="Use Socket Firewall for package installation."
+                onChange={this.handleSocketFirewallChange}
+              />
             </FormGroup>
           </Callout>
         </div>

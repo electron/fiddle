@@ -11,6 +11,33 @@
     overflow: hidden;
     background-color: @background-1;
 
+    .electron-versions-section-header {
+      padding: 8px 15px;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: @text-color-2;
+      background-color: @background-2;
+      border-bottom: 1px solid @border-color-1;
+      border-top: 1px solid @border-color-1;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+
+      &:first-child {
+        border-top: none;
+      }
+
+      &.local {
+        border-left: 3px solid @green4;
+      }
+
+      &.remote {
+        border-left: 3px solid @blue4;
+      }
+    }
+
     .electron-versions-header {
       display: flex;
       font-weight: 600;
@@ -62,6 +89,14 @@
           background-color: rgba(92, 112, 128, 0.15);
         }
 
+        &.local {
+          border-left: 3px solid @green4;
+        }
+
+        &.remote {
+          border-left: 3px solid @blue4;
+        }
+
         .version-col {
           flex: 1;
           padding: 0 15px;
@@ -101,6 +136,13 @@
     .electron-versions-table {
       .no-versions {
         color: @foreground-1;
+      }
+
+      .electron-versions-section-header {
+        background-color: rgba(255, 255, 255, 0.06);
+        border-bottom-color: @dark-gray4;
+        border-top-color: @dark-gray4;
+        color: rgba(255, 255, 255, 0.7);
       }
 
       .electron-versions-header {

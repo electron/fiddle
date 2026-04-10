@@ -100,7 +100,7 @@ declare global {
         listener: (types: string, version: string) => void,
       ): void;
       addModules(
-        { dir, packageManager }: PMOperationOptions,
+        { dir, packageManager, useSocketFirewall }: PMOperationOptions,
         ...names: Array<string>
       ): Promise<string>;
       arch: string;

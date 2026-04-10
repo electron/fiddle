@@ -3,6 +3,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import {
   addModules,
   getIsPackageManagerInstalled,
+  getSfwPath,
   packageRun,
 } from '../../src/main/npm';
 import { exec, execFile } from '../../src/main/utils/exec';
@@ -118,6 +119,12 @@ describe('npm', () => {
     });
   });
 
+  describe('getSfwPath()', () => {
+    it('returns the path to the embedded sfw script', () => {
+      expect(getSfwPath()).toMatch(/sfw\.mjs$/);
+    });
+  });
+
   describe('addModules()', () => {
     describe('npm', () => {
       it('attempts to install a single module', async () => {
@@ -165,6 +172,70 @@ describe('npm', () => {
 
         expect(execFile).toHaveBeenCalledWith('/my/directory', 'yarn', [
           'install',
+        ]);
+      });
+    });
+
+    describe('with socket firewall', () => {
+      it('uses sfw when enabled for npm', async () => {
+        await addModules(
+          {
+            dir: '/my/directory',
+            packageManager: 'npm',
+            useSocketFirewall: true,
+          },
+          'lodash',
+        );
+
+        expect(execFile).toHaveBeenCalledWith(
+          '/my/directory',
+          'node',
+          expect.arrayContaining([
+            expect.stringMatching(/sfw\.mjs$/),
+            'npm',
+            'install',
+            '-S',
+            'lodash',
+          ]),
+        );
+      });
+
+      it('uses sfw when enabled for yarn', async () => {
+        await addModules(
+          {
+            dir: '/my/directory',
+            packageManager: 'yarn',
+            useSocketFirewall: true,
+          },
+          'lodash',
+        );
+
+        expect(execFile).toHaveBeenCalledWith(
+          '/my/directory',
+          'node',
+          expect.arrayContaining([
+            expect.stringMatching(/sfw\.mjs$/),
+            'yarn',
+            'add',
+            'lodash',
+          ]),
+        );
+      });
+
+      it('does not use sfw when disabled', async () => {
+        await addModules(
+          {
+            dir: '/my/directory',
+            packageManager: 'npm',
+            useSocketFirewall: false,
+          },
+          'lodash',
+        );
+
+        expect(execFile).toHaveBeenCalledWith('/my/directory', 'npm', [
+          'install',
+          '-S',
+          'lodash',
         ]);
       });
     });
