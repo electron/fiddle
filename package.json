@@ -136,6 +136,7 @@
     "postcss-less": "^6.0.0",
     "resolve-url-loader": "^5.0.0",
     "standard": "^17.1.0",
+    "style-loader": "^4.0.0",
     "stylelint": "^15.10.1",
     "stylelint-config-standard": "^34.0.0",
     "terser-webpack-plugin": "^5.3.3",
