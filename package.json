@@ -76,7 +76,6 @@
     "shell-env": "^3.0.1",
     "tmp": "0.2.5",
     "tslib": "^2.6.0",
-    "tsx": "^4.20.3",
     "update-electron-app": "^3.0.0"
   },
   "devDependencies": {
@@ -140,6 +139,7 @@
     "stylelint-config-standard": "^34.0.0",
     "terser-webpack-plugin": "^5.3.3",
     "ts-loader": "^9.4.4",
+    "tsx": "^4.20.3",
     "typescript": "^5.8.3",
     "vitest": "^4.1.0",
     "webpack": "^5.104.1"
