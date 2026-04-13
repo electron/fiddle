@@ -5827,6 +5827,7 @@ __metadata:
     sfw: "npm:^2.0.4"
     shell-env: "npm:^3.0.1"
     standard: "npm:^17.1.0"
+    style-loader: "npm:^4.0.0"
     stylelint: "npm:^15.10.1"
     stylelint-config-standard: "npm:^34.0.0"
     terser-webpack-plugin: "npm:^5.3.3"
@@ -13598,6 +13599,15 @@ __metadata:
   dependencies:
     escape-string-regexp: "npm:^1.0.2"
   checksum: 10c0/c0f38e6f37563d878a221b1c76f0822f180ec5fc39be5ada30ee637a7d5b59d19418093bad2b4db1e69c40d7a7a7ac50828afce07276cf3d51ac8965cb140dfb
+  languageName: node
+  linkType: hard
+
+"style-loader@npm:^4.0.0":
+  version: 4.0.0
+  resolution: "style-loader@npm:4.0.0"
+  peerDependencies:
+    webpack: ^5.27.0
+  checksum: 10c0/214bc0f3b018f8c374f79b9fa16da43df78c7fef2261e9a99e36c2f8387601fad10ac75a171aa8edba75903db214bc46952ae08b94a1f8544bd146c2c8d07d27
   languageName: node
   linkType: hard
 
