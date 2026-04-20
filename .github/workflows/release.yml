@@ -101,11 +101,11 @@ jobs:
       - name: Build (Linux)
         if: ${{ startsWith(matrix.os, 'ubuntu-') }}
         run: yarn run publish --arch=${{ matrix.arch }} --dry-run # zizmor: ignore[use-trusted-publishing]
-      - uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: build-artifacts-${{ matrix.os }}-${{ matrix.arch }}
           path: out
-      - uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         if: ${{ startsWith(matrix.os, 'ubuntu-') && matrix.arch == 'x64' }}
         with:
           name: webpack-source-maps
