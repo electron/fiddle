@@ -401,7 +401,8 @@ export class Runner {
 
       this.appState.isRunning = true;
 
-      pushOutput(`Electron v${version} started.`);
+      const name = await this.appState.getName();
+      pushOutput(`Electron v${version} started as "${name}".`);
 
       window.ElectronFiddle.removeAllListeners('fiddle-runner-output');
       window.ElectronFiddle.removeAllListeners('fiddle-stopped');
