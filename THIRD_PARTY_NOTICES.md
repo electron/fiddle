@@ -26,7 +26,7 @@ manages the Socket Firewall Free binary.
 The `sfw-free` binary, downloaded at runtime by the `sfw` npm
 package, is licensed under the PolyForm Shield License 1.0.0.
 The full license text is available at:
-<https://polyformproject.org/licenses/shield/1.0.0/>
+<https://polyformproject.org/licenses/shield/1.0.0>
 
 ### PolyForm Shield License 1.0.0
 
