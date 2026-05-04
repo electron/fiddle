@@ -1,7 +1,7 @@
 import { exec as cp_exec, execFile as cp_execFile } from 'node:child_process';
 import { promisify } from 'node:util';
 
-import shellEnv from 'shell-env';
+import { shellEnv } from 'shell-env';
 
 /**
  * On macOS & Linux, we need to fix the $PATH environment variable
