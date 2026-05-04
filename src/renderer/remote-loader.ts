@@ -127,15 +127,19 @@ export class RemoteLoader {
       const nonEmptyRevisions = revisions.filter(
         (r) =>
           r === oldestRevision ||
-          r.change_status.additions > 0 ||
-          r.change_status.deletions > 0,
+          (r.change_status.additions ?? 0) > 0 ||
+          (r.change_status.deletions ?? 0) > 0,
       );
 
       return nonEmptyRevisions.reverse().map((r, i) => {
         return {
           sha: r.version,
           date: r.committed_at,
-          changes: r.change_status,
+          changes: {
+            total: r.change_status.total ?? 0,
+            additions: r.change_status.additions ?? 0,
+            deletions: r.change_status.deletions ?? 0,
+          },
           title: i === 0 ? 'Created' : `Revision ${i}`,
         };
       });
@@ -160,7 +164,8 @@ export class RemoteLoader {
 
       const values: EditorValues = {};
 
-      for (const [id, data] of Object.entries(gist.data.files)) {
+      for (const [id, data] of Object.entries(gist.data.files ?? {})) {
+        if (!data) continue;
         const content = data.truncated
           ? await fetch(data.raw_url!).then((r) => r.text())
           : data.content!;
