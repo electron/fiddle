@@ -13,7 +13,6 @@ import {
 } from 'electron';
 
 import { setupAboutPanel } from './about-panel';
-import { processCommandLine } from './command-line';
 import { setupContent } from './content';
 import { setupDevTools } from './devtools';
 import { setupDialogs } from './dialogs';
@@ -33,8 +32,6 @@ import { getUsername } from './utils/get-username';
 import { setupVersions } from './versions';
 import { getOrCreateMainWindow, mainIsReady } from './windows';
 import { IpcEvents } from '../ipc-events';
-
-let argv: string[] = [];
 
 /**
  * Handle the app's "ready" event. This is essentially
@@ -73,8 +70,6 @@ export async function onReady() {
   // any IPC listeners are set up before they're used
   mainIsReady();
   await getOrCreateMainWindow();
-
-  processCommandLine(argv);
 }
 
 /**
@@ -200,9 +195,7 @@ export function onWindowsAllClosed() {
  *
  * Exported for testing purposes.
  */
-export function main(argv_in: string[]) {
-  argv = argv_in;
-
+export function main() {
   // Handle creating/removing shortcuts on Windows when
   // installing/uninstalling.
   if (shouldQuit()) {
@@ -225,4 +218,4 @@ export function main(argv_in: string[]) {
   });
 }
 
-main(process.argv);
+main();
