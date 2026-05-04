@@ -691,22 +691,21 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@electron/fiddle-core@npm:^2.0.1":
-  version: 2.0.1
-  resolution: "@electron/fiddle-core@npm:2.0.1"
+"@electron/fiddle-core@npm:^2.2.0":
+  version: 2.2.0
+  resolution: "@electron/fiddle-core@npm:2.2.0"
   dependencies:
     "@electron/asar": "npm:^4.0.0"
-    "@electron/get": "npm:^4.0.0"
+    "@electron/get": "npm:^5.0.0"
     debug: "npm:^4.3.3"
     env-paths: "npm:^3.0.0"
     extract-zip: "npm:^2.0.1"
-    getos: "npm:^3.2.1"
     graceful-fs: "npm:^4.2.11"
     semver: "npm:^7.3.5"
     simple-git: "npm:^3.5.0"
   bin:
     fiddle-core: dist/cli.js
-  checksum: 10c0/6aee5ff636f0cb7a0ee0e8097925da60952607870018d46fea11faf5c97a5ee7e1b21ae018f17c59dd2b489c7cec67fb53e3dca294601a44513324e6e34f230b
+  checksum: 10c0/5c516250ccb695d295c1f9fac67c33d0e211e2b5e2a4ed5509115c9d0770ae77fe1851151296a56a903bf317100056e894294fa2a7f5d5290efae275c703a7f4
   languageName: node
   linkType: hard
 
@@ -738,7 +737,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@electron/get@npm:^4.0.0, @electron/get@npm:^4.0.2":
+"@electron/get@npm:^4.0.2":
   version: 4.0.3
   resolution: "@electron/get@npm:4.0.3"
   dependencies:
@@ -754,6 +753,24 @@ __metadata:
     global-agent:
       optional: true
   checksum: 10c0/66e1e45857b035a3424adcd1752d19805b4c98818d6e02a84e201936bf9c528e1b6774b99a357e073ee91a2b4a3a5b8a8620d71b90ab146bfba806232bd3f167
+  languageName: node
+  linkType: hard
+
+"@electron/get@npm:^5.0.0":
+  version: 5.0.0
+  resolution: "@electron/get@npm:5.0.0"
+  dependencies:
+    debug: "npm:^4.1.1"
+    env-paths: "npm:^3.0.0"
+    graceful-fs: "npm:^4.2.11"
+    progress: "npm:^2.0.3"
+    semver: "npm:^7.6.3"
+    sumchecker: "npm:^3.0.1"
+    undici: "npm:^7.24.4"
+  dependenciesMeta:
+    undici:
+      optional: true
+  checksum: 10c0/6f40ac6a5cb6be6178b3218f2be771351da8d06bb1ab3e15b5e5b785c9480d71e177c645fc96b06c717672018bbcb81d125da0a59fb0b2aaae7076db73360fd0
   languageName: node
   linkType: hard
 
@@ -4046,13 +4063,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"async@npm:^3.2.0":
-  version: 3.2.3
-  resolution: "async@npm:3.2.3"
-  checksum: 10c0/109780c846f05109dde14412d916ae4ed6daf6f9aad0c4aa1dcf0d4da775a3a9e35e0e06e4e06ad9fed66f99ca15549da16f2f243c56103b346e9d3bcd9c943f
-  languageName: node
-  linkType: hard
-
 "at-least-node@npm:^1.0.0":
   version: 1.0.0
   resolution: "at-least-node@npm:1.0.0"
@@ -5549,7 +5559,7 @@ __metadata:
     "@electron-forge/plugin-webpack": "npm:8.0.0-alpha.8"
     "@electron-forge/publisher-github": "npm:8.0.0-alpha.8"
     "@electron/devtron": "npm:^2.1.1"
-    "@electron/fiddle-core": "npm:^2.0.1"
+    "@electron/fiddle-core": "npm:^2.2.0"
     "@electron/fuses": "npm:^2.1.1"
     "@electron/lint-roller": "npm:^3.1.3"
     "@octokit/rest": "npm:^22.0.1"
@@ -7147,15 +7157,6 @@ __metadata:
   dependencies:
     resolve-pkg-maps: "npm:^1.0.0"
   checksum: 10c0/7f8e3dabc6a49b747920a800fb88e1952fef871cdf51b79e98db48275a5de6cdaf499c55ee67df5fa6fe7ce65f0063e26de0f2e53049b408c585aa74d39ffa21
-  languageName: node
-  linkType: hard
-
-"getos@npm:^3.2.1":
-  version: 3.2.1
-  resolution: "getos@npm:3.2.1"
-  dependencies:
-    async: "npm:^3.2.0"
-  checksum: 10c0/21556fca1da4dfc8f1707261b4f9ff19b9e9bfefa76478249d2abddba3cd014bd6c5360634add1590b27e0b27d422e8f997dddaa0234aae1fa4c54f33f82e841
   languageName: node
   linkType: hard
 
@@ -13633,6 +13634,13 @@ __metadata:
   version: 6.25.0
   resolution: "undici@npm:6.25.0"
   checksum: 10c0/2597cc6689bdb02c210c557b1f85febbfda65becae6e6fc1061508e2f33734d25207f81cd8af56ada9956329eb3a7bd7431e87dcfeceba20ee87059b57dcf985
+  languageName: node
+  linkType: hard
+
+"undici@npm:^7.24.4":
+  version: 7.25.0
+  resolution: "undici@npm:7.25.0"
+  checksum: 10c0/02a0b45dc14eb91bc488948750232450fe52f27a6b08086d6ac6736bb47908d600fe3a96d346f12eab24729c782e5c2f693bc8e8eca6696d4e4c09b1ed4cb4ec
   languageName: node
   linkType: hard
 
