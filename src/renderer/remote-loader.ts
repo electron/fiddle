@@ -63,7 +63,7 @@ export class RemoteLoader {
   ): Promise<boolean> {
     try {
       const octo = await getOctokit(this.appState);
-      const folder = await octo.repos.getContents({
+      const folder = await octo.repos.getContent({
         owner: ELECTRON_REPO,
         repo: ELECTRON_ORG,
         ref: tag,
