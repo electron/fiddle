@@ -1,6 +1,6 @@
 import cp from 'node:child_process';
 
-import shellEnv from 'shell-env';
+import { shellEnv } from 'shell-env';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { exec } from '../../../src/main/utils/exec';
