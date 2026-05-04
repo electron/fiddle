@@ -97,7 +97,9 @@ export const ipcMainEvents = [
   IpcEvents.PATH_EXISTS,
   IpcEvents.STOP_FIDDLE,
   IpcEvents.GET_VERSION_STATE,
-];
+] as const;
+
+export type IpcMainEvent = (typeof ipcMainEvents)[number];
 
 export const WEBCONTENTS_READY_FOR_IPC_SIGNAL =
   'WEBCONTENTS_READY_FOR_IPC_SIGNAL';

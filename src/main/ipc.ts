@@ -5,6 +5,7 @@ import { BrowserWindow, MessagePortMain, ipcMain } from 'electron';
 import { getOrCreateMainWindow } from './windows';
 import {
   IpcEvents,
+  IpcMainEvent,
   WEBCONTENTS_READY_FOR_IPC_SIGNAL,
   ipcMainEvents,
 } from '../ipc-events';
@@ -47,6 +48,26 @@ class IpcMainManager extends EventEmitter {
         }
       },
     );
+  }
+
+  override on(event: IpcMainEvent, listener: (...args: any[]) => void): this {
+    return super.on(event, listener);
+  }
+
+  override off(event: IpcMainEvent, listener: (...args: any[]) => void): this {
+    return super.off(event, listener);
+  }
+
+  override once(event: IpcMainEvent, listener: (...args: any[]) => void): this {
+    return super.once(event, listener);
+  }
+
+  override emit(event: IpcMainEvent, ...args: any[]): boolean {
+    return super.emit(event, ...args);
+  }
+
+  override removeAllListeners(event?: IpcMainEvent): this {
+    return super.removeAllListeners(event);
   }
 
   /**
