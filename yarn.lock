@@ -2831,13 +2831,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/getos@npm:^3.0.1":
-  version: 3.0.1
-  resolution: "@types/getos@npm:3.0.1"
-  checksum: 10c0/5037e8344365014e18f92a7611bdabe6debaf244e636b320d886c0bf174444c2d9fc77dd968c333c009ea320bc8cb8c159bfe32d758ad7a7059deeeb75a23987
-  languageName: node
-  linkType: hard
-
 "@types/glob@npm:^7.1.1":
   version: 7.2.0
   resolution: "@types/glob@npm:7.2.0"
@@ -4842,13 +4835,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"commander@npm:^7.1.0":
-  version: 7.2.0
-  resolution: "commander@npm:7.2.0"
-  checksum: 10c0/8d690ff13b0356df7e0ebbe6c59b4712f754f4b724d4f473d3cc5b3fdcf978e3a5dc3078717858a2ceb50b0f84d0660a7f22a96cdc50fb877d0c9bb31593d23a
-  languageName: node
-  linkType: hard
-
 "commander@npm:^8.3.0":
   version: 8.3.0
   resolution: "commander@npm:8.3.0"
@@ -5640,7 +5626,6 @@ __metadata:
     "@tsconfig/node22": "npm:^22.0.2"
     "@types/classnames": "npm:^2.2.11"
     "@types/fs-extra": "npm:^9.0.7"
-    "@types/getos": "npm:^3.0.1"
     "@types/node": "npm:^22.19.1"
     "@types/parse-env-string": "npm:^1.0.2"
     "@types/react": "npm:^16.14.0"
@@ -5654,7 +5639,6 @@ __metadata:
     "@vitest/coverage-v8": "npm:4.1.0"
     algoliasearch: "npm:^4.12.0"
     classnames: "npm:^2.2.6"
-    commander: "npm:^7.1.0"
     copy-webpack-plugin: "npm:^11.0.0"
     css-loader: "npm:^6.7.1"
     electron: "npm:^40.8.4"
@@ -5670,7 +5654,6 @@ __metadata:
     extract-zip: "npm:^2.0.1"
     fork-ts-checker-webpack-plugin: "npm:^8.0.0"
     fs-extra: "npm:^9.1.0"
-    getos: "npm:^3.2.1"
     husky: "npm:^9.0.11"
     jsdom: "npm:^26.1.0"
     less: "npm:^4.1.1"
