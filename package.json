@@ -63,7 +63,7 @@
     "namor": "^2.0.2",
     "node-watch": "^0.7.3",
     "p-debounce": "^2.0.0",
-    "package-json": "^7.0.0",
+    "package-json": "^10.0.1",
     "parse-env-string": "^1.0.1",
     "prettier": "^3.6.2",
     "react": "^16.14.0",
