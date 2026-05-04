@@ -1,6 +1,6 @@
 import { EventEmitter } from 'node:events';
 
-import { MessagePortMain, ipcMain } from 'electron';
+import { BrowserWindow, MessagePortMain, ipcMain } from 'electron';
 
 import { getOrCreateMainWindow } from './windows';
 import {
@@ -26,7 +26,12 @@ class IpcMainManager extends EventEmitter {
 
     ipcMainEvents.forEach((name) => {
       ipcMain.removeAllListeners(name);
-      ipcMain.on(name, (...args: Array<any>) => this.emit(name, ...args));
+      ipcMain.on(name, (event: Electron.IpcMainEvent, ...args: Array<any>) => {
+        // Only accept messages from BrowserWindows created by the app.
+        // This rejects IPC from WebViews, sub-frames, or detached windows.
+        if (!BrowserWindow.fromWebContents(event.sender)) return;
+        this.emit(name, event, ...args);
+      });
     });
 
     ipcMain.on(

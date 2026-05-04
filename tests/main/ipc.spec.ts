@@ -17,12 +17,28 @@ describe('IpcMainManager', () => {
   });
 
   describe('emit()', () => {
-    it('emits an Electron IPC event', () => {
+    it('emits an Electron IPC event from a known BrowserWindow', () => {
+      vi.mocked(electron.BrowserWindow.fromWebContents).mockReturnValue(
+        {} as electron.BrowserWindow,
+      );
       const mockListener = vi.fn();
+      const mockEvent = { sender: {} } as Electron.IpcMainEvent;
       ipcMainManager.on(IpcEvents.SHOW_WARNING_DIALOG, mockListener);
-      electron.ipcMain.emit(IpcEvents.SHOW_WARNING_DIALOG);
+      electron.ipcMain.emit(IpcEvents.SHOW_WARNING_DIALOG, mockEvent);
 
       expect(mockListener).toHaveBeenCalled();
+    });
+
+    it('does not emit for senders outside a known BrowserWindow', () => {
+      vi.mocked(electron.BrowserWindow.fromWebContents).mockReturnValue(
+        null as any,
+      );
+      const mockListener = vi.fn();
+      const mockEvent = { sender: {} } as Electron.IpcMainEvent;
+      ipcMainManager.on(IpcEvents.SHOW_WARNING_DIALOG, mockListener);
+      electron.ipcMain.emit(IpcEvents.SHOW_WARNING_DIALOG, mockEvent);
+
+      expect(mockListener).not.toHaveBeenCalled();
     });
   });
 
