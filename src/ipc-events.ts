@@ -78,7 +78,6 @@ export enum IpcEvents {
 
 export const ipcMainEvents = [
   IpcEvents.SHOW_WARNING_DIALOG,
-  IpcEvents.LOAD_LOCAL_VERSION_FOLDER,
   IpcEvents.CONFIRM_QUIT,
   IpcEvents.SET_SHOW_ME_TEMPLATE,
   IpcEvents.BLOCK_ACCELERATORS,
@@ -88,39 +87,19 @@ export const ipcMainEvents = [
   IpcEvents.RELOAD_WINDOW,
   IpcEvents.SET_NATIVE_THEME,
   IpcEvents.SHOW_WINDOW,
-  IpcEvents.GET_TEMPLATE_VALUES,
-  IpcEvents.GET_TEMPLATE,
-  IpcEvents.GET_TEST_TEMPLATE,
-  IpcEvents.CREATE_THEME_FILE,
-  IpcEvents.GET_AVAILABLE_THEMES,
-  IpcEvents.OPEN_THEME_FOLDER,
-  IpcEvents.READ_THEME_FILE,
   IpcEvents.GET_THEME_PATH,
   IpcEvents.IS_DEV_MODE,
-  IpcEvents.NPM_ADD_MODULES,
-  IpcEvents.NPM_IS_PM_INSTALLED,
-  IpcEvents.NPM_PACKAGE_RUN,
-  IpcEvents.FETCH_VERSIONS,
   IpcEvents.GET_LATEST_STABLE,
   IpcEvents.GET_LOCAL_VERSION_STATE,
   IpcEvents.GET_OLDEST_SUPPORTED_MAJOR,
   IpcEvents.GET_RELEASED_VERSIONS,
-  IpcEvents.GET_RELEASE_INFO,
-  IpcEvents.GET_PROJECT_NAME,
   IpcEvents.GET_USERNAME,
   IpcEvents.PATH_EXISTS,
-  IpcEvents.GET_ELECTRON_TYPES,
-  IpcEvents.UNWATCH_ELECTRON_TYPES,
-  IpcEvents.GET_NODE_TYPES,
-  IpcEvents.CLEANUP_DIRECTORY,
-  IpcEvents.DELETE_USER_DATA,
-  IpcEvents.SAVE_FILES_TO_TEMP,
-  IpcEvents.START_FIDDLE,
   IpcEvents.STOP_FIDDLE,
   IpcEvents.GET_VERSION_STATE,
-  IpcEvents.DOWNLOAD_VERSION,
-  IpcEvents.REMOVE_VERSION,
-];
+] as const;
+
+export type IpcMainEvent = (typeof ipcMainEvents)[number];
 
 export const WEBCONTENTS_READY_FOR_IPC_SIGNAL =
   'WEBCONTENTS_READY_FOR_IPC_SIGNAL';
