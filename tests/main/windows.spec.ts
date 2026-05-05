@@ -88,6 +88,11 @@ describe('windows', () => {
   });
 
   describe('getOrCreateMainWindow()', () => {
+    beforeEach(async () => {
+      const window = await getOrCreateMainWindow();
+      window.emit('closed');
+    });
+
     it('creates a window on first call', async () => {
       expect(browserWindows.length).toBe(0);
       await getOrCreateMainWindow();
