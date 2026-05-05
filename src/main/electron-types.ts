@@ -5,7 +5,6 @@ import { ElectronVersions } from '@electron/fiddle-core';
 import { BrowserWindow, IpcMainInvokeEvent, app } from 'electron';
 import fs from 'fs-extra';
 import watch from 'node-watch';
-import packageJson from 'package-json';
 import semver from 'semver';
 
 import { ipcMainManager } from './ipc';
@@ -197,12 +196,22 @@ export class ElectronTypes {
     );
 
     if (response.status === 404) {
-      const types = await packageJson('@types/node', {
-        version: semver.major(version).toString(),
-        fullMetadata: false,
-      });
+      const url = 'https://registry.npmjs.org/@types%2Fnode';
+      const headers: HeadersInit = {
+        Accept: 'application/vnd.npm.install-v1+json',
+      };
+      const res = await fetch(url, { headers });
+      const data = (await res.json()) as { versions: Record<string, unknown> };
 
-      downloadVersion = types.version as string;
+      const major = semver.major(version);
+      const matched = semver.maxSatisfying(
+        Object.keys(data.versions),
+        `${major}`,
+      );
+      if (!matched)
+        throw new Error(`No @types/node version found for ${major}`);
+
+      downloadVersion = matched;
       console.log(
         `falling back to the latest applicable Node.js version type: ${downloadVersion}`,
       );
