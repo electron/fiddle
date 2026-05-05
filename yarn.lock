@@ -5527,13 +5527,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"electron-default-menu@npm:^1.0.2":
-  version: 1.0.2
-  resolution: "electron-default-menu@npm:1.0.2"
-  checksum: 10c0/ee1c9c13006309d1b503e3765aadbd152519212901ff6e2d24abedcbbe6949338f2227770cb36ba9b84af73fb341d679ba50fb25e3747b6c310958a09e8c2625
-  languageName: node
-  linkType: hard
-
 "electron-devtools-installer@npm:^4.0.0":
   version: 4.0.0
   resolution: "electron-devtools-installer@npm:4.0.0"
@@ -5588,7 +5581,6 @@ __metadata:
     copy-webpack-plugin: "npm:^11.0.0"
     css-loader: "npm:^6.7.1"
     electron: "npm:^40.8.4"
-    electron-default-menu: "npm:^1.0.2"
     electron-devtools-installer: "npm:^4.0.0"
     electron-squirrel-startup: "npm:^1.0.0"
     eslint: "npm:^8.45.0"
