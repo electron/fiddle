@@ -88,6 +88,11 @@ describe('windows', () => {
   });
 
   describe('getOrCreateMainWindow()', () => {
+    beforeEach(async () => {
+      const window = await getOrCreateMainWindow();
+      window.emit('closed');
+    });
+
     it('creates a window on first call', async () => {
       expect(browserWindows.length).toBe(0);
       await getOrCreateMainWindow();
@@ -108,16 +113,18 @@ describe('windows', () => {
       expect(createContextMenu).toHaveBeenCalled();
     });
 
-    // FIXME: new test for setWindowOpenHandler
-    it.skip('prevents new-window"', async () => {
-      const e = {
-        preventDefault: vi.fn(),
-      };
-
+    it('sets a window open handler that denies and opens URL externally', async () => {
       await getOrCreateMainWindow();
-      expect(browserWindows[0]).toBeTruthy();
-      (await getOrCreateMainWindow()).webContents.emit('new-window', e);
-      expect(e.preventDefault).toHaveBeenCalled();
+      const win = browserWindows[0]!;
+      const handler = vi.mocked(win.webContents.setWindowOpenHandler).mock
+        .calls[0][0];
+      const result = handler({
+        url: 'https://example.com',
+      } as Electron.HandlerDetails);
+      expect(result).toEqual({ action: 'deny' });
+      expect(electron.shell.openExternal).toHaveBeenCalledWith(
+        'https://example.com',
+      );
     });
 
     it('prevents will-navigate"', async () => {
