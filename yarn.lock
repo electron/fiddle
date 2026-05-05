@@ -5628,7 +5628,6 @@ __metadata:
     terser-webpack-plugin: "npm:^5.3.3"
     tmp: "npm:0.2.5"
     ts-loader: "npm:^9.4.4"
-    tslib: "npm:^2.6.0"
     tsx: "npm:^4.20.3"
     typescript: "npm:^5.8.3"
     update-electron-app: "npm:^3.0.0"
