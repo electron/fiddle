@@ -17,77 +17,80 @@ interface FontSettingsState {
 /**
  * Settings font family and size.
  */
-@observer
-export class FontSettings extends React.Component<
-  FontSettingsProps,
-  FontSettingsState
-> {
-  public constructor(props: FontSettingsProps) {
-    super(props);
+export const FontSettings = observer(
+  class FontSettings extends React.Component<
+    FontSettingsProps,
+    FontSettingsState
+  > {
+    public constructor(props: FontSettingsProps) {
+      super(props);
 
-    this.state = {
-      fontSize: this.props.appState.fontSize,
-      fontFamily: this.props.appState.fontFamily,
-    };
+      this.state = {
+        fontSize: this.props.appState.fontSize,
+        fontFamily: this.props.appState.fontFamily,
+      };
 
-    this.handleSetFontFamily = this.handleSetFontFamily.bind(this);
-    this.handleSetFontSize = this.handleSetFontSize.bind(this);
-  }
+      this.handleSetFontFamily = this.handleSetFontFamily.bind(this);
+      this.handleSetFontSize = this.handleSetFontSize.bind(this);
+    }
 
-  /**
-   * Handles a change in the editor font family.
-   */
-  public handleSetFontFamily(event: React.FormEvent<HTMLInputElement>): void {
-    const { value: fontFamily } = event.currentTarget;
-    this.setState({ fontFamily });
-    this.props.appState.fontFamily = fontFamily;
-  }
+    /**
+     * Handles a change in the editor font family.
+     */
+    public handleSetFontFamily(event: React.FormEvent<HTMLInputElement>): void {
+      const { value: fontFamily } = event.currentTarget;
+      this.setState({ fontFamily });
+      this.props.appState.fontFamily = fontFamily;
+    }
 
-  /**
-   * Handles a change in the editor font size.
-   */
-  public handleSetFontSize(event: React.FormEvent<HTMLInputElement>): void {
-    const parsedFontSize = parseInt(event.currentTarget.value, 10);
-    const fontSize = Number.isNaN(parsedFontSize) ? undefined : parsedFontSize;
-    this.setState({ fontSize });
-    this.props.appState.fontSize = fontSize;
-  }
+    /**
+     * Handles a change in the editor font size.
+     */
+    public handleSetFontSize(event: React.FormEvent<HTMLInputElement>): void {
+      const parsedFontSize = parseInt(event.currentTarget.value, 10);
+      const fontSize = Number.isNaN(parsedFontSize)
+        ? undefined
+        : parsedFontSize;
+      this.setState({ fontSize });
+      this.props.appState.fontSize = fontSize;
+    }
 
-  public render() {
-    const { fontFamily, fontSize } = this.state;
-    const fontSettingsInstructions =
-      'Set a font family and size for your editors. Reload or restart for changes to take effect.';
+    public render() {
+      const { fontFamily, fontSize } = this.state;
+      const fontSettingsInstructions =
+        'Set a font family and size for your editors. Reload or restart for changes to take effect.';
 
-    return (
-      <div>
-        <h1>Font Settings</h1>
-        <Callout>
-          <p>{fontSettingsInstructions}</p>
-          <FormGroup label="Font Family" labelFor="font-family">
-            <InputGroup
-              id="font-family"
-              value={fontFamily}
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                this.handleSetFontFamily(e)
-              }
-            />
-          </FormGroup>
-          <FormGroup label="Font Size" labelFor="font-size">
-            <InputGroup
-              id="font-size"
-              value={`${fontSize || ''}`}
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                this.handleSetFontSize(e)
-              }
-            />
-            <Button
-              onClick={() => window.ElectronFiddle.reloadWindows()}
-              icon="repeat"
-              text="Reload Window"
-            />
-          </FormGroup>
-        </Callout>
-      </div>
-    );
-  }
-}
+      return (
+        <div>
+          <h1>Font Settings</h1>
+          <Callout>
+            <p>{fontSettingsInstructions}</p>
+            <FormGroup label="Font Family" labelFor="font-family">
+              <InputGroup
+                id="font-family"
+                value={fontFamily}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                  this.handleSetFontFamily(e)
+                }
+              />
+            </FormGroup>
+            <FormGroup label="Font Size" labelFor="font-size">
+              <InputGroup
+                id="font-size"
+                value={`${fontSize || ''}`}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                  this.handleSetFontSize(e)
+                }
+              />
+              <Button
+                onClick={() => window.ElectronFiddle.reloadWindows()}
+                icon="repeat"
+                text="Reload Window"
+              />
+            </FormGroup>
+          </Callout>
+        </div>
+      );
+    }
+  },
+);
