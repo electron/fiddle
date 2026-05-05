@@ -1,10 +1,11 @@
 import { EventEmitter } from 'node:events';
 
-import { MessagePortMain, ipcMain } from 'electron';
+import { BrowserWindow, MessagePortMain, ipcMain } from 'electron';
 
 import { getOrCreateMainWindow } from './windows';
 import {
   IpcEvents,
+  IpcMainEvent,
   WEBCONTENTS_READY_FOR_IPC_SIGNAL,
   ipcMainEvents,
 } from '../ipc-events';
@@ -26,7 +27,12 @@ class IpcMainManager extends EventEmitter {
 
     ipcMainEvents.forEach((name) => {
       ipcMain.removeAllListeners(name);
-      ipcMain.on(name, (...args: Array<any>) => this.emit(name, ...args));
+      ipcMain.on(name, (event: Electron.IpcMainEvent, ...args: Array<any>) => {
+        // Only accept messages from BrowserWindows created by the app.
+        // This rejects IPC from WebViews, sub-frames, or detached windows.
+        if (!BrowserWindow.fromWebContents(event.sender)) return;
+        this.emit(name, event, ...args);
+      });
     });
 
     ipcMain.on(
@@ -42,6 +48,26 @@ class IpcMainManager extends EventEmitter {
         }
       },
     );
+  }
+
+  override on(event: IpcMainEvent, listener: (...args: any[]) => void): this {
+    return super.on(event, listener);
+  }
+
+  override off(event: IpcMainEvent, listener: (...args: any[]) => void): this {
+    return super.off(event, listener);
+  }
+
+  override once(event: IpcMainEvent, listener: (...args: any[]) => void): this {
+    return super.once(event, listener);
+  }
+
+  override emit(event: IpcMainEvent, ...args: any[]): boolean {
+    return super.emit(event, ...args);
+  }
+
+  override removeAllListeners(event?: IpcMainEvent): this {
+    return super.removeAllListeners(event);
   }
 
   /**

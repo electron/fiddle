@@ -1,3 +1,4 @@
+import * as os from 'node:os';
 import * as path from 'node:path';
 
 import { BrowserWindow, IpcMainInvokeEvent, app, dialog } from 'electron';
@@ -12,19 +13,63 @@ import { IpcEvents } from '../ipc-events';
 import { isSupportedFile } from '../utils/editor-utils';
 
 /**
+ * Returns true if `str` is a safe bare name (no separators, no '..').
+ * Used to validate renderer-supplied data names before appending to appData.
+ */
+function isSafeDataName(str: unknown): str is string {
+  return (
+    typeof str === 'string' &&
+    str.length > 0 &&
+    !str.includes(path.sep) &&
+    !str.includes('/') &&
+    !str.includes('..') &&
+    str === path.basename(str)
+  );
+}
+
+/**
+ * Returns true if `dir` resolves to a path inside the OS temp directory.
+ * Used to ensure CLEANUP_DIRECTORY cannot reach outside tmp.
+ */
+function isInsideTempDir(dir: unknown): dir is string {
+  if (typeof dir !== 'string') return false;
+  const tmpDir = fs.realpathSync(os.tmpdir());
+  const resolved = path.resolve(dir);
+  return resolved.startsWith(tmpDir + path.sep) || resolved === tmpDir;
+}
+
+/**
  * Ensures that we're listening to file events
  */
 export function setupFileListeners() {
-  ipcMainManager.on(IpcEvents.PATH_EXISTS, (event, path: string) => {
-    event.returnValue = fs.existsSync(path);
+  ipcMainManager.on(IpcEvents.PATH_EXISTS, (event, filePath: string) => {
+    if (typeof filePath !== 'string') {
+      event.returnValue = false;
+      return;
+    }
+    event.returnValue = fs.existsSync(filePath);
   });
   ipcMainManager.handle(
     IpcEvents.CLEANUP_DIRECTORY,
-    (_: IpcMainInvokeEvent, dir: string) => cleanupDirectory(dir),
+    (_: IpcMainInvokeEvent, dir: string) => {
+      if (!isInsideTempDir(dir)) {
+        console.warn(
+          `cleanupDirectory: rejected path outside temp dir: ${dir}`,
+        );
+        return false;
+      }
+      return cleanupDirectory(dir);
+    },
   );
   ipcMainManager.handle(
     IpcEvents.DELETE_USER_DATA,
-    (_: IpcMainInvokeEvent, name: string) => deleteUserData(name),
+    (_: IpcMainInvokeEvent, name: string) => {
+      if (!isSafeDataName(name)) {
+        console.warn(`deleteUserData: rejected unsafe name: ${name}`);
+        return;
+      }
+      return deleteUserData(name);
+    },
   );
   ipcMainManager.handle(
     IpcEvents.SAVE_FILES_TO_TEMP,
