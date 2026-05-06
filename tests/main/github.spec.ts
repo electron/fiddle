@@ -1,4 +1,5 @@
 import * as fs from 'node:fs';
+import * as path from 'node:path';
 
 import { IpcMainInvokeEvent, safeStorage } from 'electron';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
@@ -350,7 +351,7 @@ describe('github', () => {
     it('stores credentials in userData directory', () => {
       saveToken('test');
       const writePath = vi.mocked(fs.writeFileSync).mock.calls[0][0] as string;
-      expect(writePath).toMatch(/^\/Users\/fake-user\//);
+      expect(writePath).toBe(path.join('/Users/fake-user', CREDENTIALS_FILE));
     });
   });
 
