@@ -138,8 +138,11 @@ const config: ForgeConfig = {
     new MakerMSIX({
       manifestVariables: {
         // publisher: TODO: I don't know the actual value for the cert',
+        packageIdentity: 'ElectronCommunity.ElectronFiddle',
+        appExecutable: 'electron-fiddle.exe',
         publisherDisplayName: 'Electron Community',
         packageDisplayName: 'Electron Fiddle',
+        appDisplayName: 'Electron Fiddle',
         packageDescription: packageJson.description,
       },
       windowsSignOptions: process.env.CERT_FINGERPRINT
