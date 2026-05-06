@@ -5,10 +5,10 @@ import { ElectronVersions } from '@electron/fiddle-core';
 import { BrowserWindow, IpcMainInvokeEvent, app } from 'electron';
 import fs from 'fs-extra';
 import watch from 'node-watch';
-import packageJson from 'package-json';
 import semver from 'semver';
 
 import { ipcMainManager } from './ipc';
+import { getLatestMajorVersion } from './utils/npm-version';
 import { ELECTRON_DTS } from '../constants';
 import { NodeTypes, RunnableVersion, VersionSource } from '../interfaces';
 import { IpcEvents } from '../ipc-events';
@@ -197,12 +197,8 @@ export class ElectronTypes {
     );
 
     if (response.status === 404) {
-      const types = await packageJson('@types/node', {
-        version: semver.major(version).toString(),
-        fullMetadata: false,
-      });
-
-      downloadVersion = types.version as string;
+      const major = semver.major(version);
+      downloadVersion = await getLatestMajorVersion('@types/node', major);
       console.log(
         `falling back to the latest applicable Node.js version type: ${downloadVersion}`,
       );
