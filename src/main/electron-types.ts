@@ -8,6 +8,7 @@ import watch from 'node-watch';
 import semver from 'semver';
 
 import { ipcMainManager } from './ipc';
+import { getLatestMajorVersion } from './utils/npm-version';
 import { ELECTRON_DTS } from '../constants';
 import { NodeTypes, RunnableVersion, VersionSource } from '../interfaces';
 import { IpcEvents } from '../ipc-events';
@@ -196,23 +197,8 @@ export class ElectronTypes {
     );
 
     if (response.status === 404) {
-      const url = 'https://registry.npmjs.org/@types%2Fnode';
-      const headers: HeadersInit = {
-        Accept: 'application/vnd.npm.install-v1+json',
-      };
-      const res = await fetch(url, { headers });
-      if (!res.ok) throw new Error(`npm registry returned ${res.status}`);
-      const data = (await res.json()) as { versions: Record<string, unknown> };
-
       const major = semver.major(version);
-      const matched = semver.maxSatisfying(
-        Object.keys(data.versions),
-        `${major}`,
-      );
-      if (!matched)
-        throw new Error(`No @types/node version found for ${major}`);
-
-      downloadVersion = matched;
+      downloadVersion = await getLatestMajorVersion('@types/node', major);
       console.log(
         `falling back to the latest applicable Node.js version type: ${downloadVersion}`,
       );
