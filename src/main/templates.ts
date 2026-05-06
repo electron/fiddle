@@ -12,7 +12,7 @@ import { IpcEvents } from '../ipc-events';
  * Returns expected content for a given name.
  */
 export function getTemplateValues(name: string): Promise<EditorValues> {
-  if (name.includes('..') || name.includes('/') || name.includes(path.sep)) {
+  if (path.basename(name) !== name) {
     return Promise.reject(
       new Error(`getTemplateValues: rejected unsafe template name: ${name}`),
     );
