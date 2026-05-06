@@ -173,6 +173,15 @@ const systemPreferences = {
   getUserDefault: vi.fn(),
 };
 
+const safeStorage = {
+  isEncryptionAvailable: vi.fn().mockReturnValue(true),
+  encryptString: vi.fn((text: string) => Buffer.from(`encrypted:${text}`)),
+  decryptString: vi.fn((buffer: Buffer) => {
+    const str = buffer.toString();
+    return str.startsWith('encrypted:') ? str.slice('encrypted:'.length) : str;
+  }),
+};
+
 const electronMock = {
   app,
   autoUpdater,
@@ -208,6 +217,7 @@ const electronMock = {
   Notification: NotificationMock,
   _notifications: createdNotifications,
   require: vi.fn(),
+  safeStorage,
   screen: new Screen(),
   session,
   shell,
