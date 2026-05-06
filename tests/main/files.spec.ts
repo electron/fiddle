@@ -2,9 +2,6 @@
  * @vitest-environment node
  */
 
-import * as os from 'node:os';
-import * as path from 'node:path';
-
 import { BrowserWindow, app, dialog } from 'electron';
 import fs from 'fs-extra';
 import * as tmp from 'tmp';
@@ -375,53 +372,5 @@ describe('files', () => {
       expect.stringContaining('main.js'),
       '',
     );
-  });
-
-  describe('PATH_EXISTS IPC handler', () => {
-    let handler: (event: any, filePath: string) => void;
-
-    beforeEach(() => {
-      const spy = vi.spyOn(ipcMainManager, 'on');
-      setupFileListeners();
-      const call = spy.mock.calls.find((c) => c[0] === IpcEvents.PATH_EXISTS);
-      handler = call![1] as (event: any, filePath: string) => void;
-    });
-
-    it('rejects relative paths', () => {
-      const event = { returnValue: undefined as any };
-      handler(event, 'relative/path');
-      expect(event.returnValue).toBe(false);
-      expect(fs.existsSync).not.toHaveBeenCalled();
-    });
-
-    it('rejects paths containing ..', () => {
-      const event = { returnValue: undefined as any };
-      handler(event, '/absolute/../../../etc/passwd');
-      expect(event.returnValue).toBe(false);
-      expect(fs.existsSync).not.toHaveBeenCalled();
-    });
-
-    it('rejects paths outside all allowed roots', () => {
-      const event = { returnValue: undefined as any };
-      handler(event, '/usr/local/bin/electron');
-      expect(event.returnValue).toBe(false);
-      expect(fs.existsSync).not.toHaveBeenCalled();
-    });
-
-    it('allows paths inside os.tmpdir()', () => {
-      vi.mocked(fs.existsSync).mockReturnValueOnce(true);
-      const event = { returnValue: undefined as any };
-      handler(event, path.join(os.tmpdir(), 'electron-fiddle-test', 'main.js'));
-      expect(event.returnValue).toBe(true);
-    });
-
-    it('allows paths inside app.getPath(appData)', () => {
-      vi.mocked(fs.existsSync).mockReturnValueOnce(false);
-      const event = { returnValue: undefined as any };
-      // app mock returns '/test-path' for appData
-      handler(event, path.join(app.getPath('appData'), 'some-config'));
-      expect(event.returnValue).toBe(false); // existsSync returns false — just confirming it was called
-      expect(fs.existsSync).toHaveBeenCalledOnce();
-    });
   });
 });

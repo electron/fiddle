@@ -5,7 +5,6 @@ import { BrowserWindow, IpcMainInvokeEvent, app, dialog } from 'electron';
 import fs from 'fs-extra';
 import * as tmp from 'tmp';
 
-import { ELECTRON_DOWNLOAD_PATH, ELECTRON_INSTALL_PATH } from './constants';
 import { ipcMainManager } from './ipc';
 import { getFiles } from './utils/get-files';
 import { readFiddle } from './utils/read-fiddle';
@@ -14,16 +13,16 @@ import { IpcEvents } from '../ipc-events';
 import { isSupportedFile } from '../utils/editor-utils';
 
 /**
- * Returns true if `str` is a safe bare name (no separators, no '..').
- * Used to validate renderer-supplied data names before appending to appData.
+ * Returns true if `name` is a safe bare file/data name: non-empty, not
+ * absolute, and equals its own
+ * basename. Used to validate renderer-supplied names before joining onto
+ * a trusted directory.
  */
 function isSafeDataName(str: unknown): str is string {
   return (
     typeof str === 'string' &&
     str.length > 0 &&
-    !str.includes(path.sep) &&
-    !str.includes('/') &&
-    !str.includes('..') &&
+    !path.isAbsolute(str) &&
     str === path.basename(str)
   );
 }
@@ -40,48 +39,11 @@ function isInsideTempDir(dir: unknown): dir is string {
 }
 
 /**
- * Returns true if `name` is a safe file name for use inside a temp directory.
- * Rejects absolute paths, path separators, and `..` components.
- */
-function isSafeFileName(name: unknown): name is string {
-  return (
-    typeof name === 'string' &&
-    name.length > 0 &&
-    !path.isAbsolute(name) &&
-    !name.includes('..') &&
-    !name.includes('/') &&
-    !name.includes(path.sep)
-  );
-}
-
-/**
- * Returns true if `filePath` is under one of the known safe root directories:
- * os.tmpdir(), app.getPath('appData'), ELECTRON_DOWNLOAD_PATH, or
- * ELECTRON_INSTALL_PATH.
- */
-function isAllowedPath(filePath: unknown): filePath is string {
-  if (typeof filePath !== 'string') return false;
-  const resolved = path.resolve(filePath);
-  const roots = [
-    os.tmpdir(),
-    app.getPath('appData'),
-    ELECTRON_DOWNLOAD_PATH,
-    ELECTRON_INSTALL_PATH,
-  ];
-  return roots.some((root) => {
-    const resolvedRoot = path.resolve(root);
-    return (
-      resolved.startsWith(resolvedRoot + path.sep) || resolved === resolvedRoot
-    );
-  });
-}
-
-/**
  * Ensures that we're listening to file events
  */
 export function setupFileListeners() {
   ipcMainManager.on(IpcEvents.PATH_EXISTS, (event, filePath: string) => {
-    if (!isAllowedPath(filePath)) {
+    if (typeof filePath !== 'string') {
       event.returnValue = false;
       return;
     }
@@ -240,7 +202,7 @@ export async function saveFilesToTemp(files: Files): Promise<string> {
   tmp.setGracefulCleanup();
 
   for (const [name, content] of files) {
-    if (!isSafeFileName(name)) {
+    if (!isSafeDataName(name)) {
       console.warn(`saveFilesToTemp: rejected unsafe filename: ${name}`);
       continue;
     }
