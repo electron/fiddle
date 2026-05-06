@@ -201,6 +201,7 @@ export class ElectronTypes {
         Accept: 'application/vnd.npm.install-v1+json',
       };
       const res = await fetch(url, { headers });
+      if (!res.ok) throw new Error(`npm registry returned ${res.status}`);
       const data = (await res.json()) as { versions: Record<string, unknown> };
 
       const major = semver.major(version);
