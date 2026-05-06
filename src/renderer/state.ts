@@ -17,10 +17,8 @@ import {
   fetchVersions,
   getDefaultVersion,
   getElectronVersions,
-  getLocalVersions,
   getReleaseChannel,
   makeRunnable,
-  saveLocalVersions,
 } from './versions';
 import {
   AppStateBroadcastChannel,
@@ -402,13 +400,9 @@ export class AppState {
           }
 
           // This key is deprecated, so do nothing
-          case GlobalSetting.knownVersion: {
-            break;
-          }
-
-          // Refresh local versions
+          // These keys are deprecated, so do nothing
+          case GlobalSetting.knownVersion:
           case GlobalSetting.localVersion: {
-            this.refreshLocalVersions(getLocalVersions());
             break;
           }
 
@@ -777,8 +771,8 @@ export class AppState {
     window.app.loadTheme(this.theme);
   }
 
-  public addLocalVersion(input: Version) {
-    addLocalVersion(input);
+  public addLocalVersion(token: string, name: string) {
+    addLocalVersion(token, name);
     this.addNewVersions(getElectronVersions());
   }
 
@@ -829,7 +823,7 @@ export class AppState {
     if (source === VersionSource.local) {
       if (version in this.versions) {
         delete this.versions[version];
-        saveLocalVersions(Object.values(this.versions));
+        window.ElectronFiddle.removeLocalVersion(version);
       } else {
         console.log(`State: Version ${version} already removed, doing nothing`);
       }
@@ -932,9 +926,12 @@ export class AppState {
     }
 
     const { localPath, version } = ver;
-    if (localPath && !window.ElectronFiddle.pathExists(localPath)) {
-      const err = `Local Electron build missing for version ${version} - please verify it is in the correct location or remove and re-add it.`;
-      return { err };
+    if (localPath) {
+      const state = window.ElectronFiddle.getLocalVersionState({ ...ver });
+      if (state !== InstallState.installed) {
+        const err = `Local Electron build missing for version ${version} - please verify it is in the correct location or remove and re-add it.`;
+        return { err };
+      }
     }
 
     return { ver };

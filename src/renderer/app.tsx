@@ -9,7 +9,10 @@ import { AppState } from './state';
 import { TaskRunner } from './task-runner';
 import { activateTheme, getCurrentTheme, getTheme } from './themes';
 import { getPackageJson } from './utils/get-package';
-import { getElectronVersions } from './versions';
+import {
+  getElectronVersions,
+  migrateLocalVersionsFromLocalStorage,
+} from './versions';
 import {
   EditorId,
   EditorValues,
@@ -27,14 +30,20 @@ import '../less/root.less';
  * but it does eventually render all components.
  */
 export class App {
-  public state = new AppState(getElectronVersions());
-  public fileManager = new FileManager(this.state);
-  public remoteLoader = new RemoteLoader(this.state);
-  public runner = new Runner(this.state);
+  public state: AppState;
+  public fileManager: FileManager;
+  public remoteLoader: RemoteLoader;
+  public runner: Runner;
   public readonly taskRunner: TaskRunner;
   public readonly electronTypes: ElectronTypes;
 
   constructor() {
+    migrateLocalVersionsFromLocalStorage();
+
+    this.state = new AppState(getElectronVersions());
+    this.fileManager = new FileManager(this.state);
+    this.remoteLoader = new RemoteLoader(this.state);
+    this.runner = new Runner(this.state);
     this.getEditorValues = this.getEditorValues.bind(this);
 
     this.taskRunner = new TaskRunner(this);

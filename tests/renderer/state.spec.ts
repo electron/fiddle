@@ -27,7 +27,6 @@ import {
   fetchVersions,
   getElectronVersions,
   makeRunnable,
-  saveLocalVersions,
 } from '../../src/renderer/versions';
 import { VersionsMock, createEditorValues } from '../mocks/mocks';
 import { overrideRendererPlatform, resetRendererPlatform } from '../utils';
@@ -46,7 +45,6 @@ vi.mock('../../src/renderer/versions', async () => {
     getElectronVersions: vi.fn(),
     getReleaseChannel,
     makeRunnable: vi.fn((v) => v),
-    saveLocalVersions: vi.fn(),
   };
 });
 
@@ -388,7 +386,9 @@ describe('AppState', () => {
       broadcastMessageSpy.mockClear();
       await appState.removeVersion(ver);
 
-      expect(saveLocalVersions).toHaveBeenCalledTimes(1);
+      expect(window.ElectronFiddle.removeLocalVersion).toHaveBeenCalledWith(
+        version,
+      );
       expect(appState.versions[version]).toBeUndefined();
       expect(removeSpy).toHaveBeenCalledTimes(0);
       expect(broadcastMessageSpy).not.toHaveBeenCalled();
@@ -728,7 +728,7 @@ describe('AppState', () => {
 
       vi.mocked(getElectronVersions).mockReturnValue([ver]);
 
-      appState.addLocalVersion(ver);
+      appState.addLocalVersion('fake-token', 'local-foo');
 
       expect(getElectronVersions).toHaveBeenCalledTimes(1);
       expect(appState.getVersion(version)).toStrictEqual(ver);

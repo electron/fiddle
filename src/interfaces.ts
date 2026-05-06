@@ -169,6 +169,8 @@ export interface SelectedLocalVersion {
   folderPath: string;
   isValidElectron: boolean;
   localName?: string;
+  token: string;
+  existingVersion?: Version;
 }
 
 export type FiddleEvent =
