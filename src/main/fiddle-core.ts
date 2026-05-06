@@ -1,4 +1,7 @@
 import { ChildProcess } from 'node:child_process';
+import * as fs from 'node:fs';
+import * as os from 'node:os';
+import * as path from 'node:path';
 
 import { ElectronVersions, Installer, Runner } from '@electron/fiddle-core';
 import {
@@ -20,6 +23,26 @@ import { IpcEvents } from '../ipc-events';
 let installer: Installer;
 let runner: Runner;
 
+// Keys that must not be overridden by renderer-supplied env vars because they
+// affect dynamic-linker behaviour of the spawned process in ways that go
+// beyond what the fiddle code itself can already do.
+const BLOCKED_ENV_KEYS = new Set([
+  'LD_PRELOAD',
+  'DYLD_INSERT_LIBRARIES',
+  'DYLD_FRAMEWORK_PATH',
+  'DYLD_LIBRARY_PATH',
+]);
+
+/**
+ * Returns true if `dir` resolves to a path inside the OS temp directory.
+ */
+function isInsideTempDir(dir: unknown): dir is string {
+  if (typeof dir !== 'string') return false;
+  const tmpDir = path.resolve(os.tmpdir());
+  const resolved = path.resolve(dir);
+  return resolved.startsWith(tmpDir + path.sep) || resolved === tmpDir;
+}
+
 // Keep track of which fiddle process belongs to which WebContents
 const fiddleProcesses = new WeakMap<WebContents, ChildProcess>();
 
@@ -33,14 +56,25 @@ export async function startFiddle(
   webContents: WebContents,
   params: StartFiddleParams,
 ): Promise<void> {
-  const {
-    dir,
-    enableElectronLogging,
-    isValidBuild,
-    localPath,
-    options,
-    version,
-  } = params;
+  const { dir, enableElectronLogging, localPath, options, version } = params;
+
+  // Guard 1: working directory must be inside the OS temp directory.
+  if (!isInsideTempDir(dir)) {
+    throw new Error(`startFiddle: dir must be inside the temp directory`);
+  }
+
+  // Guard 2: determine whether to use the local path by verifying the
+  // executable exists on disk — do not trust the renderer-supplied
+  // isValidBuild flag.
+  const resolvedExec = localPath ? Installer.getExecPath(localPath) : undefined;
+  const useLocalPath = !!resolvedExec && fs.existsSync(resolvedExec);
+
+  // Guard 3: strip any CLI option containing a null byte, which can
+  // truncate strings at the OS level.
+  const safeOptions = options.filter(
+    (opt) => typeof opt === 'string' && !opt.includes('\0'),
+  );
+
   const env = { ...process.env };
 
   if (enableElectronLogging) {
@@ -53,12 +87,15 @@ export async function startFiddle(
     delete env.ELECTRON_ENABLE_STACK_DUMPING;
   }
 
-  Object.assign(env, params.env);
+  const safeEnv = Object.fromEntries(
+    Object.entries(params.env).filter(([key]) => !BLOCKED_ENV_KEYS.has(key)),
+  );
+  Object.assign(env, safeEnv);
 
   const child = await runner.spawn(
-    isValidBuild && localPath ? Installer.getExecPath(localPath) : version,
+    useLocalPath ? resolvedExec! : version,
     dir,
-    { args: options, cwd: dir, env },
+    { args: safeOptions, cwd: dir, env },
   );
   fiddleProcesses.set(webContents, child);
 

@@ -10,6 +10,7 @@
   "scripts": {
     "contributors": "tsx ./tools/contributors.ts",
     "format": "prettier src --check --experimental-cli",
+    "format:write": "prettier src --write --experimental-cli",
     "lint:style": "stylelint \"./src/less/*.less\"",
     "lint:ts": "eslint \"./**/*.{ts,tsx}\"",
     "lint:js": "eslint \"./**/*.js\"",

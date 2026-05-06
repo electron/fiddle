@@ -13,16 +13,16 @@ import { IpcEvents } from '../ipc-events';
 import { isSupportedFile } from '../utils/editor-utils';
 
 /**
- * Returns true if `str` is a safe bare name (no separators, no '..').
- * Used to validate renderer-supplied data names before appending to appData.
+ * Returns true if `name` is a safe bare file/data name: non-empty, not
+ * absolute, and equals its own
+ * basename. Used to validate renderer-supplied names before joining onto
+ * a trusted directory.
  */
 function isSafeDataName(str: unknown): str is string {
   return (
     typeof str === 'string' &&
     str.length > 0 &&
-    !str.includes(path.sep) &&
-    !str.includes('/') &&
-    !str.includes('..') &&
+    !path.isAbsolute(str) &&
     str === path.basename(str)
   );
 }
@@ -195,6 +195,10 @@ export async function saveFilesToTemp(files: Files): Promise<string> {
   tmp.setGracefulCleanup();
 
   for (const [name, content] of files) {
+    if (!isSafeDataName(name)) {
+      console.warn(`saveFilesToTemp: rejected unsafe filename: ${name}`);
+      continue;
+    }
     try {
       await fs.outputFile(path.join(dir.name, name), content);
     } catch (error) {
