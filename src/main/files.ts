@@ -42,13 +42,6 @@ function isInsideTempDir(dir: unknown): dir is string {
  * Ensures that we're listening to file events
  */
 export function setupFileListeners() {
-  ipcMainManager.on(IpcEvents.PATH_EXISTS, (event, filePath: string) => {
-    if (typeof filePath !== 'string') {
-      event.returnValue = false;
-      return;
-    }
-    event.returnValue = fs.existsSync(filePath);
-  });
   ipcMainManager.handle(
     IpcEvents.CLEANUP_DIRECTORY,
     (_: IpcMainInvokeEvent, dir: string) => {

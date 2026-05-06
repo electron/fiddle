@@ -129,6 +129,11 @@ declare global {
       getTestTemplate(): Promise<EditorValues>;
       getLatestStable(): SemVer | undefined;
       getLocalVersionState(ver: Version): InstallState;
+      getLocalVersions(): Array<Version>;
+      addLocalVersion(token: string, name: string): Array<Version>;
+      cancelPendingLocalVersion(token: string): void;
+      removeLocalVersion(version: string): Array<Version>;
+      migrateLocalVersions(versions: Version[]): boolean;
       getNodeTypes(
         version: string,
       ): Promise<{ version: string; types: NodeTypes } | undefined>;
@@ -151,7 +156,6 @@ declare global {
         { dir, packageManager }: PMOperationOptions,
         command: string,
       ): Promise<string>;
-      pathExists(path: string): boolean;
       platform: string;
       pushOutputEntry(entry: OutputEntry): void;
       readThemeFile(name: string): Promise<LoadedFiddleTheme | null>;

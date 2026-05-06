@@ -56,7 +56,6 @@ describe('files', () => {
       const spy = vi.spyOn(ipcMainManager, 'handle');
       setupFileListeners();
 
-      expect(ipcMainManager.eventNames()).toEqual([IpcEvents.PATH_EXISTS]);
       expect(spy).toHaveBeenCalledWith(
         IpcEvents.CLEANUP_DIRECTORY,
         expect.anything(),

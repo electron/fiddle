@@ -1,12 +1,11 @@
 import * as semver from 'semver';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 
 import {
   ElectronReleaseChannel,
   GlobalSetting,
   RunnableVersion,
   Version,
-  VersionSource,
 } from '../../src/interfaces';
 import {
   addLocalVersion,
@@ -14,7 +13,6 @@ import {
   getDefaultVersion,
   getLocalVersions,
   getReleaseChannel,
-  saveLocalVersions,
 } from '../../src/renderer/versions';
 
 const mockVersions: Array<Partial<RunnableVersion>> = [
@@ -87,72 +85,34 @@ describe('versions', () => {
   });
 
   describe('addLocalVersion()', () => {
-    beforeEach(() => {
-      vi.mocked(window.localStorage.getItem).mockReturnValue(
-        JSON.stringify([mockVersions[0]]),
-      );
-    });
-
     it('adds a local version', () => {
-      expect(addLocalVersion(mockVersions[1] as Version)).toEqual([
+      vi.mocked(window.ElectronFiddle.addLocalVersion).mockReturnValue([
+        mockVersions[0],
+        mockVersions[1],
+      ] as Version[]);
+
+      expect(addLocalVersion('token-123', 'my-build')).toEqual([
         mockVersions[0],
         mockVersions[1],
       ]);
-    });
-
-    it('does not add duplicates', () => {
-      expect(addLocalVersion(mockVersions[0] as Version)).toEqual([
-        mockVersions[0],
-      ]);
-    });
-  });
-
-  describe('saveLocalVersions()', () => {
-    it('saves local versions', () => {
-      const mockLocalVersions = mockVersions.map((v) => {
-        v.source = VersionSource.local;
-        return v;
-      });
-
-      saveLocalVersions(mockLocalVersions as Array<RunnableVersion>);
-
-      expect(window.localStorage.setItem).toBeCalledWith(
-        GlobalSetting.localVersion,
-        JSON.stringify(mockLocalVersions),
+      expect(window.ElectronFiddle.addLocalVersion).toHaveBeenCalledWith(
+        'token-123',
+        'my-build',
       );
     });
   });
 
   describe('getLocalVersions', () => {
-    it('returns an empty array if none can be found', () => {
-      expect(getLocalVersions()).toEqual([]);
+    it('returns versions from the main process', () => {
+      vi.mocked(window.ElectronFiddle.getLocalVersions).mockReturnValue([
+        mockVersions[0] as Version,
+      ]);
+      expect(getLocalVersions()).toEqual([mockVersions[0]]);
     });
 
-    it('migrates an old format if necessary', () => {
-      vi.mocked(window.localStorage.getItem).mockReturnValueOnce(
-        `
-        [{
-          "url": "/Users/felixr/Code/electron/src/out/Debug",
-          "assets_url": "/Users/felixr/Code/electron/src/out/Debug",
-          "body": "Local version, added at 1538771049442",
-          "created_at": "1538771049442",
-          "name": "src/out/Debug 4.0.0",
-          "html_url": "",
-          "prerelease": true,
-          "published_at": "1538771049442",
-          "tag_name": "4.0.0",
-          "target_commitish": ""
-        }, { "garbage": "true" }]
-      `.trim(),
-      );
-
-      expect(getLocalVersions()).toEqual([
-        {
-          localPath: '/Users/felixr/Code/electron/src/out/Debug',
-          version: '4.0.0',
-          name: 'src/out/Debug 4.0.0',
-        },
-      ]);
+    it('returns an empty array if none exist', () => {
+      vi.mocked(window.ElectronFiddle.getLocalVersions).mockReturnValue([]);
+      expect(getLocalVersions()).toEqual([]);
     });
   });
 
