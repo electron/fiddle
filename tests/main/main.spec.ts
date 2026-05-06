@@ -31,12 +31,6 @@ import { getOrCreateMainWindow } from '../../src/main/windows';
 import { BrowserWindowMock } from '../mocks/browser-window';
 import { overridePlatform, resetPlatform } from '../utils';
 
-// Need to mock this out or CI will hit an error due to
-// code being run async continuing after the test ends:
-// > ReferenceError: You are trying to `import` a file
-// > after the test environment has been torn down.
-vi.mock('getos');
-
 vi.mock('../../src/main/windows', () => ({
   getOrCreateMainWindow: vi.fn(),
   mainIsReady: vi.fn(),
@@ -91,12 +85,12 @@ describe('main', () => {
     it('quits during Squirrel events', () => {
       vi.mocked(shouldQuit).mockReturnValueOnce(true);
 
-      main([]);
+      main();
       expect(app.quit).toHaveBeenCalledTimes(1);
     });
 
     it('listens to core events', async () => {
-      main([]);
+      main();
       expect(app.on).toHaveBeenCalledTimes(6);
     });
   });

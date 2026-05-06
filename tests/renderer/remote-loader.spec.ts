@@ -32,7 +32,7 @@ describe('RemoteLoader', () => {
   let mockGistFiles: GistFiles;
   let mockGetGists: { get: () => Promise<{ files: GistFiles }> };
   let mockRepos: Array<{ name: string; download_url: string }>;
-  let mockGetRepos: { getContents: () => Promise<{ data: typeof mockRepos }> };
+  let mockGetRepos: { getContent: () => Promise<{ data: typeof mockRepos }> };
   let editorValues: EditorValues;
 
   beforeEach(() => {
@@ -65,7 +65,7 @@ describe('RemoteLoader', () => {
       { name: 'stuff', download_url: 'https://google.com/' },
     ];
     mockGetRepos = {
-      getContents: vi.fn().mockResolvedValue({ data: mockRepos }),
+      getContent: vi.fn().mockResolvedValue({ data: mockRepos }),
     };
   });
 
@@ -385,7 +385,7 @@ describe('RemoteLoader', () => {
     it('handles an error', async () => {
       vi.mocked(getOctokit).mockResolvedValue({
         repos: {
-          getContents: async () => {
+          getContent: async () => {
             throw new Error('Bwap bwap');
           },
         },
@@ -399,7 +399,7 @@ describe('RemoteLoader', () => {
       store.showErrorDialog = vi.fn().mockResolvedValueOnce(true);
       vi.mocked(getOctokit).mockResolvedValue({
         repos: {
-          getContents: async () => ({
+          getContent: async () => ({
             not_an_array: true,
           }),
         },

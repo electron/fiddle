@@ -17,8 +17,6 @@
       "WebWorker"
     ],
     "strict": true,
-    "importHelpers": true,
-    "noEmitHelpers": true,
     "jsx": "react",
     "paths": {
       "src/*": ["./src/*"]

@@ -146,7 +146,8 @@ export const GistActionButton = observer(
           action: {
             text: 'Copy link',
             icon: 'clipboard',
-            onClick: () => navigator.clipboard.writeText(gist.data.html_url),
+            onClick: () =>
+              navigator.clipboard.writeText(gist.data.html_url ?? ''),
           },
         });
 
@@ -205,7 +206,7 @@ export const GistActionButton = observer(
         } = await octo.gists.get({ gist_id: appState.gistId! });
 
         const files = this.gistFilesList(values);
-        for (const id of Object.keys(oldFiles)) {
+        for (const id of Object.keys(oldFiles ?? {})) {
           // Delete files that have been removed or renamed.
           if (!(id in files)) files[id] = null as any;
         }
@@ -229,7 +230,8 @@ export const GistActionButton = observer(
             action: {
               text: 'Copy link',
               icon: 'clipboard',
-              onClick: () => navigator.clipboard.writeText(gist.data.html_url),
+              onClick: () =>
+                navigator.clipboard.writeText(gist.data.html_url ?? ''),
             },
           });
         }
