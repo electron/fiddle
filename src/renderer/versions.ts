@@ -19,18 +19,12 @@ export function migrateLocalVersionsFromLocalStorage(): void {
 
   try {
     const versions: Array<Version> = JSON.parse(raw);
-    if (!Array.isArray(versions) || versions.length === 0) {
-      // Nothing to migrate, just clean up
-      window.localStorage.removeItem(GlobalSetting.localVersion);
-      return;
-    }
-
-    const accepted = window.ElectronFiddle.migrateLocalVersions(versions);
-    if (accepted) {
-      window.localStorage.removeItem(GlobalSetting.localVersion);
+    if (Array.isArray(versions) && versions.length !== 0) {
+      window.ElectronFiddle.migrateLocalVersions(versions);
     }
   } catch {
-    // Corrupt data - remove it
+    // We tried our best, if something is corrupt just remove and move on
+  } finally {
     window.localStorage.removeItem(GlobalSetting.localVersion);
   }
 }
