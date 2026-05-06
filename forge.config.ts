@@ -65,6 +65,7 @@ const config: ForgeConfig = {
       [FuseV1Options.EnableNodeOptionsEnvironmentVariable]: false,
       [FuseV1Options.EnableNodeCliInspectArguments]: false,
       [FuseV1Options.OnlyLoadAppFromAsar]: true,
+      [FuseV1Options.EnableCookieEncryption]: true,
     }),
   ],
   packagerConfig: {
