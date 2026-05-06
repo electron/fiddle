@@ -60,7 +60,7 @@ function isSafeFileName(name: unknown): name is string {
  * ELECTRON_INSTALL_PATH.
  */
 function isAllowedPath(filePath: unknown): filePath is string {
-  if (typeof filePath !== 'string' || !path.isAbsolute(filePath)) return false;
+  if (typeof filePath !== 'string') return false;
   const resolved = path.resolve(filePath);
   const roots = [
     os.tmpdir(),
@@ -68,9 +68,12 @@ function isAllowedPath(filePath: unknown): filePath is string {
     ELECTRON_DOWNLOAD_PATH,
     ELECTRON_INSTALL_PATH,
   ];
-  return roots.some(
-    (root) => resolved.startsWith(root + path.sep) || resolved === root,
-  );
+  return roots.some((root) => {
+    const resolvedRoot = path.resolve(root);
+    return (
+      resolved.startsWith(resolvedRoot + path.sep) || resolved === resolvedRoot
+    );
+  });
 }
 
 /**

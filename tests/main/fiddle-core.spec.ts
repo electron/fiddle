@@ -31,10 +31,16 @@ vi.mock('node:fs');
 describe('fiddle-core', () => {
   let runner: FiddleRunnerMock;
   let originalEnv: NodeJS.ProcessEnv;
+  // Capture real tmpdir before any env mock — on Windows os.tmpdir() reads
+  // process.env.TEMP / process.env.TMP, so include them in the mock to keep
+  // os.tmpdir() stable after process.env is replaced.
+  const REAL_TMPDIR = os.tmpdir();
   const mockEnv = Object.seal({
     PATH: '/path/to/bin/',
+    TEMP: REAL_TMPDIR,
+    TMP: REAL_TMPDIR,
   });
-  const dir = path.join(os.tmpdir(), 'test-fiddle');
+  const dir = path.join(REAL_TMPDIR, 'test-fiddle');
 
   beforeEach(() => {
     runner = new FiddleRunnerMock();
