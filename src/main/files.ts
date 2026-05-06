@@ -5,6 +5,7 @@ import { BrowserWindow, IpcMainInvokeEvent, app, dialog } from 'electron';
 import fs from 'fs-extra';
 import * as tmp from 'tmp';
 
+import { ELECTRON_DOWNLOAD_PATH, ELECTRON_INSTALL_PATH } from './constants';
 import { ipcMainManager } from './ipc';
 import { getFiles } from './utils/get-files';
 import { readFiddle } from './utils/read-fiddle';
@@ -39,11 +40,45 @@ function isInsideTempDir(dir: unknown): dir is string {
 }
 
 /**
+ * Returns true if `name` is a safe file name for use inside a temp directory.
+ * Rejects absolute paths, path separators, and `..` components.
+ */
+function isSafeFileName(name: unknown): name is string {
+  return (
+    typeof name === 'string' &&
+    name.length > 0 &&
+    !path.isAbsolute(name) &&
+    !name.includes('..') &&
+    !name.includes('/') &&
+    !name.includes(path.sep)
+  );
+}
+
+/**
+ * Returns true if `filePath` is under one of the known safe root directories:
+ * os.tmpdir(), app.getPath('appData'), ELECTRON_DOWNLOAD_PATH, or
+ * ELECTRON_INSTALL_PATH.
+ */
+function isAllowedPath(filePath: unknown): filePath is string {
+  if (typeof filePath !== 'string' || !path.isAbsolute(filePath)) return false;
+  const resolved = path.resolve(filePath);
+  const roots = [
+    os.tmpdir(),
+    app.getPath('appData'),
+    ELECTRON_DOWNLOAD_PATH,
+    ELECTRON_INSTALL_PATH,
+  ];
+  return roots.some(
+    (root) => resolved.startsWith(root + path.sep) || resolved === root,
+  );
+}
+
+/**
  * Ensures that we're listening to file events
  */
 export function setupFileListeners() {
   ipcMainManager.on(IpcEvents.PATH_EXISTS, (event, filePath: string) => {
-    if (typeof filePath !== 'string') {
+    if (!isAllowedPath(filePath)) {
       event.returnValue = false;
       return;
     }
@@ -202,6 +237,10 @@ export async function saveFilesToTemp(files: Files): Promise<string> {
   tmp.setGracefulCleanup();
 
   for (const [name, content] of files) {
+    if (!isSafeFileName(name)) {
+      console.warn(`saveFilesToTemp: rejected unsafe filename: ${name}`);
+      continue;
+    }
     try {
       await fs.outputFile(path.join(dir.name, name), content);
     } catch (error) {

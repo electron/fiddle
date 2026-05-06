@@ -25,6 +25,11 @@ export async function readThemeFile(
   const file = name.endsWith('.json') ? name : `${name}.json`;
   const themePath = path.join(THEMES_PATH, file);
 
+  if (!themePath.startsWith(THEMES_PATH + path.sep)) {
+    console.warn(`readThemeFile: rejected path outside themes dir: ${name}`);
+    return null;
+  }
+
   try {
     const theme = await fs.readJSON(themePath);
     return {
@@ -54,6 +59,12 @@ export async function createThemeFile(
 
   const file = name.endsWith('.json') ? name : `${name}.json`;
   const themePath = path.join(THEMES_PATH, file);
+
+  if (!themePath.startsWith(THEMES_PATH + path.sep)) {
+    throw new Error(
+      `createThemeFile: rejected path outside themes dir: ${name}`,
+    );
+  }
 
   await fs.outputJSON(
     themePath,

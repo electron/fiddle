@@ -38,5 +38,11 @@ describe('templates', () => {
 
       vi.mocked(console.log).mockClear();
     });
+
+    it('rejects path traversal in name', async () => {
+      await expect(getTemplateValues('../../etc/passwd')).rejects.toThrow(
+        'getTemplateValues: rejected unsafe template name',
+      );
+    });
   });
 });
