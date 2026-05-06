@@ -26,9 +26,7 @@ export class StateMock {
   public genericDialogOptions = {} as GenericDialogOptions;
   public gistId = '';
   public activeGistRevision: string | undefined = undefined;
-  public gitHubAvatarUrl: string | null = null;
   public gitHubLogin: string | null = null;
-  public gitHubName: string | null = null;
   public gitHubPublishAsPublic = true;
   public gitHubToken: string | null = null;
   public isAddVersionDialogShowing = false;
@@ -127,9 +125,7 @@ export class StateMock {
       genericDialogLastResult: observable,
       genericDialogOptions: observable,
       gistId: observable,
-      gitHubAvatarUrl: observable,
       gitHubLogin: observable,
-      gitHubName: observable,
       gitHubPublishAsPublic: observable,
       gitHubToken: observable,
       isAddVersionDialogShowing: observable,

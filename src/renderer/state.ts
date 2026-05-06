@@ -56,12 +56,6 @@ export class AppState {
 
   // -- Persisted settings ------------------
   public theme: string | null = localStorage.getItem(GlobalSetting.theme);
-  public gitHubAvatarUrl: string | null = localStorage.getItem(
-    GlobalSetting.gitHubAvatarUrl,
-  );
-  public gitHubName: string | null = localStorage.getItem(
-    GlobalSetting.gitHubName,
-  );
   public gitHubLogin: string | null = localStorage.getItem(
     GlobalSetting.gitHubLogin,
   );
@@ -225,9 +219,7 @@ export class AppState {
       genericDialogOptions: observable,
       gistId: observable,
       activeGistRevision: observable,
-      gitHubAvatarUrl: observable,
       gitHubLogin: observable,
-      gitHubName: observable,
       gitHubPublishAsPublic: observable,
       gitHubToken: observable,
       hideChannels: action,
@@ -413,9 +405,7 @@ export class AppState {
           case GlobalSetting.executionFlags:
           case GlobalSetting.fontFamily:
           case GlobalSetting.fontSize:
-          case GlobalSetting.gitHubAvatarUrl:
           case GlobalSetting.gitHubLogin:
-          case GlobalSetting.gitHubName:
           case GlobalSetting.gitHubToken:
           case GlobalSetting.isClearingConsoleOnRun:
           case GlobalSetting.isEnablingElectronLogging:
@@ -504,11 +494,7 @@ export class AppState {
         this.isUsingSocketFirewall,
       ),
     );
-    autorun(() =>
-      this.save(GlobalSetting.gitHubAvatarUrl, this.gitHubAvatarUrl),
-    );
     autorun(() => this.save(GlobalSetting.gitHubLogin, this.gitHubLogin));
-    autorun(() => this.save(GlobalSetting.gitHubName, this.gitHubName));
     autorun(() => this.save(GlobalSetting.gitHubToken, this.gitHubToken));
     autorun(() =>
       this.save(
@@ -998,10 +984,8 @@ export class AppState {
    * The equivalent of signing out.
    */
   public signOutGitHub(): void {
-    this.gitHubAvatarUrl = null;
     this.gitHubLogin = null;
     this.gitHubToken = null;
-    this.gitHubName = null;
   }
 
   public async showGenericDialog(
