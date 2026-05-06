@@ -171,10 +171,13 @@ describe('fiddle-core', () => {
         version,
       });
 
-      const spawnEnv = vi.mocked(runner.spawn).mock.calls[0][2].env as Record<
-        string,
-        string
-      >;
+      const spawnEnv = (
+        vi.mocked(runner.spawn).mock.calls[0]! as unknown as [
+          unknown,
+          unknown,
+          { env: Record<string, string> },
+        ]
+      )[2].env;
       expect(spawnEnv).not.toHaveProperty('LD_PRELOAD');
       expect(spawnEnv).not.toHaveProperty('DYLD_INSERT_LIBRARIES');
       expect(spawnEnv).not.toHaveProperty('DYLD_FRAMEWORK_PATH');
