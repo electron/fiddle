@@ -77,9 +77,8 @@ function areValidGistFiles(
 
 // --- Token storage ---
 
-const CREDENTIALS_FILE = '.github-credentials';
-
 function getCredentialsPath(): string {
+  const CREDENTIALS_FILE = '.github-credentials';
   return path.join(app.getPath('userData'), CREDENTIALS_FILE);
 }
 
@@ -90,7 +89,6 @@ function saveToken(token: string): void {
 
 function loadToken(): string | null {
   const credPath = getCredentialsPath();
-  if (!fs.existsSync(credPath)) return null;
   try {
     const encrypted = fs.readFileSync(credPath);
     return safeStorage.decryptString(encrypted);
@@ -106,17 +104,17 @@ function deleteToken(): void {
 
 // --- Octokit management ---
 
-let octokit: Octokit | null = null;
+let octokit_: Octokit | null = null;
 
 function getAuthenticatedOctokit(): Octokit {
-  if (!octokit) throw new Error('Not authenticated. Please sign in first.');
-  return octokit;
+  if (!octokit_) throw new Error('Not authenticated. Please sign in first.');
+  return octokit_;
 }
 
 function getOctokit(): Octokit {
   // Returns an authenticated instance if available, otherwise unauthenticated.
   // Unauthenticated requests have lower rate limits but work for public gists.
-  return octokit || new Octokit();
+  return octokit_ || new Octokit();
 }
 
 // --- IPC handlers ---
@@ -155,7 +153,7 @@ async function handleTokenSignIn(
       };
 
     saveToken(token);
-    octokit = testOctokit;
+    octokit_ = testOctokit;
 
     return { success: true, login: response.data.login };
   } catch (error: any) {
@@ -170,7 +168,7 @@ async function handleTokenSignOut(
   _event: IpcMainInvokeEvent,
 ): Promise<{ success: boolean }> {
   deleteToken();
-  octokit = null;
+  octokit_ = null;
   return { success: true };
 }
 
@@ -185,12 +183,12 @@ async function handleTokenCheckAuth(
   if (!token) return { login: null };
 
   try {
-    octokit = new Octokit({ auth: token });
-    const response = await octokit.users.getAuthenticated();
+    octokit_ = new Octokit({ auth: token });
+    const response = await octokit_.users.getAuthenticated();
     return { login: response.data.login };
   } catch {
     // Token is expired or revoked — clean up
-    octokit = null;
+    octokit_ = null;
     deleteToken();
     return { login: null };
   }
@@ -367,38 +365,30 @@ async function handleGistListCommits(
 // --- Setup ---
 
 export function setupGitHub() {
-  ipcMainManager.handle(IpcEvents.GITHUB_TOKEN_SIGN_IN, handleTokenSignIn);
-  ipcMainManager.handle(IpcEvents.GITHUB_TOKEN_SIGN_OUT, handleTokenSignOut);
-  ipcMainManager.handle(
-    IpcEvents.GITHUB_TOKEN_CHECK_AUTH,
-    handleTokenCheckAuth,
-  );
   ipcMainManager.handle(IpcEvents.GITHUB_GIST_CREATE, handleGistCreate);
-  ipcMainManager.handle(IpcEvents.GITHUB_GIST_UPDATE, handleGistUpdate);
   ipcMainManager.handle(IpcEvents.GITHUB_GIST_DELETE, handleGistDelete);
-  ipcMainManager.handle(IpcEvents.GITHUB_GIST_LOAD, handleGistLoad);
   ipcMainManager.handle(
     IpcEvents.GITHUB_GIST_LIST_COMMITS,
     handleGistListCommits,
   );
+  ipcMainManager.handle(IpcEvents.GITHUB_GIST_LOAD, handleGistLoad);
+  ipcMainManager.handle(IpcEvents.GITHUB_GIST_UPDATE, handleGistUpdate);
+  ipcMainManager.handle(
+    IpcEvents.GITHUB_TOKEN_CHECK_AUTH,
+    handleTokenCheckAuth,
+  );
+  ipcMainManager.handle(IpcEvents.GITHUB_TOKEN_SIGN_IN, handleTokenSignIn);
+  ipcMainManager.handle(IpcEvents.GITHUB_TOKEN_SIGN_OUT, handleTokenSignOut);
 }
 
 // Exported for testing
-export {
-  isValidToken,
-  isValidGistId,
-  isValidSha,
-  isValidDescription,
-  areValidGistFiles,
-  saveToken,
-  loadToken,
-  deleteToken,
+export const testing = {
+  handleGistCreate,
+  handleGistDelete,
+  handleGistListCommits,
+  handleGistLoad,
+  handleGistUpdate,
+  handleTokenCheckAuth,
   handleTokenSignIn,
   handleTokenSignOut,
-  handleTokenCheckAuth,
-  handleGistCreate,
-  handleGistUpdate,
-  handleGistDelete,
-  handleGistLoad,
-  handleGistListCommits,
 };
