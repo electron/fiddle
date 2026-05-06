@@ -235,7 +235,6 @@ export enum GlobalSetting {
   executionFlags = 'executionFlags',
   fontFamily = 'fontFamily',
   fontSize = 'fontSize',
-  gitHubAvatarUrl = 'gitHubAvatarUrl',
   gitHubLogin = 'gitHubLogin',
   gitHubName = 'gitHubName',
   gitHubToken = 'gitHubToken',

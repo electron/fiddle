@@ -737,13 +737,11 @@ describe('AppState', () => {
 
   describe('signOutGitHub()', () => {
     it('resets all GitHub information', () => {
-      appState.gitHubAvatarUrl = 'test';
       appState.gitHubLogin = 'test';
       appState.gitHubToken = 'test';
       appState.gitHubName = 'test';
 
       appState.signOutGitHub();
-      expect(appState.gitHubAvatarUrl).toBe(null);
       expect(appState.gitHubLogin).toBe(null);
       expect(appState.gitHubToken).toBe(null);
       expect(appState.gitHubName).toBe(null);
