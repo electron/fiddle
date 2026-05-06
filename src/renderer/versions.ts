@@ -10,6 +10,26 @@ import {
 } from '../interfaces';
 
 /**
+ * One-time migration: move local versions from localStorage to main process.
+ * Must be called before getElectronVersions().
+ */
+export function migrateLocalVersionsFromLocalStorage(): void {
+  const raw = window.localStorage.getItem(GlobalSetting.localVersion);
+  if (!raw) return;
+
+  try {
+    const versions: Array<Version> = JSON.parse(raw);
+    if (Array.isArray(versions) && versions.length !== 0) {
+      window.ElectronFiddle.migrateLocalVersions(versions);
+    }
+  } catch {
+    // We tried our best, if something is corrupt just remove and move on
+  } finally {
+    window.localStorage.removeItem(GlobalSetting.localVersion);
+  }
+}
+
+/**
  * Returns a sensible default version string.
  */
 export function getDefaultVersion(versions: RunnableVersion[]): string {
@@ -69,68 +89,18 @@ export function getElectronVersions(): Array<RunnableVersion> {
 }
 
 /**
- * Add a version to the local versions
+ * Add a version to the local versions (stored in main process).
+ * Requires a token issued by selectLocalVersion.
  */
-export function addLocalVersion(input: Version): Array<Version> {
-  const versions = getLocalVersions();
-
-  if (!versions.find((v) => v.localPath === input.localPath)) {
-    versions.push(input);
-  }
-
-  saveLocalVersions(versions);
-
-  return versions;
+export function addLocalVersion(token: string, name: string): Array<Version> {
+  return window.ElectronFiddle.addLocalVersion(token, name);
 }
 
 /**
- * Get the Version (if any) that is located at localPath.
- */
-export function getLocalVersionForPath(
-  folderPath: string,
-): Version | undefined {
-  return getLocalVersions().find((v) => v.localPath === folderPath);
-}
-
-/**
- * Retrieves local Electron versions, configured by the user.
+ * Retrieves local Electron versions from the main process.
  */
 export function getLocalVersions(): Array<Version> {
-  const fromLs = window.localStorage.getItem(GlobalSetting.localVersion);
-
-  if (fromLs) {
-    try {
-      let result: Array<Version> = JSON.parse(fromLs);
-
-      if (!isExpectedFormat(result)) {
-        // Local versions are a bit more tricky and might be in an old format (pre 0.5)
-        result = migrateVersions(result);
-        saveLocalVersions(result);
-      }
-
-      return result;
-    } catch {}
-  }
-
-  return [];
-}
-
-/**
- * Saves local versions to localStorage.
- */
-export function saveLocalVersions(
-  versions: Array<Version | RunnableVersion>,
-): void {
-  const filteredVersions = versions.filter((v) => {
-    if (isElectronVersion(v)) {
-      return v.source === VersionSource.local;
-    }
-
-    return true;
-  });
-
-  const stringified = JSON.stringify(filteredVersions);
-  window.localStorage.setItem(GlobalSetting.localVersion, stringified);
+  return window.ElectronFiddle.getLocalVersions();
 }
 
 function getReleasedVersions(): Array<Version> {
@@ -165,37 +135,4 @@ export async function fetchVersions(): Promise<Version[]> {
 
   console.log(`Fetched ${versions.length} new Electron versions`);
   return versions;
-}
-
-/**
- * Is the given array an array of versions?
- */
-function isExpectedFormat(input: Array<any>): boolean {
-  return input.every((entry) => !!entry.version);
-}
-
-/**
- * Migrates old versions, if necessary
- */
-function migrateVersions(input: Array<any>): Array<Version> {
-  return input
-    .filter((item) => !!item)
-    .map((item) => {
-      const { tag_name, name, url } = item;
-
-      if (!tag_name || !name || !url) return null;
-
-      return {
-        version: tag_name,
-        name,
-        localPath: url,
-      };
-    })
-    .filter((item) => !!item) as Array<Version>;
-}
-
-function isElectronVersion(
-  input: Version | RunnableVersion,
-): input is RunnableVersion {
-  return (input as RunnableVersion).source !== undefined;
 }

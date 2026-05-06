@@ -102,12 +102,14 @@ describe('AddVersionDialog component', () => {
         folderPath: '/test/',
         isValidElectron: true,
         localName: 'Test',
+        token: 'abc-123',
       });
       await instance.selectLocalVersion();
 
       expect(instance.state.isValidElectron).toBe(true);
       expect(instance.state.folderPath).toBe('/test/');
       expect(instance.state.localName).toBe('Test');
+      expect(instance.state.token).toBe('abc-123');
     });
   });
 
@@ -150,7 +152,7 @@ describe('AddVersionDialog component', () => {
   });
 
   describe('onSubmit', () => {
-    it('does not do anything without a file', async () => {
+    it('does not do anything without a token', async () => {
       store.isAddVersionDialogShowing = true;
       const { instance } = renderClassComponentWithInstanceRef(
         AddVersionDialog,
@@ -173,6 +175,7 @@ describe('AddVersionDialog component', () => {
         instance.setState({
           name: '3.3.3',
           folderPath: '/test/path',
+          token: 'submit-token',
         });
       });
 
@@ -180,10 +183,8 @@ describe('AddVersionDialog component', () => {
 
       expect(store.addLocalVersion).toHaveBeenCalledTimes(1);
       expect(store.addLocalVersion).toHaveBeenCalledWith(
-        expect.objectContaining({
-          localPath: '/test/path',
-          name: '3.3.3',
-        }),
+        'submit-token',
+        '3.3.3',
       );
     });
 
@@ -199,6 +200,7 @@ describe('AddVersionDialog component', () => {
           isValidElectron: true,
           folderPath: '/test/path',
           name: '3.3.3',
+          token: 'dup-token',
           existingLocalVersion: {
             version: '2.2.2',
             localPath: '/test/path',

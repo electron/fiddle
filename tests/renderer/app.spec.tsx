@@ -34,6 +34,7 @@ describe('App component', () => {
       defaultDark,
     );
     vi.mocked(window.ElectronFiddle.getReleasedVersions).mockReturnValue([]);
+    vi.mocked(window.ElectronFiddle.getLocalVersions).mockReturnValue([]);
     vi.mocked(window.ElectronFiddle.getLatestStable).mockReturnValue(
       semver.parse('24.0.0')!,
     );

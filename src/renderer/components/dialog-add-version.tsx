@@ -13,7 +13,6 @@ import { observer } from 'mobx-react';
 import { Version } from '../../interfaces';
 import { AppState } from '../state';
 import { getElectronNameForPlatform } from '../utils/electron-name';
-import { getLocalVersionForPath } from '../versions';
 
 interface AddVersionDialogProps {
   appState: AppState;
@@ -26,15 +25,7 @@ interface AddVersionDialogState {
   folderPath?: string;
   localName?: string;
   name: string;
-}
-
-/**
- * Generate a unique version key for a local build.
- * Uses a format that is valid semver but can never conflict
- * with a real Electron release.
- */
-function generateLocalVersionKey(): string {
-  return `0.0.0-local.${Date.now()}`;
+  token?: string;
 }
 
 /**
@@ -65,14 +56,20 @@ export const AddVersionDialog = observer(
     public async selectLocalVersion(): Promise<void> {
       const selected = await window.ElectronFiddle.selectLocalVersion();
       if (selected) {
-        const { folderPath, isValidElectron, localName } = selected;
-        const existingLocalVersion = getLocalVersionForPath(folderPath);
-
-        this.setState({
-          existingLocalVersion,
+        const {
           folderPath,
           isValidElectron,
           localName,
+          token,
+          existingVersion,
+        } = selected;
+
+        this.setState({
+          existingLocalVersion: existingVersion,
+          folderPath,
+          isValidElectron,
+          localName,
+          token,
           // Pre-fill name from detected binary name if available
           name: localName || '',
           isValidName: !!localName,
@@ -97,22 +94,16 @@ export const AddVersionDialog = observer(
      * Handles the submission of the dialog
      */
     public async onSubmit(): Promise<void> {
-      const { folderPath, name, isValidElectron, existingLocalVersion } =
-        this.state;
+      const { token, name, isValidElectron, existingLocalVersion } = this.state;
 
-      if (!folderPath) return;
+      if (!token) return;
 
       // swap to old local electron version if the user adds a new one with the same path
       if (isValidElectron && existingLocalVersion?.localPath) {
         // set previous version as active version
         this.props.appState.setVersion(existingLocalVersion.version);
       } else {
-        const toAdd: Version = {
-          localPath: folderPath,
-          version: generateLocalVersionKey(),
-          name: name.trim(),
-        };
-        this.props.appState.addLocalVersion(toAdd);
+        this.props.appState.addLocalVersion(token, name.trim());
       }
       this.onClose();
     }
@@ -121,6 +112,10 @@ export const AddVersionDialog = observer(
      * Closes the dialog
      */
     public onClose() {
+      const { token } = this.state;
+      if (token) {
+        window.ElectronFiddle.cancelPendingLocalVersion(token);
+      }
       this.props.appState.isAddVersionDialogShowing = false;
       this.reset();
     }
