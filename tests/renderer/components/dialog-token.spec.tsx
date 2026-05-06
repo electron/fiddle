@@ -204,7 +204,6 @@ describe('TokenDialog component', () => {
 
       expect(store.gitHubToken).toBe(mockValidToken);
       expect(store.gitHubLogin).toBe(mockUser.login);
-      expect(store.gitHubName).toBe(mockUser.name);
       expect(instance.state.error).toBe(false);
       expect(store.isTokenDialogShowing).toBe(false);
     });

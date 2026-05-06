@@ -120,7 +120,6 @@ export const TokenDialog = observer(
       // Token is valid and has required scopes.
       this.props.appState.gitHubToken = this.state.tokenInput;
       this.props.appState.gitHubLogin = validation.user.login;
-      this.props.appState.gitHubName = validation.user.name;
 
       this.setState({ verifying: false, error: false });
       this.props.appState.isTokenDialogShowing = false;

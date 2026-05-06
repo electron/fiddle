@@ -236,7 +236,6 @@ export enum GlobalSetting {
   fontFamily = 'fontFamily',
   fontSize = 'fontSize',
   gitHubLogin = 'gitHubLogin',
-  gitHubName = 'gitHubName',
   gitHubToken = 'gitHubToken',
   hasShownTour = 'hasShownTour',
   isClearingConsoleOnRun = 'isClearingConsoleOnRun',

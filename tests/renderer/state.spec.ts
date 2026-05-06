@@ -739,12 +739,10 @@ describe('AppState', () => {
     it('resets all GitHub information', () => {
       appState.gitHubLogin = 'test';
       appState.gitHubToken = 'test';
-      appState.gitHubName = 'test';
 
       appState.signOutGitHub();
       expect(appState.gitHubLogin).toBe(null);
       expect(appState.gitHubToken).toBe(null);
-      expect(appState.gitHubName).toBe(null);
     });
   });
 
