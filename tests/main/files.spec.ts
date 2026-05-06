@@ -56,7 +56,6 @@ describe('files', () => {
       const spy = vi.spyOn(ipcMainManager, 'handle');
       setupFileListeners();
 
-      expect(ipcMainManager.eventNames()).toEqual([IpcEvents.PATH_EXISTS]);
       expect(spy).toHaveBeenCalledWith(
         IpcEvents.CLEANUP_DIRECTORY,
         expect.anything(),
@@ -350,5 +349,27 @@ describe('files', () => {
     ).resolves.toEqual(tmpPath);
     expect(fs.outputFile).toHaveBeenCalledTimes(3);
     expect(tmp.setGracefulCleanup).toHaveBeenCalled();
+  });
+
+  it('saveFilesToTemp() skips unsafe filenames', async () => {
+    const tmpPath = '/tmp/save-to-temp/';
+    vi.spyOn(tmp, 'dirSync').mockReturnValue({
+      name: tmpPath,
+    } as tmp.DirResult);
+
+    await saveFilesToTemp(
+      new Map([
+        ['main.js', ''],
+        ['../../../.bashrc', 'evil'],
+        ['/etc/passwd', 'evil'],
+      ]),
+    );
+
+    // Only the safe filename should be written
+    expect(fs.outputFile).toHaveBeenCalledTimes(1);
+    expect(fs.outputFile).toHaveBeenCalledWith(
+      expect.stringContaining('main.js'),
+      '',
+    );
   });
 });

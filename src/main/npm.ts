@@ -1,3 +1,4 @@
+import * as os from 'node:os';
 import * as path from 'node:path';
 
 import { IpcMainInvokeEvent, shell } from 'electron';
@@ -71,6 +72,11 @@ export async function addModules(
   { dir, packageManager, useSocketFirewall }: PMOperationOptions,
   ...names: Array<string>
 ): Promise<string> {
+  const tmpDir = os.tmpdir();
+  const resolvedDir = path.resolve(dir);
+  if (!resolvedDir.startsWith(tmpDir + path.sep) && resolvedDir !== tmpDir) {
+    throw new Error(`addModules: dir must be inside the temp directory`);
+  }
   const pm = packageManager === 'npm' ? 'npm' : 'yarn';
   const pmArgs =
     packageManager === 'npm'
@@ -95,7 +101,8 @@ export async function packageRun(
   { dir, packageManager }: PMOperationOptions,
   command: string,
 ): Promise<string> {
-  const result = await exec(dir, `${packageManager} run ${command}`);
+  const pm = packageManager === 'npm' ? 'npm' : 'yarn';
+  const result = await execFile(dir, pm, ['run', command]);
 
   shell.showItemInFolder(path.join(dir, 'out'));
 

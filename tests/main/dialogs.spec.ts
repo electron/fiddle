@@ -13,6 +13,10 @@ import { BrowserWindowMock } from '../mocks/browser-window';
 
 vi.mock('fs-extra');
 vi.mock('../../src/main/windows');
+vi.mock('../../src/main/versions', () => ({
+  getLocalVersionForPath: vi.fn(),
+  setPendingLocalPath: vi.fn((token: string) => token),
+}));
 
 describe('dialogs', () => {
   beforeEach(() => {
@@ -91,6 +95,8 @@ describe('dialogs', () => {
         folderPath: paths[0],
         isValidElectron: false,
         localName: undefined,
+        token: expect.any(String),
+        existingVersion: undefined,
       });
     });
 

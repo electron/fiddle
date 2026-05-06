@@ -15,6 +15,7 @@ import {
   RunResult,
   RunnableVersion,
   StartFiddleParams,
+  Version,
 } from '../interfaces';
 import { IpcEvents, WEBCONTENTS_READY_FOR_IPC_SIGNAL } from '../ipc-events';
 import { FiddleTheme } from '../themes-defaults';
@@ -119,6 +120,21 @@ export async function setupFiddleGlobal() {
     getLocalVersionState(ver: RunnableVersion) {
       return ipcRenderer.sendSync(IpcEvents.GET_LOCAL_VERSION_STATE, ver);
     },
+    getLocalVersions(): Array<Version> {
+      return ipcRenderer.sendSync(IpcEvents.GET_LOCAL_VERSIONS);
+    },
+    addLocalVersion(token: string, name: string): Array<Version> {
+      return ipcRenderer.sendSync(IpcEvents.ADD_LOCAL_VERSION, token, name);
+    },
+    cancelPendingLocalVersion(token: string): void {
+      ipcRenderer.sendSync(IpcEvents.CANCEL_PENDING_LOCAL_VERSION, token);
+    },
+    removeLocalVersion(version: string): Array<Version> {
+      return ipcRenderer.sendSync(IpcEvents.REMOVE_LOCAL_VERSION, version);
+    },
+    migrateLocalVersions(versions: Version[]): boolean {
+      return ipcRenderer.sendSync(IpcEvents.MIGRATE_LOCAL_VERSIONS, versions);
+    },
     getOldestSupportedMajor() {
       return ipcRenderer.sendSync(IpcEvents.GET_OLDEST_SUPPORTED_MAJOR);
     },
@@ -188,8 +204,6 @@ export async function setupFiddleGlobal() {
         command,
       );
     },
-    pathExists: (path: string) =>
-      ipcRenderer.sendSync(IpcEvents.PATH_EXISTS, path),
     platform: process.platform,
     pushOutputEntry(entry: OutputEntry) {
       ipcRenderer.send(IpcEvents.OUTPUT_ENTRY, entry);

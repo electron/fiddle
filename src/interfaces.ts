@@ -169,6 +169,8 @@ export interface SelectedLocalVersion {
   folderPath: string;
   isValidElectron: boolean;
   localName?: string;
+  token: string;
+  existingVersion?: Version;
 }
 
 export type FiddleEvent =
@@ -235,9 +237,7 @@ export enum GlobalSetting {
   executionFlags = 'executionFlags',
   fontFamily = 'fontFamily',
   fontSize = 'fontSize',
-  gitHubAvatarUrl = 'gitHubAvatarUrl',
   gitHubLogin = 'gitHubLogin',
-  gitHubName = 'gitHubName',
   gitHubToken = 'gitHubToken',
   hasShownTour = 'hasShownTour',
   isClearingConsoleOnRun = 'isClearingConsoleOnRun',
