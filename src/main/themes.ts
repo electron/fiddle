@@ -23,12 +23,13 @@ export async function readThemeFile(
   name: string,
 ): Promise<LoadedFiddleTheme | null> {
   const file = name.endsWith('.json') ? name : `${name}.json`;
-  const themePath = path.join(THEMES_PATH, file);
 
-  if (!themePath.startsWith(THEMES_PATH + path.sep)) {
-    console.warn(`readThemeFile: rejected path outside themes dir: ${name}`);
+  if (path.basename(file) !== file) {
+    console.warn(`readThemeFile: rejected path outside themes dir: ${file}`);
     return null;
   }
+  
+  const themePath = path.join(THEMES_PATH, file);
 
   try {
     const theme = await fs.readJSON(themePath);
