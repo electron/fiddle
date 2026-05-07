@@ -488,6 +488,19 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@electron-forge/maker-msix@npm:8.0.0-alpha.8":
+  version: 8.0.0-alpha.8
+  resolution: "@electron-forge/maker-msix@npm:8.0.0-alpha.8"
+  dependencies:
+    "@electron-forge/core-utils": "npm:8.0.0-alpha.8"
+    "@electron-forge/maker-base": "npm:8.0.0-alpha.8"
+    "@electron-forge/shared-types": "npm:8.0.0-alpha.8"
+    electron-windows-msix: "npm:^2.0.4"
+    fs-extra: "npm:^10.0.0"
+  checksum: 10c0/357a780298d7e21825fe201a4f978a15b0b3d56b3a310c90fe99358b20f2ca66f8ac9c83e14cc49c57538743e60bd3353c47cd7f3df366c815c2f6089ceffa07
+  languageName: node
+  linkType: hard
+
 "@electron-forge/maker-rpm@npm:8.0.0-alpha.8":
   version: 8.0.0-alpha.8
   resolution: "@electron-forge/maker-rpm@npm:8.0.0-alpha.8"
@@ -893,7 +906,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@electron/windows-sign@npm:^1.1.2":
+"@electron/windows-sign@npm:^1.1.2, @electron/windows-sign@npm:^1.2.2":
   version: 1.2.2
   resolution: "@electron/windows-sign@npm:1.2.2"
   dependencies:
@@ -5517,6 +5530,7 @@ __metadata:
     "@blueprintjs/select": "npm:^3.15.0"
     "@electron-forge/cli": "npm:8.0.0-alpha.8"
     "@electron-forge/maker-deb": "npm:8.0.0-alpha.8"
+    "@electron-forge/maker-msix": "npm:8.0.0-alpha.8"
     "@electron-forge/maker-rpm": "npm:8.0.0-alpha.8"
     "@electron-forge/maker-squirrel": "npm:8.0.0-alpha.8"
     "@electron-forge/maker-zip": "npm:8.0.0-alpha.8"
@@ -5601,7 +5615,7 @@ __metadata:
     ts-loader: "npm:^9.4.4"
     tsx: "npm:^4.20.3"
     typescript: "npm:^5.8.3"
-    update-electron-app: "npm:^3.0.0"
+    update-electron-app: "npm:^3.2.0"
     vitest: "npm:^4.1.0"
     webpack: "npm:^5.104.1"
   dependenciesMeta:
@@ -5681,6 +5695,20 @@ __metadata:
   version: 1.5.286
   resolution: "electron-to-chromium@npm:1.5.286"
   checksum: 10c0/5384510f9682d7e46f98fa48b874c3901d9639de96e9e387afce1fe010fbac31376df0534524edc15f66e9902bfacee54037a5e598004e9c6a617884e379926d
+  languageName: node
+  linkType: hard
+
+"electron-windows-msix@npm:^2.0.4":
+  version: 2.0.4
+  resolution: "electron-windows-msix@npm:2.0.4"
+  dependencies:
+    "@electron/windows-sign": "npm:^1.2.2"
+    "@malept/cross-spawn-promise": "npm:^2.0.0"
+    chalk: "npm:^3.0.0"
+    debug: "npm:^4.4.1"
+    fs-extra: "npm:^11.2.0"
+    xml-escape: "npm:^1.1.0"
+  checksum: 10c0/2fe28f34920534c45ad9e8424ce3c687862f332190df241101c72f87ea438eff7c71f313bc96f5961d2adee62ef06874d61ab8b71d044de4aaed216665f6965c
   languageName: node
   linkType: hard
 
@@ -6872,6 +6900,17 @@ __metadata:
     jsonfile: "npm:^6.0.1"
     universalify: "npm:^2.0.0"
   checksum: 10c0/d77a9a9efe60532d2e790e938c81a02c1b24904ef7a3efb3990b835514465ba720e99a6ea56fd5e2db53b4695319b644d76d5a0e9988a2beef80aa7b1da63398
+  languageName: node
+  linkType: hard
+
+"fs-extra@npm:^11.2.0":
+  version: 11.3.4
+  resolution: "fs-extra@npm:11.3.4"
+  dependencies:
+    graceful-fs: "npm:^4.2.0"
+    jsonfile: "npm:^6.0.1"
+    universalify: "npm:^2.0.0"
+  checksum: 10c0/e08276f767a62496ae97d711aaa692c6a478177f24a85979b6a2881c9db9c68b8c2ad5da0bcf92c0b2a474cea6e935ec245656441527958fd8372cb647087df0
   languageName: node
   linkType: hard
 
@@ -8292,7 +8331,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"is-url@npm:^1.1.0, is-url@npm:^1.2.4":
+"is-url@npm:^1.1.0":
   version: 1.2.4
   resolution: "is-url@npm:1.2.4"
   checksum: 10c0/0157a79874f8f95fdd63540e3f38c8583c2ef572661cd0693cda80ae3e42dfe8e9a4a972ec1b827f861d9a9acf75b37f7d58a37f94a8a053259642912c252bc3
@@ -13667,14 +13706,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"update-electron-app@npm:^3.0.0":
-  version: 3.0.0
-  resolution: "update-electron-app@npm:3.0.0"
+"update-electron-app@npm:^3.2.0":
+  version: 3.2.0
+  resolution: "update-electron-app@npm:3.2.0"
   dependencies:
     github-url-to-object: "npm:^4.0.4"
-    is-url: "npm:^1.2.4"
     ms: "npm:^2.1.1"
-  checksum: 10c0/5e0b9ce8fd2cbcf6ea64d8029f90d90394facf05d86c8dceda5dba79af6e21522ef4f37f212982be781f488d497882529d9b11b91174159f6567a24039c76e6a
+  checksum: 10c0/b8e29d384d5ae5c65705879863afe662fb5853c4350ebd8f7dab1a0c1db6413096b43d9b27a1f6215ce93d8424a8945be0b6b527f9e51cdf5201ff2b33541f90
   languageName: node
   linkType: hard
 
@@ -14383,6 +14421,13 @@ __metadata:
   version: 4.0.0
   resolution: "xdg-basedir@npm:4.0.0"
   checksum: 10c0/1b5d70d58355af90363a4e0a51c992e77fc5a1d8de5822699c7d6e96a6afea9a1e048cb93312be6870f338ca45ebe97f000425028fa149c1e87d1b5b8b212a06
+  languageName: node
+  linkType: hard
+
+"xml-escape@npm:^1.1.0":
+  version: 1.1.0
+  resolution: "xml-escape@npm:1.1.0"
+  checksum: 10c0/973cef0e383c373d1ccbacbba33ac49e7f2afd60d2710ed1308e153d2aa3b3189477f79315eb10eed43b7221add040a5eab18107170b658559e4d29ce7653a76
   languageName: node
   linkType: hard
 
