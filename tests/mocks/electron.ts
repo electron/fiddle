@@ -174,7 +174,7 @@ const systemPreferences = {
 };
 
 const safeStorage = {
-  isEncryptionAvailable: vi.fn().mockReturnValue(true),
+  isEncryptionAvailable: vi.fn(() => true),
   encryptString: vi.fn((text: string) => Buffer.from(`encrypted:${text}`)),
   decryptString: vi.fn((buffer: Buffer) => {
     const str = buffer.toString();

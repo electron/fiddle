@@ -116,22 +116,9 @@ const MOCK_GIST_DATA = {
   files: MOCK_GIST_FILES,
 };
 
-// Re-establish safeStorage mock implementations after global vi.resetAllMocks()
-function restoreSafeStorageMocks() {
-  vi.mocked(safeStorage.isEncryptionAvailable).mockReturnValue(true);
-  vi.mocked(safeStorage.encryptString).mockImplementation((text: string) =>
-    Buffer.from(`encrypted:${text}`),
-  );
-  vi.mocked(safeStorage.decryptString).mockImplementation((buffer: Buffer) => {
-    const str = buffer.toString();
-    return str.startsWith('encrypted:') ? str.slice('encrypted:'.length) : str;
-  });
-}
-
 describe('github', () => {
   beforeEach(() => {
     vi.mocked(fs.existsSync).mockReturnValue(false);
-    restoreSafeStorageMocks();
     // Reset module-level octokit state by signing out
     handleTokenSignOut(MOCK_EVENT);
   });
