@@ -303,6 +303,7 @@ export class Runner {
 
     return new Promise(async (resolve) => {
       window.ElectronFiddle.removeAllListeners('fiddle-runner-output');
+      window.ElectronFiddle.removeAllListeners('fiddle-modules-installed');
       window.ElectronFiddle.removeAllListeners('fiddle-stopped');
 
       window.ElectronFiddle.addEventListener(
@@ -311,6 +312,10 @@ export class Runner {
           pushOutput(output, { ...options, bypassBuffer: false });
         },
       );
+
+      window.ElectronFiddle.addEventListener('fiddle-modules-installed', () => {
+        this.appState.isInstallingModules = false;
+      });
 
       window.ElectronFiddle.addEventListener(
         'fiddle-stopped',

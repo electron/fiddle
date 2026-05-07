@@ -27,6 +27,7 @@ const channelMapping: Record<FiddleEvent, IpcEvents> = {
   'electron-types-changed': IpcEvents.ELECTRON_TYPES_CHANGED,
   'execute-monaco-command': IpcEvents.MONACO_EXECUTE_COMMAND,
   'fiddle-runner-output': IpcEvents.FIDDLE_RUNNER_OUTPUT,
+  'fiddle-modules-installed': IpcEvents.FIDDLE_MODULES_INSTALLED,
   'fiddle-stopped': IpcEvents.FIDDLE_STOPPED,
   'load-example': IpcEvents.LOAD_ELECTRON_EXAMPLE_REQUEST,
   'load-gist': IpcEvents.LOAD_GIST_REQUEST,

@@ -180,6 +180,7 @@ export type FiddleEvent =
   | 'electron-types-changed'
   | 'execute-monaco-command'
   | 'fiddle-runner-output'
+  | 'fiddle-modules-installed'
   | 'fiddle-stopped'
   | 'load-example'
   | 'load-gist'

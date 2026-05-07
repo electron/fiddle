@@ -244,6 +244,11 @@ export async function startFiddle(webContents: WebContents): Promise<void> {
   }
   fiddleProcesses.set(webContents, child);
 
+  // Signal the renderer that module installation is done and the process is
+  // running. Sent after fiddleProcesses.set() so that stopFiddle() will work
+  // as soon as the button transitions to "Stop".
+  ipcMainManager.send(IpcEvents.FIDDLE_MODULES_INSTALLED, [], webContents);
+
   pushOutputLine(webContents, `Electron v${version} started as "${appName}"`);
 
   child.stdout?.on('data', (data) => pushOutput(webContents, data.toString()));

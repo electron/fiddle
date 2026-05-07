@@ -49,15 +49,15 @@ export const Runner = observer(
         case downloaded:
         case installed: {
           props.disabled = false;
-          if (isRunning) {
+          if (isInstallingModules) {
+            props.disabled = true;
+            props.text = 'Installing modules';
+            props.icon = <Spinner size={16} />;
+          } else if (isRunning) {
             props.active = true;
             props.text = 'Stop';
             props.onClick = window.app.runner.stop;
             props.icon = 'stop';
-          } else if (isInstallingModules) {
-            props.disabled = true;
-            props.text = 'Installing modules';
-            props.icon = <Spinner size={16} />;
           } else {
             props.text = 'Run';
             props.onClick = window.app.runner.run;
