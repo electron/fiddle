@@ -5,10 +5,8 @@ export class ElectronFiddleMock {
   public addModules = vi.fn();
   public arch = process.arch;
   public blockAccelerators = vi.fn();
-  public cleanupDirectory = vi.fn();
   public confirmQuit = vi.fn();
   public createThemeFile = vi.fn();
-  public deleteUserData = vi.fn();
   public downloadVersion = vi.fn();
   public fetchVersions = vi.fn();
   public getAvailableThemes = vi.fn();

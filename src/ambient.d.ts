@@ -105,13 +105,11 @@ declare global {
       ): Promise<string>;
       arch: string;
       blockAccelerators(acceleratorsToBlock: BlockableAccelerator[]): void;
-      cleanupDirectory(dir: string): Promise<boolean>;
       confirmQuit(): void;
       createThemeFile(
         newTheme: FiddleTheme,
         name?: string,
       ): Promise<LoadedFiddleTheme>;
-      deleteUserData(name: string): Promise<void>;
       downloadVersion(
         version: string,
         opts?: Partial<DownloadVersionParams>,

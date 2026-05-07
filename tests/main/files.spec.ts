@@ -57,14 +57,6 @@ describe('files', () => {
       setupFileListeners();
 
       expect(spy).toHaveBeenCalledWith(
-        IpcEvents.CLEANUP_DIRECTORY,
-        expect.anything(),
-      );
-      expect(spy).toHaveBeenCalledWith(
-        IpcEvents.DELETE_USER_DATA,
-        expect.anything(),
-      );
-      expect(spy).toHaveBeenCalledWith(
         IpcEvents.SAVE_FILES_TO_TEMP,
         expect.anything(),
       );

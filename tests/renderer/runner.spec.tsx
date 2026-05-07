@@ -30,8 +30,6 @@ describe('Runner component', () => {
     vi.mocked(
       window.ElectronFiddle.getIsPackageManagerInstalled,
     ).mockResolvedValue(true);
-    vi.mocked(window.ElectronFiddle.deleteUserData).mockResolvedValue();
-
     instance = new Runner(store as unknown as AppState);
   });
 

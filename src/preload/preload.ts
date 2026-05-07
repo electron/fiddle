@@ -91,17 +91,11 @@ export async function setupFiddleGlobal() {
     blockAccelerators(acceleratorsToBlock: BlockableAccelerator[]) {
       ipcRenderer.send(IpcEvents.BLOCK_ACCELERATORS, acceleratorsToBlock);
     },
-    cleanupDirectory(dir: string) {
-      return ipcRenderer.invoke(IpcEvents.CLEANUP_DIRECTORY, dir);
-    },
     confirmQuit() {
       ipcRenderer.send(IpcEvents.CONFIRM_QUIT);
     },
     createThemeFile(newTheme: FiddleTheme, name?: string) {
       return ipcRenderer.invoke(IpcEvents.CREATE_THEME_FILE, newTheme, name);
-    },
-    async deleteUserData(name: string) {
-      await ipcRenderer.invoke(IpcEvents.DELETE_USER_DATA, name);
     },
     async downloadVersion(
       version: string,
