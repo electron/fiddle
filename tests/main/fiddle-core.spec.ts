@@ -49,6 +49,9 @@ describe('fiddle-core', () => {
     vi.mocked(Runner.create).mockResolvedValue(runner as unknown as Runner);
     setupFiddleCore(new ElectronVersionsMock() as unknown as ElectronVersions);
     vi.mocked(fs.existsSync).mockReturnValue(false);
+    vi.mocked(fs.realpathSync as (p: fs.PathLike) => string).mockImplementation(
+      (p) => p.toString(),
+    );
   });
 
   afterEach(() => {
