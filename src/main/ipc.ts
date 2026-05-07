@@ -103,14 +103,28 @@ class IpcMainManager extends EventEmitter {
   ) {
     // there can be only one, so remove previous one first
     ipcMain.removeHandler(channel);
-    ipcMain.handle(channel, listener);
+    ipcMain.handle(
+      channel,
+      (event: Electron.IpcMainInvokeEvent, ...args: any[]) => {
+        // Only accept messages from BrowserWindows created by the app.
+        // This rejects IPC from WebViews, sub-frames, or detached windows.
+        if (!BrowserWindow.fromWebContents(event.sender)) return;
+        return listener(event, ...args);
+      },
+    );
   }
 
   public handleOnce(
     channel: IpcEvents,
     listener: (event: Electron.IpcMainInvokeEvent, ...args: any[]) => any,
   ) {
-    ipcMain.handleOnce(channel, listener);
+    ipcMain.handleOnce(
+      channel,
+      (event: Electron.IpcMainInvokeEvent, ...args: any[]) => {
+        if (!BrowserWindow.fromWebContents(event.sender)) return;
+        return listener(event, ...args);
+      },
+    );
   }
 
   public postMessage(
