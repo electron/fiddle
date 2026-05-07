@@ -9,12 +9,7 @@ import {
 } from '../../src/interfaces';
 import { ForgeCommands, Runner } from '../../src/renderer/runner';
 import { AppState } from '../../src/renderer/state';
-import {
-  AppMock,
-  FileManagerMock,
-  StateMock,
-  VersionsMock,
-} from '../mocks/mocks';
+import { AppMock, StateMock, VersionsMock } from '../mocks/mocks';
 import { emitEvent } from '../utils';
 
 vi.mock('../../src/renderer/file-manager');
@@ -22,13 +17,12 @@ vi.mock('../../src/renderer/file-manager');
 describe('Runner component', () => {
   let store: StateMock;
   let instance: Runner;
-  let fileManager: FileManagerMock;
   let mockVersions: Record<string, RunnableVersion>;
   let mockVersionsArray: RunnableVersion[];
 
   beforeEach(() => {
     ({ mockVersions, mockVersionsArray } = new VersionsMock());
-    ({ fileManager, state: store } = window.app as unknown as AppMock);
+    ({ state: store } = window.app as unknown as AppMock);
     store.initVersions('2.0.2', { ...mockVersions });
     store.getName.mockResolvedValue('test-app-name');
     store.modules = new Map<string, string>([['cow', '*']]);
@@ -96,8 +90,15 @@ describe('Runner component', () => {
 
       expect(result).toBe(RunResult.SUCCESS);
       expect(store.isRunning).toBe(false);
-      expect(fileManager.saveToTemp).toHaveBeenCalled();
-      expect(window.ElectronFiddle.addModules).toHaveBeenCalled();
+      expect(window.ElectronFiddle.startFiddle).toHaveBeenCalled();
+    });
+
+    it('exposes run-time options to the main process', async () => {
+      store.isEnablingElectronLogging = true;
+      const options = await instance.getStartFiddleOptions();
+      expect(options).toEqual(
+        expect.objectContaining({ enableElectronLogging: true }),
+      );
     });
 
     it('runs with logging when enabled', async () => {
@@ -114,13 +115,7 @@ describe('Runner component', () => {
 
       expect(result).toBe(RunResult.SUCCESS);
       expect(store.isRunning).toBe(false);
-      expect(fileManager.saveToTemp).toHaveBeenCalled();
-      expect(window.ElectronFiddle.addModules).toHaveBeenCalled();
-      expect(window.ElectronFiddle.startFiddle).toBeCalledWith(
-        expect.objectContaining({
-          enableElectronLogging: true,
-        }),
-      );
+      expect(window.ElectronFiddle.startFiddle).toHaveBeenCalled();
     });
 
     it('emits output with exitCode', async () => {
@@ -139,7 +134,7 @@ describe('Runner component', () => {
 
       expect(result).toBe(RunResult.SUCCESS);
       expect(store.isRunning).toBe(false);
-      expect(store.pushOutput).toHaveBeenCalledTimes(8);
+      expect(store.pushOutput).toHaveBeenCalledTimes(3);
       expect(store.flushOutput).toHaveBeenCalledTimes(1);
       expect(store.pushOutput).toHaveBeenLastCalledWith(
         'Electron exited with code 0.',
@@ -204,34 +199,15 @@ describe('Runner component', () => {
       expect(result).toBe(RunResult.FAILURE);
       expect(store.isRunning).toBe(false);
       expect(store.flushOutput).toHaveBeenCalledTimes(1);
-      expect(store.pushOutput).toHaveBeenCalledTimes(8);
+      expect(store.pushOutput).toHaveBeenCalledTimes(3);
       expect(store.pushOutput).toHaveBeenLastCalledWith(
         `Electron exited with signal ${signal}.`,
       );
     });
 
-    it('cleans the app data dir after a run', async () => {
-      setTimeout(() => emitEvent('fiddle-stopped', 0));
-      const result = await instance.run();
-
-      expect(result).toBe(RunResult.SUCCESS);
-      await new Promise(process.nextTick);
-      expect(window.ElectronFiddle.cleanupDirectory).toHaveBeenCalledTimes(1);
-      expect(window.ElectronFiddle.deleteUserData).toHaveBeenCalledTimes(1);
-      expect(window.ElectronFiddle.deleteUserData).toHaveBeenCalledWith(
-        'test-app-name',
-      );
-    });
-
-    it('does not clean the app data dir after a run if configured', async () => {
-      (instance as any).appState.isKeepingUserDataDirs = true;
-
-      setTimeout(() => emitEvent('fiddle-stopped', 0));
-      const result = await instance.run();
-
-      expect(result).toBe(RunResult.SUCCESS);
-      await new Promise(process.nextTick);
-      expect(window.ElectronFiddle.cleanupDirectory).toHaveBeenCalledTimes(1);
+    it('does not run version not yet downloaded', async () => {
+      store.currentElectronVersion.state = InstallState.missing;
+      expect(await instance.run()).toBe(RunResult.INVALID);
     });
 
     it('automatically cleans the console when enabled', async () => {
@@ -242,30 +218,6 @@ describe('Runner component', () => {
 
       expect(result).toBe(RunResult.SUCCESS);
       expect(store.clearConsole).toHaveBeenCalled();
-    });
-
-    it('does not run version not yet downloaded', async () => {
-      store.currentElectronVersion.state = InstallState.missing;
-      expect(await instance.run()).toBe(RunResult.INVALID);
-    });
-
-    it('does not run if writing files fails', async () => {
-      vi.mocked(fileManager.saveToTemp).mockRejectedValueOnce('bwap bwap');
-
-      expect(await instance.run()).toBe(RunResult.INVALID);
-    });
-
-    it('does not run if installing modules fails', async () => {
-      const oldError = console.error;
-      console.error = vi.fn();
-
-      instance.installModules = vi.fn().mockImplementationOnce(async () => {
-        throw new Error('Bwap-bwap');
-      });
-
-      expect(await instance.run()).toBe(RunResult.INVALID);
-
-      console.error = oldError;
     });
   });
 
@@ -463,23 +415,6 @@ describe('Runner component', () => {
       expect(await instance.performForgeOperation(ForgeCommands.MAKE)).toBe(
         false,
       );
-    });
-  });
-
-  describe('installModules()', () => {
-    it.each([
-      ['does not attempt installation if npm is not installed', false, 0],
-      ['does attempt installation if npm is installed', true, 1],
-    ])('%s', async (_: unknown, haveNpm: boolean, numCalls: number) => {
-      vi.mocked(
-        window.ElectronFiddle.getIsPackageManagerInstalled,
-      ).mockResolvedValue(haveNpm);
-      await instance.installModules({
-        dir: '/fake/path',
-        packageManager: 'npm',
-      });
-
-      expect(window.ElectronFiddle.addModules).toHaveBeenCalledTimes(numCalls);
     });
   });
 });

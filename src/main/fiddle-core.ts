@@ -1,7 +1,5 @@
 import { ChildProcess } from 'node:child_process';
 import * as fs from 'node:fs';
-import * as os from 'node:os';
-import * as path from 'node:path';
 
 import { ElectronVersions, Installer, Runner } from '@electron/fiddle-core';
 import {
@@ -12,13 +10,26 @@ import {
 } from 'electron';
 
 import { ELECTRON_DOWNLOAD_PATH, ELECTRON_INSTALL_PATH } from './constants';
+import { cleanupDirectory, deleteUserData, saveFilesToTemp } from './files';
 import { ipcMainManager } from './ipc';
+import { addModules, getIsPackageManagerInstalled } from './npm';
+import { getFiles } from './utils/get-files';
+import { getStartFiddleOptions } from './utils/get-start-fiddle-options';
+import { getLocalVersions } from './versions';
 import {
   DownloadVersionParams,
+  IPackageManager,
+  PACKAGE_NAME,
   ProgressObject,
-  StartFiddleParams,
 } from '../interfaces';
 import { IpcEvents } from '../ipc-events';
+import { maybePlural } from '../renderer/utils/plural-maybe';
+
+export interface PMOperationOptions {
+  dir: string;
+  packageManager: IPackageManager;
+  useSocketFirewall?: boolean;
+}
 
 let installer: Installer;
 let runner: Runner;
@@ -33,16 +44,6 @@ const BLOCKED_ENV_KEYS = new Set([
   'DYLD_LIBRARY_PATH',
 ]);
 
-/**
- * Returns true if `dir` resolves to a path inside the OS temp directory.
- */
-function isInsideTempDir(dir: unknown): dir is string {
-  if (typeof dir !== 'string') return false;
-  const tmpDir = fs.realpathSync(os.tmpdir());
-  const resolved = fs.realpathSync(path.resolve(dir));
-  return resolved.startsWith(tmpDir + path.sep) || resolved === tmpDir;
-}
-
 // Keep track of which fiddle process belongs to which WebContents
 const fiddleProcesses = new WeakMap<WebContents, ChildProcess>();
 
@@ -52,37 +53,164 @@ const removingVersions = new Map<string, Promise<void>>();
 /**
  * Push to the renderer's run output.
  */
-function pushOutput(webContents: WebContents, message: string): void {
-  ipcMainManager.send(IpcEvents.FIDDLE_RUNNER_OUTPUT, [message], webContents);
+function pushOutput(
+  webContents: WebContents,
+  message: string,
+  options?: { isNotPre?: boolean },
+): void {
+  ipcMainManager.send(
+    IpcEvents.FIDDLE_RUNNER_OUTPUT,
+    [message, options],
+    webContents,
+  );
 }
 
-function pushOutputLine(webContents: WebContents, message: string): void {
-  pushOutput(webContents, `${message}\n`);
+function pushOutputLine(
+  webContents: WebContents,
+  message: string,
+  options?: { isNotPre?: boolean },
+): void {
+  pushOutput(webContents, `${message}\n`, options);
 }
 
 /**
- * Start running an Electron fiddle.
+ * Little convenience method that pushes message and error.
  */
-export async function startFiddle(
+function pushError(webContents: WebContents, message: string, error: Error) {
+  pushOutput(webContents, `⚠️ ${message}. Error encountered:`);
+  pushOutput(webContents, error.toString());
+  console.warn(error);
+}
+
+/**
+ * Installs the specified modules
+ */
+export async function installModules(
   webContents: WebContents,
-  params: StartFiddleParams,
+  modulesPairs: [string, string][],
+  options: PMOperationOptions,
 ): Promise<void> {
-  const { dir, enableElectronLogging, localPath, options, version } = params;
+  const modules = modulesPairs.map(([pkg, version]) => `${pkg}@${version}`);
 
-  // Guard 1: working directory must be inside the OS temp directory.
-  if (!isInsideTempDir(dir)) {
-    throw new Error(`startFiddle: dir must be inside the temp directory`);
+  // Install any modules the user added to the fiddle.
+  if (modules.length > 0) {
+    const pmInstalled = await getIsPackageManagerInstalled(
+      options.packageManager,
+    );
+    if (!pmInstalled) {
+      let message = `The ${maybePlural(`module`, modules)} ${modules.join(
+        ', ',
+      )} need to be installed, `;
+      message += `but we could not find ${options.packageManager}. Fiddle requires Node.js and npm `;
+      message += `to support the installation of modules not included in `;
+      message += `Electron. Please visit https://nodejs.org to install Node.js `;
+      message += `and npm, or https://classic.yarnpkg.com/lang/en/ to install Yarn`;
+
+      pushOutput(webContents, message, { isNotPre: true });
+      throw new Error('Package manager not installed');
+    }
+
+    pushOutput(
+      webContents,
+      `Installing node modules using ${
+        options.packageManager
+      }: ${modules.join(', ')}...`,
+      { isNotPre: true },
+    );
+
+    const result = await addModules(
+      {
+        dir: options.dir,
+        packageManager: options.packageManager,
+        useSocketFirewall: options.useSocketFirewall,
+      },
+      ...modules,
+    );
+    if (result) pushOutputLine(webContents, result);
   }
+}
 
-  // Guard 2: determine whether to use the local path by verifying the
-  // executable exists on disk — do not trust the renderer-supplied
-  // isValidBuild flag.
+/**
+ * Drive the entire run lifecycle from main: ask the renderer for the
+ * settings and files, write them to a temp directory, install modules,
+ * spawn Electron, and clean everything up when the process exits.
+ */
+export async function startFiddle(webContents: WebContents): Promise<void> {
+  const options = await getStartFiddleOptions(webContents);
+  const {
+    enableElectronLogging,
+    env: rendererEnv,
+    executionFlags,
+    isKeepingUserDataDirs,
+    modules,
+    packageManager,
+    useSocketFirewall,
+    version,
+  } = options;
+
+  // Look up local Electron builds by version string. Local builds use a
+  // version of the form `0.0.0-local.<timestamp>`, so only consult the
+  // stored local versions when the version string contains `-local`.
+  const localPath = version.includes('-local')
+    ? getLocalVersions().find((v) => v.version === version)?.localPath
+    : undefined;
+
+  // Verify the executable exists on disk before using it.
   const resolvedExec = localPath ? Installer.getExecPath(localPath) : undefined;
   const useLocalPath = !!resolvedExec && fs.existsSync(resolvedExec);
 
-  // Guard 3: strip any CLI option containing a null byte, which can
-  // truncate strings at the OS level.
-  const safeOptions = options.filter(
+  // Get the fiddle's files from the renderer.
+  const files = new Map(
+    (await getFiles(BrowserWindow.fromWebContents(webContents)!, [])).files,
+  );
+
+  // Pull the project name out of the fiddle's package.json — that's the
+  // name Electron will use for its user-data dir, so that's what we
+  // need to delete on cleanup.
+  let appName: string | undefined;
+  try {
+    const pkg = JSON.parse(files.get(PACKAGE_NAME) ?? '{}');
+    if (typeof pkg.name === 'string') appName = pkg.name;
+  } catch {
+    // package.json is malformed; skip user-data cleanup.
+  }
+
+  // Create the temp directory and write files into it. This is the only
+  // place that creates the run directory — the renderer never sees it.
+  pushOutputLine(webContents, 'Saving files to temp directory...');
+  const dir = await saveFilesToTemp(files);
+  pushOutputLine(webContents, `Saved files to ${dir}`);
+
+  const cleanup = async () => {
+    await cleanupDirectory(dir);
+    if (!appName) return;
+    if (isKeepingUserDataDirs) {
+      console.log(
+        `Cleanup: Not deleting data dir due to isKeepingUserDataDirs setting`,
+      );
+      return;
+    }
+    console.log(`Cleanup: Deleting data dir for ${appName}`);
+    await deleteUserData(appName);
+  };
+
+  try {
+    await installModules(webContents, modules, {
+      dir,
+      packageManager,
+      useSocketFirewall,
+    });
+  } catch (error: any) {
+    console.error('Runner: Could not install modules', error);
+
+    pushError(webContents, 'Could not install modules', error);
+    await cleanup();
+    throw error;
+  }
+
+  // Strip any CLI option containing a null byte, which can truncate
+  // strings at the OS level.
+  const safeOptions = [dir, '--inspect', ...executionFlags].filter(
     (opt) => typeof opt === 'string' && !opt.includes('\0'),
   );
 
@@ -99,23 +227,31 @@ export async function startFiddle(
   }
 
   const safeEnv = Object.fromEntries(
-    Object.entries(params.env).filter(([key]) => !BLOCKED_ENV_KEYS.has(key)),
+    Object.entries(rendererEnv).filter(([key]) => !BLOCKED_ENV_KEYS.has(key)),
   );
   Object.assign(env, safeEnv);
 
-  const child = await runner.spawn(
-    useLocalPath ? resolvedExec! : version,
-    dir,
-    { args: safeOptions, cwd: dir, env },
-  );
+  let child: ChildProcess;
+  try {
+    child = await runner.spawn(useLocalPath ? resolvedExec! : version, dir, {
+      args: safeOptions,
+      cwd: dir,
+      env,
+    });
+  } catch (error) {
+    await cleanup();
+    throw error;
+  }
   fiddleProcesses.set(webContents, child);
+
+  pushOutputLine(webContents, `Electron v${version} started as "${appName}"`);
 
   child.stdout?.on('data', (data) => pushOutput(webContents, data.toString()));
   child.stderr?.on('data', (data) => pushOutput(webContents, data.toString()));
 
   child.on('close', async (code, signal) => {
     fiddleProcesses.delete(webContents);
-
+    await cleanup();
     ipcMainManager.send(IpcEvents.FIDDLE_STOPPED, [code, signal], webContents);
   });
 }
@@ -220,8 +356,8 @@ export async function setupFiddleCore(versions: ElectronVersions) {
   );
   ipcMainManager.handle(
     IpcEvents.START_FIDDLE,
-    async (event: IpcMainInvokeEvent, params: StartFiddleParams) => {
-      await startFiddle(event.sender, params);
+    async (event: IpcMainInvokeEvent) => {
+      await startFiddle(event.sender);
     },
   );
   ipcMainManager.on(IpcEvents.STOP_FIDDLE, (event: IpcMainEvent) => {

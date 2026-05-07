@@ -3,7 +3,6 @@ import semver from 'semver';
 
 import { Bisector } from './bisect';
 import { AppState } from './state';
-import { maybePlural } from './utils/plural-maybe';
 import {
   FileTransformOperation,
   InstallState,
@@ -19,13 +18,6 @@ import {
 export enum ForgeCommands {
   PACKAGE = 'package',
   MAKE = 'make',
-}
-
-interface RunFiddleParams {
-  localPath: string | undefined;
-  isValidBuild: boolean; // If the localPath is a valid Electron build
-  version: string; // The user selected version
-  dir: string;
 }
 
 const resultString: Record<RunResult, string> = Object.freeze({
@@ -144,11 +136,9 @@ export class Runner {
    * Actually run the fiddle.
    */
   public async run(): Promise<RunResult> {
-    const options = { includeDependencies: false, includeElectron: false };
-
     const { appState } = this;
     const currentRunnable = appState.currentElectronVersion;
-    const { version, state, localPath } = currentRunnable;
+    const { version, state } = currentRunnable;
     const isValidBuild =
       // Destructure currentRunnable so it's not a Proxy object, which can't be used
       window.ElectronFiddle.getLocalVersionState({ ...currentRunnable }) ===
@@ -185,24 +175,6 @@ export class Runner {
     }
     appState.isConsoleShowing = true;
 
-    const dir = await this.saveToTemp(options);
-    const packageManager = appState.packageManager;
-    const useSocketFirewall = appState.isUsingSocketFirewall;
-
-    if (!dir) return RunResult.INVALID;
-
-    try {
-      await this.installModules({ dir, packageManager, useSocketFirewall });
-    } catch (error: any) {
-      console.error('Runner: Could not install modules', error);
-
-      appState.pushError('Could not install modules', error.message);
-      appState.isInstallingModules = false;
-
-      await window.ElectronFiddle.cleanupDirectory(dir);
-      return RunResult.INVALID;
-    }
-
     const isReady =
       state === InstallState.installed ||
       state === InstallState.downloaded ||
@@ -217,16 +189,10 @@ export class Runner {
       message += `before running the fiddle.`;
 
       appState.pushOutput(message, { isNotPre: true });
-      await window.ElectronFiddle.cleanupDirectory(dir);
       return RunResult.INVALID;
     }
 
-    return this.runFiddle({
-      localPath,
-      isValidBuild,
-      dir,
-      version,
-    });
+    return this.runFiddle();
   }
 
   /**
@@ -295,53 +261,6 @@ export class Runner {
     return true;
   }
 
-  /**
-   * Installs the specified modules
-   */
-  public async installModules(pmOptions: PMOperationOptions): Promise<void> {
-    const modules = Array.from(this.appState.modules.entries()).map(
-      ([pkg, version]) => `${pkg}@${version}`,
-    );
-    const { pushOutput } = this.appState;
-
-    if (modules && modules.length > 0) {
-      this.appState.isInstallingModules = true;
-      const packageManager = pmOptions.packageManager;
-      const pmInstalled =
-        await window.ElectronFiddle.getIsPackageManagerInstalled(
-          packageManager,
-        );
-      if (!pmInstalled) {
-        let message = `The ${maybePlural(`module`, modules)} ${modules.join(
-          ', ',
-        )} need to be installed, `;
-        message += `but we could not find ${packageManager}. Fiddle requires Node.js and npm `;
-        message += `to support the installation of modules not included in `;
-        message += `Electron. Please visit https://nodejs.org to install Node.js `;
-        message += `and npm, or https://classic.yarnpkg.com/lang/en/ to install Yarn`;
-
-        pushOutput(message, { isNotPre: true });
-        this.appState.isInstallingModules = false;
-        return;
-      }
-
-      pushOutput(
-        `Installing node modules using ${
-          pmOptions.packageManager
-        }: ${modules.join(', ')}...`,
-        { isNotPre: true },
-      );
-
-      const result = await window.ElectronFiddle.addModules(
-        pmOptions,
-        ...modules,
-      );
-      pushOutput(result);
-
-      this.appState.isInstallingModules = false;
-    }
-  }
-
   public buildChildEnvVars(): { [x: string]: string | undefined } {
     const { environmentVariables } = this.appState;
 
@@ -369,59 +288,34 @@ export class Runner {
 
   /**
    * Executes the fiddle with either local electron build
-   * or the user selected electron version
+   * or the user selected electron version. The main process owns the
+   * temp directory, module installation, and cleanup — the renderer
+   * simply triggers the run and waits for the `fiddle-stopped` event.
    */
-  private async runFiddle(params: RunFiddleParams): Promise<RunResult> {
-    const { version, dir } = params;
-    const { pushOutput, flushOutput, executionFlags } = this.appState;
-    const env = this.buildChildEnvVars();
+  private async runFiddle(): Promise<RunResult> {
+    const { pushOutput, flushOutput } = this.appState;
 
-    // Add user-specified cli flags if any have been set.
-    const options = [dir, '--inspect'].concat(executionFlags);
-
-    const cleanup = async () => {
+    const cleanup = () => {
       flushOutput();
-
       this.appState.isRunning = false;
-
-      // Clean older folders
-      await window.ElectronFiddle.cleanupDirectory(dir);
-      await this.deleteUserData();
+      this.appState.isInstallingModules = false;
     };
 
-    return new Promise(async (resolve, _reject) => {
-      try {
-        await window.ElectronFiddle.startFiddle({
-          ...params,
-          enableElectronLogging: this.appState.isEnablingElectronLogging,
-          options,
-          env,
-        });
-      } catch (e: any) {
-        pushOutput(`Failed to spawn Fiddle: ${e.message}`);
-        await cleanup();
-        return resolve(RunResult.FAILURE);
-      }
-
-      this.appState.isRunning = true;
-
-      const name = await this.appState.getName();
-      pushOutput(`Electron v${version} started as "${name}"`);
-
+    return new Promise(async (resolve) => {
       window.ElectronFiddle.removeAllListeners('fiddle-runner-output');
       window.ElectronFiddle.removeAllListeners('fiddle-stopped');
 
       window.ElectronFiddle.addEventListener(
         'fiddle-runner-output',
-        (output: string) => {
-          pushOutput(output, { bypassBuffer: false });
+        (output: string, options?: { isNotPre?: boolean }) => {
+          pushOutput(output, { ...options, bypassBuffer: false });
         },
       );
 
       window.ElectronFiddle.addEventListener(
         'fiddle-stopped',
-        async (code, signal) => {
-          await cleanup();
+        (code, signal) => {
+          cleanup();
 
           if (typeof code !== 'number') {
             pushOutput(`Electron exited with signal ${signal}.`);
@@ -432,6 +326,16 @@ export class Runner {
           }
         },
       );
+
+      this.appState.isRunning = true;
+
+      try {
+        await window.ElectronFiddle.startFiddle();
+      } catch (e: any) {
+        pushOutput(`Failed to spawn Fiddle: ${e.message}`);
+        cleanup();
+        resolve(RunResult.FAILURE);
+      }
     });
   }
 
@@ -496,22 +400,5 @@ export class Runner {
     }
 
     return false;
-  }
-
-  /**
-   * Deletes the user data dir after a run.
-   */
-  private async deleteUserData() {
-    if (this.appState.isKeepingUserDataDirs) {
-      console.log(
-        `Cleanup: Not deleting data dir due to isKeepingUserDataDirs setting`,
-      );
-      return;
-    }
-
-    const name = await this.appState.getName();
-
-    console.log(`Cleanup: Deleting data dir for ${name}`);
-    await window.ElectronFiddle.deleteUserData(name);
   }
 }
