@@ -50,6 +50,18 @@ const downloadingVersions = new Map<string, Promise<any>>();
 const removingVersions = new Map<string, Promise<void>>();
 
 /**
+ * Push to the renderer's run output.
+ */
+function pushOutput(webContents: WebContents, message: string): void {
+  ipcMainManager.send(IpcEvents.FIDDLE_RUNNER_OUTPUT, [message], webContents);
+}
+
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+function pushOutputLine(webContents: WebContents, message: string): void {
+  pushOutput(webContents, `${message}\n`);
+}
+
+/**
  * Start running an Electron fiddle.
  */
 export async function startFiddle(
@@ -99,16 +111,8 @@ export async function startFiddle(
   );
   fiddleProcesses.set(webContents, child);
 
-  const pushOutput = (data: string | Buffer) => {
-    ipcMainManager.send(
-      IpcEvents.FIDDLE_RUNNER_OUTPUT,
-      [data.toString()],
-      webContents,
-    );
-  };
-
-  child.stdout?.on('data', pushOutput);
-  child.stderr?.on('data', pushOutput);
+  child.stdout?.on('data', (data) => pushOutput(webContents, data.toString()));
+  child.stderr?.on('data', (data) => pushOutput(webContents, data.toString()));
 
   child.on('close', async (code, signal) => {
     fiddleProcesses.delete(webContents);
