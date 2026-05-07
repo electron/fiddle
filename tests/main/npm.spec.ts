@@ -1,3 +1,4 @@
+import * as fs from 'node:fs';
 import * as os from 'node:os';
 import * as path from 'node:path';
 
@@ -13,7 +14,7 @@ import { exec, execFile } from '../../src/main/utils/exec';
 import { overridePlatform, resetPlatform } from '../utils';
 vi.mock('../../src/main/utils/exec');
 
-const tmpModuleDir = path.join(os.tmpdir(), 'my-directory');
+const tmpModuleDir = path.join(fs.realpathSync(os.tmpdir()), 'my-directory');
 
 describe('npm', () => {
   describe('getIsPackageManagerInstalled()', () => {
