@@ -12,6 +12,7 @@ import {
   PackageJsonOptions,
   RunResult,
   RunnableVersion,
+  StartFiddleOptions,
   VersionSource,
 } from '../interfaces';
 
@@ -37,6 +38,7 @@ export class Runner {
   constructor(private readonly appState: AppState) {
     this.run = this.run.bind(this);
     this.stop = this.stop.bind(this);
+    this.getStartFiddleOptions = this.getStartFiddleOptions.bind(this);
 
     window.ElectronFiddle.removeAllListeners('run-fiddle');
     window.ElectronFiddle.removeAllListeners('package-fiddle');
@@ -49,6 +51,8 @@ export class Runner {
     window.ElectronFiddle.addEventListener('make-fiddle', () => {
       this.performForgeOperation(ForgeCommands.MAKE);
     });
+
+    window.ElectronFiddle.onGetStartFiddleOptions(this.getStartFiddleOptions);
   }
 
   /**
@@ -429,6 +433,30 @@ export class Runner {
         },
       );
     });
+  }
+
+  /**
+   * Build the options object the main process needs to run the current
+   * fiddle. Sent in response to a request from main.
+   */
+  public async getStartFiddleOptions(): Promise<StartFiddleOptions> {
+    const { appState } = this;
+
+    const modules = Array.from(appState.modules.entries());
+    if (modules.length > 0) {
+      appState.isInstallingModules = true;
+    }
+
+    return {
+      version: appState.currentElectronVersion.version,
+      enableElectronLogging: appState.isEnablingElectronLogging,
+      executionFlags: [...appState.executionFlags],
+      env: this.buildChildEnvVars(),
+      modules,
+      packageManager: appState.packageManager,
+      useSocketFirewall: appState.isUsingSocketFirewall,
+      isKeepingUserDataDirs: appState.isKeepingUserDataDirs,
+    };
   }
 
   /**

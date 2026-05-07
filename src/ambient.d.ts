@@ -22,7 +22,7 @@ import {
   RunnableVersion,
   SelectedLocalVersion,
   SemVer,
-  StartFiddleParams,
+  StartFiddleOptions,
   TestRequest,
   Version,
 } from './interfaces';
@@ -151,6 +151,9 @@ declare global {
           transforms: Array<FileTransformOperation>,
         ) => Promise<{ localPath?: string; files: Files }>,
       );
+      onGetStartFiddleOptions(
+        callback: () => Promise<StartFiddleOptions>,
+      ): void;
       openThemeFolder(): Promise<void>;
       packageRun(
         { dir, packageManager }: PMOperationOptions,
@@ -169,7 +172,7 @@ declare global {
       setShowMeTemplate(template?: string): void;
       showWarningDialog(messageOptions: MessageOptions): void;
       showWindow(): void;
-      startFiddle(params: StartFiddleParams): Promise<void>;
+      startFiddle(): Promise<void>;
       stopFiddle(): void;
       taskDone(result: RunResult): void;
       themePath: string;

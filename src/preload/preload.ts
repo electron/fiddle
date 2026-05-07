@@ -14,7 +14,7 @@ import {
   PackageJsonOptions,
   RunResult,
   RunnableVersion,
-  StartFiddleParams,
+  StartFiddleOptions,
   Version,
 } from '../interfaces';
 import { IpcEvents, WEBCONTENTS_READY_FOR_IPC_SIGNAL } from '../ipc-events';
@@ -194,6 +194,13 @@ export async function setupFiddleGlobal() {
         },
       );
     },
+    onGetStartFiddleOptions(callback: () => Promise<StartFiddleOptions>) {
+      ipcRenderer.removeAllListeners(IpcEvents.GET_START_FIDDLE_OPTIONS);
+      ipcRenderer.on(IpcEvents.GET_START_FIDDLE_OPTIONS, async (e) => {
+        const options = await callback();
+        e.ports[0].postMessage(options);
+      });
+    },
     async openThemeFolder() {
       await ipcRenderer.invoke(IpcEvents.OPEN_THEME_FOLDER);
     },
@@ -246,8 +253,8 @@ export async function setupFiddleGlobal() {
     showWindow() {
       ipcRenderer.send(IpcEvents.SHOW_WINDOW);
     },
-    async startFiddle(params: StartFiddleParams) {
-      await ipcRenderer.invoke(IpcEvents.START_FIDDLE, params);
+    async startFiddle() {
+      await ipcRenderer.invoke(IpcEvents.START_FIDDLE);
     },
     stopFiddle() {
       ipcRenderer.send(IpcEvents.STOP_FIDDLE);

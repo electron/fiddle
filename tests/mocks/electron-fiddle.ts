@@ -34,6 +34,7 @@ export class ElectronFiddleMock {
   public getVersionState = vi.fn();
   public macTitlebarClicked = vi.fn();
   public onGetFiles = vi.fn();
+  public onGetStartFiddleOptions = vi.fn();
   public openThemeFolder = vi.fn();
   public packageRun = vi.fn();
   public platform = process.platform;

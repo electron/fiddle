@@ -289,14 +289,15 @@ export interface PackageJsonOptions {
   includeDependencies?: boolean;
 }
 
-export interface StartFiddleParams {
-  localPath: string | undefined;
+export interface StartFiddleOptions {
+  version: string;
   enableElectronLogging: boolean;
-  isValidBuild: boolean; // If the localPath is a valid Electron build
-  version: string; // The user selected version
-  dir: string;
-  options: string[];
+  executionFlags: string[];
   env: { [x: string]: string | undefined };
+  modules: Array<[string, string]>;
+  packageManager: IPackageManager;
+  useSocketFirewall: boolean;
+  isKeepingUserDataDirs: boolean;
 }
 
 export interface DownloadVersionParams {
