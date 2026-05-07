@@ -56,7 +56,6 @@ function pushOutput(webContents: WebContents, message: string): void {
   ipcMainManager.send(IpcEvents.FIDDLE_RUNNER_OUTPUT, [message], webContents);
 }
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 function pushOutputLine(webContents: WebContents, message: string): void {
   pushOutput(webContents, `${message}\n`);
 }
