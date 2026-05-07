@@ -38,8 +38,8 @@ const BLOCKED_ENV_KEYS = new Set([
  */
 function isInsideTempDir(dir: unknown): dir is string {
   if (typeof dir !== 'string') return false;
-  const tmpDir = path.resolve(os.tmpdir());
-  const resolved = path.resolve(dir);
+  const tmpDir = fs.realpathSync(os.tmpdir());
+  const resolved = fs.realpathSync(path.resolve(dir));
   return resolved.startsWith(tmpDir + path.sep) || resolved === tmpDir;
 }
 
