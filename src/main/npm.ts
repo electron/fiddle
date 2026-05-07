@@ -1,3 +1,4 @@
+import * as fs from 'node:fs';
 import * as os from 'node:os';
 import * as path from 'node:path';
 
@@ -72,7 +73,7 @@ export async function addModules(
   { dir, packageManager, useSocketFirewall }: PMOperationOptions,
   ...names: Array<string>
 ): Promise<string> {
-  const tmpDir = os.tmpdir();
+  const tmpDir = fs.realpathSync(os.tmpdir());
   const resolvedDir = path.resolve(dir);
   if (!resolvedDir.startsWith(tmpDir + path.sep) && resolvedDir !== tmpDir) {
     throw new Error(`addModules: dir must be inside the temp directory`);
