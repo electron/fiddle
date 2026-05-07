@@ -23,7 +23,7 @@ import {
   ProgressObject,
 } from '../interfaces';
 import { IpcEvents } from '../ipc-events';
-import { maybePlural } from '../renderer/utils/plural-maybe';
+import { maybePlural } from '../utils/plural-maybe';
 
 export interface PMOperationOptions {
   dir: string;
