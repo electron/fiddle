@@ -26,6 +26,7 @@ const channelMapping: Record<FiddleEvent, IpcEvents> = {
   'fiddle-runner-output': IpcEvents.FIDDLE_RUNNER_OUTPUT,
   'fiddle-modules-installed': IpcEvents.FIDDLE_MODULES_INSTALLED,
   'fiddle-stopped': IpcEvents.FIDDLE_STOPPED,
+  'is-auto-bisecting': IpcEvents.IS_AUTO_BISECTING,
   'load-example': IpcEvents.LOAD_ELECTRON_EXAMPLE_REQUEST,
   'load-gist': IpcEvents.LOAD_GIST_REQUEST,
   'make-fiddle': IpcEvents.FIDDLE_MAKE,
@@ -84,6 +85,9 @@ export async function setupFiddleGlobal() {
       );
     },
     arch: process.arch,
+    autobisectFiddle(versions: Array<RunnableVersion>): void {
+      ipcRenderer.send(IpcEvents.AUTOBISECT_FIDDLE, versions);
+    },
     blockAccelerators(acceleratorsToBlock: BlockableAccelerator[]) {
       ipcRenderer.send(IpcEvents.BLOCK_ACCELERATORS, acceleratorsToBlock);
     },
@@ -190,6 +194,13 @@ export async function setupFiddleGlobal() {
       ipcRenderer.on(IpcEvents.GET_START_FIDDLE_OPTIONS, async (e) => {
         const options = await callback();
         e.ports[0].postMessage(options);
+      });
+    },
+    onSetVersion(callback: (version: string) => Promise<void>) {
+      ipcRenderer.removeAllListeners(IpcEvents.SET_VERSION);
+      ipcRenderer.on(IpcEvents.SET_VERSION, async (e, version: string) => {
+        await callback(version);
+        e.ports[0].postMessage(undefined);
       });
     },
     async openThemeFolder() {

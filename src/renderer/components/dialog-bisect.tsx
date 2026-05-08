@@ -81,7 +81,11 @@ export const BisectDialog = observer(
     public async onAuto(): Promise<void> {
       const range = this.getBisectRange();
       if (range.length > 1) {
-        window.app.runner.autobisect(range);
+        // the RunnableVersion proxies can't be cloned by structuredClone,
+        // so we have to create plain objects out of them
+        window.ElectronFiddle.autobisectFiddle(
+          range.map((version) => ({ ...version })),
+        );
         this.onClose();
       }
     }

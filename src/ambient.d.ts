@@ -49,6 +49,10 @@ declare global {
         listener: (code: number | null, signal: string | null) => void,
       ): void;
       addEventListener(
+        type: 'is-auto-bisecting',
+        listener: (isAutoBisecting: boolean) => void,
+      ): void;
+      addEventListener(
         type: 'load-example',
         listener: (exampleInfo: { path: string; tag: string }) => void,
         options?: { signal: AbortSignal },
@@ -90,6 +94,7 @@ declare global {
         ...names: Array<string>
       ): Promise<string>;
       arch: string;
+      autobisectFiddle(versions: Array<RunnableVersion>): void;
       blockAccelerators(acceleratorsToBlock: BlockableAccelerator[]): void;
       confirmQuit(): void;
       createThemeFile(
@@ -138,6 +143,7 @@ declare global {
       onGetStartFiddleOptions(
         callback: () => Promise<StartFiddleOptions>,
       ): void;
+      onSetVersion(callback: (version: string) => Promise<void>): void;
       openThemeFolder(): Promise<void>;
       packageRun(
         { dir, packageManager }: PMOperationOptions,

@@ -1,7 +1,6 @@
 import parseEnvString from 'parse-env-string';
 import semver from 'semver';
 
-import { Bisector } from './bisect';
 import { AppState } from './state';
 import {
   FileTransformOperation,
@@ -10,7 +9,6 @@ import {
   PMOperationOptions,
   PackageJsonOptions,
   RunResult,
-  RunnableVersion,
   StartFiddleOptions,
   VersionSource,
 } from '../interfaces';
@@ -20,12 +18,6 @@ export enum ForgeCommands {
   MAKE = 'make',
 }
 
-const resultString: Record<RunResult, string> = Object.freeze({
-  [RunResult.FAILURE]: '❌ failed',
-  [RunResult.INVALID]: '❓ invalid',
-  [RunResult.SUCCESS]: '✅ passed',
-});
-
 export class Runner {
   constructor(private readonly appState: AppState) {
     this.run = this.run.bind(this);
@@ -34,6 +26,7 @@ export class Runner {
     window.ElectronFiddle.removeAllListeners('run-fiddle');
     window.ElectronFiddle.removeAllListeners('package-fiddle');
     window.ElectronFiddle.removeAllListeners('make-fiddle');
+    window.ElectronFiddle.removeAllListeners('is-auto-bisecting');
 
     window.ElectronFiddle.addEventListener('run-fiddle', this.run);
     window.ElectronFiddle.addEventListener('package-fiddle', () => {
@@ -42,93 +35,17 @@ export class Runner {
     window.ElectronFiddle.addEventListener('make-fiddle', () => {
       this.performForgeOperation(ForgeCommands.MAKE);
     });
+    window.ElectronFiddle.addEventListener(
+      'is-auto-bisecting',
+      (isAutoBisecting: boolean) => {
+        this.appState.isAutoBisecting = isAutoBisecting;
+      },
+    );
 
     window.ElectronFiddle.onGetStartFiddleOptions(this.getStartFiddleOptions);
-  }
-
-  /**
-   * Bisect the current fiddle across the specified versions.
-   *
-   * @param versions - versions to bisect
-   */
-  public autobisect(versions: Array<RunnableVersion>): Promise<RunResult> {
-    const { appState } = this;
-    appState.isAutoBisecting = true;
-    const done = () => (appState.isAutoBisecting = false);
-    return this.autobisectImpl(versions).finally(done);
-  }
-
-  /**
-   * Bisect the current fiddle across the specified versions.
-   *
-   * @param versions - versions to bisect
-   */
-  public async autobisectImpl(
-    versions: Array<RunnableVersion>,
-  ): Promise<RunResult> {
-    const prefix = `Runner: autobisect`;
-    const { appState } = this;
-
-    // precondition: can't bisect unless we have >= 2 versions
-    if (versions.length < 2) {
-      appState.pushOutput(`${prefix} needs at least two Electron versions`);
-      return RunResult.INVALID;
-    }
-
-    const results: Map<string, RunResult> = new Map();
-
-    const runVersion = async (version: string) => {
-      let result = results.get(version);
-      if (result === undefined) {
-        const pre = `${prefix} Electron ${version} -`;
-        appState.pushOutput(`${pre} setting version`);
-        await appState.setVersion(version);
-        appState.pushOutput(`${pre} starting test`);
-        result = await this.run();
-        results.set(version, result);
-        appState.pushOutput(`${pre} finished test ${resultString[result]}`);
-      }
-      return result;
-    };
-
-    const bisector = new Bisector(versions);
-    let targetVersion = bisector.getCurrentVersion();
-    let next;
-    while (true) {
-      const { version } = targetVersion;
-
-      const result = await runVersion(version);
-      if (result === RunResult.INVALID) {
-        return result;
-      }
-
-      next = bisector.continue(result === RunResult.SUCCESS);
-      if (Array.isArray(next)) {
-        break;
-      }
-
-      targetVersion = next;
-    }
-
-    const [good, bad] = next.map((v) => v.version);
-    const resultGood = await runVersion(good);
-    const resultBad = await runVersion(bad);
-    if (resultGood === resultBad) {
-      appState.pushOutput(
-        `${prefix} 'good' ${good} and 'bad' ${bad} both returned ${resultString[resultGood]}`,
-      );
-      return RunResult.INVALID;
-    }
-
-    const msgs = [
-      `${prefix} complete`,
-      `${prefix} ${resultString[RunResult.SUCCESS]} ${good}`,
-      `${prefix} ${resultString[RunResult.FAILURE]} ${bad}`,
-      `${prefix} Commits between versions:`,
-      `https://github.com/electron/electron/compare/v${good}...v${bad}`,
-    ];
-    msgs.forEach((msg) => appState.pushOutput(msg));
-    return RunResult.SUCCESS;
+    window.ElectronFiddle.onSetVersion((version: string) =>
+      this.appState.setVersion(version),
+    );
   }
 
   /**

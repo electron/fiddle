@@ -171,6 +171,7 @@ export type FiddleEvent =
   | 'fiddle-runner-output'
   | 'fiddle-modules-installed'
   | 'fiddle-stopped'
+  | 'is-auto-bisecting'
   | 'load-example'
   | 'load-gist'
   | 'make-fiddle'
