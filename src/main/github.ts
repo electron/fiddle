@@ -186,10 +186,13 @@ async function handleTokenCheckAuth(
     octokit_ = new Octokit({ auth: token });
     const response = await octokit_.users.getAuthenticated();
     return { login: response.data.login };
-  } catch {
-    // Token is expired or revoked — clean up
+  } catch (error: any) {
     octokit_ = null;
-    deleteToken();
+
+    if (error?.status === 401 || error?.status === 403) {
+      deleteToken();
+    }
+
     return { login: null };
   }
 }

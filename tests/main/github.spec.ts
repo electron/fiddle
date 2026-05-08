@@ -260,14 +260,32 @@ describe('github', () => {
         users: {
           getAuthenticated: vi
             .fn()
-            .mockRejectedValue(new Error('Bad credentials')),
+            .mockRejectedValue(
+              Object.assign(new Error('Bad credentials'), { status: 401 }),
+            ),
         },
       });
 
       const result = await handleTokenCheckAuth(MOCK_EVENT);
       expect(result).toEqual({ login: null });
-      // Should have deleted the invalid token
       expect(fs.unlinkSync).toHaveBeenCalled();
+    });
+
+    it('preserves the token for transient auth-check failures', async () => {
+      vi.mocked(fs.existsSync).mockReturnValue(true);
+      vi.mocked(fs.readFileSync).mockReturnValue(
+        Buffer.from(`encrypted:${VALID_GHP_TOKEN}`),
+      );
+      mockOctokitInstance({
+        users: {
+          getAuthenticated: vi.fn().mockRejectedValue(new Error('offline')),
+        },
+      });
+
+      const result = await handleTokenCheckAuth(MOCK_EVENT);
+
+      expect(result).toEqual({ login: null });
+      expect(fs.unlinkSync).not.toHaveBeenCalled();
     });
   });
 
