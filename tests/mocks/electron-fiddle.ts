@@ -10,6 +10,7 @@ export class ElectronFiddleMock {
   public createThemeFile = vi.fn();
   public deleteUserData = vi.fn();
   public downloadVersion = vi.fn();
+  public fetchExample = vi.fn();
   public fetchVersions = vi.fn();
   public getAvailableThemes = vi.fn();
   public getElectronTypes = vi.fn();

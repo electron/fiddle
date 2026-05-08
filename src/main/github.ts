@@ -1,14 +1,20 @@
 import * as fs from 'node:fs';
-import * as path from 'node:path';
+import { join as pathJoin } from 'node:path';
 
-import { Octokit } from '@octokit/rest';
+import { Octokit, RestEndpointMethodTypes } from '@octokit/rest';
 import { IpcMainInvokeEvent, app, safeStorage } from 'electron';
 
+import { getTemplate } from './content';
 import { ipcMainManager } from './ipc';
-import { GistRevision } from '../interfaces';
+import { EditorValues, GistRevision } from '../interfaces';
 import { IpcEvents } from '../ipc-events';
+import { isSupportedFile } from '../utils/editor-utils';
 
 // --- Input validation ---
+
+const ELECTRON_ORG = 'electron';
+
+const ELECTRON_REPO = 'electron';
 
 const TOKEN_PATTERN =
   /^(ghp_[a-zA-Z0-9]{36}|github_pat_[a-zA-Z0-9]{22}_[a-zA-Z0-9]{59})$/;
@@ -79,7 +85,7 @@ function areValidGistFiles(
 
 function getCredentialsPath(): string {
   const CREDENTIALS_FILE = '.github-credentials';
-  return path.join(app.getPath('userData'), CREDENTIALS_FILE);
+  return pathJoin(app.getPath('userData'), CREDENTIALS_FILE);
 }
 
 function saveToken(token: string): void {
@@ -365,9 +371,64 @@ async function handleGistListCommits(
   }));
 }
 
+async function handleFetchExample(
+  _event: IpcMainInvokeEvent,
+  params: unknown,
+): Promise<EditorValues> {
+  if (typeof params !== 'object' || params === null)
+    throw new Error('Invalid parameters.');
+  const { ref, path } = params as Record<string, unknown>;
+  if (typeof ref !== 'string') throw new Error('Invalid ref.');
+  if (typeof path !== 'string') throw new Error('Invalid path.');
+  return fetchExample(ref, path);
+}
+
+async function fetchExample(ref: string, path: string): Promise<EditorValues> {
+  if (!ref) throw new Error('Invalid ref.');
+  if (!path) throw new Error('Invalid path.');
+
+  // `repos.getContent` returns a union; the directory variant is the array form.
+  type RepoContentEntry = Extract<
+    RestEndpointMethodTypes['repos']['getContent']['response']['data'],
+    readonly unknown[]
+  >[number];
+
+  const owner = ELECTRON_ORG;
+  const repo = ELECTRON_REPO;
+  const octo = getOctokit();
+
+  // Fetch the example folder listing.
+  const folder = await octo.repos.getContent({ owner, path, ref, repo });
+  if (!Array.isArray(folder.data))
+    throw new Error(`${owner}:${repo}/${path}:${ref} is not a valid example`);
+  const files = (folder.data as RepoContentEntry[]).filter(
+    (file) =>
+      typeof file.download_url === 'string' &&
+      typeof file.name === 'string' &&
+      isSupportedFile(file.name),
+  );
+
+  // Get the base template for this version: 'v42.0.0' -> '42.0.0'.
+  const version = ref.replace(/^v/, '');
+  const values: EditorValues = { ...(await getTemplate(version)) };
+
+  // Download each supported file and overlay onto the template.
+  await Promise.all(
+    files.map(async (file) => {
+      const resp = await fetch(file.download_url as string);
+      if (!resp.ok)
+        throw new Error(`Failed to download ${file.name}: ${resp.status}`);
+      values[file.name as keyof EditorValues] = await resp.text();
+    }),
+  );
+
+  return values;
+}
+
 // --- Setup ---
 
 export function setupGitHub() {
+  ipcMainManager.handle(IpcEvents.GITHUB_FETCH_EXAMPLE, handleFetchExample);
   ipcMainManager.handle(IpcEvents.GITHUB_GIST_CREATE, handleGistCreate);
   ipcMainManager.handle(IpcEvents.GITHUB_GIST_DELETE, handleGistDelete);
   ipcMainManager.handle(
@@ -386,6 +447,7 @@ export function setupGitHub() {
 
 // Exported for testing
 export const testing = {
+  fetchExample,
   handleGistCreate,
   handleGistDelete,
   handleGistListCommits,

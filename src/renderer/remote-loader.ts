@@ -1,13 +1,11 @@
 import semver from 'semver';
 
-import { ELECTRON_ORG, ELECTRON_REPO } from './constants';
 import { AppState } from './state';
 import { disableDownload } from './utils/disable-download';
 import { isKnownFile, isSupportedFile } from './utils/editor-utils';
 import { getOctokit } from './utils/octokit';
 import { getReleaseChannel } from './versions';
 import {
-  EditorId,
   EditorValues,
   ElectronReleaseChannel,
   GenericDialogType,
@@ -62,14 +60,6 @@ export class RemoteLoader {
     path: string,
   ): Promise<boolean> {
     try {
-      const octo = await getOctokit(this.appState);
-      const folder = await octo.repos.getContent({
-        owner: ELECTRON_REPO,
-        repo: ELECTRON_ORG,
-        ref: tag,
-        path,
-      });
-
       const index = tag.search(/\d/);
       const version = tag.substring(index);
 
@@ -80,35 +70,7 @@ export class RemoteLoader {
       const ok = await this.setElectronVersion(version);
       if (!ok) return false;
 
-      const values = await window.ElectronFiddle.getTemplate(
-        this.appState.version,
-      );
-      if (!Array.isArray(folder.data)) {
-        throw new Error(
-          'The example Fiddle tried to launch is not a valid Electron example',
-        );
-      }
-
-      const loaders: Array<Promise<void>> = [];
-
-      for (const child of folder.data) {
-        if (!child.download_url) {
-          console.warn(`Could not find download_url for ${child.name}`);
-          continue;
-        }
-
-        if (isSupportedFile(child.name)) {
-          loaders.push(
-            fetch(child.download_url)
-              .then((r) => r.text())
-              .then((t) => {
-                values[child.name as EditorId] = t;
-              }),
-          );
-        }
-      }
-
-      await Promise.all(loaders);
+      const values = await window.ElectronFiddle.fetchExample(tag, path);
 
       return this.handleLoadingSuccess(values, '');
     } catch (error: any) {
