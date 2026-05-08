@@ -144,6 +144,10 @@ export async function cleanupDirectory(dir?: string): Promise<boolean> {
 }
 
 export async function deleteUserData(name: string) {
+  if (!isSafeDataName(name)) {
+    console.warn(`deleteUserData: rejected unsafe name: ${name}`);
+    return;
+  }
   const appData = path.join(app.getPath('appData'), name);
   console.log(`Cleanup: Deleting data dir ${appData}`);
   await cleanupDirectory(appData);
