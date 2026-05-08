@@ -20,7 +20,7 @@ export enum ForgeCommands {
 
 export class Runner {
   constructor(private readonly appState: AppState) {
-    this.run = this.run.bind(this);
+    this.runFiddle = this.runFiddle.bind(this);
     this.getStartFiddleOptions = this.getStartFiddleOptions.bind(this);
 
     window.ElectronFiddle.removeAllListeners('run-fiddle');
@@ -28,7 +28,7 @@ export class Runner {
     window.ElectronFiddle.removeAllListeners('make-fiddle');
     window.ElectronFiddle.removeAllListeners('is-auto-bisecting');
 
-    window.ElectronFiddle.addEventListener('run-fiddle', this.run);
+    window.ElectronFiddle.addEventListener('run-fiddle', this.runFiddle);
     window.ElectronFiddle.addEventListener('package-fiddle', () => {
       this.performForgeOperation(ForgeCommands.PACKAGE);
     });
@@ -46,69 +46,6 @@ export class Runner {
     window.ElectronFiddle.onSetVersion((version: string) =>
       this.appState.setVersion(version),
     );
-  }
-
-  /**
-   * Actually run the fiddle.
-   */
-  public async run(): Promise<RunResult> {
-    const { appState } = this;
-    const currentRunnable = appState.currentElectronVersion;
-    const { version, state } = currentRunnable;
-    const isValidBuild =
-      // Destructure currentRunnable so it's not a Proxy object, which can't be used
-      window.ElectronFiddle.getLocalVersionState({ ...currentRunnable }) ===
-      InstallState.installed;
-
-    // If the current active version is unavailable when we try to run
-    // the fiddle, show an error and fall back.
-    const { err, ver } = appState.isVersionUsable(version);
-    if (!ver) {
-      console.warn(`Running fiddle with version ('${version}') failed: ${err}`);
-      appState.showErrorDialog(err!);
-      const fallback = appState.findUsableVersion();
-      if (fallback) await appState.setVersion(fallback.version);
-      return RunResult.INVALID;
-    }
-
-    if (
-      ver.source !== VersionSource.local &&
-      semver.lt(ver.version, '28.0.0') &&
-      !ver.version.startsWith('28.0.0-nightly')
-    ) {
-      const entryPoint = appState.editorMosaic.mainEntryPointFile();
-
-      if (entryPoint === MAIN_MJS) {
-        appState.showErrorDialog(
-          'ESM main entry points are only supported starting in Electron 28',
-        );
-        return RunResult.INVALID;
-      }
-    }
-
-    if (appState.isClearingConsoleOnRun) {
-      appState.clearConsole();
-    }
-    appState.isConsoleShowing = true;
-
-    const isReady =
-      state === InstallState.installed ||
-      state === InstallState.downloaded ||
-      isValidBuild;
-
-    if (!isReady) {
-      console.warn(`Runner: Binary ${version} not ready`);
-
-      let message = `Could not start fiddle: `;
-      message += `Electron ${version} not downloaded yet. `;
-      message += `Please wait for it to finish downloading `;
-      message += `before running the fiddle.`;
-
-      appState.pushOutput(message, { isNotPre: true });
-      return RunResult.INVALID;
-    }
-
-    return this.runFiddle();
   }
 
   /**
@@ -202,7 +139,38 @@ export class Runner {
    * simply triggers the run and waits for the `fiddle-stopped` event.
    */
   private async runFiddle(): Promise<RunResult> {
-    const { pushOutput, flushOutput } = this.appState;
+    const { clearConsole, isClearingConsoleOnRun, pushOutput, flushOutput } =
+      this.appState;
+    const currentRunnable = this.appState.currentElectronVersion;
+    const { version, state } = currentRunnable;
+
+    if (isClearingConsoleOnRun) {
+      clearConsole();
+    }
+    this.appState.isConsoleShowing = true;
+
+    const isValidBuild =
+      // Destructure currentRunnable so it's not a Proxy object, which can't be used
+      window.ElectronFiddle.getLocalVersionState({ ...currentRunnable }) ===
+      InstallState.installed;
+
+    const isReady =
+      state === InstallState.installed ||
+      state === InstallState.downloaded ||
+      isValidBuild;
+
+    // TODO(dsanders11) - Should this be moved to main process?
+    if (!isReady) {
+      console.warn(`Runner: Binary ${version} not ready`);
+
+      let message = `Could not start fiddle: `;
+      message += `Electron ${version} not downloaded yet. `;
+      message += `Please wait for it to finish downloading `;
+      message += `before running the fiddle.`;
+
+      pushOutput(message, { isNotPre: true });
+      return RunResult.INVALID;
+    }
 
     const cleanup = () => {
       flushOutput();
@@ -259,6 +227,34 @@ export class Runner {
    */
   public async getStartFiddleOptions(): Promise<StartFiddleOptions> {
     const { appState } = this;
+    const currentRunnable = appState.currentElectronVersion;
+    const { version } = currentRunnable;
+
+    // If the current active version is unavailable when we try to run
+    // the fiddle, show an error and fall back.
+    const { err, ver } = appState.isVersionUsable(version);
+    if (!ver) {
+      console.warn(`Running fiddle with version ('${version}') failed: ${err}`);
+      appState.showErrorDialog(err!);
+      const fallback = appState.findUsableVersion();
+      if (fallback) await appState.setVersion(fallback.version);
+      throw new Error(RunResult.INVALID);
+    }
+
+    if (
+      ver.source !== VersionSource.local &&
+      semver.lt(ver.version, '28.0.0') &&
+      !ver.version.startsWith('28.0.0-nightly')
+    ) {
+      const entryPoint = appState.editorMosaic.mainEntryPointFile();
+
+      if (entryPoint === MAIN_MJS) {
+        appState.showErrorDialog(
+          'ESM main entry points are only supported starting in Electron 28',
+        );
+        throw new Error(RunResult.INVALID);
+      }
+    }
 
     const modules = Array.from(appState.modules.entries());
     if (modules.length > 0) {
