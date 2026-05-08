@@ -56,7 +56,7 @@ export const Runner = observer(
           } else if (isRunning) {
             props.active = true;
             props.text = 'Stop';
-            props.onClick = window.app.runner.stop;
+            props.onClick = () => window.ElectronFiddle.stopFiddle();
             props.icon = 'stop';
           } else {
             props.text = 'Run';

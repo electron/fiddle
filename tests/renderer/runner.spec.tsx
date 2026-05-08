@@ -219,40 +219,6 @@ describe('Runner component', () => {
     });
   });
 
-  describe('stop()', () => {
-    it('stops a running session', async () => {
-      vi.mocked(window.ElectronFiddle.stopFiddle).mockImplementationOnce(() => {
-        emitEvent('fiddle-stopped', RunResult.FAILURE);
-      });
-
-      // wait for run() to get running
-      const runPromise = instance.run();
-      await vi.waitUntil(() => store.isRunning);
-      expect(store.isRunning).toBe(true);
-
-      // call stop and wait for run() to resolve
-      instance.stop();
-      const runResult = await runPromise;
-
-      expect(runResult).toBe(RunResult.FAILURE);
-      expect(store.isRunning).toBe(false);
-    });
-
-    it('fails if stopping fiddle fails', async () => {
-      vi.mocked(window.ElectronFiddle.stopFiddle).mockImplementationOnce(
-        () => {},
-      );
-
-      // wait for run() to get running
-      instance.run();
-      await vi.waitUntil(() => store.isRunning);
-      expect(store.isRunning).toBe(true);
-
-      instance.stop();
-      expect(store.isRunning).toBe(true);
-    });
-  });
-
   describe('autobisect()', () => {
     it('returns success if bisection succeeds', async () => {
       // make sure good, bad exist in our mock

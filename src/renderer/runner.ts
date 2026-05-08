@@ -29,7 +29,6 @@ const resultString: Record<RunResult, string> = Object.freeze({
 export class Runner {
   constructor(private readonly appState: AppState) {
     this.run = this.run.bind(this);
-    this.stop = this.stop.bind(this);
     this.getStartFiddleOptions = this.getStartFiddleOptions.bind(this);
 
     window.ElectronFiddle.removeAllListeners('run-fiddle');
@@ -193,13 +192,6 @@ export class Runner {
     }
 
     return this.runFiddle();
-  }
-
-  /**
-   * Stop a currently running Electron fiddle.
-   */
-  public stop(): void {
-    window.ElectronFiddle.stopFiddle();
   }
 
   /**
