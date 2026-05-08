@@ -20,5 +20,4 @@ export class AppMock {
   public runner = new RunnerMock();
   public setup = vi.fn();
   public state = new StateMock();
-  public taskRunner = {};
 }

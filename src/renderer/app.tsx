@@ -6,7 +6,6 @@ import { FileManager } from './file-manager';
 import { RemoteLoader } from './remote-loader';
 import { Runner } from './runner';
 import { AppState } from './state';
-import { TaskRunner } from './task-runner';
 import { activateTheme, getCurrentTheme, getTheme } from './themes';
 import { getPackageJson } from './utils/get-package';
 import {
@@ -34,7 +33,6 @@ export class App {
   public fileManager: FileManager;
   public remoteLoader: RemoteLoader;
   public runner: Runner;
-  public readonly taskRunner: TaskRunner;
   public readonly electronTypes: ElectronTypes;
 
   constructor() {
@@ -45,8 +43,6 @@ export class App {
     this.remoteLoader = new RemoteLoader(this.state);
     this.runner = new Runner(this.state);
     this.getEditorValues = this.getEditorValues.bind(this);
-
-    this.taskRunner = new TaskRunner(this);
 
     this.electronTypes = new ElectronTypes(window.monaco);
   }
