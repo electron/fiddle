@@ -22,7 +22,6 @@ import {
 } from '../../interfaces';
 import { AppState } from '../state';
 import { ensureRequiredFiles } from '../utils/editor-utils';
-import { getOctokit } from '../utils/octokit';
 
 interface GistActionButtonProps {
   appState: AppState;
@@ -110,7 +109,6 @@ export const GistActionButton = observer(
     private async publishGist(description: string): Promise<boolean> {
       const { appState } = this.props;
 
-      const octo = await getOctokit(appState);
       const { gitHubPublishAsPublic } = appState;
       const options = { includeDependencies: true, includeElectron: true };
       const defaultGistValues = await window.ElectronFiddle.getTemplate(
@@ -126,14 +124,14 @@ export const GistActionButton = observer(
           ? this.gistFilesList(defaultGistValues)
           : this.gistFilesList(currentEditorValues);
 
-        const gist = await octo.gists.create({
-          public: !!gitHubPublishAsPublic,
+        const gist = await window.ElectronFiddle.gistCreate({
+          isPublic: !!gitHubPublishAsPublic,
           description,
           files: gistFilesList,
         });
 
-        appState.gistId = gist.data.id;
-        appState.activeGistRevision = gist.data.history?.[0]?.version;
+        appState.gistId = gist.id;
+        appState.activeGistRevision = gist.revision;
         appState.localPath = undefined;
 
         if (appState.isPublishingGistAsRevision) {
@@ -146,8 +144,7 @@ export const GistActionButton = observer(
           action: {
             text: 'Copy link',
             icon: 'clipboard',
-            onClick: () =>
-              navigator.clipboard.writeText(gist.data.html_url ?? ''),
+            onClick: () => navigator.clipboard.writeText(gist.url),
           },
         });
 

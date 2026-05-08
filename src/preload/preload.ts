@@ -7,6 +7,7 @@ import {
   FiddleEvent,
   FileTransformOperation,
   Files,
+  GistCreateParams,
   GistLoadParams,
   GistUpdateParams,
   IPackageManager,
@@ -119,6 +120,8 @@ export async function setupFiddleGlobal() {
       ipcRenderer.invoke(IpcEvents.GITHUB_GIST_UPDATE, params),
     gistDelete: (id: string) =>
       ipcRenderer.invoke(IpcEvents.GITHUB_GIST_DELETE, id),
+    gistCreate: (params: GistCreateParams) =>
+      ipcRenderer.invoke(IpcEvents.GITHUB_GIST_CREATE, params),
     getElectronTypes(ver: RunnableVersion) {
       return ipcRenderer.invoke(IpcEvents.GET_ELECTRON_TYPES, ver);
     },
