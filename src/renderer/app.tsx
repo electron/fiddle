@@ -165,11 +165,13 @@ export class App {
     // Wait for auth restore before signalling ready so that queued IPC
     // messages (e.g. deep-linked private gist loads) use the authenticated
     // Octokit instance.
-    window.ElectronFiddle.gitHubCheckAuth().then(({ login }) => {
-      this.state.gitHubLogin = login;
-    }).finally(() => {
-      window.ElectronFiddle.sendReady();
-    });
+    window.ElectronFiddle.gitHubCheckAuth()
+      .then(({ login }) => {
+        this.state.gitHubLogin = login;
+      })
+      .finally(() => {
+        window.ElectronFiddle.sendReady();
+      });
 
     window.ElectronFiddle.addEventListener('set-show-me-template', () => {
       window.ElectronFiddle.setShowMeTemplate(this.state.templateName);
