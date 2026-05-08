@@ -23,6 +23,7 @@ import {
   PACKAGE_NAME,
   ProgressObject,
   RunResult,
+  StartFiddleOptions,
 } from '../interfaces';
 import { IpcEvents } from '../ipc-events';
 import { maybePlural } from '../utils/plural-maybe';
@@ -111,7 +112,14 @@ export async function installModules(
 export async function startFiddle(
   webContents: WebContents,
 ): Promise<RunResult> {
-  const options = await getStartFiddleOptions(webContents);
+  let options: StartFiddleOptions;
+
+  try {
+    options = await getStartFiddleOptions(webContents);
+  } catch {
+    return RunResult.INVALID;
+  }
+
   const {
     enableElectronLogging,
     env: rendererEnv,

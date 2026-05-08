@@ -192,8 +192,14 @@ export async function setupFiddleGlobal() {
     onGetStartFiddleOptions(callback: () => Promise<StartFiddleOptions>) {
       ipcRenderer.removeAllListeners(IpcEvents.GET_START_FIDDLE_OPTIONS);
       ipcRenderer.on(IpcEvents.GET_START_FIDDLE_OPTIONS, async (e) => {
-        const options = await callback();
-        e.ports[0].postMessage(options);
+        try {
+          const options = await callback();
+          e.ports[0].postMessage({ result: options });
+        } catch (error) {
+          const message =
+            error instanceof Error ? error.message : String(error);
+          e.ports[0].postMessage({ error: message });
+        }
       });
     },
     onSetVersion(callback: (version: string) => Promise<void>) {
