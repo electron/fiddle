@@ -251,6 +251,12 @@ export interface GistWriteResult {
   revision?: string;
 }
 
+export interface GitHubSignInResult {
+  success: boolean;
+  login?: string;
+  error?: string;
+}
+
 export enum GlobalSetting {
   acceleratorsToBlock = 'acceleratorsToBlock',
   channelsToShow = 'channelsToShow',

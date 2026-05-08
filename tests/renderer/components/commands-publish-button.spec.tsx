@@ -1,4 +1,3 @@
-import { Octokit } from '@octokit/rest';
 import { act, waitFor } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
@@ -6,59 +5,24 @@ import {
   EditorValues,
   GistActionState,
   GistActionType,
+  GistCreateParams,
+  GistFile,
   MAIN_JS,
 } from '../../../src/interfaces';
 import { App } from '../../../src/renderer/app';
 import { GistActionButton } from '../../../src/renderer/components/commands-action-button';
 import { AppState } from '../../../src/renderer/state';
-import { getOctokit } from '../../../src/renderer/utils/octokit';
 import { createEditorValues } from '../../mocks/mocks';
 import { renderClassComponentWithInstanceRef } from '../utils/renderClassComponentWithInstanceRef';
 
-vi.mock('../../../src/renderer/utils/octokit');
-
-class OctokitMock {
-  private static nextId = 1;
-  private static nextVersion = 1;
-
-  static resetCounters() {
-    OctokitMock.nextId = 1;
-    OctokitMock.nextVersion = 1;
-  }
-
-  public authenticate = vi.fn();
-  public gists = {
-    create: vi.fn().mockImplementation(() => ({
-      data: {
-        id: OctokitMock.nextId++,
-        history: [{ version: `created-sha-${OctokitMock.nextVersion++}` }],
-      },
-    })),
-    delete: vi.fn(),
-    update: vi.fn().mockImplementation(() => ({
-      data: {
-        history: [{ version: `updated-sha-${OctokitMock.nextVersion++}` }],
-      },
-    })),
-    get: vi.fn(),
-  };
-}
-
-type GistFile = { filename: string; content: string };
 type GistFiles = { [id: string]: GistFile };
-type GistCreateOpts = {
-  description: string;
-  files: GistFiles;
-  public: boolean;
-};
 
 describe('Action button component', () => {
   const description = 'Electron Fiddle Gist';
   const errorMessage = '💀';
   let app: App;
-  let mocktokit: OctokitMock;
   let state: AppState;
-  let expectedGistOpts: GistCreateOpts;
+  let expectedGistOpts: GistCreateParams;
 
   function getGistFiles(values: EditorValues): GistFiles {
     return Object.fromEntries(
@@ -73,19 +37,24 @@ describe('Action button component', () => {
     ({ app } = window);
     ({ state } = app);
 
-    // reset static counters between runs
-    OctokitMock.resetCounters();
+    // default IPC mock for gist create so publishGist() can run
+    vi.mocked(window.ElectronFiddle.gistCreate).mockResolvedValue({
+      id: 'created-gist-id',
+      url: 'https://gist.github.com/created-gist-id',
+      revision: 'created-sha',
+    });
 
-    // have the octokit getter use our mock
-    mocktokit = new OctokitMock();
-    vi.mocked(getOctokit).mockImplementation(
-      async () => mocktokit as unknown as Octokit,
-    );
+    // default IPC mock for gist updates so handleUpdate() can run safely
+    vi.mocked(window.ElectronFiddle.gistUpdate).mockResolvedValue({
+      id: 'gist-id',
+      url: 'https://gist.github.com/gist-id',
+      revision: 'updated-sha',
+    });
 
     // build ExpectedGistCreateOpts
     const editorValues = createEditorValues();
     const files = getGistFiles(editorValues);
-    expectedGistOpts = { description, files, public: true } as const;
+    expectedGistOpts = { description, files, isPublic: true };
 
     vi.mocked(window.ElectronFiddle.getTemplate).mockResolvedValue({
       [MAIN_JS]: '// content',
@@ -175,7 +144,9 @@ describe('Action button component', () => {
     it('publishes a gist', async () => {
       state.showInputDialog = vi.fn().mockResolvedValueOnce(description);
       await instance.performGistAction();
-      expect(mocktokit.gists.create).toHaveBeenCalledWith(expectedGistOpts);
+      expect(window.ElectronFiddle.gistCreate).toHaveBeenCalledWith(
+        expectedGistOpts,
+      );
     });
 
     it('marks the Fiddle as saved', async () => {
@@ -184,7 +155,9 @@ describe('Action button component', () => {
       ]);
       state.showInputDialog = vi.fn().mockResolvedValueOnce(description);
       await instance.performGistAction();
-      expect(mocktokit.gists.create).toHaveBeenCalledWith(expectedGistOpts);
+      expect(window.ElectronFiddle.gistCreate).toHaveBeenCalledWith(
+        expectedGistOpts,
+      );
       expect(state.editorMosaic.isEdited).toBe(false);
     });
 
@@ -192,7 +165,7 @@ describe('Action button component', () => {
       const description = 'some non-default description';
       state.showInputDialog = vi.fn().mockResolvedValueOnce(description);
       await instance.performGistAction();
-      expect(mocktokit.gists.create).toHaveBeenCalledWith({
+      expect(window.ElectronFiddle.gistCreate).toHaveBeenCalledWith({
         ...expectedGistOpts,
         description,
       });
@@ -201,7 +174,7 @@ describe('Action button component', () => {
     it('publishes only if the user confirms', async () => {
       state.showInputDialog = vi.fn().mockResolvedValueOnce(undefined);
       await instance.performGistAction();
-      expect(mocktokit.gists.create).not.toHaveBeenCalled();
+      expect(window.ElectronFiddle.gistCreate).not.toHaveBeenCalled();
     });
 
     describe('empty files', () => {
@@ -214,7 +187,7 @@ describe('Action button component', () => {
 
         const files = getGistFiles(values);
         const expected = { ...expectedGistOpts, files };
-        expect(mocktokit.gists.create).toHaveBeenCalledWith(expected);
+        expect(window.ElectronFiddle.gistCreate).toHaveBeenCalledWith(expected);
       });
 
       it('are omitted if they are not required files', async () => {
@@ -230,7 +203,7 @@ describe('Action button component', () => {
 
         const files = getGistFiles(required);
         const expected = { ...expectedGistOpts, files };
-        expect(mocktokit.gists.create).toHaveBeenCalledWith(expected);
+        expect(window.ElectronFiddle.gistCreate).toHaveBeenCalledWith(expected);
       });
 
       it('calls update() if isPublishingGistAsRevision is true', async () => {
@@ -245,9 +218,9 @@ describe('Action button component', () => {
     });
 
     it('handles an error in Gist publishing', async () => {
-      mocktokit.gists.create.mockImplementation(() => {
-        throw new Error(errorMessage);
-      });
+      vi.mocked(window.ElectronFiddle.gistCreate).mockRejectedValueOnce(
+        new Error(errorMessage),
+      );
 
       state.showInputDialog = vi.fn().mockResolvedValueOnce(description);
 
@@ -261,10 +234,9 @@ describe('Action button component', () => {
       state.showInputDialog = vi.fn().mockResolvedValueOnce(description);
       instance.setSecret();
       await instance.performGistAction();
-      const { create } = mocktokit.gists;
-      expect(create).toHaveBeenCalledWith({
+      expect(window.ElectronFiddle.gistCreate).toHaveBeenCalledWith({
         ...expectedGistOpts,
-        public: false,
+        isPublic: false,
       });
     });
 
@@ -272,21 +244,19 @@ describe('Action button component', () => {
       state.showInputDialog = vi.fn().mockResolvedValueOnce(description);
       instance.setPublic();
       await instance.performGistAction();
-      const { create } = mocktokit.gists;
-      expect(create).toHaveBeenCalledWith({
+      expect(window.ElectronFiddle.gistCreate).toHaveBeenCalledWith({
         ...expectedGistOpts,
-        public: true,
+        isPublic: true,
       });
     });
 
     it('sets activeGistRevision to the new revision SHA after publishing', async () => {
       const revisionSha = 'new-publish-revision-sha';
-      mocktokit.gists.create.mockImplementationOnce(() => ({
-        data: {
-          id: 'new-gist-id',
-          history: [{ version: revisionSha }],
-        },
-      }));
+      vi.mocked(window.ElectronFiddle.gistCreate).mockResolvedValueOnce({
+        id: 'new-gist-id',
+        url: 'https://gist.github.com/new-gist-id',
+        revision: revisionSha,
+      });
 
       state.showInputDialog = vi.fn().mockResolvedValueOnce(description);
       await instance.performGistAction();
@@ -305,29 +275,29 @@ describe('Action button component', () => {
       ({ instance } = createActionButton());
       act(() => instance.setState({ actionType: GistActionType.update }));
 
-      mocktokit.gists.get.mockImplementation(() => {
-        return {
-          data: expectedGistOpts,
-        };
+      vi.mocked(window.ElectronFiddle.gistUpdate).mockResolvedValue({
+        id: gistId,
+        url: `https://gist.github.com/${gistId}`,
+        revision: 'updated-sha',
       });
     });
 
-    it('attempts to update an existing Gist', async () => {
+    it('attempts to update an existing Gist via IPC', async () => {
       await instance.performGistAction();
 
-      expect(mocktokit.gists.update).toHaveBeenCalledWith({
-        gist_id: gistId,
+      expect(window.ElectronFiddle.gistUpdate).toHaveBeenCalledWith({
+        id: gistId,
         files: expectedGistOpts.files,
       });
     });
 
     it('sets activeGistRevision to the new revision SHA after updating', async () => {
       const revisionSha = 'new-update-revision-sha';
-      mocktokit.gists.update.mockImplementationOnce(() => ({
-        data: {
-          history: [{ version: revisionSha }],
-        },
-      }));
+      vi.mocked(window.ElectronFiddle.gistUpdate).mockResolvedValueOnce({
+        id: gistId,
+        url: `https://gist.github.com/${gistId}`,
+        revision: revisionSha,
+      });
 
       await instance.performGistAction();
 
@@ -335,9 +305,9 @@ describe('Action button component', () => {
     });
 
     it('notifies the user if updating fails', async () => {
-      mocktokit.gists.update.mockImplementation(() => {
-        throw new Error(errorMessage);
-      });
+      vi.mocked(window.ElectronFiddle.gistUpdate).mockRejectedValueOnce(
+        new Error(errorMessage),
+      );
 
       await instance.performGistAction();
 
@@ -362,15 +332,15 @@ describe('Action button component', () => {
       act(() => instance.setState({ actionType: GistActionType.delete }));
     });
 
-    it('attempts to delete an existing Gist', async () => {
+    it('attempts to delete an existing Gist via IPC', async () => {
       await instance.performGistAction();
-      expect(mocktokit.gists.delete).toHaveBeenCalledWith({ gist_id: gistId });
+      expect(window.ElectronFiddle.gistDelete).toHaveBeenCalledWith(gistId);
     });
 
     it('notifies the user if deleting fails', async () => {
-      mocktokit.gists.delete.mockImplementation(() => {
-        throw new Error(errorMessage);
-      });
+      vi.mocked(window.ElectronFiddle.gistDelete).mockRejectedValueOnce(
+        new Error(errorMessage),
+      );
 
       await instance.performGistAction();
 

@@ -13,6 +13,7 @@ import {
   GistRevision,
   GistUpdateParams,
   GistWriteResult,
+  GitHubSignInResult,
   IPackageManager,
   InstallState,
   InstallStateEvent,
@@ -118,6 +119,7 @@ declare global {
       gistListCommits(gistId: string): Promise<GistRevision[]>;
       gistLoad(params: GistLoadParams): Promise<GistLoadResult>;
       gistUpdate(params: GistUpdateParams): Promise<GistWriteResult>;
+      gitHubSignIn(token: string): Promise<GitHubSignInResult>;
       getAvailableThemes(): Promise<Array<LoadedFiddleTheme>>;
       getElectronTypes(ver: RunnableVersion): Promise<string | undefined>;
       getIsPackageManagerInstalled(

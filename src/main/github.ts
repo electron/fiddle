@@ -7,7 +7,7 @@ import { IpcMainInvokeEvent, app, safeStorage } from 'electron';
 import { getTemplate } from './content';
 import { ipcMainManager } from './ipc';
 import { GIST_MAX_FILE_COUNT, GIST_MAX_FILE_SIZE } from '../constants';
-import { EditorValues, GistFile, GistLoadResult, GistRevision, GistWriteResult } from '../interfaces';
+import { EditorValues, GistFile, GistLoadResult, GistRevision, GistWriteResult, GitHubSignInResult } from '../interfaces';
 import { IpcEvents } from '../ipc-events';
 import { isSupportedFile } from '../utils/editor-utils';
 
@@ -118,16 +118,10 @@ function getOctokit(): Octokit {
 
 // --- IPC handlers ---
 
-interface SignInResult {
-  success: boolean;
-  login?: string;
-  error?: string;
-}
-
 async function handleTokenSignIn(
   _event: IpcMainInvokeEvent,
   token: unknown,
-): Promise<SignInResult> {
+): Promise<GitHubSignInResult> {
   if (!isValidToken(token))
     return { success: false, error: 'Invalid token format.' };
 

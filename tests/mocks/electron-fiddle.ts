@@ -11,8 +11,12 @@ export class ElectronFiddleMock {
   public downloadVersion = vi.fn();
   public fetchExample = vi.fn();
   public fetchVersions = vi.fn();
+  public gistCreate = vi.fn();
+  public gistDelete = vi.fn();
   public gistListCommits = vi.fn();
   public gistLoad = vi.fn();
+  public gistUpdate = vi.fn();
+  public gitHubSignIn = vi.fn();
   public getAvailableThemes = vi.fn();
   public getElectronTypes = vi.fn();
   public getIsPackageManagerInstalled = vi.fn();
