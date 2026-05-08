@@ -6,7 +6,7 @@ import {
   shell,
 } from 'electron';
 
-import { startFiddle } from './fiddle-core';
+import { isRunFiddleEnabled, startFiddle } from './fiddle-core';
 import {
   saveFiddle,
   saveFiddleAs,
@@ -316,8 +316,10 @@ function getQuitItems(): Array<MenuItemConstructorOptions> {
 function getTasksMenu(): MenuItemConstructorOptions {
   const tasksMenu: Array<MenuItemConstructorOptions> = [
     {
+      id: 'run-fiddle',
       label: 'Run Fiddle...',
       accelerator: 'F5',
+      enabled: isRunFiddleEnabled(),
       click: (_, focusedWindow) => {
         if (focusedWindow)
           startFiddle((focusedWindow as BrowserWindow).webContents).catch(

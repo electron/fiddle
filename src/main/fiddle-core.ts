@@ -6,7 +6,9 @@ import {
   BrowserWindow,
   IpcMainEvent,
   IpcMainInvokeEvent,
+  Menu,
   WebContents,
+  app,
 } from 'electron';
 
 import { ELECTRON_DOWNLOAD_PATH, ELECTRON_INSTALL_PATH } from './constants';
@@ -50,8 +52,33 @@ const BLOCKED_ENV_KEYS = new Set([
 // Keep track of which fiddle process belongs to which WebContents
 const fiddleProcesses = new WeakMap<WebContents, ChildProcess>();
 
+// Keep track of active runs to prevent double runs
+const activeRuns = new WeakMap<WebContents, Promise<RunResult>>();
+
 const downloadingVersions = new Map<string, Promise<any>>();
 const removingVersions = new Map<string, Promise<void>>();
+
+/**
+ * Whether the focused window's "Run Fiddle..." menu item should be
+ * enabled. False if the focused window already has a fiddle running.
+ */
+export function isRunFiddleEnabled(): boolean {
+  const focused = BrowserWindow.getFocusedWindow();
+  return !focused || !activeRuns.has(focused.webContents);
+}
+
+/**
+ * Update the enabled state of the "Run Fiddle..." menu item to reflect
+ * whether the focused window already has a fiddle running. Used to
+ * refresh the existing menu item between full menu rebuilds.
+ */
+export function updateRunFiddleMenuItem(): void {
+  const menu = Menu.getApplicationMenu();
+  const item = menu?.getMenuItemById('run-fiddle');
+  if (!item) return;
+
+  item.enabled = isRunFiddleEnabled();
+}
 
 /**
  * Installs the specified modules
@@ -112,6 +139,21 @@ export async function installModules(
 export async function startFiddle(
   webContents: WebContents,
 ): Promise<RunResult> {
+  // Ignore concurrent run attempts from the same WebContents.
+  if (!activeRuns.has(webContents)) {
+    activeRuns.set(webContents, startFiddleImpl(webContents));
+    updateRunFiddleMenuItem();
+  }
+
+  try {
+    return await activeRuns.get(webContents)!;
+  } finally {
+    activeRuns.delete(webContents);
+    updateRunFiddleMenuItem();
+  }
+}
+
+async function startFiddleImpl(webContents: WebContents): Promise<RunResult> {
   let options: StartFiddleOptions;
 
   try {
@@ -300,6 +342,10 @@ export async function setupFiddleCore(versions: ElectronVersions) {
   });
 
   runner = await Runner.create({ installer, versions });
+
+  // Refresh the "Run Fiddle..." menu item when window focus changes so it
+  // reflects the focused window's run state.
+  app.on('browser-window-focus', updateRunFiddleMenuItem);
 
   ipcMainManager.on(
     IpcEvents.GET_VERSION_STATE,
