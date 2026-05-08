@@ -69,11 +69,11 @@ export function createMainWindow(): Electron.BrowserWindow {
   console.log(`Creating main window`);
   let browserWindow: BrowserWindow | null;
   browserWindow = new BrowserWindow(getMainWindowOptions());
-  browserWindow.loadURL(
-    !!process.env.VITEST
-      ? path.join(process.cwd(), './.webpack/renderer/main_window/index.html')
-      : MAIN_WINDOW_WEBPACK_ENTRY,
-  );
+  if (process.env.VITEST) {
+    browserWindow.loadFile('.webpack/renderer/main_window/index.html');
+  } else {
+    browserWindow.loadURL(MAIN_WINDOW_WEBPACK_ENTRY);
+  }
 
   browserWindow.webContents.once('dom-ready', () => {
     if (browserWindow) {

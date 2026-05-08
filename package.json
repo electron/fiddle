@@ -70,7 +70,6 @@
     "semver": "^7.3.4",
     "sfw": "^2.0.4",
     "shell-env": "^4.0.3",
-    "tmp": "0.2.5",
     "update-electron-app": "^3.0.0"
   },
   "devDependencies": {
@@ -99,7 +98,6 @@
     "@types/react-dom": "^16.9.11",
     "@types/react-window": "^1.8.8",
     "@types/semver": "^7.3.4",
-    "@types/tmp": "0.2.0",
     "@typescript-eslint/eslint-plugin": "^6.0.0",
     "@typescript-eslint/parser": "^6.0.0",
     "@vercel/webpack-asset-relocator-loader": "^1.7.2",
