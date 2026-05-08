@@ -1,7 +1,6 @@
 import type * as MonacoType from 'monaco-editor';
 
 import {
-  BisectRequest,
   BlockableAccelerator,
   DownloadVersionParams,
   EditorValues,
@@ -13,17 +12,14 @@ import {
   InstallStateEvent,
   MessageOptions,
   NodeTypes,
-  OutputEntry,
   PMOperationOptions,
   PackageJsonOptions,
   ProgressObject,
   ReleaseInfo,
-  RunResult,
   RunnableVersion,
   SelectedLocalVersion,
   SemVer,
   StartFiddleParams,
-  TestRequest,
   Version,
 } from './interfaces';
 import { App } from './renderer/app';
@@ -37,11 +33,6 @@ declare global {
       addEventListener(
         type: FiddleEvent,
         listener: () => void,
-        options?: { signal: AbortSignal },
-      ): void;
-      addEventListener(
-        type: 'bisect-task',
-        listener: (request: BisectRequest) => void,
         options?: { signal: AbortSignal },
       ): void;
       addEventListener(
@@ -77,11 +68,6 @@ declare global {
       addEventListener(
         type: 'saved-local-fiddle',
         listener: (filePath: string) => void,
-      ): void;
-      addEventListener(
-        type: 'test-task',
-        listener: (request: TestRequest) => void,
-        options?: { signal: AbortSignal },
       ): void;
       addEventListener(
         type: 'toggle-monaco-option',
@@ -157,7 +143,6 @@ declare global {
         command: string,
       ): Promise<string>;
       platform: string;
-      pushOutputEntry(entry: OutputEntry): void;
       readThemeFile(name: string): Promise<LoadedFiddleTheme | null>;
       reloadWindows(): void;
       removeAllListeners(type: FiddleEvent): void;
@@ -171,7 +156,6 @@ declare global {
       showWindow(): void;
       startFiddle(params: StartFiddleParams): Promise<void>;
       stopFiddle(): void;
-      taskDone(result: RunResult): void;
       themePath: string;
       uncacheTypes(ver: RunnableVersion): Promise<void>;
       unwatchElectronTypes(): Promise<void>;

@@ -37,7 +37,6 @@ export class ElectronFiddleMock {
   public openThemeFolder = vi.fn();
   public packageRun = vi.fn();
   public platform = process.platform;
-  public pushOutputEntry = vi.fn();
   public reloadWindows = vi.fn();
   public removeAllListeners = vi.fn();
   public removeVersion = vi.fn();
@@ -50,7 +49,6 @@ export class ElectronFiddleMock {
   public showWindow = vi.fn();
   public startFiddle = vi.fn();
   public stopFiddle = vi.fn();
-  public taskDone = vi.fn();
   public readThemeFile = vi.fn();
   public themePath = '~/.electron-fiddle/themes';
   public uncacheTypes = vi.fn();

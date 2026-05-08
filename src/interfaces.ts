@@ -89,16 +89,6 @@ export interface SetupRequest {
   useObsolete?: boolean;
 }
 
-export interface BisectRequest {
-  setup: SetupRequest;
-  goodVersion: string;
-  badVersion: string;
-}
-
-export interface TestRequest {
-  setup: SetupRequest;
-}
-
 export interface OutputEntry {
   text: string;
   timeString: string;
@@ -175,7 +165,6 @@ export interface SelectedLocalVersion {
 
 export type FiddleEvent =
   | 'before-quit'
-  | 'bisect-task'
   | 'clear-console'
   | 'electron-types-changed'
   | 'execute-monaco-command'
@@ -197,7 +186,6 @@ export type FiddleEvent =
   | 'select-all-in-editor'
   | 'set-show-me-template'
   | 'show-welcome-tour'
-  | 'test-task'
   | 'toggle-bisect'
   | 'toggle-monaco-option'
   | 'undo-in-editor'

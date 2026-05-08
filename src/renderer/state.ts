@@ -1094,7 +1094,6 @@ export class AppState {
       text: strData.trim(),
       timeString: this.timeFmt.format(new Date()),
     };
-    window.ElectronFiddle.pushOutputEntry(entry);
     this.output.push(entry);
   }
 
