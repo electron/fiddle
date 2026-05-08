@@ -57,5 +57,4 @@ export class ElectronFiddleMock {
   public themePath = '~/.electron-fiddle/themes';
   public uncacheTypes = vi.fn();
   public unwatchElectronTypes = vi.fn();
-  public gistLoad = vi.fn();
 }
