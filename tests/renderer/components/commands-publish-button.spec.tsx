@@ -115,7 +115,7 @@ describe('Action button component', () => {
 
     // If authed, continue to performGistAction
     vi.mocked(state.toggleAuthDialog).mockImplementationOnce(
-      () => (state.gitHubToken = 'github-token'),
+      () => (state.gitHubLogin = 'test-user'),
     );
     await instance.handleClick();
     expect(state.toggleAuthDialog).toHaveBeenCalled();
@@ -123,7 +123,7 @@ describe('Action button component', () => {
   });
 
   it('toggles the publish method on click if authed', async () => {
-    state.gitHubToken = 'github-token';
+    state.gitHubLogin = 'test-user';
 
     const { instance } = createActionButton();
     instance.performGistAction = vi.fn();

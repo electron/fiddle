@@ -7,7 +7,7 @@ import { IpcMainInvokeEvent, app, safeStorage } from 'electron';
 import { getTemplate } from './content';
 import { ipcMainManager } from './ipc';
 import { GIST_MAX_FILE_COUNT, GIST_MAX_FILE_SIZE, GITHUB_TOKEN_PATTERN } from '../constants';
-import { EditorValues, GistFile, GistLoadResult, GistRevision, GistWriteResult, GitHubSignInResult } from '../interfaces';
+import { EditorValues, GistFile, GistLoadResult, GistRevision, GistWriteResult, GitHubCheckAuthResult, GitHubSignInResult } from '../interfaces';
 import { IpcEvents } from '../ipc-events';
 import { isSupportedFile } from '../utils/editor-utils';
 
@@ -159,13 +159,9 @@ async function handleTokenSignOut(_event: IpcMainInvokeEvent): Promise<void> {
   octokit_ = null;
 }
 
-interface CheckAuthResult {
-  login: string | null;
-}
-
 async function handleTokenCheckAuth(
   _event: IpcMainInvokeEvent,
-): Promise<CheckAuthResult> {
+): Promise<GitHubCheckAuthResult> {
   const token = loadToken();
   if (!token) return { login: null };
 

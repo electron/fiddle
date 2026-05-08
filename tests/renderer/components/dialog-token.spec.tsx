@@ -188,7 +188,6 @@ describe('TokenDialog component', () => {
       expect(window.ElectronFiddle.gitHubSignIn).toHaveBeenCalledWith(
         mockValidToken,
       );
-      expect(store.gitHubToken).toBe(mockValidToken);
       expect(store.gitHubLogin).toBe(mockLogin);
       expect(instance.state.error).toBe(false);
       expect(store.isTokenDialogShowing).toBe(false);
@@ -216,7 +215,7 @@ describe('TokenDialog component', () => {
       expect(instance.state.errorMessage).toBe(
         'Invalid GitHub token. Please check your token and try again.',
       );
-      expect(store.gitHubToken).toEqual(null);
+      expect(store.gitHubLogin).toEqual(null);
     });
 
     it('surfaces the missing-gist-scope error from the main process', async () => {
@@ -242,7 +241,7 @@ describe('TokenDialog component', () => {
       expect(instance.state.errorMessage).toBe(
         'Token is missing the "gist" scope. Please generate a new token with gist permissions.',
       );
-      expect(store.gitHubToken).toEqual(null);
+      expect(store.gitHubLogin).toEqual(null);
     });
   });
 });

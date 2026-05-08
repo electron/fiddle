@@ -16,7 +16,9 @@ export class ElectronFiddleMock {
   public gistListCommits = vi.fn();
   public gistLoad = vi.fn();
   public gistUpdate = vi.fn();
+  public gitHubCheckAuth = vi.fn();
   public gitHubSignIn = vi.fn();
+  public gitHubSignOut = vi.fn();
   public getAvailableThemes = vi.fn();
   public getElectronTypes = vi.fn();
   public getIsPackageManagerInstalled = vi.fn();

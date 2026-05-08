@@ -68,12 +68,13 @@ export const TokenDialog = observer(
           error: true,
           errorMessage: result.error,
         });
-        this.props.appState.gitHubToken = null;
+        this.props.appState.gitHubLogin = null;
         return;
       }
 
-      // Token is valid and has required scopes.
-      this.props.appState.gitHubToken = this.state.tokenInput;
+      // Token is valid and has required scopes. The token itself stays in
+      // the main process; the renderer only tracks the login as a "signed
+      // in?" signal.
       this.props.appState.gitHubLogin = result.login ?? null;
 
       this.setState({ verifying: false, error: false });

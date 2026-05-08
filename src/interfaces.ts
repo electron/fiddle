@@ -257,6 +257,10 @@ export interface GitHubSignInResult {
   error?: string;
 }
 
+export interface GitHubCheckAuthResult {
+  login: string | null;
+}
+
 export enum GlobalSetting {
   acceleratorsToBlock = 'acceleratorsToBlock',
   channelsToShow = 'channelsToShow',
