@@ -286,7 +286,7 @@ describe('Action button component', () => {
       await instance.performGistAction();
 
       expect(window.ElectronFiddle.gistUpdate).toHaveBeenCalledWith({
-        id: gistId,
+        gistId,
         files: expectedGistOpts.files,
       });
     });

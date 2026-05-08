@@ -229,7 +229,7 @@ export interface GistFile {
 }
 
 export interface GistLoadParams {
-  id: string;
+  gistId: string;
   revision?: string;
 }
 
@@ -239,7 +239,7 @@ export interface GistLoadResult {
 }
 
 export interface GistUpdateParams {
-  id: string;
+  gistId: string;
   files: Record<string, GistFile>;
 }
 

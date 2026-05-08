@@ -6,7 +6,11 @@ import { IpcMainInvokeEvent, app, safeStorage } from 'electron';
 
 import { getTemplate } from './content';
 import { ipcMainManager } from './ipc';
-import { GITHUB_TOKEN_PATTERN } from '../constants';
+import {
+  GIST_MAX_FILE_COUNT,
+  GIST_MAX_FILE_SIZE,
+  GITHUB_TOKEN_PATTERN,
+} from '../constants';
 import {
   EditorValues,
   GistFile,
@@ -30,10 +34,6 @@ const GIST_ID_PATTERN = /^[0-9a-fA-F]{32}$/;
 const SHA_PATTERN = /^[0-9a-f]{40}$/;
 
 const MAX_DESCRIPTION_LENGTH = 256;
-
-const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10 MB per file — GitHub's gist limit
-
-const MAX_FILE_COUNT = 300; // GitHub's gist file limit
 
 function isValidToken(token: unknown): token is string {
   return typeof token === 'string' && GITHUB_TOKEN_PATTERN.test(token);
@@ -63,7 +63,8 @@ function areValidGistFiles(
 
   const entries = Object.entries(files as Record<string, unknown>);
 
-  if (entries.length === 0 || entries.length > MAX_FILE_COUNT) return false;
+  if (entries.length === 0 || entries.length > GIST_MAX_FILE_COUNT)
+    return false;
 
   for (const [key, value] of entries) {
     // null entries are used to delete files during update
@@ -76,7 +77,7 @@ function areValidGistFiles(
     if (filename.length === 0) return false;
     if (filename !== key) return false;
     if (typeof content !== 'string') return false;
-    if (content.length > MAX_FILE_SIZE) return false;
+    if (content.length > GIST_MAX_FILE_SIZE) return false;
   }
 
   return true;
@@ -158,6 +159,7 @@ async function handleTokenSignIn(
 
     return { success: true, login: response.data.login };
   } catch (error: any) {
+    console.warn('GitHub token sign-in failed', error);
     return {
       success: false,
       error: 'Invalid GitHub token. Please check your token and try again.',
@@ -229,23 +231,25 @@ async function handleGistUpdate(
   if (typeof params !== 'object' || params === null)
     throw new Error('Invalid parameters.');
 
-  const { id, files } = params as Record<string, unknown>;
+  const { gistId, files } = params as Record<string, unknown>;
 
-  if (!isValidGistId(id)) throw new Error('Invalid gist ID.');
+  if (!isValidGistId(gistId)) throw new Error('Invalid gist ID.');
   if (!areValidGistFiles(files)) throw new Error('Invalid files payload.');
 
   const octo = getAuthenticatedOctokit();
 
   // Fetch existing files to detect deletions
-  const { data: existing } = await octo.gists.get({ gist_id: id });
-  const updateFiles = { ...(files as Record<string, GistFile | null>) };
+  const { data: existing } = await octo.gists.get({ gist_id: gistId });
+  const updateFiles: Record<string, GistFile | null> = { ...files };
   for (const fileId of Object.keys(existing.files ?? {})) {
-    if (!(fileId in updateFiles)) updateFiles[fileId] = null as any;
+    if (!(fileId in updateFiles)) updateFiles[fileId] = null;
   }
 
   const gist = await octo.gists.update({
-    gist_id: id,
-    files: updateFiles as any,
+    gist_id: gistId,
+    // Octokit's generated types don't model file deletion (null), but the
+    // REST API requires it. Cast only at the boundary.
+    files: updateFiles as Record<string, GistFile>,
   });
 
   return {
@@ -272,16 +276,16 @@ async function handleGistLoad(
   if (typeof params !== 'object' || params === null)
     throw new Error('Invalid parameters.');
 
-  const { id, revision } = params as Record<string, unknown>;
+  const { gistId, revision } = params as Record<string, unknown>;
 
-  if (!isValidGistId(id)) throw new Error('Invalid gist ID.');
+  if (!isValidGistId(gistId)) throw new Error('Invalid gist ID.');
   if (revision !== undefined && !isValidSha(revision))
     throw new Error('Invalid revision SHA.');
 
   const octo = getOctokit();
   const gist = revision
-    ? await octo.gists.getRevision({ gist_id: id, sha: revision })
-    : await octo.gists.get({ gist_id: id });
+    ? await octo.gists.getRevision({ gist_id: gistId, sha: revision })
+    : await octo.gists.get({ gist_id: gistId });
 
   const files: GistLoadResult['files'] = {};
   for (const [fileId, data] of Object.entries(gist.data.files ?? {})) {
