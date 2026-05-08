@@ -162,12 +162,14 @@ export class App {
     this.setupTypeListeners();
 
     // Restore signed-in state from main's encrypted credential, if any.
-    // Fire-and-forget; the UI works fine while this resolves.
-    void window.ElectronFiddle.gitHubCheckAuth().then(({ login }) => {
+    // Wait for auth restore before signalling ready so that queued IPC
+    // messages (e.g. deep-linked private gist loads) use the authenticated
+    // Octokit instance.
+    window.ElectronFiddle.gitHubCheckAuth().then(({ login }) => {
       this.state.gitHubLogin = login;
+    }).finally(() => {
+      window.ElectronFiddle.sendReady();
     });
-
-    window.ElectronFiddle.sendReady();
 
     window.ElectronFiddle.addEventListener('set-show-me-template', () => {
       window.ElectronFiddle.setShowMeTemplate(this.state.templateName);
