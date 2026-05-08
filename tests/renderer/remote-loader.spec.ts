@@ -3,6 +3,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import {
   EditorValues,
   ElectronReleaseChannel,
+  GistFile,
   GistRevision,
   InstallState,
   MAIN_JS,
@@ -18,7 +19,6 @@ import {
 } from '../../src/renderer/utils/editor-utils';
 import { AppMock, StateMock, createEditorValues } from '../mocks/mocks';
 
-type GistFile = { filename: string; content: string };
 type GistFiles = { [id: string]: GistFile };
 
 describe('RemoteLoader', () => {
@@ -47,13 +47,10 @@ describe('RemoteLoader', () => {
       ]),
     );
 
-    vi.mocked(window.ElectronFiddle.gistLoad).mockImplementation(
-      async ({ gistId }) => ({
-        files: mockGistFiles,
-        id: gistId,
-        revision: 'sha1',
-      }),
-    );
+    vi.mocked(window.ElectronFiddle.gistLoad).mockImplementation(async () => ({
+      files: mockGistFiles,
+      revision: 'sha1',
+    }));
   });
 
   describe('fetchGistAndLoad()', () => {
@@ -65,7 +62,7 @@ describe('RemoteLoader', () => {
 
       expect(result).toBe(true);
       expect(window.ElectronFiddle.gistLoad).toHaveBeenCalledWith({
-        gistId,
+        id: gistId,
         revision: undefined,
       });
       expect(app.replaceFiddle).toBeCalledWith(editorValues, { gistId });
@@ -116,7 +113,6 @@ describe('RemoteLoader', () => {
           'blah.blah': { filename: 'blah.blah', content: '' },
           'yes.no': { filename: 'yes.no', content: '' },
         },
-        id: gistId,
         revision: 'sha1',
       });
       store.gistId = gistId;
@@ -259,7 +255,7 @@ describe('RemoteLoader', () => {
 
       expect(result).toBe(true);
       expect(window.ElectronFiddle.gistLoad).toHaveBeenCalledWith({
-        gistId,
+        id: gistId,
         revision,
       });
       expect(store.activeGistRevision).toBe(revision);

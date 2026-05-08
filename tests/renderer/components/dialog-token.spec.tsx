@@ -1,16 +1,12 @@
 import * as React from 'react';
 
-import { Octokit } from '@octokit/rest';
 import { act, render, screen } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { TokenDialog } from '../../../src/renderer/components/dialog-token';
 import { AppState } from '../../../src/renderer/state';
-import { getOctokit } from '../../../src/renderer/utils/octokit';
 import { overrideRendererPlatform } from '../../utils';
 import { renderClassComponentWithInstanceRef } from '../utils/renderClassComponentWithInstanceRef';
-
-vi.mock('../../../src/renderer/utils/octokit');
 
 describe('TokenDialog component', () => {
   const mockValidToken = 'ghp_muuHkYenGrOHrTBQKDALW8WtSD929EXMz63n';
@@ -154,27 +150,13 @@ describe('TokenDialog component', () => {
   });
 
   describe('onSubmitToken()', () => {
-    let mockOctokit: Octokit;
-    const mockUser = {
-      avatar_url: 'https://avatars.fake/hi',
-      login: 'test-login',
-      name: 'Test User',
-    } as const;
+    const mockLogin = 'test-login';
 
     beforeEach(() => {
-      mockOctokit = {
-        authenticate: vi.fn(),
-        users: {
-          getAuthenticated: vi.fn().mockResolvedValue({
-            data: mockUser,
-            headers: {
-              'x-oauth-scopes': 'gist, repo',
-            },
-          }),
-        },
-      } as unknown as Octokit;
-
-      vi.mocked(getOctokit).mockResolvedValue(mockOctokit);
+      vi.mocked(window.ElectronFiddle.gitHubSignIn).mockResolvedValue({
+        success: true,
+        login: mockLogin,
+      });
     });
 
     it('handles missing input', async () => {
@@ -189,6 +171,7 @@ describe('TokenDialog component', () => {
       await instance.onSubmitToken();
 
       expect(instance.state.verifying).toBe(false);
+      expect(window.ElectronFiddle.gitHubSignIn).not.toHaveBeenCalled();
     });
 
     it('tries to sign the user in', async () => {
@@ -202,16 +185,20 @@ describe('TokenDialog component', () => {
 
       await instance.onSubmitToken();
 
+      expect(window.ElectronFiddle.gitHubSignIn).toHaveBeenCalledWith(
+        mockValidToken,
+      );
       expect(store.gitHubToken).toBe(mockValidToken);
-      expect(store.gitHubLogin).toBe(mockUser.login);
+      expect(store.gitHubLogin).toBe(mockLogin);
       expect(instance.state.error).toBe(false);
       expect(store.isTokenDialogShowing).toBe(false);
     });
 
     it('handles an invalid token error', async () => {
-      vi.mocked(mockOctokit.users.getAuthenticated).mockRejectedValue(
-        new Error('Bad credentials'),
-      );
+      vi.mocked(window.ElectronFiddle.gitHubSignIn).mockResolvedValueOnce({
+        success: false,
+        error: 'Invalid GitHub token. Please check your token and try again.',
+      });
 
       store.isTokenDialogShowing = true;
       const { instance } = renderClassComponentWithInstanceRef(TokenDialog, {
@@ -232,13 +219,12 @@ describe('TokenDialog component', () => {
       expect(store.gitHubToken).toEqual(null);
     });
 
-    it('handles missing gist scope', async () => {
-      vi.mocked(mockOctokit.users.getAuthenticated).mockResolvedValue({
-        data: mockUser,
-        headers: {
-          'x-oauth-scopes': 'repo, user', // Missing 'gist' scope
-        },
-      } as any);
+    it('surfaces the missing-gist-scope error from the main process', async () => {
+      vi.mocked(window.ElectronFiddle.gitHubSignIn).mockResolvedValueOnce({
+        success: false,
+        error:
+          'Token is missing the "gist" scope. Please generate a new token with gist permissions.',
+      });
 
       store.isTokenDialogShowing = true;
       const { instance } = renderClassComponentWithInstanceRef(TokenDialog, {
@@ -257,149 +243,6 @@ describe('TokenDialog component', () => {
         'Token is missing the "gist" scope. Please generate a new token with gist permissions.',
       );
       expect(store.gitHubToken).toEqual(null);
-    });
-
-    it('handles empty scopes header', async () => {
-      vi.mocked(mockOctokit.users.getAuthenticated).mockResolvedValue({
-        data: mockUser,
-        headers: {
-          // No x-oauth-scopes header
-        },
-      } as any);
-
-      store.isTokenDialogShowing = true;
-      const { instance } = renderClassComponentWithInstanceRef(TokenDialog, {
-        appState: store,
-      });
-      act(() => {
-        instance.setState({ tokenInput: mockValidToken });
-      });
-
-      await act(async () => {
-        await instance.onSubmitToken();
-      });
-
-      expect(instance.state.error).toBe(true);
-      expect(instance.state.errorMessage).toBe(
-        'Token is missing the "gist" scope. Please generate a new token with gist permissions.',
-      );
-      expect(store.gitHubToken).toEqual(null);
-    });
-  });
-
-  describe('validateGitHubToken()', () => {
-    let mockOctokit: Octokit;
-    const mockUser = {
-      avatar_url: 'https://avatars.fake/hi',
-      login: 'test-login',
-      name: 'Test User',
-    } as const;
-
-    beforeEach(() => {
-      mockOctokit = {
-        users: {
-          getAuthenticated: vi.fn(),
-        },
-      } as unknown as Octokit;
-
-      vi.mocked(getOctokit).mockResolvedValue(mockOctokit);
-    });
-
-    it('validates a token with gist scope', async () => {
-      vi.mocked(mockOctokit.users.getAuthenticated).mockResolvedValue({
-        data: mockUser,
-        headers: {
-          'x-oauth-scopes': 'gist, repo, user',
-        },
-      } as any);
-
-      store.isTokenDialogShowing = true;
-      const { instance } = renderClassComponentWithInstanceRef(TokenDialog, {
-        appState: store,
-      });
-
-      // validateGitHubToken is private — cast needed to test it directly
-      const result = await (instance as any).validateGitHubToken('valid-token');
-
-      expect(result).toEqual({
-        isValid: true,
-        scopes: ['gist', 'repo', 'user'],
-        hasGistScope: true,
-        user: mockUser,
-      });
-    });
-
-    it('validates a token without gist scope', async () => {
-      vi.mocked(mockOctokit.users.getAuthenticated).mockResolvedValue({
-        data: mockUser,
-        headers: {
-          'x-oauth-scopes': 'repo, user',
-        },
-      } as any);
-
-      store.isTokenDialogShowing = true;
-      const { instance } = renderClassComponentWithInstanceRef(TokenDialog, {
-        appState: store,
-      });
-
-      // validateGitHubToken is private
-      const result = await (instance as any).validateGitHubToken(
-        'token-without-gist',
-      );
-
-      expect(result).toEqual({
-        isValid: true,
-        scopes: ['repo', 'user'],
-        hasGistScope: false,
-        user: mockUser,
-      });
-    });
-
-    it('handles invalid token', async () => {
-      vi.mocked(mockOctokit.users.getAuthenticated).mockRejectedValue(
-        new Error('Bad credentials'),
-      );
-
-      store.isTokenDialogShowing = true;
-      const { instance } = renderClassComponentWithInstanceRef(TokenDialog, {
-        appState: store,
-      });
-
-      // validateGitHubToken is private
-      const result = await (instance as any).validateGitHubToken(
-        'invalid-token',
-      );
-
-      expect(result).toEqual({
-        isValid: false,
-        scopes: [],
-        hasGistScope: false,
-        error: 'Bad credentials',
-      });
-    });
-
-    it('handles missing scopes header', async () => {
-      vi.mocked(mockOctokit.users.getAuthenticated).mockResolvedValue({
-        data: mockUser,
-        headers: {},
-      } as any);
-
-      store.isTokenDialogShowing = true;
-      const { instance } = renderClassComponentWithInstanceRef(TokenDialog, {
-        appState: store,
-      });
-
-      // validateGitHubToken is private
-      const result = await (instance as any).validateGitHubToken(
-        'token-no-scopes-header',
-      );
-
-      expect(result).toEqual({
-        isValid: true,
-        scopes: [],
-        hasGistScope: false,
-        user: mockUser,
-      });
     });
   });
 });
