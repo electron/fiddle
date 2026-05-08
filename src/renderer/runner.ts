@@ -189,10 +189,12 @@ export class Runner {
     window.ElectronFiddle.addEventListener('fiddle-stopped', (code, signal) => {
       cleanup();
 
-      if (typeof code !== 'number') {
+      if (typeof code !== 'number' && typeof signal === 'string') {
         pushOutput(`Electron exited with signal ${signal}.`);
-      } else {
+      } else if (typeof code === 'number') {
         pushOutput(`Electron exited with code ${code}.`);
+      } else {
+        pushOutput('Electron exited.');
       }
     });
 

@@ -226,6 +226,7 @@ async function startFiddleImpl(webContents: WebContents): Promise<RunResult> {
 
     pushError(webContents, 'Could not install modules', error);
     await cleanup();
+    ipcMainManager.send(IpcEvents.FIDDLE_STOPPED, [null, null], webContents);
     return RunResult.FAILURE;
   }
 
@@ -262,6 +263,7 @@ async function startFiddleImpl(webContents: WebContents): Promise<RunResult> {
   } catch (error: any) {
     pushError(webContents, 'Failed to spawn Fiddle', error);
     await cleanup();
+    ipcMainManager.send(IpcEvents.FIDDLE_STOPPED, [null, null], webContents);
     return RunResult.FAILURE;
   }
   fiddleProcesses.set(webContents, child);
