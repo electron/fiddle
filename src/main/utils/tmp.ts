@@ -22,7 +22,11 @@ export async function tmpName(options: { template: string }): Promise<string> {
 }
 
 export function dirSync(options: { prefix: string }): string {
-  return fs.mkdtempSync(options.prefix);
+  const tempPath = fs.mkdtempSync(
+    path.join(fs.realpathSync(os.tmpdir()), options.prefix),
+  );
+  _pathsToCleanup.push(tempPath);
+  return tempPath;
 }
 
 export function setGracefulCleanup(): void {
