@@ -21,20 +21,14 @@ import { pushError, pushOutput, pushOutputLine } from './utils/push-output';
 import { getLocalVersions } from './versions';
 import {
   DownloadVersionParams,
-  IPackageManager,
   PACKAGE_NAME,
+  PMOperationOptions,
   ProgressObject,
   RunResult,
   StartFiddleOptions,
 } from '../interfaces';
 import { IpcEvents } from '../ipc-events';
 import { maybePlural } from '../utils/plural-maybe';
-
-export interface PMOperationOptions {
-  dir: string;
-  packageManager: IPackageManager;
-  useSocketFirewall?: boolean;
-}
 
 let installer: Installer;
 let runner: Runner;
