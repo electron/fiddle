@@ -194,31 +194,22 @@ export const GistActionButton = observer(
      */
     public async handleUpdate(silent = false) {
       const { appState } = this.props;
-      const octo = await getOctokit(this.props.appState);
       const options = { includeDependencies: true, includeElectron: true };
       const values = await window.app.getEditorValues(options);
 
       appState.activeGistAction = GistActionState.updating;
 
       try {
-        const {
-          data: { files: oldFiles },
-        } = await octo.gists.get({ gist_id: appState.gistId! });
-
         const files = this.gistFilesList(values);
-        for (const id of Object.keys(oldFiles ?? {})) {
-          // Delete files that have been removed or renamed.
-          if (!(id in files)) files[id] = null as any;
-        }
 
-        const gist = await octo.gists.update({
-          gist_id: appState.gistId!,
+        const gist = await window.ElectronFiddle.gistUpdate({
+          id: appState.gistId!,
           files,
         });
 
         // Update the active revision to the newly created revision
-        if (gist.data.history?.[0]?.version) {
-          appState.activeGistRevision = gist.data.history[0].version;
+        if (gist.revision) {
+          appState.activeGistRevision = gist.revision;
         }
 
         await appState.editorMosaic.markAsSaved();
@@ -230,8 +221,7 @@ export const GistActionButton = observer(
             action: {
               text: 'Copy link',
               icon: 'clipboard',
-              onClick: () =>
-                navigator.clipboard.writeText(gist.data.html_url ?? ''),
+              onClick: () => navigator.clipboard.writeText(gist.url),
             },
           });
         }

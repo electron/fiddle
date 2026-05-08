@@ -6,7 +6,13 @@ import { IpcMainInvokeEvent, app, safeStorage } from 'electron';
 
 import { getTemplate } from './content';
 import { ipcMainManager } from './ipc';
-import { EditorValues, GistLoadResult, GistRevision } from '../interfaces';
+import {
+  EditorValues,
+  GistFile,
+  GistLoadResult,
+  GistRevision,
+  GistWriteResult,
+} from '../interfaces';
 import { IpcEvents } from '../ipc-events';
 import { isSupportedFile } from '../utils/editor-utils';
 
@@ -47,11 +53,6 @@ function isValidDescription(description: unknown): description is string {
     description.length > 0 &&
     description.length <= MAX_DESCRIPTION_LENGTH
   );
-}
-
-interface GistFile {
-  filename: string;
-  content: string;
 }
 
 function areValidGistFiles(
@@ -203,12 +204,6 @@ async function handleTokenCheckAuth(
   }
 }
 
-interface GistWriteResult {
-  id: string;
-  url: string;
-  revision?: string;
-}
-
 async function handleGistCreate(
   _event: IpcMainInvokeEvent,
   params: unknown,
@@ -247,22 +242,22 @@ async function handleGistUpdate(
   if (typeof params !== 'object' || params === null)
     throw new Error('Invalid parameters.');
 
-  const { gistId, files } = params as Record<string, unknown>;
+  const { id, files } = params as Record<string, unknown>;
 
-  if (!isValidGistId(gistId)) throw new Error('Invalid gist ID.');
+  if (!isValidGistId(id)) throw new Error('Invalid gist ID.');
   if (!areValidGistFiles(files)) throw new Error('Invalid files payload.');
 
   const octo = getAuthenticatedOctokit();
 
   // Fetch existing files to detect deletions
-  const { data: existing } = await octo.gists.get({ gist_id: gistId });
+  const { data: existing } = await octo.gists.get({ gist_id: id });
   const updateFiles = { ...(files as Record<string, GistFile | null>) };
-  for (const id of Object.keys(existing.files ?? {})) {
-    if (!(id in updateFiles)) updateFiles[id] = null as any;
+  for (const fileId of Object.keys(existing.files ?? {})) {
+    if (!(fileId in updateFiles)) updateFiles[fileId] = null as any;
   }
 
   const gist = await octo.gists.update({
-    gist_id: gistId,
+    gist_id: id,
     files: updateFiles as any,
   });
 
@@ -291,16 +286,16 @@ async function handleGistLoad(
   if (typeof params !== 'object' || params === null)
     throw new Error('Invalid parameters.');
 
-  const { gistId, revision } = params as Record<string, unknown>;
+  const { id, revision } = params as Record<string, unknown>;
 
-  if (!isValidGistId(gistId)) throw new Error('Invalid gist ID.');
+  if (!isValidGistId(id)) throw new Error('Invalid gist ID.');
   if (revision !== undefined && !isValidSha(revision))
     throw new Error('Invalid revision SHA.');
 
   const octo = getOctokit();
   const gist = revision
-    ? await octo.gists.getRevision({ gist_id: gistId, sha: revision })
-    : await octo.gists.get({ gist_id: gistId });
+    ? await octo.gists.getRevision({ gist_id: id, sha: revision })
+    : await octo.gists.get({ gist_id: id });
 
   const files: GistLoadResult['files'] = {};
   for (const [id, data] of Object.entries(gist.data.files ?? {})) {
@@ -324,7 +319,6 @@ async function handleGistLoad(
 
   return {
     files,
-    id: gist.data.id!,
     revision: gist.data.history?.[0]?.version,
   };
 }
