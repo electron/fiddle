@@ -133,8 +133,10 @@ describe('github', () => {
         const result = await handleTokenSignIn(MOCK_EVENT, token);
         expect(result).toEqual({ success: true, login: MOCK_LOGIN });
 
-        const writePath = vi.mocked(fs.writeFileSync).mock.calls.at(-1)?.[0];
+        const lastWriteCall = vi.mocked(fs.writeFileSync).mock.calls.at(-1);
+        const writePath = lastWriteCall?.[0];
         expect(writePath).toBe(path.join('/Users/fake-user', CREDENTIALS_FILE));
+        expect(lastWriteCall?.[2]).toEqual({ mode: 0o600 });
       }
 
       expect(fs.writeFileSync).toHaveBeenCalled();
@@ -258,14 +260,32 @@ describe('github', () => {
         users: {
           getAuthenticated: vi
             .fn()
-            .mockRejectedValue(new Error('Bad credentials')),
+            .mockRejectedValue(
+              Object.assign(new Error('Bad credentials'), { status: 401 }),
+            ),
         },
       });
 
       const result = await handleTokenCheckAuth(MOCK_EVENT);
       expect(result).toEqual({ login: null });
-      // Should have deleted the invalid token
       expect(fs.unlinkSync).toHaveBeenCalled();
+    });
+
+    it('preserves the token for transient auth-check failures', async () => {
+      vi.mocked(fs.existsSync).mockReturnValue(true);
+      vi.mocked(fs.readFileSync).mockReturnValue(
+        Buffer.from(`encrypted:${VALID_GHP_TOKEN}`),
+      );
+      mockOctokitInstance({
+        users: {
+          getAuthenticated: vi.fn().mockRejectedValue(new Error('offline')),
+        },
+      });
+
+      const result = await handleTokenCheckAuth(MOCK_EVENT);
+
+      expect(result).toEqual({ login: null });
+      expect(fs.unlinkSync).not.toHaveBeenCalled();
     });
   });
 
