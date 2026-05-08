@@ -12,6 +12,10 @@ import { isSupportedFile } from '../utils/editor-utils';
 
 // --- Input validation ---
 
+const ELECTRON_ORG = 'electron';
+
+const ELECTRON_REPO = 'electron';
+
 const TOKEN_PATTERN =
   /^(ghp_[a-zA-Z0-9]{36}|github_pat_[a-zA-Z0-9]{22}_[a-zA-Z0-9]{59})$/;
 
@@ -389,8 +393,8 @@ async function fetchExample(ref: string, path: string): Promise<EditorValues> {
     readonly unknown[]
   >[number];
 
-  const owner = 'electron';
-  const repo = 'electron';
+  const owner = ELECTRON_ORG;
+  const repo = ELECTRON_REPO;
   const octo = getOctokit();
 
   // Fetch the example folder listing.
