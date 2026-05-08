@@ -1,5 +1,6 @@
 import type { IpcMainEvent, WebContents } from 'electron';
 
+import { startFiddle } from './fiddle-core';
 import { ipcMainManager } from './ipc';
 import { pushOutputLine } from './utils/push-output';
 import { setVersion } from './utils/set-version';
@@ -48,13 +49,13 @@ async function autobisectImpl(
   const results: Map<string, RunResult> = new Map();
 
   const runVersion = async (version: string) => {
-    const result = results.get(version);
+    let result = results.get(version);
     if (result === undefined) {
       const pre = `${prefix} Electron ${version} -`;
       pushOutputLine(webContents, `${pre} setting version`);
       await setVersion(webContents, version);
       pushOutputLine(webContents, `${pre} starting test`);
-      // TODO - result = await this.run();
+      result = await startFiddle(webContents);
       results.set(version, result);
       pushOutputLine(
         webContents,

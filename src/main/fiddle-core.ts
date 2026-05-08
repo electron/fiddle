@@ -22,6 +22,7 @@ import {
   IPackageManager,
   PACKAGE_NAME,
   ProgressObject,
+  RunResult,
 } from '../interfaces';
 import { IpcEvents } from '../ipc-events';
 import { maybePlural } from '../utils/plural-maybe';
@@ -103,8 +104,13 @@ export async function installModules(
  * Drive the entire run lifecycle from main: ask the renderer for the
  * settings and files, write them to a temp directory, install modules,
  * spawn Electron, and clean everything up when the process exits.
+ *
+ * Resolves with a {@link RunResult} describing whether the run was
+ * successful, failed, or was invalid.
  */
-export async function startFiddle(webContents: WebContents): Promise<void> {
+export async function startFiddle(
+  webContents: WebContents,
+): Promise<RunResult> {
   const options = await getStartFiddleOptions(webContents);
   const {
     enableElectronLogging,
@@ -174,7 +180,7 @@ export async function startFiddle(webContents: WebContents): Promise<void> {
 
     pushError(webContents, 'Could not install modules', error);
     await cleanup();
-    throw error;
+    return RunResult.FAILURE;
   }
 
   // Strip any CLI option containing a null byte, which can truncate
@@ -207,9 +213,10 @@ export async function startFiddle(webContents: WebContents): Promise<void> {
       cwd: dir,
       env,
     });
-  } catch (error) {
+  } catch (error: any) {
+    pushError(webContents, 'Failed to spawn Fiddle', error);
     await cleanup();
-    throw error;
+    return RunResult.FAILURE;
   }
   fiddleProcesses.set(webContents, child);
 
@@ -223,10 +230,26 @@ export async function startFiddle(webContents: WebContents): Promise<void> {
   child.stdout?.on('data', (data) => pushOutput(webContents, data.toString()));
   child.stderr?.on('data', (data) => pushOutput(webContents, data.toString()));
 
-  child.on('close', async (code, signal) => {
-    fiddleProcesses.delete(webContents);
-    await cleanup();
-    ipcMainManager.send(IpcEvents.FIDDLE_STOPPED, [code, signal], webContents);
+  return new Promise<RunResult>((resolve) => {
+    child.on('close', async (code, signal) => {
+      fiddleProcesses.delete(webContents);
+      await cleanup();
+
+      let result: RunResult;
+      if (typeof code !== 'number') {
+        result = RunResult.FAILURE;
+      } else {
+        result = code === 0 ? RunResult.SUCCESS : RunResult.FAILURE;
+      }
+
+      ipcMainManager.send(
+        IpcEvents.FIDDLE_STOPPED,
+        [code, signal],
+        webContents,
+      );
+
+      resolve(result);
+    });
   });
 }
 
@@ -331,7 +354,7 @@ export async function setupFiddleCore(versions: ElectronVersions) {
   ipcMainManager.handle(
     IpcEvents.START_FIDDLE,
     async (event: IpcMainInvokeEvent) => {
-      await startFiddle(event.sender);
+      return await startFiddle(event.sender);
     },
   );
   ipcMainManager.on(IpcEvents.STOP_FIDDLE, (event: IpcMainEvent) => {

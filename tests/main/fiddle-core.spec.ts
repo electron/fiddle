@@ -159,9 +159,20 @@ describe('fiddle-core', () => {
   describe('startFiddle', () => {
     const version = '18.0.0';
 
+    function mockSpawnWithAutoClose(
+      child: ChildProcessMock,
+      code: number | null = 0,
+      signal: NodeJS.Signals | null = null,
+    ) {
+      vi.mocked(runner.spawn).mockImplementation(async () => {
+        setImmediate(() => child.emit('close', code, signal));
+        return child;
+      });
+    }
+
     it('uses provided env', async () => {
       const child = new ChildProcessMock();
-      vi.mocked(runner.spawn).mockResolvedValue(child);
+      mockSpawnWithAutoClose(child);
       getStartFiddleOptionsMock.mockResolvedValueOnce(
         makeOptions({ env: { NODE_OPTIONS: '--inspect-brk' } }),
       );
@@ -182,7 +193,7 @@ describe('fiddle-core', () => {
 
     it('runs with logging when enabled', async () => {
       const child = new ChildProcessMock();
-      vi.mocked(runner.spawn).mockResolvedValue(child);
+      mockSpawnWithAutoClose(child);
       getStartFiddleOptionsMock.mockResolvedValueOnce(
         makeOptions({ enableElectronLogging: true }),
       );
@@ -205,7 +216,7 @@ describe('fiddle-core', () => {
 
     it('can set ELECTRON_ENABLE_LOGGING in env', async () => {
       const child = new ChildProcessMock();
-      vi.mocked(runner.spawn).mockResolvedValue(child);
+      mockSpawnWithAutoClose(child);
       getStartFiddleOptionsMock.mockResolvedValueOnce(
         makeOptions({ env: { ELECTRON_ENABLE_LOGGING: 'true' } }),
       );
@@ -226,7 +237,7 @@ describe('fiddle-core', () => {
 
     it('strips blocked env keys from the renderer-supplied env', async () => {
       const child = new ChildProcessMock();
-      vi.mocked(runner.spawn).mockResolvedValue(child);
+      mockSpawnWithAutoClose(child);
       getStartFiddleOptionsMock.mockResolvedValueOnce(
         makeOptions({
           env: {
@@ -257,7 +268,7 @@ describe('fiddle-core', () => {
 
     it('uses localPath when the version resolves to a local build with an existing executable', async () => {
       const child = new ChildProcessMock();
-      vi.mocked(runner.spawn).mockResolvedValue(child);
+      mockSpawnWithAutoClose(child);
       const localPath = '/some/local/electron';
       const localVersion = '0.0.0-local.123';
       getLocalVersionsMock.mockReturnValueOnce([
@@ -281,7 +292,7 @@ describe('fiddle-core', () => {
 
     it('falls back to version when the local build executable does not exist', async () => {
       const child = new ChildProcessMock();
-      vi.mocked(runner.spawn).mockResolvedValue(child);
+      mockSpawnWithAutoClose(child);
       const localPath = '/nonexistent/electron';
       const localVersion = '0.0.0-local.456';
       getLocalVersionsMock.mockReturnValueOnce([
@@ -303,7 +314,7 @@ describe('fiddle-core', () => {
 
     it('strips null bytes from execution flags', async () => {
       const child = new ChildProcessMock();
-      vi.mocked(runner.spawn).mockResolvedValue(child);
+      mockSpawnWithAutoClose(child);
       getStartFiddleOptionsMock.mockResolvedValueOnce(
         makeOptions({
           executionFlags: ['safe-flag', 'evil\0flag', '--js-flags=ok'],
@@ -323,13 +334,10 @@ describe('fiddle-core', () => {
 
     it('cleans up the temp dir and user data after the child process closes', async () => {
       const child = new ChildProcessMock();
-      vi.mocked(runner.spawn).mockResolvedValue(child);
+      mockSpawnWithAutoClose(child);
       getStartFiddleOptionsMock.mockResolvedValueOnce(makeOptions());
 
       await startFiddle(new WebContentsMock() as unknown as WebContents);
-
-      child.emit('close', 0, null);
-      await new Promise(process.nextTick);
 
       expect(filesMod.cleanupDirectory).toHaveBeenCalledWith(TEMP_DIR);
       expect(filesMod.deleteUserData).toHaveBeenCalledWith('test-app');
@@ -337,15 +345,12 @@ describe('fiddle-core', () => {
 
     it('does not delete user data when isKeepingUserDataDirs is true', async () => {
       const child = new ChildProcessMock();
-      vi.mocked(runner.spawn).mockResolvedValue(child);
+      mockSpawnWithAutoClose(child);
       getStartFiddleOptionsMock.mockResolvedValueOnce(
         makeOptions({ isKeepingUserDataDirs: true }),
       );
 
       await startFiddle(new WebContentsMock() as unknown as WebContents);
-
-      child.emit('close', 0, null);
-      await new Promise(process.nextTick);
 
       expect(filesMod.cleanupDirectory).toHaveBeenCalledWith(TEMP_DIR);
       expect(filesMod.deleteUserData).not.toHaveBeenCalled();

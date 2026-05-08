@@ -135,10 +135,11 @@ export class Runner {
   /**
    * Executes the fiddle with either local electron build
    * or the user selected electron version. The main process owns the
-   * temp directory, module installation, and cleanup — the renderer
-   * simply triggers the run and waits for the `fiddle-stopped` event.
+   * temp directory, module installation, spawning Electron, and cleanup —
+   * the renderer simply triggers the run, streams output back, and waits
+   * for `startFiddle()` to resolve.
    */
-  private async runFiddle(): Promise<RunResult> {
+  private async runFiddle(): Promise<void> {
     const { clearConsole, isClearingConsoleOnRun, pushOutput, flushOutput } =
       this.appState;
     const currentRunnable = this.appState.currentElectronVersion;
@@ -169,7 +170,7 @@ export class Runner {
       message += `before running the fiddle.`;
 
       pushOutput(message, { isNotPre: true });
-      return RunResult.INVALID;
+      return;
     }
 
     const cleanup = () => {
@@ -178,47 +179,40 @@ export class Runner {
       this.appState.isInstallingModules = false;
     };
 
-    return new Promise(async (resolve) => {
-      window.ElectronFiddle.removeAllListeners('fiddle-runner-output');
-      window.ElectronFiddle.removeAllListeners('fiddle-modules-installed');
-      window.ElectronFiddle.removeAllListeners('fiddle-stopped');
+    window.ElectronFiddle.removeAllListeners('fiddle-runner-output');
+    window.ElectronFiddle.removeAllListeners('fiddle-modules-installed');
+    window.ElectronFiddle.removeAllListeners('fiddle-stopped');
 
-      window.ElectronFiddle.addEventListener(
-        'fiddle-runner-output',
-        (output: string, options?: { isNotPre?: boolean }) => {
-          pushOutput(output, { ...options, bypassBuffer: false });
-        },
-      );
+    window.ElectronFiddle.addEventListener(
+      'fiddle-runner-output',
+      (output: string, options?: { isNotPre?: boolean }) => {
+        pushOutput(output, { ...options, bypassBuffer: false });
+      },
+    );
 
-      window.ElectronFiddle.addEventListener('fiddle-modules-installed', () => {
-        this.appState.isInstallingModules = false;
-      });
+    window.ElectronFiddle.addEventListener('fiddle-stopped', (code, signal) => {
+      cleanup();
 
-      window.ElectronFiddle.addEventListener(
-        'fiddle-stopped',
-        (code, signal) => {
-          cleanup();
-
-          if (typeof code !== 'number') {
-            pushOutput(`Electron exited with signal ${signal}.`);
-            resolve(RunResult.FAILURE);
-          } else {
-            pushOutput(`Electron exited with code ${code}.`);
-            resolve(code === 0 ? RunResult.SUCCESS : RunResult.FAILURE);
-          }
-        },
-      );
-
-      this.appState.isRunning = true;
-
-      try {
-        await window.ElectronFiddle.startFiddle();
-      } catch (e: any) {
-        pushOutput(`Failed to spawn Fiddle: ${e.message}`);
-        cleanup();
-        resolve(RunResult.FAILURE);
+      if (typeof code !== 'number') {
+        pushOutput(`Electron exited with signal ${signal}.`);
+      } else {
+        pushOutput(`Electron exited with code ${code}.`);
       }
     });
+
+    window.ElectronFiddle.addEventListener('fiddle-modules-installed', () => {
+      this.appState.isInstallingModules = false;
+    });
+
+    this.appState.isRunning = true;
+
+    try {
+      await window.ElectronFiddle.startFiddle();
+    } catch (e: any) {
+      pushOutput(`Failed to spawn Fiddle: ${e.message}`);
+    } finally {
+      cleanup();
+    }
   }
 
   /**
