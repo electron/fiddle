@@ -161,6 +161,12 @@ export class App {
     this.setupUnloadListeners();
     this.setupTypeListeners();
 
+    // Restore signed-in state from main's encrypted credential, if any.
+    // Fire-and-forget; the UI works fine while this resolves.
+    void window.ElectronFiddle.gitHubCheckAuth().then(({ login }) => {
+      this.state.gitHubLogin = login;
+    });
+
     window.ElectronFiddle.sendReady();
 
     window.ElectronFiddle.addEventListener('set-show-me-template', () => {

@@ -13,6 +13,7 @@ import {
   GistLoadResult,
   GistRevision,
   GistWriteResult,
+  GitHubCheckAuthResult,
   GitHubSignInResult,
 } from '../interfaces';
 import { IpcEvents } from '../ipc-events';
@@ -169,13 +170,9 @@ async function handleTokenSignOut(_event: IpcMainInvokeEvent): Promise<void> {
   octokit_ = null;
 }
 
-interface CheckAuthResult {
-  login: string | null;
-}
-
 async function handleTokenCheckAuth(
   _event: IpcMainInvokeEvent,
-): Promise<CheckAuthResult> {
+): Promise<GitHubCheckAuthResult> {
   const token = loadToken();
   if (!token) return { login: null };
 

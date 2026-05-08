@@ -80,14 +80,14 @@ export const GistActionButton = observer(
     public async handleClick(): Promise<void> {
       const { appState } = this.props;
 
-      if (!appState.gitHubToken) {
+      if (!appState.gitHubLogin) {
         appState.toggleAuthDialog();
       }
 
       // Wait for the dialog to be closed again
       await when(() => !appState.isTokenDialogShowing);
 
-      if (appState.gitHubToken) {
+      if (appState.gitHubLogin) {
         return this.performGistAction();
       }
     }
