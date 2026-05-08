@@ -220,13 +220,28 @@ export interface GistRevision {
 }
 
 export interface GistLoadParams {
-  gistId: string;
+  id: string;
   revision?: string;
 }
 
+export interface GistFile {
+  filename: string;
+  content: string;
+}
+
 export interface GistLoadResult {
-  files: Record<string, { filename: string; content: string }>;
+  files: Record<string, GistFile>;
+  revision?: string;
+}
+
+export interface GistUpdateParams {
   id: string;
+  files: Record<string, GistFile>;
+}
+
+export interface GistWriteResult {
+  id: string;
+  url: string;
   revision?: string;
 }
 

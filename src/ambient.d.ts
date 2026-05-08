@@ -10,6 +10,8 @@ import {
   GistLoadParams,
   GistLoadResult,
   GistRevision,
+  GistUpdateParams,
+  GistWriteResult,
   IPackageManager,
   InstallState,
   InstallStateEvent,
@@ -112,6 +114,7 @@ declare global {
       fetchExample(ref: string, path: string): Promise<EditorValues>;
       gistListCommits(gistId: string): Promise<GistRevision[]>;
       gistLoad(params: GistLoadParams): Promise<GistLoadResult>;
+      gistUpdate(params: GistUpdateParams): Promise<GistWriteResult>;
       getAvailableThemes(): Promise<Array<LoadedFiddleTheme>>;
       getElectronTypes(ver: RunnableVersion): Promise<string | undefined>;
       getIsPackageManagerInstalled(
