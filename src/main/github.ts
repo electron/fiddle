@@ -6,7 +6,7 @@ import { IpcMainInvokeEvent, app, safeStorage } from 'electron';
 
 import { getTemplate } from './content';
 import { ipcMainManager } from './ipc';
-import { EditorValues, GistRevision } from '../interfaces';
+import { EditorValues, GistLoadResult, GistRevision } from '../interfaces';
 import { IpcEvents } from '../ipc-events';
 import { isSupportedFile } from '../utils/editor-utils';
 
@@ -284,15 +284,6 @@ async function handleGistDelete(
   return { success: true };
 }
 
-interface GistLoadResult {
-  files: Record<
-    string,
-    { filename: string; content: string; truncated: boolean; rawUrl?: string }
-  >;
-  id: string;
-  revision?: string;
-}
-
 async function handleGistLoad(
   _event: IpcMainInvokeEvent,
   params: unknown,
@@ -328,8 +319,6 @@ async function handleGistLoad(
     files[id] = {
       filename: data.filename ?? id,
       content,
-      truncated: false,
-      rawUrl: data.raw_url ?? undefined,
     };
   }
 

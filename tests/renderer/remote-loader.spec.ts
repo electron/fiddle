@@ -21,7 +21,7 @@ import { AppMock, StateMock, createEditorValues } from '../mocks/mocks';
 
 vi.mock('../../src/renderer/utils/octokit');
 
-type GistFile = { content: string; truncated?: boolean; raw_url?: string };
+type GistFile = { filename: string; content: string };
 type GistFiles = { [id: string]: GistFile };
 
 describe('RemoteLoader', () => {
@@ -29,7 +29,6 @@ describe('RemoteLoader', () => {
   let app: AppMock;
   let store: StateMock;
   let mockGistFiles: GistFiles;
-  let mockGetGists: { get: () => Promise<{ files: GistFiles }> };
   let editorValues: EditorValues;
 
   beforeEach(() => {
@@ -47,25 +46,31 @@ describe('RemoteLoader', () => {
     mockGistFiles = Object.fromEntries(
       Object.entries(editorValues).map(([id, content]) => [
         id,
-        { content: content as string },
+        { filename: id, content: content as string },
       ]),
     );
-    mockGetGists = {
-      get: vi.fn().mockResolvedValue({ data: { files: mockGistFiles } }),
-    };
+
+    vi.mocked(window.ElectronFiddle.gistLoad).mockImplementation(
+      async ({ gistId }) => ({
+        files: mockGistFiles,
+        id: gistId,
+        revision: 'sha1',
+      }),
+    );
   });
 
   describe('fetchGistAndLoad()', () => {
     it('loads a fiddle', async () => {
       const gistId = 'abcdtestid';
-      vi.mocked(getOctokit).mockResolvedValue({
-        gists: mockGetGists,
-      } as unknown as Octokit);
       store.gistId = gistId;
 
       const result = await instance.fetchGistAndLoad(gistId);
 
       expect(result).toBe(true);
+      expect(window.ElectronFiddle.gistLoad).toHaveBeenCalledWith({
+        gistId,
+        revision: undefined,
+      });
       expect(app.replaceFiddle).toBeCalledWith(editorValues, { gistId });
     });
 
@@ -75,11 +80,7 @@ describe('RemoteLoader', () => {
         '{"main":"main.js","devDependencies":{"electron":"17.0.0",}}';
 
       store.gistId = gistId;
-      mockGistFiles[PACKAGE_NAME] = { content: badPj };
-
-      vi.mocked(getOctokit).mockResolvedValue({
-        gists: mockGetGists,
-      } as unknown as Octokit);
+      mockGistFiles[PACKAGE_NAME] = { filename: PACKAGE_NAME, content: badPj };
 
       const result = await instance.fetchGistAndLoad(gistId);
       expect(result).toBe(false);
@@ -98,11 +99,10 @@ describe('RemoteLoader', () => {
       };
 
       store.gistId = gistId;
-      mockGistFiles[PACKAGE_NAME] = { content: JSON.stringify(pj, null, 2) };
-
-      vi.mocked(getOctokit).mockResolvedValue({
-        gists: mockGetGists,
-      } as unknown as Octokit);
+      mockGistFiles[PACKAGE_NAME] = {
+        filename: PACKAGE_NAME,
+        content: JSON.stringify(pj, null, 2),
+      };
 
       const result = await instance.fetchGistAndLoad(gistId);
 
@@ -114,19 +114,14 @@ describe('RemoteLoader', () => {
       const gistId = 'abcdtestid';
 
       store.showErrorDialog = vi.fn().mockResolvedValueOnce(true);
-      const errorGetGists = {
-        get: vi.fn().mockResolvedValue({
-          data: {
-            files: {
-              'blah.blah': { content: '' },
-              'yes.no': { content: '' },
-            },
-          },
-        }),
-      };
-      vi.mocked(getOctokit).mockResolvedValue({
-        gists: errorGetGists,
-      } as unknown as Octokit);
+      vi.mocked(window.ElectronFiddle.gistLoad).mockResolvedValueOnce({
+        files: {
+          'blah.blah': { filename: 'blah.blah', content: '' },
+          'yes.no': { filename: 'yes.no', content: '' },
+        },
+        id: gistId,
+        revision: 'sha1',
+      });
       store.gistId = gistId;
 
       const result = await instance.fetchGistAndLoad(gistId);
@@ -148,11 +143,11 @@ describe('RemoteLoader', () => {
       };
 
       store.gistId = gistId;
-      mockGistFiles[PACKAGE_NAME] = { content: JSON.stringify(pj, null, 2) };
+      mockGistFiles[PACKAGE_NAME] = {
+        filename: PACKAGE_NAME,
+        content: JSON.stringify(pj, null, 2),
+      };
 
-      vi.mocked(getOctokit).mockResolvedValue({
-        gists: mockGetGists,
-      } as unknown as Octokit);
       vi.mocked(window.ElectronFiddle.isReleasedMajor).mockResolvedValue(true);
 
       const result = await instance.fetchGistAndLoad(gistId);
@@ -160,32 +155,6 @@ describe('RemoteLoader', () => {
       expect(result).toBe(true);
       expect(store.modules.size).toEqual(0);
       expect(store.setVersion).toBeCalledWith('17.0.0');
-    });
-
-    it('handles gists with files over 1mb', async () => {
-      const gistId = 'toobig';
-      const filename = 'index.js';
-      const content = 'hello im huge';
-
-      editorValues[filename] = content;
-      mockGistFiles[filename] = {
-        truncated: true,
-        content: 'truncated',
-        raw_url: 'https://gist.githubusercontent.com/IMTOOBIG',
-      };
-
-      vi.spyOn(global, 'fetch').mockResolvedValueOnce({
-        text: () => Promise.resolve(content),
-      } as Response);
-
-      vi.mocked(getOctokit).mockResolvedValue({
-        gists: mockGetGists,
-      } as unknown as Octokit);
-      instance.confirmAddFile = vi.fn().mockResolvedValue(true);
-
-      const result = await instance.fetchGistAndLoad(gistId);
-      expect(result).toBe(true);
-      expect(app.replaceFiddle).toBeCalledWith(editorValues, { gistId });
     });
 
     it('does not set an invalid Electron version from package.json', async () => {
@@ -198,11 +167,10 @@ describe('RemoteLoader', () => {
       };
 
       store.gistId = gistId;
-      mockGistFiles[PACKAGE_NAME] = { content: JSON.stringify(pj, null, 2) };
-
-      vi.mocked(getOctokit).mockResolvedValue({
-        gists: mockGetGists,
-      } as unknown as Octokit);
+      mockGistFiles[PACKAGE_NAME] = {
+        filename: PACKAGE_NAME,
+        content: JSON.stringify(pj, null, 2),
+      };
 
       const result = await instance.fetchGistAndLoad(gistId);
 
@@ -230,11 +198,10 @@ describe('RemoteLoader', () => {
       };
 
       store.gistId = gistId;
-      mockGistFiles[PACKAGE_NAME] = { content: JSON.stringify(pj, null, 2) };
-
-      vi.mocked(getOctokit).mockResolvedValue({
-        gists: mockGetGists,
-      } as unknown as Octokit);
+      mockGistFiles[PACKAGE_NAME] = {
+        filename: PACKAGE_NAME,
+        content: JSON.stringify(pj, null, 2),
+      };
 
       const result = await instance.fetchGistAndLoad(gistId);
 
@@ -256,11 +223,8 @@ describe('RemoteLoader', () => {
       store.gistId = gistId;
 
       editorValues[filename] = content;
-      mockGistFiles[filename] = { content };
+      mockGistFiles[filename] = { filename, content };
 
-      vi.mocked(getOctokit).mockResolvedValue({
-        gists: mockGetGists,
-      } as unknown as Octokit);
       instance.confirmAddFile = vi.fn().mockResolvedValue(true);
 
       const result = await instance.fetchGistAndLoad(gistId);
@@ -279,11 +243,8 @@ describe('RemoteLoader', () => {
       store.gistId = gistId;
 
       editorValues[filename] = content;
-      mockGistFiles[filename] = { content };
+      mockGistFiles[filename] = { filename, content };
 
-      vi.mocked(getOctokit).mockResolvedValue({
-        gists: mockGetGists,
-      } as unknown as Octokit);
       instance.confirmAddFile = vi.fn().mockResolvedValue(true);
 
       const result = await instance.fetchGistAndLoad(gistId);
@@ -292,14 +253,35 @@ describe('RemoteLoader', () => {
       expect(app.replaceFiddle).toBeCalledWith(editorValues, { gistId });
     });
 
+    it('forwards the requested revision to the IPC', async () => {
+      const gistId = 'abcdtestid';
+      const revision = 'sha-revision';
+      store.gistId = gistId;
+
+      const result = await instance.fetchGistAndLoad(gistId, revision);
+
+      expect(result).toBe(true);
+      expect(window.ElectronFiddle.gistLoad).toHaveBeenCalledWith({
+        gistId,
+        revision,
+      });
+      expect(store.activeGistRevision).toBe(revision);
+    });
+
+    it('sets the active revision to the latest version when none is requested', async () => {
+      const gistId = 'abcdtestid';
+      store.gistId = gistId;
+
+      const result = await instance.fetchGistAndLoad(gistId);
+
+      expect(result).toBe(true);
+      expect(store.activeGistRevision).toBe('sha1');
+    });
+
     it('handles an error', async () => {
-      vi.mocked(getOctokit).mockResolvedValue({
-        gists: {
-          get: async () => {
-            throw new Error('Bwap bwap');
-          },
-        },
-      } as unknown as Octokit);
+      vi.mocked(window.ElectronFiddle.gistLoad).mockRejectedValueOnce(
+        new Error('Bwap bwap'),
+      );
 
       const result = await instance.fetchGistAndLoad('abcdtestid');
       expect(result).toBe(false);

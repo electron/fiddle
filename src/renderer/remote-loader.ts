@@ -119,18 +119,12 @@ export class RemoteLoader {
     revision?: string,
   ): Promise<boolean> {
     try {
-      const octo = await getOctokit(this.appState);
-      const gist = revision
-        ? await octo.gists.getRevision({ gist_id: gistId, sha: revision })
-        : await octo.gists.get({ gist_id: gistId });
+      const gist = await window.ElectronFiddle.gistLoad({ gistId, revision });
 
       const values: EditorValues = {};
 
-      for (const [id, data] of Object.entries(gist.data.files ?? {})) {
-        if (!data) continue;
-        const content = data.truncated
-          ? await fetch(data.raw_url!).then((r) => r.text())
-          : data.content!;
+      for (const [id, data] of Object.entries(gist.files)) {
+        const { content } = data;
 
         if (id === PACKAGE_NAME) {
           const deps: Record<string, string> = {};
@@ -205,7 +199,7 @@ export class RemoteLoader {
       const result = await this.handleLoadingSuccess(values, gistId);
 
       // Set the active revision - either the specified revision or the latest one
-      const activeRevision = revision || gist.data.history?.[0]?.version;
+      const activeRevision = revision || gist.revision;
       if (activeRevision) {
         this.appState.activeGistRevision = activeRevision;
       }

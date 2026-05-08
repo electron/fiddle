@@ -606,7 +606,6 @@ describe('github', () => {
         'https://gist.githubusercontent.com/raw/large.js',
       );
       expect(result.files['large.js'].content).toBe(fullContent);
-      expect(result.files['large.js'].truncated).toBe(false);
 
       fetchSpy.mockRestore();
     });
