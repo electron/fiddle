@@ -3,6 +3,7 @@ import * as React from 'react';
 import { Button, Callout, Dialog, InputGroup, Intent } from '@blueprintjs/core';
 import { observer } from 'mobx-react';
 
+import { GITHUB_TOKEN_PATTERN } from '../../constants';
 import { AppState } from '../state';
 
 interface TokenDialogProps {
@@ -19,8 +20,6 @@ interface TokenDialogState {
 const TOKEN_SCOPES = ['gist'].join();
 const TOKEN_DESCRIPTION = encodeURIComponent('Fiddle Gist Token');
 const GENERATE_TOKEN_URL = `https://github.com/settings/tokens/new?scopes=${TOKEN_SCOPES}&description=${TOKEN_DESCRIPTION}`;
-const TOKEN_PATTERN =
-  /^(ghp_[a-zA-Z0-9]{36}|github_pat_[a-zA-Z0-9]{22}_[a-zA-Z0-9]{59})$/;
 
 /**
  * The token dialog asks the user for a GitHub Personal Access Token.
@@ -115,7 +114,7 @@ export const TokenDialog = observer(
     public async onTokenInputFocused() {
       const text = ((await navigator.clipboard.readText()) || '').trim();
 
-      if (TOKEN_PATTERN.test(text)) {
+      if (GITHUB_TOKEN_PATTERN.test(text)) {
         this.setState({ tokenInput: text });
       }
     }

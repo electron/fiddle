@@ -6,7 +6,7 @@ import { IpcMainInvokeEvent, app, safeStorage } from 'electron';
 
 import { getTemplate } from './content';
 import { ipcMainManager } from './ipc';
-import { GIST_MAX_FILE_COUNT, GIST_MAX_FILE_SIZE } from '../constants';
+import { GIST_MAX_FILE_COUNT, GIST_MAX_FILE_SIZE, GITHUB_TOKEN_PATTERN } from '../constants';
 import { EditorValues, GistFile, GistLoadResult, GistRevision, GistWriteResult, GitHubSignInResult } from '../interfaces';
 import { IpcEvents } from '../ipc-events';
 import { isSupportedFile } from '../utils/editor-utils';
@@ -17,9 +17,6 @@ const ELECTRON_ORG = 'electron';
 
 const ELECTRON_REPO = 'electron';
 
-const TOKEN_PATTERN =
-  /^(ghp_[a-zA-Z0-9]{36}|github_pat_[a-zA-Z0-9]{22}_[a-zA-Z0-9]{59})$/;
-
 const GIST_ID_PATTERN = /^[0-9a-fA-F]{32}$/;
 
 const SHA_PATTERN = /^[0-9a-f]{40}$/;
@@ -27,7 +24,7 @@ const SHA_PATTERN = /^[0-9a-f]{40}$/;
 const MAX_DESCRIPTION_LENGTH = 256;
 
 function isValidToken(token: unknown): token is string {
-  return typeof token === 'string' && TOKEN_PATTERN.test(token);
+  return typeof token === 'string' && GITHUB_TOKEN_PATTERN.test(token);
 }
 
 function isValidGistId(gistId: unknown): gistId is string {
@@ -157,12 +154,9 @@ async function handleTokenSignIn(
   }
 }
 
-async function handleTokenSignOut(
-  _event: IpcMainInvokeEvent,
-): Promise<{ success: boolean }> {
+async function handleTokenSignOut(_event: IpcMainInvokeEvent): Promise<void> {
   deleteToken();
   octokit_ = null;
-  return { success: true };
 }
 
 interface CheckAuthResult {
@@ -283,7 +277,7 @@ async function handleGistLoad(
     : await octo.gists.get({ gist_id: id });
 
   const files: GistLoadResult['files'] = {};
-  for (const [id, data] of Object.entries(gist.data.files ?? {})) {
+  for (const [fileId, data] of Object.entries(gist.data.files ?? {})) {
     if (!data) continue;
 
     // When GitHub truncates a large file, data.content is incomplete.
@@ -296,8 +290,8 @@ async function handleGistLoad(
       }
     }
 
-    files[id] = {
-      filename: data.filename ?? id,
+    files[fileId] = {
+      filename: data.filename ?? fileId,
       content,
     };
   }
