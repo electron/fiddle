@@ -7,6 +7,9 @@ import {
   FiddleEvent,
   FileTransformOperation,
   Files,
+  GistLoadParams,
+  GistLoadResult,
+  GistRevision,
   IPackageManager,
   InstallState,
   InstallStateEvent,
@@ -104,6 +107,8 @@ declare global {
       ): Promise<void>;
       fetchVersions(): Promise<Version[]>;
       fetchExample(ref: string, path: string): Promise<EditorValues>;
+      gistListCommits(gistId: string): Promise<GistRevision[]>;
+      gistLoad(params: GistLoadParams): Promise<GistLoadResult>;
       getAvailableThemes(): Promise<Array<LoadedFiddleTheme>>;
       getElectronTypes(ver: RunnableVersion): Promise<string | undefined>;
       getIsPackageManagerInstalled(

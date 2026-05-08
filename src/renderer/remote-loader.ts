@@ -3,7 +3,6 @@ import semver from 'semver';
 import { AppState } from './state';
 import { disableDownload } from './utils/disable-download';
 import { isKnownFile, isSupportedFile } from './utils/editor-utils';
-import { getOctokit } from './utils/octokit';
 import { getReleaseChannel } from './versions';
 import {
   EditorValues,
@@ -80,31 +79,7 @@ export class RemoteLoader {
 
   public async getGistRevisions(gistId: string): Promise<GistRevision[]> {
     try {
-      const octo = await getOctokit(this.appState);
-      const { data: revisions } = await octo.gists.listCommits({
-        gist_id: gistId,
-      });
-
-      const oldestRevision = revisions[revisions.length - 1];
-      const nonEmptyRevisions = revisions.filter(
-        (r) =>
-          r === oldestRevision ||
-          (r.change_status.additions ?? 0) > 0 ||
-          (r.change_status.deletions ?? 0) > 0,
-      );
-
-      return nonEmptyRevisions.reverse().map((r, i) => {
-        return {
-          sha: r.version,
-          date: r.committed_at,
-          changes: {
-            total: r.change_status.total ?? 0,
-            additions: r.change_status.additions ?? 0,
-            deletions: r.change_status.deletions ?? 0,
-          },
-          title: i === 0 ? 'Created' : `Revision ${i}`,
-        };
-      });
+      return await window.ElectronFiddle.gistListCommits(gistId);
     } catch (error: any) {
       this.handleLoadingFailed(error);
       return [];
@@ -119,18 +94,12 @@ export class RemoteLoader {
     revision?: string,
   ): Promise<boolean> {
     try {
-      const octo = await getOctokit(this.appState);
-      const gist = revision
-        ? await octo.gists.getRevision({ gist_id: gistId, sha: revision })
-        : await octo.gists.get({ gist_id: gistId });
+      const gist = await window.ElectronFiddle.gistLoad({ gistId, revision });
 
       const values: EditorValues = {};
 
-      for (const [id, data] of Object.entries(gist.data.files ?? {})) {
-        if (!data) continue;
-        const content = data.truncated
-          ? await fetch(data.raw_url!).then((r) => r.text())
-          : data.content!;
+      for (const [id, data] of Object.entries(gist.files)) {
+        const { content } = data;
 
         if (id === PACKAGE_NAME) {
           const deps: Record<string, string> = {};
@@ -205,7 +174,7 @@ export class RemoteLoader {
       const result = await this.handleLoadingSuccess(values, gistId);
 
       // Set the active revision - either the specified revision or the latest one
-      const activeRevision = revision || gist.data.history?.[0]?.version;
+      const activeRevision = revision || gist.revision;
       if (activeRevision) {
         this.appState.activeGistRevision = activeRevision;
       }
