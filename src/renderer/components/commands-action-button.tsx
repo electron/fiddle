@@ -245,17 +245,14 @@ export const GistActionButton = observer(
      */
     public async handleDelete() {
       const { appState } = this.props;
-      const octo = await getOctokit(this.props.appState);
 
       appState.activeGistAction = GistActionState.deleting;
 
       try {
-        const gist = await octo.gists.delete({
-          gist_id: appState.gistId!,
-        });
+        await window.ElectronFiddle.gistDelete(appState.gistId!);
 
         appState.editorMosaic.clearSaved();
-        console.log('Deleting: Deleting done', { gist });
+        console.log('Deleting: Deleting done');
         this.renderToast({ message: 'Successfully deleted gist!' });
       } catch (error: any) {
         console.warn(`Could not delete gist`, { error });

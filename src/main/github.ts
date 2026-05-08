@@ -263,12 +263,11 @@ async function handleGistUpdate(
 async function handleGistDelete(
   _event: IpcMainInvokeEvent,
   gistId: unknown,
-): Promise<{ success: boolean }> {
+): Promise<void> {
   if (!isValidGistId(gistId)) throw new Error('Invalid gist ID.');
 
   const octo = getAuthenticatedOctokit();
   await octo.gists.delete({ gist_id: gistId });
-  return { success: true };
 }
 
 async function handleGistLoad(

@@ -116,6 +116,8 @@ export async function setupFiddleGlobal() {
       ipcRenderer.invoke(IpcEvents.GITHUB_GIST_LOAD, params),
     gistUpdate: (params: GistUpdateParams) =>
       ipcRenderer.invoke(IpcEvents.GITHUB_GIST_UPDATE, params),
+    gistDelete: (id: string) =>
+      ipcRenderer.invoke(IpcEvents.GITHUB_GIST_DELETE, id),
     getElectronTypes(ver: RunnableVersion) {
       return ipcRenderer.invoke(IpcEvents.GET_ELECTRON_TYPES, ver);
     },
