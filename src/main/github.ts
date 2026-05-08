@@ -147,6 +147,7 @@ async function handleTokenSignIn(
 
     return { success: true, login: response.data.login };
   } catch (error: any) {
+    console.warn('GitHub token sign-in failed', error);
     return {
       success: false,
       error: 'Invalid GitHub token. Please check your token and try again.',
@@ -218,23 +219,25 @@ async function handleGistUpdate(
   if (typeof params !== 'object' || params === null)
     throw new Error('Invalid parameters.');
 
-  const { id, files } = params as Record<string, unknown>;
+  const { gistId, files } = params as Record<string, unknown>;
 
-  if (!isValidGistId(id)) throw new Error('Invalid gist ID.');
+  if (!isValidGistId(gistId)) throw new Error('Invalid gist ID.');
   if (!areValidGistFiles(files)) throw new Error('Invalid files payload.');
 
   const octo = getAuthenticatedOctokit();
 
   // Fetch existing files to detect deletions
-  const { data: existing } = await octo.gists.get({ gist_id: id });
-  const updateFiles = { ...(files as Record<string, GistFile | null>) };
+  const { data: existing } = await octo.gists.get({ gist_id: gistId });
+  const updateFiles: Record<string, GistFile | null> = { ...files };
   for (const fileId of Object.keys(existing.files ?? {})) {
-    if (!(fileId in updateFiles)) updateFiles[fileId] = null as any;
+    if (!(fileId in updateFiles)) updateFiles[fileId] = null;
   }
 
   const gist = await octo.gists.update({
-    gist_id: id,
-    files: updateFiles as any,
+    gist_id: gistId,
+    // Octokit's generated types don't model file deletion (null), but the
+    // REST API requires it. Cast only at the boundary.
+    files: updateFiles as Record<string, GistFile>,
   });
 
   return {
@@ -261,16 +264,16 @@ async function handleGistLoad(
   if (typeof params !== 'object' || params === null)
     throw new Error('Invalid parameters.');
 
-  const { id, revision } = params as Record<string, unknown>;
+  const { gistId, revision } = params as Record<string, unknown>;
 
-  if (!isValidGistId(id)) throw new Error('Invalid gist ID.');
+  if (!isValidGistId(gistId)) throw new Error('Invalid gist ID.');
   if (revision !== undefined && !isValidSha(revision))
     throw new Error('Invalid revision SHA.');
 
   const octo = getOctokit();
   const gist = revision
-    ? await octo.gists.getRevision({ gist_id: id, sha: revision })
-    : await octo.gists.get({ gist_id: id });
+    ? await octo.gists.getRevision({ gist_id: gistId, sha: revision })
+    : await octo.gists.get({ gist_id: gistId });
 
   const files: GistLoadResult['files'] = {};
   for (const [fileId, data] of Object.entries(gist.data.files ?? {})) {

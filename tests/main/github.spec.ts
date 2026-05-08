@@ -387,7 +387,7 @@ describe('github', () => {
 
     it('updates a gist with valid parameters', async () => {
       const result = await handleGistUpdate(MOCK_EVENT, {
-        id: VALID_GIST_ID,
+        gistId: VALID_GIST_ID,
         files: {
           'main.js': { filename: 'main.js', content: 'new code' },
           'old.js': null,
@@ -401,7 +401,7 @@ describe('github', () => {
       for (const gistId of INVALID_GIST_IDS) {
         await expect(
           handleGistUpdate(MOCK_EVENT, {
-            id: gistId,
+            gistId,
             files: VALID_FILES,
           }),
         ).rejects.toThrow('Invalid gist ID');
@@ -418,7 +418,7 @@ describe('github', () => {
       for (const files of invalidFiles) {
         await expect(
           handleGistUpdate(MOCK_EVENT, {
-            id: VALID_GIST_ID,
+            gistId: VALID_GIST_ID,
             files,
           }),
         ).rejects.toThrow('Invalid files');
@@ -426,7 +426,7 @@ describe('github', () => {
 
       await expect(
         handleGistUpdate(MOCK_EVENT, {
-          id: VALID_GIST_ID,
+          gistId: VALID_GIST_ID,
           files: 'not-an-object',
         }),
       ).rejects.toThrow('Invalid files');
@@ -476,7 +476,7 @@ describe('github', () => {
 
     it('loads a gist by ID', async () => {
       const result = await handleGistLoad(MOCK_EVENT, {
-        id: VALID_GIST_ID,
+        gistId: VALID_GIST_ID,
       });
 
       expect(result.files['main.js'].content).toBe('console.log("hi")');
@@ -484,7 +484,7 @@ describe('github', () => {
 
     it('loads a gist at a specific revision', async () => {
       const result = await handleGistLoad(MOCK_EVENT, {
-        id: VALID_GIST_ID,
+        gistId: VALID_GIST_ID,
         revision: VALID_SHA,
       });
 
@@ -493,16 +493,16 @@ describe('github', () => {
 
     it('rejects invalid gist IDs', async () => {
       for (const gistId of INVALID_GIST_IDS) {
-        await expect(
-          handleGistLoad(MOCK_EVENT, { id: gistId }),
-        ).rejects.toThrow('Invalid gist ID');
+        await expect(handleGistLoad(MOCK_EVENT, { gistId })).rejects.toThrow(
+          'Invalid gist ID',
+        );
       }
     });
 
     it('rejects invalid revision SHA', async () => {
       await expect(
         handleGistLoad(MOCK_EVENT, {
-          id: VALID_GIST_ID,
+          gistId: VALID_GIST_ID,
           revision: 'not-a-sha',
         }),
       ).rejects.toThrow('Invalid revision SHA');
@@ -511,7 +511,7 @@ describe('github', () => {
     it('loads a gist with valid or omitted revision', async () => {
       for (const revision of [VALID_SHA, undefined]) {
         const result = await handleGistLoad(MOCK_EVENT, {
-          id: VALID_GIST_ID,
+          gistId: VALID_GIST_ID,
           revision,
         });
 
@@ -523,7 +523,7 @@ describe('github', () => {
       for (const revision of ['abc123', null, 'a'.repeat(41), 'A'.repeat(40)]) {
         await expect(
           handleGistLoad(MOCK_EVENT, {
-            id: VALID_GIST_ID,
+            gistId: VALID_GIST_ID,
             revision,
           }),
         ).rejects.toThrow('Invalid revision SHA');
@@ -542,13 +542,14 @@ describe('github', () => {
       mockOctokitInstance();
 
       const result = await handleGistLoad(MOCK_EVENT, {
-        id: VALID_GIST_ID,
+        gistId: VALID_GIST_ID,
       });
       expect(result.files['main.js'].content).toBe('console.log("hi")');
     });
 
     it('fetches full content for truncated files', async () => {
-      const fullContent = 'a'.repeat(2000);
+      // This is the largest allowable size a gist file can be
+      const fullContent = 'a'.repeat(GIST_MAX_FILE_SIZE);
 
       // Sign out and re-sign-in with a mock that returns a truncated file
       await handleTokenSignOut(MOCK_EVENT);
@@ -579,7 +580,7 @@ describe('github', () => {
       } as Response);
 
       const result = await handleGistLoad(MOCK_EVENT, {
-        id: VALID_GIST_ID,
+        gistId: VALID_GIST_ID,
       });
 
       expect(global.fetch).toHaveBeenCalledWith(

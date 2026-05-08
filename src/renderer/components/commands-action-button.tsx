@@ -196,7 +196,7 @@ export const GistActionButton = observer(
         const files = this.gistFilesList(values);
 
         const gist = await window.ElectronFiddle.gistUpdate({
-          id: appState.gistId!,
+          gistId: appState.gistId!,
           files,
         });
 
@@ -245,7 +245,6 @@ export const GistActionButton = observer(
         await window.ElectronFiddle.gistDelete(appState.gistId!);
 
         appState.editorMosaic.clearSaved();
-        console.log('Deleting: Deleting done');
         this.renderToast({ message: 'Successfully deleted gist!' });
       } catch (error: any) {
         console.warn(`Could not delete gist`, { error });

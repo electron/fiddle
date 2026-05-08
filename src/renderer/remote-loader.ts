@@ -95,7 +95,7 @@ export class RemoteLoader {
   ): Promise<boolean> {
     try {
       const gist = await window.ElectronFiddle.gistLoad({
-        id: gistId,
+        gistId,
         revision,
       });
 

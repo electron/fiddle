@@ -62,7 +62,7 @@ describe('RemoteLoader', () => {
 
       expect(result).toBe(true);
       expect(window.ElectronFiddle.gistLoad).toHaveBeenCalledWith({
-        id: gistId,
+        gistId,
         revision: undefined,
       });
       expect(app.replaceFiddle).toBeCalledWith(editorValues, { gistId });
@@ -255,7 +255,7 @@ describe('RemoteLoader', () => {
 
       expect(result).toBe(true);
       expect(window.ElectronFiddle.gistLoad).toHaveBeenCalledWith({
-        id: gistId,
+        gistId,
         revision,
       });
       expect(store.activeGistRevision).toBe(revision);
