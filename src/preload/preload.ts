@@ -110,6 +110,8 @@ export async function setupFiddleGlobal() {
     },
     fetchExample: (ref: string, path: string) =>
       ipcRenderer.invoke(IpcEvents.GITHUB_FETCH_EXAMPLE, { ref, path }),
+    gistListCommits: (gistId: string) =>
+      ipcRenderer.invoke(IpcEvents.GITHUB_GIST_LIST_COMMITS, gistId),
     gistLoad: (params: GistLoadParams) =>
       ipcRenderer.invoke(IpcEvents.GITHUB_GIST_LOAD, params),
     getElectronTypes(ver: RunnableVersion) {

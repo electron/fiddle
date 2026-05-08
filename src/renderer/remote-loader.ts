@@ -3,7 +3,6 @@ import semver from 'semver';
 import { AppState } from './state';
 import { disableDownload } from './utils/disable-download';
 import { isKnownFile, isSupportedFile } from './utils/editor-utils';
-import { getOctokit } from './utils/octokit';
 import { getReleaseChannel } from './versions';
 import {
   EditorValues,
@@ -80,31 +79,7 @@ export class RemoteLoader {
 
   public async getGistRevisions(gistId: string): Promise<GistRevision[]> {
     try {
-      const octo = await getOctokit(this.appState);
-      const { data: revisions } = await octo.gists.listCommits({
-        gist_id: gistId,
-      });
-
-      const oldestRevision = revisions[revisions.length - 1];
-      const nonEmptyRevisions = revisions.filter(
-        (r) =>
-          r === oldestRevision ||
-          (r.change_status.additions ?? 0) > 0 ||
-          (r.change_status.deletions ?? 0) > 0,
-      );
-
-      return nonEmptyRevisions.reverse().map((r, i) => {
-        return {
-          sha: r.version,
-          date: r.committed_at,
-          changes: {
-            total: r.change_status.total ?? 0,
-            additions: r.change_status.additions ?? 0,
-            deletions: r.change_status.deletions ?? 0,
-          },
-          title: i === 0 ? 'Created' : `Revision ${i}`,
-        };
-      });
+      return await window.ElectronFiddle.gistListCommits(gistId);
     } catch (error: any) {
       this.handleLoadingFailed(error);
       return [];

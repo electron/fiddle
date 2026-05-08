@@ -625,6 +625,71 @@ describe('github', () => {
       expect(result[1].title).toBe('Revision 1');
     });
 
+    it('always keeps the initial revision even with empty change_status', async () => {
+      await handleTokenSignOut(MOCK_EVENT);
+      mockOctokitInstance({
+        gists: {
+          listCommits: vi.fn().mockResolvedValue({
+            data: [
+              {
+                version: 'sha2',
+                committed_at: '2026-02-05T12:00:00Z',
+                change_status: { additions: 5, deletions: 2, total: 7 },
+              },
+              {
+                version: 'sha1',
+                committed_at: '2026-02-01T10:00:00Z',
+                change_status: { additions: 0, deletions: 0, total: 0 },
+              },
+            ],
+          }),
+        },
+      });
+      await handleTokenSignIn(MOCK_EVENT, VALID_GHP_TOKEN);
+
+      const result = await handleGistListCommits(MOCK_EVENT, VALID_GIST_ID);
+
+      // The initial revision should NOT be filtered out.
+      expect(result).toHaveLength(2);
+      expect(result[0].sha).toBe('sha1');
+      expect(result[0].title).toBe('Created');
+    });
+
+    it('filters out empty revisions except the initial one', async () => {
+      await handleTokenSignOut(MOCK_EVENT);
+      mockOctokitInstance({
+        gists: {
+          listCommits: vi.fn().mockResolvedValue({
+            data: [
+              {
+                version: 'sha3',
+                committed_at: '2026-02-10T12:00:00Z',
+                change_status: { additions: 3, deletions: 1, total: 4 },
+              },
+              {
+                version: 'sha2',
+                committed_at: '2026-02-05T12:00:00Z',
+                change_status: { additions: 0, deletions: 0, total: 0 },
+              },
+              {
+                version: 'sha1',
+                committed_at: '2026-02-01T10:00:00Z',
+                change_status: { additions: 0, deletions: 0, total: 0 },
+              },
+            ],
+          }),
+        },
+      });
+      await handleTokenSignIn(MOCK_EVENT, VALID_GHP_TOKEN);
+
+      const result = await handleGistListCommits(MOCK_EVENT, VALID_GIST_ID);
+
+      // sha2 (empty, not initial) is dropped; sha1 (initial) and sha3 are kept.
+      expect(result).toHaveLength(2);
+      expect(result[0].sha).toBe('sha1');
+      expect(result[1].sha).toBe('sha3');
+    });
+
     it('rejects invalid gist IDs', async () => {
       for (const gistId of INVALID_GIST_IDS) {
         await expect(handleGistListCommits(MOCK_EVENT, gistId)).rejects.toThrow(
