@@ -5,7 +5,7 @@ import { observer } from 'mobx-react';
 
 import { VersionSelect } from './version-select';
 import { RunnableVersion } from '../../interfaces';
-import { Bisector } from '../bisect';
+import { Bisector } from '../../utils/bisect';
 import { AppState } from '../state';
 
 interface BisectDialogProps {

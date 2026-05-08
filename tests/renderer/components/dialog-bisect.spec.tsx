@@ -7,14 +7,14 @@ import {
   RunResult,
   VersionSource,
 } from '../../../src/interfaces';
-import { Bisector } from '../../../src/renderer/bisect';
 import { BisectDialog } from '../../../src/renderer/components/dialog-bisect';
 import { Runner } from '../../../src/renderer/runner';
 import { AppState } from '../../../src/renderer/state';
+import { Bisector } from '../../../src/utils/bisect';
 import { StateMock } from '../../mocks/mocks';
 import { renderClassComponentWithInstanceRef } from '../utils/renderClassComponentWithInstanceRef';
 
-vi.mock('../../../src/renderer/bisect');
+vi.mock('../../../src/utils/bisect');
 
 describe.each([8, 15])('BisectDialog component', (numVersions) => {
   let runner: Runner;
