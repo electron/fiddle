@@ -18,7 +18,6 @@ import {
 } from '../../src/renderer/utils/editor-utils';
 import { getOctokit } from '../../src/renderer/utils/octokit';
 import { AppMock, StateMock, createEditorValues } from '../mocks/mocks';
-import { FetchMock } from '../utils';
 
 vi.mock('../../src/renderer/utils/octokit');
 
@@ -31,8 +30,6 @@ describe('RemoteLoader', () => {
   let store: StateMock;
   let mockGistFiles: GistFiles;
   let mockGetGists: { get: () => Promise<{ files: GistFiles }> };
-  let mockRepos: Array<{ name: string; download_url: string }>;
-  let mockGetRepos: { getContent: () => Promise<{ data: typeof mockRepos }> };
   let editorValues: EditorValues;
 
   beforeEach(() => {
@@ -55,17 +52,6 @@ describe('RemoteLoader', () => {
     );
     mockGetGists = {
       get: vi.fn().mockResolvedValue({ data: { files: mockGistFiles } }),
-    };
-
-    mockRepos = [
-      ...Object.keys(editorValues).map((name) => ({
-        name,
-        download_url: `https://${name}`,
-      })),
-      { name: 'stuff', download_url: 'https://google.com/' },
-    ];
-    mockGetRepos = {
-      getContent: vi.fn().mockResolvedValue({ data: mockRepos }),
     };
   });
 
@@ -90,10 +76,6 @@ describe('RemoteLoader', () => {
 
       store.gistId = gistId;
       mockGistFiles[PACKAGE_NAME] = { content: badPj };
-      mockRepos.push({
-        name: PACKAGE_NAME,
-        download_url: `https://${PACKAGE_NAME}`,
-      });
 
       vi.mocked(getOctokit).mockResolvedValue({
         gists: mockGetGists,
@@ -117,10 +99,6 @@ describe('RemoteLoader', () => {
 
       store.gistId = gistId;
       mockGistFiles[PACKAGE_NAME] = { content: JSON.stringify(pj, null, 2) };
-      mockRepos.push({
-        name: PACKAGE_NAME,
-        download_url: `https://${PACKAGE_NAME}`,
-      });
 
       vi.mocked(getOctokit).mockResolvedValue({
         gists: mockGetGists,
@@ -171,10 +149,6 @@ describe('RemoteLoader', () => {
 
       store.gistId = gistId;
       mockGistFiles[PACKAGE_NAME] = { content: JSON.stringify(pj, null, 2) };
-      mockRepos.push({
-        name: PACKAGE_NAME,
-        download_url: `https://${PACKAGE_NAME}`,
-      });
 
       vi.mocked(getOctokit).mockResolvedValue({
         gists: mockGetGists,
@@ -225,10 +199,6 @@ describe('RemoteLoader', () => {
 
       store.gistId = gistId;
       mockGistFiles[PACKAGE_NAME] = { content: JSON.stringify(pj, null, 2) };
-      mockRepos.push({
-        name: PACKAGE_NAME,
-        download_url: `https://${PACKAGE_NAME}`,
-      });
 
       vi.mocked(getOctokit).mockResolvedValue({
         gists: mockGetGists,
@@ -261,10 +231,6 @@ describe('RemoteLoader', () => {
 
       store.gistId = gistId;
       mockGistFiles[PACKAGE_NAME] = { content: JSON.stringify(pj, null, 2) };
-      mockRepos.push({
-        name: PACKAGE_NAME,
-        download_url: `https://${PACKAGE_NAME}`,
-      });
 
       vi.mocked(getOctokit).mockResolvedValue({
         gists: mockGetGists,
@@ -291,10 +257,6 @@ describe('RemoteLoader', () => {
 
       editorValues[filename] = content;
       mockGistFiles[filename] = { content };
-      mockRepos.push({
-        name: filename,
-        download_url: `https://${filename}`,
-      });
 
       vi.mocked(getOctokit).mockResolvedValue({
         gists: mockGetGists,
@@ -318,10 +280,6 @@ describe('RemoteLoader', () => {
 
       editorValues[filename] = content;
       mockGistFiles[filename] = { content };
-      mockRepos.push({
-        name: filename,
-        download_url: `https://${filename}`,
-      });
 
       vi.mocked(getOctokit).mockResolvedValue({
         gists: mockGetGists,
@@ -349,67 +307,57 @@ describe('RemoteLoader', () => {
   });
 
   describe('fetchExampleAndLoad()', () => {
-    let fetchMock: FetchMock;
-
     beforeEach(() => {
       instance.setElectronVersion = vi.fn().mockReturnValueOnce(true);
-      fetchMock = new FetchMock();
-      for (const { name, download_url } of mockRepos) {
-        fetchMock.add(download_url, name);
-      }
     });
 
     it('loads an Electron example', async () => {
-      vi.mocked(window.ElectronFiddle.getTemplate).mockResolvedValue({
-        [MAIN_JS]: '// content',
-      });
-
-      vi.mocked(getOctokit).mockResolvedValue({
-        repos: mockGetRepos,
-      } as unknown as Octokit);
+      vi.mocked(window.ElectronFiddle.fetchExample).mockResolvedValue(
+        editorValues,
+      );
 
       await instance.fetchExampleAndLoad('v4.0.0', 'test/path');
 
-      const expectedValues: Record<string, string> = {};
-      for (const filename of Object.keys(mockGistFiles)) {
-        expectedValues[filename] = filename;
-      }
+      expect(window.ElectronFiddle.fetchExample).toHaveBeenCalledWith(
+        'v4.0.0',
+        'test/path',
+      );
       expect(app.replaceFiddle).toHaveBeenCalledTimes(1);
       expect(app.replaceFiddle).toHaveBeenCalledWith(
-        expectedValues,
+        editorValues,
         expect.anything(),
       );
       expect(instance.setElectronVersion).toBeCalledWith('4.0.0');
     });
 
-    it('handles an error', async () => {
-      vi.mocked(getOctokit).mockResolvedValue({
-        repos: {
-          getContent: async () => {
-            throw new Error('Bwap bwap');
-          },
-        },
-      } as unknown as Octokit);
+    it('handles an error from the IPC', async () => {
+      vi.mocked(window.ElectronFiddle.fetchExample).mockRejectedValue(
+        new Error('Bwap bwap'),
+      );
 
       const result = await instance.fetchExampleAndLoad('v4.0.0', 'test/path');
       expect(result).toBe(false);
     });
 
-    it('handles incorrect results', async () => {
+    it('rejects an invalid Electron version in the tag', async () => {
       store.showErrorDialog = vi.fn().mockResolvedValueOnce(true);
-      vi.mocked(getOctokit).mockResolvedValue({
-        repos: {
-          getContent: async () => ({
-            not_an_array: true,
-          }),
-        },
-      } as unknown as Octokit);
+
+      const result = await instance.fetchExampleAndLoad('not-a-tag', 'p');
+
+      expect(result).toBe(false);
+      expect(window.ElectronFiddle.fetchExample).not.toHaveBeenCalled();
+      expect(store.showErrorDialog).toHaveBeenCalledWith(
+        expect.stringMatching(/Could not determine Electron version/i),
+      );
+    });
+
+    it('does not call fetchExample when setElectronVersion fails', async () => {
+      instance.setElectronVersion = vi.fn().mockResolvedValueOnce(false);
 
       const result = await instance.fetchExampleAndLoad('v4.0.0', 'test/path');
+
       expect(result).toBe(false);
-      expect(store.showErrorDialog).toHaveBeenCalledWith(
-        expect.stringMatching(/not a valid/i),
-      );
+      expect(window.ElectronFiddle.fetchExample).not.toHaveBeenCalled();
     });
   });
 

@@ -103,6 +103,7 @@ declare global {
         opts?: Partial<DownloadVersionParams>,
       ): Promise<void>;
       fetchVersions(): Promise<Version[]>;
+      fetchExample(ref: string, path: string): Promise<EditorValues>;
       getAvailableThemes(): Promise<Array<LoadedFiddleTheme>>;
       getElectronTypes(ver: RunnableVersion): Promise<string | undefined>;
       getIsPackageManagerInstalled(
