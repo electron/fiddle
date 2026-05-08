@@ -39,6 +39,43 @@ const MOCK_EVENT = {} as IpcMainInvokeEvent;
 // Import Octokit so we can mock its constructor
 const { Octokit } = await import('@octokit/rest');
 
+const VALID_GHP_TOKEN = 'ghp_ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefgh12';
+const VALID_PAT_TOKEN =
+  'github_pat_ABCDEFGHIJKLMNOPQRSTUV_ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyzABCDEFG';
+const VALID_GIST_ID = 'abc123def456abc123def456abc123de';
+const VALID_SHA = 'abc123def456abc123def456abc123deabc123de';
+const INVALID_GIST_IDS = [
+  'bad-id',
+  123,
+  null,
+  undefined,
+  'abc123',
+  'a'.repeat(33),
+  'zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz',
+  'https://gist.github.com/abc123def456abc123def456abc123de',
+];
+const MOCK_LOGIN = 'testuser';
+const CREDENTIALS_FILE = '.github-credentials';
+const VALID_FILES = {
+  'main.js': { filename: 'main.js', content: 'code' },
+};
+
+const MOCK_GIST_FILES = {
+  'main.js': {
+    filename: 'main.js',
+    content: 'console.log("hi")',
+    truncated: false,
+    raw_url: 'https://raw.example.com/main.js',
+  },
+};
+
+const MOCK_GIST_DATA = {
+  id: VALID_GIST_ID,
+  html_url: `https://gist.github.com/${VALID_GIST_ID}`,
+  history: [{ version: 'sha1' }],
+  files: MOCK_GIST_FILES,
+};
+
 function mockOctokitInstance(overrides: Record<string, any> = {}) {
   const instance = {
     users: {
@@ -84,43 +121,6 @@ function mockOctokitInstance(overrides: Record<string, any> = {}) {
   });
   return instance;
 }
-
-const VALID_GHP_TOKEN = 'ghp_ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefgh12';
-const VALID_PAT_TOKEN =
-  'github_pat_ABCDEFGHIJKLMNOPQRSTUV_ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyzABCDEFG';
-const VALID_GIST_ID = 'abc123def456abc123def456abc123de';
-const VALID_SHA = 'abc123def456abc123def456abc123deabc123de';
-const INVALID_GIST_IDS = [
-  'bad-id',
-  123,
-  null,
-  undefined,
-  'abc123',
-  'a'.repeat(33),
-  'zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz',
-  'https://gist.github.com/abc123def456abc123def456abc123de',
-];
-const MOCK_LOGIN = 'testuser';
-const CREDENTIALS_FILE = '.github-credentials';
-const VALID_FILES = {
-  'main.js': { filename: 'main.js', content: 'code' },
-};
-
-const MOCK_GIST_FILES = {
-  'main.js': {
-    filename: 'main.js',
-    content: 'console.log("hi")',
-    truncated: false,
-    raw_url: 'https://raw.example.com/main.js',
-  },
-};
-
-const MOCK_GIST_DATA = {
-  id: VALID_GIST_ID,
-  html_url: `https://gist.github.com/${VALID_GIST_ID}`,
-  history: [{ version: 'sha1' }],
-  files: MOCK_GIST_FILES,
-};
 
 describe('github', () => {
   beforeEach(() => {
@@ -212,8 +212,7 @@ describe('github', () => {
   describe('handleTokenSignOut()', () => {
     it('deletes the stored token', async () => {
       vi.mocked(fs.existsSync).mockReturnValue(true);
-      const result = await handleTokenSignOut(MOCK_EVENT);
-      expect(result).toEqual({ success: true });
+      await expect(handleTokenSignOut(MOCK_EVENT)).resolves.toBeUndefined();
       expect(fs.unlinkSync).toHaveBeenCalled();
     });
 

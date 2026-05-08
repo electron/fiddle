@@ -28,8 +28,6 @@ interface GistActionButtonProps {
 }
 
 interface IGistActionButtonState {
-  readonly isUpdating: boolean;
-  readonly isDeleting: boolean;
   readonly actionType: GistActionType;
 }
 
@@ -49,8 +47,6 @@ export const GistActionButton = observer(
       this.setPublic = this.setPublic.bind(this);
 
       this.state = {
-        isUpdating: false,
-        isDeleting: false,
         actionType: GistActionType.publish,
       };
 
