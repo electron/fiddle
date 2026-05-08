@@ -38,7 +38,7 @@ describe('TokenDialog component', () => {
     nextState: Partial<TokenDialogInstance['state']>,
   ) {
     act(() => {
-      instance.setState(nextState);
+      instance.setState(nextState as TokenDialogInstance['state']);
     });
   }
 
