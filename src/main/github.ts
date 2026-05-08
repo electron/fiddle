@@ -84,7 +84,7 @@ function getCredentialsPath(): string {
 
 function saveToken(token: string): void {
   const encrypted = safeStorage.encryptString(token);
-  fs.writeFileSync(getCredentialsPath(), encrypted);
+  fs.writeFileSync(getCredentialsPath(), encrypted, { mode: 0o600 });
 }
 
 function loadToken(): string | null {

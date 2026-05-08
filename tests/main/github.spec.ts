@@ -133,8 +133,10 @@ describe('github', () => {
         const result = await handleTokenSignIn(MOCK_EVENT, token);
         expect(result).toEqual({ success: true, login: MOCK_LOGIN });
 
-        const writePath = vi.mocked(fs.writeFileSync).mock.calls.at(-1)?.[0];
+        const lastWriteCall = vi.mocked(fs.writeFileSync).mock.calls.at(-1);
+        const writePath = lastWriteCall?.[0];
         expect(writePath).toBe(path.join('/Users/fake-user', CREDENTIALS_FILE));
+        expect(lastWriteCall?.[2]).toEqual({ mode: 0o600 });
       }
 
       expect(fs.writeFileSync).toHaveBeenCalled();
