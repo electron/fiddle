@@ -219,14 +219,20 @@ export interface GistRevision {
   };
 }
 
-export interface GistLoadParams {
-  id: string;
-  revision?: string;
+export interface GistCreateParams {
+  description: string;
+  files: Record<string, GistFile>;
+  isPublic: boolean;
 }
 
 export interface GistFile {
   filename: string;
   content: string;
+}
+
+export interface GistLoadParams {
+  id: string;
+  revision?: string;
 }
 
 export interface GistLoadResult {

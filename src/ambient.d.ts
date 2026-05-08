@@ -7,6 +7,7 @@ import {
   FiddleEvent,
   FileTransformOperation,
   Files,
+  GistCreateParams,
   GistLoadParams,
   GistLoadResult,
   GistRevision,
@@ -112,10 +113,11 @@ declare global {
       ): Promise<void>;
       fetchVersions(): Promise<Version[]>;
       fetchExample(ref: string, path: string): Promise<EditorValues>;
+      gistCreate(params: GistCreateParams): Promise<GistWriteResult>;
+      gistDelete(id: string): Promise<void>;
       gistListCommits(gistId: string): Promise<GistRevision[]>;
       gistLoad(params: GistLoadParams): Promise<GistLoadResult>;
       gistUpdate(params: GistUpdateParams): Promise<GistWriteResult>;
-      gistDelete(id: string): Promise<void>;
       getAvailableThemes(): Promise<Array<LoadedFiddleTheme>>;
       getElectronTypes(ver: RunnableVersion): Promise<string | undefined>;
       getIsPackageManagerInstalled(
