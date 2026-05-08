@@ -4,7 +4,6 @@
 
 import { BrowserWindow, app, dialog } from 'electron';
 import fs from 'fs-extra';
-import * as tmp from 'tmp';
 import { type Mock, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { MAIN_JS } from '../../src/interfaces';
@@ -22,6 +21,7 @@ import {
 } from '../../src/main/files';
 import { ipcMainManager } from '../../src/main/ipc';
 import { getFiles } from '../../src/main/utils/get-files';
+import * as tmp from '../../src/main/utils/tmp';
 import { getOrCreateMainWindow } from '../../src/main/windows';
 import { BrowserWindowMock } from '../mocks/browser-window';
 import { createEditorValues } from '../mocks/editor-values';
@@ -29,7 +29,7 @@ import { createEditorValues } from '../mocks/editor-values';
 vi.mock('../../src/main/windows');
 vi.mock('../../src/main/utils/get-files');
 vi.mock('fs-extra');
-vi.mock('tmp');
+vi.mock('../../src/main/utils/tmp');
 
 const mockWindow = new BrowserWindowMock() as unknown as Electron.BrowserWindow;
 
@@ -326,9 +326,7 @@ describe('files', () => {
 
   it('saveFilesToTemp()', async () => {
     const tmpPath = '/tmp/save-to-temp/';
-    vi.spyOn(tmp, 'dirSync').mockReturnValue({
-      name: tmpPath,
-    } as tmp.DirResult);
+    vi.spyOn(tmp, 'dirSync').mockReturnValue(tmpPath);
 
     await expect(
       saveFilesToTemp(
@@ -345,9 +343,7 @@ describe('files', () => {
 
   it('saveFilesToTemp() skips unsafe filenames', async () => {
     const tmpPath = '/tmp/save-to-temp/';
-    vi.spyOn(tmp, 'dirSync').mockReturnValue({
-      name: tmpPath,
-    } as tmp.DirResult);
+    vi.spyOn(tmp, 'dirSync').mockReturnValue(tmpPath);
 
     await saveFilesToTemp(
       new Map([

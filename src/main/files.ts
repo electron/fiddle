@@ -2,11 +2,11 @@ import * as path from 'node:path';
 
 import { BrowserWindow, IpcMainInvokeEvent, app, dialog } from 'electron';
 import fs from 'fs-extra';
-import * as tmp from 'tmp';
 
 import { ipcMainManager } from './ipc';
 import { getFiles } from './utils/get-files';
 import { readFiddle } from './utils/read-fiddle';
+import * as tmp from './utils/tmp';
 import { Files } from '../interfaces';
 import { IpcEvents } from '../ipc-events';
 import { isSupportedFile } from '../utils/editor-utils';
@@ -166,13 +166,13 @@ export async function saveFilesToTemp(files: Files): Promise<string> {
       continue;
     }
     try {
-      await fs.outputFile(path.join(dir.name, name), content);
+      await fs.outputFile(path.join(dir, name), content);
     } catch (error) {
       throw error;
     }
   }
 
-  return dir.name;
+  return dir;
 }
 
 /**
