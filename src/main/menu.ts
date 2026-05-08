@@ -6,6 +6,7 @@ import {
   shell,
 } from 'electron';
 
+import { startFiddle } from './fiddle-core';
 import {
   saveFiddle,
   saveFiddleAs,
@@ -317,7 +318,12 @@ function getTasksMenu(): MenuItemConstructorOptions {
     {
       label: 'Run Fiddle...',
       accelerator: 'F5',
-      click: () => ipcMainManager.send(IpcEvents.FIDDLE_RUN),
+      click: (_, focusedWindow) => {
+        if (focusedWindow)
+          startFiddle((focusedWindow as BrowserWindow).webContents).catch(
+            console.error,
+          );
+      },
     },
     {
       label: 'Package Fiddle...',

@@ -123,6 +123,8 @@ export async function startFiddle(
     version,
   } = options;
 
+  ipcMainManager.send(IpcEvents.FIDDLE_RUN, [], webContents);
+
   // Look up local Electron builds by version string. Local builds use a
   // version of the form `0.0.0-local.<timestamp>`, so only consult the
   // stored local versions when the version string contains `-local`.

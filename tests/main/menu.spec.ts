@@ -13,8 +13,9 @@ import {
   vi,
 } from 'vitest';
 
-import { BlockableAccelerator, MAIN_JS } from '../../src/interfaces';
+import { BlockableAccelerator, MAIN_JS, RunResult } from '../../src/interfaces';
 import { IpcEvents } from '../../src/ipc-events';
+import { startFiddle } from '../../src/main/fiddle-core';
 import {
   saveFiddle,
   saveFiddleAs,
@@ -28,6 +29,7 @@ import { createMainWindow } from '../../src/main/windows';
 import { overridePlatform, resetPlatform } from '../utils';
 
 vi.mock('../../src/main/files');
+vi.mock('../../src/main/fiddle-core');
 vi.mock('../../src/main/templates');
 vi.mock('../../src/main/windows');
 vi.mock('../../src/main/ipc');
@@ -311,8 +313,16 @@ describe('menu', () => {
       });
 
       it('runs the fiddle', () => {
-        tasks.submenu[0].click();
-        expect(ipcMainManager.send).toHaveBeenCalledWith(IpcEvents.FIDDLE_RUN);
+        vi.mocked(startFiddle).mockResolvedValueOnce(RunResult.SUCCESS);
+        const mocks = {
+          send: vi.fn(),
+        };
+        const focusedWindow = {
+          webContents:
+            mocks as Partial<electron.WebContents> as electron.WebContents,
+        } as Partial<electron.BrowserWindow> as electron.BrowserWindow;
+        tasks.submenu[0].click(undefined, focusedWindow);
+        expect(startFiddle).toHaveBeenCalledWith(focusedWindow.webContents);
       });
 
       it('packages the fiddle', () => {

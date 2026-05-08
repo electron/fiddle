@@ -60,7 +60,7 @@ export const Runner = observer(
             props.icon = 'stop';
           } else {
             props.text = 'Run';
-            props.onClick = () => (window.app.runner as any).runFiddle();
+            props.onClick = () => window.ElectronFiddle.startFiddle();
             props.icon = 'play';
           }
           break;

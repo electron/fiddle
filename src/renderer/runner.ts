@@ -133,11 +133,7 @@ export class Runner {
   }
 
   /**
-   * Executes the fiddle with either local electron build
-   * or the user selected electron version. The main process owns the
-   * temp directory, module installation, spawning Electron, and cleanup —
-   * the renderer simply triggers the run, streams output back, and waits
-   * for `startFiddle()` to resolve.
+   * Update the UI for running the fiddle.
    */
   private async runFiddle(): Promise<void> {
     const { clearConsole, isClearingConsoleOnRun, pushOutput, flushOutput } =
@@ -205,14 +201,6 @@ export class Runner {
     });
 
     this.appState.isRunning = true;
-
-    try {
-      await window.ElectronFiddle.startFiddle();
-    } catch (e: any) {
-      pushOutput(`Failed to spawn Fiddle: ${e.message}`);
-    } finally {
-      cleanup();
-    }
   }
 
   /**
