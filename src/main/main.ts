@@ -19,6 +19,7 @@ import { setupDialogs } from './dialogs';
 import { setupTypes } from './electron-types';
 import { setupFiddleCore } from './fiddle-core';
 import { onFirstRunMaybe } from './first-run';
+import { setupGitHub } from './github';
 import { ipcMainManager } from './ipc';
 import { setupNpm } from './npm';
 import { listenForProtocolHandler, setupProtocolHandler } from './protocol';
@@ -60,6 +61,7 @@ export async function onReady() {
   setupThemes();
   setupIsDevMode();
   setupNpm();
+  setupGitHub();
   const knownVersions = await setupVersions();
   setupGetProjectName();
   setupGetUsername();

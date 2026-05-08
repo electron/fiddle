@@ -89,16 +89,6 @@ export interface SetupRequest {
   useObsolete?: boolean;
 }
 
-export interface BisectRequest {
-  setup: SetupRequest;
-  goodVersion: string;
-  badVersion: string;
-}
-
-export interface TestRequest {
-  setup: SetupRequest;
-}
-
 export interface OutputEntry {
   text: string;
   timeString: string;
@@ -175,7 +165,6 @@ export interface SelectedLocalVersion {
 
 export type FiddleEvent =
   | 'before-quit'
-  | 'bisect-task'
   | 'clear-console'
   | 'electron-types-changed'
   | 'execute-monaco-command'
@@ -197,7 +186,6 @@ export type FiddleEvent =
   | 'select-all-in-editor'
   | 'set-show-me-template'
   | 'show-welcome-tour'
-  | 'test-task'
   | 'toggle-bisect'
   | 'toggle-monaco-option'
   | 'undo-in-editor'
@@ -227,6 +215,17 @@ export interface GistRevision {
     additions: number;
     total: number;
   };
+}
+
+export interface GistLoadParams {
+  gistId: string;
+  revision?: string;
+}
+
+export interface GistLoadResult {
+  files: Record<string, { filename: string; content: string }>;
+  id: string;
+  revision?: string;
 }
 
 export enum GlobalSetting {

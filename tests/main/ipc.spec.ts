@@ -90,24 +90,72 @@ describe('IpcMainManager', () => {
   });
 
   describe('handle()', () => {
-    it('calls ipcMain.handle', () => {
+    it('registers a handler via ipcMain.handle', () => {
       const noop = () => ({});
       ipcMainManager.handle(IpcEvents.FIDDLE_RUN, noop);
       expect(electron.ipcMain.handle).toHaveBeenCalledWith(
         IpcEvents.FIDDLE_RUN,
-        noop,
+        expect.any(Function),
       );
+    });
+
+    it('rejects senders outside a known BrowserWindow', async () => {
+      vi.mocked(electron.BrowserWindow.fromWebContents).mockReturnValue(
+        null as any,
+      );
+      const mockListener = vi.fn().mockReturnValue('result');
+      ipcMainManager.handle(IpcEvents.FIDDLE_RUN, mockListener);
+
+      // Extract the wrapper that was passed to ipcMain.handle
+      const wrapper = vi.mocked(electron.ipcMain.handle).mock.calls.at(-1)![1];
+      const mockEvent = { sender: {} } as Electron.IpcMainInvokeEvent;
+      const result = await wrapper(mockEvent, 'arg1');
+
+      expect(result).toBeUndefined();
+      expect(mockListener).not.toHaveBeenCalled();
+    });
+
+    it('calls the listener for senders from a known BrowserWindow', async () => {
+      vi.mocked(electron.BrowserWindow.fromWebContents).mockReturnValue(
+        {} as electron.BrowserWindow,
+      );
+      const mockListener = vi.fn().mockReturnValue('result');
+      ipcMainManager.handle(IpcEvents.FIDDLE_RUN, mockListener);
+
+      const wrapper = vi.mocked(electron.ipcMain.handle).mock.calls.at(-1)![1];
+      const mockEvent = { sender: {} } as Electron.IpcMainInvokeEvent;
+      const result = await wrapper(mockEvent, 'arg1');
+
+      expect(result).toBe('result');
+      expect(mockListener).toHaveBeenCalledWith(mockEvent, 'arg1');
     });
   });
 
   describe('handleOnce()', () => {
-    it('calls ipcMain.handleOnce', () => {
+    it('registers a handler via ipcMain.handleOnce', () => {
       const noop = () => ({});
       ipcMainManager.handleOnce(IpcEvents.FIDDLE_RUN, noop);
       expect(electron.ipcMain.handleOnce).toHaveBeenCalledWith(
         IpcEvents.FIDDLE_RUN,
-        noop,
+        expect.any(Function),
       );
+    });
+
+    it('rejects senders outside a known BrowserWindow', async () => {
+      vi.mocked(electron.BrowserWindow.fromWebContents).mockReturnValue(
+        null as any,
+      );
+      const mockListener = vi.fn().mockReturnValue('result');
+      ipcMainManager.handleOnce(IpcEvents.FIDDLE_RUN, mockListener);
+
+      const wrapper = vi
+        .mocked(electron.ipcMain.handleOnce)
+        .mock.calls.at(-1)![1];
+      const mockEvent = { sender: {} } as Electron.IpcMainInvokeEvent;
+      const result = await wrapper(mockEvent, 'arg1');
+
+      expect(result).toBeUndefined();
+      expect(mockListener).not.toHaveBeenCalled();
     });
   });
 });

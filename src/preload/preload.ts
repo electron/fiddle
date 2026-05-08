@@ -7,12 +7,11 @@ import {
   FiddleEvent,
   FileTransformOperation,
   Files,
+  GistLoadParams,
   IPackageManager,
   MessageOptions,
-  OutputEntry,
   PMOperationOptions,
   PackageJsonOptions,
-  RunResult,
   RunnableVersion,
   StartFiddleParams,
   Version,
@@ -22,7 +21,6 @@ import { FiddleTheme } from '../themes-defaults';
 
 const channelMapping: Record<FiddleEvent, IpcEvents> = {
   'before-quit': IpcEvents.BEFORE_QUIT,
-  'bisect-task': IpcEvents.TASK_BISECT,
   'clear-console': IpcEvents.CLEAR_CONSOLE,
   'electron-types-changed': IpcEvents.ELECTRON_TYPES_CHANGED,
   'execute-monaco-command': IpcEvents.MONACO_EXECUTE_COMMAND,
@@ -44,7 +42,6 @@ const channelMapping: Record<FiddleEvent, IpcEvents> = {
   'select-all-in-editor': IpcEvents.SELECT_ALL_IN_EDITOR,
   'set-show-me-template': IpcEvents.SET_SHOW_ME_TEMPLATE,
   'show-welcome-tour': IpcEvents.SHOW_WELCOME_TOUR,
-  'test-task': IpcEvents.TASK_TEST,
   'toggle-bisect': IpcEvents.BISECT_COMMANDS_TOGGLE,
   'toggle-monaco-option': IpcEvents.MONACO_TOGGLE_OPTION,
   'undo-in-editor': IpcEvents.UNDO_IN_EDITOR,
@@ -111,6 +108,12 @@ export async function setupFiddleGlobal() {
     fetchVersions() {
       return ipcRenderer.invoke(IpcEvents.FETCH_VERSIONS);
     },
+    fetchExample: (ref: string, path: string) =>
+      ipcRenderer.invoke(IpcEvents.GITHUB_FETCH_EXAMPLE, { ref, path }),
+    gistListCommits: (gistId: string) =>
+      ipcRenderer.invoke(IpcEvents.GITHUB_GIST_LIST_COMMITS, gistId),
+    gistLoad: (params: GistLoadParams) =>
+      ipcRenderer.invoke(IpcEvents.GITHUB_GIST_LOAD, params),
     getElectronTypes(ver: RunnableVersion) {
       return ipcRenderer.invoke(IpcEvents.GET_ELECTRON_TYPES, ver);
     },
@@ -205,9 +208,6 @@ export async function setupFiddleGlobal() {
       );
     },
     platform: process.platform,
-    pushOutputEntry(entry: OutputEntry) {
-      ipcRenderer.send(IpcEvents.OUTPUT_ENTRY, entry);
-    },
     reloadWindows() {
       ipcRenderer.send(IpcEvents.RELOAD_WINDOW);
     },
@@ -251,9 +251,6 @@ export async function setupFiddleGlobal() {
     },
     stopFiddle() {
       ipcRenderer.send(IpcEvents.STOP_FIDDLE);
-    },
-    taskDone(result: RunResult) {
-      ipcRenderer.send(IpcEvents.TASK_DONE, result);
     },
     themePath: await ipcRenderer.sendSync(IpcEvents.GET_THEME_PATH),
     async uncacheTypes(ver: RunnableVersion) {
