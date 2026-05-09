@@ -121,7 +121,6 @@ describe('github', () => {
   beforeEach(async () => {
     userDataPath = tmp.dirSync({ prefix: 'electron-fiddle-github-' });
     app.setPath('userData', userDataPath);
-
     // Confirm that the folder we just created will hold the credentials file
     expect(getCredentialsPath().startsWith(userDataPath)).toBe(true);
     expect(loadToken()).toBeNull();
@@ -137,9 +136,10 @@ describe('github', () => {
       mockOctokitInstance();
       expect(loadToken()).toBeNull();
 
+      const expectedSignInResult = { success: true, login: MOCK_LOGIN };
       for (const token of [VALID_GHP_TOKEN, VALID_PAT_TOKEN]) {
         const result = await handleTokenSignIn(MOCK_EVENT, token);
-        expect(result).toEqual({ success: true, login: MOCK_LOGIN });
+        expect(result).toEqual(expectedSignInResult);
 
         const encrypted = safeStorage.encryptString(token);
         expect(loadToken()).toBe(token);
