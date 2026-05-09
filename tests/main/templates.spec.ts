@@ -1,5 +1,3 @@
-import * as path from 'node:path';
-
 import { describe, expect, it, vi } from 'vitest';
 
 import { MAIN_JS } from '../../src/interfaces';
@@ -7,9 +5,6 @@ import { getTemplateValues } from '../../src/main/templates';
 import { getEmptyContent } from '../../src/utils/editor-utils';
 
 vi.unmock('fs-extra');
-vi.mock('../../src/main/constants', () => ({
-  STATIC_DIR: path.join(__dirname, '../../static'),
-}));
 
 describe('templates', () => {
   const KNOWN_GOOD_TEMPLATE = 'clipboard';
