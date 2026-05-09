@@ -4,6 +4,7 @@ import * as path from 'node:path';
 import { IpcMainInvokeEvent, safeStorage } from 'electron';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
+import { GIST_MAX_FILE_COUNT, GIST_MAX_FILE_SIZE } from '../../src/constants';
 import { testing } from '../../src/main/github';
 
 const {
@@ -354,11 +355,11 @@ describe('github', () => {
         {
           'main.js': {
             filename: 'main.js',
-            content: 'x'.repeat(10 * 1024 * 1024 + 1),
+            content: 'x'.repeat(GIST_MAX_FILE_SIZE + 1),
           },
         },
         Object.fromEntries(
-          Array.from({ length: 301 }, (_, index) => {
+          Array.from({ length: GIST_MAX_FILE_COUNT + 1 }, (_, index) => {
             const filename = `file${index}.js`;
             return [filename, { filename, content: 'x' }];
           }),
