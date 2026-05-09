@@ -38,6 +38,9 @@ describe('App component', () => {
     vi.mocked(window.ElectronFiddle.getLatestStable).mockReturnValue(
       semver.parse('24.0.0')!,
     );
+    vi.mocked(window.ElectronFiddle.gitHubCheckAuth).mockResolvedValue({
+      login: null,
+    });
 
     const { app: appMock } = window;
     const { electronTypes, fileManager, remoteLoader, runner, state } = appMock;

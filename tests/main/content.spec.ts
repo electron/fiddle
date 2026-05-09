@@ -20,9 +20,6 @@ import { getTemplate, getTestTemplate } from '../../src/main/content';
 import { isReleasedMajor } from '../../src/main/versions';
 
 vi.unmock('fs-extra');
-vi.mock('../../src/main/constants', () => ({
-  STATIC_DIR: path.join(__dirname, '../../static'),
-}));
 vi.mock('../../src/main/versions', () => ({
   isReleasedMajor: vi.fn(),
 }));

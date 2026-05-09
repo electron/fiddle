@@ -94,7 +94,10 @@ export class RemoteLoader {
     revision?: string,
   ): Promise<boolean> {
     try {
-      const gist = await window.ElectronFiddle.gistLoad({ gistId, revision });
+      const gist = await window.ElectronFiddle.gistLoad({
+        gistId,
+        revision,
+      });
 
       const values: EditorValues = {};
 

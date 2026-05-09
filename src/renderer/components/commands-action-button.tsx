@@ -22,15 +22,12 @@ import {
 } from '../../interfaces';
 import { AppState } from '../state';
 import { ensureRequiredFiles } from '../utils/editor-utils';
-import { getOctokit } from '../utils/octokit';
 
 interface GistActionButtonProps {
   appState: AppState;
 }
 
 interface IGistActionButtonState {
-  readonly isUpdating: boolean;
-  readonly isDeleting: boolean;
   readonly actionType: GistActionType;
 }
 
@@ -50,8 +47,6 @@ export const GistActionButton = observer(
       this.setPublic = this.setPublic.bind(this);
 
       this.state = {
-        isUpdating: false,
-        isDeleting: false,
         actionType: GistActionType.publish,
       };
 
@@ -85,14 +80,14 @@ export const GistActionButton = observer(
     public async handleClick(): Promise<void> {
       const { appState } = this.props;
 
-      if (!appState.gitHubToken) {
+      if (!appState.gitHubLogin) {
         appState.toggleAuthDialog();
       }
 
       // Wait for the dialog to be closed again
       await when(() => !appState.isTokenDialogShowing);
 
-      if (appState.gitHubToken) {
+      if (appState.gitHubLogin) {
         return this.performGistAction();
       }
     }
@@ -110,7 +105,6 @@ export const GistActionButton = observer(
     private async publishGist(description: string): Promise<boolean> {
       const { appState } = this.props;
 
-      const octo = await getOctokit(appState);
       const { gitHubPublishAsPublic } = appState;
       const options = { includeDependencies: true, includeElectron: true };
       const defaultGistValues = await window.ElectronFiddle.getTemplate(
@@ -126,14 +120,14 @@ export const GistActionButton = observer(
           ? this.gistFilesList(defaultGistValues)
           : this.gistFilesList(currentEditorValues);
 
-        const gist = await octo.gists.create({
-          public: !!gitHubPublishAsPublic,
+        const gist = await window.ElectronFiddle.gistCreate({
+          isPublic: !!gitHubPublishAsPublic,
           description,
           files: gistFilesList,
         });
 
-        appState.gistId = gist.data.id;
-        appState.activeGistRevision = gist.data.history?.[0]?.version;
+        appState.gistId = gist.id;
+        appState.activeGistRevision = gist.revision;
         appState.localPath = undefined;
 
         if (appState.isPublishingGistAsRevision) {
@@ -146,8 +140,7 @@ export const GistActionButton = observer(
           action: {
             text: 'Copy link',
             icon: 'clipboard',
-            onClick: () =>
-              navigator.clipboard.writeText(gist.data.html_url ?? ''),
+            onClick: () => navigator.clipboard.writeText(gist.url),
           },
         });
 
@@ -194,31 +187,22 @@ export const GistActionButton = observer(
      */
     public async handleUpdate(silent = false) {
       const { appState } = this.props;
-      const octo = await getOctokit(this.props.appState);
       const options = { includeDependencies: true, includeElectron: true };
       const values = await window.app.getEditorValues(options);
 
       appState.activeGistAction = GistActionState.updating;
 
       try {
-        const {
-          data: { files: oldFiles },
-        } = await octo.gists.get({ gist_id: appState.gistId! });
-
         const files = this.gistFilesList(values);
-        for (const id of Object.keys(oldFiles ?? {})) {
-          // Delete files that have been removed or renamed.
-          if (!(id in files)) files[id] = null as any;
-        }
 
-        const gist = await octo.gists.update({
-          gist_id: appState.gistId!,
+        const gist = await window.ElectronFiddle.gistUpdate({
+          gistId: appState.gistId!,
           files,
         });
 
         // Update the active revision to the newly created revision
-        if (gist.data.history?.[0]?.version) {
-          appState.activeGistRevision = gist.data.history[0].version;
+        if (gist.revision) {
+          appState.activeGistRevision = gist.revision;
         }
 
         await appState.editorMosaic.markAsSaved();
@@ -230,8 +214,7 @@ export const GistActionButton = observer(
             action: {
               text: 'Copy link',
               icon: 'clipboard',
-              onClick: () =>
-                navigator.clipboard.writeText(gist.data.html_url ?? ''),
+              onClick: () => navigator.clipboard.writeText(gist.url),
             },
           });
         }
@@ -255,17 +238,13 @@ export const GistActionButton = observer(
      */
     public async handleDelete() {
       const { appState } = this.props;
-      const octo = await getOctokit(this.props.appState);
 
       appState.activeGistAction = GistActionState.deleting;
 
       try {
-        const gist = await octo.gists.delete({
-          gist_id: appState.gistId!,
-        });
+        await window.ElectronFiddle.gistDelete(appState.gistId!);
 
         appState.editorMosaic.clearSaved();
-        console.log('Deleting: Deleting done', { gist });
         this.renderToast({ message: 'Successfully deleted gist!' });
       } catch (error: any) {
         console.warn(`Could not delete gist`, { error });
