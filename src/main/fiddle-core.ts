@@ -182,7 +182,12 @@ async function startFiddleImpl(webContents: WebContents): Promise<RunResult> {
 
   // Get the fiddle's files from the renderer.
   const files = new Map(
-    (await getFiles(BrowserWindow.fromWebContents(webContents)!, [])).files,
+    (
+      await getFiles(BrowserWindow.fromWebContents(webContents)!, [], {
+        includeDependencies: false,
+        includeElectron: false,
+      })
+    ).files,
   );
 
   // Pull the project name out of the fiddle's package.json — that's the
