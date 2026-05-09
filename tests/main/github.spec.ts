@@ -130,8 +130,6 @@ describe('github', () => {
     fs.rmSync(userDataPath, { recursive: true, force: true });
   });
 
-  // --- Token sign-in ---
-
   describe('handleTokenSignIn()', () => {
     it('saves encrypted tokens to a permission-protected userData file', async () => {
       mockOctokitInstance();
@@ -140,7 +138,7 @@ describe('github', () => {
       const expectedSignInResult = { success: true, login: MOCK_LOGIN };
       for (const token of [VALID_GHP_TOKEN, VALID_PAT_TOKEN]) {
         const result = await handleTokenSignIn(MOCK_EVENT, token);
-        expect(result).toEqual(expectedSignInResult);
+        expect(result).toEqual({ success: true, login: MOCK_LOGIN });
 
         const encrypted = safeStorage.encryptString(token);
         expect(loadToken()).toBe(token);
@@ -210,8 +208,6 @@ describe('github', () => {
     });
   });
 
-  // --- Token sign-out ---
-
   describe('handleTokenSignOut()', () => {
     it('deletes the stored token', async () => {
       // setup: set a token & confirm it loads
@@ -224,24 +220,19 @@ describe('github', () => {
     });
   });
 
-  // --- Check auth ---
-
   describe('handleTokenCheckAuth()', () => {
     it('returns null when decryption fails', async () => {
       saveToken(VALID_GHP_TOKEN);
       vi.mocked(safeStorage.decryptString).mockImplementationOnce(() => {
         throw new Error('corrupt');
       });
-
       const result = await handleTokenCheckAuth(MOCK_EVENT);
-
       expect(result).toEqual({ login: null });
     });
 
     it('returns login when a valid token is stored', async () => {
       saveToken(VALID_GHP_TOKEN);
       mockOctokitInstance();
-
       const result = await handleTokenCheckAuth(MOCK_EVENT);
       expect(result).toEqual({ login: MOCK_LOGIN });
     });
