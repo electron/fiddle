@@ -1,8 +1,21 @@
+import * as fs from 'node:fs';
 import * as path from 'node:path';
 
 import { app } from 'electron';
 
-export const STATIC_DIR = path.resolve(__dirname, '../static');
+// Find the root dir for static assets (eg `show-me/`, `electron-quick-start/`).
+// In production, the bundled main script lives in `.webpack/main/` and webpack
+// copies static assets to `.webpack/static/`.
+// In tests (vitest loads the source TypeScript directly), `__dirname` is
+// `src/main/` and the static folder lives at the repository root.
+function resolveStaticDir(): string {
+  const paths = ['../static', '../../static'].map((p) =>
+    path.resolve(__dirname, p),
+  );
+  return paths.find(fs.existsSync) ?? paths[0];
+}
+
+export const STATIC_DIR = resolveStaticDir();
 
 export const ELECTRON_DOWNLOAD_PATH = path.join(
   app.getPath('userData'),
