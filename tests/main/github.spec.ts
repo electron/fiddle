@@ -1,14 +1,15 @@
 import * as fs from 'node:fs';
-import * as path from 'node:path';
 
 import { IpcMainInvokeEvent, app, safeStorage } from 'electron';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { GIST_MAX_FILE_COUNT, GIST_MAX_FILE_SIZE } from '../../src/constants';
 import { testing } from '../../src/main/github';
+import * as tmp from '../../src/main/utils/tmp';
 
 const {
   fetchExample,
+  getCredentialsPath,
   handleGistCreate,
   handleGistDelete,
   handleGistListCommits,
@@ -17,14 +18,10 @@ const {
   handleTokenCheckAuth,
   handleTokenSignIn,
   handleTokenSignOut,
+  loadToken,
+  saveToken,
 } = testing;
 
-vi.mock('node:fs', () => ({
-  existsSync: vi.fn(() => false),
-  readFileSync: vi.fn(() => Buffer.from('')),
-  writeFileSync: vi.fn(),
-  unlinkSync: vi.fn(),
-}));
 vi.mock('@octokit/rest', () => {
   const MockOctokit = vi.fn();
   return { Octokit: MockOctokit };
@@ -56,10 +53,10 @@ const INVALID_GIST_IDS = [
   'https://gist.github.com/abc123def456abc123def456abc123de',
 ];
 const MOCK_LOGIN = 'testuser';
-const CREDENTIALS_FILE = '.github-credentials';
 const VALID_FILES = {
   'main.js': { filename: 'main.js', content: 'code' },
 };
+let userDataPath: string;
 
 function mockOctokitInstance(overrides: Record<string, any> = {}) {
   const MOCK_GIST_FILES = {
@@ -124,31 +121,33 @@ function mockOctokitInstance(overrides: Record<string, any> = {}) {
 }
 
 describe('github', () => {
-  beforeEach(() => {
-    vi.mocked(fs.existsSync).mockReturnValue(false);
+  beforeEach(async () => {
+    userDataPath = tmp.dirSync({ prefix: 'electron-fiddle-github-' });
+    app.setPath('userData', userDataPath);
     // Reset module-level octokit state by signing out
-    handleTokenSignOut(MOCK_EVENT);
+    await handleTokenSignOut(MOCK_EVENT);
+  });
+
+  afterEach(async () => {
+    await handleTokenSignOut(MOCK_EVENT);
+    fs.rmSync(userDataPath, { recursive: true, force: true });
   });
 
   // --- Token sign-in ---
 
   describe('handleTokenSignIn()', () => {
-    it('signs in with valid token formats', async () => {
+    it('saves encrypted tokens to a permission-protected userData file', async () => {
       mockOctokitInstance();
-
+      const expectedSignInResult = { success: true, login: MOCK_LOGIN };
       for (const token of [VALID_GHP_TOKEN, VALID_PAT_TOKEN]) {
         const result = await handleTokenSignIn(MOCK_EVENT, token);
-        expect(result).toEqual({ success: true, login: MOCK_LOGIN });
+        expect(result).toEqual(expectedSignInResult);
 
-        const lastWriteCall = vi.mocked(fs.writeFileSync).mock.calls.at(-1);
-        const writePath = lastWriteCall?.[0];
-        expect(writePath).toBe(
-          path.join(app.getPath('userData'), CREDENTIALS_FILE),
-        );
-        expect(lastWriteCall?.[2]).toEqual({ mode: 0o600 });
+        const expectedContents = safeStorage.encryptString(token);
+        expect(fs.readFileSync(getCredentialsPath())).toEqual(expectedContents);
+        expect(fs.statSync(getCredentialsPath()).mode & 0o777).toBe(0o600);
+        expect(loadToken()).toBe(token);
       }
-
-      expect(fs.writeFileSync).toHaveBeenCalled();
     });
 
     it('rejects an invalid token format', async () => {
@@ -214,17 +213,16 @@ describe('github', () => {
 
   describe('handleTokenSignOut()', () => {
     it('deletes the stored token', async () => {
-      vi.mocked(fs.existsSync).mockReturnValue(true);
+      saveToken(VALID_GHP_TOKEN);
+
       await expect(handleTokenSignOut(MOCK_EVENT)).resolves.toBeUndefined();
-      expect(fs.unlinkSync).toHaveBeenCalled();
+      expect(loadToken()).toBeNull();
     });
 
     it('does nothing when the token file does not exist', async () => {
-      vi.mocked(fs.existsSync).mockReturnValue(false);
-
       await handleTokenSignOut(MOCK_EVENT);
 
-      expect(fs.unlinkSync).not.toHaveBeenCalled();
+      expect(loadToken()).toBeNull();
     });
   });
 
@@ -232,8 +230,8 @@ describe('github', () => {
 
   describe('handleTokenCheckAuth()', () => {
     it('returns null when decryption fails', async () => {
-      vi.mocked(fs.existsSync).mockReturnValue(true);
-      vi.mocked(fs.readFileSync).mockImplementation(() => {
+      saveToken(VALID_GHP_TOKEN);
+      vi.mocked(safeStorage.decryptString).mockImplementationOnce(() => {
         throw new Error('corrupt');
       });
 
@@ -243,10 +241,7 @@ describe('github', () => {
     });
 
     it('returns login when a valid token is stored', async () => {
-      vi.mocked(fs.existsSync).mockReturnValue(true);
-      vi.mocked(fs.readFileSync).mockReturnValue(
-        Buffer.from(`encrypted:${VALID_GHP_TOKEN}`),
-      );
+      saveToken(VALID_GHP_TOKEN);
       mockOctokitInstance();
 
       const result = await handleTokenCheckAuth(MOCK_EVENT);
@@ -254,16 +249,12 @@ describe('github', () => {
     });
 
     it('returns null when no token is stored', async () => {
-      vi.mocked(fs.existsSync).mockReturnValue(false);
       const result = await handleTokenCheckAuth(MOCK_EVENT);
       expect(result).toEqual({ login: null });
     });
 
     it('cleans up and returns null for expired tokens', async () => {
-      vi.mocked(fs.existsSync).mockReturnValue(true);
-      vi.mocked(fs.readFileSync).mockReturnValue(
-        Buffer.from(`encrypted:${VALID_GHP_TOKEN}`),
-      );
+      saveToken(VALID_GHP_TOKEN);
       mockOctokitInstance({
         users: {
           getAuthenticated: vi
@@ -276,14 +267,11 @@ describe('github', () => {
 
       const result = await handleTokenCheckAuth(MOCK_EVENT);
       expect(result).toEqual({ login: null });
-      expect(fs.unlinkSync).toHaveBeenCalled();
+      expect(loadToken()).toBeNull();
     });
 
     it('preserves the token for transient auth-check failures', async () => {
-      vi.mocked(fs.existsSync).mockReturnValue(true);
-      vi.mocked(fs.readFileSync).mockReturnValue(
-        Buffer.from(`encrypted:${VALID_GHP_TOKEN}`),
-      );
+      saveToken(VALID_GHP_TOKEN);
       mockOctokitInstance({
         users: {
           getAuthenticated: vi.fn().mockRejectedValue(new Error('offline')),
@@ -293,7 +281,7 @@ describe('github', () => {
       const result = await handleTokenCheckAuth(MOCK_EVENT);
 
       expect(result).toEqual({ login: null });
-      expect(fs.unlinkSync).not.toHaveBeenCalled();
+      expect(loadToken()).toBe(VALID_GHP_TOKEN);
     });
   });
 
@@ -303,7 +291,6 @@ describe('github', () => {
     await handleTokenSignIn(MOCK_EVENT, VALID_GHP_TOKEN);
     // Clear call counts from sign-in so they don't leak into assertions
     vi.mocked(Octokit).mockClear();
-    vi.mocked(fs.writeFileSync).mockClear();
   }
 
   // --- Gist create ---

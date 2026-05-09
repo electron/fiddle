@@ -421,6 +421,7 @@ export function setupGitHub() {
 // Exported for testing
 export const testing = {
   fetchExample,
+  getCredentialsPath,
   handleGistCreate,
   handleGistDelete,
   handleGistListCommits,
@@ -429,4 +430,6 @@ export const testing = {
   handleTokenCheckAuth,
   handleTokenSignIn,
   handleTokenSignOut,
+  loadToken,
+  saveToken,
 };
