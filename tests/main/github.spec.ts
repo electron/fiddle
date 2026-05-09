@@ -1,7 +1,7 @@
 import * as fs from 'node:fs';
 import * as path from 'node:path';
 
-import { IpcMainInvokeEvent, safeStorage } from 'electron';
+import { IpcMainInvokeEvent, app, safeStorage } from 'electron';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { GIST_MAX_FILE_COUNT, GIST_MAX_FILE_SIZE } from '../../src/constants';
@@ -142,7 +142,9 @@ describe('github', () => {
 
         const lastWriteCall = vi.mocked(fs.writeFileSync).mock.calls.at(-1);
         const writePath = lastWriteCall?.[0];
-        expect(writePath).toBe(path.join('/Users/fake-user', CREDENTIALS_FILE));
+        expect(writePath).toBe(
+          path.join(app.getPath('userData'), CREDENTIALS_FILE),
+        );
         expect(lastWriteCall?.[2]).toEqual({ mode: 0o600 });
       }
 
