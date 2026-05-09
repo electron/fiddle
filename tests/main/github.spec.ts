@@ -130,18 +130,15 @@ describe('github', () => {
     fs.rmSync(userDataPath, { recursive: true, force: true });
   });
 
-  // --- Token sign-in ---
-
   describe('handleTokenSignIn()', () => {
     it('saves encrypted tokens to a permission-protected userData file', async () => {
       mockOctokitInstance();
-      const expectedSignInResult = { success: true, login: MOCK_LOGIN };
       for (const token of [VALID_GHP_TOKEN, VALID_PAT_TOKEN]) {
         const result = await handleTokenSignIn(MOCK_EVENT, token);
-        expect(result).toEqual(expectedSignInResult);
+        expect(result).toEqual({ success: true, login: MOCK_LOGIN });
 
-        const expectedContents = safeStorage.encryptString(token);
-        expect(fs.readFileSync(getCredentialsPath())).toEqual(expectedContents);
+        const encrypted = safeStorage.encryptString(token);
+        expect(fs.readFileSync(getCredentialsPath())).toEqual(encrypted);
         expect(fs.statSync(getCredentialsPath()).mode & 0o777).toBe(0o600);
         expect(loadToken()).toBe(token);
       }
@@ -206,24 +203,18 @@ describe('github', () => {
     });
   });
 
-  // --- Token sign-out ---
-
   describe('handleTokenSignOut()', () => {
     it('deletes the stored token', async () => {
       saveToken(VALID_GHP_TOKEN);
-
       await expect(handleTokenSignOut(MOCK_EVENT)).resolves.toBeUndefined();
       expect(loadToken()).toBeNull();
     });
 
     it('does nothing when the token file does not exist', async () => {
       await handleTokenSignOut(MOCK_EVENT);
-
       expect(loadToken()).toBeNull();
     });
   });
-
-  // --- Check auth ---
 
   describe('handleTokenCheckAuth()', () => {
     it('returns null when decryption fails', async () => {
@@ -231,16 +222,13 @@ describe('github', () => {
       vi.mocked(safeStorage.decryptString).mockImplementationOnce(() => {
         throw new Error('corrupt');
       });
-
       const result = await handleTokenCheckAuth(MOCK_EVENT);
-
       expect(result).toEqual({ login: null });
     });
 
     it('returns login when a valid token is stored', async () => {
       saveToken(VALID_GHP_TOKEN);
       mockOctokitInstance();
-
       const result = await handleTokenCheckAuth(MOCK_EVENT);
       expect(result).toEqual({ login: MOCK_LOGIN });
     });
