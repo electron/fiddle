@@ -1,6 +1,7 @@
 import '@testing-library/jest-dom/vitest';
 
 import { cleanup } from '@testing-library/react';
+import { app } from 'electron';
 import { configure as mobxConfigure } from 'mobx';
 import { afterEach, beforeEach, expect, vi } from 'vitest';
 
@@ -103,6 +104,7 @@ afterEach(() => {
 
 beforeEach(() => {
   vi.resetAllMocks();
+  (app as any)._resetMockedPaths();
 
   (process.env.TEST as any) = true;
   document.body.innerHTML = '<div id="app" />';
