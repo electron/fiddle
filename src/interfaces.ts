@@ -219,6 +219,17 @@ export interface GistRevision {
   };
 }
 
+export interface GistLoadParams {
+  gistId: string;
+  revision?: string;
+}
+
+export interface GistLoadResult {
+  files: Record<string, { filename: string; content: string }>;
+  id: string;
+  revision?: string;
+}
+
 export enum GlobalSetting {
   acceleratorsToBlock = 'acceleratorsToBlock',
   channelsToShow = 'channelsToShow',

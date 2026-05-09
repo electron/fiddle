@@ -7,6 +7,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { testing } from '../../src/main/github';
 
 const {
+  fetchExample,
   handleGistCreate,
   handleGistDelete,
   handleGistListCommits,
@@ -27,6 +28,11 @@ vi.mock('@octokit/rest', () => {
   const MockOctokit = vi.fn();
   return { Octokit: MockOctokit };
 });
+vi.mock('../../src/main/content', () => ({
+  getTemplate: vi.fn(),
+}));
+
+const { getTemplate } = await import('../../src/main/content');
 
 const MOCK_EVENT = {} as IpcMainInvokeEvent;
 
@@ -600,7 +606,6 @@ describe('github', () => {
         'https://gist.githubusercontent.com/raw/large.js',
       );
       expect(result.files['large.js'].content).toBe(fullContent);
-      expect(result.files['large.js'].truncated).toBe(false);
 
       fetchSpy.mockRestore();
     });
@@ -620,12 +625,265 @@ describe('github', () => {
       expect(result[1].title).toBe('Revision 1');
     });
 
+    it('always keeps the initial revision even with empty change_status', async () => {
+      await handleTokenSignOut(MOCK_EVENT);
+      mockOctokitInstance({
+        gists: {
+          listCommits: vi.fn().mockResolvedValue({
+            data: [
+              {
+                version: 'sha2',
+                committed_at: '2026-02-05T12:00:00Z',
+                change_status: { additions: 5, deletions: 2, total: 7 },
+              },
+              {
+                version: 'sha1',
+                committed_at: '2026-02-01T10:00:00Z',
+                change_status: { additions: 0, deletions: 0, total: 0 },
+              },
+            ],
+          }),
+        },
+      });
+      await handleTokenSignIn(MOCK_EVENT, VALID_GHP_TOKEN);
+
+      const result = await handleGistListCommits(MOCK_EVENT, VALID_GIST_ID);
+
+      // The initial revision should NOT be filtered out.
+      expect(result).toHaveLength(2);
+      expect(result[0].sha).toBe('sha1');
+      expect(result[0].title).toBe('Created');
+    });
+
+    it('filters out empty revisions except the initial one', async () => {
+      await handleTokenSignOut(MOCK_EVENT);
+      mockOctokitInstance({
+        gists: {
+          listCommits: vi.fn().mockResolvedValue({
+            data: [
+              {
+                version: 'sha3',
+                committed_at: '2026-02-10T12:00:00Z',
+                change_status: { additions: 3, deletions: 1, total: 4 },
+              },
+              {
+                version: 'sha2',
+                committed_at: '2026-02-05T12:00:00Z',
+                change_status: { additions: 0, deletions: 0, total: 0 },
+              },
+              {
+                version: 'sha1',
+                committed_at: '2026-02-01T10:00:00Z',
+                change_status: { additions: 0, deletions: 0, total: 0 },
+              },
+            ],
+          }),
+        },
+      });
+      await handleTokenSignIn(MOCK_EVENT, VALID_GHP_TOKEN);
+
+      const result = await handleGistListCommits(MOCK_EVENT, VALID_GIST_ID);
+
+      // sha2 (empty, not initial) is dropped; sha1 (initial) and sha3 are kept.
+      expect(result).toHaveLength(2);
+      expect(result[0].sha).toBe('sha1');
+      expect(result[1].sha).toBe('sha3');
+    });
+
     it('rejects invalid gist IDs', async () => {
       for (const gistId of INVALID_GIST_IDS) {
         await expect(handleGistListCommits(MOCK_EVENT, gistId)).rejects.toThrow(
           'Invalid gist ID',
         );
       }
+    });
+  });
+
+  // --- Fetch example ---
+
+  describe('fetchExample()', () => {
+    const REF = 'v42.0.0';
+    const EXAMPLE_PATH = 'docs/fiddles/quick-start';
+    const TEMPLATE_VALUES = {
+      'main.js': '// template main',
+      'index.html': '<!-- template html -->',
+      'renderer.js': '// template renderer',
+      'preload.js': '// template preload',
+      'styles.css': '/* template css */',
+      'package.json': '{}',
+    };
+
+    function makeFolderEntry(name: string, downloadUrl: string | null = null) {
+      return {
+        name,
+        download_url: downloadUrl ?? `https://example.test/${name}`,
+      };
+    }
+
+    function mockFetchResponses(map: Record<string, string>) {
+      return vi
+        .spyOn(global, 'fetch')
+        .mockImplementation(async (input: RequestInfo | URL) => {
+          const url = typeof input === 'string' ? input : input.toString();
+          const body = map[url];
+          if (body === undefined) {
+            return { ok: false, status: 404, text: async () => '' } as Response;
+          }
+          return { ok: true, status: 200, text: async () => body } as Response;
+        });
+    }
+
+    beforeEach(() => {
+      vi.mocked(getTemplate).mockReset();
+      vi.mocked(getTemplate).mockResolvedValue({ ...TEMPLATE_VALUES });
+    });
+
+    it('overlays downloaded supported files onto the template', async () => {
+      const folder = [
+        makeFolderEntry('main.js'),
+        makeFolderEntry('index.html'),
+      ];
+      const getContent = vi.fn().mockResolvedValue({ data: folder });
+      mockOctokitInstance({ repos: { getContent } });
+
+      const fetchSpy = mockFetchResponses({
+        'https://example.test/main.js': '// example main',
+        'https://example.test/index.html': '<!-- example html -->',
+      });
+
+      const result = await fetchExample(REF, EXAMPLE_PATH);
+
+      expect(getContent).toHaveBeenCalledWith({
+        owner: 'electron',
+        repo: 'electron',
+        path: EXAMPLE_PATH,
+        ref: REF,
+      });
+      // Strips the leading 'v' and forwards the version to getTemplate.
+      expect(getTemplate).toHaveBeenCalledWith('42.0.0');
+      // Overridden values come from the example.
+      expect(result['main.js']).toBe('// example main');
+      expect(result['index.html']).toBe('<!-- example html -->');
+      // Files not in the example fall back to template values.
+      expect(result['renderer.js']).toBe(TEMPLATE_VALUES['renderer.js']);
+      expect(result['package.json']).toBe(TEMPLATE_VALUES['package.json']);
+
+      fetchSpy.mockRestore();
+    });
+
+    it('skips unsupported file types', async () => {
+      const folder = [
+        makeFolderEntry('main.js'),
+        makeFolderEntry('README.md'),
+        makeFolderEntry('image.png'),
+      ];
+      const getContent = vi.fn().mockResolvedValue({ data: folder });
+      mockOctokitInstance({ repos: { getContent } });
+
+      const fetchSpy = mockFetchResponses({
+        'https://example.test/main.js': '// example main',
+      });
+
+      const result = await fetchExample(REF, EXAMPLE_PATH);
+
+      // Only the supported file should be fetched.
+      expect(fetchSpy).toHaveBeenCalledTimes(1);
+      expect(fetchSpy).toHaveBeenCalledWith('https://example.test/main.js');
+      expect(result['main.js']).toBe('// example main');
+
+      fetchSpy.mockRestore();
+    });
+
+    it('skips entries that lack a download_url', async () => {
+      const folder = [
+        // Subdirectory: no download_url even though the name looks supported.
+        { name: 'nested.js', download_url: null },
+        makeFolderEntry('main.js'),
+      ];
+      const getContent = vi.fn().mockResolvedValue({ data: folder });
+      mockOctokitInstance({ repos: { getContent } });
+
+      const fetchSpy = mockFetchResponses({
+        'https://example.test/main.js': '// example main',
+      });
+
+      const result = await fetchExample(REF, EXAMPLE_PATH);
+
+      expect(fetchSpy).toHaveBeenCalledTimes(1);
+      expect(result['main.js']).toBe('// example main');
+
+      fetchSpy.mockRestore();
+    });
+
+    it('throws when the path resolves to a single file (data is not an array)', async () => {
+      const getContent = vi.fn().mockResolvedValue({
+        data: { name: 'main.js', download_url: 'https://example.test/main.js' },
+      });
+      mockOctokitInstance({ repos: { getContent } });
+
+      await expect(fetchExample(REF, EXAMPLE_PATH)).rejects.toThrow(
+        'is not a valid example',
+      );
+    });
+
+    it('throws when a file download fails', async () => {
+      const folder = [makeFolderEntry('main.js')];
+      const getContent = vi.fn().mockResolvedValue({ data: folder });
+      mockOctokitInstance({ repos: { getContent } });
+
+      const fetchSpy = vi.spyOn(global, 'fetch').mockResolvedValue({
+        ok: false,
+        status: 500,
+        text: async () => '',
+      } as Response);
+
+      await expect(fetchExample(REF, EXAMPLE_PATH)).rejects.toThrow(
+        /Failed to download main\.js: 500/,
+      );
+
+      fetchSpy.mockRestore();
+    });
+
+    it('propagates errors from getContent', async () => {
+      const getContent = vi.fn().mockRejectedValue(new Error('Not Found'));
+      mockOctokitInstance({ repos: { getContent } });
+
+      await expect(fetchExample(REF, EXAMPLE_PATH)).rejects.toThrow(
+        'Not Found',
+      );
+    });
+
+    it('rejects an empty ref', async () => {
+      mockOctokitInstance({ repos: { getContent: vi.fn() } });
+      await expect(fetchExample('', EXAMPLE_PATH)).rejects.toThrow(
+        'Invalid ref',
+      );
+    });
+
+    it('rejects an empty path', async () => {
+      mockOctokitInstance({ repos: { getContent: vi.fn() } });
+      await expect(fetchExample(REF, '')).rejects.toThrow('Invalid path');
+    });
+
+    it('returns a fresh object that does not mutate the cached template', async () => {
+      const folder = [makeFolderEntry('main.js')];
+      const getContent = vi.fn().mockResolvedValue({ data: folder });
+      mockOctokitInstance({ repos: { getContent } });
+
+      const cached = { ...TEMPLATE_VALUES };
+      vi.mocked(getTemplate).mockResolvedValue(cached);
+
+      const fetchSpy = mockFetchResponses({
+        'https://example.test/main.js': '// example main',
+      });
+
+      const result = await fetchExample(REF, EXAMPLE_PATH);
+
+      expect(result).not.toBe(cached);
+      expect(cached['main.js']).toBe(TEMPLATE_VALUES['main.js']);
+      expect(result['main.js']).toBe('// example main');
+
+      fetchSpy.mockRestore();
     });
   });
 });
