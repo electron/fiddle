@@ -4,6 +4,7 @@ import { IpcMainInvokeEvent, app, safeStorage } from 'electron';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { GIST_MAX_FILE_COUNT, GIST_MAX_FILE_SIZE } from '../../src/constants';
+import { getTemplate } from '../../src/main/content';
 import { testing } from '../../src/main/github';
 import * as tmp from '../../src/main/utils/tmp';
 
@@ -26,11 +27,7 @@ vi.mock('@octokit/rest', () => {
   const MockOctokit = vi.fn();
   return { Octokit: MockOctokit };
 });
-vi.mock('../../src/main/content', () => ({
-  getTemplate: vi.fn(),
-}));
-
-const { getTemplate } = await import('../../src/main/content');
+vi.unmock('fs-extra');
 
 const MOCK_EVENT = {} as IpcMainInvokeEvent;
 
@@ -693,16 +690,9 @@ describe('github', () => {
   // --- Fetch example ---
 
   describe('fetchExample()', () => {
-    const REF = 'v42.0.0';
+    const REF = 'example-template';
     const EXAMPLE_PATH = 'docs/fiddles/quick-start';
-    const TEMPLATE_VALUES = {
-      'main.js': '// template main',
-      'index.html': '<!-- template html -->',
-      'renderer.js': '// template renderer',
-      'preload.js': '// template preload',
-      'styles.css': '/* template css */',
-      'package.json': '{}',
-    };
+    const TEMPLATE_VERSION = REF.replace(/^v/, '');
 
     function makeFolderEntry(name: string, downloadUrl: string | null = null) {
       return {
@@ -724,11 +714,6 @@ describe('github', () => {
         });
     }
 
-    beforeEach(() => {
-      vi.mocked(getTemplate).mockReset();
-      vi.mocked(getTemplate).mockResolvedValue({ ...TEMPLATE_VALUES });
-    });
-
     it('overlays downloaded supported files onto the template', async () => {
       const folder = [
         makeFolderEntry('main.js'),
@@ -742,6 +727,7 @@ describe('github', () => {
         'https://example.test/index.html': '<!-- example html -->',
       });
 
+      const templateValues = await getTemplate(TEMPLATE_VERSION);
       const result = await fetchExample(REF, EXAMPLE_PATH);
 
       expect(getContent).toHaveBeenCalledWith({
@@ -750,14 +736,12 @@ describe('github', () => {
         path: EXAMPLE_PATH,
         ref: REF,
       });
-      // Strips the leading 'v' and forwards the version to getTemplate.
-      expect(getTemplate).toHaveBeenCalledWith('42.0.0');
       // Overridden values come from the example.
       expect(result['main.js']).toBe('// example main');
       expect(result['index.html']).toBe('<!-- example html -->');
       // Files not in the example fall back to template values.
-      expect(result['renderer.js']).toBe(TEMPLATE_VALUES['renderer.js']);
-      expect(result['package.json']).toBe(TEMPLATE_VALUES['package.json']);
+      expect(result['renderer.js']).toBe(templateValues['renderer.js']);
+      expect(result['package.json']).toBe(templateValues['package.json']);
 
       fetchSpy.mockRestore();
     });
@@ -856,13 +840,12 @@ describe('github', () => {
       await expect(fetchExample(REF, '')).rejects.toThrow('Invalid path');
     });
 
-    it('returns a fresh object that does not mutate the cached template', async () => {
+    it('returns a fresh object that does not mutate the template', async () => {
       const folder = [makeFolderEntry('main.js')];
       const getContent = vi.fn().mockResolvedValue({ data: folder });
       mockOctokitInstance({ repos: { getContent } });
 
-      const cached = { ...TEMPLATE_VALUES };
-      vi.mocked(getTemplate).mockResolvedValue(cached);
+      const templateValues = await getTemplate(TEMPLATE_VERSION);
 
       const fetchSpy = mockFetchResponses({
         'https://example.test/main.js': '// example main',
@@ -870,9 +853,10 @@ describe('github', () => {
 
       const result = await fetchExample(REF, EXAMPLE_PATH);
 
-      expect(result).not.toBe(cached);
-      expect(cached['main.js']).toBe(TEMPLATE_VALUES['main.js']);
+      expect(result).not.toBe(templateValues);
+      expect(templateValues['main.js']).not.toBe('// example main');
       expect(result['main.js']).toBe('// example main');
+      expect(await getTemplate(TEMPLATE_VERSION)).toEqual(templateValues);
 
       fetchSpy.mockRestore();
     });
