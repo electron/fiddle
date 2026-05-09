@@ -61,23 +61,23 @@ const VALID_FILES = {
   'main.js': { filename: 'main.js', content: 'code' },
 };
 
-const MOCK_GIST_FILES = {
-  'main.js': {
-    filename: 'main.js',
-    content: 'console.log("hi")',
-    truncated: false,
-    raw_url: 'https://raw.example.com/main.js',
-  },
-};
-
-const MOCK_GIST_DATA = {
-  id: VALID_GIST_ID,
-  html_url: `https://gist.github.com/${VALID_GIST_ID}`,
-  history: [{ version: 'sha1' }],
-  files: MOCK_GIST_FILES,
-};
-
 function mockOctokitInstance(overrides: Record<string, any> = {}) {
+  const MOCK_GIST_FILES = {
+    'main.js': {
+      filename: 'main.js',
+      content: 'console.log("hi")',
+      truncated: false,
+      raw_url: 'https://raw.example.com/main.js',
+    },
+  };
+
+  const MOCK_GIST_DATA = {
+    id: VALID_GIST_ID,
+    html_url: `https://gist.github.com/${VALID_GIST_ID}`,
+    history: [{ version: 'sha1' }],
+    files: MOCK_GIST_FILES,
+  };
+
   const instance = {
     users: {
       getAuthenticated: vi.fn().mockResolvedValue({
