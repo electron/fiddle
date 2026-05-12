@@ -160,7 +160,6 @@ export class AppState {
   public isBisectDialogShowing = false;
   public isConsoleShowing = false;
   public isGenericDialogShowing = false;
-  public isInstallingModules = false;
   public isOnline = navigator.onLine;
   public isQuitting = false;
   public isRunning = false;
@@ -232,7 +231,6 @@ export class AppState {
       isEnablingElectronLogging: observable,
       isGenericDialogShowing: observable,
       isHistoryShowing: observable,
-      isInstallingModules: observable,
       isKeepingUserDataDirs: observable,
       isOnline: observable,
       isPublishingGistAsRevision: observable,

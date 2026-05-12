@@ -56,7 +56,7 @@ export const Commands = observer(
             </ControlGroup>
             <ControlGroup fill={true} vertical={false}>
               <VersionChooser appState={appState} />
-              <Runner appState={appState} />
+              <Runner />
             </ControlGroup>
             {isBisectCommandShowing && (
               <ControlGroup fill={true} vertical={false}>

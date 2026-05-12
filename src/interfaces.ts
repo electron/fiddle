@@ -188,6 +188,7 @@ export type FiddleEvent =
   | 'select-all-in-editor'
   | 'set-show-me-template'
   | 'show-welcome-tour'
+  | 'theme-loaded'
   | 'toggle-bisect'
   | 'toggle-monaco-option'
   | 'undo-in-editor'

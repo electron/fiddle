@@ -22,8 +22,19 @@ describe('preload', () => {
 
       expect(contextBridge.exposeInMainWorld).toHaveBeenCalledWith(
         'ElectronFiddle',
-        expect.objectContaining({ startFiddle: expect.anything() }),
+        expect.objectContaining({
+          stopFiddle: expect.anything(),
+        }),
       );
+    });
+
+    it('does not expose startFiddle from the main preload', async () => {
+      vi.mocked(contextBridge.exposeInMainWorld).mockReturnValue(undefined);
+      await setupFiddleGlobal();
+
+      const exposed = vi.mocked(contextBridge.exposeInMainWorld).mock
+        .calls[0][1] as Record<string, unknown>;
+      expect(exposed.startFiddle).toBeUndefined();
     });
   });
 });

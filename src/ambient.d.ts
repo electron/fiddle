@@ -167,7 +167,6 @@ declare global {
       setShowMeTemplate(template?: string): void;
       showWarningDialog(messageOptions: MessageOptions): void;
       showWindow(): void;
-      startFiddle(): Promise<void>;
       stopFiddle(): void;
       themePath: string;
       uncacheTypes(ver: RunnableVersion): Promise<void>;

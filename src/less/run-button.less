@@ -1,0 +1,25 @@
+@import 'blueprint.less';
+@import 'variables.less';
+
+:root {
+  color-scheme: light dark;
+}
+
+html,
+body {
+  margin: 0;
+  background: transparent;
+}
+
+#run-button {
+  white-space: nowrap;
+  margin-bottom: 0;
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+}
+
+// In dark themes, disable the box shadow, we'll use
+// an outline around the iframe for these instead.
+.bp3-dark #run-button {
+  box-shadow: none;
+}

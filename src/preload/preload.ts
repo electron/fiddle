@@ -44,6 +44,7 @@ const channelMapping: Record<FiddleEvent, IpcEvents> = {
   'select-all-in-editor': IpcEvents.SELECT_ALL_IN_EDITOR,
   'set-show-me-template': IpcEvents.SET_SHOW_ME_TEMPLATE,
   'show-welcome-tour': IpcEvents.SHOW_WELCOME_TOUR,
+  'theme-loaded': IpcEvents.THEME_LOADED,
   'toggle-bisect': IpcEvents.BISECT_COMMANDS_TOGGLE,
   'toggle-monaco-option': IpcEvents.MONACO_TOGGLE_OPTION,
   'undo-in-editor': IpcEvents.UNDO_IN_EDITOR,
@@ -51,30 +52,62 @@ const channelMapping: Record<FiddleEvent, IpcEvents> = {
   'version-state-changed': IpcEvents.VERSION_STATE_CHANGED,
 } as const;
 
+function addEventListener(
+  type: FiddleEvent,
+  listener: (...args: any[]) => void,
+  options?: { signal: AbortSignal },
+) {
+  const channel = channelMapping[type];
+  if (!channel) return;
+  const ipcListener = (_event: IpcRendererEvent, ...args: any[]) => {
+    listener(...args);
+  };
+  ipcRenderer.on(channel, ipcListener);
+  if (options?.signal) {
+    options.signal.addEventListener('abort', () => {
+      ipcRenderer.off(channel, ipcListener);
+    });
+  }
+}
+
+function removeAllListeners(type: FiddleEvent) {
+  const channel = channelMapping[type];
+  if (channel) {
+    ipcRenderer.removeAllListeners(channel);
+  }
+}
+
+const ISOLATED_ACTIONS_PROTOCOL = 'isolated-actions:';
+
+// This preload runs in every frame in the default session, so
+// expose a different API surface depending on the protocol.
 async function preload() {
-  await setupFiddleGlobal();
+  if (location.protocol === ISOLATED_ACTIONS_PROTOCOL) {
+    setupIsolatedActionsGlobal();
+  } else {
+    await setupFiddleGlobal();
+  }
+}
+
+function setupIsolatedActionsGlobal() {
+  contextBridge.exposeInMainWorld('IsolatedActionsElectronFiddle', {
+    startFiddle() {
+      ipcRenderer.invoke(IpcEvents.START_FIDDLE);
+    },
+    stopFiddle() {
+      ipcRenderer.send(IpcEvents.STOP_FIDDLE);
+    },
+    readThemeFile(name: string) {
+      return ipcRenderer.invoke(IpcEvents.READ_THEME_FILE, name);
+    },
+    addEventListener,
+    removeAllListeners,
+  });
 }
 
 export async function setupFiddleGlobal() {
   contextBridge.exposeInMainWorld('ElectronFiddle', {
-    addEventListener(
-      type: FiddleEvent,
-      listener: (...args: any[]) => void,
-      options?: { signal: AbortSignal },
-    ) {
-      const channel = channelMapping[type];
-      if (channel) {
-        const ipcListener = (_event: IpcRendererEvent, ...args: any[]) => {
-          listener(...args);
-        };
-        ipcRenderer.on(channel, ipcListener);
-        if (options?.signal) {
-          options.signal.addEventListener('abort', () => {
-            ipcRenderer.off(channel, ipcListener);
-          });
-        }
-      }
-    },
+    addEventListener,
     addModules(
       { dir, packageManager, useSocketFirewall }: PMOperationOptions,
       ...names: Array<string>
@@ -233,12 +266,7 @@ export async function setupFiddleGlobal() {
     readThemeFile(name?: string) {
       return ipcRenderer.invoke(IpcEvents.READ_THEME_FILE, name);
     },
-    removeAllListeners(type: FiddleEvent) {
-      const channel = channelMapping[type];
-      if (channel) {
-        ipcRenderer.removeAllListeners(channel);
-      }
-    },
+    removeAllListeners,
     async removeVersion(version: string) {
       return ipcRenderer.invoke(IpcEvents.REMOVE_VERSION, version);
     },
@@ -264,9 +292,6 @@ export async function setupFiddleGlobal() {
     },
     showWindow() {
       ipcRenderer.send(IpcEvents.SHOW_WINDOW);
-    },
-    async startFiddle() {
-      await ipcRenderer.invoke(IpcEvents.START_FIDDLE);
     },
     stopFiddle() {
       ipcRenderer.send(IpcEvents.STOP_FIDDLE);
