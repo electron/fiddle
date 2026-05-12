@@ -58,6 +58,9 @@ export function getMainWindowOptions(): Electron.BrowserWindowConstructorOptions
       preload: !!process.env.VITEST
         ? path.join(process.cwd(), './.webpack/renderer/main_window/preload.js')
         : MAIN_WINDOW_PRELOAD_WEBPACK_ENTRY,
+      nodeIntegration: false,
+      // Run the preload script in subframes
+      nodeIntegrationInSubFrames: true,
     },
   };
 }

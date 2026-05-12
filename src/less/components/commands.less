@@ -73,6 +73,23 @@ header {
     white-space: nowrap;
   }
 
+  iframe.run-button-frame {
+    -webkit-app-region: no-drag;
+    border: 0;
+    background: transparent;
+    color-scheme: inherit;
+    width: 86px;
+    height: 30px;
+    display: inline-block;
+
+    // Manually apply the focus ring on the iframe
+    &.has-focus {
+      outline: @blue3 solid 2px !important;
+      outline-offset: 2px !important;
+      z-index: 5 !important;
+    }
+  }
+
   select {
     width: 100px;
     margin-left: 5px;
@@ -132,5 +149,14 @@ header {
     flex-shrink: 0;
     user-select: none;
     margin: auto 10px;
+  }
+}
+
+// In dark mode we set an outline on the iframe to be the
+// border so that it matches the height of other buttons
+.bp3-dark .commands {
+  iframe.run-button-frame {
+    margin-left: 1px;
+    outline: 1px solid rgba(16, 22, 26, 0.4);
   }
 }

@@ -1,6 +1,5 @@
 import { autorun, reaction, when } from 'mobx';
 
-import { PREFERS_DARK_MEDIA_QUERY } from './constants';
 import { ElectronTypes } from './electron-types';
 import { FileManager } from './file-manager';
 import { RemoteLoader } from './remote-loader';
@@ -12,6 +11,7 @@ import {
   getElectronVersions,
   migrateLocalVersionsFromLocalStorage,
 } from './versions';
+import { PREFERS_DARK_MEDIA_QUERY } from '../constants';
 import {
   EditorId,
   EditorValues,
@@ -184,12 +184,27 @@ export class App {
     // match theme to system when box is ticked
     reaction(
       () => this.state.isUsingSystemTheme,
-      () => {
-        if (this.state.isUsingSystemTheme) {
+      (isUsingSystemTheme) => {
+        if (isUsingSystemTheme) {
           window.ElectronFiddle.setNativeTheme('system');
           this.loadTheme(getCurrentTheme().file);
         } else {
           this.loadTheme(this.state.theme);
+        }
+
+        // Tell every isolated-actions:// iframe whether we're using system theme
+        for (const iframe of Array.from(
+          document.querySelectorAll<HTMLIFrameElement>(
+            'iframe[src^="isolated-actions://"]',
+          ),
+        )) {
+          iframe.contentWindow?.postMessage(
+            {
+              type: 'isolated-run-button-using-system-theme',
+              value: isUsingSystemTheme,
+            },
+            new URL(iframe.src).origin,
+          );
         }
       },
     );
@@ -244,6 +259,18 @@ export class App {
       if (!this.state.isUsingSystemTheme) {
         window.ElectronFiddle.setNativeTheme('light');
       }
+    }
+
+    // Tell every isolated-actions:// iframe the selected theme name
+    for (const iframe of Array.from(
+      document.querySelectorAll<HTMLIFrameElement>(
+        'iframe[src^="isolated-actions://"]',
+      ),
+    )) {
+      iframe.contentWindow?.postMessage(
+        { type: 'isolated-run-button-theme', themeName: theme.file },
+        new URL(iframe.src).origin,
+      );
     }
   }
 
