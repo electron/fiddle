@@ -15,7 +15,7 @@ function resolveStaticDir(): string {
   return paths.find(fs.existsSync) ?? paths[0];
 }
 
-export const STATIC_DIR = resolveStaticDir();
+export const STATIC_DIR = path.resolve(__dirname, process.env.VITEST ? '../../static' : '../static');
 
 export const ELECTRON_DOWNLOAD_PATH = path.join(
   app.getPath('userData'),
