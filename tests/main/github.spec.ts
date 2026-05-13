@@ -128,6 +128,7 @@ describe('github', () => {
   });
 
   afterEach(async () => {
+    await handleTokenSignOut(MOCK_EVENT);
     fs.rmSync(userDataPath, { recursive: true, force: true });
   });
 
