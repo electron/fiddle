@@ -1,4 +1,3 @@
-import * as fs from 'node:fs';
 import * as path from 'node:path';
 
 import { app } from 'electron';
@@ -8,14 +7,10 @@ import { app } from 'electron';
 // copies static assets to `.webpack/static/`.
 // In tests (vitest loads the source TypeScript directly), `__dirname` is
 // `src/main/` and the static folder lives at the repository root.
-function resolveStaticDir(): string {
-  const paths = ['../static', '../../static'].map((p) =>
-    path.resolve(__dirname, p),
-  );
-  return paths.find(fs.existsSync) ?? paths[0];
-}
-
-export const STATIC_DIR = path.resolve(__dirname, process.env.VITEST ? '../../static' : '../static');
+export const STATIC_DIR = path.resolve(
+  __dirname,
+  process.env.VITEST ? '../../static' : '../static',
+);
 
 export const ELECTRON_DOWNLOAD_PATH = path.join(
   app.getPath('userData'),
