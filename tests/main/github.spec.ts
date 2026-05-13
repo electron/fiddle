@@ -121,12 +121,13 @@ describe('github', () => {
   beforeEach(async () => {
     userDataPath = tmp.dirSync({ prefix: 'electron-fiddle-github-' });
     app.setPath('userData', userDataPath);
-    // Reset module-level octokit state by signing out
-    await handleTokenSignOut(MOCK_EVENT);
+
+    // Confirm that the folder we just created will hold the credentials file
+    expect(getCredentialsPath().startsWith(userDataPath)).toBe(true);
+    expect(loadToken()).toBeNull();
   });
 
   afterEach(async () => {
-    await handleTokenSignOut(MOCK_EVENT);
     fs.rmSync(userDataPath, { recursive: true, force: true });
   });
 
