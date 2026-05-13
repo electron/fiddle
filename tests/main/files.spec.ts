@@ -2,6 +2,8 @@
  * @vitest-environment node
  */
 
+import path from 'node:path';
+
 import { BrowserWindow, app, dialog } from 'electron';
 import fs from 'fs-extra';
 import { type Mock, beforeEach, describe, expect, it, vi } from 'vitest';
@@ -217,7 +219,9 @@ describe('files', () => {
 
       await deleteUserData('my-fiddle');
 
-      expect(fs.remove).toHaveBeenCalledWith('/fake/appData/my-fiddle');
+      expect(fs.remove).toHaveBeenCalledWith(
+        path.normalize('/fake/appData/my-fiddle'),
+      );
     });
 
     it.each([
