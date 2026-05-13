@@ -136,7 +136,6 @@ describe('github', () => {
       mockOctokitInstance();
       expect(loadToken()).toBeNull();
 
-      const expectedSignInResult = { success: true, login: MOCK_LOGIN };
       for (const token of [VALID_GHP_TOKEN, VALID_PAT_TOKEN]) {
         const result = await handleTokenSignIn(MOCK_EVENT, token);
         expect(result).toEqual({ success: true, login: MOCK_LOGIN });
