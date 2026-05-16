@@ -6,6 +6,7 @@ import { IpcMainInvokeEvent, app, safeStorage } from 'electron';
 
 import { getTemplate } from './content';
 import { ipcMainManager } from './ipc';
+import { GIST_MAX_FILE_COUNT, GIST_MAX_FILE_SIZE } from '../constants';
 import { EditorValues, GistLoadResult, GistRevision } from '../interfaces';
 import { IpcEvents } from '../ipc-events';
 import { isSupportedFile } from '../utils/editor-utils';
@@ -24,10 +25,6 @@ const GIST_ID_PATTERN = /^[0-9a-fA-F]{32}$/;
 const SHA_PATTERN = /^[0-9a-f]{40}$/;
 
 const MAX_DESCRIPTION_LENGTH = 256;
-
-const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10 MB per file — GitHub's gist limit
-
-const MAX_FILE_COUNT = 300; // GitHub's gist file limit
 
 function isValidToken(token: unknown): token is string {
   return typeof token === 'string' && TOKEN_PATTERN.test(token);
@@ -62,7 +59,8 @@ function areValidGistFiles(
 
   const entries = Object.entries(files as Record<string, unknown>);
 
-  if (entries.length === 0 || entries.length > MAX_FILE_COUNT) return false;
+  if (entries.length === 0 || entries.length > GIST_MAX_FILE_COUNT)
+    return false;
 
   for (const [key, value] of entries) {
     // null entries are used to delete files during update
@@ -75,7 +73,7 @@ function areValidGistFiles(
     if (filename.length === 0) return false;
     if (filename !== key) return false;
     if (typeof content !== 'string') return false;
-    if (content.length > MAX_FILE_SIZE) return false;
+    if (content.length > GIST_MAX_FILE_SIZE) return false;
   }
 
   return true;
@@ -437,6 +435,7 @@ export function setupGitHub() {
 // Exported for testing
 export const testing = {
   fetchExample,
+  getCredentialsPath,
   handleGistCreate,
   handleGistDelete,
   handleGistListCommits,
@@ -445,4 +444,6 @@ export const testing = {
   handleTokenCheckAuth,
   handleTokenSignIn,
   handleTokenSignOut,
+  loadToken,
+  saveToken,
 };
