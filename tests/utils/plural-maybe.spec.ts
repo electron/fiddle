@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { maybePlural } from '../../../src/renderer/utils/plural-maybe';
+import { maybePlural } from '../../src/utils/plural-maybe';
 
 describe('maybePlural', () => {
   describe('maybePlural()', () => {

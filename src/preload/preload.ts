@@ -13,7 +13,7 @@ import {
   PMOperationOptions,
   PackageJsonOptions,
   RunnableVersion,
-  StartFiddleParams,
+  StartFiddleOptions,
   Version,
 } from '../interfaces';
 import { IpcEvents, WEBCONTENTS_READY_FOR_IPC_SIGNAL } from '../ipc-events';
@@ -25,7 +25,9 @@ const channelMapping: Record<FiddleEvent, IpcEvents> = {
   'electron-types-changed': IpcEvents.ELECTRON_TYPES_CHANGED,
   'execute-monaco-command': IpcEvents.MONACO_EXECUTE_COMMAND,
   'fiddle-runner-output': IpcEvents.FIDDLE_RUNNER_OUTPUT,
+  'fiddle-modules-installed': IpcEvents.FIDDLE_MODULES_INSTALLED,
   'fiddle-stopped': IpcEvents.FIDDLE_STOPPED,
+  'is-auto-bisecting': IpcEvents.IS_AUTO_BISECTING,
   'load-example': IpcEvents.LOAD_ELECTRON_EXAMPLE_REQUEST,
   'load-gist': IpcEvents.LOAD_GIST_REQUEST,
   'make-fiddle': IpcEvents.FIDDLE_MAKE,
@@ -84,20 +86,17 @@ export async function setupFiddleGlobal() {
       );
     },
     arch: process.arch,
+    autobisectFiddle(versions: Array<RunnableVersion>): void {
+      ipcRenderer.send(IpcEvents.AUTOBISECT_FIDDLE, versions);
+    },
     blockAccelerators(acceleratorsToBlock: BlockableAccelerator[]) {
       ipcRenderer.send(IpcEvents.BLOCK_ACCELERATORS, acceleratorsToBlock);
-    },
-    cleanupDirectory(dir: string) {
-      return ipcRenderer.invoke(IpcEvents.CLEANUP_DIRECTORY, dir);
     },
     confirmQuit() {
       ipcRenderer.send(IpcEvents.CONFIRM_QUIT);
     },
     createThemeFile(newTheme: FiddleTheme, name?: string) {
       return ipcRenderer.invoke(IpcEvents.CREATE_THEME_FILE, newTheme, name);
-    },
-    async deleteUserData(name: string) {
-      await ipcRenderer.invoke(IpcEvents.DELETE_USER_DATA, name);
     },
     async downloadVersion(
       version: string,
@@ -197,6 +196,26 @@ export async function setupFiddleGlobal() {
         },
       );
     },
+    onGetStartFiddleOptions(callback: () => Promise<StartFiddleOptions>) {
+      ipcRenderer.removeAllListeners(IpcEvents.GET_START_FIDDLE_OPTIONS);
+      ipcRenderer.on(IpcEvents.GET_START_FIDDLE_OPTIONS, async (e) => {
+        try {
+          const options = await callback();
+          e.ports[0].postMessage({ result: options });
+        } catch (error) {
+          const message =
+            error instanceof Error ? error.message : String(error);
+          e.ports[0].postMessage({ error: message });
+        }
+      });
+    },
+    onSetVersion(callback: (version: string) => Promise<void>) {
+      ipcRenderer.removeAllListeners(IpcEvents.SET_VERSION);
+      ipcRenderer.on(IpcEvents.SET_VERSION, async (e, version: string) => {
+        await callback(version);
+        e.ports[0].postMessage(undefined);
+      });
+    },
     async openThemeFolder() {
       await ipcRenderer.invoke(IpcEvents.OPEN_THEME_FOLDER);
     },
@@ -246,8 +265,8 @@ export async function setupFiddleGlobal() {
     showWindow() {
       ipcRenderer.send(IpcEvents.SHOW_WINDOW);
     },
-    async startFiddle(params: StartFiddleParams) {
-      await ipcRenderer.invoke(IpcEvents.START_FIDDLE, params);
+    async startFiddle() {
+      await ipcRenderer.invoke(IpcEvents.START_FIDDLE);
     },
     stopFiddle() {
       ipcRenderer.send(IpcEvents.STOP_FIDDLE);

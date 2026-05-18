@@ -7,7 +7,6 @@ import {
   when,
 } from 'mobx';
 
-import { Bisector } from './bisect';
 import { EditorMosaic } from './editor-mosaic';
 import { ELECTRON_MIRROR } from './mirror-constants';
 import { normalizeVersion } from './utils/normalize-version';
@@ -41,6 +40,7 @@ import {
   VersionSource,
   WindowSpecificSetting,
 } from '../interfaces';
+import { Bisector } from '../utils/bisect';
 
 /**
  * The application's state. Exported as a singleton below.

@@ -1,6 +1,10 @@
 import { MessageChannelMain } from 'electron';
 
-import { FileTransformOperation, Files } from '../../interfaces';
+import {
+  FileTransformOperation,
+  Files,
+  PackageJsonOptions,
+} from '../../interfaces';
 import { IpcEvents } from '../../ipc-events';
 import { ipcMainManager } from '../ipc';
 
@@ -10,12 +14,13 @@ import { ipcMainManager } from '../ipc';
 export function getFiles(
   window: Electron.BrowserWindow,
   transforms: Array<FileTransformOperation>,
+  options?: PackageJsonOptions,
 ): Promise<{ localPath?: string; files: Files }> {
   return new Promise((resolve) => {
     const { port1, port2 } = new MessageChannelMain();
     ipcMainManager.postMessage(
       IpcEvents.GET_FILES,
-      { options: undefined, transforms },
+      { options, transforms },
       [port1],
       window.webContents,
     );
