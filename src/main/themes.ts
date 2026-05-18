@@ -2,7 +2,7 @@ import * as path from 'node:path';
 
 import { IpcMainInvokeEvent, app, shell } from 'electron';
 import fs from 'fs-extra';
-import * as namor from 'namor';
+import namor from 'namor';
 
 import { ipcMainManager } from './ipc';
 import { IpcEvents } from '../ipc-events';
@@ -56,7 +56,7 @@ export async function createThemeFile(
     Object.entries(theme).filter(([key]) => !['file', 'css'].includes(key)),
   ) as FiddleTheme;
 
-  name = name || namor.generate({ words: 2, numbers: 0 });
+  name = name || namor.generate({ words: 2 });
 
   const file = name.endsWith('.json') ? name : `${name}.json`;
   const themePath = path.join(THEMES_PATH, file);

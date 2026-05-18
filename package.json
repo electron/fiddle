@@ -58,7 +58,7 @@
     "mobx": "^6.5.0",
     "mobx-react": "^7.3.0",
     "monaco-editor": "^0.22.0",
-    "namor": "^2.0.2",
+    "namor": "^3.0.3",
     "node-watch": "^0.7.3",
     "p-debounce": "^2.0.0",
     "parse-env-string": "^1.0.1",
