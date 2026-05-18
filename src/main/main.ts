@@ -13,6 +13,7 @@ import {
 } from 'electron';
 
 import { setupAboutPanel } from './about-panel';
+import { setupAutobisect } from './autobisect';
 import { setupContent } from './content';
 import { setupDevTools } from './devtools';
 import { setupDialogs } from './dialogs';
@@ -67,6 +68,7 @@ export async function onReady() {
   setupGetUsername();
   setupTypes(knownVersions);
   await setupFiddleCore(knownVersions);
+  setupAutobisect();
 
   // Do this after setting everything up to ensure that
   // any IPC listeners are set up before they're used

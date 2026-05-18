@@ -4,11 +4,10 @@ export class ElectronFiddleMock {
   public addEventListener = vi.fn();
   public addModules = vi.fn();
   public arch = process.arch;
+  public autobisectFiddle = vi.fn();
   public blockAccelerators = vi.fn();
-  public cleanupDirectory = vi.fn();
   public confirmQuit = vi.fn();
   public createThemeFile = vi.fn();
-  public deleteUserData = vi.fn();
   public downloadVersion = vi.fn();
   public fetchExample = vi.fn();
   public fetchVersions = vi.fn();
@@ -37,6 +36,8 @@ export class ElectronFiddleMock {
   public getVersionState = vi.fn();
   public macTitlebarClicked = vi.fn();
   public onGetFiles = vi.fn();
+  public onGetStartFiddleOptions = vi.fn();
+  public onSetVersion = vi.fn();
   public openThemeFolder = vi.fn();
   public packageRun = vi.fn();
   public platform = process.platform;

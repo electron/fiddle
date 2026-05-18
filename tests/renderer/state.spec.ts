@@ -21,13 +21,13 @@ import {
   Version,
   VersionSource,
 } from '../../src/interfaces';
-import { Bisector } from '../../src/renderer/bisect';
 import { AppState } from '../../src/renderer/state';
 import {
   fetchVersions,
   getElectronVersions,
   makeRunnable,
 } from '../../src/renderer/versions';
+import { Bisector } from '../../src/utils/bisect';
 import { VersionsMock, createEditorValues } from '../mocks/mocks';
 import { overrideRendererPlatform, resetRendererPlatform } from '../utils';
 

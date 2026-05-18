@@ -169,7 +169,9 @@ export type FiddleEvent =
   | 'electron-types-changed'
   | 'execute-monaco-command'
   | 'fiddle-runner-output'
+  | 'fiddle-modules-installed'
   | 'fiddle-stopped'
+  | 'is-auto-bisecting'
   | 'load-example'
   | 'load-gist'
   | 'make-fiddle'
@@ -288,14 +290,15 @@ export interface PackageJsonOptions {
   includeDependencies?: boolean;
 }
 
-export interface StartFiddleParams {
-  localPath: string | undefined;
+export interface StartFiddleOptions {
+  version: string;
   enableElectronLogging: boolean;
-  isValidBuild: boolean; // If the localPath is a valid Electron build
-  version: string; // The user selected version
-  dir: string;
-  options: string[];
+  executionFlags: string[];
   env: { [x: string]: string | undefined };
+  modules: Array<[string, string]>;
+  packageManager: IPackageManager;
+  useSocketFirewall: boolean;
+  isKeepingUserDataDirs: boolean;
 }
 
 export interface DownloadVersionParams {

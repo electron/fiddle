@@ -5,7 +5,7 @@ import { observer } from 'mobx-react';
 
 import { VersionSelect } from './version-select';
 import { RunnableVersion } from '../../interfaces';
-import { Bisector } from '../bisect';
+import { Bisector } from '../../utils/bisect';
 import { AppState } from '../state';
 
 interface BisectDialogProps {
@@ -81,7 +81,11 @@ export const BisectDialog = observer(
     public async onAuto(): Promise<void> {
       const range = this.getBisectRange();
       if (range.length > 1) {
-        window.app.runner.autobisect(range);
+        // the RunnableVersion proxies can't be cloned by structuredClone,
+        // so we have to create plain objects out of them
+        window.ElectronFiddle.autobisectFiddle(
+          range.map((version) => ({ ...version })),
+        );
         this.onClose();
       }
     }
