@@ -49,6 +49,14 @@ export const mainConfig = (
             from: 'node_modules/sfw/package.json',
             to: '../sfw/package.json',
           },
+          // namor v3 reads its word lists from disk at runtime via
+          // `fs.readFileSync(path.resolve(__dirname, '../dict', ...))`. When
+          // bundled, __dirname is `.webpack/main`, so the dict files need to
+          // live at `.webpack/dict` for namor to find them.
+          {
+            from: 'node_modules/namor/dict',
+            to: '../dict',
+          },
         ],
       }),
     ],
