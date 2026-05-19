@@ -1,6 +1,6 @@
 import * as path from 'node:path';
 
-import * as namor from 'namor';
+import namor from 'namor';
 
 /**
  * Returns a name for this project
@@ -10,5 +10,5 @@ export function getProjectName(localPath?: string): string {
     return path.basename(localPath);
   }
 
-  return namor.generate({ words: 3, numbers: 0 });
+  return namor.generate({ words: 3 });
 }

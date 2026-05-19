@@ -5568,7 +5568,7 @@ __metadata:
     mobx-react: "npm:^7.3.0"
     monaco-editor: "npm:^0.22.0"
     monaco-editor-webpack-plugin: "npm:^3.0.0"
-    namor: "npm:^2.0.2"
+    namor: "npm:^3.0.3"
     node-watch: "npm:^0.7.3"
     npm-run-all2: "npm:^7.0.1"
     p-debounce: "npm:^2.0.0"
@@ -10058,12 +10058,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"namor@npm:^2.0.2":
-  version: 2.0.2
-  resolution: "namor@npm:2.0.2"
+"namor@npm:^3.0.3":
+  version: 3.0.3
+  resolution: "namor@npm:3.0.3"
   dependencies:
     crypto-extra: "npm:1.0.1"
-  checksum: 10c0/bc4cc6a7c585adc316297de3a8fd1a47b64108efc2c3fe69c1b0b06c5410f913c46284bca220f45c4d3b7515ec5abf290509cf8a9409f1be17d97a1f6253a075
+  checksum: 10c0/fce90feb0f21422ec7ea4a3c1b888a72cbce9f2fe6660f9d16f7e0cb19ac44c623b5f23a9b5d4aec218c894b9501d5f25bc726ea557e56557584c3a858bf28e0
   languageName: node
   linkType: hard
 
