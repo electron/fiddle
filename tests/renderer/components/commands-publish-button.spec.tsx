@@ -5,8 +5,6 @@ import {
   EditorValues,
   GistActionState,
   GistActionType,
-  GistCreateParams,
-  GistFile,
   MAIN_JS,
 } from '../../../src/interfaces';
 import { App } from '../../../src/renderer/app';
@@ -15,14 +13,20 @@ import { AppState } from '../../../src/renderer/state';
 import { createEditorValues } from '../../mocks/mocks';
 import { renderClassComponentWithInstanceRef } from '../utils/renderClassComponentWithInstanceRef';
 
+type GistFile = { filename: string; content: string };
 type GistFiles = { [id: string]: GistFile };
+type GistCreateOpts = {
+  description: string;
+  files: GistFiles;
+  isPublic: boolean;
+};
 
 describe('Action button component', () => {
   const description = 'Electron Fiddle Gist';
   const errorMessage = '💀';
   let app: App;
   let state: AppState;
-  let expectedGistOpts: GistCreateParams;
+  let expectedGistOpts: GistCreateOpts;
 
   function getGistFiles(values: EditorValues): GistFiles {
     return Object.fromEntries(
@@ -65,30 +69,6 @@ describe('Action button component', () => {
     return renderClassComponentWithInstanceRef(GistActionButton, {
       appState: state,
     });
-  }
-
-  type ActionButtonInstance = ReturnType<typeof createActionButton>['instance'];
-
-  function createModeActionButton(
-    actionType: GistActionType,
-    gistId = '123',
-  ): ActionButtonInstance {
-    state.gistId = gistId;
-    const { instance } = createActionButton();
-    act(() => instance.setState({ actionType }));
-    return instance;
-  }
-
-  async function performWithDescription(
-    instance: ActionButtonInstance,
-    nextDescription: string | undefined,
-  ) {
-    state.showInputDialog = vi.fn().mockResolvedValueOnce(nextDescription);
-    await instance.performGistAction();
-  }
-
-  async function performWithDefaultDescription(instance: ActionButtonInstance) {
-    await performWithDescription(instance, description);
   }
 
   it('renders', () => {
@@ -166,7 +146,8 @@ describe('Action button component', () => {
     });
 
     it('publishes a gist', async () => {
-      await performWithDefaultDescription(instance);
+      state.showInputDialog = vi.fn().mockResolvedValueOnce(description);
+      await instance.performGistAction();
       expect(window.ElectronFiddle.gistCreate).toHaveBeenCalledWith(
         expectedGistOpts,
       );
@@ -176,7 +157,8 @@ describe('Action button component', () => {
       (state.editorMosaic as any).currentHashes = new Map([
         [MAIN_JS, 'abc123'],
       ]);
-      await performWithDefaultDescription(instance);
+      state.showInputDialog = vi.fn().mockResolvedValueOnce(description);
+      await instance.performGistAction();
       expect(window.ElectronFiddle.gistCreate).toHaveBeenCalledWith(
         expectedGistOpts,
       );
@@ -184,16 +166,18 @@ describe('Action button component', () => {
     });
 
     it('asks the user for a description', async () => {
-      const nextDescription = 'some non-default description';
-      await performWithDescription(instance, nextDescription);
+      const description = 'some non-default description';
+      state.showInputDialog = vi.fn().mockResolvedValueOnce(description);
+      await instance.performGistAction();
       expect(window.ElectronFiddle.gistCreate).toHaveBeenCalledWith({
         ...expectedGistOpts,
-        description: nextDescription,
+        description,
       });
     });
 
     it('publishes only if the user confirms', async () => {
-      await performWithDescription(instance, undefined);
+      state.showInputDialog = vi.fn().mockResolvedValueOnce(undefined);
+      await instance.performGistAction();
       expect(window.ElectronFiddle.gistCreate).not.toHaveBeenCalled();
     });
 
@@ -202,7 +186,8 @@ describe('Action button component', () => {
         const values = { [MAIN_JS]: '' } as const;
 
         vi.mocked(app.getEditorValues).mockResolvedValueOnce(values);
-        await performWithDefaultDescription(instance);
+        state.showInputDialog = vi.fn().mockResolvedValueOnce(description);
+        await instance.performGistAction();
 
         const files = getGistFiles(values);
         const expected = { ...expectedGistOpts, files };
@@ -217,7 +202,8 @@ describe('Action button component', () => {
           ...required,
           ...optional,
         });
-        await performWithDefaultDescription(instance);
+        state.showInputDialog = vi.fn().mockResolvedValueOnce(description);
+        await instance.performGistAction();
 
         const files = getGistFiles(required);
         const expected = { ...expectedGistOpts, files };
@@ -240,15 +226,18 @@ describe('Action button component', () => {
         new Error(errorMessage),
       );
 
-      await performWithDefaultDescription(instance);
+      state.showInputDialog = vi.fn().mockResolvedValueOnce(description);
+
+      await instance.performGistAction();
       expect(state.activeGistAction).toBe(GistActionState.none);
 
       // On failure the editor should still be considered edited
     });
 
     it('can publish secret gists', async () => {
+      state.showInputDialog = vi.fn().mockResolvedValueOnce(description);
       instance.setSecret();
-      await performWithDefaultDescription(instance);
+      await instance.performGistAction();
       expect(window.ElectronFiddle.gistCreate).toHaveBeenCalledWith({
         ...expectedGistOpts,
         isPublic: false,
@@ -256,8 +245,9 @@ describe('Action button component', () => {
     });
 
     it('can publish public gists', async () => {
+      state.showInputDialog = vi.fn().mockResolvedValueOnce(description);
       instance.setPublic();
-      await performWithDefaultDescription(instance);
+      await instance.performGistAction();
       expect(window.ElectronFiddle.gistCreate).toHaveBeenCalledWith({
         ...expectedGistOpts,
         isPublic: true,
@@ -272,7 +262,8 @@ describe('Action button component', () => {
         revision: revisionSha,
       });
 
-      await performWithDefaultDescription(instance);
+      state.showInputDialog = vi.fn().mockResolvedValueOnce(description);
+      await instance.performGistAction();
 
       expect(state.activeGistRevision).toBe(revisionSha);
     });
@@ -284,7 +275,9 @@ describe('Action button component', () => {
 
     beforeEach(() => {
       // create a button that's primed to update gistId
-      instance = createModeActionButton(GistActionType.update, gistId);
+      state.gistId = gistId;
+      ({ instance } = createActionButton());
+      act(() => instance.setState({ actionType: GistActionType.update }));
 
       vi.mocked(window.ElectronFiddle.gistUpdate).mockResolvedValue({
         id: gistId,
@@ -293,7 +286,7 @@ describe('Action button component', () => {
       });
     });
 
-    it('attempts to update an existing Gist via IPC', async () => {
+    it('attempts to update an existing Gist', async () => {
       await instance.performGistAction();
 
       expect(window.ElectronFiddle.gistUpdate).toHaveBeenCalledWith({
@@ -336,11 +329,14 @@ describe('Action button component', () => {
     let instance: any;
 
     beforeEach(() => {
+      state.gistId = gistId;
+
       // create a button primed to delete gistId
-      instance = createModeActionButton(GistActionType.delete, gistId);
+      ({ instance } = createActionButton());
+      act(() => instance.setState({ actionType: GistActionType.delete }));
     });
 
-    it('attempts to delete an existing Gist via IPC', async () => {
+    it('attempts to delete an existing Gist', async () => {
       await instance.performGistAction();
       expect(window.ElectronFiddle.gistDelete).toHaveBeenCalledWith(gistId);
     });
