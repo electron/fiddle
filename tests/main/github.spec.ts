@@ -213,9 +213,7 @@ describe('github', () => {
       // setup: set a token & confirm it loads
       saveToken(VALID_GHP_TOKEN);
       expect(loadToken()).toBe(VALID_GHP_TOKEN);
-
-      const expected = { success: true };
-      await expect(handleTokenSignOut(MOCK_EVENT)).resolves.toEqual(expected);
+      await expect(handleTokenSignOut(MOCK_EVENT)).resolves.toBeUndefined();
       expect(loadToken()).toBeNull();
     });
   });
