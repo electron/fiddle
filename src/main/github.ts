@@ -6,8 +6,20 @@ import { IpcMainInvokeEvent, app, safeStorage } from 'electron';
 
 import { getTemplate } from './content';
 import { ipcMainManager } from './ipc';
-import { GIST_MAX_FILE_COUNT, GIST_MAX_FILE_SIZE, GITHUB_TOKEN_PATTERN } from '../constants';
-import { EditorValues, GistFile, GistLoadResult, GistRevision, GistWriteResult, GitHubCheckAuthResult, GitHubSignInResult } from '../interfaces';
+import {
+  GIST_MAX_FILE_COUNT,
+  GIST_MAX_FILE_SIZE,
+  GITHUB_TOKEN_PATTERN,
+} from '../constants';
+import {
+  EditorValues,
+  GistFile,
+  GistLoadResult,
+  GistRevision,
+  GistWriteResult,
+  GitHubCheckAuthResult,
+  GitHubSignInResult,
+} from '../interfaces';
 import { IpcEvents } from '../ipc-events';
 import { isSupportedFile } from '../utils/editor-utils';
 
