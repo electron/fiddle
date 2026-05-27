@@ -1,3 +1,5 @@
+import * as path from 'node:path';
+
 import { WebContents, WebFrameMain, net, protocol } from 'electron';
 
 export const ISOLATED_ACTIONS_SCHEME = 'isolated-actions';
@@ -7,6 +9,22 @@ export const ISOLATED_ACTIONS_RUN_BUTTON_URL = `${ISOLATED_ACTIONS_SCHEME}://${I
 const RUN_BUTTON_ENTRY_NAME = 'isolated_run_button';
 
 declare const ISOLATED_RUN_BUTTON_WEBPACK_ENTRY: string;
+
+/**
+ * Check if a URL is the isolated run button document URL.
+ */
+function isIsolatedRunButtonDocumentUrl(rawUrl: string): boolean {
+  try {
+    const url = new URL(rawUrl);
+    return (
+      url.protocol === `${ISOLATED_ACTIONS_SCHEME}:` &&
+      url.host === ISOLATED_ACTIONS_RUN_BUTTON_HOST &&
+      url.pathname === '/'
+    );
+  } catch {
+    return false;
+  }
+}
 
 /**
  * Register `isolated-actions://` as a scheme. This call
@@ -52,12 +70,6 @@ export function setupIsolatedActionsProtocol() {
 
     let pathname = url.pathname;
 
-    // Refuse path traversal — anything with `..` could escape the
-    // upstream output directory once we resolve it.
-    if (pathname.includes('..')) {
-      return new Response(null, { status: 400 });
-    }
-
     // The iframe loads `isolated-actions://run-button/`. The HTML it
     // pulls back references its bundle as `/isolated_run_button/...`;
     // those resolve back through this handler and need the upstream
@@ -66,10 +78,25 @@ export function setupIsolatedActionsProtocol() {
       pathname = `${entryDirSuffix}index.html`;
     }
 
-    // Anything else is a webpack-emitted absolute path
-    // (`/isolated_run_button/<asset>`) that already lines up with the
-    // upstream layout — pass it through unchanged.
-    return net.fetch(`${upstreamRoot}${pathname}`, {
+    // Decode and normalize so percent-encoded `..` segments can't
+    // escape the upstream output directory. `path.posix.normalize`
+    // saturates traversal at `/`, so as long as the result is still
+    // an absolute path the concatenation below stays under
+    // `upstreamRoot`.
+    let normalized: string;
+    try {
+      normalized = path.posix.normalize(decodeURIComponent(pathname));
+      if (!normalized.startsWith('/')) {
+        return new Response(null, { status: 400 });
+      }
+    } catch {
+      return new Response(null, { status: 400 });
+    }
+
+    // The decoded+normalized path is a webpack-emitted absolute path
+    // (`/isolated_run_button/<asset>`, `/assets/<asset>`, etc.) that
+    // already lines up with the upstream layout — pass it through.
+    return net.fetch(`${upstreamRoot}${normalized}`, {
       bypassCustomProtocolHandlers: true,
     });
   });
@@ -84,12 +111,6 @@ export function getIsolatedRunButtonFrame(
   const frames = webContents.mainFrame?.framesInSubtree;
   if (!frames) return null;
   return (
-    frames.find((frame) => {
-      try {
-        return new URL(frame.url).protocol === `${ISOLATED_ACTIONS_SCHEME}:`;
-      } catch {
-        return false;
-      }
-    }) ?? null
+    frames.find((frame) => isIsolatedRunButtonDocumentUrl(frame.url)) ?? null
   );
 }
