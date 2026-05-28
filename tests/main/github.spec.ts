@@ -225,14 +225,14 @@ describe('github', () => {
         throw new Error('corrupt');
       });
       const result = await handleTokenCheckAuth(MOCK_EVENT);
-      expect(result).toEqual({ login: null });
+      expect(result).toEqual({ login: null, hasToken: false });
     });
 
     it('returns login when a valid token is stored', async () => {
       saveToken(VALID_GHP_TOKEN);
       mockOctokitInstance();
       const result = await handleTokenCheckAuth(MOCK_EVENT);
-      expect(result).toEqual({ login: MOCK_LOGIN });
+      expect(result).toEqual({ login: MOCK_LOGIN, hasToken: true });
     });
 
     it('returns null when no token is stored', async () => {
@@ -240,7 +240,7 @@ describe('github', () => {
       expect(loadToken()).toBeNull();
 
       const result = await handleTokenCheckAuth(MOCK_EVENT);
-      expect(result).toEqual({ login: null });
+      expect(result).toEqual({ login: null, hasToken: false });
     });
 
     it('cleans up and returns null for expired tokens', async () => {
@@ -256,11 +256,11 @@ describe('github', () => {
       });
 
       const result = await handleTokenCheckAuth(MOCK_EVENT);
-      expect(result).toEqual({ login: null });
+      expect(result).toEqual({ login: null, hasToken: false });
       expect(loadToken()).toBeNull();
     });
 
-    it('preserves the token for transient auth-check failures', async () => {
+    it('preserves the token and reports hasToken for transient failures', async () => {
       saveToken(VALID_GHP_TOKEN);
       mockOctokitInstance({
         users: {
@@ -270,8 +270,28 @@ describe('github', () => {
 
       const result = await handleTokenCheckAuth(MOCK_EVENT);
 
-      expect(result).toEqual({ login: null });
+      expect(result).toEqual({ login: null, hasToken: true });
       expect(loadToken()).toBe(VALID_GHP_TOKEN);
+    });
+
+    it('keeps octokit_ usable after a transient failure', async () => {
+      saveToken(VALID_GHP_TOKEN);
+      mockOctokitInstance({
+        users: {
+          getAuthenticated: vi.fn().mockRejectedValue(new Error('offline')),
+        },
+      });
+
+      await handleTokenCheckAuth(MOCK_EVENT);
+
+      // Subsequent gist operations should succeed using the preserved
+      // authenticated Octokit instance, simulating a return to online.
+      const result = await handleGistCreate(MOCK_EVENT, {
+        description: 'Test',
+        files: VALID_FILES,
+        isPublic: false,
+      });
+      expect(result.id).toBe(VALID_GIST_ID);
     });
   });
 

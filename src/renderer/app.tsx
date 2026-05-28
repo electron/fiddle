@@ -166,8 +166,12 @@ export class App {
     // messages (e.g. deep-linked private gist loads) use the authenticated
     // Octokit instance.
     window.ElectronFiddle.gitHubCheckAuth()
-      .then(({ login }) => {
-        this.state.gitHubLogin = login;
+      .then(({ login, hasToken }) => {
+        // Only update gitHubLogin if login succeeded or if there's no token.
+        // If we're offline (!login && hasToken), keep the current username.
+        if (login || !hasToken) {
+          this.state.gitHubLogin = login;
+        }
       })
       .catch((e) => console.warn('Failed to check GitHub auth status', e))
       .finally(() => {

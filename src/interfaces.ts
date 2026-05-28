@@ -259,6 +259,7 @@ export interface GitHubSignInResult {
 
 export interface GitHubCheckAuthResult {
   login: string | null;
+  hasToken: boolean;
 }
 
 export enum GlobalSetting {

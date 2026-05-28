@@ -176,20 +176,22 @@ async function handleTokenCheckAuth(
   _event: IpcMainInvokeEvent,
 ): Promise<GitHubCheckAuthResult> {
   const token = loadToken();
-  if (!token) return { login: null };
+  if (!token) return { login: null, hasToken: false };
 
   try {
     octokit_ = new Octokit({ auth: token });
     const response = await octokit_.users.getAuthenticated();
-    return { login: response.data.login };
+    return { login: response.data.login, hasToken: true };
   } catch (error: any) {
-    octokit_ = null;
-
     if (error?.status === 401 || error?.status === 403) {
+      octokit_ = null;
       deleteToken();
+      return { login: null, hasToken: false };
     }
 
-    return { login: null };
+    // If we're offline, don't 't invalidte the token or octokit_.
+    // Keep them as-is for use when we're back online.
+    return { login: null, hasToken: true };
   }
 }
 
