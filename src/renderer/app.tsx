@@ -169,6 +169,7 @@ export class App {
       .then(({ login }) => {
         this.state.gitHubLogin = login;
       })
+      .catch((e) => console.warn('Failed to check GitHub auth status', e))
       .finally(() => {
         window.ElectronFiddle.sendReady();
       });
