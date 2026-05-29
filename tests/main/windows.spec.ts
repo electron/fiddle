@@ -56,6 +56,8 @@ describe('windows', () => {
       },
       webPreferences: {
         preload: '/fake/path',
+        nodeIntegration: false,
+        nodeIntegrationInSubFrames: true,
       },
     };
 

@@ -76,6 +76,7 @@ expect.addSnapshotSerializer({
 global.window = global.window || {};
 global.document = global.document || { body: {} };
 global.fetch = window.fetch = vi.fn();
+global.location = global.location || { protocol: 'http:' };
 
 delete (window as any).localStorage;
 (window.localStorage as any) = {};

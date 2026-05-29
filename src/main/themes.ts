@@ -1,10 +1,11 @@
 import * as path from 'node:path';
 
-import { IpcMainInvokeEvent, app, shell } from 'electron';
+import { BrowserWindow, IpcMainInvokeEvent, app, shell } from 'electron';
 import fs from 'fs-extra';
 import namor from 'namor';
 
 import { ipcMainManager } from './ipc';
+import { getIsolatedRunButtonFrame } from './isolated-actions';
 import { IpcEvents } from '../ipc-events';
 import {
   FiddleTheme,
@@ -125,7 +126,19 @@ export async function openThemeFolder() {
 export function setupThemes() {
   ipcMainManager.handle(
     IpcEvents.READ_THEME_FILE,
-    (_: IpcMainInvokeEvent, name: string) => readThemeFile(name),
+    async (_: IpcMainInvokeEvent, name: string) => {
+      const theme = await readThemeFile(name);
+      // Hand the loaded theme to every isolated run-button OOPIF
+      // so it can cache it for later — this keeps the renderer off
+      // the CSS path while still letting the iframe apply by name.
+      if (theme) {
+        for (const window of BrowserWindow.getAllWindows()) {
+          const frame = getIsolatedRunButtonFrame(window.webContents);
+          if (frame) frame.send(IpcEvents.THEME_LOADED, theme);
+        }
+      }
+      return theme;
+    },
   );
   ipcMainManager.handle(
     IpcEvents.GET_AVAILABLE_THEMES,

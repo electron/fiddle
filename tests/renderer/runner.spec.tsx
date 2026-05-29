@@ -129,13 +129,6 @@ describe('Runner component', () => {
       );
     });
 
-    it('clears the installing-modules flag when modules are installed', () => {
-      emitEvent('run-fiddle');
-      store.isInstallingModules = true;
-      emitEvent('fiddle-modules-installed');
-      expect(store.isInstallingModules).toBe(false);
-    });
-
     it('does not run version not yet downloaded', () => {
       store.currentElectronVersion.state = InstallState.missing;
       vi.mocked(window.ElectronFiddle.getLocalVersionState).mockReturnValue(
@@ -204,22 +197,6 @@ describe('Runner component', () => {
           isKeepingUserDataDirs: true,
         }),
       );
-    });
-
-    it('marks modules as installing when there are modules to install', async () => {
-      store.modules = new Map<string, string>([['cow', '*']]);
-
-      await instance.getStartFiddleOptions();
-
-      expect(store.isInstallingModules).toBe(true);
-    });
-
-    it('does not mark modules as installing when there are no modules', async () => {
-      store.modules = new Map<string, string>();
-
-      await instance.getStartFiddleOptions();
-
-      expect(store.isInstallingModules).toBeFalsy();
     });
 
     it('shows a dialog and throws when the current version is unusable', async () => {

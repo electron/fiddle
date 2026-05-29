@@ -22,6 +22,10 @@ import { setupFiddleCore } from './fiddle-core';
 import { onFirstRunMaybe } from './first-run';
 import { setupGitHub } from './github';
 import { ipcMainManager } from './ipc';
+import {
+  registerIsolatedActionsScheme,
+  setupIsolatedActionsProtocol,
+} from './isolated-actions';
 import { setupNpm } from './npm';
 import { listenForProtocolHandler, setupProtocolHandler } from './protocol';
 import { shouldQuit } from './squirrel';
@@ -51,6 +55,7 @@ export async function onReady() {
   setupMenu();
   setupMenuHandler();
   setupProtocolHandler();
+  setupIsolatedActionsProtocol();
   setupFileListeners();
   setupUpdates();
   setupDialogs();
@@ -209,6 +214,10 @@ export function main() {
 
   // Set the app's name
   app.name = 'Electron Fiddle';
+
+  // Register the isolated-actions:// scheme as privileged. Must happen
+  // before `app.whenReady()` resolves.
+  registerIsolatedActionsScheme();
 
   // Ensure that there's only ever one Fiddle running
   listenForProtocolHandler();

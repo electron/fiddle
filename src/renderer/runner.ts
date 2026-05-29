@@ -172,7 +172,6 @@ export class Runner {
     const cleanup = () => {
       flushOutput();
       this.appState.isRunning = false;
-      this.appState.isInstallingModules = false;
     };
 
     window.ElectronFiddle.removeAllListeners('fiddle-runner-output');
@@ -196,10 +195,6 @@ export class Runner {
       } else {
         pushOutput('Electron exited.');
       }
-    });
-
-    window.ElectronFiddle.addEventListener('fiddle-modules-installed', () => {
-      this.appState.isInstallingModules = false;
     });
 
     this.appState.isRunning = true;
@@ -240,17 +235,12 @@ export class Runner {
       }
     }
 
-    const modules = Array.from(appState.modules.entries());
-    if (modules.length > 0) {
-      appState.isInstallingModules = true;
-    }
-
     return {
       version: appState.currentElectronVersion.version,
       enableElectronLogging: appState.isEnablingElectronLogging,
       executionFlags: [...appState.executionFlags],
       env: this.buildChildEnvVars(),
-      modules,
+      modules: Array.from(appState.modules.entries()),
       packageManager: appState.packageManager,
       useSocketFirewall: appState.isUsingSocketFirewall,
       isKeepingUserDataDirs: appState.isKeepingUserDataDirs,

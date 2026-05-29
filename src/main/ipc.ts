@@ -1,6 +1,11 @@
 import { EventEmitter } from 'node:events';
 
-import { BrowserWindow, MessagePortMain, ipcMain } from 'electron';
+import {
+  BrowserWindow,
+  MessagePortMain,
+  WebFrameMain,
+  ipcMain,
+} from 'electron';
 
 import { getOrCreateMainWindow } from './windows';
 import {
@@ -9,6 +14,12 @@ import {
   WEBCONTENTS_READY_FOR_IPC_SIGNAL,
   ipcMainEvents,
 } from '../ipc-events';
+
+type IpcSendTarget = Electron.WebContents | WebFrameMain;
+
+function isWebContents(target: IpcSendTarget): target is Electron.WebContents {
+  return 'mainFrame' in target;
+}
 
 /**
  * The main purpose of this class is to be the central
@@ -71,30 +82,55 @@ class IpcMainManager extends EventEmitter {
   }
 
   /**
-   * Send an IPC message to an instance of Electron.WebContents.
-   * If none is specified, we'll automatically go with the main window.
+   * Send an IPC message to one or more targets — either a
+   * `WebContents` (which sends to its main frame) or a
+   * `WebFrameMain` (sends to that specific sub-frame). If no target
+   * is provided, falls back to the main window. Targets may be a
+   * single value or an array; nullish entries are skipped so callers
+   * can pass results of optional lookups (e.g. a frame that
+   * may not exist yet) without filtering first.
    */
   public send(
     channel: IpcEvents,
     args?: Array<any>,
-    target?: Electron.WebContents,
+    target?: IpcSendTarget | Array<IpcSendTarget | null | undefined> | null,
   ) {
-    const _target = target;
-    if (!_target) {
+    if (target === undefined || target === null) {
       getOrCreateMainWindow().then((window) => {
         this.send(channel, args, window.webContents);
       });
       return;
     }
 
-    const _args = args || [];
-    if (!this.readyWebContents.has(_target)) {
-      const existing = this.messageQueue.get(_target) || [];
-      this.messageQueue.set(_target, [...existing, [channel, args]]);
+    if (Array.isArray(target)) {
+      for (const t of target) {
+        if (t) this.sendOne(channel, args, t);
+      }
       return;
     }
 
-    _target.isDestroyed() || _target.send(channel, ..._args);
+    this.sendOne(channel, args, target);
+  }
+
+  private sendOne(
+    channel: IpcEvents,
+    args: Array<any> | undefined,
+    target: IpcSendTarget,
+  ) {
+    const _args = args || [];
+
+    // Queue messages to WebContents until the ready signal
+    if (isWebContents(target)) {
+      if (!this.readyWebContents.has(target)) {
+        const existing = this.messageQueue.get(target) || [];
+        this.messageQueue.set(target, [...existing, [channel, args]]);
+        return;
+      }
+      target.isDestroyed() || target.send(channel, ..._args);
+      return;
+    }
+
+    target.send(channel, ..._args);
   }
 
   public handle(

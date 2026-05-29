@@ -173,6 +173,8 @@ const session = {
     cookies: {
       get: vi.fn(),
     },
+    getPreloads: vi.fn(() => [] as string[]),
+    setPreloads: vi.fn(),
   },
 };
 
@@ -195,10 +197,23 @@ const safeStorage = {
   }),
 };
 
+const protocolMock = {
+  registerSchemesAsPrivileged: vi.fn(),
+  handle: vi.fn(),
+  unhandle: vi.fn(),
+  isProtocolHandled: vi.fn(),
+};
+
+const netMock = {
+  fetch: vi.fn(),
+};
+
 const electronMock = {
   app,
   autoUpdater,
   BrowserWindow: BrowserWindowMock,
+  net: netMock,
+  protocol: protocolMock,
   clipboard: {
     readText: vi.fn(),
     readImage: vi.fn(),
