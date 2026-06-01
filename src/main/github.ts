@@ -189,7 +189,7 @@ async function handleTokenCheckAuth(
       return { login: null, hasToken: false };
     }
 
-    // If we're offline, don't 't invalidte the token or octokit_.
+    // If we're offline, don't invalidate the token or octokit_.
     // Keep them as-is for use when we're back online.
     return { login: null, hasToken: true };
   }
