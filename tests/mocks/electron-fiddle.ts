@@ -57,7 +57,6 @@ export class ElectronFiddleMock {
   public setShowMeTemplate = vi.fn();
   public showWarningDialog = vi.fn();
   public showWindow = vi.fn();
-  public startFiddle = vi.fn();
   public stopFiddle = vi.fn();
   public readThemeFile = vi.fn();
   public themePath = '~/.electron-fiddle/themes';

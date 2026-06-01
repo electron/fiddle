@@ -6,10 +6,12 @@ import * as fs from 'node:fs';
 import * as os from 'node:os';
 
 import { ElectronVersions, Installer, Runner } from '@electron/fiddle-core';
+import * as electron from 'electron';
 import { WebContents } from 'electron';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import type { StartFiddleOptions } from '../../src/interfaces';
+import { IpcEvents } from '../../src/ipc-events';
 import {
   installModules,
   setupFiddleCore,
@@ -367,6 +369,79 @@ describe('fiddle-core', () => {
       ).rejects.toThrow('disk full');
 
       expect(runner.spawn).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('START_FIDDLE IPC handler', () => {
+    beforeEach(() => {
+      // The IpcMainManager wraps every handle() listener with a
+      // BrowserWindow guard; make sure that guard finds a window so
+      // the wrapper actually delegates to our handler.
+      vi.mocked(electron.BrowserWindow.fromWebContents).mockReturnValue(
+        {} as electron.BrowserWindow,
+      );
+    });
+
+    function getStartFiddleHandler() {
+      // setupFiddleCore in the outer beforeEach has already wired the
+      // handler — pull the most recent registration for START_FIDDLE
+      // out of the ipcMain mock.
+      const registration = vi
+        .mocked(electron.ipcMain.handle)
+        .mock.calls.findLast(([channel]) => channel === IpcEvents.START_FIDDLE);
+      if (!registration) throw new Error('START_FIDDLE handler not registered');
+      return registration[1];
+    }
+
+    function makeInvokeEvent(senderUrl: string): electron.IpcMainInvokeEvent {
+      const sender = new WebContentsMock() as unknown as WebContents;
+      return {
+        sender,
+        senderFrame: { url: senderUrl } as unknown as electron.WebFrameMain,
+      } as electron.IpcMainInvokeEvent;
+    }
+
+    it('ignores START_FIDDLE coming from the main app frame', async () => {
+      const handler = getStartFiddleHandler();
+      // The IpcMainManager's BrowserWindow guard returns the wrapper
+      // that delegates to our handler — invoke it directly so the
+      // sender-frame URL check is the one being exercised.
+      await handler(makeInvokeEvent('http://localhost:3000/main_window/'));
+
+      expect(runner.spawn).not.toHaveBeenCalled();
+    });
+
+    it('ignores START_FIDDLE coming from a file:// frame', async () => {
+      const handler = getStartFiddleHandler();
+      await handler(makeInvokeEvent('file:///some/index.html'));
+
+      expect(runner.spawn).not.toHaveBeenCalled();
+    });
+
+    it('ignores START_FIDDLE when there is no sender frame', async () => {
+      const handler = getStartFiddleHandler();
+      const sender = new WebContentsMock() as unknown as WebContents;
+      const event = {
+        sender,
+        senderFrame: null,
+      } as unknown as electron.IpcMainInvokeEvent;
+      await handler(event);
+
+      expect(runner.spawn).not.toHaveBeenCalled();
+    });
+
+    it('accepts START_FIDDLE coming from the isolated-actions:// protocol', async () => {
+      const child = new ChildProcessMock();
+      vi.mocked(runner.spawn).mockImplementation(async () => {
+        setImmediate(() => child.emit('close', 0, null));
+        return child;
+      });
+      getStartFiddleOptionsMock.mockResolvedValueOnce(makeOptions());
+
+      const handler = getStartFiddleHandler();
+      await handler(makeInvokeEvent('isolated-actions://run-button/'));
+
+      expect(runner.spawn).toHaveBeenCalledTimes(1);
     });
   });
 });

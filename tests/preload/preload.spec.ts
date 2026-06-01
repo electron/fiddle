@@ -22,7 +22,7 @@ describe('preload', () => {
 
       expect(contextBridge.exposeInMainWorld).toHaveBeenCalledWith(
         'ElectronFiddle',
-        expect.objectContaining({ startFiddle: expect.anything() }),
+        expect.objectContaining({ stopFiddle: expect.anything() }),
       );
     });
   });

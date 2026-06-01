@@ -14,6 +14,10 @@ import {
 import { ELECTRON_DOWNLOAD_PATH, ELECTRON_INSTALL_PATH } from './constants';
 import { cleanupDirectory, deleteUserData, saveFilesToTemp } from './files';
 import { ipcMainManager } from './ipc';
+import {
+  ISOLATED_ACTIONS_SCHEME,
+  getIsolatedRunButtonFrame,
+} from './isolated-actions';
 import { addModules, getIsPackageManagerInstalled } from './npm';
 import { getFiles } from './utils/get-files';
 import { getStartFiddleOptions } from './utils/get-start-fiddle-options';
@@ -167,7 +171,11 @@ async function startFiddleImpl(webContents: WebContents): Promise<RunResult> {
     version,
   } = options;
 
-  ipcMainManager.send(IpcEvents.FIDDLE_RUN, [], webContents);
+  ipcMainManager.send(
+    IpcEvents.FIDDLE_RUN,
+    [{ installingModules: modules.length > 0 }],
+    [webContents, getIsolatedRunButtonFrame(webContents)],
+  );
 
   // Look up local Electron builds by version string. Local builds use a
   // version of the form `0.0.0-local.<timestamp>`, so only consult the
@@ -231,7 +239,11 @@ async function startFiddleImpl(webContents: WebContents): Promise<RunResult> {
 
     pushError(webContents, 'Could not install modules', error);
     await cleanup();
-    ipcMainManager.send(IpcEvents.FIDDLE_STOPPED, [null, null], webContents);
+    ipcMainManager.send(
+      IpcEvents.FIDDLE_STOPPED,
+      [null, null],
+      [webContents, getIsolatedRunButtonFrame(webContents)],
+    );
     return RunResult.FAILURE;
   }
 
@@ -268,7 +280,11 @@ async function startFiddleImpl(webContents: WebContents): Promise<RunResult> {
   } catch (error: any) {
     pushError(webContents, 'Failed to spawn Fiddle', error);
     await cleanup();
-    ipcMainManager.send(IpcEvents.FIDDLE_STOPPED, [null, null], webContents);
+    ipcMainManager.send(
+      IpcEvents.FIDDLE_STOPPED,
+      [null, null],
+      [webContents, getIsolatedRunButtonFrame(webContents)],
+    );
     return RunResult.FAILURE;
   }
   fiddleProcesses.set(webContents, child);
@@ -276,7 +292,11 @@ async function startFiddleImpl(webContents: WebContents): Promise<RunResult> {
   // Signal the renderer that module installation is done and the process is
   // running. Sent after fiddleProcesses.set() so that stopFiddle() will work
   // as soon as the button transitions to "Stop".
-  ipcMainManager.send(IpcEvents.FIDDLE_MODULES_INSTALLED, [], webContents);
+  ipcMainManager.send(
+    IpcEvents.FIDDLE_MODULES_INSTALLED,
+    [],
+    [webContents, getIsolatedRunButtonFrame(webContents)],
+  );
 
   pushOutputLine(webContents, `Electron v${version} started as "${appName}"`);
 
@@ -298,7 +318,7 @@ async function startFiddleImpl(webContents: WebContents): Promise<RunResult> {
       ipcMainManager.send(
         IpcEvents.FIDDLE_STOPPED,
         [code, signal],
-        webContents,
+        [webContents, getIsolatedRunButtonFrame(webContents)],
       );
 
       resolve(result);
@@ -337,7 +357,7 @@ export async function setupFiddleCore(versions: ElectronVersions) {
       ipcMainManager.send(
         IpcEvents.VERSION_STATE_CHANGED,
         [event],
-        window.webContents,
+        [window.webContents, getIsolatedRunButtonFrame(window.webContents)],
       );
     }
   });
@@ -374,7 +394,7 @@ export async function setupFiddleCore(versions: ElectronVersions) {
             ipcMainManager.send(
               IpcEvents.VERSION_DOWNLOAD_PROGRESS,
               [version, progress],
-              webContents,
+              [webContents, getIsolatedRunButtonFrame(webContents)],
             );
           },
         });
@@ -411,7 +431,15 @@ export async function setupFiddleCore(versions: ElectronVersions) {
   ipcMainManager.handle(
     IpcEvents.START_FIDDLE,
     async (event: IpcMainInvokeEvent) => {
-      return await startFiddle(event.sender);
+      const { sender, senderFrame } = event;
+
+      // START_FIDDLE is only valid when it originates from isolated-actions://
+      if (
+        senderFrame &&
+        new URL(senderFrame.url).protocol === `${ISOLATED_ACTIONS_SCHEME}:`
+      ) {
+        return await startFiddle(sender);
+      }
     },
   );
   ipcMainManager.on(IpcEvents.STOP_FIDDLE, (event: IpcMainEvent) => {

@@ -13,3 +13,5 @@ export const GIST_MAX_FILE_COUNT = 300;
 // process (sign-in validation), so they stay in lockstep.
 export const GITHUB_TOKEN_PATTERN =
   /^(ghp_[a-zA-Z0-9]{36}|github_pat_[a-zA-Z0-9]{22}_[a-zA-Z0-9]{59})$/;
+
+export const PREFERS_DARK_MEDIA_QUERY = '(prefers-color-scheme: dark)';

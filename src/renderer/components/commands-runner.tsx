@@ -1,84 +1,73 @@
 import * as React from 'react';
 
-import { Button, ButtonProps, Spinner } from '@blueprintjs/core';
-import { observer } from 'mobx-react';
-
-import { InstallState, VersionSource } from '../../interfaces';
-import { AppState } from '../state';
-
-interface RunnerProps {
-  appState: AppState;
-}
+const ISOLATED_RUN_BUTTON_ORIGIN = 'isolated-actions://run-button';
+const RESIZE_MESSAGE = 'isolated-run-button-resize';
+const FOCUS_MESSAGE = 'isolated-run-button-focus';
 
 /**
- * The runner component is responsible for actually launching the fiddle
- * with Electron. It also renders the button that does so.
+ * Renders the run button as a borderless cross-origin iframe served
+ * via the `isolated-actions://` scheme. This ensures the button is
+ * protected from a compromised renderer and fiddles cannot be started
+ * programmatically without user interaction.
  */
-export const Runner = observer(
-  class Runner extends React.Component<RunnerProps> {
-    public render() {
-      const { downloaded, downloading, missing, installing, installed } =
-        InstallState;
-      const {
-        isRunning,
-        isInstallingModules,
-        currentElectronVersion,
-        isOnline,
-      } = this.props.appState;
+export class Runner extends React.Component<Record<string, never>> {
+  private iframeRef = React.createRef<HTMLIFrameElement>();
+  private readonly src: string;
 
-      const { downloadProgress, source, state } = currentElectronVersion;
-      const props: ButtonProps = { disabled: true };
+  constructor(props: Record<string, never>) {
+    super(props);
+    const initialTheme = window.app?.state?.theme ?? '';
+    const initialUsingSystemTheme =
+      window.app?.state?.isUsingSystemTheme ?? true;
+    this.src =
+      `${ISOLATED_RUN_BUTTON_ORIGIN}/` +
+      `?initialTheme=${encodeURIComponent(initialTheme)}` +
+      `&initialUsingSystemTheme=${initialUsingSystemTheme}`;
+  }
 
-      if ([downloading, missing].includes(state) && !isOnline) {
-        props.text = 'Offline';
-        props.icon = 'satellite';
-        return <Button id="button-run" {...props} type={undefined} />;
+  public componentDidMount() {
+    window.addEventListener('message', this.handleMessage);
+  }
+
+  public componentWillUnmount() {
+    window.removeEventListener('message', this.handleMessage);
+  }
+
+  private handleMessage = (event: MessageEvent) => {
+    if (event.origin !== ISOLATED_RUN_BUTTON_ORIGIN) return;
+    if (event.source !== this.iframeRef.current?.contentWindow) return;
+    const data = event.data as {
+      type?: unknown;
+      width?: unknown;
+      value?: unknown;
+    } | null;
+    if (!data || typeof data.type !== 'string') return;
+
+    const iframe = this.iframeRef.current;
+    if (!iframe) return;
+
+    if (data.type === RESIZE_MESSAGE) {
+      // The iframe tells us the width of the content so we can resize accordingly
+      if (typeof data.width === 'number' && data.width > 0) {
+        iframe.style.width = `${Math.ceil(data.width)}px`;
       }
-
-      switch (state) {
-        case downloading: {
-          props.text = 'Downloading';
-          props.icon = <Spinner size={16} value={downloadProgress} />;
-          break;
-        }
-        case installing: {
-          props.text = 'Unzipping';
-          props.icon = <Spinner size={16} />;
-          break;
-        }
-        case downloaded:
-        case installed: {
-          props.disabled = false;
-          if (isInstallingModules) {
-            props.disabled = true;
-            props.text = 'Installing modules';
-            props.icon = <Spinner size={16} />;
-          } else if (isRunning) {
-            props.active = true;
-            props.text = 'Stop';
-            props.onClick = () => window.ElectronFiddle.stopFiddle();
-            props.icon = 'stop';
-          } else {
-            props.text = 'Run';
-            props.onClick = () => window.ElectronFiddle.startFiddle();
-            props.icon = 'play';
-          }
-          break;
-        }
-        case missing: {
-          if (source === VersionSource.local) {
-            props.text = 'Unavailable';
-            props.icon = 'issue';
-            break;
-          }
-        }
-        default: {
-          props.text = 'Checking status';
-          props.icon = <Spinner size={16} />;
-        }
-      }
-
-      return <Button id="button-run" {...props} type={undefined} />;
+    } else if (data.type === FOCUS_MESSAGE) {
+      // Focus is inside the iframe but render the focus ring on the iframe itself
+      iframe.classList.toggle('has-focus', !!data.value);
     }
-  },
-);
+  };
+
+  public render() {
+    return (
+      <iframe
+        id="button-run"
+        ref={this.iframeRef}
+        className="run-button-frame"
+        title="Run Fiddle"
+        src={this.src}
+        allow=""
+        tabIndex={0}
+      />
+    );
+  }
+}

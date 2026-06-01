@@ -66,6 +66,7 @@ describe('IpcMainManager', () => {
       const mockTarget = {
         send: vi.fn(),
         isDestroyed: () => false,
+        mainFrame: {},
       } as unknown as Electron.WebContents;
 
       vi.mocked(getOrCreateMainWindow).mockResolvedValue(null as any);
@@ -79,6 +80,8 @@ describe('IpcMainManager', () => {
     it('does not send an event to a target window if it is not ready', () => {
       const mockTarget = {
         send: vi.fn(),
+        isDestroyed: () => false,
+        mainFrame: {},
       } as unknown as Electron.WebContents;
 
       vi.mocked(getOrCreateMainWindow).mockResolvedValue(null as any);
@@ -86,6 +89,44 @@ describe('IpcMainManager', () => {
       ipcMainManager.send(IpcEvents.FIDDLE_RUN, undefined, mockTarget);
 
       expect(mockTarget.send).toHaveBeenCalledTimes(0);
+    });
+
+    it('sends to every target when given an array', () => {
+      const ready = {
+        send: vi.fn(),
+        isDestroyed: () => false,
+        mainFrame: {},
+      } as unknown as Electron.WebContents;
+      const frame = { send: vi.fn() } as unknown as Electron.WebFrameMain;
+      ipcMainManager.readyWebContents.add(ready);
+
+      ipcMainManager.send(IpcEvents.FIDDLE_RUN, ['arg'], [ready, frame]);
+
+      expect(ready.send).toHaveBeenCalledWith(IpcEvents.FIDDLE_RUN, 'arg');
+      expect(frame.send).toHaveBeenCalledWith(IpcEvents.FIDDLE_RUN, 'arg');
+    });
+
+    it('skips nullish entries in a target array', () => {
+      const target = {
+        send: vi.fn(),
+        isDestroyed: () => false,
+        mainFrame: {},
+      } as unknown as Electron.WebContents;
+      ipcMainManager.readyWebContents.add(target);
+
+      ipcMainManager.send(IpcEvents.FIDDLE_RUN, [], [target, null, undefined]);
+
+      expect(target.send).toHaveBeenCalledTimes(1);
+    });
+
+    it('sends directly to a WebFrameMain target without queueing', () => {
+      const frame = { send: vi.fn() } as unknown as Electron.WebFrameMain;
+
+      // Frames don't participate in the WEBCONTENTS_READY_FOR_IPC_SIGNAL
+      // ready handshake, so they should bypass the queue entirely.
+      ipcMainManager.send(IpcEvents.FIDDLE_RUN, ['arg'], frame);
+
+      expect(frame.send).toHaveBeenCalledWith(IpcEvents.FIDDLE_RUN, 'arg');
     });
   });
 
