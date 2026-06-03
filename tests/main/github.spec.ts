@@ -1,13 +1,16 @@
 import * as fs from 'node:fs';
-import * as path from 'node:path';
 
-import { IpcMainInvokeEvent, safeStorage } from 'electron';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { IpcMainInvokeEvent, app, safeStorage } from 'electron';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
+import { GIST_MAX_FILE_COUNT, GIST_MAX_FILE_SIZE } from '../../src/constants';
+import { getTemplate } from '../../src/main/content';
 import { testing } from '../../src/main/github';
+import * as tmp from '../../src/main/utils/tmp';
 
 const {
   fetchExample,
+  getCredentialsPath,
   handleGistCreate,
   handleGistDelete,
   handleGistListCommits,
@@ -16,30 +19,59 @@ const {
   handleTokenCheckAuth,
   handleTokenSignIn,
   handleTokenSignOut,
+  loadToken,
+  saveToken,
 } = testing;
 
-vi.mock('node:fs', () => ({
-  existsSync: vi.fn(() => false),
-  readFileSync: vi.fn(() => Buffer.from('')),
-  writeFileSync: vi.fn(),
-  unlinkSync: vi.fn(),
-}));
 vi.mock('@octokit/rest', () => {
   const MockOctokit = vi.fn();
   return { Octokit: MockOctokit };
 });
-vi.mock('../../src/main/content', () => ({
-  getTemplate: vi.fn(),
-}));
-
-const { getTemplate } = await import('../../src/main/content');
+vi.unmock('fs-extra');
 
 const MOCK_EVENT = {} as IpcMainInvokeEvent;
 
 // Import Octokit so we can mock its constructor
 const { Octokit } = await import('@octokit/rest');
 
+const VALID_GHP_TOKEN = 'ghp_ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefgh12';
+const VALID_PAT_TOKEN =
+  'github_pat_ABCDEFGHIJKLMNOPQRSTUV_ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyzABCDEFG';
+const VALID_GIST_ID = 'abc123def456abc123def456abc123de';
+const VALID_SHA = 'abc123def456abc123def456abc123deabc123de';
+const INVALID_GIST_IDS = [
+  'bad-id',
+  123,
+  null,
+  undefined,
+  'abc123',
+  'a'.repeat(33),
+  'zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz',
+  'https://gist.github.com/abc123def456abc123def456abc123de',
+];
+const MOCK_LOGIN = 'testuser';
+const VALID_FILES = {
+  'main.js': { filename: 'main.js', content: 'code' },
+};
+let userDataPath: string;
+
 function mockOctokitInstance(overrides: Record<string, any> = {}) {
+  const MOCK_GIST_FILES = {
+    'main.js': {
+      filename: 'main.js',
+      content: 'console.log("hi")',
+      truncated: false,
+      raw_url: 'https://raw.example.com/main.js',
+    },
+  };
+
+  const MOCK_GIST_DATA = {
+    id: VALID_GIST_ID,
+    html_url: `https://gist.github.com/${VALID_GIST_ID}`,
+    history: [{ version: 'sha1' }],
+    files: MOCK_GIST_FILES,
+  };
+
   const instance = {
     users: {
       getAuthenticated: vi.fn().mockResolvedValue({
@@ -85,67 +117,36 @@ function mockOctokitInstance(overrides: Record<string, any> = {}) {
   return instance;
 }
 
-const VALID_GHP_TOKEN = 'ghp_ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefgh12';
-const VALID_PAT_TOKEN =
-  'github_pat_ABCDEFGHIJKLMNOPQRSTUV_ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyzABCDEFG';
-const VALID_GIST_ID = 'abc123def456abc123def456abc123de';
-const VALID_SHA = 'abc123def456abc123def456abc123deabc123de';
-const INVALID_GIST_IDS = [
-  'bad-id',
-  123,
-  null,
-  undefined,
-  'abc123',
-  'a'.repeat(33),
-  'zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz',
-  'https://gist.github.com/abc123def456abc123def456abc123de',
-];
-const MOCK_LOGIN = 'testuser';
-const CREDENTIALS_FILE = '.github-credentials';
-const VALID_FILES = {
-  'main.js': { filename: 'main.js', content: 'code' },
-};
-
-const MOCK_GIST_FILES = {
-  'main.js': {
-    filename: 'main.js',
-    content: 'console.log("hi")',
-    truncated: false,
-    raw_url: 'https://raw.example.com/main.js',
-  },
-};
-
-const MOCK_GIST_DATA = {
-  id: VALID_GIST_ID,
-  html_url: `https://gist.github.com/${VALID_GIST_ID}`,
-  history: [{ version: 'sha1' }],
-  files: MOCK_GIST_FILES,
-};
-
 describe('github', () => {
-  beforeEach(() => {
-    vi.mocked(fs.existsSync).mockReturnValue(false);
-    // Reset module-level octokit state by signing out
-    handleTokenSignOut(MOCK_EVENT);
+  beforeEach(async () => {
+    userDataPath = tmp.dirSync({ prefix: 'electron-fiddle-github-' });
+    app.setPath('userData', userDataPath);
+    // Confirm that the folder we just created will hold the credentials file
+    expect(getCredentialsPath().startsWith(userDataPath)).toBe(true);
+    expect(loadToken()).toBeNull();
   });
 
-  // --- Token sign-in ---
+  afterEach(async () => {
+    await handleTokenSignOut(MOCK_EVENT);
+    fs.rmSync(userDataPath, { recursive: true, force: true });
+  });
 
   describe('handleTokenSignIn()', () => {
-    it('signs in with valid token formats', async () => {
+    it('saves encrypted tokens to a permission-protected userData file', async () => {
       mockOctokitInstance();
+      expect(loadToken()).toBeNull();
 
       for (const token of [VALID_GHP_TOKEN, VALID_PAT_TOKEN]) {
         const result = await handleTokenSignIn(MOCK_EVENT, token);
         expect(result).toEqual({ success: true, login: MOCK_LOGIN });
 
-        const lastWriteCall = vi.mocked(fs.writeFileSync).mock.calls.at(-1);
-        const writePath = lastWriteCall?.[0];
-        expect(writePath).toBe(path.join('/Users/fake-user', CREDENTIALS_FILE));
-        expect(lastWriteCall?.[2]).toEqual({ mode: 0o600 });
+        const encrypted = safeStorage.encryptString(token);
+        expect(loadToken()).toBe(token);
+        expect(fs.readFileSync(getCredentialsPath())).toEqual(encrypted);
+        // POSIX permission bits aren't meaningful on Windows
+        if (process.platform !== 'win32')
+          expect(fs.statSync(getCredentialsPath()).mode & 0o777).toBe(0o600);
       }
-
-      expect(fs.writeFileSync).toHaveBeenCalled();
     });
 
     it('rejects an invalid token format', async () => {
@@ -207,61 +208,43 @@ describe('github', () => {
     });
   });
 
-  // --- Token sign-out ---
-
   describe('handleTokenSignOut()', () => {
     it('deletes the stored token', async () => {
-      vi.mocked(fs.existsSync).mockReturnValue(true);
-      const result = await handleTokenSignOut(MOCK_EVENT);
-      expect(result).toEqual({ success: true });
-      expect(fs.unlinkSync).toHaveBeenCalled();
-    });
-
-    it('does nothing when the token file does not exist', async () => {
-      vi.mocked(fs.existsSync).mockReturnValue(false);
-
-      await handleTokenSignOut(MOCK_EVENT);
-
-      expect(fs.unlinkSync).not.toHaveBeenCalled();
+      // setup: set a token & confirm it loads
+      saveToken(VALID_GHP_TOKEN);
+      expect(loadToken()).toBe(VALID_GHP_TOKEN);
+      await expect(handleTokenSignOut(MOCK_EVENT)).resolves.toBeUndefined();
+      expect(loadToken()).toBeNull();
     });
   });
 
-  // --- Check auth ---
-
   describe('handleTokenCheckAuth()', () => {
     it('returns null when decryption fails', async () => {
-      vi.mocked(fs.existsSync).mockReturnValue(true);
-      vi.mocked(fs.readFileSync).mockImplementation(() => {
+      saveToken(VALID_GHP_TOKEN);
+      vi.mocked(safeStorage.decryptString).mockImplementationOnce(() => {
         throw new Error('corrupt');
       });
-
       const result = await handleTokenCheckAuth(MOCK_EVENT);
-
-      expect(result).toEqual({ login: null });
+      expect(result).toEqual({ login: null, hasToken: false });
     });
 
     it('returns login when a valid token is stored', async () => {
-      vi.mocked(fs.existsSync).mockReturnValue(true);
-      vi.mocked(fs.readFileSync).mockReturnValue(
-        Buffer.from(`encrypted:${VALID_GHP_TOKEN}`),
-      );
+      saveToken(VALID_GHP_TOKEN);
       mockOctokitInstance();
-
       const result = await handleTokenCheckAuth(MOCK_EVENT);
-      expect(result).toEqual({ login: MOCK_LOGIN });
+      expect(result).toEqual({ login: MOCK_LOGIN, hasToken: true });
     });
 
     it('returns null when no token is stored', async () => {
-      vi.mocked(fs.existsSync).mockReturnValue(false);
+      // setup: confirm there's no token
+      expect(loadToken()).toBeNull();
+
       const result = await handleTokenCheckAuth(MOCK_EVENT);
-      expect(result).toEqual({ login: null });
+      expect(result).toEqual({ login: null, hasToken: false });
     });
 
     it('cleans up and returns null for expired tokens', async () => {
-      vi.mocked(fs.existsSync).mockReturnValue(true);
-      vi.mocked(fs.readFileSync).mockReturnValue(
-        Buffer.from(`encrypted:${VALID_GHP_TOKEN}`),
-      );
+      saveToken(VALID_GHP_TOKEN);
       mockOctokitInstance({
         users: {
           getAuthenticated: vi
@@ -273,15 +256,12 @@ describe('github', () => {
       });
 
       const result = await handleTokenCheckAuth(MOCK_EVENT);
-      expect(result).toEqual({ login: null });
-      expect(fs.unlinkSync).toHaveBeenCalled();
+      expect(result).toEqual({ login: null, hasToken: false });
+      expect(loadToken()).toBeNull();
     });
 
-    it('preserves the token for transient auth-check failures', async () => {
-      vi.mocked(fs.existsSync).mockReturnValue(true);
-      vi.mocked(fs.readFileSync).mockReturnValue(
-        Buffer.from(`encrypted:${VALID_GHP_TOKEN}`),
-      );
+    it('preserves the token and reports hasToken for transient failures', async () => {
+      saveToken(VALID_GHP_TOKEN);
       mockOctokitInstance({
         users: {
           getAuthenticated: vi.fn().mockRejectedValue(new Error('offline')),
@@ -290,8 +270,28 @@ describe('github', () => {
 
       const result = await handleTokenCheckAuth(MOCK_EVENT);
 
-      expect(result).toEqual({ login: null });
-      expect(fs.unlinkSync).not.toHaveBeenCalled();
+      expect(result).toEqual({ login: null, hasToken: true });
+      expect(loadToken()).toBe(VALID_GHP_TOKEN);
+    });
+
+    it('keeps octokit_ usable after a transient failure', async () => {
+      saveToken(VALID_GHP_TOKEN);
+      mockOctokitInstance({
+        users: {
+          getAuthenticated: vi.fn().mockRejectedValue(new Error('offline')),
+        },
+      });
+
+      await handleTokenCheckAuth(MOCK_EVENT);
+
+      // Subsequent gist operations should succeed using the preserved
+      // authenticated Octokit instance, simulating a return to online.
+      const result = await handleGistCreate(MOCK_EVENT, {
+        description: 'Test',
+        files: VALID_FILES,
+        isPublic: false,
+      });
+      expect(result.id).toBe(VALID_GIST_ID);
     });
   });
 
@@ -299,9 +299,6 @@ describe('github', () => {
   async function signInForGistTests() {
     mockOctokitInstance();
     await handleTokenSignIn(MOCK_EVENT, VALID_GHP_TOKEN);
-    // Clear call counts from sign-in so they don't leak into assertions
-    vi.mocked(Octokit).mockClear();
-    vi.mocked(fs.writeFileSync).mockClear();
   }
 
   // --- Gist create ---
@@ -354,11 +351,11 @@ describe('github', () => {
         {
           'main.js': {
             filename: 'main.js',
-            content: 'x'.repeat(10 * 1024 * 1024 + 1),
+            content: 'x'.repeat(GIST_MAX_FILE_SIZE + 1),
           },
         },
         Object.fromEntries(
-          Array.from({ length: 301 }, (_, index) => {
+          Array.from({ length: GIST_MAX_FILE_COUNT + 1 }, (_, index) => {
             const filename = `file${index}.js`;
             return [filename, { filename, content: 'x' }];
           }),
@@ -471,8 +468,9 @@ describe('github', () => {
         VALID_GIST_ID,
         'AABBCCDDEE11223344556677889900FF',
       ]) {
-        const result = await handleGistDelete(MOCK_EVENT, gistId);
-        expect(result).toEqual({ success: true });
+        await expect(
+          handleGistDelete(MOCK_EVENT, gistId),
+        ).resolves.toBeUndefined();
       }
     });
 
@@ -498,7 +496,6 @@ describe('github', () => {
         gistId: VALID_GIST_ID,
       });
 
-      expect(result.id).toBe(VALID_GIST_ID);
       expect(result.files['main.js'].content).toBe('console.log("hi")');
     });
 
@@ -508,7 +505,7 @@ describe('github', () => {
         revision: VALID_SHA,
       });
 
-      expect(result.id).toBe(VALID_GIST_ID);
+      expect(result.revision).toBe('sha1');
     });
 
     it('rejects invalid gist IDs', async () => {
@@ -535,7 +532,7 @@ describe('github', () => {
           revision,
         });
 
-        expect(result.id).toBe(VALID_GIST_ID);
+        expect(result.revision).toBe('sha1');
       }
     });
 
@@ -564,11 +561,12 @@ describe('github', () => {
       const result = await handleGistLoad(MOCK_EVENT, {
         gistId: VALID_GIST_ID,
       });
-      expect(result.id).toBe(VALID_GIST_ID);
+      expect(result.files['main.js'].content).toBe('console.log("hi")');
     });
 
     it('fetches full content for truncated files', async () => {
-      const fullContent = 'a'.repeat(2000);
+      // This is the largest allowable size a gist file can be
+      const fullContent = 'a'.repeat(GIST_MAX_FILE_SIZE);
 
       // Sign out and re-sign-in with a mock that returns a truncated file
       await handleTokenSignOut(MOCK_EVENT);
@@ -702,16 +700,9 @@ describe('github', () => {
   // --- Fetch example ---
 
   describe('fetchExample()', () => {
-    const REF = 'v42.0.0';
+    const REF = 'example-template';
     const EXAMPLE_PATH = 'docs/fiddles/quick-start';
-    const TEMPLATE_VALUES = {
-      'main.js': '// template main',
-      'index.html': '<!-- template html -->',
-      'renderer.js': '// template renderer',
-      'preload.js': '// template preload',
-      'styles.css': '/* template css */',
-      'package.json': '{}',
-    };
+    const TEMPLATE_VERSION = REF.replace(/^v/, '');
 
     function makeFolderEntry(name: string, downloadUrl: string | null = null) {
       return {
@@ -733,11 +724,6 @@ describe('github', () => {
         });
     }
 
-    beforeEach(() => {
-      vi.mocked(getTemplate).mockReset();
-      vi.mocked(getTemplate).mockResolvedValue({ ...TEMPLATE_VALUES });
-    });
-
     it('overlays downloaded supported files onto the template', async () => {
       const folder = [
         makeFolderEntry('main.js'),
@@ -751,6 +737,7 @@ describe('github', () => {
         'https://example.test/index.html': '<!-- example html -->',
       });
 
+      const templateValues = await getTemplate(TEMPLATE_VERSION);
       const result = await fetchExample(REF, EXAMPLE_PATH);
 
       expect(getContent).toHaveBeenCalledWith({
@@ -759,14 +746,12 @@ describe('github', () => {
         path: EXAMPLE_PATH,
         ref: REF,
       });
-      // Strips the leading 'v' and forwards the version to getTemplate.
-      expect(getTemplate).toHaveBeenCalledWith('42.0.0');
       // Overridden values come from the example.
       expect(result['main.js']).toBe('// example main');
       expect(result['index.html']).toBe('<!-- example html -->');
       // Files not in the example fall back to template values.
-      expect(result['renderer.js']).toBe(TEMPLATE_VALUES['renderer.js']);
-      expect(result['package.json']).toBe(TEMPLATE_VALUES['package.json']);
+      expect(result['renderer.js']).toBe(templateValues['renderer.js']);
+      expect(result['package.json']).toBe(templateValues['package.json']);
 
       fetchSpy.mockRestore();
     });
@@ -865,13 +850,12 @@ describe('github', () => {
       await expect(fetchExample(REF, '')).rejects.toThrow('Invalid path');
     });
 
-    it('returns a fresh object that does not mutate the cached template', async () => {
+    it('returns a fresh object that does not mutate the template', async () => {
       const folder = [makeFolderEntry('main.js')];
       const getContent = vi.fn().mockResolvedValue({ data: folder });
       mockOctokitInstance({ repos: { getContent } });
 
-      const cached = { ...TEMPLATE_VALUES };
-      vi.mocked(getTemplate).mockResolvedValue(cached);
+      const templateValues = await getTemplate(TEMPLATE_VERSION);
 
       const fetchSpy = mockFetchResponses({
         'https://example.test/main.js': '// example main',
@@ -879,9 +863,10 @@ describe('github', () => {
 
       const result = await fetchExample(REF, EXAMPLE_PATH);
 
-      expect(result).not.toBe(cached);
-      expect(cached['main.js']).toBe(TEMPLATE_VALUES['main.js']);
+      expect(result).not.toBe(templateValues);
+      expect(templateValues['main.js']).not.toBe('// example main');
       expect(result['main.js']).toBe('// example main');
+      expect(await getTemplate(TEMPLATE_VERSION)).toEqual(templateValues);
 
       fetchSpy.mockRestore();
     });

@@ -1,12 +1,12 @@
-import { PREFERS_DARK_MEDIA_QUERY } from './constants';
 import { AppState } from './state';
+import { PREFERS_DARK_MEDIA_QUERY } from '../constants';
 import {
   DefaultThemes,
-  FiddleTheme,
   LoadedFiddleTheme,
   defaultDark,
   defaultLight,
 } from '../themes-defaults';
+import { getCssStringForTheme } from '../utils/theme';
 
 /**
  * Activate a given theme (or the default)
@@ -49,20 +49,5 @@ export async function getTheme(
     theme = appState.isUsingSystemTheme ? getCurrentTheme() : defaultDark;
   }
 
-  return { ...theme, css: await getCssStringForTheme(theme) };
-}
-
-/**
- * Get the CSS string for a theme.
- */
-async function getCssStringForTheme(theme: FiddleTheme): Promise<string> {
-  let cssContent = '';
-
-  const keys = Object.keys(theme.common) as (keyof typeof theme.common)[];
-
-  keys.forEach((key: keyof typeof theme.common) => {
-    cssContent += `    --${key}: ${theme.common[key]};\n`;
-  });
-
-  return `\n  html, body {\n${cssContent}  }\n`;
+  return { ...theme, css: getCssStringForTheme(theme) };
 }

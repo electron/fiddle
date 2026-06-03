@@ -4,13 +4,22 @@
 
 import * as fs from 'node:fs';
 import * as os from 'node:os';
-import * as path from 'node:path';
 
 import { ElectronVersions, Installer, Runner } from '@electron/fiddle-core';
+import * as electron from 'electron';
 import { WebContents } from 'electron';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { setupFiddleCore, startFiddle } from '../../src/main/fiddle-core';
+import type { StartFiddleOptions } from '../../src/interfaces';
+import { IpcEvents } from '../../src/ipc-events';
+import {
+  installModules,
+  setupFiddleCore,
+  startFiddle,
+} from '../../src/main/fiddle-core';
+import * as filesMod from '../../src/main/files';
+import { addModules, getIsPackageManagerInstalled } from '../../src/main/npm';
+import { getFiles } from '../../src/main/utils/get-files';
 import { ChildProcessMock } from '../mocks/child-process';
 import { ElectronVersionsMock, FiddleRunnerMock } from '../mocks/fiddle-core';
 import { WebContentsMock } from '../mocks/web-contents';
@@ -28,6 +37,59 @@ vi.mock('@electron/fiddle-core', async () => {
 
 vi.mock('node:fs');
 
+// The refactored startFiddle delegates the heavy lifting to small helper
+// modules. Mock them so these tests can focus on the spawn behaviour.
+const { TEMP_DIR, getLocalVersionsMock, getStartFiddleOptionsMock } =
+  vi.hoisted(() => {
+    return {
+      TEMP_DIR: require('node:path').join(
+        require('node:os').tmpdir(),
+        'test-fiddle',
+      ),
+      getLocalVersionsMock: vi.fn(
+        () => [] as Array<{ version: string; localPath: string }>,
+      ),
+      getStartFiddleOptionsMock: vi.fn(),
+    };
+  });
+vi.mock('../../src/main/files', () => ({
+  saveFilesToTemp: vi.fn().mockResolvedValue(TEMP_DIR),
+  cleanupDirectory: vi.fn().mockResolvedValue(true),
+  deleteUserData: vi.fn().mockResolvedValue(undefined),
+}));
+vi.mock('../../src/main/npm', () => ({
+  addModules: vi.fn().mockResolvedValue(''),
+  getIsPackageManagerInstalled: vi.fn().mockResolvedValue(true),
+}));
+vi.mock('../../src/main/utils/get-files', () => ({
+  getFiles: vi.fn().mockResolvedValue({
+    files: new Map([['package.json', JSON.stringify({ name: 'test-app' })]]),
+  }),
+}));
+vi.mock('../../src/main/versions', () => ({
+  getLocalVersions: () => getLocalVersionsMock(),
+}));
+vi.mock('../../src/main/utils/get-start-fiddle-options', () => ({
+  getStartFiddleOptions: (...args: unknown[]) =>
+    getStartFiddleOptionsMock(...args),
+}));
+
+function makeOptions(
+  overrides: Partial<StartFiddleOptions> = {},
+): StartFiddleOptions {
+  return {
+    enableElectronLogging: false,
+    env: {},
+    executionFlags: [],
+    isKeepingUserDataDirs: false,
+    modules: [],
+    packageManager: 'npm',
+    useSocketFirewall: false,
+    version: '18.0.0',
+    ...overrides,
+  };
+}
+
 describe('fiddle-core', () => {
   let runner: FiddleRunnerMock;
   let originalEnv: NodeJS.ProcessEnv;
@@ -40,7 +102,6 @@ describe('fiddle-core', () => {
     TEMP: REAL_TMPDIR,
     TMP: REAL_TMPDIR,
   });
-  const dir = path.join(REAL_TMPDIR, 'test-fiddle');
 
   beforeEach(() => {
     runner = new FiddleRunnerMock();
@@ -49,9 +110,15 @@ describe('fiddle-core', () => {
     vi.mocked(Runner.create).mockResolvedValue(runner as unknown as Runner);
     setupFiddleCore(new ElectronVersionsMock() as unknown as ElectronVersions);
     vi.mocked(fs.existsSync).mockReturnValue(false);
-    vi.mocked(fs.realpathSync as (p: fs.PathLike) => string).mockImplementation(
-      (p) => p.toString(),
-    );
+    vi.mocked(filesMod.saveFilesToTemp).mockResolvedValue(TEMP_DIR);
+    vi.mocked(filesMod.cleanupDirectory).mockResolvedValue(true);
+    vi.mocked(filesMod.deleteUserData).mockResolvedValue();
+    vi.mocked(addModules).mockResolvedValue('');
+    vi.mocked(getIsPackageManagerInstalled).mockResolvedValue(true);
+    vi.mocked(getFiles).mockResolvedValue({
+      files: new Map([['package.json', JSON.stringify({ name: 'test-app' })]]),
+    });
+    getLocalVersionsMock.mockReturnValue([]);
   });
 
   afterEach(() => {
@@ -59,42 +126,64 @@ describe('fiddle-core', () => {
     vi.clearAllMocks();
   });
 
+  describe('installModules()', () => {
+    it('does not attempt installation if npm is not installed', async () => {
+      vi.mocked(getIsPackageManagerInstalled).mockResolvedValue(false);
+      await expect(
+        installModules(
+          new WebContentsMock() as unknown as WebContents,
+          [['lodash', '4.0.0']],
+          {
+            dir: '/fake/path',
+            packageManager: 'npm',
+          },
+        ),
+      ).rejects.toThrow('Package manager not installed');
+
+      expect(addModules).toHaveBeenCalledTimes(0);
+    });
+
+    it('does attempt installation if npm is installed', async () => {
+      vi.mocked(getIsPackageManagerInstalled).mockResolvedValue(true);
+      await installModules(
+        new WebContentsMock() as unknown as WebContents,
+        [['lodash', '4.0.0']],
+        {
+          dir: '/fake/path',
+          packageManager: 'npm',
+        },
+      );
+
+      expect(addModules).toHaveBeenCalledTimes(1);
+    });
+  });
+
   describe('startFiddle', () => {
     const version = '18.0.0';
 
-    it('rejects dir outside the temp directory', async () => {
-      await expect(
-        startFiddle(new WebContentsMock() as unknown as WebContents, {
-          dir: '/not/a/tmp/path',
-          enableElectronLogging: false,
-          env: {},
-          isValidBuild: false,
-          localPath: undefined,
-          options: [],
-          version,
-        }),
-      ).rejects.toThrow('startFiddle: dir must be inside the temp directory');
-    });
+    function mockSpawnWithAutoClose(
+      child: ChildProcessMock,
+      code: number | null = 0,
+      signal: NodeJS.Signals | null = null,
+    ) {
+      vi.mocked(runner.spawn).mockImplementation(async () => {
+        setImmediate(() => child.emit('close', code, signal));
+        return child;
+      });
+    }
 
     it('uses provided env', async () => {
       const child = new ChildProcessMock();
-      vi.mocked(runner.spawn).mockResolvedValue(child);
+      mockSpawnWithAutoClose(child);
+      getStartFiddleOptionsMock.mockResolvedValueOnce(
+        makeOptions({ env: { NODE_OPTIONS: '--inspect-brk' } }),
+      );
 
-      await startFiddle(new WebContentsMock() as unknown as WebContents, {
-        dir,
-        enableElectronLogging: false,
-        env: {
-          NODE_OPTIONS: '--inspect-brk',
-        },
-        isValidBuild: true,
-        localPath: undefined,
-        options: [],
-        version,
-      });
+      await startFiddle(new WebContentsMock() as unknown as WebContents);
 
       expect(runner.spawn).toHaveBeenCalledWith(
         version,
-        dir,
+        TEMP_DIR,
         expect.objectContaining({
           env: {
             ...mockEnv,
@@ -106,21 +195,16 @@ describe('fiddle-core', () => {
 
     it('runs with logging when enabled', async () => {
       const child = new ChildProcessMock();
-      vi.mocked(runner.spawn).mockResolvedValue(child);
+      mockSpawnWithAutoClose(child);
+      getStartFiddleOptionsMock.mockResolvedValueOnce(
+        makeOptions({ enableElectronLogging: true }),
+      );
 
-      await startFiddle(new WebContentsMock() as unknown as WebContents, {
-        dir,
-        enableElectronLogging: true,
-        env: {},
-        isValidBuild: true,
-        localPath: undefined,
-        options: [],
-        version,
-      });
+      await startFiddle(new WebContentsMock() as unknown as WebContents);
 
       expect(runner.spawn).toHaveBeenCalledWith(
         version,
-        dir,
+        TEMP_DIR,
         expect.objectContaining({
           env: {
             ...mockEnv,
@@ -134,23 +218,16 @@ describe('fiddle-core', () => {
 
     it('can set ELECTRON_ENABLE_LOGGING in env', async () => {
       const child = new ChildProcessMock();
-      vi.mocked(runner.spawn).mockResolvedValue(child);
+      mockSpawnWithAutoClose(child);
+      getStartFiddleOptionsMock.mockResolvedValueOnce(
+        makeOptions({ env: { ELECTRON_ENABLE_LOGGING: 'true' } }),
+      );
 
-      await startFiddle(new WebContentsMock() as unknown as WebContents, {
-        dir,
-        enableElectronLogging: false,
-        env: {
-          ELECTRON_ENABLE_LOGGING: 'true',
-        },
-        isValidBuild: true,
-        localPath: undefined,
-        options: [],
-        version,
-      });
+      await startFiddle(new WebContentsMock() as unknown as WebContents);
 
       expect(runner.spawn).toHaveBeenCalledWith(
         version,
-        dir,
+        TEMP_DIR,
         expect.objectContaining({
           env: {
             ...mockEnv,
@@ -160,25 +237,22 @@ describe('fiddle-core', () => {
       );
     });
 
-    it('strips blocked env keys from params.env', async () => {
+    it('strips blocked env keys from the renderer-supplied env', async () => {
       const child = new ChildProcessMock();
-      vi.mocked(runner.spawn).mockResolvedValue(child);
+      mockSpawnWithAutoClose(child);
+      getStartFiddleOptionsMock.mockResolvedValueOnce(
+        makeOptions({
+          env: {
+            LD_PRELOAD: '/evil/lib.so',
+            DYLD_INSERT_LIBRARIES: '/evil/lib.dylib',
+            DYLD_FRAMEWORK_PATH: '/evil/frameworks',
+            DYLD_LIBRARY_PATH: '/evil/lib',
+            SAFE_VAR: 'allowed',
+          },
+        }),
+      );
 
-      await startFiddle(new WebContentsMock() as unknown as WebContents, {
-        dir,
-        enableElectronLogging: false,
-        env: {
-          LD_PRELOAD: '/evil/lib.so',
-          DYLD_INSERT_LIBRARIES: '/evil/lib.dylib',
-          DYLD_FRAMEWORK_PATH: '/evil/frameworks',
-          DYLD_LIBRARY_PATH: '/evil/lib',
-          SAFE_VAR: 'allowed',
-        },
-        isValidBuild: false,
-        localPath: undefined,
-        options: [],
-        version,
-      });
+      await startFiddle(new WebContentsMock() as unknown as WebContents);
 
       const spawnEnv = (
         vi.mocked(runner.spawn).mock.calls[0]! as unknown as [
@@ -194,74 +268,180 @@ describe('fiddle-core', () => {
       expect(spawnEnv['SAFE_VAR']).toBe('allowed');
     });
 
-    it('uses localPath when the resolved executable exists on disk', async () => {
+    it('uses localPath when the version resolves to a local build with an existing executable', async () => {
       const child = new ChildProcessMock();
-      vi.mocked(runner.spawn).mockResolvedValue(child);
+      mockSpawnWithAutoClose(child);
       const localPath = '/some/local/electron';
+      const localVersion = '0.0.0-local.123';
+      getLocalVersionsMock.mockReturnValueOnce([
+        { version: localVersion, localPath },
+      ]);
       // InstallerMock.getExecPath returns `${localPath}/electron`
       vi.mocked(fs.existsSync).mockReturnValue(true);
+      getStartFiddleOptionsMock.mockResolvedValueOnce(
+        makeOptions({ version: localVersion }),
+      );
 
-      await startFiddle(new WebContentsMock() as unknown as WebContents, {
-        dir,
-        enableElectronLogging: false,
-        env: {},
-        isValidBuild: true,
-        localPath,
-        options: [],
-        version,
-      });
+      await startFiddle(new WebContentsMock() as unknown as WebContents);
 
       expect(Installer.getExecPath).toHaveBeenCalledWith(localPath);
       expect(runner.spawn).toHaveBeenCalledWith(
         `${localPath}/electron`,
-        dir,
+        TEMP_DIR,
         expect.anything(),
       );
     });
 
-    it('falls back to version when localPath executable does not exist', async () => {
+    it('falls back to version when the local build executable does not exist', async () => {
       const child = new ChildProcessMock();
-      vi.mocked(runner.spawn).mockResolvedValue(child);
+      mockSpawnWithAutoClose(child);
+      const localPath = '/nonexistent/electron';
+      const localVersion = '0.0.0-local.456';
+      getLocalVersionsMock.mockReturnValueOnce([
+        { version: localVersion, localPath },
+      ]);
       vi.mocked(fs.existsSync).mockReturnValue(false);
+      getStartFiddleOptionsMock.mockResolvedValueOnce(
+        makeOptions({ version: localVersion }),
+      );
 
-      await startFiddle(new WebContentsMock() as unknown as WebContents, {
-        dir,
-        enableElectronLogging: false,
-        env: {},
-        isValidBuild: true,
-        localPath: '/nonexistent/electron',
-        options: [],
-        version,
-      });
+      await startFiddle(new WebContentsMock() as unknown as WebContents);
 
       expect(runner.spawn).toHaveBeenCalledWith(
-        version,
-        dir,
+        localVersion,
+        TEMP_DIR,
         expect.anything(),
       );
     });
 
-    it('strips null bytes from options', async () => {
+    it('strips null bytes from execution flags', async () => {
       const child = new ChildProcessMock();
-      vi.mocked(runner.spawn).mockResolvedValue(child);
-
-      await startFiddle(new WebContentsMock() as unknown as WebContents, {
-        dir,
-        enableElectronLogging: false,
-        env: {},
-        isValidBuild: false,
-        localPath: undefined,
-        options: ['--inspect', 'safe-flag', 'evil\0flag', '--js-flags=ok'],
-        version,
-      });
-
-      expect(runner.spawn).toHaveBeenCalledWith(
-        version,
-        dir,
-        expect.objectContaining({
-          args: ['--inspect', 'safe-flag', '--js-flags=ok'],
+      mockSpawnWithAutoClose(child);
+      getStartFiddleOptionsMock.mockResolvedValueOnce(
+        makeOptions({
+          executionFlags: ['safe-flag', 'evil\0flag', '--js-flags=ok'],
         }),
       );
+
+      await startFiddle(new WebContentsMock() as unknown as WebContents);
+
+      expect(runner.spawn).toHaveBeenCalledWith(
+        version,
+        TEMP_DIR,
+        expect.objectContaining({
+          args: [TEMP_DIR, '--inspect', 'safe-flag', '--js-flags=ok'],
+        }),
+      );
+    });
+
+    it('cleans up the temp dir and user data after the child process closes', async () => {
+      const child = new ChildProcessMock();
+      mockSpawnWithAutoClose(child);
+      getStartFiddleOptionsMock.mockResolvedValueOnce(makeOptions());
+
+      await startFiddle(new WebContentsMock() as unknown as WebContents);
+
+      expect(filesMod.cleanupDirectory).toHaveBeenCalledWith(TEMP_DIR);
+      expect(filesMod.deleteUserData).toHaveBeenCalledWith('test-app');
+    });
+
+    it('does not delete user data when isKeepingUserDataDirs is true', async () => {
+      const child = new ChildProcessMock();
+      mockSpawnWithAutoClose(child);
+      getStartFiddleOptionsMock.mockResolvedValueOnce(
+        makeOptions({ isKeepingUserDataDirs: true }),
+      );
+
+      await startFiddle(new WebContentsMock() as unknown as WebContents);
+
+      expect(filesMod.cleanupDirectory).toHaveBeenCalledWith(TEMP_DIR);
+      expect(filesMod.deleteUserData).not.toHaveBeenCalled();
+    });
+
+    it('cleans up when saveFilesToTemp fails', async () => {
+      getStartFiddleOptionsMock.mockResolvedValueOnce(makeOptions());
+      vi.mocked(filesMod.saveFilesToTemp).mockRejectedValueOnce(
+        new Error('disk full'),
+      );
+
+      await expect(
+        startFiddle(new WebContentsMock() as unknown as WebContents),
+      ).rejects.toThrow('disk full');
+
+      expect(runner.spawn).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('START_FIDDLE IPC handler', () => {
+    beforeEach(() => {
+      // The IpcMainManager wraps every handle() listener with a
+      // BrowserWindow guard; make sure that guard finds a window so
+      // the wrapper actually delegates to our handler.
+      vi.mocked(electron.BrowserWindow.fromWebContents).mockReturnValue(
+        {} as electron.BrowserWindow,
+      );
+    });
+
+    function getStartFiddleHandler() {
+      // setupFiddleCore in the outer beforeEach has already wired the
+      // handler — pull the most recent registration for START_FIDDLE
+      // out of the ipcMain mock.
+      const registration = vi
+        .mocked(electron.ipcMain.handle)
+        .mock.calls.findLast(([channel]) => channel === IpcEvents.START_FIDDLE);
+      if (!registration) throw new Error('START_FIDDLE handler not registered');
+      return registration[1];
+    }
+
+    function makeInvokeEvent(senderUrl: string): electron.IpcMainInvokeEvent {
+      const sender = new WebContentsMock() as unknown as WebContents;
+      return {
+        sender,
+        senderFrame: { url: senderUrl } as unknown as electron.WebFrameMain,
+      } as electron.IpcMainInvokeEvent;
+    }
+
+    it('ignores START_FIDDLE coming from the main app frame', async () => {
+      const handler = getStartFiddleHandler();
+      // The IpcMainManager's BrowserWindow guard returns the wrapper
+      // that delegates to our handler — invoke it directly so the
+      // sender-frame URL check is the one being exercised.
+      await handler(makeInvokeEvent('http://localhost:3000/main_window/'));
+
+      expect(runner.spawn).not.toHaveBeenCalled();
+    });
+
+    it('ignores START_FIDDLE coming from a file:// frame', async () => {
+      const handler = getStartFiddleHandler();
+      await handler(makeInvokeEvent('file:///some/index.html'));
+
+      expect(runner.spawn).not.toHaveBeenCalled();
+    });
+
+    it('ignores START_FIDDLE when there is no sender frame', async () => {
+      const handler = getStartFiddleHandler();
+      const sender = new WebContentsMock() as unknown as WebContents;
+      const event = {
+        sender,
+        senderFrame: null,
+      } as unknown as electron.IpcMainInvokeEvent;
+      await handler(event);
+
+      expect(runner.spawn).not.toHaveBeenCalled();
+    });
+
+    it('accepts START_FIDDLE coming from the isolated-actions:// protocol', async () => {
+      const child = new ChildProcessMock();
+      vi.mocked(runner.spawn).mockImplementation(async () => {
+        setImmediate(() => child.emit('close', 0, null));
+        return child;
+      });
+      getStartFiddleOptionsMock.mockResolvedValueOnce(makeOptions());
+
+      const handler = getStartFiddleHandler();
+      await handler(makeInvokeEvent('isolated-actions://run-button/'));
+
+      expect(runner.spawn).toHaveBeenCalledTimes(1);
     });
   });
 });

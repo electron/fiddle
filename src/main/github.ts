@@ -6,7 +6,20 @@ import { IpcMainInvokeEvent, app, safeStorage } from 'electron';
 
 import { getTemplate } from './content';
 import { ipcMainManager } from './ipc';
-import { EditorValues, GistLoadResult, GistRevision } from '../interfaces';
+import {
+  GIST_MAX_FILE_COUNT,
+  GIST_MAX_FILE_SIZE,
+  GITHUB_TOKEN_PATTERN,
+} from '../constants';
+import {
+  EditorValues,
+  GistFile,
+  GistLoadResult,
+  GistRevision,
+  GistWriteResult,
+  GitHubCheckAuthResult,
+  GitHubSignInResult,
+} from '../interfaces';
 import { IpcEvents } from '../ipc-events';
 import { isSupportedFile } from '../utils/editor-utils';
 
@@ -16,21 +29,14 @@ const ELECTRON_ORG = 'electron';
 
 const ELECTRON_REPO = 'electron';
 
-const TOKEN_PATTERN =
-  /^(ghp_[a-zA-Z0-9]{36}|github_pat_[a-zA-Z0-9]{22}_[a-zA-Z0-9]{59})$/;
-
 const GIST_ID_PATTERN = /^[0-9a-fA-F]{32}$/;
 
 const SHA_PATTERN = /^[0-9a-f]{40}$/;
 
 const MAX_DESCRIPTION_LENGTH = 256;
 
-const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10 MB per file — GitHub's gist limit
-
-const MAX_FILE_COUNT = 300; // GitHub's gist file limit
-
 function isValidToken(token: unknown): token is string {
-  return typeof token === 'string' && TOKEN_PATTERN.test(token);
+  return typeof token === 'string' && GITHUB_TOKEN_PATTERN.test(token);
 }
 
 function isValidGistId(gistId: unknown): gistId is string {
@@ -49,11 +55,6 @@ function isValidDescription(description: unknown): description is string {
   );
 }
 
-interface GistFile {
-  filename: string;
-  content: string;
-}
-
 function areValidGistFiles(
   files: unknown,
 ): files is Record<string, GistFile | null> {
@@ -62,7 +63,8 @@ function areValidGistFiles(
 
   const entries = Object.entries(files as Record<string, unknown>);
 
-  if (entries.length === 0 || entries.length > MAX_FILE_COUNT) return false;
+  if (entries.length === 0 || entries.length > GIST_MAX_FILE_COUNT)
+    return false;
 
   for (const [key, value] of entries) {
     // null entries are used to delete files during update
@@ -75,7 +77,7 @@ function areValidGistFiles(
     if (filename.length === 0) return false;
     if (filename !== key) return false;
     if (typeof content !== 'string') return false;
-    if (content.length > MAX_FILE_SIZE) return false;
+    if (content.length > GIST_MAX_FILE_SIZE) return false;
   }
 
   return true;
@@ -125,16 +127,10 @@ function getOctokit(): Octokit {
 
 // --- IPC handlers ---
 
-interface SignInResult {
-  success: boolean;
-  login?: string;
-  error?: string;
-}
-
 async function handleTokenSignIn(
   _event: IpcMainInvokeEvent,
   token: unknown,
-): Promise<SignInResult> {
+): Promise<GitHubSignInResult> {
   if (!isValidToken(token))
     return { success: false, error: 'Invalid token format.' };
 
@@ -163,6 +159,7 @@ async function handleTokenSignIn(
 
     return { success: true, login: response.data.login };
   } catch (error: any) {
+    console.warn('GitHub token sign-in failed', error);
     return {
       success: false,
       error: 'Invalid GitHub token. Please check your token and try again.',
@@ -170,43 +167,32 @@ async function handleTokenSignIn(
   }
 }
 
-async function handleTokenSignOut(
-  _event: IpcMainInvokeEvent,
-): Promise<{ success: boolean }> {
+async function handleTokenSignOut(_event: IpcMainInvokeEvent): Promise<void> {
   deleteToken();
   octokit_ = null;
-  return { success: true };
-}
-
-interface CheckAuthResult {
-  login: string | null;
 }
 
 async function handleTokenCheckAuth(
   _event: IpcMainInvokeEvent,
-): Promise<CheckAuthResult> {
+): Promise<GitHubCheckAuthResult> {
   const token = loadToken();
-  if (!token) return { login: null };
+  if (!token) return { login: null, hasToken: false };
 
   try {
     octokit_ = new Octokit({ auth: token });
     const response = await octokit_.users.getAuthenticated();
-    return { login: response.data.login };
+    return { login: response.data.login, hasToken: true };
   } catch (error: any) {
-    octokit_ = null;
-
     if (error?.status === 401 || error?.status === 403) {
+      octokit_ = null;
       deleteToken();
+      return { login: null, hasToken: false };
     }
 
-    return { login: null };
+    // If we're offline, don't invalidate the token or octokit_.
+    // Keep them as-is for use when we're back online.
+    return { login: null, hasToken: true };
   }
-}
-
-interface GistWriteResult {
-  id: string;
-  url: string;
-  revision?: string;
 }
 
 async function handleGistCreate(
@@ -256,14 +242,16 @@ async function handleGistUpdate(
 
   // Fetch existing files to detect deletions
   const { data: existing } = await octo.gists.get({ gist_id: gistId });
-  const updateFiles = { ...(files as Record<string, GistFile | null>) };
-  for (const id of Object.keys(existing.files ?? {})) {
-    if (!(id in updateFiles)) updateFiles[id] = null as any;
+  const updateFiles: Record<string, GistFile | null> = { ...files };
+  for (const fileId of Object.keys(existing.files ?? {})) {
+    if (!(fileId in updateFiles)) updateFiles[fileId] = null;
   }
 
   const gist = await octo.gists.update({
     gist_id: gistId,
-    files: updateFiles as any,
+    // Octokit's generated types don't model file deletion (null), but the
+    // REST API requires it. Cast only at the boundary.
+    files: updateFiles as Record<string, GistFile>,
   });
 
   return {
@@ -276,12 +264,11 @@ async function handleGistUpdate(
 async function handleGistDelete(
   _event: IpcMainInvokeEvent,
   gistId: unknown,
-): Promise<{ success: boolean }> {
+): Promise<void> {
   if (!isValidGistId(gistId)) throw new Error('Invalid gist ID.');
 
   const octo = getAuthenticatedOctokit();
   await octo.gists.delete({ gist_id: gistId });
-  return { success: true };
 }
 
 async function handleGistLoad(
@@ -303,7 +290,7 @@ async function handleGistLoad(
     : await octo.gists.get({ gist_id: gistId });
 
   const files: GistLoadResult['files'] = {};
-  for (const [id, data] of Object.entries(gist.data.files ?? {})) {
+  for (const [fileId, data] of Object.entries(gist.data.files ?? {})) {
     if (!data) continue;
 
     // When GitHub truncates a large file, data.content is incomplete.
@@ -316,15 +303,14 @@ async function handleGistLoad(
       }
     }
 
-    files[id] = {
-      filename: data.filename ?? id,
+    files[fileId] = {
+      filename: data.filename ?? fileId,
       content,
     };
   }
 
   return {
     files,
-    id: gist.data.id!,
     revision: gist.data.history?.[0]?.version,
   };
 }
@@ -437,6 +423,7 @@ export function setupGitHub() {
 // Exported for testing
 export const testing = {
   fetchExample,
+  getCredentialsPath,
   handleGistCreate,
   handleGistDelete,
   handleGistListCommits,
@@ -445,4 +432,6 @@ export const testing = {
   handleTokenCheckAuth,
   handleTokenSignIn,
   handleTokenSignOut,
+  loadToken,
+  saveToken,
 };

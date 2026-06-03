@@ -7,9 +7,14 @@ import {
   FiddleEvent,
   FileTransformOperation,
   Files,
+  GistCreateParams,
   GistLoadParams,
   GistLoadResult,
   GistRevision,
+  GistUpdateParams,
+  GistWriteResult,
+  GitHubCheckAuthResult,
+  GitHubSignInResult,
   IPackageManager,
   InstallState,
   InstallStateEvent,
@@ -22,7 +27,7 @@ import {
   RunnableVersion,
   SelectedLocalVersion,
   SemVer,
-  StartFiddleParams,
+  StartFiddleOptions,
   Version,
 } from './interfaces';
 import { App } from './renderer/app';
@@ -50,6 +55,10 @@ declare global {
       addEventListener(
         type: 'fiddle-stopped',
         listener: (code: number | null, signal: string | null) => void,
+      ): void;
+      addEventListener(
+        type: 'is-auto-bisecting',
+        listener: (isAutoBisecting: boolean) => void,
       ): void;
       addEventListener(
         type: 'load-example',
@@ -93,22 +102,27 @@ declare global {
         ...names: Array<string>
       ): Promise<string>;
       arch: string;
+      autobisectFiddle(versions: Array<RunnableVersion>): void;
       blockAccelerators(acceleratorsToBlock: BlockableAccelerator[]): void;
-      cleanupDirectory(dir: string): Promise<boolean>;
       confirmQuit(): void;
       createThemeFile(
         newTheme: FiddleTheme,
         name?: string,
       ): Promise<LoadedFiddleTheme>;
-      deleteUserData(name: string): Promise<void>;
       downloadVersion(
         version: string,
         opts?: Partial<DownloadVersionParams>,
       ): Promise<void>;
       fetchVersions(): Promise<Version[]>;
       fetchExample(ref: string, path: string): Promise<EditorValues>;
+      gistCreate(params: GistCreateParams): Promise<GistWriteResult>;
+      gistDelete(id: string): Promise<void>;
       gistListCommits(gistId: string): Promise<GistRevision[]>;
       gistLoad(params: GistLoadParams): Promise<GistLoadResult>;
+      gistUpdate(params: GistUpdateParams): Promise<GistWriteResult>;
+      gitHubCheckAuth(): Promise<GitHubCheckAuthResult>;
+      gitHubSignIn(token: string): Promise<GitHubSignInResult>;
+      gitHubSignOut(): Promise<void>;
       getAvailableThemes(): Promise<Array<LoadedFiddleTheme>>;
       getElectronTypes(ver: RunnableVersion): Promise<string | undefined>;
       getIsPackageManagerInstalled(
@@ -143,6 +157,10 @@ declare global {
           transforms: Array<FileTransformOperation>,
         ) => Promise<{ localPath?: string; files: Files }>,
       );
+      onGetStartFiddleOptions(
+        callback: () => Promise<StartFiddleOptions>,
+      ): void;
+      onSetVersion(callback: (version: string) => Promise<void>): void;
       openThemeFolder(): Promise<void>;
       packageRun(
         { dir, packageManager }: PMOperationOptions,
@@ -160,7 +178,6 @@ declare global {
       setShowMeTemplate(template?: string): void;
       showWarningDialog(messageOptions: MessageOptions): void;
       showWindow(): void;
-      startFiddle(params: StartFiddleParams): Promise<void>;
       stopFiddle(): void;
       themePath: string;
       uncacheTypes(ver: RunnableVersion): Promise<void>;

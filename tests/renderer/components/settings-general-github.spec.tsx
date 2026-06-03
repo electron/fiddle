@@ -21,7 +21,6 @@ describe('GitHubSettings component', () => {
   });
 
   it('renders when signed in', () => {
-    store.gitHubToken = '123';
     store.gitHubLogin = 'Test User';
 
     render(<GitHubSettings appState={store} />);

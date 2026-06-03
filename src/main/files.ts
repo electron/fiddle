@@ -1,4 +1,3 @@
-import * as os from 'node:os';
 import * as path from 'node:path';
 
 import { BrowserWindow, IpcMainInvokeEvent, app, dialog } from 'electron';
@@ -28,42 +27,9 @@ function isSafeDataName(str: unknown): str is string {
 }
 
 /**
- * Returns true if `dir` resolves to a path inside the OS temp directory.
- * Used to ensure CLEANUP_DIRECTORY cannot reach outside tmp.
- */
-function isInsideTempDir(dir: unknown): dir is string {
-  if (typeof dir !== 'string') return false;
-  const tmpDir = fs.realpathSync(os.tmpdir());
-  const resolved = path.resolve(dir);
-  return resolved.startsWith(tmpDir + path.sep) || resolved === tmpDir;
-}
-
-/**
  * Ensures that we're listening to file events
  */
 export function setupFileListeners() {
-  ipcMainManager.handle(
-    IpcEvents.CLEANUP_DIRECTORY,
-    (_: IpcMainInvokeEvent, dir: string) => {
-      if (!isInsideTempDir(dir)) {
-        console.warn(
-          `cleanupDirectory: rejected path outside temp dir: ${dir}`,
-        );
-        return false;
-      }
-      return cleanupDirectory(dir);
-    },
-  );
-  ipcMainManager.handle(
-    IpcEvents.DELETE_USER_DATA,
-    (_: IpcMainInvokeEvent, name: string) => {
-      if (!isSafeDataName(name)) {
-        console.warn(`deleteUserData: rejected unsafe name: ${name}`);
-        return;
-      }
-      return deleteUserData(name);
-    },
-  );
   ipcMainManager.handle(
     IpcEvents.SAVE_FILES_TO_TEMP,
     (_: IpcMainInvokeEvent, files: [string, string][]) =>
@@ -178,6 +144,10 @@ export async function cleanupDirectory(dir?: string): Promise<boolean> {
 }
 
 export async function deleteUserData(name: string) {
+  if (!isSafeDataName(name)) {
+    console.warn(`deleteUserData: rejected unsafe name: ${name}`);
+    return;
+  }
   const appData = path.join(app.getPath('appData'), name);
   console.log(`Cleanup: Deleting data dir ${appData}`);
   await cleanupDirectory(appData);

@@ -169,7 +169,9 @@ export type FiddleEvent =
   | 'electron-types-changed'
   | 'execute-monaco-command'
   | 'fiddle-runner-output'
+  | 'fiddle-modules-installed'
   | 'fiddle-stopped'
+  | 'is-auto-bisecting'
   | 'load-example'
   | 'load-gist'
   | 'make-fiddle'
@@ -186,6 +188,7 @@ export type FiddleEvent =
   | 'select-all-in-editor'
   | 'set-show-me-template'
   | 'show-welcome-tour'
+  | 'theme-loaded'
   | 'toggle-bisect'
   | 'toggle-monaco-option'
   | 'undo-in-editor'
@@ -217,15 +220,47 @@ export interface GistRevision {
   };
 }
 
+export interface GistCreateParams {
+  description: string;
+  files: Record<string, GistFile>;
+  isPublic: boolean;
+}
+
+export interface GistFile {
+  filename: string;
+  content: string;
+}
+
 export interface GistLoadParams {
   gistId: string;
   revision?: string;
 }
 
 export interface GistLoadResult {
-  files: Record<string, { filename: string; content: string }>;
-  id: string;
+  files: Record<string, GistFile>;
   revision?: string;
+}
+
+export interface GistUpdateParams {
+  gistId: string;
+  files: Record<string, GistFile>;
+}
+
+export interface GistWriteResult {
+  id: string;
+  url: string;
+  revision?: string;
+}
+
+export interface GitHubSignInResult {
+  success: boolean;
+  login?: string;
+  error?: string;
+}
+
+export interface GitHubCheckAuthResult {
+  login: string | null;
+  hasToken: boolean;
 }
 
 export enum GlobalSetting {
@@ -288,14 +323,15 @@ export interface PackageJsonOptions {
   includeDependencies?: boolean;
 }
 
-export interface StartFiddleParams {
-  localPath: string | undefined;
+export interface StartFiddleOptions {
+  version: string;
   enableElectronLogging: boolean;
-  isValidBuild: boolean; // If the localPath is a valid Electron build
-  version: string; // The user selected version
-  dir: string;
-  options: string[];
+  executionFlags: string[];
   env: { [x: string]: string | undefined };
+  modules: Array<[string, string]>;
+  packageManager: IPackageManager;
+  useSocketFirewall: boolean;
+  isKeepingUserDataDirs: boolean;
 }
 
 export interface DownloadVersionParams {

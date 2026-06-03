@@ -6,6 +6,15 @@ import { BrowserWindowMock } from './browser-window';
 import { WebContentsMock } from './web-contents';
 
 const createdNotifications: Array<NotificationMock> = [];
+const defaultMockedPaths: Record<string, string> = {
+  home: '~',
+  userData: '/Users/fake-user',
+};
+let mockedPaths: Record<string, string> = { ...defaultMockedPaths };
+
+function resetMockedPaths() {
+  mockedPaths = { ...defaultMockedPaths };
+}
 
 class NotificationMock extends EventEmitter {
   public readonly show = vi.fn();
@@ -132,11 +141,15 @@ const app = {
     removedItems: [],
   })),
   getLoginItemSettings: vi.fn(),
-  getPath: vi.fn((name: string) => {
-    if (name === 'userData') return '/Users/fake-user';
-    if (name === 'home') return `~`;
-    return '/test-path';
+  getPath: vi.fn((key: string) => {
+    const ret = mockedPaths[key];
+    if (!ret) throw new Error(`Unexpected call: app.getPath(${key})`);
+    return ret;
   }),
+  setPath: vi.fn((name: string, path: string) => {
+    mockedPaths[name] = path;
+  }),
+  _resetMockedPaths: resetMockedPaths,
   focus: vi.fn(),
   quit: vi.fn(),
   relaunch: vi.fn(),
@@ -160,6 +173,8 @@ const session = {
     cookies: {
       get: vi.fn(),
     },
+    getPreloads: vi.fn(() => [] as string[]),
+    setPreloads: vi.fn(),
   },
 };
 
@@ -182,10 +197,23 @@ const safeStorage = {
   }),
 };
 
+const protocolMock = {
+  registerSchemesAsPrivileged: vi.fn(),
+  handle: vi.fn(),
+  unhandle: vi.fn(),
+  isProtocolHandled: vi.fn(),
+};
+
+const netMock = {
+  fetch: vi.fn(),
+};
+
 const electronMock = {
   app,
   autoUpdater,
   BrowserWindow: BrowserWindowMock,
+  net: netMock,
+  protocol: protocolMock,
   clipboard: {
     readText: vi.fn(),
     readImage: vi.fn(),

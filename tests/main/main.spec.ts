@@ -56,6 +56,11 @@ vi.mock('../../src/main/ipc', () => ({
   },
 }));
 
+vi.mock('../../src/main/isolated-actions', () => ({
+  setupIsolatedActionsProtocol: vi.fn(),
+  registerIsolatedActionsScheme: vi.fn(),
+}));
+
 /**
  * This test is very basic and some might say that it's
  * just testing that methods are being called as written.

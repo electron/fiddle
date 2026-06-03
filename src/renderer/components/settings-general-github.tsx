@@ -72,10 +72,10 @@ export const GitHubSettings = observer(
     }
 
     public render() {
-      const { gitHubToken } = this.props.appState;
+      const { gitHubLogin } = this.props.appState;
       const { isPublishingGistAsRevision } = this.props.appState;
 
-      const maybeSignedIn = !!gitHubToken
+      const maybeSignedIn = !!gitHubLogin
         ? this.renderSignedIn()
         : this.renderNotSignedIn();
 

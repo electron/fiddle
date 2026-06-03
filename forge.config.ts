@@ -37,7 +37,7 @@ const config: ForgeConfig = {
       name: '@electron-forge/plugin-webpack',
       config: {
         devContentSecurityPolicy:
-          "default-src 'none'; img-src 'self' https: data:; media-src 'none'; child-src 'self'; object-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; connect-src 'self' https:; font-src 'self' https:;",
+          "default-src 'none'; img-src 'self' https: data:; media-src 'none'; child-src 'self' isolated-actions:; object-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; connect-src 'self' https:; font-src 'self' https:;",
         devServer: {
           // Disallow browser from opening/reloading with HMR in development mode.
           open: false,
@@ -55,6 +55,11 @@ const config: ForgeConfig = {
               preload: {
                 js: path.join(root, 'src/preload/preload.ts'),
               },
+            },
+            {
+              html: path.join(root, './static/isolated-run-button.html'),
+              js: path.join(root, './src/isolated-run-button.ts'),
+              name: 'isolated_run_button',
             },
           ],
         },

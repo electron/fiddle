@@ -2,6 +2,8 @@
  * @vitest-environment node
  */
 
+import path from 'node:path';
+
 import { BrowserWindow, app, dialog } from 'electron';
 import fs from 'fs-extra';
 import { type Mock, beforeEach, describe, expect, it, vi } from 'vitest';
@@ -10,6 +12,7 @@ import { MAIN_JS } from '../../src/interfaces';
 import { IpcEvents } from '../../src/ipc-events';
 import {
   cleanupDirectory,
+  deleteUserData,
   saveFiddle,
   saveFiddleAs,
   saveFiddleAsForgeProject,
@@ -56,14 +59,6 @@ describe('files', () => {
       const spy = vi.spyOn(ipcMainManager, 'handle');
       setupFileListeners();
 
-      expect(spy).toHaveBeenCalledWith(
-        IpcEvents.CLEANUP_DIRECTORY,
-        expect.anything(),
-      );
-      expect(spy).toHaveBeenCalledWith(
-        IpcEvents.DELETE_USER_DATA,
-        expect.anything(),
-      );
       expect(spy).toHaveBeenCalledWith(
         IpcEvents.SAVE_FILES_TO_TEMP,
         expect.anything(),
@@ -211,6 +206,53 @@ describe('files', () => {
       const result = await cleanupDirectory('/fake/dir');
 
       expect(result).toBe(false);
+    });
+  });
+
+  describe('deleteUserData()', () => {
+    beforeEach(() => {
+      vi.mocked(app.getPath).mockReturnValue('/fake/appData');
+    });
+
+    it('removes the user-data directory for a safe name', async () => {
+      vi.mocked(fs.existsSync).mockReturnValueOnce(true);
+
+      await deleteUserData('my-fiddle');
+
+      expect(fs.remove).toHaveBeenCalledWith(
+        path.normalize('/fake/appData/my-fiddle'),
+      );
+    });
+
+    it.each([
+      ['parent-traversal segment', '../../etc'],
+      ['absolute path', '/etc/passwd'],
+      ['empty string', ''],
+      ['nested path segment', 'a/b'],
+    ])('rejects an unsafe name (%s)', async (_label, name) => {
+      const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
+
+      await deleteUserData(name);
+
+      expect(fs.remove).not.toHaveBeenCalled();
+      expect(warn).toHaveBeenCalledWith(
+        expect.stringContaining('rejected unsafe name'),
+      );
+
+      warn.mockRestore();
+    });
+
+    it('rejects a non-string name', async () => {
+      const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
+
+      await deleteUserData(undefined as unknown as string);
+
+      expect(fs.remove).not.toHaveBeenCalled();
+      expect(warn).toHaveBeenCalledWith(
+        expect.stringContaining('rejected unsafe name'),
+      );
+
+      warn.mockRestore();
     });
   });
 

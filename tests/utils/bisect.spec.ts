@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it } from 'vitest';
 
 import { InstallState, VersionSource } from '../../src/interfaces';
-import { Bisector } from '../../src/renderer/bisect';
+import { Bisector } from '../../src/utils/bisect';
 
 const generateVersionRange = (rangeLength: number) =>
   new Array(rangeLength).fill(0).map((_, i) => ({

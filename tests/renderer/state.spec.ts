@@ -21,13 +21,13 @@ import {
   Version,
   VersionSource,
 } from '../../src/interfaces';
-import { Bisector } from '../../src/renderer/bisect';
 import { AppState } from '../../src/renderer/state';
 import {
   fetchVersions,
   getElectronVersions,
   makeRunnable,
 } from '../../src/renderer/versions';
+import { Bisector } from '../../src/utils/bisect';
 import { VersionsMock, createEditorValues } from '../mocks/mocks';
 import { overrideRendererPlatform, resetRendererPlatform } from '../utils';
 
@@ -736,13 +736,13 @@ describe('AppState', () => {
   });
 
   describe('signOutGitHub()', () => {
-    it('resets all GitHub information', () => {
+    it('clears the login indicator and tells main to drop the token', async () => {
       appState.gitHubLogin = 'test';
-      appState.gitHubToken = 'test';
 
-      appState.signOutGitHub();
+      await appState.signOutGitHub();
+
+      expect(window.ElectronFiddle.gitHubSignOut).toHaveBeenCalled();
       expect(appState.gitHubLogin).toBe(null);
-      expect(appState.gitHubToken).toBe(null);
     });
   });
 
