@@ -144,10 +144,11 @@ const config: ForgeConfig = {
     },
     new MakerMSIX({
       manifestVariables: {
-        // publisher: TODO: I don't know the actual value for the cert',
+        publisher:
+          'CN=OpenJS Foundation, OU=Electron, O=OpenJS Foundation, L=San Francisco, S=California, C=US, SERIALNUMBER=5579593, OID.2.5.4.15=Private Organization, OID.1.3.6.1.4.1.311.60.2.1.2=Delaware, OID.1.3.6.1.4.1.311.60.2.1.3=US',
+        publisherDisplayName: 'OpenJS Foundation',
         packageIdentity: 'ElectronCommunity.ElectronFiddle',
         appExecutable: 'electron-fiddle.exe',
-        publisherDisplayName: 'Electron Community',
         packageDisplayName: 'Electron Fiddle',
         appDisplayName: 'Electron Fiddle',
         packageDescription: packageJson.description,
