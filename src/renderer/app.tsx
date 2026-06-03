@@ -161,7 +161,22 @@ export class App {
     this.setupUnloadListeners();
     this.setupTypeListeners();
 
-    window.ElectronFiddle.sendReady();
+    // Restore signed-in state from main's encrypted credential, if any.
+    // Wait for auth restore before signalling ready so that queued IPC
+    // messages (e.g. deep-linked private gist loads) use the authenticated
+    // Octokit instance.
+    window.ElectronFiddle.gitHubCheckAuth()
+      .then(({ login, hasToken }) => {
+        // Only update gitHubLogin if login succeeded or if there's no token.
+        // If we're offline (!login && hasToken), keep the current username.
+        if (login || !hasToken) {
+          this.state.gitHubLogin = login;
+        }
+      })
+      .catch((e) => console.warn('Failed to check GitHub auth status', e))
+      .finally(() => {
+        window.ElectronFiddle.sendReady();
+      });
 
     window.ElectronFiddle.addEventListener('set-show-me-template', () => {
       window.ElectronFiddle.setShowMeTemplate(this.state.templateName);

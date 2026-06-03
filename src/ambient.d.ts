@@ -7,9 +7,14 @@ import {
   FiddleEvent,
   FileTransformOperation,
   Files,
+  GistCreateParams,
   GistLoadParams,
   GistLoadResult,
   GistRevision,
+  GistUpdateParams,
+  GistWriteResult,
+  GitHubCheckAuthResult,
+  GitHubSignInResult,
   IPackageManager,
   InstallState,
   InstallStateEvent,
@@ -110,8 +115,14 @@ declare global {
       ): Promise<void>;
       fetchVersions(): Promise<Version[]>;
       fetchExample(ref: string, path: string): Promise<EditorValues>;
+      gistCreate(params: GistCreateParams): Promise<GistWriteResult>;
+      gistDelete(id: string): Promise<void>;
       gistListCommits(gistId: string): Promise<GistRevision[]>;
       gistLoad(params: GistLoadParams): Promise<GistLoadResult>;
+      gistUpdate(params: GistUpdateParams): Promise<GistWriteResult>;
+      gitHubCheckAuth(): Promise<GitHubCheckAuthResult>;
+      gitHubSignIn(token: string): Promise<GitHubSignInResult>;
+      gitHubSignOut(): Promise<void>;
       getAvailableThemes(): Promise<Array<LoadedFiddleTheme>>;
       getElectronTypes(ver: RunnableVersion): Promise<string | undefined>;
       getIsPackageManagerInstalled(

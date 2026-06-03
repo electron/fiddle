@@ -121,7 +121,6 @@ describe('github', () => {
   beforeEach(async () => {
     userDataPath = tmp.dirSync({ prefix: 'electron-fiddle-github-' });
     app.setPath('userData', userDataPath);
-
     // Confirm that the folder we just created will hold the credentials file
     expect(getCredentialsPath().startsWith(userDataPath)).toBe(true);
     expect(loadToken()).toBeNull();
@@ -214,9 +213,7 @@ describe('github', () => {
       // setup: set a token & confirm it loads
       saveToken(VALID_GHP_TOKEN);
       expect(loadToken()).toBe(VALID_GHP_TOKEN);
-
-      const expected = { success: true };
-      await expect(handleTokenSignOut(MOCK_EVENT)).resolves.toEqual(expected);
+      await expect(handleTokenSignOut(MOCK_EVENT)).resolves.toBeUndefined();
       expect(loadToken()).toBeNull();
     });
   });
@@ -228,14 +225,14 @@ describe('github', () => {
         throw new Error('corrupt');
       });
       const result = await handleTokenCheckAuth(MOCK_EVENT);
-      expect(result).toEqual({ login: null });
+      expect(result).toEqual({ login: null, hasToken: false });
     });
 
     it('returns login when a valid token is stored', async () => {
       saveToken(VALID_GHP_TOKEN);
       mockOctokitInstance();
       const result = await handleTokenCheckAuth(MOCK_EVENT);
-      expect(result).toEqual({ login: MOCK_LOGIN });
+      expect(result).toEqual({ login: MOCK_LOGIN, hasToken: true });
     });
 
     it('returns null when no token is stored', async () => {
@@ -243,7 +240,7 @@ describe('github', () => {
       expect(loadToken()).toBeNull();
 
       const result = await handleTokenCheckAuth(MOCK_EVENT);
-      expect(result).toEqual({ login: null });
+      expect(result).toEqual({ login: null, hasToken: false });
     });
 
     it('cleans up and returns null for expired tokens', async () => {
@@ -259,11 +256,11 @@ describe('github', () => {
       });
 
       const result = await handleTokenCheckAuth(MOCK_EVENT);
-      expect(result).toEqual({ login: null });
+      expect(result).toEqual({ login: null, hasToken: false });
       expect(loadToken()).toBeNull();
     });
 
-    it('preserves the token for transient auth-check failures', async () => {
+    it('preserves the token and reports hasToken for transient failures', async () => {
       saveToken(VALID_GHP_TOKEN);
       mockOctokitInstance({
         users: {
@@ -273,8 +270,28 @@ describe('github', () => {
 
       const result = await handleTokenCheckAuth(MOCK_EVENT);
 
-      expect(result).toEqual({ login: null });
+      expect(result).toEqual({ login: null, hasToken: true });
       expect(loadToken()).toBe(VALID_GHP_TOKEN);
+    });
+
+    it('keeps octokit_ usable after a transient failure', async () => {
+      saveToken(VALID_GHP_TOKEN);
+      mockOctokitInstance({
+        users: {
+          getAuthenticated: vi.fn().mockRejectedValue(new Error('offline')),
+        },
+      });
+
+      await handleTokenCheckAuth(MOCK_EVENT);
+
+      // Subsequent gist operations should succeed using the preserved
+      // authenticated Octokit instance, simulating a return to online.
+      const result = await handleGistCreate(MOCK_EVENT, {
+        description: 'Test',
+        files: VALID_FILES,
+        isPublic: false,
+      });
+      expect(result.id).toBe(VALID_GIST_ID);
     });
   });
 
@@ -451,8 +468,9 @@ describe('github', () => {
         VALID_GIST_ID,
         'AABBCCDDEE11223344556677889900FF',
       ]) {
-        const result = await handleGistDelete(MOCK_EVENT, gistId);
-        expect(result).toEqual({ success: true });
+        await expect(
+          handleGistDelete(MOCK_EVENT, gistId),
+        ).resolves.toBeUndefined();
       }
     });
 
@@ -478,7 +496,6 @@ describe('github', () => {
         gistId: VALID_GIST_ID,
       });
 
-      expect(result.id).toBe(VALID_GIST_ID);
       expect(result.files['main.js'].content).toBe('console.log("hi")');
     });
 
@@ -488,7 +505,7 @@ describe('github', () => {
         revision: VALID_SHA,
       });
 
-      expect(result.id).toBe(VALID_GIST_ID);
+      expect(result.revision).toBe('sha1');
     });
 
     it('rejects invalid gist IDs', async () => {
@@ -515,7 +532,7 @@ describe('github', () => {
           revision,
         });
 
-        expect(result.id).toBe(VALID_GIST_ID);
+        expect(result.revision).toBe('sha1');
       }
     });
 
@@ -544,11 +561,12 @@ describe('github', () => {
       const result = await handleGistLoad(MOCK_EVENT, {
         gistId: VALID_GIST_ID,
       });
-      expect(result.id).toBe(VALID_GIST_ID);
+      expect(result.files['main.js'].content).toBe('console.log("hi")');
     });
 
     it('fetches full content for truncated files', async () => {
-      const fullContent = 'a'.repeat(2000);
+      // This is the largest allowable size a gist file can be
+      const fullContent = 'a'.repeat(GIST_MAX_FILE_SIZE);
 
       // Sign out and re-sign-in with a mock that returns a truncated file
       await handleTokenSignOut(MOCK_EVENT);

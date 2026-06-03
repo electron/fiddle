@@ -7,7 +7,9 @@ import {
   FiddleEvent,
   FileTransformOperation,
   Files,
+  GistCreateParams,
   GistLoadParams,
+  GistUpdateParams,
   IPackageManager,
   MessageOptions,
   PMOperationOptions,
@@ -142,10 +144,21 @@ export async function setupFiddleGlobal() {
     },
     fetchExample: (ref: string, path: string) =>
       ipcRenderer.invoke(IpcEvents.GITHUB_FETCH_EXAMPLE, { ref, path }),
+    gistCreate: (params: GistCreateParams) =>
+      ipcRenderer.invoke(IpcEvents.GITHUB_GIST_CREATE, params),
+    gistDelete: (id: string) =>
+      ipcRenderer.invoke(IpcEvents.GITHUB_GIST_DELETE, id),
     gistListCommits: (gistId: string) =>
       ipcRenderer.invoke(IpcEvents.GITHUB_GIST_LIST_COMMITS, gistId),
     gistLoad: (params: GistLoadParams) =>
       ipcRenderer.invoke(IpcEvents.GITHUB_GIST_LOAD, params),
+    gistUpdate: (params: GistUpdateParams) =>
+      ipcRenderer.invoke(IpcEvents.GITHUB_GIST_UPDATE, params),
+    gitHubCheckAuth: () =>
+      ipcRenderer.invoke(IpcEvents.GITHUB_TOKEN_CHECK_AUTH),
+    gitHubSignIn: (token: string) =>
+      ipcRenderer.invoke(IpcEvents.GITHUB_TOKEN_SIGN_IN, token),
+    gitHubSignOut: () => ipcRenderer.invoke(IpcEvents.GITHUB_TOKEN_SIGN_OUT),
     getElectronTypes(ver: RunnableVersion) {
       return ipcRenderer.invoke(IpcEvents.GET_ELECTRON_TYPES, ver);
     },

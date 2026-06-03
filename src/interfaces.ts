@@ -220,15 +220,47 @@ export interface GistRevision {
   };
 }
 
+export interface GistCreateParams {
+  description: string;
+  files: Record<string, GistFile>;
+  isPublic: boolean;
+}
+
+export interface GistFile {
+  filename: string;
+  content: string;
+}
+
 export interface GistLoadParams {
   gistId: string;
   revision?: string;
 }
 
 export interface GistLoadResult {
-  files: Record<string, { filename: string; content: string }>;
-  id: string;
+  files: Record<string, GistFile>;
   revision?: string;
+}
+
+export interface GistUpdateParams {
+  gistId: string;
+  files: Record<string, GistFile>;
+}
+
+export interface GistWriteResult {
+  id: string;
+  url: string;
+  revision?: string;
+}
+
+export interface GitHubSignInResult {
+  success: boolean;
+  login?: string;
+  error?: string;
+}
+
+export interface GitHubCheckAuthResult {
+  login: string | null;
+  hasToken: boolean;
 }
 
 export enum GlobalSetting {

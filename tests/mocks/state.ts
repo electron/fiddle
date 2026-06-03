@@ -28,7 +28,6 @@ export class StateMock {
   public activeGistRevision: string | undefined = undefined;
   public gitHubLogin: string | null = null;
   public gitHubPublishAsPublic = true;
-  public gitHubToken: string | null = null;
   public isAddVersionDialogShowing = false;
   public isAutoBisecting = false;
   public isClearingConsoleOnRun = false;
@@ -126,7 +125,6 @@ export class StateMock {
       gistId: observable,
       gitHubLogin: observable,
       gitHubPublishAsPublic: observable,
-      gitHubToken: observable,
       isAddVersionDialogShowing: observable,
       isAutoBisecting: observable,
       isClearingConsoleOnRun: observable,

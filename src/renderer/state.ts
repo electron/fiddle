@@ -42,6 +42,12 @@ import {
 } from '../interfaces';
 import { Bisector } from '../utils/bisect';
 
+// Migration: previous versions of Fiddle stored the GitHub PAT in
+// localStorage in plaintext. The token now lives encrypted in the main
+// process; remove any leftover renderer copy on startup so it doesn't
+// linger forever.
+localStorage.removeItem(GlobalSetting.gitHubToken);
+
 /**
  * The application's state. Exported as a singleton below.
  */
@@ -59,8 +65,6 @@ export class AppState {
   public gitHubLogin: string | null = localStorage.getItem(
     GlobalSetting.gitHubLogin,
   );
-  public gitHubToken: string | null =
-    localStorage.getItem(GlobalSetting.gitHubToken) || null;
   public gitHubPublishAsPublic = !!this.retrieve(
     WindowSpecificSetting.gitHubPublishAsPublic,
   );
@@ -220,7 +224,6 @@ export class AppState {
       activeGistRevision: observable,
       gitHubLogin: observable,
       gitHubPublishAsPublic: observable,
-      gitHubToken: observable,
       hideChannels: action,
       isAddVersionDialogShowing: observable,
       isAutoBisecting: observable,
@@ -391,6 +394,7 @@ export class AppState {
 
           // This key is deprecated, so do nothing
           // These keys are deprecated, so do nothing
+          case GlobalSetting.gitHubToken:
           case GlobalSetting.knownVersion:
           case GlobalSetting.localVersion: {
             break;
@@ -404,7 +408,6 @@ export class AppState {
           case GlobalSetting.fontFamily:
           case GlobalSetting.fontSize:
           case GlobalSetting.gitHubLogin:
-          case GlobalSetting.gitHubToken:
           case GlobalSetting.isClearingConsoleOnRun:
           case GlobalSetting.isEnablingElectronLogging:
           case GlobalSetting.isKeepingUserDataDirs:
@@ -493,7 +496,6 @@ export class AppState {
       ),
     );
     autorun(() => this.save(GlobalSetting.gitHubLogin, this.gitHubLogin));
-    autorun(() => this.save(GlobalSetting.gitHubToken, this.gitHubToken));
     autorun(() =>
       this.save(
         WindowSpecificSetting.gitHubPublishAsPublic,
@@ -979,11 +981,13 @@ export class AppState {
   }
 
   /**
-   * The equivalent of signing out.
+   * The equivalent of signing out. Tells main to delete its encrypted
+   * credential and clear the cached Octokit, then clears the renderer's
+   * "signed in" indicator.
    */
-  public signOutGitHub(): void {
+  public async signOutGitHub(): Promise<void> {
+    await window.ElectronFiddle.gitHubSignOut();
     this.gitHubLogin = null;
-    this.gitHubToken = null;
   }
 
   public async showGenericDialog(
