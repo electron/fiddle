@@ -348,6 +348,14 @@ window.addEventListener('message', (event: MessageEvent) => {
   }
 });
 
-void applyThemeByName(initialParams.get('initialTheme'));
+if (isUsingSystemTheme) {
+  applyTheme(
+    window.matchMedia(PREFERS_DARK_MEDIA_QUERY).matches
+      ? defaultDark
+      : defaultLight,
+  );
+} else {
+  void applyThemeByName(initialParams.get('initialTheme'));
+}
 
 render();
