@@ -1,6 +1,7 @@
 import * as path from 'node:path';
 
 import { FuseV1Options, FuseVersion } from '@electron/fuses';
+import { MakerMSIX } from '@electron-forge/maker-msix';
 import { FusesPlugin } from '@electron-forge/plugin-fuses';
 import type { ForgeConfig } from '@electron-forge/shared-types';
 
@@ -141,6 +142,23 @@ const config: ForgeConfig = {
           : undefined,
       }),
     },
+    new MakerMSIX({
+      manifestVariables: {
+        publisher:
+          'CN=OpenJS Foundation, OU=Electron, O=OpenJS Foundation, L=San Francisco, S=California, C=US, SERIALNUMBER=5579593, OID.2.5.4.15=Private Organization, OID.1.3.6.1.4.1.311.60.2.1.2=Delaware, OID.1.3.6.1.4.1.311.60.2.1.3=US',
+        publisherDisplayName: 'OpenJS Foundation',
+        packageIdentity: 'ElectronCommunity.ElectronFiddle',
+        appExecutable: 'electron-fiddle.exe',
+        packageDisplayName: 'Electron Fiddle',
+        appDisplayName: 'Electron Fiddle',
+        packageDescription: packageJson.description,
+      },
+      windowsSignOptions: process.env.CERT_FINGERPRINT
+        ? {
+            signWithParams: `/sha1 ${process.env.CERT_FINGERPRINT} /tr http://timestamp.digicert.com /td SHA256 /fd SHA256`,
+          }
+        : undefined,
+    }),
     {
       name: '@electron-forge/maker-zip',
       platforms: ['darwin'],
