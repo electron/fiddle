@@ -155,7 +155,8 @@ const config: ForgeConfig = {
       },
       windowsSignOptions: process.env.CERT_FINGERPRINT
         ? {
-            signWithParams: `/sha1 ${process.env.CERT_FINGERPRINT} /tr http://timestamp.digicert.com /td SHA256 /fd SHA256`,
+            signWithParams: `/sha1 ${process.env.CERT_FINGERPRINT}`,
+            hashes: ['sha256'] as any,
           }
         : undefined,
     }),
