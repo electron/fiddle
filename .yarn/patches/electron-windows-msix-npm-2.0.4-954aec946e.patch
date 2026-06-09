@@ -1,0 +1,13 @@
+diff --git a/lib/utils.js b/lib/utils.js
+index 4a88a7ea32cf4191261149d5fe98dcfd638eaa25..d37f22356a8e7480e81b4a003168ca52932b1a63 100644
+--- a/lib/utils.js
++++ b/lib/utils.js
+@@ -251,7 +251,7 @@ const makeProgramOptions = async (options, manifestVars) => {
+     let cert_pfx = windowsSignOptions?.certificateFile || '';
+     let cert_cer = '';
+     let cert_pass = '';
+-    const createDevCert = sign && !options.windowsSignOptions?.certificateFile && !process.env.WINDOWS_CERTIFICATE_FILE;
++    const createDevCert = sign && !options.windowsSignOptions && !process.env.WINDOWS_CERTIFICATE_FILE;
+     if (sign) {
+         windowsSignOptions = options.windowsSignOptions || { files: [msix], certificateFile: '', certificatePassword: '', hashes: ["sha256"] };
+         cert_pass = windowsSignOptions?.certificatePassword || process.env.WINDOWS_CERTIFICATE_PASSWORD || generatePassword();
