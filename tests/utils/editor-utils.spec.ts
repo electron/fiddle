@@ -30,6 +30,13 @@ describe('editor-utils', () => {
         expect(isSupportedFile(id)).toBe(true);
       }
     });
+
+    it('rejects path traversal and absolute paths', () => {
+      expect(isSupportedFile('../../../../tmp/evil.js')).toBe(false);
+      expect(isSupportedFile('/tmp/evil.js')).toBe(false);
+      expect(isSupportedFile('foo/bar.js')).toBe(false);
+      expect(isSupportedFile('..\\..\\evil.js')).toBe(false);
+    });
   });
 
   describe('getSuffix', () => {
