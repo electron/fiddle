@@ -23,9 +23,9 @@
     "package": "electron-forge package",
     "publish": "electron-forge publish",
     "start": "tsx ./tools/clean-webpack.ts && electron-forge start --",
-    "test": "vitest run",
-    "test:ci": "vitest run --coverage --reporter=default --reporter=junit --outputFile=./reports/report.xml",
-    "test:report": "vitest run --reporter=json --outputFile=report.json | true",
+    "test": "tsx ./tools/vitest.ts run",
+    "test:ci": "tsx ./tools/vitest.ts run --coverage --reporter=default --reporter=junit --outputFile=./reports/report.xml",
+    "test:report": "tsx ./tools/vitest.ts run --reporter=json --outputFile=report.json | true",
     "tsc": "tsc --noEmit -p .",
     "electron-releases": "tsx ./tools/fetch-releases.ts",
     "postinstall": "husky && npm run electron-releases"
