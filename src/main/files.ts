@@ -208,9 +208,14 @@ export async function saveFiles(
   filePath: string,
   files: Files,
 ) {
-  console.log(`saveFiddleWithTransforms: Asked to save to ${filePath}`);
+  console.log(`saveFiles: Asked to save to ${filePath}`);
 
   for (const [fileName, content] of files) {
+    if (!isSafeDataName(fileName)) {
+      console.warn(`saveFiles: rejected unsafe filename: ${fileName}`);
+      continue;
+    }
+
     const savePath = path.join(filePath, fileName);
 
     // If the file has content, save it to disk. If there's no
