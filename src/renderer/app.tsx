@@ -8,8 +8,8 @@ import { AppState } from './state';
 import { activateTheme, getCurrentTheme, getTheme } from './themes';
 import { getPackageJson } from './utils/get-package';
 import {
+  discardLocalVersionsFromLocalStorage,
   getElectronVersions,
-  migrateLocalVersionsFromLocalStorage,
 } from './versions';
 import { PREFERS_DARK_MEDIA_QUERY } from '../constants';
 import {
@@ -36,7 +36,7 @@ export class App {
   public readonly electronTypes: ElectronTypes;
 
   constructor() {
-    migrateLocalVersionsFromLocalStorage();
+    const legacyLocalVersionsDiscarded = discardLocalVersionsFromLocalStorage();
 
     this.state = new AppState(getElectronVersions());
     this.fileManager = new FileManager(this.state);
@@ -45,6 +45,12 @@ export class App {
     this.getEditorValues = this.getEditorValues.bind(this);
 
     this.electronTypes = new ElectronTypes(window.monaco);
+
+    if (legacyLocalVersionsDiscarded) {
+      void this.state.showInfoDialog(
+        'Fiddle has changed how it stores local Electron versions. Existing local versions have been removed and must be re-added.',
+      );
+    }
   }
 
   private confirmReplaceUnsaved(): Promise<boolean> {

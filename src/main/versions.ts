@@ -12,7 +12,6 @@ import { IpcEvents } from '../ipc-events';
 let knownVersions: ElectronVersions;
 let localVersions: Array<Version> = [];
 let localVersionsPath: string;
-let migrated = false;
 
 /**
  * Helper to check if this version is from a released major branch.
@@ -82,7 +81,6 @@ function loadLocalVersions(): void {
       const raw = fs.readFileSync(localVersionsPath, 'utf-8');
       const data = JSON.parse(raw);
       if (data && typeof data === 'object') {
-        migrated = !!data.migrated;
         localVersions = Array.isArray(data.versions)
           ? data.versions.filter(
               (v: any) =>
@@ -105,7 +103,7 @@ function persistLocalVersions(): void {
   try {
     fs.writeFileSync(
       localVersionsPath,
-      JSON.stringify({ migrated, versions: localVersions }, null, 2),
+      JSON.stringify({ versions: localVersions }, null, 2),
     );
   } catch (err) {
     console.warn('Failed to save local versions:', err);
@@ -182,38 +180,6 @@ export function removeLocalVersion(version: string): Array<Version> {
   return localVersions;
 }
 
-/**
- * One-time migration of local versions from the renderer's localStorage
- * to the main process store. Returns true if the migration was accepted,
- * false if it was already performed previously.
- */
-export function migrateLocalVersions(versions: Array<Version>): boolean {
-  if (migrated) {
-    return false;
-  }
-
-  // Validate and merge incoming versions
-  const validVersions = versions.filter(
-    (v) =>
-      v &&
-      typeof v.version === 'string' &&
-      v.version.length > 0 &&
-      typeof v.localPath === 'string' &&
-      v.localPath.length > 0,
-  );
-
-  for (const ver of validVersions) {
-    if (!localVersions.find((v) => v.localPath === ver.localPath)) {
-      localVersions.push(ver);
-    }
-  }
-
-  migrated = true;
-  persistLocalVersions();
-
-  return true;
-}
-
 export async function setupVersions() {
   knownVersions = await ElectronVersions.create({
     initialVersions: releases,
@@ -259,12 +225,6 @@ export async function setupVersions() {
     (event, token: string) => {
       cancelPendingLocalPath(token);
       event.returnValue = undefined;
-    },
-  );
-  ipcMainManager.on(
-    IpcEvents.MIGRATE_LOCAL_VERSIONS,
-    (event, versions: Version[]) => {
-      event.returnValue = migrateLocalVersions(versions);
     },
   );
   ipcMainManager.on(IpcEvents.GET_OLDEST_SUPPORTED_MAJOR, (event) => {

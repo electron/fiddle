@@ -139,7 +139,6 @@ declare global {
       addLocalVersion(token: string, name: string): Array<Version>;
       cancelPendingLocalVersion(token: string): void;
       removeLocalVersion(version: string): Array<Version>;
-      migrateLocalVersions(versions: Version[]): boolean;
       getNodeTypes(
         version: string,
       ): Promise<{ version: string; types: NodeTypes } | undefined>;
