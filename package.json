@@ -103,7 +103,7 @@
     "@typescript-eslint/parser": "^6.0.0",
     "@vercel/webpack-asset-relocator-loader": "^1.7.2",
     "@vitest/coverage-v8": "4.1.0",
-    "copy-webpack-plugin": "^11.0.0",
+    "copy-webpack-plugin": "^14.0.0",
     "css-loader": "^6.7.1",
     "electron": "^42.1.0",
     "electron-devtools-installer": "^4.0.0",
