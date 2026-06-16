@@ -12,6 +12,7 @@ import {
 } from '@blueprintjs/core';
 import { observer } from 'mobx-react';
 
+import { DEFAULT_TART_IMAGE } from '../../constants';
 import { GlobalSetting, IPackageManager } from '../../interfaces';
 import { AppState } from '../state';
 
@@ -59,6 +60,8 @@ export const ExecutionSettings = observer(
         this.handleElectronLoggingChange.bind(this);
       this.handleSocketFirewallChange =
         this.handleSocketFirewallChange.bind(this);
+      this.handleRunInVMChange = this.handleRunInVMChange.bind(this);
+      this.handleVMImageChange = this.handleVMImageChange.bind(this);
 
       this.handleSettingsItemChange = this.handleSettingsItemChange.bind(this);
       this.addNewSettingsItem = this.addNewSettingsItem.bind(this);
@@ -103,6 +106,23 @@ export const ExecutionSettings = observer(
     ) {
       const { checked } = event.currentTarget;
       this.props.appState.isUsingSocketFirewall = checked;
+    }
+
+    /**
+     * Handles a change on whether or not to run fiddles inside an isolated
+     * `tart` macOS VM.
+     */
+    public handleRunInVMChange(event: React.FormEvent<HTMLInputElement>) {
+      const { checked } = event.currentTarget;
+      this.props.appState.isRunningInVM = checked;
+    }
+
+    /**
+     * Handles a change to the base `tart` VM image.
+     */
+    public handleVMImageChange(event: React.ChangeEvent<HTMLInputElement>) {
+      const { value } = event.currentTarget;
+      this.props.appState.vmImage = value || DEFAULT_TART_IMAGE;
     }
 
     /**
@@ -259,7 +279,11 @@ export const ExecutionSettings = observer(
         isKeepingUserDataDirs,
         isEnablingElectronLogging,
         isUsingSocketFirewall,
+        isRunningInVM,
+        vmImage,
       } = this.props.appState;
+
+      const isMac = window.ElectronFiddle.platform === 'darwin';
 
       return (
         <div>
@@ -386,6 +410,46 @@ export const ExecutionSettings = observer(
               />
             </FormGroup>
           </Callout>
+          {isMac && (
+            <>
+              <br />
+              <Callout>
+                <FormGroup>
+                  <p>
+                    Run fiddles inside a throwaway{' '}
+                    <a href="https://tart.run" target="_blank" rel="noreferrer">
+                      tart
+                    </a>{' '}
+                    macOS virtual machine instead of directly on your computer.
+                    The fiddle and the selected Electron build are mounted into
+                    a freshly cloned VM, which is discarded as soon as the run
+                    finishes — keeping untrusted fiddle code isolated from your
+                    host. This requires <code>tart</code> (and{' '}
+                    <code>sshpass</code>) to be installed and only works on
+                    Apple Silicon Macs.
+                  </p>
+                  <Checkbox
+                    checked={isRunningInVM}
+                    label="Run fiddles in an isolated macOS VM."
+                    onChange={this.handleRunInVMChange}
+                  />
+                  <FormGroup
+                    label="Base VM image"
+                    disabled={!isRunningInVM}
+                    helperText="The tart image cloned for each run."
+                  >
+                    <InputGroup
+                      aria-label="Base VM image"
+                      placeholder={DEFAULT_TART_IMAGE}
+                      value={vmImage}
+                      disabled={!isRunningInVM}
+                      onChange={this.handleVMImageChange}
+                    />
+                  </FormGroup>
+                </FormGroup>
+              </Callout>
+            </>
+          )}
         </div>
       );
     }

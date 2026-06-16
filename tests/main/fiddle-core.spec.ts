@@ -37,6 +37,11 @@ vi.mock('@electron/fiddle-core', async () => {
 
 vi.mock('node:fs');
 
+const { spawnInVMMock } = vi.hoisted(() => ({ spawnInVMMock: vi.fn() }));
+vi.mock('../../src/main/tart', () => ({
+  spawnInVM: (...args: unknown[]) => spawnInVMMock(...args),
+}));
+
 // The refactored startFiddle delegates the heavy lifting to small helper
 // modules. Mock them so these tests can focus on the spawn behaviour.
 const { TEMP_DIR, getLocalVersionsMock, getStartFiddleOptionsMock } =
@@ -86,6 +91,8 @@ function makeOptions(
     packageManager: 'npm',
     useSocketFirewall: false,
     version: '18.0.0',
+    runInVM: false,
+    vmImage: 'ghcr.io/cirruslabs/macos-sequoia-base:latest',
     ...overrides,
   };
 }
@@ -332,6 +339,54 @@ describe('fiddle-core', () => {
           args: [TEMP_DIR, '--inspect', 'safe-flag', '--js-flags=ok'],
         }),
       );
+    });
+
+    it('runs inside a tart VM when runInVM is enabled on macOS', async () => {
+      const originalPlatform = process.platform;
+      Object.defineProperty(process, 'platform', { value: 'darwin' });
+      try {
+        const child = new ChildProcessMock();
+        spawnInVMMock.mockImplementation(async () => {
+          setImmediate(() => child.emit('close', 0, null));
+          return child;
+        });
+        getStartFiddleOptionsMock.mockResolvedValueOnce(
+          makeOptions({ runInVM: true, executionFlags: ['--foo'] }),
+        );
+
+        await startFiddle(new WebContentsMock() as unknown as WebContents);
+
+        expect(runner.spawn).not.toHaveBeenCalled();
+        expect(spawnInVMMock).toHaveBeenCalledWith(
+          expect.objectContaining({
+            fiddleDir: TEMP_DIR,
+            electronDir: `/install/${version}`,
+            execPath: `/install/${version}/electron`,
+            flags: ['--inspect', '--foo'],
+          }),
+        );
+      } finally {
+        Object.defineProperty(process, 'platform', { value: originalPlatform });
+      }
+    });
+
+    it('does not use the VM runner on non-macOS platforms', async () => {
+      const originalPlatform = process.platform;
+      Object.defineProperty(process, 'platform', { value: 'linux' });
+      try {
+        const child = new ChildProcessMock();
+        mockSpawnWithAutoClose(child);
+        getStartFiddleOptionsMock.mockResolvedValueOnce(
+          makeOptions({ runInVM: true }),
+        );
+
+        await startFiddle(new WebContentsMock() as unknown as WebContents);
+
+        expect(spawnInVMMock).not.toHaveBeenCalled();
+        expect(runner.spawn).toHaveBeenCalledTimes(1);
+      } finally {
+        Object.defineProperty(process, 'platform', { value: originalPlatform });
+      }
     });
 
     it('cleans up the temp dir and user data after the child process closes', async () => {

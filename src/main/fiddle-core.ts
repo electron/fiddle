@@ -19,6 +19,7 @@ import {
   getIsolatedRunButtonFrame,
 } from './isolated-actions';
 import { addModules, getIsPackageManagerInstalled } from './npm';
+import { spawnInVM } from './tart';
 import { getFiles } from './utils/get-files';
 import { getStartFiddleOptions } from './utils/get-start-fiddle-options';
 import { pushError, pushOutput, pushOutputLine } from './utils/push-output';
@@ -167,9 +168,14 @@ async function startFiddleImpl(webContents: WebContents): Promise<RunResult> {
     isKeepingUserDataDirs,
     modules,
     packageManager,
+    runInVM,
     useSocketFirewall,
     version,
+    vmImage,
   } = options;
+
+  // The tart VM runner only works on macOS (Apple Silicon).
+  const useVM = runInVM && process.platform === 'darwin';
 
   ipcMainManager.send(
     IpcEvents.FIDDLE_RUN,
@@ -272,11 +278,33 @@ async function startFiddleImpl(webContents: WebContents): Promise<RunResult> {
 
   let child: ChildProcess;
   try {
-    child = await runner.spawn(useLocalPath ? resolvedExec! : version, dir, {
-      args: safeOptions,
-      cwd: dir,
-      env,
-    });
+    if (useVM) {
+      // Resolve the on-disk Electron build so it can be mounted into the VM.
+      // Local builds are already on disk; remote versions are installed here
+      // (downloading first if necessary).
+      const electronDir = useLocalPath
+        ? localPath!
+        : await installer.install(version);
+      const execPath = Installer.getExecPath(electronDir);
+
+      child = await spawnInVM({
+        image: vmImage,
+        fiddleDir: dir,
+        electronDir,
+        execPath,
+        // safeOptions[0] is the host fiddle dir, which the VM runner remaps
+        // to the guest mount point — pass only the flags that follow.
+        flags: safeOptions.slice(1),
+        env,
+        onStatus: (line) => pushOutputLine(webContents, line),
+      });
+    } else {
+      child = await runner.spawn(useLocalPath ? resolvedExec! : version, dir, {
+        args: safeOptions,
+        cwd: dir,
+        env,
+      });
+    }
   } catch (error: any) {
     pushError(webContents, 'Failed to spawn Fiddle', error);
     await cleanup();
@@ -298,7 +326,12 @@ async function startFiddleImpl(webContents: WebContents): Promise<RunResult> {
     [webContents, getIsolatedRunButtonFrame(webContents)],
   );
 
-  pushOutputLine(webContents, `Electron v${version} started as "${appName}"`);
+  pushOutputLine(
+    webContents,
+    `Electron v${version} started as "${appName}"${
+      useVM ? ' in an isolated VM' : ''
+    }`,
+  );
 
   child.stdout?.on('data', (data) => pushOutput(webContents, data.toString()));
   child.stderr?.on('data', (data) => pushOutput(webContents, data.toString()));

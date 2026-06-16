@@ -7,6 +7,7 @@ import { InstallState } from '../../src/interfaces';
 
 export class InstallerMock extends EventEmitter {
   public state = () => InstallState.installed;
+  public install = vi.fn(async (version: string) => `/install/${version}`);
   public static getExecPath = vi.fn((p: string) => `${p}/electron`);
 }
 

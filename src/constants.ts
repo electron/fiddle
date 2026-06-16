@@ -15,3 +15,12 @@ export const GITHUB_TOKEN_PATTERN =
   /^(ghp_[a-zA-Z0-9]{36}|github_pat_[a-zA-Z0-9]{22}_[a-zA-Z0-9]{59})$/;
 
 export const PREFERS_DARK_MEDIA_QUERY = '(prefers-color-scheme: dark)';
+
+/**
+ * The default base image cloned by the `tart` VM runner. Cirrus Labs
+ * publishes ready-to-use macOS images with SSH enabled and the default
+ * `admin`/`admin` credentials the runner expects. Shared between the
+ * renderer (settings default) and the main process (run lifecycle).
+ */
+export const DEFAULT_TART_IMAGE =
+  'ghcr.io/cirruslabs/macos-sequoia-base:latest';

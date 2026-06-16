@@ -2,7 +2,7 @@ import * as React from 'react';
 
 import { act, render, screen } from '@testing-library/react';
 import { userEvent } from '@testing-library/user-event';
-import { beforeEach, describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
 import {
   ExecutionSettings,
@@ -61,6 +61,68 @@ describe('ExecutionSettings component', () => {
       // Click to uncheck
       await user.click(checkbox);
       expect(store.isEnablingElectronLogging).toBe(false);
+    });
+  });
+
+  describe('handleRunInVMChange()', () => {
+    const originalPlatform = window.ElectronFiddle.platform;
+
+    beforeEach(() => {
+      (window.ElectronFiddle as any).platform = 'darwin';
+      store.vmImage = 'ghcr.io/cirruslabs/macos-sequoia-base:latest';
+    });
+
+    afterEach(() => {
+      (window.ElectronFiddle as any).platform = originalPlatform;
+    });
+
+    it('handles a new selection', async () => {
+      const user = userEvent.setup();
+      render(<ExecutionSettings appState={store} />);
+
+      const checkbox = screen.getByLabelText(
+        'Run fiddles in an isolated macOS VM.',
+      );
+
+      await user.click(checkbox);
+      expect(store.isRunningInVM).toBe(true);
+
+      await user.click(checkbox);
+      expect(store.isRunningInVM).toBe(false);
+    });
+
+    it('is hidden on non-macOS platforms', () => {
+      (window.ElectronFiddle as any).platform = 'linux';
+      render(<ExecutionSettings appState={store} />);
+
+      expect(
+        screen.queryByLabelText('Run fiddles in an isolated macOS VM.'),
+      ).not.toBeInTheDocument();
+    });
+  });
+
+  describe('handleVMImageChange()', () => {
+    it('updates the image, falling back to the default when emptied', () => {
+      const { instance } = renderClassComponentWithInstanceRef(
+        ExecutionSettings,
+        { appState: store },
+      );
+
+      act(() => {
+        instance.handleVMImageChange({
+          currentTarget: { value: 'my/custom:image' },
+        } as React.ChangeEvent<HTMLInputElement>);
+      });
+      expect(store.vmImage).toBe('my/custom:image');
+
+      act(() => {
+        instance.handleVMImageChange({
+          currentTarget: { value: '' },
+        } as React.ChangeEvent<HTMLInputElement>);
+      });
+      expect(store.vmImage).toBe(
+        'ghcr.io/cirruslabs/macos-sequoia-base:latest',
+      );
     });
   });
 

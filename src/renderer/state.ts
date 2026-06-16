@@ -19,6 +19,7 @@ import {
   getReleaseChannel,
   makeRunnable,
 } from './versions';
+import { DEFAULT_TART_IMAGE } from '../constants';
 import {
   AppStateBroadcastChannel,
   AppStateBroadcastMessage,
@@ -98,6 +99,10 @@ export class AppState {
   public isUsingSocketFirewall = !!(
     this.retrieve(GlobalSetting.isUsingSocketFirewall) ?? true
   );
+  public isRunningInVM = !!this.retrieve(GlobalSetting.isRunningInVM);
+  public vmImage =
+    (this.retrieve(GlobalSetting.vmImage) as string | null) ??
+    DEFAULT_TART_IMAGE;
   public executionFlags: Array<string> =
     (this.retrieve(GlobalSetting.executionFlags) as Array<string>) === null
       ? []
@@ -237,6 +242,7 @@ export class AppState {
       isKeepingUserDataDirs: observable,
       isOnline: observable,
       isPublishingGistAsRevision: observable,
+      isRunningInVM: observable,
       isUsingSocketFirewall: observable,
       isQuitting: observable,
       isRunning: observable,
@@ -289,6 +295,7 @@ export class AppState {
       version: observable,
       versions: observable,
       versionsToShow: computed,
+      vmImage: observable,
       changeRunnableState: action,
       startDownloadingAll: action,
       stopDownloadingAll: action,
@@ -412,13 +419,15 @@ export class AppState {
           case GlobalSetting.isEnablingElectronLogging:
           case GlobalSetting.isKeepingUserDataDirs:
           case GlobalSetting.isPublishingGistAsRevision:
+          case GlobalSetting.isRunningInVM:
           case GlobalSetting.isShowingGistHistory:
           case GlobalSetting.isUsingSocketFirewall:
           case GlobalSetting.isUsingSystemTheme:
           case GlobalSetting.packageAuthor:
           case GlobalSetting.packageManager:
           case GlobalSetting.showObsoleteVersions:
-          case GlobalSetting.showUndownloadedVersions: {
+          case GlobalSetting.showUndownloadedVersions:
+          case GlobalSetting.vmImage: {
             // Fall back to updating the state.
             (this[key] as any) = parsedValue;
             break;
@@ -495,6 +504,8 @@ export class AppState {
         this.isUsingSocketFirewall,
       ),
     );
+    autorun(() => this.save(GlobalSetting.isRunningInVM, this.isRunningInVM));
+    autorun(() => this.save(GlobalSetting.vmImage, this.vmImage));
     autorun(() => this.save(GlobalSetting.gitHubLogin, this.gitHubLogin));
     autorun(() =>
       this.save(

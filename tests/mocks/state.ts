@@ -39,6 +39,8 @@ export class StateMock {
   public isOnline = true;
   public isQuitting = false;
   public isRunning = false;
+  public isRunningInVM = false;
+  public vmImage = 'ghcr.io/cirruslabs/macos-sequoia-base:latest';
   public isSettingsShowing = false;
   public isTokenDialogShowing = false;
   public isTourShowing = false;

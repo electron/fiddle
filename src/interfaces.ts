@@ -278,6 +278,7 @@ export enum GlobalSetting {
   isEnablingElectronLogging = 'isEnablingElectronLogging',
   isKeepingUserDataDirs = 'isKeepingUserDataDirs',
   isPublishingGistAsRevision = 'isPublishingGistAsRevision',
+  isRunningInVM = 'isRunningInVM',
   isUsingSocketFirewall = 'isUsingSocketFirewall',
   isUsingSystemTheme = 'isUsingSystemTheme',
   knownVersion = 'known-electron-versions',
@@ -288,6 +289,7 @@ export enum GlobalSetting {
   showObsoleteVersions = 'showObsoleteVersions',
   showUndownloadedVersions = 'showUndownloadedVersions',
   theme = 'theme',
+  vmImage = 'vmImage',
 }
 
 export enum WindowSpecificSetting {
@@ -332,6 +334,11 @@ export interface StartFiddleOptions {
   packageManager: IPackageManager;
   useSocketFirewall: boolean;
   isKeepingUserDataDirs: boolean;
+  // Whether to run the fiddle inside an isolated `tart` macOS VM rather than
+  // directly on the host. Only honoured on macOS (Apple Silicon).
+  runInVM: boolean;
+  // The base `tart` VM image to clone when `runInVM` is enabled.
+  vmImage: string;
 }
 
 export interface DownloadVersionParams {
