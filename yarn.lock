@@ -5344,7 +5344,7 @@ __metadata:
     classnames: "npm:^2.2.6"
     copy-webpack-plugin: "npm:^14.0.0"
     css-loader: "npm:^6.7.1"
-    electron: "npm:^42.1.0"
+    electron: "npm:^42.3.3"
     electron-devtools-installer: "npm:^4.0.0"
     electron-squirrel-startup: "npm:^1.0.0"
     eslint: "npm:^8.45.0"
@@ -5520,9 +5520,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"electron@npm:^42.1.0":
-  version: 42.3.2
-  resolution: "electron@npm:42.3.2"
+"electron@npm:^42.3.3":
+  version: 42.3.3
+  resolution: "electron@npm:42.3.3"
   dependencies:
     "@electron/get": "npm:^5.0.0"
     "@types/node": "npm:^24.9.0"
@@ -5530,7 +5530,7 @@ __metadata:
   bin:
     electron: cli.js
     install-electron: install.js
-  checksum: 10c0/04d261772430bf4abad04254df372a50b86bd99ebf588e1c654be00eb2cb560079101d35b6d58f80a68fde933e0f15908d1e764464796936a8a7ff78facaf0f3
+  checksum: 10c0/9fdb34c23097986e4ed9f328ec36356d78481133a17fdba78312be6dddb5e513f91e727a7802f91ff7302d86f794998085ef6fbc2c2b8ae9bc2d5f8b38711759
   languageName: node
   linkType: hard
 
