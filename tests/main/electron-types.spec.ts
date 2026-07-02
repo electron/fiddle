@@ -1,9 +1,9 @@
+import * as os from 'node:os';
 import * as path from 'node:path';
 
 import { ElectronVersions, ReleaseInfo } from '@electron/fiddle-core';
 import type { BrowserWindow } from 'electron';
 import fs from 'fs-extra';
-import * as tmp from 'tmp';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import {
@@ -27,21 +27,20 @@ describe('ElectronTypes', () => {
   let localFile: string;
   let localVersion: RunnableVersion;
   let remoteVersion: RunnableVersion;
-  let tmpdir: tmp.DirResult;
+  let tmpdir: string;
   let electronTypes: ElectronTypes;
   let nodeTypesData: NodeTypesMock[];
   let electronVersions: ElectronVersionsMock;
   let browserWindow: BrowserWindow;
 
   beforeEach(async () => {
-    tmpdir = tmp.dirSync({
-      template: 'electron-fiddle-typedefs-XXXXXX',
-      unsafeCleanup: true,
-    });
+    tmpdir = fs.mkdtempSync(
+      path.join(os.tmpdir(), 'electron-fiddle-typedefs-'),
+    );
 
-    const electronCacheDir = path.join(tmpdir.name, 'electron-cache');
-    const nodeCacheDir = path.join(tmpdir.name, 'node-cache');
-    const localDir = path.join(tmpdir.name, 'local');
+    const electronCacheDir = path.join(tmpdir, 'electron-cache');
+    const nodeCacheDir = path.join(tmpdir, 'node-cache');
+    const localDir = path.join(tmpdir, 'local');
 
     fs.ensureDirSync(nodeCacheDir);
     fs.ensureDirSync(localDir);
@@ -85,7 +84,7 @@ describe('ElectronTypes', () => {
 
   afterEach(async () => {
     electronTypes.unwatch(browserWindow);
-    tmpdir.removeCallback();
+    fs.rmSync(tmpdir, { recursive: true, force: true });
     vi.mocked(fetch).mockReset();
   });
 

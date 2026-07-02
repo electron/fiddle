@@ -2,6 +2,7 @@
  * @vitest-environment node
  */
 
+import * as electron from 'electron';
 import { BrowserWindow, ContextMenuParams, Menu } from 'electron';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
@@ -11,6 +12,7 @@ import {
   getMonacoItems,
   getRunItems,
 } from '../../src/main/context-menu';
+import { startFiddle } from '../../src/main/fiddle-core';
 import { ipcMainManager } from '../../src/main/ipc';
 import { isDevMode } from '../../src/main/utils/devmode';
 import { BrowserWindowMock } from '../mocks/browser-window';
@@ -18,6 +20,7 @@ import { WebContentsMock } from '../mocks/web-contents';
 
 vi.mock('../../src/main/utils/devmode');
 vi.mock('../../src/main/ipc');
+vi.mock('../../src/main/fiddle-core');
 
 describe('context-menu', () => {
   let mockWindow: BrowserWindow;
@@ -225,9 +228,25 @@ describe('context-menu', () => {
   });
 
   describe('getRunItems()', () => {
-    it('executes an IPC send() on click', () => {
+    it('starts the fiddle on click', () => {
+      vi.mocked(startFiddle).mockResolvedValueOnce(undefined as any);
       const result = getRunItems();
-      (result[0] as any).click();
+      const mocks = {
+        send: vi.fn(),
+      };
+      const focusedWindow = {
+        webContents:
+          mocks as Partial<electron.WebContents> as electron.WebContents,
+      } as Partial<electron.BrowserWindow> as electron.BrowserWindow;
+      expect(result[0].id).toBe('run');
+      result[0].click?.({} as any, focusedWindow, {} as any);
+      expect(startFiddle).toHaveBeenCalledWith(focusedWindow.webContents);
+    });
+
+    it('executes an IPC send() on clear console click', () => {
+      const result = getRunItems();
+      expect(result[1].id).toBe('clear_console');
+      result[1].click?.({} as any, {} as any, {} as any);
       expect(ipcMainManager.send).toHaveBeenCalledTimes(1);
     });
   });

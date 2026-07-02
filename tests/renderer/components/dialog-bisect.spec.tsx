@@ -4,20 +4,17 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import {
   ElectronReleaseChannel,
   InstallState,
-  RunResult,
   VersionSource,
 } from '../../../src/interfaces';
-import { Bisector } from '../../../src/renderer/bisect';
 import { BisectDialog } from '../../../src/renderer/components/dialog-bisect';
-import { Runner } from '../../../src/renderer/runner';
 import { AppState } from '../../../src/renderer/state';
+import { Bisector } from '../../../src/utils/bisect';
 import { StateMock } from '../../mocks/mocks';
 import { renderClassComponentWithInstanceRef } from '../utils/renderClassComponentWithInstanceRef';
 
-vi.mock('../../../src/renderer/bisect');
+vi.mock('../../../src/utils/bisect');
 
 describe.each([8, 15])('BisectDialog component', (numVersions) => {
-  let runner: Runner;
   let store: AppState;
 
   const generateVersionRange = (rangeLength: number) =>
@@ -28,7 +25,7 @@ describe.each([8, 15])('BisectDialog component', (numVersions) => {
     }));
 
   beforeEach(() => {
-    ({ runner, state: store } = window.app);
+    ({ state: store } = window.app);
 
     (store as unknown as StateMock).versionsToShow =
       generateVersionRange(numVersions);
@@ -201,13 +198,11 @@ describe.each([8, 15])('BisectDialog component', (numVersions) => {
         });
       });
 
-      vi.mocked(runner.autobisect).mockResolvedValue(RunResult.SUCCESS);
-
       // click the 'auto' button
       await instance.onAuto();
 
       // check the results
-      expect(runner.autobisect).toHaveBeenCalled();
+      expect(window.ElectronFiddle.autobisectFiddle).toHaveBeenCalled();
     });
 
     it('does nothing if endIndex or startIndex are falsy', async () => {

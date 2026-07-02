@@ -6,6 +6,7 @@ import {
   shell,
 } from 'electron';
 
+import { isRunFiddleEnabled, startFiddle } from './fiddle-core';
 import {
   saveFiddle,
   saveFiddleAs,
@@ -315,9 +316,16 @@ function getQuitItems(): Array<MenuItemConstructorOptions> {
 function getTasksMenu(): MenuItemConstructorOptions {
   const tasksMenu: Array<MenuItemConstructorOptions> = [
     {
+      id: 'run-fiddle',
       label: 'Run Fiddle...',
       accelerator: 'F5',
-      click: () => ipcMainManager.send(IpcEvents.FIDDLE_RUN),
+      enabled: isRunFiddleEnabled(),
+      click: (_, focusedWindow) => {
+        if (focusedWindow)
+          startFiddle((focusedWindow as BrowserWindow).webContents).catch(
+            console.error,
+          );
+      },
     },
     {
       label: 'Package Fiddle...',

@@ -7,26 +7,29 @@ import {
   FiddleEvent,
   FileTransformOperation,
   Files,
+  GistCreateParams,
+  GistLoadParams,
+  GistUpdateParams,
   IPackageManager,
   MessageOptions,
-  OutputEntry,
   PMOperationOptions,
   PackageJsonOptions,
-  RunResult,
   RunnableVersion,
-  StartFiddleParams,
+  StartFiddleOptions,
+  Version,
 } from '../interfaces';
 import { IpcEvents, WEBCONTENTS_READY_FOR_IPC_SIGNAL } from '../ipc-events';
 import { FiddleTheme } from '../themes-defaults';
 
 const channelMapping: Record<FiddleEvent, IpcEvents> = {
   'before-quit': IpcEvents.BEFORE_QUIT,
-  'bisect-task': IpcEvents.TASK_BISECT,
   'clear-console': IpcEvents.CLEAR_CONSOLE,
   'electron-types-changed': IpcEvents.ELECTRON_TYPES_CHANGED,
   'execute-monaco-command': IpcEvents.MONACO_EXECUTE_COMMAND,
   'fiddle-runner-output': IpcEvents.FIDDLE_RUNNER_OUTPUT,
+  'fiddle-modules-installed': IpcEvents.FIDDLE_MODULES_INSTALLED,
   'fiddle-stopped': IpcEvents.FIDDLE_STOPPED,
+  'is-auto-bisecting': IpcEvents.IS_AUTO_BISECTING,
   'load-example': IpcEvents.LOAD_ELECTRON_EXAMPLE_REQUEST,
   'load-gist': IpcEvents.LOAD_GIST_REQUEST,
   'make-fiddle': IpcEvents.FIDDLE_MAKE,
@@ -43,7 +46,7 @@ const channelMapping: Record<FiddleEvent, IpcEvents> = {
   'select-all-in-editor': IpcEvents.SELECT_ALL_IN_EDITOR,
   'set-show-me-template': IpcEvents.SET_SHOW_ME_TEMPLATE,
   'show-welcome-tour': IpcEvents.SHOW_WELCOME_TOUR,
-  'test-task': IpcEvents.TASK_TEST,
+  'theme-loaded': IpcEvents.THEME_LOADED,
   'toggle-bisect': IpcEvents.BISECT_COMMANDS_TOGGLE,
   'toggle-monaco-option': IpcEvents.MONACO_TOGGLE_OPTION,
   'undo-in-editor': IpcEvents.UNDO_IN_EDITOR,
@@ -51,30 +54,62 @@ const channelMapping: Record<FiddleEvent, IpcEvents> = {
   'version-state-changed': IpcEvents.VERSION_STATE_CHANGED,
 } as const;
 
+function addEventListener(
+  type: FiddleEvent,
+  listener: (...args: any[]) => void,
+  options?: { signal: AbortSignal },
+) {
+  const channel = channelMapping[type];
+  if (!channel) return;
+  const ipcListener = (_event: IpcRendererEvent, ...args: any[]) => {
+    listener(...args);
+  };
+  ipcRenderer.on(channel, ipcListener);
+  if (options?.signal) {
+    options.signal.addEventListener('abort', () => {
+      ipcRenderer.off(channel, ipcListener);
+    });
+  }
+}
+
+function removeAllListeners(type: FiddleEvent) {
+  const channel = channelMapping[type];
+  if (channel) {
+    ipcRenderer.removeAllListeners(channel);
+  }
+}
+
+const ISOLATED_ACTIONS_PROTOCOL = 'isolated-actions:';
+
+// This preload runs in every frame in the default session, so
+// expose a different API surface depending on the protocol.
 async function preload() {
-  await setupFiddleGlobal();
+  if (location.protocol === ISOLATED_ACTIONS_PROTOCOL) {
+    setupIsolatedActionsGlobal();
+  } else {
+    await setupFiddleGlobal();
+  }
+}
+
+function setupIsolatedActionsGlobal() {
+  contextBridge.exposeInMainWorld('IsolatedActionsElectronFiddle', {
+    startFiddle() {
+      ipcRenderer.invoke(IpcEvents.START_FIDDLE);
+    },
+    stopFiddle() {
+      ipcRenderer.send(IpcEvents.STOP_FIDDLE);
+    },
+    readThemeFile(name: string) {
+      return ipcRenderer.invoke(IpcEvents.READ_THEME_FILE, name);
+    },
+    addEventListener,
+    removeAllListeners,
+  });
 }
 
 export async function setupFiddleGlobal() {
   contextBridge.exposeInMainWorld('ElectronFiddle', {
-    addEventListener(
-      type: FiddleEvent,
-      listener: (...args: any[]) => void,
-      options?: { signal: AbortSignal },
-    ) {
-      const channel = channelMapping[type];
-      if (channel) {
-        const ipcListener = (_event: IpcRendererEvent, ...args: any[]) => {
-          listener(...args);
-        };
-        ipcRenderer.on(channel, ipcListener);
-        if (options?.signal) {
-          options.signal.addEventListener('abort', () => {
-            ipcRenderer.off(channel, ipcListener);
-          });
-        }
-      }
-    },
+    addEventListener,
     addModules(
       { dir, packageManager, useSocketFirewall }: PMOperationOptions,
       ...names: Array<string>
@@ -86,20 +121,17 @@ export async function setupFiddleGlobal() {
       );
     },
     arch: process.arch,
+    autobisectFiddle(versions: Array<RunnableVersion>): void {
+      ipcRenderer.send(IpcEvents.AUTOBISECT_FIDDLE, versions);
+    },
     blockAccelerators(acceleratorsToBlock: BlockableAccelerator[]) {
       ipcRenderer.send(IpcEvents.BLOCK_ACCELERATORS, acceleratorsToBlock);
-    },
-    cleanupDirectory(dir: string) {
-      return ipcRenderer.invoke(IpcEvents.CLEANUP_DIRECTORY, dir);
     },
     confirmQuit() {
       ipcRenderer.send(IpcEvents.CONFIRM_QUIT);
     },
     createThemeFile(newTheme: FiddleTheme, name?: string) {
       return ipcRenderer.invoke(IpcEvents.CREATE_THEME_FILE, newTheme, name);
-    },
-    async deleteUserData(name: string) {
-      await ipcRenderer.invoke(IpcEvents.DELETE_USER_DATA, name);
     },
     async downloadVersion(
       version: string,
@@ -110,6 +142,23 @@ export async function setupFiddleGlobal() {
     fetchVersions() {
       return ipcRenderer.invoke(IpcEvents.FETCH_VERSIONS);
     },
+    fetchExample: (ref: string, path: string) =>
+      ipcRenderer.invoke(IpcEvents.GITHUB_FETCH_EXAMPLE, { ref, path }),
+    gistCreate: (params: GistCreateParams) =>
+      ipcRenderer.invoke(IpcEvents.GITHUB_GIST_CREATE, params),
+    gistDelete: (id: string) =>
+      ipcRenderer.invoke(IpcEvents.GITHUB_GIST_DELETE, id),
+    gistListCommits: (gistId: string) =>
+      ipcRenderer.invoke(IpcEvents.GITHUB_GIST_LIST_COMMITS, gistId),
+    gistLoad: (params: GistLoadParams) =>
+      ipcRenderer.invoke(IpcEvents.GITHUB_GIST_LOAD, params),
+    gistUpdate: (params: GistUpdateParams) =>
+      ipcRenderer.invoke(IpcEvents.GITHUB_GIST_UPDATE, params),
+    gitHubCheckAuth: () =>
+      ipcRenderer.invoke(IpcEvents.GITHUB_TOKEN_CHECK_AUTH),
+    gitHubSignIn: (token: string) =>
+      ipcRenderer.invoke(IpcEvents.GITHUB_TOKEN_SIGN_IN, token),
+    gitHubSignOut: () => ipcRenderer.invoke(IpcEvents.GITHUB_TOKEN_SIGN_OUT),
     getElectronTypes(ver: RunnableVersion) {
       return ipcRenderer.invoke(IpcEvents.GET_ELECTRON_TYPES, ver);
     },
@@ -118,6 +167,18 @@ export async function setupFiddleGlobal() {
     },
     getLocalVersionState(ver: RunnableVersion) {
       return ipcRenderer.sendSync(IpcEvents.GET_LOCAL_VERSION_STATE, ver);
+    },
+    getLocalVersions(): Array<Version> {
+      return ipcRenderer.sendSync(IpcEvents.GET_LOCAL_VERSIONS);
+    },
+    addLocalVersion(token: string, name: string): Array<Version> {
+      return ipcRenderer.sendSync(IpcEvents.ADD_LOCAL_VERSION, token, name);
+    },
+    cancelPendingLocalVersion(token: string): void {
+      ipcRenderer.sendSync(IpcEvents.CANCEL_PENDING_LOCAL_VERSION, token);
+    },
+    removeLocalVersion(version: string): Array<Version> {
+      return ipcRenderer.sendSync(IpcEvents.REMOVE_LOCAL_VERSION, version);
     },
     getOldestSupportedMajor() {
       return ipcRenderer.sendSync(IpcEvents.GET_OLDEST_SUPPORTED_MAJOR);
@@ -178,6 +239,26 @@ export async function setupFiddleGlobal() {
         },
       );
     },
+    onGetStartFiddleOptions(callback: () => Promise<StartFiddleOptions>) {
+      ipcRenderer.removeAllListeners(IpcEvents.GET_START_FIDDLE_OPTIONS);
+      ipcRenderer.on(IpcEvents.GET_START_FIDDLE_OPTIONS, async (e) => {
+        try {
+          const options = await callback();
+          e.ports[0].postMessage({ result: options });
+        } catch (error) {
+          const message =
+            error instanceof Error ? error.message : String(error);
+          e.ports[0].postMessage({ error: message });
+        }
+      });
+    },
+    onSetVersion(callback: (version: string) => Promise<void>) {
+      ipcRenderer.removeAllListeners(IpcEvents.SET_VERSION);
+      ipcRenderer.on(IpcEvents.SET_VERSION, async (e, version: string) => {
+        await callback(version);
+        e.ports[0].postMessage(undefined);
+      });
+    },
     async openThemeFolder() {
       await ipcRenderer.invoke(IpcEvents.OPEN_THEME_FOLDER);
     },
@@ -188,24 +269,14 @@ export async function setupFiddleGlobal() {
         command,
       );
     },
-    pathExists: (path: string) =>
-      ipcRenderer.sendSync(IpcEvents.PATH_EXISTS, path),
     platform: process.platform,
-    pushOutputEntry(entry: OutputEntry) {
-      ipcRenderer.send(IpcEvents.OUTPUT_ENTRY, entry);
-    },
     reloadWindows() {
       ipcRenderer.send(IpcEvents.RELOAD_WINDOW);
     },
     readThemeFile(name?: string) {
       return ipcRenderer.invoke(IpcEvents.READ_THEME_FILE, name);
     },
-    removeAllListeners(type: FiddleEvent) {
-      const channel = channelMapping[type];
-      if (channel) {
-        ipcRenderer.removeAllListeners(channel);
-      }
-    },
+    removeAllListeners,
     async removeVersion(version: string) {
       return ipcRenderer.invoke(IpcEvents.REMOVE_VERSION, version);
     },
@@ -232,14 +303,8 @@ export async function setupFiddleGlobal() {
     showWindow() {
       ipcRenderer.send(IpcEvents.SHOW_WINDOW);
     },
-    async startFiddle(params: StartFiddleParams) {
-      await ipcRenderer.invoke(IpcEvents.START_FIDDLE, params);
-    },
     stopFiddle() {
       ipcRenderer.send(IpcEvents.STOP_FIDDLE);
-    },
-    taskDone(result: RunResult) {
-      ipcRenderer.send(IpcEvents.TASK_DONE, result);
     },
     themePath: await ipcRenderer.sendSync(IpcEvents.GET_THEME_PATH),
     async uncacheTypes(ver: RunnableVersion) {

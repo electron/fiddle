@@ -13,13 +13,19 @@ import {
 } from 'electron';
 
 import { setupAboutPanel } from './about-panel';
+import { setupAutobisect } from './autobisect';
 import { setupContent } from './content';
 import { setupDevTools } from './devtools';
 import { setupDialogs } from './dialogs';
 import { setupTypes } from './electron-types';
 import { setupFiddleCore } from './fiddle-core';
 import { onFirstRunMaybe } from './first-run';
+import { setupGitHub } from './github';
 import { ipcMainManager } from './ipc';
+import {
+  registerIsolatedActionsScheme,
+  setupIsolatedActionsProtocol,
+} from './isolated-actions';
 import { setupNpm } from './npm';
 import { listenForProtocolHandler, setupProtocolHandler } from './protocol';
 import { shouldQuit } from './squirrel';
@@ -49,6 +55,7 @@ export async function onReady() {
   setupMenu();
   setupMenuHandler();
   setupProtocolHandler();
+  setupIsolatedActionsProtocol();
   setupFileListeners();
   setupUpdates();
   setupDialogs();
@@ -60,11 +67,13 @@ export async function onReady() {
   setupThemes();
   setupIsDevMode();
   setupNpm();
+  setupGitHub();
   const knownVersions = await setupVersions();
   setupGetProjectName();
   setupGetUsername();
   setupTypes(knownVersions);
   await setupFiddleCore(knownVersions);
+  setupAutobisect();
 
   // Do this after setting everything up to ensure that
   // any IPC listeners are set up before they're used
@@ -205,6 +214,10 @@ export function main() {
 
   // Set the app's name
   app.name = 'Electron Fiddle';
+
+  // Register the isolated-actions:// scheme as privileged. Must happen
+  // before `app.whenReady()` resolves.
+  registerIsolatedActionsScheme();
 
   // Ensure that there's only ever one Fiddle running
   listenForProtocolHandler();

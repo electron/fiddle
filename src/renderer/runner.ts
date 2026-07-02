@@ -1,9 +1,7 @@
 import parseEnvString from 'parse-env-string';
 import semver from 'semver';
 
-import { Bisector } from './bisect';
 import { AppState } from './state';
-import { maybePlural } from './utils/plural-maybe';
 import {
   FileTransformOperation,
   InstallState,
@@ -11,7 +9,7 @@ import {
   PMOperationOptions,
   PackageJsonOptions,
   RunResult,
-  RunnableVersion,
+  StartFiddleOptions,
   VersionSource,
 } from '../interfaces';
 
@@ -20,216 +18,34 @@ export enum ForgeCommands {
   MAKE = 'make',
 }
 
-interface RunFiddleParams {
-  localPath: string | undefined;
-  isValidBuild: boolean; // If the localPath is a valid Electron build
-  version: string; // The user selected version
-  dir: string;
-}
-
-const resultString: Record<RunResult, string> = Object.freeze({
-  [RunResult.FAILURE]: '❌ failed',
-  [RunResult.INVALID]: '❓ invalid',
-  [RunResult.SUCCESS]: '✅ passed',
-});
-
 export class Runner {
   constructor(private readonly appState: AppState) {
-    this.run = this.run.bind(this);
-    this.stop = this.stop.bind(this);
+    this.runFiddle = this.runFiddle.bind(this);
+    this.getStartFiddleOptions = this.getStartFiddleOptions.bind(this);
 
     window.ElectronFiddle.removeAllListeners('run-fiddle');
     window.ElectronFiddle.removeAllListeners('package-fiddle');
     window.ElectronFiddle.removeAllListeners('make-fiddle');
+    window.ElectronFiddle.removeAllListeners('is-auto-bisecting');
 
-    window.ElectronFiddle.addEventListener('run-fiddle', this.run);
+    window.ElectronFiddle.addEventListener('run-fiddle', this.runFiddle);
     window.ElectronFiddle.addEventListener('package-fiddle', () => {
       this.performForgeOperation(ForgeCommands.PACKAGE);
     });
     window.ElectronFiddle.addEventListener('make-fiddle', () => {
       this.performForgeOperation(ForgeCommands.MAKE);
     });
-  }
+    window.ElectronFiddle.addEventListener(
+      'is-auto-bisecting',
+      (isAutoBisecting: boolean) => {
+        this.appState.isAutoBisecting = isAutoBisecting;
+      },
+    );
 
-  /**
-   * Bisect the current fiddle across the specified versions.
-   *
-   * @param versions - versions to bisect
-   */
-  public autobisect(versions: Array<RunnableVersion>): Promise<RunResult> {
-    const { appState } = this;
-    appState.isAutoBisecting = true;
-    const done = () => (appState.isAutoBisecting = false);
-    return this.autobisectImpl(versions).finally(done);
-  }
-
-  /**
-   * Bisect the current fiddle across the specified versions.
-   *
-   * @param versions - versions to bisect
-   */
-  public async autobisectImpl(
-    versions: Array<RunnableVersion>,
-  ): Promise<RunResult> {
-    const prefix = `Runner: autobisect`;
-    const { appState } = this;
-
-    // precondition: can't bisect unless we have >= 2 versions
-    if (versions.length < 2) {
-      appState.pushOutput(`${prefix} needs at least two Electron versions`);
-      return RunResult.INVALID;
-    }
-
-    const results: Map<string, RunResult> = new Map();
-
-    const runVersion = async (version: string) => {
-      let result = results.get(version);
-      if (result === undefined) {
-        const pre = `${prefix} Electron ${version} -`;
-        appState.pushOutput(`${pre} setting version`);
-        await appState.setVersion(version);
-        appState.pushOutput(`${pre} starting test`);
-        result = await this.run();
-        results.set(version, result);
-        appState.pushOutput(`${pre} finished test ${resultString[result]}`);
-      }
-      return result;
-    };
-
-    const bisector = new Bisector(versions);
-    let targetVersion = bisector.getCurrentVersion();
-    let next;
-    while (true) {
-      const { version } = targetVersion;
-
-      const result = await runVersion(version);
-      if (result === RunResult.INVALID) {
-        return result;
-      }
-
-      next = bisector.continue(result === RunResult.SUCCESS);
-      if (Array.isArray(next)) {
-        break;
-      }
-
-      targetVersion = next;
-    }
-
-    const [good, bad] = next.map((v) => v.version);
-    const resultGood = await runVersion(good);
-    const resultBad = await runVersion(bad);
-    if (resultGood === resultBad) {
-      appState.pushOutput(
-        `${prefix} 'good' ${good} and 'bad' ${bad} both returned ${resultString[resultGood]}`,
-      );
-      return RunResult.INVALID;
-    }
-
-    const msgs = [
-      `${prefix} complete`,
-      `${prefix} ${resultString[RunResult.SUCCESS]} ${good}`,
-      `${prefix} ${resultString[RunResult.FAILURE]} ${bad}`,
-      `${prefix} Commits between versions:`,
-      `https://github.com/electron/electron/compare/v${good}...v${bad}`,
-    ];
-    msgs.forEach((msg) => appState.pushOutput(msg));
-    return RunResult.SUCCESS;
-  }
-
-  /**
-   * Actually run the fiddle.
-   */
-  public async run(): Promise<RunResult> {
-    const options = { includeDependencies: false, includeElectron: false };
-
-    const { appState } = this;
-    const currentRunnable = appState.currentElectronVersion;
-    const { version, state, localPath } = currentRunnable;
-    const isValidBuild =
-      // Destructure currentRunnable so it's not a Proxy object, which can't be used
-      window.ElectronFiddle.getLocalVersionState({ ...currentRunnable }) ===
-      InstallState.installed;
-
-    // If the current active version is unavailable when we try to run
-    // the fiddle, show an error and fall back.
-    const { err, ver } = appState.isVersionUsable(version);
-    if (!ver) {
-      console.warn(`Running fiddle with version ('${version}') failed: ${err}`);
-      appState.showErrorDialog(err!);
-      const fallback = appState.findUsableVersion();
-      if (fallback) await appState.setVersion(fallback.version);
-      return RunResult.INVALID;
-    }
-
-    if (
-      ver.source !== VersionSource.local &&
-      semver.lt(ver.version, '28.0.0') &&
-      !ver.version.startsWith('28.0.0-nightly')
-    ) {
-      const entryPoint = appState.editorMosaic.mainEntryPointFile();
-
-      if (entryPoint === MAIN_MJS) {
-        appState.showErrorDialog(
-          'ESM main entry points are only supported starting in Electron 28',
-        );
-        return RunResult.INVALID;
-      }
-    }
-
-    if (appState.isClearingConsoleOnRun) {
-      appState.clearConsole();
-    }
-    appState.isConsoleShowing = true;
-
-    const dir = await this.saveToTemp(options);
-    const packageManager = appState.packageManager;
-    const useSocketFirewall = appState.isUsingSocketFirewall;
-
-    if (!dir) return RunResult.INVALID;
-
-    try {
-      await this.installModules({ dir, packageManager, useSocketFirewall });
-    } catch (error: any) {
-      console.error('Runner: Could not install modules', error);
-
-      appState.pushError('Could not install modules', error.message);
-      appState.isInstallingModules = false;
-
-      await window.ElectronFiddle.cleanupDirectory(dir);
-      return RunResult.INVALID;
-    }
-
-    const isReady =
-      state === InstallState.installed ||
-      state === InstallState.downloaded ||
-      isValidBuild;
-
-    if (!isReady) {
-      console.warn(`Runner: Binary ${version} not ready`);
-
-      let message = `Could not start fiddle: `;
-      message += `Electron ${version} not downloaded yet. `;
-      message += `Please wait for it to finish downloading `;
-      message += `before running the fiddle.`;
-
-      appState.pushOutput(message, { isNotPre: true });
-      await window.ElectronFiddle.cleanupDirectory(dir);
-      return RunResult.INVALID;
-    }
-
-    return this.runFiddle({
-      localPath,
-      isValidBuild,
-      dir,
-      version,
-    });
-  }
-
-  /**
-   * Stop a currently running Electron fiddle.
-   */
-  public stop(): void {
-    window.ElectronFiddle.stopFiddle();
+    window.ElectronFiddle.onGetStartFiddleOptions(this.getStartFiddleOptions);
+    window.ElectronFiddle.onSetVersion((version: string) =>
+      this.appState.setVersion(version),
+    );
   }
 
   /**
@@ -291,53 +107,6 @@ export class Runner {
     return true;
   }
 
-  /**
-   * Installs the specified modules
-   */
-  public async installModules(pmOptions: PMOperationOptions): Promise<void> {
-    const modules = Array.from(this.appState.modules.entries()).map(
-      ([pkg, version]) => `${pkg}@${version}`,
-    );
-    const { pushOutput } = this.appState;
-
-    if (modules && modules.length > 0) {
-      this.appState.isInstallingModules = true;
-      const packageManager = pmOptions.packageManager;
-      const pmInstalled =
-        await window.ElectronFiddle.getIsPackageManagerInstalled(
-          packageManager,
-        );
-      if (!pmInstalled) {
-        let message = `The ${maybePlural(`module`, modules)} ${modules.join(
-          ', ',
-        )} need to be installed, `;
-        message += `but we could not find ${packageManager}. Fiddle requires Node.js and npm `;
-        message += `to support the installation of modules not included in `;
-        message += `Electron. Please visit https://nodejs.org to install Node.js `;
-        message += `and npm, or https://classic.yarnpkg.com/lang/en/ to install Yarn`;
-
-        pushOutput(message, { isNotPre: true });
-        this.appState.isInstallingModules = false;
-        return;
-      }
-
-      pushOutput(
-        `Installing node modules using ${
-          pmOptions.packageManager
-        }: ${modules.join(', ')}...`,
-        { isNotPre: true },
-      );
-
-      const result = await window.ElectronFiddle.addModules(
-        pmOptions,
-        ...modules,
-      );
-      pushOutput(result);
-
-      this.appState.isInstallingModules = false;
-    }
-  }
-
   public buildChildEnvVars(): { [x: string]: string | undefined } {
     const { environmentVariables } = this.appState;
 
@@ -364,71 +133,118 @@ export class Runner {
   }
 
   /**
-   * Executes the fiddle with either local electron build
-   * or the user selected electron version
+   * Update the UI for running the fiddle.
    */
-  private async runFiddle(params: RunFiddleParams): Promise<RunResult> {
-    const { version, dir } = params;
-    const { pushOutput, flushOutput, executionFlags } = this.appState;
-    const env = this.buildChildEnvVars();
+  private async runFiddle(): Promise<void> {
+    const { clearConsole, isClearingConsoleOnRun, pushOutput, flushOutput } =
+      this.appState;
+    const currentRunnable = this.appState.currentElectronVersion;
+    const { version, state } = currentRunnable;
 
-    // Add user-specified cli flags if any have been set.
-    const options = [dir, '--inspect'].concat(executionFlags);
+    if (isClearingConsoleOnRun) {
+      clearConsole();
+    }
+    this.appState.isConsoleShowing = true;
 
-    const cleanup = async () => {
+    const isValidBuild =
+      // Destructure currentRunnable so it's not a Proxy object, which can't be used
+      window.ElectronFiddle.getLocalVersionState({ ...currentRunnable }) ===
+      InstallState.installed;
+
+    const isReady =
+      state === InstallState.installed ||
+      state === InstallState.downloaded ||
+      isValidBuild;
+
+    // TODO(dsanders11) - Should this be moved to main process?
+    if (!isReady) {
+      console.warn(`Runner: Binary ${version} not ready`);
+
+      let message = `Could not start fiddle: `;
+      message += `Electron ${version} not downloaded yet. `;
+      message += `Please wait for it to finish downloading `;
+      message += `before running the fiddle.`;
+
+      pushOutput(message, { isNotPre: true });
+      return;
+    }
+
+    const cleanup = () => {
       flushOutput();
-
       this.appState.isRunning = false;
-
-      // Clean older folders
-      await window.ElectronFiddle.cleanupDirectory(dir);
-      await this.deleteUserData();
     };
 
-    return new Promise(async (resolve, _reject) => {
-      try {
-        await window.ElectronFiddle.startFiddle({
-          ...params,
-          enableElectronLogging: this.appState.isEnablingElectronLogging,
-          options,
-          env,
-        });
-      } catch (e: any) {
-        pushOutput(`Failed to spawn Fiddle: ${e.message}`);
-        await cleanup();
-        return resolve(RunResult.FAILURE);
+    window.ElectronFiddle.removeAllListeners('fiddle-runner-output');
+    window.ElectronFiddle.removeAllListeners('fiddle-modules-installed');
+    window.ElectronFiddle.removeAllListeners('fiddle-stopped');
+
+    window.ElectronFiddle.addEventListener(
+      'fiddle-runner-output',
+      (output: string, options?: { isNotPre?: boolean }) => {
+        pushOutput(output, { ...options, bypassBuffer: false });
+      },
+    );
+
+    window.ElectronFiddle.addEventListener('fiddle-stopped', (code, signal) => {
+      cleanup();
+
+      if (typeof code !== 'number' && typeof signal === 'string') {
+        pushOutput(`Electron exited with signal ${signal}.`);
+      } else if (typeof code === 'number') {
+        pushOutput(`Electron exited with code ${code}.`);
+      } else {
+        pushOutput('Electron exited.');
       }
-
-      this.appState.isRunning = true;
-
-      const name = await this.appState.getName();
-      pushOutput(`Electron v${version} started as "${name}"`);
-
-      window.ElectronFiddle.removeAllListeners('fiddle-runner-output');
-      window.ElectronFiddle.removeAllListeners('fiddle-stopped');
-
-      window.ElectronFiddle.addEventListener(
-        'fiddle-runner-output',
-        (output: string) => {
-          pushOutput(output, { bypassBuffer: false });
-        },
-      );
-
-      window.ElectronFiddle.addEventListener(
-        'fiddle-stopped',
-        async (code, signal) => {
-          await cleanup();
-
-          if (typeof code !== 'number') {
-            pushOutput(`Electron exited with signal ${signal}.`);
-            resolve(RunResult.FAILURE);
-          } else {
-            pushOutput(`Electron exited with code ${code}.`);
-            resolve(code === 0 ? RunResult.SUCCESS : RunResult.FAILURE);
-          }
-        },
-      );
     });
+
+    this.appState.isRunning = true;
+  }
+
+  /**
+   * Build the options object the main process needs to run the current
+   * fiddle. Sent in response to a request from main.
+   */
+  public async getStartFiddleOptions(): Promise<StartFiddleOptions> {
+    const { appState } = this;
+    const currentRunnable = appState.currentElectronVersion;
+    const { version } = currentRunnable;
+
+    // If the current active version is unavailable when we try to run
+    // the fiddle, show an error and fall back.
+    const { err, ver } = appState.isVersionUsable(version);
+    if (!ver) {
+      console.warn(`Running fiddle with version ('${version}') failed: ${err}`);
+      appState.showErrorDialog(err!);
+      const fallback = appState.findUsableVersion();
+      if (fallback) await appState.setVersion(fallback.version);
+      throw new Error(RunResult.INVALID);
+    }
+
+    if (
+      ver.source !== VersionSource.local &&
+      semver.lt(ver.version, '28.0.0') &&
+      !ver.version.startsWith('28.0.0-nightly')
+    ) {
+      const entryPoint = appState.editorMosaic.mainEntryPointFile();
+
+      if (entryPoint === MAIN_MJS) {
+        appState.showErrorDialog(
+          'ESM main entry points are only supported starting in Electron 28',
+        );
+        throw new Error(RunResult.INVALID);
+      }
+    }
+
+    return {
+      version: appState.currentElectronVersion.version,
+      enableElectronLogging: appState.isEnablingElectronLogging,
+      executionFlags: [...appState.executionFlags],
+      env: this.buildChildEnvVars(),
+      modules: Array.from(appState.modules.entries()),
+      packageManager: appState.packageManager,
+      useSocketFirewall: appState.isUsingSocketFirewall,
+      isKeepingUserDataDirs: appState.isKeepingUserDataDirs,
+    };
   }
 
   /**
@@ -468,22 +284,5 @@ export class Runner {
     }
 
     return false;
-  }
-
-  /**
-   * Deletes the user data dir after a run.
-   */
-  private async deleteUserData() {
-    if (this.appState.isKeepingUserDataDirs) {
-      console.log(
-        `Cleanup: Not deleting data dir due to isKeepingUserDataDirs setting`,
-      );
-      return;
-    }
-
-    const name = await this.appState.getName();
-
-    console.log(`Cleanup: Deleting data dir for ${name}`);
-    await window.ElectronFiddle.deleteUserData(name);
   }
 }

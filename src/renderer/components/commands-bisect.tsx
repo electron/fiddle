@@ -20,7 +20,7 @@ export const BisectHandler = observer(
     }
 
     private continueBisect(isGood: boolean) {
-      window.app.runner.stop();
+      window.ElectronFiddle.stopFiddle();
 
       const { appState } = this.props;
       const response = appState.Bisector!.continue(isGood);
@@ -52,7 +52,7 @@ export const BisectHandler = observer(
     }
 
     private skipBisect() {
-      window.app.runner.stop();
+      window.ElectronFiddle.stopFiddle();
       const { appState } = this.props;
       const response = appState.Bisector!.skip();
 

@@ -1,6 +1,7 @@
 import * as path from 'node:path';
 
 import { FuseV1Options, FuseVersion } from '@electron/fuses';
+import { MakerMSIX } from '@electron-forge/maker-msix';
 import { FusesPlugin } from '@electron-forge/plugin-fuses';
 import type { ForgeConfig } from '@electron-forge/shared-types';
 
@@ -36,7 +37,7 @@ const config: ForgeConfig = {
       name: '@electron-forge/plugin-webpack',
       config: {
         devContentSecurityPolicy:
-          "default-src 'none'; img-src 'self' https: data:; media-src 'none'; child-src 'self'; object-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; connect-src 'self' https:; font-src 'self' https:;",
+          "default-src 'none'; img-src 'self' https: data:; media-src 'none'; child-src 'self' isolated-actions:; object-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; connect-src 'self' https:; font-src 'self' https:;",
         devServer: {
           // Disallow browser from opening/reloading with HMR in development mode.
           open: false,
@@ -55,6 +56,11 @@ const config: ForgeConfig = {
                 js: path.join(root, 'src/preload/preload.ts'),
               },
             },
+            {
+              html: path.join(root, './static/isolated-run-button.html'),
+              js: path.join(root, './src/isolated-run-button.ts'),
+              name: 'isolated_run_button',
+            },
           ],
         },
       },
@@ -65,6 +71,8 @@ const config: ForgeConfig = {
       [FuseV1Options.EnableNodeOptionsEnvironmentVariable]: false,
       [FuseV1Options.EnableNodeCliInspectArguments]: false,
       [FuseV1Options.OnlyLoadAppFromAsar]: true,
+      [FuseV1Options.EnableCookieEncryption]: true,
+      [FuseV1Options.EnableEmbeddedAsarIntegrityValidation]: true,
     }),
   ],
   packagerConfig: {
@@ -134,6 +142,24 @@ const config: ForgeConfig = {
           : undefined,
       }),
     },
+    new MakerMSIX({
+      manifestVariables: {
+        publisher:
+          'CN=OpenJS Foundation, OU=Electron, O=OpenJS Foundation, L=San Francisco, S=California, C=US, SERIALNUMBER=5579593, OID.2.5.4.15=Private Organization, OID.1.3.6.1.4.1.311.60.2.1.2=Delaware, OID.1.3.6.1.4.1.311.60.2.1.3=US',
+        publisherDisplayName: 'OpenJS Foundation',
+        packageIdentity: 'ElectronCommunity.ElectronFiddle',
+        appExecutable: 'electron-fiddle.exe',
+        packageDisplayName: 'Electron Fiddle',
+        appDisplayName: 'Electron Fiddle',
+        packageDescription: packageJson.description,
+      },
+      windowsSignOptions: process.env.CERT_FINGERPRINT
+        ? {
+            signWithParams: `/sha1 ${process.env.CERT_FINGERPRINT}`,
+            hashes: ['sha256'] as any,
+          }
+        : undefined,
+    }),
     {
       name: '@electron-forge/maker-zip',
       platforms: ['darwin'],

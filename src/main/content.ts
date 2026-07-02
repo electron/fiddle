@@ -6,6 +6,7 @@ import fs from 'fs-extra';
 import { STATIC_DIR } from './constants';
 import { ipcMainManager } from './ipc';
 import { readFiddle } from './utils/read-fiddle';
+import { tmpName } from './utils/tmp';
 import { isReleasedMajor } from './versions';
 import { EditorValues } from '../interfaces';
 import { IpcEvents } from '../ipc-events';
@@ -42,8 +43,9 @@ async function prepareTemplate(branch: string): Promise<string> {
 
       // save it to a tempfile
       const buffer = Buffer.from(await response.arrayBuffer());
-      const { tmpNameSync } = await import('tmp');
-      const tempfile = tmpNameSync({ template: 'electron-fiddle-XXXXXX.zip' });
+      const tempfile = await tmpName({
+        template: 'electron-fiddle-XXXXXX.zip',
+      });
       console.log(`Content: ${branch} saving template to "${tempfile}"`);
       await fs.writeFile(tempfile, buffer, { encoding: 'utf8' });
 

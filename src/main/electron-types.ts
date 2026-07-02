@@ -1,14 +1,15 @@
-import { readdir } from 'fs/promises';
+import { readdir } from 'node:fs/promises';
 import * as path from 'node:path';
+import { once } from 'node:stream';
 
 import { ElectronVersions } from '@electron/fiddle-core';
 import { BrowserWindow, IpcMainInvokeEvent, app } from 'electron';
 import fs from 'fs-extra';
 import watch from 'node-watch';
-import packageJson from 'package-json';
 import semver from 'semver';
 
 import { ipcMainManager } from './ipc';
+import { getLatestMajorVersion } from './utils/npm-version';
 import { ELECTRON_DTS } from '../constants';
 import { NodeTypes, RunnableVersion, VersionSource } from '../interfaces';
 import { IpcEvents } from '../ipc-events';
@@ -65,7 +66,6 @@ export class ElectronTypes {
     // If it's a local development version, pull Electron types from out directory.
     if (dir) {
       const file = path.join(dir, 'gen/electron/tsc/typings', ELECTRON_DTS);
-      content = this.getTypesFromFile(file);
       try {
         this.unwatch(window);
         this.localPaths.set(window, dir);
@@ -75,12 +75,14 @@ export class ElectronTypes {
           const watcher = watch(file, () =>
             this.notifyElectronTypesChanged(dir, file, version),
           );
+          await once(watcher, 'ready');
           this.watchers.set(dir, watcher);
         }
         window.once('close', () => this.unwatch(window));
       } catch (err) {
         console.debug(`Unable to watch "${file}" for changes: ${err}`);
       }
+      content = this.getTypesFromFile(file);
     }
 
     // If it's a published version, pull from cached file.
@@ -197,12 +199,8 @@ export class ElectronTypes {
     );
 
     if (response.status === 404) {
-      const types = await packageJson('@types/node', {
-        version: semver.major(version).toString(),
-        fullMetadata: false,
-      });
-
-      downloadVersion = types.version as string;
+      const major = semver.major(version);
+      downloadVersion = await getLatestMajorVersion('@types/node', major);
       console.log(
         `falling back to the latest applicable Node.js version type: ${downloadVersion}`,
       );

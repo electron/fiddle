@@ -1,10 +1,11 @@
 import * as path from 'node:path';
 
-import { IpcMainInvokeEvent, app, shell } from 'electron';
+import { BrowserWindow, IpcMainInvokeEvent, app, shell } from 'electron';
 import fs from 'fs-extra';
-import * as namor from 'namor';
+import namor from 'namor';
 
 import { ipcMainManager } from './ipc';
+import { getIsolatedRunButtonFrame } from './isolated-actions';
 import { IpcEvents } from '../ipc-events';
 import {
   FiddleTheme,
@@ -23,6 +24,12 @@ export async function readThemeFile(
   name: string,
 ): Promise<LoadedFiddleTheme | null> {
   const file = name.endsWith('.json') ? name : `${name}.json`;
+
+  if (path.basename(file) !== file) {
+    console.warn(`readThemeFile: rejected path outside themes dir: ${file}`);
+    return null;
+  }
+
   const themePath = path.join(THEMES_PATH, file);
 
   try {
@@ -50,10 +57,16 @@ export async function createThemeFile(
     Object.entries(theme).filter(([key]) => !['file', 'css'].includes(key)),
   ) as FiddleTheme;
 
-  name = name || namor.generate({ words: 2, numbers: 0 });
+  name = name || namor.generate({ words: 2 });
 
   const file = name.endsWith('.json') ? name : `${name}.json`;
   const themePath = path.join(THEMES_PATH, file);
+
+  if (path.basename(file) !== file) {
+    throw new Error(
+      `createThemeFile: rejected path outside themes dir: ${name}`,
+    );
+  }
 
   await fs.outputJSON(
     themePath,
@@ -113,7 +126,19 @@ export async function openThemeFolder() {
 export function setupThemes() {
   ipcMainManager.handle(
     IpcEvents.READ_THEME_FILE,
-    (_: IpcMainInvokeEvent, name: string) => readThemeFile(name),
+    async (_: IpcMainInvokeEvent, name: string) => {
+      const theme = await readThemeFile(name);
+      // Hand the loaded theme to every isolated run-button OOPIF
+      // so it can cache it for later — this keeps the renderer off
+      // the CSS path while still letting the iframe apply by name.
+      if (theme) {
+        for (const window of BrowserWindow.getAllWindows()) {
+          const frame = getIsolatedRunButtonFrame(window.webContents);
+          if (frame) frame.send(IpcEvents.THEME_LOADED, theme);
+        }
+      }
+      return theme;
+    },
   );
   ipcMainManager.handle(
     IpcEvents.GET_AVAILABLE_THEMES,

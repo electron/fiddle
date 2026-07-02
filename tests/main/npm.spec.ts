@@ -1,3 +1,7 @@
+import * as fs from 'node:fs';
+import * as os from 'node:os';
+import * as path from 'node:path';
+
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import {
@@ -9,6 +13,8 @@ import {
 import { exec, execFile } from '../../src/main/utils/exec';
 import { overridePlatform, resetPlatform } from '../utils';
 vi.mock('../../src/main/utils/exec');
+
+const tmpModuleDir = path.join(fs.realpathSync(os.tmpdir()), 'my-directory');
 
 describe('npm', () => {
   describe('getIsPackageManagerInstalled()', () => {
@@ -126,15 +132,21 @@ describe('npm', () => {
   });
 
   describe('addModules()', () => {
+    it('rejects dirs outside the temp directory', async () => {
+      await expect(
+        addModules({ dir: '/not/a/tmp/path', packageManager: 'npm' }),
+      ).rejects.toThrow('addModules: dir must be inside the temp directory');
+    });
+
     describe('npm', () => {
       it('attempts to install a single module', async () => {
         addModules(
-          { dir: '/my/directory', packageManager: 'npm' },
+          { dir: tmpModuleDir, packageManager: 'npm' },
           'say',
           'thing',
         );
 
-        expect(execFile).toHaveBeenCalledWith('/my/directory', 'npm', [
+        expect(execFile).toHaveBeenCalledWith(tmpModuleDir, 'npm', [
           'install',
           '-S',
           'say',
@@ -143,9 +155,9 @@ describe('npm', () => {
       });
 
       it('attempts to install all modules', async () => {
-        addModules({ dir: '/my/directory', packageManager: 'npm' });
+        addModules({ dir: tmpModuleDir, packageManager: 'npm' });
 
-        expect(execFile).toHaveBeenCalledWith('/my/directory', 'npm', [
+        expect(execFile).toHaveBeenCalledWith(tmpModuleDir, 'npm', [
           'install',
           '-S',
         ]);
@@ -155,12 +167,12 @@ describe('npm', () => {
     describe('yarn', () => {
       it('attempts to install a single module', async () => {
         addModules(
-          { dir: '/my/directory', packageManager: 'yarn' },
+          { dir: tmpModuleDir, packageManager: 'yarn' },
           'say',
           'thing',
         );
 
-        expect(execFile).toHaveBeenCalledWith('/my/directory', 'yarn', [
+        expect(execFile).toHaveBeenCalledWith(tmpModuleDir, 'yarn', [
           'add',
           'say',
           'thing',
@@ -168,9 +180,9 @@ describe('npm', () => {
       });
 
       it('attempts to installs all modules', async () => {
-        addModules({ dir: '/my/directory', packageManager: 'yarn' });
+        addModules({ dir: tmpModuleDir, packageManager: 'yarn' });
 
-        expect(execFile).toHaveBeenCalledWith('/my/directory', 'yarn', [
+        expect(execFile).toHaveBeenCalledWith(tmpModuleDir, 'yarn', [
           'install',
         ]);
       });
@@ -180,7 +192,7 @@ describe('npm', () => {
       it('uses sfw when enabled for npm', async () => {
         await addModules(
           {
-            dir: '/my/directory',
+            dir: tmpModuleDir,
             packageManager: 'npm',
             useSocketFirewall: true,
           },
@@ -188,7 +200,7 @@ describe('npm', () => {
         );
 
         expect(execFile).toHaveBeenCalledWith(
-          '/my/directory',
+          tmpModuleDir,
           'node',
           expect.arrayContaining([
             expect.stringMatching(/sfw\.mjs$/),
@@ -203,7 +215,7 @@ describe('npm', () => {
       it('uses sfw when enabled for yarn', async () => {
         await addModules(
           {
-            dir: '/my/directory',
+            dir: tmpModuleDir,
             packageManager: 'yarn',
             useSocketFirewall: true,
           },
@@ -211,7 +223,7 @@ describe('npm', () => {
         );
 
         expect(execFile).toHaveBeenCalledWith(
-          '/my/directory',
+          tmpModuleDir,
           'node',
           expect.arrayContaining([
             expect.stringMatching(/sfw\.mjs$/),
@@ -225,14 +237,14 @@ describe('npm', () => {
       it('does not use sfw when disabled', async () => {
         await addModules(
           {
-            dir: '/my/directory',
+            dir: tmpModuleDir,
             packageManager: 'npm',
             useSocketFirewall: false,
           },
           'lodash',
         );
 
-        expect(execFile).toHaveBeenCalledWith('/my/directory', 'npm', [
+        expect(execFile).toHaveBeenCalledWith(tmpModuleDir, 'npm', [
           'install',
           '-S',
           'lodash',
@@ -245,13 +257,19 @@ describe('npm', () => {
     it('attempts to run a command via npm', async () => {
       packageRun({ dir: '/my/directory', packageManager: 'npm' }, 'package');
 
-      expect(exec).toHaveBeenCalledWith('/my/directory', 'npm run package');
+      expect(execFile).toHaveBeenCalledWith('/my/directory', 'npm', [
+        'run',
+        'package',
+      ]);
     });
 
     it('attempts to run a command via yarn', async () => {
       packageRun({ dir: '/my/directory', packageManager: 'yarn' }, 'package');
 
-      expect(exec).toHaveBeenCalledWith('/my/directory', 'yarn run package');
+      expect(execFile).toHaveBeenCalledWith('/my/directory', 'yarn', [
+        'run',
+        'package',
+      ]);
     });
   });
 });

@@ -7,7 +7,6 @@ import {
   when,
 } from 'mobx';
 
-import { Bisector } from './bisect';
 import { EditorMosaic } from './editor-mosaic';
 import { ELECTRON_MIRROR } from './mirror-constants';
 import { normalizeVersion } from './utils/normalize-version';
@@ -17,10 +16,8 @@ import {
   fetchVersions,
   getDefaultVersion,
   getElectronVersions,
-  getLocalVersions,
   getReleaseChannel,
   makeRunnable,
-  saveLocalVersions,
 } from './versions';
 import {
   AppStateBroadcastChannel,
@@ -43,6 +40,13 @@ import {
   VersionSource,
   WindowSpecificSetting,
 } from '../interfaces';
+import { Bisector } from '../utils/bisect';
+
+// Migration: previous versions of Fiddle stored the GitHub PAT in
+// localStorage in plaintext. The token now lives encrypted in the main
+// process; remove any leftover renderer copy on startup so it doesn't
+// linger forever.
+localStorage.removeItem(GlobalSetting.gitHubToken);
 
 /**
  * The application's state. Exported as a singleton below.
@@ -58,17 +62,9 @@ export class AppState {
 
   // -- Persisted settings ------------------
   public theme: string | null = localStorage.getItem(GlobalSetting.theme);
-  public gitHubAvatarUrl: string | null = localStorage.getItem(
-    GlobalSetting.gitHubAvatarUrl,
-  );
-  public gitHubName: string | null = localStorage.getItem(
-    GlobalSetting.gitHubName,
-  );
   public gitHubLogin: string | null = localStorage.getItem(
     GlobalSetting.gitHubLogin,
   );
-  public gitHubToken: string | null =
-    localStorage.getItem(GlobalSetting.gitHubToken) || null;
   public gitHubPublishAsPublic = !!this.retrieve(
     WindowSpecificSetting.gitHubPublishAsPublic,
   );
@@ -168,7 +164,6 @@ export class AppState {
   public isBisectDialogShowing = false;
   public isConsoleShowing = false;
   public isGenericDialogShowing = false;
-  public isInstallingModules = false;
   public isOnline = navigator.onLine;
   public isQuitting = false;
   public isRunning = false;
@@ -227,11 +222,8 @@ export class AppState {
       genericDialogOptions: observable,
       gistId: observable,
       activeGistRevision: observable,
-      gitHubAvatarUrl: observable,
       gitHubLogin: observable,
-      gitHubName: observable,
       gitHubPublishAsPublic: observable,
-      gitHubToken: observable,
       hideChannels: action,
       isAddVersionDialogShowing: observable,
       isAutoBisecting: observable,
@@ -242,7 +234,6 @@ export class AppState {
       isEnablingElectronLogging: observable,
       isGenericDialogShowing: observable,
       isHistoryShowing: observable,
-      isInstallingModules: observable,
       isKeepingUserDataDirs: observable,
       isOnline: observable,
       isPublishingGistAsRevision: observable,
@@ -402,13 +393,10 @@ export class AppState {
           }
 
           // This key is deprecated, so do nothing
-          case GlobalSetting.knownVersion: {
-            break;
-          }
-
-          // Refresh local versions
+          // These keys are deprecated, so do nothing
+          case GlobalSetting.gitHubToken:
+          case GlobalSetting.knownVersion:
           case GlobalSetting.localVersion: {
-            this.refreshLocalVersions(getLocalVersions());
             break;
           }
 
@@ -419,10 +407,7 @@ export class AppState {
           case GlobalSetting.executionFlags:
           case GlobalSetting.fontFamily:
           case GlobalSetting.fontSize:
-          case GlobalSetting.gitHubAvatarUrl:
           case GlobalSetting.gitHubLogin:
-          case GlobalSetting.gitHubName:
-          case GlobalSetting.gitHubToken:
           case GlobalSetting.isClearingConsoleOnRun:
           case GlobalSetting.isEnablingElectronLogging:
           case GlobalSetting.isKeepingUserDataDirs:
@@ -510,12 +495,7 @@ export class AppState {
         this.isUsingSocketFirewall,
       ),
     );
-    autorun(() =>
-      this.save(GlobalSetting.gitHubAvatarUrl, this.gitHubAvatarUrl),
-    );
     autorun(() => this.save(GlobalSetting.gitHubLogin, this.gitHubLogin));
-    autorun(() => this.save(GlobalSetting.gitHubName, this.gitHubName));
-    autorun(() => this.save(GlobalSetting.gitHubToken, this.gitHubToken));
     autorun(() =>
       this.save(
         WindowSpecificSetting.gitHubPublishAsPublic,
@@ -777,8 +757,8 @@ export class AppState {
     window.app.loadTheme(this.theme);
   }
 
-  public addLocalVersion(input: Version) {
-    addLocalVersion(input);
+  public addLocalVersion(token: string, name: string) {
+    addLocalVersion(token, name);
     this.addNewVersions(getElectronVersions());
   }
 
@@ -829,7 +809,7 @@ export class AppState {
     if (source === VersionSource.local) {
       if (version in this.versions) {
         delete this.versions[version];
-        saveLocalVersions(Object.values(this.versions));
+        window.ElectronFiddle.removeLocalVersion(version);
       } else {
         console.log(`State: Version ${version} already removed, doing nothing`);
       }
@@ -932,9 +912,12 @@ export class AppState {
     }
 
     const { localPath, version } = ver;
-    if (localPath && !window.ElectronFiddle.pathExists(localPath)) {
-      const err = `Local Electron build missing for version ${version} - please verify it is in the correct location or remove and re-add it.`;
-      return { err };
+    if (localPath) {
+      const state = window.ElectronFiddle.getLocalVersionState({ ...ver });
+      if (state !== InstallState.installed) {
+        const err = `Local Electron build missing for version ${version} - please verify it is in the correct location or remove and re-add it.`;
+        return { err };
+      }
     }
 
     return { ver };
@@ -998,13 +981,13 @@ export class AppState {
   }
 
   /**
-   * The equivalent of signing out.
+   * The equivalent of signing out. Tells main to delete its encrypted
+   * credential and clear the cached Octokit, then clears the renderer's
+   * "signed in" indicator.
    */
-  public signOutGitHub(): void {
-    this.gitHubAvatarUrl = null;
+  public async signOutGitHub(): Promise<void> {
+    await window.ElectronFiddle.gitHubSignOut();
     this.gitHubLogin = null;
-    this.gitHubToken = null;
-    this.gitHubName = null;
   }
 
   public async showGenericDialog(
@@ -1113,7 +1096,6 @@ export class AppState {
       text: strData.trim(),
       timeString: this.timeFmt.format(new Date()),
     };
-    window.ElectronFiddle.pushOutputEntry(entry);
     this.output.push(entry);
   }
 

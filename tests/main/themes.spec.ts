@@ -101,6 +101,12 @@ describe('themes', () => {
       expect(theme).toBeTruthy();
       expect(fs.readJSON).toHaveBeenCalledWith(expected);
     });
+
+    it('rejects path traversal in name', async () => {
+      const theme = await readThemeFile('../../etc/passwd');
+      expect(theme).toBeNull();
+      expect(fs.readJSON).not.toHaveBeenCalled();
+    });
   });
 
   describe('createThemeFile()', () => {
@@ -158,6 +164,12 @@ describe('themes', () => {
       expect(shell.showItemInFolder).toHaveBeenCalledWith(
         path.join(THEMES_PATH, 'theme-name.json'),
       );
+    });
+
+    it('rejects path traversal in name', async () => {
+      await expect(
+        createThemeFile(defaultTheme, '../../etc/evil'),
+      ).rejects.toThrow('createThemeFile: rejected path outside themes dir');
     });
   });
 

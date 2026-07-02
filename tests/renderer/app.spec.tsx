@@ -34,9 +34,14 @@ describe('App component', () => {
       defaultDark,
     );
     vi.mocked(window.ElectronFiddle.getReleasedVersions).mockReturnValue([]);
+    vi.mocked(window.ElectronFiddle.getLocalVersions).mockReturnValue([]);
     vi.mocked(window.ElectronFiddle.getLatestStable).mockReturnValue(
       semver.parse('24.0.0')!,
     );
+    vi.mocked(window.ElectronFiddle.gitHubCheckAuth).mockResolvedValue({
+      login: null,
+      hasToken: false,
+    });
 
     const { app: appMock } = window;
     const { electronTypes, fileManager, remoteLoader, runner, state } = appMock;
@@ -84,6 +89,27 @@ describe('App component', () => {
       // test that electronTypes was updated when state.version changed
       expect(spy).toHaveBeenLastCalledWith(state.currentElectronVersion);
       expect(spy).toHaveBeenCalledTimes(2);
+    });
+
+    it('preserves cached gitHubLogin when offline at startup', async () => {
+      // Simulate a previous session having cached a logged-in user.
+      const login = 'cached-user';
+      app.state.gitHubLogin = login;
+
+      // Simulate main reporting a stored token but no live login
+      // (e.g. offline at startup).
+      vi.mocked(window.ElectronFiddle.gitHubCheckAuth).mockResolvedValue({
+        login: null,
+        hasToken: true,
+      });
+
+      await app.setup();
+      // Wait for the gitHubCheckAuth().then().finally() chain to complete.
+      await vi.waitFor(() =>
+        expect(window.ElectronFiddle.sendReady).toHaveBeenCalled(),
+      );
+
+      expect(app.state.gitHubLogin).toBe(login);
     });
   });
 

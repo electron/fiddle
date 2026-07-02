@@ -1,6 +1,7 @@
 import '@testing-library/jest-dom/vitest';
 
 import { cleanup } from '@testing-library/react';
+import { app } from 'electron';
 import { configure as mobxConfigure } from 'mobx';
 import { afterEach, beforeEach, expect, vi } from 'vitest';
 
@@ -75,6 +76,7 @@ expect.addSnapshotSerializer({
 global.window = global.window || {};
 global.document = global.document || { body: {} };
 global.fetch = window.fetch = vi.fn();
+global.location = global.location || { protocol: 'http:' };
 
 delete (window as any).localStorage;
 (window.localStorage as any) = {};
@@ -103,6 +105,7 @@ afterEach(() => {
 
 beforeEach(() => {
   vi.resetAllMocks();
+  (app as any)._resetMockedPaths();
 
   (process.env.TEST as any) = true;
   document.body.innerHTML = '<div id="app" />';

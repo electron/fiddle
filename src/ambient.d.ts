@@ -1,29 +1,33 @@
 import type * as MonacoType from 'monaco-editor';
 
 import {
-  BisectRequest,
   BlockableAccelerator,
   DownloadVersionParams,
   EditorValues,
   FiddleEvent,
   FileTransformOperation,
   Files,
+  GistCreateParams,
+  GistLoadParams,
+  GistLoadResult,
+  GistRevision,
+  GistUpdateParams,
+  GistWriteResult,
+  GitHubCheckAuthResult,
+  GitHubSignInResult,
   IPackageManager,
   InstallState,
   InstallStateEvent,
   MessageOptions,
   NodeTypes,
-  OutputEntry,
   PMOperationOptions,
   PackageJsonOptions,
   ProgressObject,
   ReleaseInfo,
-  RunResult,
   RunnableVersion,
   SelectedLocalVersion,
   SemVer,
-  StartFiddleParams,
-  TestRequest,
+  StartFiddleOptions,
   Version,
 } from './interfaces';
 import { App } from './renderer/app';
@@ -40,11 +44,6 @@ declare global {
         options?: { signal: AbortSignal },
       ): void;
       addEventListener(
-        type: 'bisect-task',
-        listener: (request: BisectRequest) => void,
-        options?: { signal: AbortSignal },
-      ): void;
-      addEventListener(
         type: 'execute-monaco-command',
         listener: (commandId: string, opts?: Partial<{ all: boolean }>) => void,
         options?: { signal: AbortSignal },
@@ -56,6 +55,10 @@ declare global {
       addEventListener(
         type: 'fiddle-stopped',
         listener: (code: number | null, signal: string | null) => void,
+      ): void;
+      addEventListener(
+        type: 'is-auto-bisecting',
+        listener: (isAutoBisecting: boolean) => void,
       ): void;
       addEventListener(
         type: 'load-example',
@@ -79,11 +82,6 @@ declare global {
         listener: (filePath: string) => void,
       ): void;
       addEventListener(
-        type: 'test-task',
-        listener: (request: TestRequest) => void,
-        options?: { signal: AbortSignal },
-      ): void;
-      addEventListener(
         type: 'toggle-monaco-option',
         listener: (path: string) => void,
       ): void;
@@ -104,19 +102,27 @@ declare global {
         ...names: Array<string>
       ): Promise<string>;
       arch: string;
+      autobisectFiddle(versions: Array<RunnableVersion>): void;
       blockAccelerators(acceleratorsToBlock: BlockableAccelerator[]): void;
-      cleanupDirectory(dir: string): Promise<boolean>;
       confirmQuit(): void;
       createThemeFile(
         newTheme: FiddleTheme,
         name?: string,
       ): Promise<LoadedFiddleTheme>;
-      deleteUserData(name: string): Promise<void>;
       downloadVersion(
         version: string,
         opts?: Partial<DownloadVersionParams>,
       ): Promise<void>;
       fetchVersions(): Promise<Version[]>;
+      fetchExample(ref: string, path: string): Promise<EditorValues>;
+      gistCreate(params: GistCreateParams): Promise<GistWriteResult>;
+      gistDelete(id: string): Promise<void>;
+      gistListCommits(gistId: string): Promise<GistRevision[]>;
+      gistLoad(params: GistLoadParams): Promise<GistLoadResult>;
+      gistUpdate(params: GistUpdateParams): Promise<GistWriteResult>;
+      gitHubCheckAuth(): Promise<GitHubCheckAuthResult>;
+      gitHubSignIn(token: string): Promise<GitHubSignInResult>;
+      gitHubSignOut(): Promise<void>;
       getAvailableThemes(): Promise<Array<LoadedFiddleTheme>>;
       getElectronTypes(ver: RunnableVersion): Promise<string | undefined>;
       getIsPackageManagerInstalled(
@@ -129,6 +135,10 @@ declare global {
       getTestTemplate(): Promise<EditorValues>;
       getLatestStable(): SemVer | undefined;
       getLocalVersionState(ver: Version): InstallState;
+      getLocalVersions(): Array<Version>;
+      addLocalVersion(token: string, name: string): Array<Version>;
+      cancelPendingLocalVersion(token: string): void;
+      removeLocalVersion(version: string): Array<Version>;
       getNodeTypes(
         version: string,
       ): Promise<{ version: string; types: NodeTypes } | undefined>;
@@ -146,14 +156,16 @@ declare global {
           transforms: Array<FileTransformOperation>,
         ) => Promise<{ localPath?: string; files: Files }>,
       );
+      onGetStartFiddleOptions(
+        callback: () => Promise<StartFiddleOptions>,
+      ): void;
+      onSetVersion(callback: (version: string) => Promise<void>): void;
       openThemeFolder(): Promise<void>;
       packageRun(
         { dir, packageManager }: PMOperationOptions,
         command: string,
       ): Promise<string>;
-      pathExists(path: string): boolean;
       platform: string;
-      pushOutputEntry(entry: OutputEntry): void;
       readThemeFile(name: string): Promise<LoadedFiddleTheme | null>;
       reloadWindows(): void;
       removeAllListeners(type: FiddleEvent): void;
@@ -165,9 +177,7 @@ declare global {
       setShowMeTemplate(template?: string): void;
       showWarningDialog(messageOptions: MessageOptions): void;
       showWindow(): void;
-      startFiddle(params: StartFiddleParams): Promise<void>;
       stopFiddle(): void;
-      taskDone(result: RunResult): void;
       themePath: string;
       uncacheTypes(ver: RunnableVersion): Promise<void>;
       unwatchElectronTypes(): Promise<void>;

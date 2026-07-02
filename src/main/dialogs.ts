@@ -1,3 +1,4 @@
+import * as crypto from 'node:crypto';
 import * as path from 'node:path';
 
 import { Installer } from '@electron/fiddle-core';
@@ -5,6 +6,7 @@ import { BrowserWindow, dialog } from 'electron';
 import fs from 'fs-extra';
 
 import { ipcMainManager } from './ipc';
+import { getLocalVersionForPath, setPendingLocalPath } from './versions';
 import { SelectedLocalVersion } from '../interfaces';
 import { IpcEvents } from '../ipc-events';
 
@@ -60,7 +62,17 @@ export function setupDialogs() {
           ? makeLocalName(folderPath)
           : undefined;
 
-        return { folderPath, isValidElectron, localName };
+        const token = setPendingLocalPath(crypto.randomUUID(), folderPath);
+
+        const existingVersion = getLocalVersionForPath(folderPath);
+
+        return {
+          folderPath,
+          isValidElectron,
+          localName,
+          token,
+          existingVersion,
+        };
       }
 
       return undefined;

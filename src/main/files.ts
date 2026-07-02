@@ -1,76 +1,35 @@
-import * as os from 'node:os';
 import * as path from 'node:path';
 
 import { BrowserWindow, IpcMainInvokeEvent, app, dialog } from 'electron';
 import fs from 'fs-extra';
-import * as tmp from 'tmp';
 
 import { ipcMainManager } from './ipc';
 import { getFiles } from './utils/get-files';
 import { readFiddle } from './utils/read-fiddle';
+import * as tmp from './utils/tmp';
 import { Files } from '../interfaces';
 import { IpcEvents } from '../ipc-events';
 import { isSupportedFile } from '../utils/editor-utils';
 
 /**
- * Returns true if `str` is a safe bare name (no separators, no '..').
- * Used to validate renderer-supplied data names before appending to appData.
+ * Returns true if `name` is a safe bare file/data name: non-empty, not
+ * absolute, and equals its own
+ * basename. Used to validate renderer-supplied names before joining onto
+ * a trusted directory.
  */
 function isSafeDataName(str: unknown): str is string {
   return (
     typeof str === 'string' &&
     str.length > 0 &&
-    !str.includes(path.sep) &&
-    !str.includes('/') &&
-    !str.includes('..') &&
+    !path.isAbsolute(str) &&
     str === path.basename(str)
   );
-}
-
-/**
- * Returns true if `dir` resolves to a path inside the OS temp directory.
- * Used to ensure CLEANUP_DIRECTORY cannot reach outside tmp.
- */
-function isInsideTempDir(dir: unknown): dir is string {
-  if (typeof dir !== 'string') return false;
-  const tmpDir = fs.realpathSync(os.tmpdir());
-  const resolved = path.resolve(dir);
-  return resolved.startsWith(tmpDir + path.sep) || resolved === tmpDir;
 }
 
 /**
  * Ensures that we're listening to file events
  */
 export function setupFileListeners() {
-  ipcMainManager.on(IpcEvents.PATH_EXISTS, (event, filePath: string) => {
-    if (typeof filePath !== 'string') {
-      event.returnValue = false;
-      return;
-    }
-    event.returnValue = fs.existsSync(filePath);
-  });
-  ipcMainManager.handle(
-    IpcEvents.CLEANUP_DIRECTORY,
-    (_: IpcMainInvokeEvent, dir: string) => {
-      if (!isInsideTempDir(dir)) {
-        console.warn(
-          `cleanupDirectory: rejected path outside temp dir: ${dir}`,
-        );
-        return false;
-      }
-      return cleanupDirectory(dir);
-    },
-  );
-  ipcMainManager.handle(
-    IpcEvents.DELETE_USER_DATA,
-    (_: IpcMainInvokeEvent, name: string) => {
-      if (!isSafeDataName(name)) {
-        console.warn(`deleteUserData: rejected unsafe name: ${name}`);
-        return;
-      }
-      return deleteUserData(name);
-    },
-  );
   ipcMainManager.handle(
     IpcEvents.SAVE_FILES_TO_TEMP,
     (_: IpcMainInvokeEvent, files: [string, string][]) =>
@@ -185,6 +144,10 @@ export async function cleanupDirectory(dir?: string): Promise<boolean> {
 }
 
 export async function deleteUserData(name: string) {
+  if (!isSafeDataName(name)) {
+    console.warn(`deleteUserData: rejected unsafe name: ${name}`);
+    return;
+  }
   const appData = path.join(app.getPath('appData'), name);
   console.log(`Cleanup: Deleting data dir ${appData}`);
   await cleanupDirectory(appData);
@@ -202,14 +165,18 @@ export async function saveFilesToTemp(files: Files): Promise<string> {
   tmp.setGracefulCleanup();
 
   for (const [name, content] of files) {
+    if (!isSafeDataName(name)) {
+      console.warn(`saveFilesToTemp: rejected unsafe filename: ${name}`);
+      continue;
+    }
     try {
-      await fs.outputFile(path.join(dir.name, name), content);
+      await fs.outputFile(path.join(dir, name), content);
     } catch (error) {
       throw error;
     }
   }
 
-  return dir.name;
+  return dir;
 }
 
 /**
@@ -241,9 +208,14 @@ export async function saveFiles(
   filePath: string,
   files: Files,
 ) {
-  console.log(`saveFiddleWithTransforms: Asked to save to ${filePath}`);
+  console.log(`saveFiles: Asked to save to ${filePath}`);
 
   for (const [fileName, content] of files) {
+    if (!isSafeDataName(fileName)) {
+      console.warn(`saveFiles: rejected unsafe filename: ${fileName}`);
+      continue;
+    }
+
     const savePath = path.join(filePath, fileName);
 
     // If the file has content, save it to disk. If there's no

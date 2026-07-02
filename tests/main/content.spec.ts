@@ -1,8 +1,8 @@
+import * as os from 'node:os';
 import * as path from 'node:path';
 
 import { app } from 'electron';
 import fs from 'fs-extra';
-import * as tmp from 'tmp';
 import {
   afterEach,
   beforeAll,
@@ -13,16 +13,13 @@ import {
   vi,
 } from 'vitest';
 
-let fakeUserData: tmp.DirResult | null;
+let fakeUserData: string | null;
 
 import { EditorValues, MAIN_JS } from '../../src/interfaces';
 import { getTemplate, getTestTemplate } from '../../src/main/content';
 import { isReleasedMajor } from '../../src/main/versions';
 
 vi.unmock('fs-extra');
-vi.mock('../../src/main/constants', () => ({
-  STATIC_DIR: path.join(__dirname, '../../static'),
-}));
 vi.mock('../../src/main/versions', () => ({
   isReleasedMajor: vi.fn(),
 }));
@@ -65,11 +62,9 @@ describe('content', () => {
       if (name === 'userData') {
         // set it to be a newly-allocated tmpdir
         if (!fakeUserData) {
-          tmp.setGracefulCleanup();
-          fakeUserData = tmp.dirSync({
-            template: 'electron-fiddle-tests--user-data-XXXXXX',
-            unsafeCleanup: true, // remove everything
-          });
+          fakeUserData = fs.mkdtempSync(
+            path.join(os.tmpdir(), 'electron-fiddle-tests--user-data-'),
+          );
         }
       }
 
@@ -79,7 +74,7 @@ describe('content', () => {
 
   afterEach(() => {
     if (fakeUserData) {
-      fakeUserData.removeCallback();
+      fs.rmSync(fakeUserData, { recursive: true, force: true });
       fakeUserData = null;
     }
   });

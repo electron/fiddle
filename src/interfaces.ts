@@ -89,16 +89,6 @@ export interface SetupRequest {
   useObsolete?: boolean;
 }
 
-export interface BisectRequest {
-  setup: SetupRequest;
-  goodVersion: string;
-  badVersion: string;
-}
-
-export interface TestRequest {
-  setup: SetupRequest;
-}
-
 export interface OutputEntry {
   text: string;
   timeString: string;
@@ -169,16 +159,19 @@ export interface SelectedLocalVersion {
   folderPath: string;
   isValidElectron: boolean;
   localName?: string;
+  token: string;
+  existingVersion?: Version;
 }
 
 export type FiddleEvent =
   | 'before-quit'
-  | 'bisect-task'
   | 'clear-console'
   | 'electron-types-changed'
   | 'execute-monaco-command'
   | 'fiddle-runner-output'
+  | 'fiddle-modules-installed'
   | 'fiddle-stopped'
+  | 'is-auto-bisecting'
   | 'load-example'
   | 'load-gist'
   | 'make-fiddle'
@@ -195,7 +188,7 @@ export type FiddleEvent =
   | 'select-all-in-editor'
   | 'set-show-me-template'
   | 'show-welcome-tour'
-  | 'test-task'
+  | 'theme-loaded'
   | 'toggle-bisect'
   | 'toggle-monaco-option'
   | 'undo-in-editor'
@@ -227,6 +220,49 @@ export interface GistRevision {
   };
 }
 
+export interface GistCreateParams {
+  description: string;
+  files: Record<string, GistFile>;
+  isPublic: boolean;
+}
+
+export interface GistFile {
+  filename: string;
+  content: string;
+}
+
+export interface GistLoadParams {
+  gistId: string;
+  revision?: string;
+}
+
+export interface GistLoadResult {
+  files: Record<string, GistFile>;
+  revision?: string;
+}
+
+export interface GistUpdateParams {
+  gistId: string;
+  files: Record<string, GistFile>;
+}
+
+export interface GistWriteResult {
+  id: string;
+  url: string;
+  revision?: string;
+}
+
+export interface GitHubSignInResult {
+  success: boolean;
+  login?: string;
+  error?: string;
+}
+
+export interface GitHubCheckAuthResult {
+  login: string | null;
+  hasToken: boolean;
+}
+
 export enum GlobalSetting {
   acceleratorsToBlock = 'acceleratorsToBlock',
   channelsToShow = 'channelsToShow',
@@ -235,9 +271,7 @@ export enum GlobalSetting {
   executionFlags = 'executionFlags',
   fontFamily = 'fontFamily',
   fontSize = 'fontSize',
-  gitHubAvatarUrl = 'gitHubAvatarUrl',
   gitHubLogin = 'gitHubLogin',
-  gitHubName = 'gitHubName',
   gitHubToken = 'gitHubToken',
   hasShownTour = 'hasShownTour',
   isClearingConsoleOnRun = 'isClearingConsoleOnRun',
@@ -289,14 +323,15 @@ export interface PackageJsonOptions {
   includeDependencies?: boolean;
 }
 
-export interface StartFiddleParams {
-  localPath: string | undefined;
+export interface StartFiddleOptions {
+  version: string;
   enableElectronLogging: boolean;
-  isValidBuild: boolean; // If the localPath is a valid Electron build
-  version: string; // The user selected version
-  dir: string;
-  options: string[];
+  executionFlags: string[];
   env: { [x: string]: string | undefined };
+  modules: Array<[string, string]>;
+  packageManager: IPackageManager;
+  useSocketFirewall: boolean;
+  isKeepingUserDataDirs: boolean;
 }
 
 export interface DownloadVersionParams {

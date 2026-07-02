@@ -5,6 +5,7 @@ import {
   MenuItemConstructorOptions,
 } from 'electron';
 
+import { isRunFiddleEnabled, startFiddle } from './fiddle-core';
 import { ipcMainManager } from './ipc';
 import { isDevMode } from './utils/devmode';
 import { IpcEvents } from '../ipc-events';
@@ -17,7 +18,13 @@ export function getRunItems(): Array<MenuItemConstructorOptions> {
     {
       id: 'run',
       label: 'Run Fiddle',
-      click: () => ipcMainManager.send(IpcEvents.FIDDLE_RUN),
+      enabled: isRunFiddleEnabled(),
+      click: (_, focusedWindow) => {
+        if (focusedWindow)
+          startFiddle((focusedWindow as BrowserWindow).webContents).catch(
+            console.error,
+          );
+      },
     },
     {
       id: 'clear_console',

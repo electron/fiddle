@@ -2,15 +2,17 @@
  * @vitest-environment node
  */
 
+import path from 'node:path';
+
 import { BrowserWindow, app, dialog } from 'electron';
 import fs from 'fs-extra';
-import * as tmp from 'tmp';
 import { type Mock, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { MAIN_JS } from '../../src/interfaces';
 import { IpcEvents } from '../../src/ipc-events';
 import {
   cleanupDirectory,
+  deleteUserData,
   saveFiddle,
   saveFiddleAs,
   saveFiddleAsForgeProject,
@@ -22,6 +24,7 @@ import {
 } from '../../src/main/files';
 import { ipcMainManager } from '../../src/main/ipc';
 import { getFiles } from '../../src/main/utils/get-files';
+import * as tmp from '../../src/main/utils/tmp';
 import { getOrCreateMainWindow } from '../../src/main/windows';
 import { BrowserWindowMock } from '../mocks/browser-window';
 import { createEditorValues } from '../mocks/editor-values';
@@ -29,7 +32,7 @@ import { createEditorValues } from '../mocks/editor-values';
 vi.mock('../../src/main/windows');
 vi.mock('../../src/main/utils/get-files');
 vi.mock('fs-extra');
-vi.mock('tmp');
+vi.mock('../../src/main/utils/tmp');
 
 const mockWindow = new BrowserWindowMock() as unknown as Electron.BrowserWindow;
 
@@ -56,15 +59,6 @@ describe('files', () => {
       const spy = vi.spyOn(ipcMainManager, 'handle');
       setupFileListeners();
 
-      expect(ipcMainManager.eventNames()).toEqual([IpcEvents.PATH_EXISTS]);
-      expect(spy).toHaveBeenCalledWith(
-        IpcEvents.CLEANUP_DIRECTORY,
-        expect.anything(),
-      );
-      expect(spy).toHaveBeenCalledWith(
-        IpcEvents.DELETE_USER_DATA,
-        expect.anything(),
-      );
       expect(spy).toHaveBeenCalledWith(
         IpcEvents.SAVE_FILES_TO_TEMP,
         expect.anything(),
@@ -215,6 +209,53 @@ describe('files', () => {
     });
   });
 
+  describe('deleteUserData()', () => {
+    beforeEach(() => {
+      vi.mocked(app.getPath).mockReturnValue('/fake/appData');
+    });
+
+    it('removes the user-data directory for a safe name', async () => {
+      vi.mocked(fs.existsSync).mockReturnValueOnce(true);
+
+      await deleteUserData('my-fiddle');
+
+      expect(fs.remove).toHaveBeenCalledWith(
+        path.normalize('/fake/appData/my-fiddle'),
+      );
+    });
+
+    it.each([
+      ['parent-traversal segment', '../../etc'],
+      ['absolute path', '/etc/passwd'],
+      ['empty string', ''],
+      ['nested path segment', 'a/b'],
+    ])('rejects an unsafe name (%s)', async (_label, name) => {
+      const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
+
+      await deleteUserData(name);
+
+      expect(fs.remove).not.toHaveBeenCalled();
+      expect(warn).toHaveBeenCalledWith(
+        expect.stringContaining('rejected unsafe name'),
+      );
+
+      warn.mockRestore();
+    });
+
+    it('rejects a non-string name', async () => {
+      const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
+
+      await deleteUserData(undefined as unknown as string);
+
+      expect(fs.remove).not.toHaveBeenCalled();
+      expect(warn).toHaveBeenCalledWith(
+        expect.stringContaining('rejected unsafe name'),
+      );
+
+      warn.mockRestore();
+    });
+  });
+
   describe('saveFiles()', () => {
     it('saves all non-empty files in Fiddle', async () => {
       const values = { ...editorValues };
@@ -335,9 +376,7 @@ describe('files', () => {
 
   it('saveFilesToTemp()', async () => {
     const tmpPath = '/tmp/save-to-temp/';
-    vi.spyOn(tmp, 'dirSync').mockReturnValue({
-      name: tmpPath,
-    } as tmp.DirResult);
+    vi.spyOn(tmp, 'dirSync').mockReturnValue(tmpPath);
 
     await expect(
       saveFilesToTemp(
@@ -350,5 +389,25 @@ describe('files', () => {
     ).resolves.toEqual(tmpPath);
     expect(fs.outputFile).toHaveBeenCalledTimes(3);
     expect(tmp.setGracefulCleanup).toHaveBeenCalled();
+  });
+
+  it('saveFilesToTemp() skips unsafe filenames', async () => {
+    const tmpPath = '/tmp/save-to-temp/';
+    vi.spyOn(tmp, 'dirSync').mockReturnValue(tmpPath);
+
+    await saveFilesToTemp(
+      new Map([
+        ['main.js', ''],
+        ['../../../.bashrc', 'evil'],
+        ['/etc/passwd', 'evil'],
+      ]),
+    );
+
+    // Only the safe filename should be written
+    expect(fs.outputFile).toHaveBeenCalledTimes(1);
+    expect(fs.outputFile).toHaveBeenCalledWith(
+      expect.stringContaining('main.js'),
+      '',
+    );
   });
 });

@@ -3,8 +3,8 @@ import * as React from 'react';
 import { Button, Callout, Dialog, InputGroup, Intent } from '@blueprintjs/core';
 import { observer } from 'mobx-react';
 
+import { GITHUB_TOKEN_PATTERN } from '../../constants';
 import { AppState } from '../state';
-import { getOctokit } from '../utils/octokit';
 
 interface TokenDialogProps {
   appState: AppState;
@@ -20,8 +20,6 @@ interface TokenDialogState {
 const TOKEN_SCOPES = ['gist'].join();
 const TOKEN_DESCRIPTION = encodeURIComponent('Fiddle Gist Token');
 const GENERATE_TOKEN_URL = `https://github.com/settings/tokens/new?scopes=${TOKEN_SCOPES}&description=${TOKEN_DESCRIPTION}`;
-const TOKEN_PATTERN =
-  /^(ghp_[a-zA-Z0-9]{36}|github_pat_[a-zA-Z0-9]{22}_[a-zA-Z0-9]{59})$/;
 
 /**
  * The token dialog asks the user for a GitHub Personal Access Token.
@@ -51,77 +49,33 @@ export const TokenDialog = observer(
     }
 
     /**
-     * Validates a GitHub token and checks for required scopes.
-     */
-    private async validateGitHubToken(token: string): Promise<{
-      isValid: boolean;
-      scopes: string[];
-      hasGistScope: boolean;
-      user?: any;
-      error?: string;
-    }> {
-      try {
-        const octokit = await getOctokit({ gitHubToken: token } as AppState);
-        const response = await octokit.users.getAuthenticated();
-
-        const scopes = response.headers['x-oauth-scopes']?.split(', ') || [];
-        const hasGistScope = scopes.includes('gist');
-
-        return {
-          isValid: true,
-          scopes,
-          hasGistScope,
-          user: response.data,
-        };
-      } catch (error: any) {
-        return {
-          isValid: false,
-          scopes: [],
-          hasGistScope: false,
-          error: error.message,
-        };
-      }
-    }
-
-    /**
-     * Handles the submission of a token and verifies
-     * that it has the correct scopes.
+     * Handles the submission of a token. Validation runs in the main
+     * process, which checks the token's format, authenticates against
+     * GitHub, and verifies that the required scopes are present.
      */
     public async onSubmitToken(): Promise<void> {
       if (!this.state.tokenInput) return;
       this.setState({ verifying: true, error: false, errorMessage: undefined });
 
-      const validation = await this.validateGitHubToken(this.state.tokenInput);
+      const result = await window.ElectronFiddle.gitHubSignIn(
+        this.state.tokenInput,
+      );
 
-      if (!validation.isValid) {
-        console.warn(`Authenticating against GitHub failed`, validation.error);
+      if (!result.success) {
+        console.warn(`Authenticating against GitHub failed`, result.error);
         this.setState({
           verifying: false,
           error: true,
-          errorMessage:
-            'Invalid GitHub token. Please check your token and try again.',
+          errorMessage: result.error,
         });
-        this.props.appState.gitHubToken = null;
+        this.props.appState.gitHubLogin = null;
         return;
       }
 
-      if (!validation.hasGistScope) {
-        console.warn(`Token missing required gist scope`);
-        this.setState({
-          verifying: false,
-          error: true,
-          errorMessage:
-            'Token is missing the "gist" scope. Please generate a new token with gist permissions.',
-        });
-        this.props.appState.gitHubToken = null;
-        return;
-      }
-
-      // Token is valid and has required scopes.
-      this.props.appState.gitHubToken = this.state.tokenInput;
-      this.props.appState.gitHubAvatarUrl = validation.user.avatar_url;
-      this.props.appState.gitHubLogin = validation.user.login;
-      this.props.appState.gitHubName = validation.user.name;
+      // Token is valid and has required scopes. The token itself stays in
+      // the main process; the renderer only tracks the login as a "signed
+      // in?" signal.
+      this.props.appState.gitHubLogin = result.login ?? null;
 
       this.setState({ verifying: false, error: false });
       this.props.appState.isTokenDialogShowing = false;
@@ -161,7 +115,7 @@ export const TokenDialog = observer(
     public async onTokenInputFocused() {
       const text = ((await navigator.clipboard.readText()) || '').trim();
 
-      if (TOKEN_PATTERN.test(text)) {
+      if (GITHUB_TOKEN_PATTERN.test(text)) {
         this.setState({ tokenInput: text });
       }
     }

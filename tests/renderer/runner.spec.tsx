@@ -1,20 +1,15 @@
-import * as semver from 'semver';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import {
   InstallState,
+  MAIN_MJS,
   RunResult,
   RunnableVersion,
   VersionSource,
 } from '../../src/interfaces';
 import { ForgeCommands, Runner } from '../../src/renderer/runner';
 import { AppState } from '../../src/renderer/state';
-import {
-  AppMock,
-  FileManagerMock,
-  StateMock,
-  VersionsMock,
-} from '../mocks/mocks';
+import { AppMock, StateMock, VersionsMock } from '../mocks/mocks';
 import { emitEvent } from '../utils';
 
 vi.mock('../../src/renderer/file-manager');
@@ -22,13 +17,11 @@ vi.mock('../../src/renderer/file-manager');
 describe('Runner component', () => {
   let store: StateMock;
   let instance: Runner;
-  let fileManager: FileManagerMock;
   let mockVersions: Record<string, RunnableVersion>;
-  let mockVersionsArray: RunnableVersion[];
 
   beforeEach(() => {
-    ({ mockVersions, mockVersionsArray } = new VersionsMock());
-    ({ fileManager, state: store } = window.app as unknown as AppMock);
+    ({ mockVersions } = new VersionsMock());
+    ({ state: store } = window.app as unknown as AppMock);
     store.initVersions('2.0.2', { ...mockVersions });
     store.getName.mockResolvedValue('test-app-name');
     store.modules = new Map<string, string>([['cow', '*']]);
@@ -36,8 +29,9 @@ describe('Runner component', () => {
     vi.mocked(
       window.ElectronFiddle.getIsPackageManagerInstalled,
     ).mockResolvedValue(true);
-    vi.mocked(window.ElectronFiddle.deleteUserData).mockResolvedValue();
-
+    vi.mocked(window.ElectronFiddle.getLocalVersionState).mockReturnValue(
+      InstallState.installed,
+    );
     instance = new Runner(store as unknown as AppState);
   });
 
@@ -83,82 +77,35 @@ describe('Runner component', () => {
     });
   });
 
-  describe('run()', () => {
-    it('runs', async () => {
-      // wait for run() to get running
-      const runPromise = instance.run();
-      await vi.waitUntil(() => store.isRunning);
+  describe('run-fiddle event', () => {
+    it('updates UI state when running starts', () => {
+      emitEvent('run-fiddle');
       expect(store.isRunning).toBe(true);
-
-      // fiddle exits with success
-      setTimeout(() => emitEvent('fiddle-stopped', 0));
-      const result = await runPromise;
-
-      expect(result).toBe(RunResult.SUCCESS);
-      expect(store.isRunning).toBe(false);
-      expect(fileManager.saveToTemp).toHaveBeenCalled();
-      expect(window.ElectronFiddle.addModules).toHaveBeenCalled();
+      expect(store.isConsoleShowing).toBe(true);
     });
 
-    it('runs with logging when enabled', async () => {
-      store.isEnablingElectronLogging = true;
+    it('emits output via fiddle-runner-output and exit message via fiddle-stopped', () => {
+      emitEvent('run-fiddle');
 
-      // wait for run() to get running
-      const runPromise = instance.run();
-      await vi.waitUntil(() => store.isRunning);
-      expect(store.isRunning).toBe(true);
-
-      // fiddle exits with success
-      setTimeout(() => emitEvent('fiddle-stopped', 0));
-      const result = await runPromise;
-
-      expect(result).toBe(RunResult.SUCCESS);
-      expect(store.isRunning).toBe(false);
-      expect(fileManager.saveToTemp).toHaveBeenCalled();
-      expect(window.ElectronFiddle.addModules).toHaveBeenCalled();
-      expect(window.ElectronFiddle.startFiddle).toBeCalledWith(
-        expect.objectContaining({
-          enableElectronLogging: true,
-        }),
-      );
-    });
-
-    it('emits output with exitCode', async () => {
-      // wait for run() to get running
-      const runPromise = instance.run();
-      await vi.waitUntil(() => store.isRunning);
-      expect(store.isRunning).toBe(true);
-
-      // mock fiddle gives output,
-      // then exits with exitCode 0
+      // mock fiddle gives output, then exits with exitCode 0
       emitEvent('fiddle-runner-output', 'hi');
       emitEvent('fiddle-runner-output', 'hi');
       emitEvent('fiddle-stopped', 0);
 
-      const result = await runPromise;
-
-      expect(result).toBe(RunResult.SUCCESS);
       expect(store.isRunning).toBe(false);
-      expect(store.pushOutput).toHaveBeenCalledTimes(8);
+      expect(store.pushOutput).toHaveBeenCalledTimes(3);
       expect(store.flushOutput).toHaveBeenCalledTimes(1);
       expect(store.pushOutput).toHaveBeenLastCalledWith(
         'Electron exited with code 0.',
       );
     });
 
-    it('returns failure when app exits nonzero', async () => {
+    it('reports a non-zero exit code', () => {
       const ARBITRARY_FAIL_CODE = 50;
 
-      // wait for run() to get running
-      const runPromise = instance.run();
-      await vi.waitUntil(() => store.isRunning);
-      expect(store.isRunning).toBe(true);
-
-      // mock fiddle exits with ARBITRARY_FAIL_CODE
+      emitEvent('run-fiddle');
       emitEvent('fiddle-stopped', ARBITRARY_FAIL_CODE);
-      const result = await runPromise;
 
-      expect(result).toBe(RunResult.FAILURE);
       expect(store.isRunning).toBe(false);
       expect(store.flushOutput).toHaveBeenCalledTimes(1);
       expect(store.pushOutput).toHaveBeenLastCalledWith(
@@ -166,7 +113,93 @@ describe('Runner component', () => {
       );
     });
 
-    it('shows a dialog and returns invalid when the current version is missing', async () => {
+    it('reports a signal exit when there is no exit code', () => {
+      const signal = 'SIGTERM';
+
+      emitEvent('run-fiddle');
+      emitEvent('fiddle-runner-output', 'hi');
+      emitEvent('fiddle-runner-output', 'hi');
+      emitEvent('fiddle-stopped', null, signal);
+
+      expect(store.isRunning).toBe(false);
+      expect(store.flushOutput).toHaveBeenCalledTimes(1);
+      expect(store.pushOutput).toHaveBeenCalledTimes(3);
+      expect(store.pushOutput).toHaveBeenLastCalledWith(
+        `Electron exited with signal ${signal}.`,
+      );
+    });
+
+    it('does not run version not yet downloaded', () => {
+      store.currentElectronVersion.state = InstallState.missing;
+      vi.mocked(window.ElectronFiddle.getLocalVersionState).mockReturnValue(
+        InstallState.missing,
+      );
+
+      emitEvent('run-fiddle');
+
+      expect(store.isRunning).toBe(false);
+      expect(store.pushOutput).toHaveBeenCalledWith(
+        expect.stringContaining('not downloaded yet'),
+        expect.objectContaining({ isNotPre: true }),
+      );
+    });
+
+    it('runs a local build when getLocalVersionState reports installed', () => {
+      store.currentElectronVersion = {
+        ...store.currentElectronVersion,
+        state: InstallState.missing,
+        source: VersionSource.local,
+      };
+      vi.mocked(window.ElectronFiddle.getLocalVersionState).mockReturnValue(
+        InstallState.installed,
+      );
+
+      emitEvent('run-fiddle');
+      expect(store.isRunning).toBe(true);
+    });
+
+    it('automatically clears the console when enabled', () => {
+      store.isClearingConsoleOnRun = true;
+      emitEvent('run-fiddle');
+      expect(store.clearConsole).toHaveBeenCalled();
+    });
+
+    it('runs in response to the IPC event', () => {
+      // Confirm the event listener has been registered for 'run-fiddle'.
+      const calls = vi.mocked(window.ElectronFiddle.addEventListener).mock
+        .calls;
+      expect(calls.some((c) => (c as any[])[0] === 'run-fiddle')).toBe(true);
+    });
+  });
+
+  describe('getStartFiddleOptions()', () => {
+    it('exposes run-time options to the main process', async () => {
+      store.isEnablingElectronLogging = true;
+      const options = await instance.getStartFiddleOptions();
+      expect(options).toEqual(
+        expect.objectContaining({ enableElectronLogging: true }),
+      );
+    });
+
+    it('returns options reflecting the current AppState', async () => {
+      store.executionFlags = ['--inspect-brk'];
+      (store as any).packageManager = 'npm';
+      (store as any).isUsingSocketFirewall = true;
+      (store as any).isKeepingUserDataDirs = true;
+
+      const options = await instance.getStartFiddleOptions();
+      expect(options).toEqual(
+        expect.objectContaining({
+          version: '2.0.2',
+          executionFlags: ['--inspect-brk'],
+          packageManager: 'npm',
+          useSocketFirewall: true,
+          isKeepingUserDataDirs: true,
+        }),
+      );
+    });
+
+    it('shows a dialog and throws when the current version is unusable', async () => {
       store.showErrorDialog = vi.fn().mockResolvedValueOnce(true);
       store.currentElectronVersion = {
         version: 'test-0',
@@ -178,210 +211,56 @@ describe('Runner component', () => {
       const err = `Local Electron build missing for version ${store.currentElectronVersion.version} - please verify it is in the correct location or remove and re-add it.`;
       store.isVersionUsable = vi.fn().mockReturnValueOnce({ err });
 
-      const result = await instance.run();
-      expect(result).toBe(RunResult.INVALID);
+      await expect(instance.getStartFiddleOptions()).rejects.toThrow(
+        RunResult.INVALID,
+      );
 
       expect(store.showErrorDialog).toHaveBeenCalledWith(
         expect.stringMatching(err),
       );
     });
 
-    it('emits output without exitCode', async () => {
-      // wait for run() to get running
-      const runPromise = instance.run();
-      await vi.waitUntil(() => store.isRunning);
-      expect(store.isRunning).toBe(true);
-
-      const signal = 'SIGTERM';
-
-      // mock fiddle gives output,
-      // then exits without an explicit exitCode
-      emitEvent('fiddle-runner-output', 'hi');
-      emitEvent('fiddle-runner-output', 'hi');
-      emitEvent('fiddle-stopped', null, signal);
-      const result = await runPromise;
-
-      expect(result).toBe(RunResult.FAILURE);
-      expect(store.isRunning).toBe(false);
-      expect(store.flushOutput).toHaveBeenCalledTimes(1);
-      expect(store.pushOutput).toHaveBeenCalledTimes(8);
-      expect(store.pushOutput).toHaveBeenLastCalledWith(
-        `Electron exited with signal ${signal}.`,
-      );
-    });
-
-    it('cleans the app data dir after a run', async () => {
-      setTimeout(() => emitEvent('fiddle-stopped', 0));
-      const result = await instance.run();
-
-      expect(result).toBe(RunResult.SUCCESS);
-      await new Promise(process.nextTick);
-      expect(window.ElectronFiddle.cleanupDirectory).toHaveBeenCalledTimes(1);
-      expect(window.ElectronFiddle.deleteUserData).toHaveBeenCalledTimes(1);
-      expect(window.ElectronFiddle.deleteUserData).toHaveBeenCalledWith(
-        'test-app-name',
-      );
-    });
-
-    it('does not clean the app data dir after a run if configured', async () => {
-      (instance as any).appState.isKeepingUserDataDirs = true;
-
-      setTimeout(() => emitEvent('fiddle-stopped', 0));
-      const result = await instance.run();
-
-      expect(result).toBe(RunResult.SUCCESS);
-      await new Promise(process.nextTick);
-      expect(window.ElectronFiddle.cleanupDirectory).toHaveBeenCalledTimes(1);
-    });
-
-    it('automatically cleans the console when enabled', async () => {
-      store.isClearingConsoleOnRun = true;
-
-      setTimeout(() => emitEvent('fiddle-stopped', 0));
-      const result = await instance.run();
-
-      expect(result).toBe(RunResult.SUCCESS);
-      expect(store.clearConsole).toHaveBeenCalled();
-    });
-
-    it('does not run version not yet downloaded', async () => {
-      store.currentElectronVersion.state = InstallState.missing;
-      expect(await instance.run()).toBe(RunResult.INVALID);
-    });
-
-    it('does not run if writing files fails', async () => {
-      vi.mocked(fileManager.saveToTemp).mockRejectedValueOnce('bwap bwap');
-
-      expect(await instance.run()).toBe(RunResult.INVALID);
-    });
-
-    it('does not run if installing modules fails', async () => {
-      const oldError = console.error;
-      console.error = vi.fn();
-
-      instance.installModules = vi.fn().mockImplementationOnce(async () => {
-        throw new Error('Bwap-bwap');
+    it('rejects ESM main entry on Electron versions older than 28', async () => {
+      store.showErrorDialog = vi.fn().mockResolvedValueOnce(true);
+      store.currentElectronVersion = {
+        version: '27.0.0',
+        state: InstallState.installed,
+        source: VersionSource.remote,
+      } as const;
+      store.isVersionUsable = vi.fn().mockReturnValueOnce({
+        ver: store.currentElectronVersion,
       });
+      store.editorMosaic.mainEntryPointFile = vi.fn(() => MAIN_MJS) as any;
 
-      expect(await instance.run()).toBe(RunResult.INVALID);
+      await expect(instance.getStartFiddleOptions()).rejects.toThrow(
+        RunResult.INVALID,
+      );
 
-      console.error = oldError;
+      expect(store.showErrorDialog).toHaveBeenCalledWith(
+        expect.stringContaining('ESM main entry points'),
+      );
     });
   });
 
-  describe('stop()', () => {
-    it('stops a running session', async () => {
-      vi.mocked(window.ElectronFiddle.stopFiddle).mockImplementationOnce(() => {
-        emitEvent('fiddle-stopped', RunResult.FAILURE);
-      });
+  describe('is-auto-bisecting event', () => {
+    it('updates AppState.isAutoBisecting when toggled by main', () => {
+      emitEvent('is-auto-bisecting', true);
+      expect(store.isAutoBisecting).toBe(true);
 
-      // wait for run() to get running
-      const runPromise = instance.run();
-      await vi.waitUntil(() => store.isRunning);
-      expect(store.isRunning).toBe(true);
-
-      // call stop and wait for run() to resolve
-      instance.stop();
-      const runResult = await runPromise;
-
-      expect(runResult).toBe(RunResult.FAILURE);
-      expect(store.isRunning).toBe(false);
-    });
-
-    it('fails if stopping fiddle fails', async () => {
-      vi.mocked(window.ElectronFiddle.stopFiddle).mockImplementationOnce(
-        () => {},
-      );
-
-      // wait for run() to get running
-      instance.run();
-      await vi.waitUntil(() => store.isRunning);
-      expect(store.isRunning).toBe(true);
-
-      instance.stop();
-      expect(store.isRunning).toBe(true);
+      emitEvent('is-auto-bisecting', false);
+      expect(store.isAutoBisecting).toBe(false);
     });
   });
 
-  describe('autobisect()', () => {
-    it('returns success if bisection succeeds', async () => {
-      // make sure good, bad exist in our mock
-      const LAST_GOOD = '2.0.1';
-      const FIRST_BAD = '2.0.2';
-      expect(mockVersions[LAST_GOOD]).toEqual(expect.anything());
-      expect(mockVersions[FIRST_BAD]).toEqual(expect.anything());
+  describe('onSetVersion handler', () => {
+    it('forwards the version to AppState.setVersion', async () => {
+      const calls = vi.mocked(window.ElectronFiddle.onSetVersion).mock.calls;
+      expect(calls).toHaveLength(1);
+      const callback = calls[0][0];
 
-      const spy = vi.spyOn(store, 'setVersion');
-      instance.run = vi.fn().mockImplementation(() => {
-        // test succeeds iff version <= LAST_GOOD
-        if (typeof store.version !== 'string') {
-          throw new Error(
-            'Need to pass version string into this implementation!',
-          );
-        }
-        return semver.compare(store.version, LAST_GOOD) <= 0
-          ? RunResult.SUCCESS
-          : RunResult.FAILURE;
-      });
+      await callback('2.0.1');
 
-      const bisectRange = [...mockVersionsArray].reverse();
-      const result = await instance.autobisect(bisectRange);
-
-      expect(result).toBe(RunResult.SUCCESS);
-      expect(store.setVersion).toHaveBeenCalledTimes(2);
-      expect(spy).toHaveBeenNthCalledWith(1, LAST_GOOD);
-      expect(spy).toHaveBeenNthCalledWith(2, FIRST_BAD);
-      expect(store.pushOutput).toHaveBeenLastCalledWith(
-        `https://github.com/electron/electron/compare/v${LAST_GOOD}...v${FIRST_BAD}`,
-      );
-
-      spy.mockRestore();
-    });
-
-    it('returns invalid if unable to run', async () => {
-      const spy = vi.spyOn(store, 'setVersion');
-      instance.run = vi.fn().mockImplementation(() => RunResult.INVALID);
-
-      const bisectRange = [...mockVersionsArray].reverse();
-      const result = await instance.autobisect(bisectRange);
-
-      expect(result).toBe(RunResult.INVALID);
-      expect(store.pushOutput).toHaveBeenLastCalledWith(
-        'Runner: autobisect Electron 2.0.1 - finished test ❓ invalid',
-      );
-
-      spy.mockRestore();
-    });
-
-    it('returns invalid if not enough versions to bisect', async () => {
-      const bisectRange = [mockVersions['2.0.1']];
-
-      const result = await instance.autobisect(bisectRange);
-
-      expect(result).toBe(RunResult.INVALID);
-      expect(store.pushOutput).toHaveBeenLastCalledWith(
-        'Runner: autobisect needs at least two Electron versions',
-      );
-    });
-
-    async function allRunsReturn(runResult: RunResult) {
-      instance.run = vi.fn().mockImplementation(() => runResult);
-      const bisectRange = [...mockVersionsArray].reverse();
-
-      const bisectResult = await instance.autobisect(bisectRange);
-
-      expect(bisectResult).toBe(RunResult.INVALID);
-      expect(store.pushOutput).toHaveBeenLastCalledWith(
-        expect.stringMatching('both returned'),
-      );
-    }
-
-    it('returns invalid if a bad version cannot be found', () => {
-      allRunsReturn(RunResult.SUCCESS);
-    });
-
-    it('returns invalid if a good version cannot be found', async () => {
-      allRunsReturn(RunResult.FAILURE);
+      expect(store.setVersion).toHaveBeenCalledWith('2.0.1');
     });
   });
 
@@ -463,23 +342,6 @@ describe('Runner component', () => {
       expect(await instance.performForgeOperation(ForgeCommands.MAKE)).toBe(
         false,
       );
-    });
-  });
-
-  describe('installModules()', () => {
-    it.each([
-      ['does not attempt installation if npm is not installed', false, 0],
-      ['does attempt installation if npm is installed', true, 1],
-    ])('%s', async (_: unknown, haveNpm: boolean, numCalls: number) => {
-      vi.mocked(
-        window.ElectronFiddle.getIsPackageManagerInstalled,
-      ).mockResolvedValue(haveNpm);
-      await instance.installModules({
-        dir: '/fake/path',
-        packageManager: 'npm',
-      });
-
-      expect(window.ElectronFiddle.addModules).toHaveBeenCalledTimes(numCalls);
     });
   });
 });
