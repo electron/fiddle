@@ -638,6 +638,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@electron-internal/extract-zip@npm:^1.0.1":
+  version: 1.0.1
+  resolution: "@electron-internal/extract-zip@npm:1.0.1"
+  checksum: 10c0/4149cb1c99da41457802a11fac692701f58460dcd78341958c10c948876abd3747d45137cf6bfe0c99e7dea0bdb32bf072e9d420a18f55bd1e0087bd1a5c45ba
+  languageName: node
+  linkType: hard
+
 "@electron/asar@npm:^3.2.1":
   version: 3.2.17
   resolution: "@electron/asar@npm:3.2.17"
@@ -5316,6 +5323,7 @@ __metadata:
     "@electron-forge/plugin-fuses": "npm:8.0.0-alpha.9"
     "@electron-forge/plugin-webpack": "npm:8.0.0-alpha.9"
     "@electron-forge/publisher-github": "npm:8.0.0-alpha.9"
+    "@electron-internal/extract-zip": "npm:^1.0.1"
     "@electron/devtron": "npm:^2.1.1"
     "@electron/fiddle-core": "npm:^2.2.0"
     "@electron/fuses": "npm:^2.1.1"
@@ -5353,7 +5361,6 @@ __metadata:
     eslint-plugin-import: "npm:^2.27.5"
     eslint-plugin-react: "npm:^7.32.2"
     eslint-plugin-tsdoc: "npm:^0.3.0"
-    extract-zip: "npm:^2.0.1"
     fork-ts-checker-webpack-plugin: "npm:^8.0.0"
     fs-extra: "npm:^9.1.0"
     husky: "npm:^9.0.11"
