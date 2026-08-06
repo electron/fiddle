@@ -50,4 +50,5 @@ jobs:
         with:
           name: audit-results
           path: audit-results.md
+          archive: false
           if-no-files-found: warn
