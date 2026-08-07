@@ -41,4 +41,14 @@ jobs:
             } else {
               core.summary.addRaw('🎉 No broken links');
             }
+            require('fs').writeFileSync('audit-results.md', core.summary.stringify());
             await core.summary.write();
+      # Step summaries are not API-readable; this artifact lets agents fetch the findings
+      - name: Upload audit results artifact
+        if: ${{ always() }}
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: audit-results
+          path: audit-results.md
+          archive: false
+          if-no-files-found: warn
