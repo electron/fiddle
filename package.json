@@ -16,7 +16,7 @@
     "lint:js": "eslint \"./**/*.js\"",
     "lint:markdown": "markdownlint-cli2 \"*.md\"",
     "lint:templates": "standard \"static/**/*.js\"",
-    "lint:links": "lint-roller-markdown-links --fetch-external-links \"*.md\"",
+    "lint:links": "lint-roller-markdown-links \"*.md\"",
     "lint:fix": "npm-run-all \"lint:!(fix|links) -- --fix\"",
     "lint": "npm-run-all \"lint:!(fix)\"",
     "make": "electron-forge make",
