@@ -33,6 +33,13 @@ jobs:
         with:
           node-version-file: .nvmrc
           cache: 'yarn'
+      - name: Use D:\\ drive for Windows
+        if: runner.os == 'Windows'
+        shell: bash
+        run: |
+          mkdir -p /d/fast-temp
+          echo "YARN_GLOBAL_FOLDER=D:\\yarn-data" >> $GITHUB_ENV
+          echo "TEMP=D:\\fast-temp" >> $GITHUB_ENV
       - name: Install dependencies
         run: yarn --immutable
       - run: yarn run contributors
