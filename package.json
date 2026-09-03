@@ -47,7 +47,7 @@
     "@blueprintjs/core": "^3.36.0",
     "@blueprintjs/popover2": "^0.12.2",
     "@blueprintjs/select": "^3.15.0",
-    "@electron-internal/extract-zip": "^1.0.1",
+    "@electron-internal/extract-zip": "^1.0.5",
     "@electron/fiddle-core": "^2.2.0",
     "@octokit/rest": "^22.0.1",
     "@sentry/electron": "^7.12.0",

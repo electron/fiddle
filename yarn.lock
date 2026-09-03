@@ -638,10 +638,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@electron-internal/extract-zip@npm:^1.0.1":
-  version: 1.0.1
-  resolution: "@electron-internal/extract-zip@npm:1.0.1"
-  checksum: 10c0/4149cb1c99da41457802a11fac692701f58460dcd78341958c10c948876abd3747d45137cf6bfe0c99e7dea0bdb32bf072e9d420a18f55bd1e0087bd1a5c45ba
+"@electron-internal/extract-zip@npm:^1.0.5":
+  version: 1.0.5
+  resolution: "@electron-internal/extract-zip@npm:1.0.5"
+  checksum: 10c0/d3341937dcb37097fd4927b7e5dfb7cb6b1ba56a42b00d62a55a7a9bbd093545dd8c6711ab39b321b2696d968b2cc32c29ed9d60a1fa6aa1665588e03e60d4e1
   languageName: node
   linkType: hard
 
@@ -5321,7 +5321,7 @@ __metadata:
     "@electron-forge/plugin-fuses": "npm:8.0.0-alpha.9"
     "@electron-forge/plugin-webpack": "npm:8.0.0-alpha.9"
     "@electron-forge/publisher-github": "npm:8.0.0-alpha.9"
-    "@electron-internal/extract-zip": "npm:^1.0.1"
+    "@electron-internal/extract-zip": "npm:^1.0.5"
     "@electron/devtron": "npm:^2.1.1"
     "@electron/fiddle-core": "npm:^2.2.0"
     "@electron/fuses": "npm:^2.1.1"
