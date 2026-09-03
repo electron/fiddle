@@ -180,9 +180,6 @@ export async function setupFiddleGlobal() {
     removeLocalVersion(version: string): Array<Version> {
       return ipcRenderer.sendSync(IpcEvents.REMOVE_LOCAL_VERSION, version);
     },
-    migrateLocalVersions(versions: Version[]): boolean {
-      return ipcRenderer.sendSync(IpcEvents.MIGRATE_LOCAL_VERSIONS, versions);
-    },
     getOldestSupportedMajor() {
       return ipcRenderer.sendSync(IpcEvents.GET_OLDEST_SUPPORTED_MAJOR);
     },

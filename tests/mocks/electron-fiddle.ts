@@ -28,7 +28,6 @@ export class ElectronFiddleMock {
   public addLocalVersion = vi.fn();
   public cancelPendingLocalVersion = vi.fn();
   public removeLocalVersion = vi.fn();
-  public migrateLocalVersions = vi.fn();
   public getNodeTypes = vi.fn();
   public getOldestSupportedMajor = vi.fn();
   public getReleaseInfo = vi.fn();

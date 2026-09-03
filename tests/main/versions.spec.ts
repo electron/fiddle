@@ -12,7 +12,6 @@ import {
   getOldestSupportedMajor,
   getReleasedVersions,
   isReleasedMajor,
-  migrateLocalVersions,
   removeLocalVersion,
   setPendingLocalPath,
   setupVersions,
@@ -102,7 +101,7 @@ describe('versions', () => {
   });
 
   describe('local version management', () => {
-    const emptyState = JSON.stringify({ migrated: false, versions: [] });
+    const emptyState = JSON.stringify({ versions: [] });
 
     beforeEach(async () => {
       // Provide clean persisted state so loadLocalVersions resets properly
@@ -181,66 +180,9 @@ describe('versions', () => {
       });
     });
 
-    describe('migrateLocalVersions()', () => {
-      it('accepts migration on first call', () => {
-        const versions: Version[] = [
-          { version: '1.0.0', localPath: '/path/a' },
-          { version: '2.0.0', localPath: '/path/b' },
-        ];
-
-        const accepted = migrateLocalVersions(versions);
-        expect(accepted).toBe(true);
-        expect(getLocalVersions()).toEqual(versions);
-        expect(fs.writeFileSync).toHaveBeenCalled();
-      });
-
-      it('rejects migration on subsequent calls', () => {
-        migrateLocalVersions([{ version: '1.0.0', localPath: '/path/a' }]);
-        vi.mocked(fs.writeFileSync).mockClear();
-
-        const accepted = migrateLocalVersions([
-          { version: '3.0.0', localPath: '/path/c' },
-        ]);
-        expect(accepted).toBe(false);
-        expect(fs.writeFileSync).not.toHaveBeenCalled();
-      });
-
-      it('filters out invalid entries', () => {
-        const versions = [
-          { version: '1.0.0', localPath: '/valid' },
-          { version: '2.0.0', localPath: '' },
-          { version: null, localPath: '/no-version' },
-          null,
-        ] as unknown as Version[];
-
-        migrateLocalVersions(versions);
-        expect(getLocalVersions()).toEqual([
-          { version: '1.0.0', localPath: '/valid' },
-        ]);
-      });
-
-      it('does not add duplicates by localPath', () => {
-        setPendingLocalPath('token-dup', '/path/a');
-        addLocalVersion('token-dup', 'build a');
-
-        migrateLocalVersions([
-          { version: '1.0.0-dup', localPath: '/path/a' },
-          { version: '2.0.0', localPath: '/path/b' },
-        ]);
-
-        const locals = getLocalVersions();
-        expect(locals.filter((v) => v.localPath === '/path/a')).toHaveLength(1);
-        expect(locals).toContainEqual({
-          version: '2.0.0',
-          localPath: '/path/b',
-        });
-      });
-    });
-
     describe('loadLocalVersions()', () => {
       it('loads persisted versions on setup', async () => {
         const stored = {
-          migrated: true,
           versions: [{ version: '5.0.0', localPath: '/stored' }],
         };
         vi.mocked(fs.existsSync).mockReturnValue(true);
@@ -249,10 +191,6 @@ describe('versions', () => {
         await setupVersions();
 
         expect(getLocalVersions()).toEqual(stored.versions);
-        // Since migrated was true, further migration should be rejected
-        expect(
-          migrateLocalVersions([{ version: '6.0.0', localPath: '/new' }]),
-        ).toBe(false);
       });
     });
   });

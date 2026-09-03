@@ -9,6 +9,7 @@ import {
 } from '../../src/interfaces';
 import {
   addLocalVersion,
+  discardLocalVersionsFromLocalStorage,
   fetchVersions,
   getDefaultVersion,
   getLocalVersions,
@@ -122,6 +123,43 @@ describe('versions', () => {
       await fetchVersions();
       expect(localStorage.removeItem).toHaveBeenCalledWith(
         GlobalSetting.knownVersion,
+      );
+    });
+  });
+
+  describe('discardLocalVersionsFromLocalStorage()', () => {
+    it('returns true and removes legacy local versions', () => {
+      vi.mocked(localStorage.getItem).mockReturnValue(
+        JSON.stringify([{ version: '1.0.0', localPath: '/legacy/path' }]),
+      );
+
+      const result = discardLocalVersionsFromLocalStorage();
+
+      expect(result).toBe(true);
+      expect(localStorage.removeItem).toHaveBeenCalledWith(
+        GlobalSetting.localVersion,
+      );
+    });
+
+    it('returns false for empty legacy versions but still removes key', () => {
+      vi.mocked(localStorage.getItem).mockReturnValue(JSON.stringify([]));
+
+      const result = discardLocalVersionsFromLocalStorage();
+
+      expect(result).toBe(false);
+      expect(localStorage.removeItem).toHaveBeenCalledWith(
+        GlobalSetting.localVersion,
+      );
+    });
+
+    it('returns false and removes legacy key even when value is invalid json', () => {
+      vi.mocked(localStorage.getItem).mockReturnValue('not-json');
+
+      const result = discardLocalVersionsFromLocalStorage();
+
+      expect(result).toBe(false);
+      expect(localStorage.removeItem).toHaveBeenCalledWith(
+        GlobalSetting.localVersion,
       );
     });
   });

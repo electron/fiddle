@@ -10,23 +10,25 @@ import {
 } from '../interfaces';
 
 /**
- * One-time migration: move local versions from localStorage to main process.
- * Must be called before getElectronVersions().
+ * Legacy builds stored local versions in renderer localStorage - discard them.
+ * Returns true if any legacy local versions were found and discarded, else false.
  */
-export function migrateLocalVersionsFromLocalStorage(): void {
+export function discardLocalVersionsFromLocalStorage(): boolean {
   const raw = window.localStorage.getItem(GlobalSetting.localVersion);
-  if (!raw) return;
+  if (!raw) return false;
 
   try {
     const versions: Array<Version> = JSON.parse(raw);
     if (Array.isArray(versions) && versions.length !== 0) {
-      window.ElectronFiddle.migrateLocalVersions(versions);
+      return true;
     }
   } catch {
     // We tried our best, if something is corrupt just remove and move on
   } finally {
     window.localStorage.removeItem(GlobalSetting.localVersion);
   }
+
+  return false;
 }
 
 /**

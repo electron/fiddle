@@ -45,5 +45,10 @@ export function getSuffix(filename: string) {
 }
 
 export function isSupportedFile(filename: string): filename is EditorId {
+  // Reject any name containing a path separator
+  if (/[/\\]/.test(filename)) {
+    return false;
+  }
+
   return /\.(css|html|cjs|js|mjs|json)$/i.test(filename);
 }
