@@ -52,7 +52,7 @@ async function prepareTemplate(branch: string): Promise<string> {
       // unzip it from the tempfile
       console.log(`Content: ${branch} unzipping template`);
       await fs.ensureDir(TEMPLATES_DIR);
-      const { default: extract } = await import('extract-zip');
+      const { extract } = await import('@electron-internal/extract-zip');
       await extract(tempfile, { dir: TEMPLATES_DIR });
 
       // cleanup
