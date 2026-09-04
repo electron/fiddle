@@ -1,6 +1,9 @@
+import * as fs from 'node:fs';
+import * as os from 'node:os';
 import * as path from 'node:path';
 
 import { FuseV1Options, FuseVersion } from '@electron/fuses';
+import type { SignToolOptions } from '@electron/windows-sign';
 import { MakerMSIX } from '@electron-forge/maker-msix';
 import { FusesPlugin } from '@electron-forge/plugin-fuses';
 import type { ForgeConfig } from '@electron-forge/shared-types';
@@ -25,6 +28,93 @@ const commonLinuxConfig = {
 };
 
 const requirements = path.resolve(__dirname, 'tools/certs/requirements.txt');
+
+/**
+ * Windows code signing through Azure Trusted Signing.
+ *
+ * Authentication is not handled here. In CI, `azure/login` performs an OIDC
+ * login with the Azure CLI, and the Trusted Signing dlib then picks up that
+ * session through `AzureCliCredential`. This function only tells signtool
+ * where the dlib lives and which account and certificate profile to use.
+ *
+ * Returns `undefined` when none of the Azure variables are set so that local
+ * and CI builds produce unsigned artifacts, as before.
+ */
+function getWindowsSignOptions(): SignToolOptions | undefined {
+  const {
+    AZURE_CODE_SIGNING_DLIB: dlib,
+    AZURE_CODE_SIGNING_ENDPOINT: endpoint,
+    AZURE_CODE_SIGNING_ACCOUNT_NAME: accountName,
+    AZURE_CODE_SIGNING_CERTIFICATE_PROFILE_NAME: certificateProfileName,
+    WINDOWS_SIGNTOOL_PATH: signToolPath,
+  } = process.env;
+
+  if (!dlib && !endpoint && !accountName && !certificateProfileName) {
+    return undefined;
+  }
+
+  if (!dlib || !endpoint || !accountName || !certificateProfileName) {
+    throw new Error(
+      'Azure Trusted Signing is only partially configured. Set all of ' +
+        'AZURE_CODE_SIGNING_DLIB, AZURE_CODE_SIGNING_ENDPOINT, ' +
+        'AZURE_CODE_SIGNING_ACCOUNT_NAME and ' +
+        'AZURE_CODE_SIGNING_CERTIFICATE_PROFILE_NAME, or none of them.',
+    );
+  }
+
+  if (!signToolPath) {
+    // The signtool.exe vendored by @electron/windows-sign predates /dlib
+    // support. Trusted Signing needs one from Windows SDK 10.0.22621.755+.
+    throw new Error(
+      'Azure Trusted Signing needs a recent signtool.exe. Set ' +
+        'WINDOWS_SIGNTOOL_PATH to one from Windows SDK 10.0.22621.755 or later.',
+    );
+  }
+
+  const metadataPath = path.join(
+    os.tmpdir(),
+    'electron-fiddle-trusted-signing-metadata.json',
+  );
+
+  fs.writeFileSync(
+    metadataPath,
+    JSON.stringify(
+      {
+        Endpoint: endpoint,
+        CodeSigningAccountName: accountName,
+        CertificateProfileName: certificateProfileName,
+        // `azure/login` leaves us with an Azure CLI session. Skip the other
+        // credential providers DefaultAzureCredential would otherwise probe,
+        // some of which (managed identity) time out slowly on GitHub runners.
+        ExcludeCredentials: [
+          'ManagedIdentityCredential',
+          'WorkloadIdentityCredential',
+          'SharedTokenCacheCredential',
+          'VisualStudioCredential',
+          'VisualStudioCodeCredential',
+          'AzurePowerShellCredential',
+          'AzureDeveloperCliCredential',
+          'InteractiveBrowserCredential',
+        ],
+      },
+      null,
+      2,
+    ),
+  );
+
+  return {
+    signToolPath,
+    // Passed as an array so paths with spaces survive intact.
+    signWithParams: ['/dlib', dlib, '/dmdf', metadataPath],
+    timestampServer: 'http://timestamp.acs.microsoft.com',
+    // Trusted Signing certificates are SHA-256 only; no SHA-1 dual signing.
+    hashes: ['sha256'] as SignToolOptions['hashes'],
+    // Certificate selection is done by the dlib, not by signtool's `/a`.
+    automaticallySelectCertificate: false,
+  };
+}
+
+const windowsSignOptions = getWindowsSignOptions();
 
 const config: ForgeConfig = {
   hooks: {
@@ -137,15 +227,15 @@ const config: ForgeConfig = {
         noMsi: true,
         setupExe: `electron-fiddle-${version}-win32-${arch}-setup.exe`,
         setupIcon: path.resolve(iconDir, 'fiddle.ico'),
-        signWithParams: process.env.CERT_FINGERPRINT
-          ? `/sha1 ${process.env.CERT_FINGERPRINT} /tr http://timestamp.digicert.com /td SHA256 /fd SHA256`
-          : undefined,
+        windowsSign: windowsSignOptions,
       }),
     },
     new MakerMSIX({
       manifestVariables: {
+        // Must match the subject of the Azure Trusted Signing certificate
+        // exactly, or signtool refuses to sign the package.
         publisher:
-          'CN=OpenJS Foundation, OU=Electron, O=OpenJS Foundation, L=San Francisco, S=California, C=US, SERIALNUMBER=5579593, OID.2.5.4.15=Private Organization, OID.1.3.6.1.4.1.311.60.2.1.2=Delaware, OID.1.3.6.1.4.1.311.60.2.1.3=US',
+          'CN=OpenJS Foundation, O=OpenJS Foundation, L=San Francisco, S=California, C=US',
         publisherDisplayName: 'OpenJS Foundation',
         packageIdentity: 'ElectronCommunity.ElectronFiddle',
         appExecutable: 'electron-fiddle.exe',
@@ -153,12 +243,7 @@ const config: ForgeConfig = {
         appDisplayName: 'Electron Fiddle',
         packageDescription: packageJson.description,
       },
-      windowsSignOptions: process.env.CERT_FINGERPRINT
-        ? {
-            signWithParams: `/sha1 ${process.env.CERT_FINGERPRINT}`,
-            hashes: ['sha256'] as any,
-          }
-        : undefined,
+      windowsSignOptions,
     }),
     {
       name: '@electron-forge/maker-zip',
