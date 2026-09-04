@@ -32,6 +32,8 @@ jobs:
     permissions:
       actions: write
       contents: read
+      # Required for the OIDC login to Azure used for Windows code signing
+      id-token: write
     environment: release
     steps:
       - run: git config --global core.autocrlf input
@@ -58,30 +60,32 @@ jobs:
           MACOS_CERT_P12: ${{ secrets.MACOS_CERT_P12 }}
           MACOS_CERT_PASSWORD: ${{ secrets.MACOS_CERT_PASSWORD }}
         run: chmod +x tools/add-macos-cert.sh && . ./tools/add-macos-cert.sh
-      - name: Signing Manager Setup (Windows)
+      - name: Azure login (Windows)
         if: ${{ startsWith(matrix.os, 'windows-') }}
-        uses: digicert/code-signing-software-trust-action@fae23a455ba4bde62b64fd7cb2f81ade788f5a95 # v1.2.1
-      - name: Write authentication cert to disk (Windows)
-        if: ${{ startsWith(matrix.os, 'windows-') }}
-        shell: bash
-        env:
-          SM_CLIENT_CERT_P12_BASE64: ${{ secrets.SM_CLIENT_CERT_P12_BASE64 }}
-        run: | 
-          echo "$SM_CLIENT_CERT_P12_BASE64" | base64 --decode > /d/cert.p12
-          echo "SM_CLIENT_CERT_FILE=D:\\cert.p12" >> "$GITHUB_ENV" 
-      - name: Sync cert (Windows)
+        uses: azure/login@7ddb5af1ef8758cf1353cf3b42f940aee27ba21c # v3.0.2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+      - name: Install Azure Trusted Signing client (Windows)
         if: ${{ startsWith(matrix.os, 'windows-') }}
         shell: pwsh
-        env:
-          CERT_FINGERPRINT: ${{ secrets.CERT_FINGERPRINT }}
-          KEYPAIR_ALIAS: ${{ secrets.KEYPAIR_ALIAS }}
-          SM_API_KEY: ${{ secrets.SM_API_KEY }}
-          SM_CLIENT_CERT_FILE: ${{ env.SM_CLIENT_CERT_FILE }}
-          SM_CLIENT_CERT_PASSWORD: ${{ secrets.SM_CLIENT_CERT_PASSWORD }}
-          SM_HOST: ${{ secrets.SM_HOST }}
         run: |
-          smksp_registrar list
-          smctl windows certsync --keypair-alias=$env:KEYPAIR_ALIAS
+          $clientDir = Join-Path $env:RUNNER_TEMP 'trusted-signing'
+          nuget install Microsoft.Trusted.Signing.Client -Version 1.0.95 -x -OutputDirectory $clientDir
+          $dlib = Join-Path $clientDir 'Microsoft.Trusted.Signing.Client\bin\x64\Azure.CodeSigning.Dlib.dll'
+          if (-not (Test-Path $dlib)) { throw "Azure.CodeSigning.Dlib.dll not found at $dlib" }
+
+          # Trusted Signing needs signtool.exe from Windows SDK 10.0.22621.755 or
+          # later; pick the newest SDK installed on the runner.
+          $signtool = Get-ChildItem "${env:ProgramFiles(x86)}\Windows Kits\10\bin\10.*\x64\signtool.exe" |
+            Sort-Object { [version]$_.Directory.Parent.Name } -Descending |
+            Select-Object -First 1
+          if (-not $signtool) { throw 'No Windows SDK signtool.exe found' }
+          Write-Host "Using signtool: $($signtool.FullName)"
+
+          "AZURE_CODE_SIGNING_DLIB=$dlib" >> $env:GITHUB_ENV
+          "WINDOWS_SIGNTOOL_PATH=$($signtool.FullName)" >> $env:GITHUB_ENV
       - name: Build (macOS)
         if: ${{ startsWith(matrix.os, 'macos-') }}
         env:
@@ -91,12 +95,13 @@ jobs:
       - name: Build (Windows)
         if: ${{ startsWith(matrix.os, 'windows-') }}
         env:
-          CERT_FINGERPRINT: ${{ secrets.CERT_FINGERPRINT }}
-          KEYPAIR_ALIAS: ${{ secrets.KEYPAIR_ALIAS }}
-          SM_API_KEY: ${{ secrets.SM_API_KEY }}
-          SM_CLIENT_CERT_FILE: ${{ env.SM_CLIENT_CERT_FILE }}
-          SM_CLIENT_CERT_PASSWORD: ${{ secrets.SM_CLIENT_CERT_PASSWORD }}
-          SM_HOST: ${{ secrets.SM_HOST }}
+          # AZURE_CODE_SIGNING_DLIB and WINDOWS_SIGNTOOL_PATH come from the
+          # previous step via GITHUB_ENV. The values below identify the Trusted
+          # Signing account and are not secrets; the endpoint must match the
+          # region the account was created in.
+          AZURE_CODE_SIGNING_ENDPOINT: https://eus.codesigning.azure.net
+          AZURE_CODE_SIGNING_ACCOUNT_NAME: OpenJS-CodeSigning
+          AZURE_CODE_SIGNING_CERTIFICATE_PROFILE_NAME: Electron
         run: yarn run publish --arch=${{ matrix.arch }} --dry-run # zizmor: ignore[use-trusted-publishing]
       - name: Build (Linux)
         if: ${{ startsWith(matrix.os, 'ubuntu-') }}
