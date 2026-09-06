@@ -16,7 +16,6 @@ jobs:
         os:
           - macos-latest-large
           - ubuntu-latest
-          - windows-latest
         arch:
           - x64
         include:
@@ -26,14 +25,10 @@ jobs:
             arch: armv7l
           - os: ubuntu-24.04-arm
             arch: arm64
-          - os: windows-latest
-            arch: ia32
     runs-on: "${{ matrix.os }}"
     permissions:
       actions: write
       contents: read
-      # Required for the OIDC login to Azure used for Windows code signing
-      id-token: write
     environment: release
     steps:
       - run: git config --global core.autocrlf input
@@ -60,15 +55,65 @@ jobs:
           MACOS_CERT_P12: ${{ secrets.MACOS_CERT_P12 }}
           MACOS_CERT_PASSWORD: ${{ secrets.MACOS_CERT_PASSWORD }}
         run: chmod +x tools/add-macos-cert.sh && . ./tools/add-macos-cert.sh
-      - name: Azure login (Windows)
-        if: ${{ startsWith(matrix.os, 'windows-') }}
+      - name: Build (macOS)
+        if: ${{ startsWith(matrix.os, 'macos-') }}
+        env:
+          APPLE_ID: ${{ secrets.APPLE_ID }}
+          APPLE_ID_PASSWORD: ${{ secrets.APPLE_ID_PASSWORD }}
+        run: yarn run publish --arch=${{ matrix.arch }} --dry-run # zizmor: ignore[use-trusted-publishing]
+      - name: Build (Linux)
+        if: ${{ startsWith(matrix.os, 'ubuntu-') }}
+        run: yarn run publish --arch=${{ matrix.arch }} --dry-run # zizmor: ignore[use-trusted-publishing]
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: build-artifacts-${{ matrix.os }}-${{ matrix.arch }}
+          path: out
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        if: ${{ startsWith(matrix.os, 'ubuntu-') && matrix.arch == 'x64' }}
+        with:
+          name: webpack-source-maps
+          path: .webpack
+          include-hidden-files: true
+
+  build-windows:
+    name: Build (Windows)
+    strategy:
+      fail-fast: false
+      matrix:
+        arch:
+          - x64
+          - ia32
+    runs-on: windows-latest
+    permissions:
+      actions: write
+      contents: read
+      # Required for the OIDC login to Azure used for code signing. Kept in
+      # its own job so the macOS and Linux runners can't request ID tokens.
+      id-token: write
+    environment: release
+    steps:
+      - run: git config --global core.autocrlf input
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Setup Node.js
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version-file: .nvmrc
+          package-manager-cache: false
+      - run: yarn install --immutable
+      - run: yarn run contributors
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - run: yarn run electron-releases
+      - name: Azure login
         uses: azure/login@7ddb5af1ef8758cf1353cf3b42f940aee27ba21c # v3.0.2
         with:
           client-id: ${{ secrets.AZURE_CLIENT_ID }}
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
-      - name: Install Azure Trusted Signing client (Windows)
-        if: ${{ startsWith(matrix.os, 'windows-') }}
+      - name: Install Azure Trusted Signing client
         shell: pwsh
         run: |
           $clientDir = Join-Path $env:RUNNER_TEMP 'trusted-signing'
@@ -86,14 +131,7 @@ jobs:
 
           "AZURE_CODE_SIGNING_DLIB=$dlib" >> $env:GITHUB_ENV
           "WINDOWS_SIGNTOOL_PATH=$($signtool.FullName)" >> $env:GITHUB_ENV
-      - name: Build (macOS)
-        if: ${{ startsWith(matrix.os, 'macos-') }}
-        env:
-          APPLE_ID: ${{ secrets.APPLE_ID }}
-          APPLE_ID_PASSWORD: ${{ secrets.APPLE_ID_PASSWORD }}
-        run: yarn run publish --arch=${{ matrix.arch }} --dry-run # zizmor: ignore[use-trusted-publishing]
       - name: Build (Windows)
-        if: ${{ startsWith(matrix.os, 'windows-') }}
         env:
           # AZURE_CODE_SIGNING_DLIB and WINDOWS_SIGNTOOL_PATH come from the
           # previous step via GITHUB_ENV. The values below identify the Trusted
@@ -103,19 +141,10 @@ jobs:
           AZURE_CODE_SIGNING_ACCOUNT_NAME: OpenJS-CodeSigning
           AZURE_CODE_SIGNING_CERTIFICATE_PROFILE_NAME: Electron
         run: yarn run publish --arch=${{ matrix.arch }} --dry-run # zizmor: ignore[use-trusted-publishing]
-      - name: Build (Linux)
-        if: ${{ startsWith(matrix.os, 'ubuntu-') }}
-        run: yarn run publish --arch=${{ matrix.arch }} --dry-run # zizmor: ignore[use-trusted-publishing]
       - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
-          name: build-artifacts-${{ matrix.os }}-${{ matrix.arch }}
+          name: build-artifacts-windows-latest-${{ matrix.arch }}
           path: out
-      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
-        if: ${{ startsWith(matrix.os, 'ubuntu-') && matrix.arch == 'x64' }}
-        with:
-          name: webpack-source-maps
-          path: .webpack
-          include-hidden-files: true
 
   test:
     permissions:
@@ -127,6 +156,7 @@ jobs:
     runs-on: ubuntu-latest
     needs:
       - build
+      - build-windows
       - test
     environment: release
     permissions:

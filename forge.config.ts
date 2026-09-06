@@ -3,7 +3,6 @@ import * as os from 'node:os';
 import * as path from 'node:path';
 
 import { FuseV1Options, FuseVersion } from '@electron/fuses';
-import type { SignToolOptions } from '@electron/windows-sign';
 import { MakerMSIX } from '@electron-forge/maker-msix';
 import { FusesPlugin } from '@electron-forge/plugin-fuses';
 import type { ForgeConfig } from '@electron-forge/shared-types';
@@ -40,7 +39,13 @@ const requirements = path.resolve(__dirname, 'tools/certs/requirements.txt');
  * Returns `undefined` when none of the Azure variables are set so that local
  * and CI builds produce unsigned artifacts, as before.
  */
-function getWindowsSignOptions(): SignToolOptions | undefined {
+// Derived from Forge rather than imported from `@electron/windows-sign`, so the
+// type always matches the version Forge itself depends on.
+type WindowsSignOptions = NonNullable<
+  MakerMSIX['config']['windowsSignOptions']
+>;
+
+function getWindowsSignOptions(): WindowsSignOptions | undefined {
   const {
     AZURE_CODE_SIGNING_DLIB: dlib,
     AZURE_CODE_SIGNING_ENDPOINT: endpoint,
@@ -108,7 +113,7 @@ function getWindowsSignOptions(): SignToolOptions | undefined {
     signWithParams: ['/dlib', dlib, '/dmdf', metadataPath],
     timestampServer: 'http://timestamp.acs.microsoft.com',
     // Trusted Signing certificates are SHA-256 only; no SHA-1 dual signing.
-    hashes: ['sha256'] as SignToolOptions['hashes'],
+    hashes: ['sha256'] as WindowsSignOptions['hashes'],
     // Certificate selection is done by the dlib, not by signtool's `/a`.
     automaticallySelectCertificate: false,
   };
