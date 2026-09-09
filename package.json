@@ -118,7 +118,7 @@
     "jsdom": "^26.1.0",
     "less": "^4.1.1",
     "less-loader": "^11.0.0",
-    "lint-staged": "^16.4.0",
+    "lint-staged": "^17.4.1",
     "log-symbols": "^6.0.0",
     "markdownlint-cli2": "^0.22.0",
     "mini-css-extract-plugin": "^2.6.1",
