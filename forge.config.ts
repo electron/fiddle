@@ -121,6 +121,115 @@ function getWindowsSignOptions(): WindowsSignOptions | undefined {
 
 const windowsSignOptions = getWindowsSignOptions();
 
+/**
+ * Windows 10 SDK bin directory holding makeappx.exe, makepri.exe and
+ * signtool.exe. Because we supply our own AppxManifest, electron-windows-msix
+ * derives the SDK version from the manifest's MinVersion and fails unless an
+ * SDK of exactly that version is installed, so point it at one explicitly.
+ * CI already selects the newest SDK's signtool; locally, fall back to the
+ * newest installed SDK that ships makeappx.exe.
+ */
+function getWindowsKitPath(): string | undefined {
+  if (process.platform !== 'win32') {
+    return undefined;
+  }
+
+  const { WINDOWS_SIGNTOOL_PATH: signToolPath } = process.env;
+  if (signToolPath) {
+    return path.dirname(signToolPath);
+  }
+
+  const kitsBin = path.join(
+    process.env['ProgramFiles(x86)'] ?? 'C:\\Program Files (x86)',
+    'Windows Kits',
+    '10',
+    'bin',
+  );
+  const hostArch =
+    process.env.PROCESSOR_ARCHITECTURE === 'ARM64' ? 'arm64' : 'x64';
+  if (!fs.existsSync(kitsBin)) {
+    return undefined;
+  }
+
+  const compareVersions = (a: string, b: string) => {
+    const [na, nb] = [a, b].map((v) => v.split('.').map(Number));
+    const i = na.findIndex((n, idx) => n !== nb[idx]);
+    return i === -1 ? 0 : na[i] - nb[i];
+  };
+  const newest = fs
+    .readdirSync(kitsBin)
+    .filter(
+      (name) =>
+        /^10\.\d+\.\d+\.\d+$/.test(name) &&
+        fs.existsSync(path.join(kitsBin, name, hostArch, 'makeappx.exe')),
+    )
+    .sort(compareVersions)
+    .pop();
+
+  return newest ? path.join(kitsBin, newest, hostArch) : undefined;
+}
+
+const msixManifestTemplate = path.resolve(
+  __dirname,
+  'tools/msix/AppxManifest.xml.in',
+);
+
+const escapeXml = (value: string) =>
+  value
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+
+/**
+ * Renders the MSIX AppxManifest for the given architecture and returns its
+ * path. The packager's built-in template has no protocol declaration, and an
+ * MSIX app can only register `electron-fiddle://` through its manifest, so we
+ * ship our own template (see tools/msix/AppxManifest.xml.in).
+ */
+function renderMsixManifest(arch: string): string {
+  const processorArchitecture = { x64: 'x64', arm64: 'arm64', ia32: 'x86' }[
+    arch
+  ];
+  if (!processorArchitecture) {
+    throw new Error(`Unsupported MSIX architecture: ${arch}`);
+  }
+
+  // MSIX versions are four-part; drop any prerelease suffix like the packager does.
+  const msixVersion = /^\d+\.\d+\.\d+$/.test(version)
+    ? `${version}.0`
+    : version.replace(/[-+].*/, '.0');
+
+  const manifest = fs
+    .readFileSync(msixManifestTemplate, 'utf8')
+    .replace(/{{Version}}/g, msixVersion)
+    .replace(/{{ProcessorArchitecture}}/g, processorArchitecture)
+    .replace(/{{Description}}/g, escapeXml(packageJson.description));
+
+  const manifestPath = path.join(
+    os.tmpdir(),
+    `electron-fiddle-AppxManifest-${arch}.xml`,
+  );
+  fs.writeFileSync(manifestPath, manifest);
+  return manifestPath;
+}
+
+/**
+ * update.electronjs.org only serves MSIX updates for x64 and arm64 packages,
+ * so an ia32 MSIX would never receive updates. Only build the x64 package.
+ */
+class MakerMSIXx64 extends MakerMSIX {
+  async make(options: Parameters<MakerMSIX['make']>[0]) {
+    if (options.targetArch !== 'x64') {
+      console.log(
+        `Skipping MSIX for ${options.targetArch}: only the x64 MSIX is published`,
+      );
+      return [];
+    }
+    return super.make(options);
+  }
+}
+
 const config: ForgeConfig = {
   hooks: {
     generateAssets: async () => {
@@ -235,21 +344,21 @@ const config: ForgeConfig = {
         windowsSign: windowsSignOptions,
       }),
     },
-    new MakerMSIX({
+    new MakerMSIXx64((arch: string) => ({
+      appManifest: renderMsixManifest(arch),
+      windowsKitPath: getWindowsKitPath(),
       manifestVariables: {
-        // Must match the subject of the Azure Trusted Signing certificate
-        // exactly, or signtool refuses to sign the package.
+        // The manifest is rendered from tools/msix/AppxManifest.xml.in, so
+        // the other variables are ignored. The publisher is still used as the
+        // subject of the self-signed dev cert that unsigned local builds are
+        // signed with; it must match the Publisher in the manifest, which in
+        // turn must match the subject of the Azure Trusted Signing
+        // certificate exactly, or signtool refuses to sign the package.
         publisher:
           'CN=OpenJS Foundation, O=OpenJS Foundation, L=San Francisco, S=California, C=US',
-        publisherDisplayName: 'OpenJS Foundation',
-        packageIdentity: 'ElectronCommunity.ElectronFiddle',
-        appExecutable: 'electron-fiddle.exe',
-        packageDisplayName: 'Electron Fiddle',
-        appDisplayName: 'Electron Fiddle',
-        packageDescription: packageJson.description,
       },
       windowsSignOptions,
-    }),
+    })),
     {
       name: '@electron-forge/maker-zip',
       platforms: ['darwin'],

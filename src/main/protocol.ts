@@ -125,6 +125,9 @@ export const listenForProtocolHandler = () => {
 };
 
 export const setupProtocolHandler = () => {
+  // On Windows, only the Squirrel install registers the protocol at runtime.
+  // The MSIX package declares it in its AppxManifest instead, and has no
+  // Squirrel stub next to the app directory, so this returns early there.
   if (process.platform === 'win32' && !fs.existsSync(squirrelPath)) return;
   if (!app.isDefaultProtocolClient(PROTOCOL, squirrelPath)) {
     app.setAsDefaultProtocolClient(PROTOCOL, squirrelPath);

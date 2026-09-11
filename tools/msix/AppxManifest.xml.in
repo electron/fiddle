@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  MSIX manifest for Electron Fiddle, rendered by forge.config.ts.
+
+  electron-windows-msix ships a generic manifest template, but MSIX apps can
+  only register URL protocols through the manifest, so we provide our own
+  with a `windows.protocol` extension for `electron-fiddle://` links.
+
+  Placeholders ({{Version}}, {{ProcessorArchitecture}}, {{Description}}) are
+  filled in from package.json and the target architecture at make time.
+  The Publisher must match the subject of the code signing certificate.
+-->
+<Package
+  xmlns="http://schemas.microsoft.com/appx/manifest/foundation/windows10"
+  xmlns:uap="http://schemas.microsoft.com/appx/manifest/uap/windows10"
+  xmlns:rescap="http://schemas.microsoft.com/appx/manifest/foundation/windows10/restrictedcapabilities"
+  IgnorableNamespaces="uap rescap">
+  <Identity Name="ElectronCommunity.ElectronFiddle"
+            ProcessorArchitecture="{{ProcessorArchitecture}}"
+            Version="{{Version}}"
+            Publisher="CN=OpenJS Foundation, O=OpenJS Foundation, L=San Francisco, S=California, C=US" />
+  <Properties>
+    <DisplayName>Electron Fiddle</DisplayName>
+    <PublisherDisplayName>OpenJS Foundation</PublisherDisplayName>
+    <Logo>assets\icon.png</Logo>
+  </Properties>
+  <Dependencies>
+    <TargetDeviceFamily Name="Windows.Desktop" MinVersion="10.0.14393.0" MaxVersionTested="10.0.14393.0" />
+  </Dependencies>
+  <Resources>
+    <Resource Language="en-US" />
+  </Resources>
+  <Capabilities>
+    <rescap:Capability Name="runFullTrust" />
+    <Capability Name="internetClient" />
+  </Capabilities>
+  <Applications>
+    <Application Id="App" Executable="app\electron-fiddle.exe" EntryPoint="Windows.FullTrustApplication">
+      <uap:VisualElements
+          DisplayName="Electron Fiddle"
+          Description="{{Description}}"
+          Square44x44Logo="assets\Square44x44Logo.png"
+          Square150x150Logo="assets\Square150x150Logo.png"
+          BackgroundColor="transparent">
+      </uap:VisualElements>
+      <Extensions>
+        <uap:Extension Category="windows.protocol">
+          <uap:Protocol Name="electron-fiddle">
+            <uap:DisplayName>Electron Fiddle</uap:DisplayName>
+          </uap:Protocol>
+        </uap:Extension>
+      </Extensions>
+    </Application>
+  </Applications>
+</Package>
