@@ -2,7 +2,6 @@
 
 [![Test](https://github.com/electron/fiddle/actions/workflows/test.yml/badge.svg)](https://github.com/electron/fiddle/actions/workflows/test.yml)
 [![Coverage Status](https://coveralls.io/repos/github/electron/fiddle/badge.svg?branch=main)](https://coveralls.io/github/electron/fiddle?branch=main)
-[![Electron Discord Invite](https://img.shields.io/discord/745037351163527189?color=%237289DA&label=chat&logo=discord&logoColor=white)](https://discord.com/invite/APGC3k5yaH)
 
 Electron Fiddle lets you create and play with small Electron experiments. It
 greets you with a quick-start template after opening – change a few things,
