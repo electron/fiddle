@@ -173,6 +173,9 @@ const msixManifestTemplate = path.resolve(
   __dirname,
   'tools/msix/AppxManifest.xml.in',
 );
+// Tile and Start menu icons referenced by the manifest. The packager's
+// bundled defaults are placeholder images, not the Fiddle logo.
+const msixAssets = path.resolve(__dirname, 'tools/msix/assets');
 
 const escapeXml = (value: string) =>
   value
@@ -346,6 +349,7 @@ const config: ForgeConfig = {
     },
     new MakerMSIXx64((arch: string) => ({
       appManifest: renderMsixManifest(arch),
+      packageAssets: msixAssets,
       windowsKitPath: getWindowsKitPath(),
       manifestVariables: {
         // The manifest is rendered from tools/msix/AppxManifest.xml.in, so
