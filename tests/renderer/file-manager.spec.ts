@@ -52,7 +52,7 @@ describe('FileManager', () => {
 
     it('opens a fiddle with supported files', async () => {
       const file = 'file.js';
-      expect(isSupportedFile(file));
+      expect(isSupportedFile(file)).toBe(true);
       const content = '// content';
       const values = { ...editorValues, [file]: content };
       app.remoteLoader.confirmAddFile.mockResolvedValue(true);
@@ -188,7 +188,7 @@ describe('FileManager', () => {
     it('includes supported files', async () => {
       const file = 'file.js';
       const content = '// file.js';
-      expect(isSupportedFile(file));
+      expect(isSupportedFile(file)).toBe(true);
       const values = { ...editorValues, [file]: content };
 
       app.getEditorValues.mockReturnValue(values);

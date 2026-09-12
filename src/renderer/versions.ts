@@ -73,8 +73,8 @@ export function makeRunnable(ver: Version): RunnableVersion {
   const ret: RunnableVersion = {
     ...ver,
     version: normalizeVersion(ver.version),
-    source: Boolean(ver.localPath) ? VersionSource.local : VersionSource.remote,
-    state: Boolean(ver.localPath)
+    source: ver.localPath ? VersionSource.local : VersionSource.remote,
+    state: ver.localPath
       ? window.ElectronFiddle.getLocalVersionState({ ...ver })
       : InstallState.missing,
   };

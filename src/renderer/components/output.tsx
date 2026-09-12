@@ -71,7 +71,7 @@ export const Output = observer(
      * Initialize Monaco.
      */
     public async initMonaco() {
-      const { monaco, monacoOptions: monacoOptions } = this.props;
+      const { monaco, monacoOptions } = this.props;
       const ref = this.outputRef.current;
       if (ref) {
         this.setupCustomOutputEditorLanguage(monaco);

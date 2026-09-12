@@ -530,7 +530,7 @@ describe('App component', () => {
         () => vi.mocked(window.ElectronFiddle.showWindow).mock.calls.length > 0,
       );
       expect(window.close).not.toHaveBeenCalled();
-      expect(!app.state.isQuitting);
+      expect(app.state.isQuitting).toBe(false);
     });
   });
 });

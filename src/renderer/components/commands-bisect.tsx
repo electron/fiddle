@@ -66,7 +66,7 @@ export const BisectHandler = observer(
 
     public render() {
       const { appState } = this.props;
-      if (!!appState.Bisector) {
+      if (appState.Bisector) {
         const isDownloading =
           appState.currentElectronVersion.state === InstallState.downloading;
         return (
