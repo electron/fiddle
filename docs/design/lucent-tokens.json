@@ -1,0 +1,711 @@
+{
+ "name": "Lucent",
+ "version": "1.0",
+ "date": "2026-09-12",
+ "prefix": "--lu-",
+ "modes": [
+  "dark",
+  "light"
+ ],
+ "color": [
+  {
+   "group": "Ground and surfaces",
+   "token": "window",
+   "dark": "#10121b",
+   "light": "#eef3f8",
+   "use": "Opaque window ground. Shows only where the OS gives no material: Linux, Reduce transparency, or a failed material."
+  },
+  {
+   "group": "Ground and surfaces",
+   "token": "surface",
+   "dark": "#1b1c26",
+   "light": "#ffffff",
+   "use": "The sheet: editor, console, settings pages. Dark is Electron navy #1b1c26 exactly."
+  },
+  {
+   "group": "Ground and surfaces",
+   "token": "surface-raised",
+   "dark": "#262837",
+   "light": "#ffffff",
+   "use": "Opaque overlays and the fallback for every material."
+  },
+  {
+   "group": "Ground and surfaces",
+   "token": "surface-sunken",
+   "dark": "#15161f",
+   "light": "#f3f6fa",
+   "use": "Console log, table heads, wells."
+  },
+  {
+   "group": "Ground and surfaces",
+   "token": "hover",
+   "dark": "rgba(159,234,249,0.08)",
+   "light": "rgba(27,28,38,0.06)",
+   "use": "Hovered rows and the selected tab, on the sheet."
+  },
+  {
+   "group": "Ground and surfaces",
+   "token": "fill",
+   "dark": "rgba(255,255,255,0.08)",
+   "light": "rgba(118,118,128,0.12)",
+   "use": "Neutral fill: ghost hover, segmented track, callouts, inline code."
+  },
+  {
+   "group": "Ground and surfaces",
+   "token": "fill-strong",
+   "dark": "rgba(255,255,255,0.13)",
+   "light": "rgba(118,118,128,0.20)",
+   "use": "Pressed states, menu item hover, progress track."
+  },
+  {
+   "group": "Ground and surfaces",
+   "token": "line",
+   "dark": "rgba(159,234,249,0.12)",
+   "light": "rgba(27,28,38,0.12)",
+   "use": "Hairlines (0.5px) between rows and above the console. Nowhere else."
+  },
+  {
+   "group": "Ground and surfaces",
+   "token": "line-strong",
+   "dark": "#6d7594",
+   "light": "#7b8196",
+   "use": "Field and control borders. 3:1 on every surface."
+  },
+  {
+   "group": "Materials",
+   "token": "material-chrome",
+   "dark": "rgba(22,24,36,0.62)",
+   "light": "rgba(250,250,253,0.62)",
+   "use": "Tint painted over the native window material: title bar, sidebar, status bar."
+  },
+  {
+   "group": "Materials",
+   "token": "material-thin",
+   "dark": "rgba(27,28,38,0.42)",
+   "light": "rgba(255,255,255,0.42)",
+   "use": "App-drawn floating panes (pop-out previews). Blurred with blur-thin."
+  },
+  {
+   "group": "Materials",
+   "token": "material-overlay",
+   "dark": "rgba(38,40,56,0.90)",
+   "light": "rgba(252,252,254,0.86)",
+   "use": "Menus, popovers, toasts, dialogs. Blurred with blur-overlay."
+  },
+  {
+   "group": "Materials",
+   "token": "capsule",
+   "dark": "rgba(255,255,255,0.08)",
+   "light": "rgba(255,255,255,0.60)",
+   "use": "Toolbar capsules and toolbar buttons on the chrome."
+  },
+  {
+   "group": "Materials",
+   "token": "capsule-hover",
+   "dark": "rgba(255,255,255,0.15)",
+   "light": "rgba(255,255,255,0.86)",
+   "use": "Toolbar button hover."
+  },
+  {
+   "group": "Materials",
+   "token": "chip",
+   "dark": "rgba(255,255,255,0.13)",
+   "light": "rgba(255,255,255,0.88)",
+   "use": "Selected sidebar row, lifted with shadow-lift."
+  },
+  {
+   "group": "Materials",
+   "token": "rim",
+   "dark": "rgba(255,255,255,0.30)",
+   "light": "rgba(255,255,255,0.95)",
+   "use": "The lit top edge of glass (inset 0.5px)."
+  },
+  {
+   "group": "Materials",
+   "token": "rim-soft",
+   "dark": "rgba(255,255,255,0.07)",
+   "light": "rgba(255,255,255,0.34)",
+   "use": "The faint all-round edge of glass (inset 0.5px)."
+  },
+  {
+   "group": "Materials",
+   "token": "scrim",
+   "dark": "rgba(6,8,18,0.50)",
+   "light": "rgba(226,228,238,0.40)",
+   "use": "Behind dialogs, with blur-scrim."
+  },
+  {
+   "group": "Text",
+   "token": "ink",
+   "dark": "#eef1f8",
+   "light": "#1b1c26",
+   "use": "Primary text on every surface and material."
+  },
+  {
+   "group": "Text",
+   "token": "ink-muted",
+   "dark": "#aeb4c9",
+   "light": "#4c5266",
+   "use": "Secondary text, inactive tabs, sidebar heads, labels."
+  },
+  {
+   "group": "Text",
+   "token": "ink-faint",
+   "dark": "#949ab2",
+   "light": "#5f6578",
+   "use": "Line numbers, timestamps, the process label. Never for sentences."
+  },
+  {
+   "group": "Accent and signals",
+   "token": "accent",
+   "dark": "#9feaf9",
+   "light": "#006f85",
+   "use": "Electron cyan (teal in light): focus, selection, links, the active icon."
+  },
+  {
+   "group": "Accent and signals",
+   "token": "accent-soft",
+   "dark": "#1c3945",
+   "light": "#dcf3f8",
+   "use": "Selected list rows, primary callouts, search matches."
+  },
+  {
+   "group": "Accent and signals",
+   "token": "action",
+   "dark": "#9feaf9",
+   "light": "#1b1c26",
+   "use": "Primary fill: Run, checked boxes, switches on. Cyan in dark, navy in light."
+  },
+  {
+   "group": "Accent and signals",
+   "token": "on-action",
+   "dark": "#0d2a31",
+   "light": "#9feaf9",
+   "use": "Label and icon on action."
+  },
+  {
+   "group": "Accent and signals",
+   "token": "focus-ring",
+   "dark": "var(--lu-accent)",
+   "light": "var(--lu-accent)",
+   "use": "Keyboard focus. Drawn at 70% opacity, 3px."
+  },
+  {
+   "group": "Accent and signals",
+   "token": "spark",
+   "dark": "#ff6e6e",
+   "light": "#d4122b",
+   "use": "Electron red: running, errors, destructive actions. Small doses."
+  },
+  {
+   "group": "Accent and signals",
+   "token": "spark-soft",
+   "dark": "#3a1d26",
+   "light": "#fdecee",
+   "use": "Error line, error lens, Stop button, error badges."
+  },
+  {
+   "group": "Accent and signals",
+   "token": "success",
+   "dark": "#6ee3a4",
+   "light": "#0b6b3d",
+   "use": "Installed, passed, saved."
+  },
+  {
+   "group": "Accent and signals",
+   "token": "warning",
+   "dark": "#f3c46b",
+   "light": "#9e5100",
+   "use": "Deprecated APIs and pre-release versions."
+  },
+  {
+   "group": "Controls",
+   "token": "field",
+   "dark": "#171923",
+   "light": "#ffffff",
+   "use": "Text fields, selects, checkboxes and radios on the sheet."
+  },
+  {
+   "group": "Controls",
+   "token": "field-on-glass",
+   "dark": "rgba(255,255,255,0.07)",
+   "light": "rgba(255,255,255,0.72)",
+   "use": "Fields that sit on the chrome (sidebar search)."
+  },
+  {
+   "group": "Controls",
+   "token": "field-edge-on-glass",
+   "dark": "rgba(245,245,247,0.50)",
+   "light": "rgba(29,29,31,0.56)",
+   "use": "Border of fields on the chrome."
+  },
+  {
+   "group": "Controls",
+   "token": "button",
+   "dark": "rgba(255,255,255,0.11)",
+   "light": "#ffffff",
+   "use": "Secondary button fill."
+  },
+  {
+   "group": "Controls",
+   "token": "button-hover",
+   "dark": "rgba(255,255,255,0.16)",
+   "light": "#f6f6f8",
+   "use": "Secondary button hover."
+  },
+  {
+   "group": "Controls",
+   "token": "button-edge",
+   "dark": "rgba(0,0,0,0.45)",
+   "light": "rgba(20,22,40,0.16)",
+   "use": "The 0.5px ring on secondary buttons, cards and tables."
+  },
+  {
+   "group": "Controls",
+   "token": "thumb",
+   "dark": "#3c4058",
+   "light": "#ffffff",
+   "use": "Selected segment in a segmented control."
+  },
+  {
+   "group": "Controls",
+   "token": "kbd",
+   "dark": "rgba(255,255,255,0.08)",
+   "light": "#ffffff",
+   "use": "Key caps."
+  },
+  {
+   "group": "Controls",
+   "token": "tooltip",
+   "dark": "rgba(38,40,56,0.92)",
+   "light": "rgba(27,28,38,0.90)",
+   "use": "Tooltip fill. Navy in both appearances."
+  },
+  {
+   "group": "Controls",
+   "token": "tooltip-ink",
+   "dark": "#eef1f8",
+   "light": "#f3f5fa",
+   "use": "Tooltip text."
+  },
+  {
+   "group": "Editor",
+   "token": "syntax-keyword",
+   "dark": "#9feaf9",
+   "light": "#006f85",
+   "use": "const, function, require, async, await."
+  },
+  {
+   "group": "Editor",
+   "token": "syntax-string",
+   "dark": "#ffb38a",
+   "light": "#a5470f",
+   "use": "Strings and template literals."
+  },
+  {
+   "group": "Editor",
+   "token": "syntax-function",
+   "dark": "#86b4ff",
+   "light": "#1f5fd1",
+   "use": "Functions and methods, in Electron bright blue."
+  },
+  {
+   "group": "Editor",
+   "token": "syntax-number",
+   "dark": "#ff9a9a",
+   "light": "#c01127",
+   "use": "Numbers, booleans, null."
+  },
+  {
+   "group": "Editor",
+   "token": "syntax-comment",
+   "dark": "#8a90aa",
+   "light": "#646a7c",
+   "use": "Comments."
+  },
+  {
+   "group": "Editor",
+   "token": "cursor-line",
+   "dark": "color-mix(in srgb, var(--lu-accent) 7%, var(--lu-surface))",
+   "light": "color-mix(in srgb, var(--lu-accent) 7%, var(--lu-surface))",
+   "use": "The line the caret is on."
+  },
+  {
+   "group": "Accent and signals",
+   "token": "assist-ring",
+   "dark": "linear-gradient(100deg, #9feaf9, #47a8ff 38%, #2f6bff 70%, #7fdcff)",
+   "light": "linear-gradient(100deg, #1f7cff, #00a3bf 38%, #6fd6ea 70%, #1b1c26)",
+   "use": "The assist field border only. The one multicolour element in the app."
+  }
+ ],
+ "shadow": [
+  {
+   "token": "shadow-popover",
+   "dark": "0 0 0 0.5px rgba(4,6,16,0.6), 0 16px 40px -8px rgba(4,6,16,0.65), 0 2px 8px rgba(4,6,16,0.35)",
+   "light": "0 0 0 0.5px rgba(20,22,40,0.14), 0 12px 32px -8px rgba(20,24,48,0.28), 0 2px 6px rgba(20,24,48,0.08)",
+   "use": "Menus, popovers, toasts, dialogs. Add the rims (see materials)."
+  },
+  {
+   "token": "shadow-island",
+   "dark": "0 0 0 0.5px rgba(4,6,16,0.55), 0 1px 2px rgba(4,6,16,0.3), 0 10px 28px -12px rgba(4,6,16,0.6)",
+   "light": "0 0 0 0.5px rgba(20,22,40,0.10), 0 1px 2px rgba(20,24,48,0.06), 0 8px 24px -12px rgba(20,24,48,0.22)",
+   "use": "The sheet, cards, swatches."
+  },
+  {
+   "token": "shadow-lift",
+   "dark": "inset 0 0.5px 0 rgba(255,255,255,0.14), 0 0 0 0.5px rgba(0,0,0,0.5), 0 1px 3px rgba(0,0,0,0.35)",
+   "light": "0 0 0 0.5px rgba(20,22,40,0.08), 0 1px 2px rgba(20,22,40,0.12), 0 2px 6px -2px rgba(20,22,40,0.1)",
+   "use": "Selected sidebar row, selected segment."
+  },
+  {
+   "token": "shadow-capsule",
+   "dark": "inset 0 0.5px 0 rgba(255,255,255,0.2), inset 0 0 0 0.5px rgba(255,255,255,0.06), 0 0 0 0.5px rgba(0,0,0,0.45), 0 3px 10px -3px rgba(0,0,0,0.45)",
+   "light": "inset 0 0.5px 0 #fff, inset 0 0 0 0.5px rgba(255,255,255,0.55), 0 0 0 0.5px rgba(20,22,40,0.08), 0 3px 10px -3px rgba(30,40,90,0.18)",
+   "use": "Toolbar capsules and toolbar buttons."
+  },
+  {
+   "token": "shadow-button",
+   "dark": "0 0 0 0.5px rgba(0,0,0,0.45), 0 1px 2px rgba(0,0,0,0.3), inset 0 0.5px 0 rgba(255,255,255,0.12)",
+   "light": "0 0 0 0.5px rgba(20,22,40,0.16), 0 1px 2px rgba(0,0,0,0.07), inset 0 0.5px 0 rgba(255,255,255,0.7)",
+   "use": "Secondary buttons."
+  },
+  {
+   "token": "shadow-primary",
+   "dark": "inset 0 0.5px 0 rgba(255,255,255,0.5), inset 0 -0.5px 0 rgba(0,0,0,0.12), 0 1px 2px color-mix(in srgb, var(--lu-action) 35%, transparent), 0 4px 12px -4px color-mix(in srgb, var(--lu-action) 60%, transparent)",
+   "light": "inset 0 0.5px 0 rgba(255,255,255,0.5), inset 0 -0.5px 0 rgba(0,0,0,0.12), 0 1px 2px color-mix(in srgb, var(--lu-action) 35%, transparent), 0 4px 12px -4px color-mix(in srgb, var(--lu-action) 60%, transparent)",
+   "use": "Primary buttons (Run). Pair with the sheen gradient."
+  },
+  {
+   "token": "shadow-float",
+   "dark": "0 0 0 0.5px rgba(0,0,0,0.85), 0 44px 90px -24px rgba(0,0,0,0.75), 0 14px 30px -12px rgba(0,0,0,0.5)",
+   "light": "0 0 0 0.5px rgba(20,22,40,0.18), 0 44px 90px -24px rgba(18,40,90,0.42), 0 14px 30px -12px rgba(18,40,90,0.2)",
+   "use": "App-drawn floating panes only. Real windows get the OS shadow."
+  }
+ ],
+ "blur": [
+  {
+   "token": "blur-chrome",
+   "dark": "blur(34px) saturate(170%)",
+   "light": "blur(34px) saturate(180%)",
+   "use": "Only when the app draws its own glass over its own content. Real window chrome uses the native material instead."
+  },
+  {
+   "token": "blur-overlay",
+   "dark": "blur(24px) saturate(170%)",
+   "light": "blur(24px) saturate(180%)",
+   "use": "Menus, popovers, toasts, dialogs."
+  },
+  {
+   "token": "blur-thin",
+   "dark": "blur(22px) saturate(190%)",
+   "light": "blur(22px) saturate(190%)",
+   "use": "App-drawn floating panes."
+  },
+  {
+   "token": "blur-tooltip",
+   "dark": "blur(16px) saturate(160%)",
+   "light": "blur(16px) saturate(160%)",
+   "use": "Tooltips."
+  },
+  {
+   "token": "blur-scrim",
+   "dark": "blur(8px) saturate(140%)",
+   "light": "blur(8px) saturate(140%)",
+   "use": "Dialog scrim."
+  }
+ ],
+ "radius": [
+  {
+   "token": "radius-code",
+   "round": "5px",
+   "squircle": "5px",
+   "use": "Inline code, search-match highlight (3px)."
+  },
+  {
+   "token": "radius-check",
+   "round": "5px",
+   "squircle": "7px",
+   "use": "Checkboxes."
+  },
+  {
+   "token": "radius-sm",
+   "round": "6px",
+   "squircle": "9px",
+   "use": "Key caps, small chips."
+  },
+  {
+   "token": "radius-item",
+   "round": "8px",
+   "squircle": "12px",
+   "use": "Menu items, tree rows, tabs, tooltips (8px, round), console rows."
+  },
+  {
+   "token": "radius-control",
+   "round": "10px",
+   "squircle": "15px",
+   "use": "Buttons, fields, selects, segmented controls, callouts, list rows, error lens."
+  },
+  {
+   "token": "radius-menu",
+   "round": "13px",
+   "squircle": "17px",
+   "use": "Menus: radius-item plus the 5px menu padding, so corners stay concentric."
+  },
+  {
+   "token": "radius-panel",
+   "round": "16px",
+   "squircle": "24px",
+   "use": "Popovers, toasts, cards, coachmarks."
+  },
+  {
+   "token": "radius-dialog",
+   "round": "20px",
+   "squircle": "28px",
+   "use": "Dialogs."
+  },
+  {
+   "token": "radius-sheet",
+   "round": "16px",
+   "squircle": "26px",
+   "use": "The sheet inside the window."
+  },
+  {
+   "token": "radius-float",
+   "round": "26px",
+   "squircle": "40px",
+   "use": "App-drawn floating panes. Real windows use the OS corner."
+  },
+  {
+   "token": "radius-capsule",
+   "round": "999px",
+   "squircle": "999px",
+   "use": "Toolbar capsules, toolbar buttons, badges, tags, the assist field, filter chips."
+  }
+ ],
+ "size": [
+  {
+   "token": "size-titlebar",
+   "value": "56px",
+   "use": "Title bar height, including the toolbar."
+  },
+  {
+   "token": "size-toolbar",
+   "value": "36px",
+   "use": "Toolbar capsule and toolbar button outer height."
+  },
+  {
+   "token": "size-toolbar-inner",
+   "value": "30px",
+   "use": "Controls inside a capsule (3px inset)."
+  },
+  {
+   "token": "size-control",
+   "value": "30px",
+   "use": "Default button, field and select."
+  },
+  {
+   "token": "size-control-sm",
+   "value": "24px",
+   "use": "Small buttons and fields; icon buttons in the tab row."
+  },
+  {
+   "token": "size-row",
+   "value": "28px",
+   "use": "Menu items, tree rows, tabs."
+  },
+  {
+   "token": "size-tabrow",
+   "value": "46px",
+   "use": "Tab row, plus a 0.5px hairline."
+  },
+  {
+   "token": "size-sidebar",
+   "value": "228px",
+   "use": "Sidebar width (resizable 200 to 320)."
+  },
+  {
+   "token": "size-sheet-inset",
+   "value": "8px",
+   "use": "Gap between the sheet and the window edge (right side; the sidebar sits left)."
+  },
+  {
+   "token": "size-editor-line",
+   "value": "20px",
+   "use": "Editor line height."
+  },
+  {
+   "token": "size-gutter",
+   "value": "66px",
+   "use": "Line-number column: 48px numbers plus 18px space. The error lens starts here."
+  },
+  {
+   "token": "size-assist",
+   "value": "40px",
+   "use": "Assist row: 24px field plus 8px above and below."
+  },
+  {
+   "token": "size-console",
+   "value": "160px",
+   "use": "Console default height (resizable)."
+  },
+  {
+   "token": "size-console-bar",
+   "value": "46px",
+   "use": "Console header."
+  },
+  {
+   "token": "size-statusbar",
+   "value": "32px",
+   "use": "Status bar."
+  },
+  {
+   "token": "size-hairline",
+   "value": "0.5px",
+   "use": "Every divider. 1px only for field borders."
+  },
+  {
+   "token": "size-icon",
+   "value": "16px",
+   "use": "Icons, drawn at 1.4px stroke."
+  }
+ ],
+ "space": [
+  {
+   "token": "space-1",
+   "value": "4px",
+   "use": "Icon to label, capsule inset (3px is the one exception)."
+  },
+  {
+   "token": "space-2",
+   "value": "8px",
+   "use": "Related controls, sheet inset, assist row padding."
+  },
+  {
+   "token": "space-3",
+   "value": "12px",
+   "use": "Sidebar and title bar padding."
+  },
+  {
+   "token": "space-4",
+   "value": "16px",
+   "use": "Editor padding, card padding."
+  },
+  {
+   "token": "space-6",
+   "value": "24px",
+   "use": "Dialog gutters, section gaps."
+  },
+  {
+   "token": "space-8",
+   "value": "32px",
+   "use": "Empty states, settings page margins."
+  }
+ ],
+ "type": {
+  "sans": "\"Inter\", system-ui, -apple-system, \"Segoe UI\", sans-serif",
+  "mono": "\"Commit Mono\", ui-monospace, \"SF Mono\", \"Cascadia Mono\", Menlo, monospace",
+  "features": "\"cv05\", \"ss03\"",
+  "styles": [
+   {
+    "token": "type-display",
+    "size": "40px",
+    "lineHeight": "44px",
+    "weight": 650,
+    "tracking": "-0.028em",
+    "family": "sans",
+    "use": "Welcome and empty states. Inter switches to its Display cut on its own at this size."
+   },
+   {
+    "token": "type-title",
+    "size": "22px",
+    "lineHeight": "28px",
+    "weight": 650,
+    "tracking": "-0.018em",
+    "family": "sans",
+    "use": "Settings pages and large dialog titles."
+   },
+   {
+    "token": "type-headline",
+    "size": "15px",
+    "lineHeight": "20px",
+    "weight": 600,
+    "tracking": "-0.01em",
+    "family": "sans",
+    "use": "Dialog titles, section heads, toast titles."
+   },
+   {
+    "token": "type-body",
+    "size": "13px",
+    "lineHeight": "18px",
+    "weight": 400,
+    "tracking": "0",
+    "family": "sans",
+    "use": "Default UI text, desktop dense."
+   },
+   {
+    "token": "type-label",
+    "size": "13px",
+    "lineHeight": "16px",
+    "weight": 500,
+    "tracking": "0",
+    "family": "sans",
+    "use": "Buttons, tabs, menu items."
+   },
+   {
+    "token": "type-caption",
+    "size": "11px",
+    "lineHeight": "14px",
+    "weight": 600,
+    "tracking": "0.005em",
+    "family": "sans",
+    "use": "Sidebar heads, field labels, badges. Sentence case, never shouted."
+   },
+   {
+    "token": "type-code",
+    "size": "13px",
+    "lineHeight": "20px",
+    "weight": 400,
+    "tracking": "0",
+    "family": "mono",
+    "use": "Editor and console, in Commit Mono."
+   }
+  ]
+ },
+ "motion": [
+  {
+   "token": "ease",
+   "value": "cubic-bezier(0.32, 0.72, 0, 1)",
+   "use": "Everything that moves. A fast start and a long, soft landing."
+  },
+  {
+   "token": "dur-instant",
+   "value": "80ms",
+   "use": "Menu item hover."
+  },
+  {
+   "token": "dur-fast",
+   "value": "150ms",
+   "use": "Colour, fill and border changes (hover, selection)."
+  },
+  {
+   "token": "dur-base",
+   "value": "220ms",
+   "use": "Press scale, segmented thumb, field focus ring."
+  },
+  {
+   "token": "dur-slow",
+   "value": "280ms",
+   "use": "Switch knob travel."
+  },
+  {
+   "token": "dur-enter",
+   "value": "500ms",
+   "use": "Floating panes appearing: from opacity 0, 14px lower, scale 0.94, blur 6px."
+  },
+  {
+   "token": "press-scale",
+   "value": "0.965",
+   "use": "Buttons shrink to this while pressed. Chips 0.96, large tiles 0.98."
+  }
+ ]
+}

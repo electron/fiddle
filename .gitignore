@@ -1,54 +1,10 @@
-.DS_Store
-.env
-.gclient_done
-**/.npmrc
-.tags*
-.vs/
-.vscode/
-*.log
-*.pyc
-*.sln
-*.swp
-*.VC.db
-*.VC.VC.opendb
-*.vcxproj
-*.vcxproj.filters
-*.vcxproj.user
-*.xcodeproj
-/.idea/
-/external_binaries/
-/out/
 node_modules/
-SHASUMS256.txt
-compile_commands.json
-.envrc
-.cache
-yarn-error.log
-*.p12
-
-# Coverage
-coverage
-
-# Test report
-report.json
-
-# npm package
-/npm/dist
-/npm/path.txt
-
-# Electron Fiddle-Specific
-/static/contributors.json
-/static/css/root.css
-/static/releases.json
-
-# Webpack configurations
-.webpack
-
-# Yarn v4
-.pnp.*
-.yarn/*
-!.yarn/patches
-!.yarn/plugins
-!.yarn/releases
-!.yarn/sdks
-!.yarn/versions
+out/
+dist/
+.vite/
+coverage/
+*.log
+.DS_Store
+.eslintcache
+*.tsbuildinfo
+/test-results/
