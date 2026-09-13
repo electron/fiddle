@@ -19,7 +19,7 @@ import {
   isSupportedFileName,
   sortFileNames,
 } from './files';
-import { thrownReason } from './test-helpers/zip';
+import { thrownReason } from './test-helpers/errors';
 
 describe('isSupportedFileName', () => {
   it.each(['main.js', 'a.cjs', 'b.mjs', 'index.html', 'styles.css', 'data.json', 'STYLE.CSS', 'App.MJS', 'a.b.js'])(
@@ -27,7 +27,7 @@ describe('isSupportedFileName', () => {
     (name) => expect(isSupportedFileName(name)).toBe(true),
   );
 
-  it.each(['readme.md', 'a.ts', 'a/b.js', 'a\\b.js', '.js', '', 'noext', 'main.js\0'])('rejects %j', (name) =>
+  it.each(['readme.md', 'a.ts', 'a/b.js', 'a\\b.js', '.js', '', 'noext', 'main.js\0', 'C:x.js', 'a?.js', 'a*.js', 'a|b.js', 'a<b.js', 'a"b.js', 'tab\t.js'])('rejects %j', (name) =>
     expect(isSupportedFileName(name)).toBe(false),
   );
 });
@@ -53,6 +53,13 @@ describe('names', () => {
     expect(isMainEntry('index.js')).toBe(false);
     expect(findMainEntry(['index.html', 'main.mjs'])).toBe('main.mjs');
     expect(findMainEntry(['index.html'])).toBeUndefined();
+  });
+
+  it('finds main entries in any case, so no second main.js is added next to Main.js', () => {
+    expect(isMainEntry('Main.js')).toBe(true);
+    expect(isMainEntry('MAIN.MJS')).toBe(true);
+    expect(findMainEntry(['index.html', 'Main.js'])).toBe('Main.js');
+    expect(ensureMainEntry({ 'Main.js': 'mine' })).toEqual({ 'Main.js': 'mine' });
   });
 
   it('knows the known files', () => {
@@ -115,6 +122,7 @@ describe('validation', () => {
     expect(thrownReason(() => assertValidFileName('package.json'))).toBe('reserved-name');
     expect(thrownReason(() => assertValidFileName('package-lock.json'))).toBe('reserved-name');
     expect(thrownReason(() => assertValidFileName('notes.md'))).toBe('unsupported-extension');
+    expect(thrownReason(() => assertValidFileName('C:x.js'))).toBe('invalid-character');
     expect(thrownReason(() => assertValidFileName('ok.js'))).toBeNull();
   });
 

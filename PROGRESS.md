@@ -31,6 +31,11 @@ Parallel agents share this checkout, and each owns only the files listed for its
 - Run `yarn generate` only as `flock /tmp/fiddle-2027-generate.lock yarn generate`.
 - i18n strings go in your own namespace, `src/i18n/locales/en/<slice>.json`.
 - Everything under `packages/app/src/`.
+- Main-process strings:
+  - Command labels go in `locales/en/main.json`, as small append-only keys, because `CommandDefinition.label` is typed against `main`.
+  - Every other main-process string (dialogs, notices, notifications) goes in your own namespace, named `main<Slice>.json` (for example `mainDocuments.json`). Main's i18n loads these automatically. Translate with `tm('mainDocuments')(key)` from `src/main/i18n.ts`.
+  - Namespace names must be valid identifiers, so use camelCase, not hyphens.
+  - Never create a second i18next instance.
 
 **Slices:**
 
@@ -88,14 +93,77 @@ Parallel agents share this checkout, and each owns only the files listed for its
   Without these, regeneration wouldn't be clean.
 - **Store names.** The EIPC stores are named `App` and `Window`, which gives `useAppStore`, `useWindowStore`, `updateAppStore` and `updateWindowStore`. EIPC names hooks by store name alone, so two stores both called `State` would collide.
 - **i18n namespaces.** `common` is the renderer's startup namespace. `main` is main's menus and dialogs.
+- **Packaging and CI (§12):**
+  - `forge.config.ts` carries the old app's identity and settings over. `tools/release-identity.mjs` checks them against `packages/app/build/identity.json` in CI.
+  - Signing uses Azure Trusted Signing through Windows SDK's `signtool`, with no override. The `electron-windows-msix` dev-cert patch (`.yarn/patches/`) is still needed.
+  - Notarization uses an App Store Connect API key (`APPLE_API_KEY`, `APPLE_API_KEY_ID` and `APPLE_API_ISSUER`), with an Apple ID as a fallback.
+  - Only `build-windows` and `attest` have `id-token: write`. `attest` runs no repository code. The publish job uses `GITHUB_TOKEN` with `contents: write` instead of `electron/secret-service-action`, which needs OIDC.
+- **E2E driver release check.** `tools/release-check-asar.mjs` fails the CI package smoke test and every release build if any packaged `app.asar` contains one of the driver's markers.
+  - The markers are copied from `MARKERS` in `packages/app/tools/driver-release-check.ts`. Keep the two lists in sync.
+  - The script is plain `.mjs`, so it runs on any Node. The `.ts` tools need type stripping, which isn't on by default in the Node 22.17 pinned in `.nvmrc`.
+- **Sentry release name.** It's `Electron-Fiddle@<package.json version>`, with no `v` (`@sentry/electron`'s default). The release workflow uses the same name.
 
+- **Run and stop shortcut (Versions and run).** Lucent says ⌘R runs and stops. `run.toggle` is CmdOrCtrl+R, with F5 as a hidden second menu accelerator, and Reload moved to CmdOrCtrl+Shift+R.
+- **Console default (Versions and run).** Lucent's default layout wins over §17.7: the console is visible at 160px. A run, package or make reopens it if it was dragged below 96px.
+- **Fiddle userData (Versions and run).** Each run passes `--user-data-dir=<run dir>/user-data`, so the fiddle's userData is deleted with the run dir. "Keep user data dirs" drops the flag.
+- **Runtime errors (Versions and run).** Runs always set `ELECTRON_ENABLE_LOGGING`, and Chromium's CONSOLE lines become Renderer rows. Chromium's other log lines only show with advanced logging on. CONSOLE lines carry only a line number, so a renderer error has no column unless its message includes a stack frame.
+- **Trust for package, make and auto-bisect (Versions and run).** All go through `ensureTrusted`. Package and make are refused when not approved, with no scripts-off fallback. Untrusted fiddles install modules with `--ignore-scripts` unless the approval allowed scripts.
+- **Release snapshot (Versions and run).** `static/releases.json` is bundled into main as a `?raw` string and used until the cache has a fresher list.
+- **Platform slice** (`main/{platform,updates,crash,migration}/**`, `main/log.ts`, `renderer/features/about/**`):
+  - **Startup order** in `main/index.ts`: Squirrel events first, then the test harness, then Sentry (before `ready`). After `ready` come the log file, then `runMigration()`, which must finish before any store is created (`loadSettings`, `initDocuments`, onboarding…). `startPlatform()` runs before `installMenu`.
+  - **One-time import** (§6): `importedFrom: { version, at }` in state.json, where `version` is the app version that ran the import (the old app's version isn't recorded anywhere). Files are created only if absent, so an interrupted import can run again. The new files are sparse `settings.json`, `onboarding.json` (`tourDone`), `local-builds.json` (`{ schemaVersion: 1, builds: [{ id, name, path, addedAt }] }`, the Versions slice's to read), `credentials/github` (through `CredentialStore`) and `themes/<old file name>.json` (Monaco `editor` kept, `common: {}`). Old Electron versions are copied into `<cache>/electron/<version>` in the background after the first launch; zips are extracted by core's per-version `Installer`. `static/import-local-storage.html` is the only file:// page (documented in `security.ts`).
+  - **Old keys:** "Block Save / Save As" becomes `keybindings: { 'file.save': null, 'file.saveAs': null }`. The old DEFAULT mirror maps to the new `auto`. `isUsingSystemTheme` off maps the built-in themes to `appearance` and custom ones to `theme`. Ignored: `gitHubToken`, `known-electron-versions` and `version`.
+  - **Sentry:** `IPCMode.Classic` through the app preload (`@sentry/electron/preload-namespaced`, same origin check as EIPC). Renderer events are scrubbed by main's `beforeSend`. The renderer starts its SDK only if `AppPlatform.IsCrashReportingEnabled()`. Turning "Send crash reports" off closes Sentry at once; turning it on takes effect after a restart. Native dumps from any non-renderer process are dropped.
+  - **Updates:** "Beta updates" applies after a restart. The kill switch is `https://raw.githubusercontent.com/electron/fiddle/main/update-policy.json`. A blocked version shows a modal notice (Download / Quit), then quits. Linux and MSIX get a daily GitHub releases check and a toast (`AppPlatform.UpdateAvailable`).
+  - **Logs:** `<userData>/logs/main.log`, `main.1.log`, `main.2.log`. Renderer code logs through `log` from `renderer/features/about`.
+- **Native modules are the one exception to "no externals" (§2).** Native addons can't be bundled.
+  - `@electron-internal/extract-zip` is external in `vite.main.config.mts`. Core loads it lazily (`await import()` in `defaultExtract`), so importing core never loads the addon.
+  - Forge's Vite plugin doesn't copy externals (Forge #3738, still so in 8.0.0-alpha.10). `forge.config.ts`'s `packageAfterCopy` copies each module in `NATIVE_MODULES` into the app's `node_modules`, keeping only the target platform and arch's `.node`. `asar.unpack: '**/*.node'` keeps the addons out of the asar.
+  - Main's CommonJS bundle defines `import.meta.url` as `__fiddleImportMetaUrl`, declared in an output banner, so bundled ESM dependencies that call `createRequire(import.meta.url)` (`@electron/get`, `@electron/asar`) keep working. A banner name can't be shadowed by a module's own `require`.
 ## Deferred
 
 - **Electron's install script doesn't run** with `enableScripts: false`, despite `dependenciesMeta.electron.built`. After a fresh install, run `node node_modules/electron/install.js`. Needs a proper allowlist fix in `.yarnrc.yml` or a postinstall.
-- **Packaging (§12):** AppImage and MSIX makers, signing, notarization and the GitHub publisher.
+  - **Fixed.** Electron 44 has no install script, only an `install-electron` bin, so `built` never mattered. `packages/app`'s `postinstall` now runs `install-electron`; workspace scripts still run under `enableScripts: false`. Verified: remove `node_modules/electron/dist`, run `yarn install`, and `dist/electron` is back. Release jobs install with `--mode=skip-build`, so it doesn't run where secrets are.
+- **Packaging (§12, §13) still to do:**
+  - The `.appinstaller` file (§13): `electron-windows-msix` 2.0.4 and Forge's MSIX maker can't generate one.
+  - The upgrade test (§6): a disabled `upgrade-test` job skeleton (macOS and Windows) is in `ci.yml`. The release doesn't depend on it yet.
+  - Trimming `build/entitlements.plist` (§4) waits for the helper that spawns fiddles with responsibility disclaimed.
+  - Debug-ID source maps (§14): the release uploads the Linux x64 `.vite` maps with `url_prefix: '~/.vite'`, as the old app did.
+  - The packaged smoke test running one fiddle offline (§11): CI only runs `yarn package` on each OS.
+  - Refresh-data PRs are opened with `GITHUB_TOKEN`, so CI doesn't run on them until the PR is closed and reopened.
 - **Not wired yet:**
   - Sentry and `update-electron-app` (installed only);
   - JSON-lines logs (`src/main/log.ts` is a console stub);
   - keybinding overrides;
   - a renderer consumer for the `Window.Command` event.
 - **Lint rule** banning string literals in JSX and in menu and dialog definitions (§9).
+- **Gist share links (§17.17):** "Copy share link" copies `https://gist.github.com/<id>`. The https URL that redirects to `electron-fiddle://` needs a web endpoint. Swap it in `GitHubService.shareLink` (`src/main/github/service.ts`).
+- **Gists ↔ Documents:** `src/main/github/documents-bridge.ts` is a stub. File text (`getFiddleFiles`), the default template, and the "saved as gist" and "gist deleted" transitions have to come from Documents' main-side exports.
+- **Versions and run:** Installer extraction still runs on the main thread (core's default); a worker needs a second Vite main entry. Socket Firewall isn't bundled, so module installs run without it and say so. The version picker has type-ahead but no search field or "copy version".
+
+## Wave 3: integration checklist
+
+Collected from the wave 2 reports. The orchestrator ticks these off.
+
+- [ ] **Packaging ships `static/`.** Add `extraResource: ['static']` so the packaged app has its bundled content: Show Me, the quick-start template, `releases.json`, `contributors.json` and `import-local-storage.html`. Documents finds it through `process.resourcesPath`.
+- [ ] **`contributors.json` snapshot** exists and is committed. The About panel and credits read it.
+- [ ] **Versions and run to Documents:**
+  - Call `setDocumentHooks({ defaultVersion, isReleasedMajor, isUsableVersion, forgeOptions })`.
+  - Clear the console when `fiddle.fiddleRev` changes.
+  - Use `ensureTrusted(windowId, op, { packagesWithInstallScripts })`.
+- [ ] **Gists to Documents:** call `markPublished` and `markGistDeleted`, and set the `github` hook in `setDocumentHooks`.
+- [ ] **App UX to Documents:** set modules with `setFiddleModules`. Share `state.json` through `getStateStore()`.
+- [ ] **Shell wiring:**
+  - Mount `useDocumentDrop()` and `<Toaster>` (for update and storage toasts).
+  - Add the `data-tour` anchors.
+  - Route F1 to the palette.
+- [ ] **Tour anchors:** `data-tour` on VersionPicker, RunButton, ConsolePane and PublishButton.
+- [ ] **`getCacheRoot()`:** uses the OS cache dir (env-paths), not `app.getPath('cache')`.
+- [ ] **Crash-reporting disclosure on first run** (§14).
+- [ ] **Private gists opened from deep links** wait for GitHub sign-in (§17.4).
+- [ ] **Drop a gist URL on the dock** (macOS).
+- [ ] **`parseEnvEntries` reports every blocked name.** Core drops all `LD_*` and `DYLD_*` variables, but parsing only flags `LD_PRELOAD` and `DYLD_*`.
+- [ ] **Headless CLI (§7).**
+- [ ] **E2E specs** for each feature, plus the feature-coverage IDs.
+- [ ] **i18n:** a pseudo-locale, a translation script, other locales, and the lint rule against string literals.
+- [ ] **Acceptance checklist** from the Lucent handover, in both appearances.

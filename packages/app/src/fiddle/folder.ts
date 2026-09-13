@@ -1,19 +1,21 @@
-import { mkdir, readdir, readFile, rm, writeFile } from 'node:fs/promises';
+import { lstat, mkdir, readdir, readFile, rm, unlink, writeFile } from 'node:fs/promises';
 import * as path from 'node:path';
 
 import { ErrorCode, FiddleError } from '../shared/errors';
-import { ensureMainEntry, type FileMap, isReservedFileName, isSupportedFileName, PACKAGE_JSON } from './files';
-import { type ParsedPackageJson, parsePackageJson } from './package-json';
+import {
+  type FileMap,
+  fileRuleError,
+  hasInvalidCharacter,
+  hasName,
+  hasPathSeparator,
+  isSupportedFileName,
+  PACKAGE_JSON,
+} from './files';
+import { type PickedFiles, pickFiddleFiles, type PickOptions } from './pick';
 
 export const GITIGNORE_CONTENT = 'node_modules\nout';
 
-export interface FolderReadResult {
-  /** Supported top-level files, with a main entry added if missing. */
-  files: FileMap;
-  packageJson?: ParsedPackageJson;
-  /** Set when `package.json` is invalid. The rest of the folder still loads. */
-  packageJsonError?: FiddleError;
-}
+export type FolderReadResult = PickedFiles;
 
 async function listDir(dir: string) {
   try {
@@ -27,39 +29,46 @@ async function listDir(dir: string) {
   }
 }
 
-/** Reads a fiddle folder: supported top-level files (not symlinks), plus `package.json`. */
-export async function readFiddleFolder(dir: string): Promise<FolderReadResult> {
-  const entries = await listDir(dir);
-  const names = entries
-    .filter((e) => e.isFile() && isSupportedFileName(e.name) && !isReservedFileName(e.name))
-    .map((e) => e.name);
-  const contents = await Promise.all(names.map((name) => readFile(path.join(dir, name), 'utf8')));
-  const result: FolderReadResult = {
-    files: ensureMainEntry(Object.fromEntries(names.map((name, i) => [name, contents[i]!]))),
-  };
-
-  if (entries.some((e) => e.isFile() && e.name === PACKAGE_JSON)) {
-    try {
-      result.packageJson = parsePackageJson(await readFile(path.join(dir, PACKAGE_JSON), 'utf8'));
-    } catch (error) {
-      result.packageJsonError = FiddleError.from(error);
-    }
+/**
+ * Reads a fiddle folder's top-level regular files (never symlinks or
+ * folders) through `pickFiddleFiles`. Unsupported files aren't read.
+ */
+export async function readFiddleFolder(dir: string, options: PickOptions = {}): Promise<FolderReadResult> {
+  const names: string[] = [];
+  const skipped: string[] = [];
+  for (const entry of await listDir(dir)) {
+    if (!entry.isFile()) continue;
+    if (isSupportedFileName(entry.name) || entry.name === PACKAGE_JSON) names.push(entry.name);
+    else skipped.push(entry.name);
   }
-  return result;
+  const contents = await Promise.all(names.map((name) => readFile(path.join(dir, name), 'utf8')));
+  const picked = pickFiddleFiles(Object.fromEntries(names.map((name, i) => [name, contents[i]!])), options);
+  return { ...picked, skipped: [...skipped, ...picked.skipped] };
 }
 
-/** Throws unless `name` is a plain file name that can't escape its folder. */
-export function assertSafeFileName(name: string): void {
-  if (
-    name === '' ||
-    name === '.' ||
-    name === '..' ||
-    /[/\\\0]/.test(name) ||
-    /^[a-z]:/i.test(name) ||
-    path.basename(name) !== name
-  ) {
-    throw new FiddleError(ErrorCode.invalidArgument, `Unsafe file name: ${name}`, { reason: 'unsafe-path', name });
+/** The same name rules as `files.ts`, plus `package.json`. Names that differ only in case are refused. */
+function assertWritableNames(names: readonly string[]): void {
+  const seen: string[] = [];
+  for (const name of names) {
+    if (name !== PACKAGE_JSON) {
+      if (name === '') throw fileRuleError('empty-name', name);
+      if (hasPathSeparator(name)) throw fileRuleError('path-separator', name);
+      if (hasInvalidCharacter(name)) throw fileRuleError('invalid-character', name);
+      if (!isSupportedFileName(name)) throw fileRuleError('unsupported-extension', name);
+    }
+    if (hasName(seen, name)) throw fileRuleError('duplicate-name', name);
+    seen.push(name);
   }
+}
+
+/** Writes `target` as a regular file. A symlink there is replaced, never followed. */
+async function writeRegularFile(target: string, content: string): Promise<void> {
+  try {
+    if ((await lstat(target)).isSymbolicLink()) await unlink(target);
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code !== 'ENOENT') throw error;
+  }
+  await writeFile(target, content, 'utf8');
 }
 
 /** Supported files already in `dir`, for the overwrite warning. Empty if `dir` doesn't exist. */
@@ -79,12 +88,13 @@ export async function findExistingSupportedFiles(dir: string): Promise<string[]>
  */
 export async function writeFiddleFolder(dir: string, files: FileMap): Promise<void> {
   const entries = Object.entries(files);
-  for (const [name] of entries) assertSafeFileName(name);
+  assertWritableNames(entries.map(([name]) => name));
   await mkdir(dir, { recursive: true });
   for (const [name, content] of entries) {
     const target = path.join(dir, name);
+    // rm removes a symlink itself, not what it points to.
     if (content === '') await rm(target, { force: true });
-    else await writeFile(target, content, 'utf8');
+    else await writeRegularFile(target, content);
   }
-  await writeFile(path.join(dir, '.gitignore'), GITIGNORE_CONTENT, 'utf8');
+  await writeRegularFile(path.join(dir, '.gitignore'), GITIGNORE_CONTENT);
 }

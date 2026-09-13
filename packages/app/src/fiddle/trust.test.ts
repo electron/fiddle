@@ -1,15 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { FiddleError } from '../shared/errors';
-import {
-  CODE_EXECUTING_OPERATIONS,
-  type FiddleOrigin,
-  formatOrigin,
-  isCodeExecutingOperation,
-  isUntrustedOrigin,
-  needsApproval,
-  parseOrigin,
-} from './trust';
+import { ANONYMOUS_GIST_OWNER, type FiddleOrigin, formatOrigin, gistOrigin, isUntrustedOrigin, needsApproval } from './trust';
 
 const id = '8c5fc0c6a5153d49b5a4a56d3ed9da8f';
 const sha = 'a'.repeat(40);
@@ -22,34 +13,34 @@ const origins: [FiddleOrigin, string][] = [
 ];
 
 describe('origins', () => {
-  it.each(origins)('formats and parses %j', (origin, text) => {
+  it.each(origins)('formats %j', (origin, text) => {
     expect(formatOrigin(origin)).toBe(text);
-    expect(parseOrigin(text)).toEqual(origin);
-  });
-
-  it.each(['', 'remote', 'gist:octocat/short@x', `gist:${id}@${sha}`, 'electron:v30.0.0'])('rejects %j', (text) => {
-    expect(() => parseOrigin(text)).toThrow(FiddleError);
   });
 
   it('marks remote origins untrusted', () => {
     expect(origins.map(([o]) => isUntrustedOrigin(o))).toEqual([false, false, true, true]);
   });
+
+  it('builds gist origins, with a placeholder owner for anonymous gists', () => {
+    expect(gistOrigin(id.toUpperCase(), sha.toUpperCase(), 'octocat')).toEqual({ kind: 'gist', owner: 'octocat', id, sha });
+    expect(formatOrigin(gistOrigin(id, sha, null))).toBe(`gist:${ANONYMOUS_GIST_OWNER}/${id}@${sha}`);
+  });
 });
 
-describe('operations', () => {
-  it('lists the code-executing operations', () => {
-    expect([...CODE_EXECUTING_OPERATIONS]).toEqual(['run', 'install-modules', 'auto-bisect', 'package', 'make']);
-    for (const op of CODE_EXECUTING_OPERATIONS) expect(isCodeExecutingOperation(op)).toBe(true);
-    for (const op of ['save', 'publish', 'export', 'bisect-manual', 'load']) expect(isCodeExecutingOperation(op)).toBe(false);
+describe('needsApproval', () => {
+  it('asks for remote fiddles until that exact origin is approved', () => {
+    const gist = gistOrigin(id, sha, 'octocat');
+    expect(needsApproval(gist)).toBe(true);
+    expect(needsApproval(gist, formatOrigin(gist))).toBe(false);
+    // Another revision of the same gist needs approval again.
+    expect(needsApproval(gistOrigin(id, 'b'.repeat(40), 'octocat'), formatOrigin(gist))).toBe(true);
+    const docs: FiddleOrigin = { kind: 'electron', tag: 'v30.0.0', path: 'docs/fiddles/x' };
+    expect(needsApproval(docs, formatOrigin(gist))).toBe(true);
+    expect(needsApproval(docs, formatOrigin(docs))).toBe(false);
   });
 
-  it('asks for approval only for code on untrusted fiddles', () => {
-    const gist: FiddleOrigin = { kind: 'gist', owner: 'o', id, sha };
-    expect(needsApproval(gist, 'run', false)).toBe(true);
-    expect(needsApproval(gist, 'package', false)).toBe(true);
-    expect(needsApproval(gist, 'run', true)).toBe(false);
-    expect(needsApproval(gist, 'save', false)).toBe(false);
-    expect(needsApproval({ kind: 'local' }, 'run', false)).toBe(false);
-    expect(needsApproval({ kind: 'example' }, 'make', false)).toBe(false);
+  it('never asks for local fiddles and examples', () => {
+    expect(needsApproval({ kind: 'local' })).toBe(false);
+    expect(needsApproval({ kind: 'example' }, 'something-else')).toBe(false);
   });
 });

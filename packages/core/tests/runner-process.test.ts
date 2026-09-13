@@ -3,7 +3,7 @@ import os from 'node:os';
 import path from 'node:path';
 import { Writable } from 'node:stream';
 
-import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { BaseVersions, Runner } from '../src/index.js';
 
@@ -24,9 +24,19 @@ function collector() {
   return { out, text: () => chunks.join('') };
 }
 
+function isAlive(pid: number): boolean {
+  try {
+    process.kill(pid, 0);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 describe('Runner with a real child process', () => {
   let tmpdir: string;
   let runner: Runner;
+  const pids: number[] = [];
 
   beforeEach(async () => {
     tmpdir = await fs.promises.mkdtemp(path.join(os.tmpdir(), 'fiddle-core-'));
@@ -37,14 +47,30 @@ describe('Runner with a real child process', () => {
         fiddles: path.join(tmpdir, 'fiddles'),
       },
       versions: new BaseVersions([]),
+      errors: 'typed',
     });
   });
 
   afterEach(() => {
+    vi.unstubAllEnvs();
+    for (const pid of pids.splice(0)) if (isAlive(pid)) process.kill(pid, 'SIGKILL');
     fs.rmSync(tmpdir, { recursive: true, force: true });
   });
 
   const fiddle = (main: string) => new Map([['main.js', main]]);
+
+  /** A fiddle that writes its pid to a file, then runs until killed. */
+  function longRunning() {
+    const pidFile = path.join(tmpdir, 'pid');
+    const main = `require('node:fs').writeFileSync(${JSON.stringify(pidFile)}, String(process.pid)); setInterval(() => {}, 1000);`;
+    const started = async () => {
+      await expect.poll(() => fs.existsSync(pidFile)).toBe(true);
+      const pid = Number(fs.readFileSync(pidFile, 'utf8'));
+      pids.push(pid);
+      return pid;
+    };
+    return { main, started };
+  }
 
   it('reports the exit code', async () => {
     const main = 'process.exit(Number(process.env.EXIT_CODE ?? 0));';
@@ -93,8 +119,7 @@ describe('Runner with a real child process', () => {
   });
 
   it('kills the child and rejects when aborted', async () => {
-    const pidFile = path.join(tmpdir, 'pid');
-    const main = `require('node:fs').writeFileSync(${JSON.stringify(pidFile)}, String(process.pid)); setInterval(() => {}, 1000);`;
+    const { main, started } = longRunning();
     const controller = new AbortController();
     const run = runner.run(electron, fiddle(main), {
       out: undefined,
@@ -102,20 +127,37 @@ describe('Runner with a real child process', () => {
       signal: controller.signal,
     });
 
-    await expect.poll(() => fs.existsSync(pidFile)).toBe(true);
+    const pid = await started();
     controller.abort();
     await expect(run).rejects.toHaveProperty('code', 'aborted');
-
-    const pid = Number(fs.readFileSync(pidFile, 'utf8'));
-    await expect
-      .poll(() => {
-        try {
-          process.kill(pid, 0);
-          return true;
-        } catch {
-          return false;
-        }
-      })
-      .toBe(false);
+    await expect.poll(() => isAlive(pid)).toBe(false);
   });
+
+  // xvfb-run starts Electron as its own child. Killing only xvfb-run would
+  // leave Electron running.
+  it.runIf(process.platform === 'linux')(
+    'kills Electron under a headless wrapper when aborted',
+    async () => {
+      const bin = path.join(tmpdir, 'bin');
+      fs.mkdirSync(bin);
+      const wrapper = path.join(bin, 'xvfb-run');
+      // like xvfb-run: drop its own option, run the command as a child, wait
+      fs.writeFileSync(wrapper, '#!/bin/sh\nshift\n"$@" &\nwait $!\n', { mode: 0o755 });
+      vi.stubEnv('PATH', `${bin}${path.delimiter}${process.env.PATH ?? ''}`);
+
+      const { main, started } = longRunning();
+      const controller = new AbortController();
+      const run = runner.run(electron, fiddle(main), {
+        out: undefined,
+        showConfig: false,
+        headless: true,
+        signal: controller.signal,
+      });
+
+      const pid = await started();
+      controller.abort();
+      await expect(run).rejects.toHaveProperty('code', 'aborted');
+      await expect.poll(() => isAlive(pid)).toBe(false);
+    },
+  );
 });

@@ -134,7 +134,9 @@ function compileMessages(locale, file, raw) {
         problems.push(`${key}: every key needs a "description"`);
       } else if (
         typeof value.maxLength === 'number' &&
-        value.message.length > value.maxLength
+        // Measure what people see: an interpolation like {{percent}} renders
+        // as a few characters, not its placeholder text.
+        value.message.replace(/\{\{[^}]*\}\}/g, 'xxx').length > value.maxLength
       ) {
         problems.push(`${key}: longer than maxLength ${value.maxLength}`);
       } else messages[key] = value.message;

@@ -3,6 +3,7 @@ import { describe, expect, it } from 'vitest';
 import { ErrorCode, FiddleError } from '../shared/errors';
 import {
   addFile,
+  checkEsmSupport,
   createFiddle,
   type Fiddle,
   fileNames,
@@ -15,7 +16,7 @@ import {
   VersionRefSchema,
   visibleFileNames,
 } from './fiddle';
-import { thrownReason } from './test-helpers/zip';
+import { thrownReason } from './test-helpers/errors';
 
 const version = { kind: 'release', version: '30.0.0' } as const;
 
@@ -25,6 +26,26 @@ function base(): Fiddle {
     version,
   });
 }
+
+describe('checkEsmSupport', () => {
+  const mjs = { 'main.mjs': 'import { app } from "electron";' };
+
+  it('refuses a main.mjs entry before Electron 28', () => {
+    expect(checkEsmSupport(mjs, { kind: 'release', version: '27.3.0' })).toMatchObject({
+      code: ErrorCode.invalidArgument,
+      details: { reason: 'esm-unsupported', file: 'main.mjs', version: '27.3.0' },
+    });
+    expect(checkEsmSupport({ 'Main.MJS': '' }, { kind: 'release', version: '22.0.0' })).toBeInstanceOf(FiddleError);
+  });
+
+  it('allows Electron 28 and later, local builds, and CommonJS entries', () => {
+    expect(checkEsmSupport(mjs, { kind: 'release', version: '28.0.0' })).toBeNull();
+    expect(checkEsmSupport(mjs, { kind: 'release', version: '28.0.0-alpha.1' })).toBeNull();
+    expect(checkEsmSupport(mjs, { kind: 'release', version: '33.0.0-nightly.20240801' })).toBeNull();
+    expect(checkEsmSupport(mjs, { kind: 'local', id: 'my-build' })).toBeNull();
+    expect(checkEsmSupport({ 'main.js': '', 'preload.mjs': '' }, { kind: 'release', version: '20.0.0' })).toBeNull();
+  });
+});
 
 describe('createFiddle', () => {
   it('hides empty and placeholder-only files and fills defaults', () => {

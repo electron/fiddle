@@ -1,0 +1,83 @@
+{
+  "updateReadyTitle": {
+    "message": "Update ready",
+    "description": "Title of the dialog shown when a new version of the app has been downloaded.",
+    "maxLength": 40
+  },
+  "updateReadyDetail": {
+    "message": "A new version of Electron Fiddle has been downloaded. Restart the app to use it.",
+    "description": "Body of the dialog shown when a new version of the app has been downloaded."
+  },
+  "restart": {
+    "message": "Restart",
+    "description": "Button in the update dialog that restarts the app to install the update.",
+    "maxLength": 20
+  },
+  "later": {
+    "message": "Later",
+    "description": "Button in the update dialog that closes it; the update installs on the next launch.",
+    "maxLength": 20
+  },
+  "versionBlockedMessage": {
+    "message": "This version of Electron Fiddle can no longer be used",
+    "description": "Blocking notice shown at startup when this app version has been withdrawn. The app quits after it."
+  },
+  "versionBlockedDetail": {
+    "message": "Download the latest version to keep using Electron Fiddle.",
+    "description": "Body of the blocking notice for a withdrawn version, used when the server gives no message of its own."
+  },
+  "downloadLatest": {
+    "message": "Download",
+    "description": "Button in the withdrawn-version notice that opens the download page, then quits.",
+    "maxLength": 20
+  },
+  "quit": {
+    "message": "Quit",
+    "description": "Button that quits the app.",
+    "maxLength": 20
+  },
+  "moveMessage": {
+    "message": "Move Electron Fiddle to the Applications folder?",
+    "description": "macOS first-run question, shown when the app runs from outside /Applications."
+  },
+  "moveDetail": {
+    "message": "Updates install reliably only when the app is in the Applications folder.",
+    "description": "macOS first-run explanation under the move-to-Applications question."
+  },
+  "moveButton": {
+    "message": "Move to Applications",
+    "description": "Button that moves the app into /Applications and relaunches it.",
+    "maxLength": 30
+  },
+  "dontMove": {
+    "message": "Don't move",
+    "description": "Button that keeps the app where it is.",
+    "maxLength": 20
+  },
+  "crashConsentMessage": {
+    "message": "A window crashed. Send a crash report?",
+    "description": "Question shown after an app window crashed natively, before a crash dump is uploaded."
+  },
+  "crashConsentDetail": {
+    "message": "The report includes a snapshot of the crashed window's memory, which may contain the code you had open. It helps the Electron Fiddle team fix the crash.",
+    "description": "Explains what a native crash report contains, so the user can decide whether to send it."
+  },
+  "sendReport": {
+    "message": "Send report",
+    "description": "Button that uploads the crash report.",
+    "maxLength": 20
+  },
+  "dontSend": {
+    "message": "Don't send",
+    "description": "Button that discards the crash report.",
+    "maxLength": 20
+  },
+  "aboutVersion": {
+    "message": "{{version}} (Electron {{electron}})",
+    "description": "Version line in the About panel on Windows and Linux. {{version}} is the app version, {{electron}} the Electron version, e.g. 1.0.0 (Electron 44.3.0)."
+  },
+  "aboutCopyright": {
+    "message": "© Electron authors",
+    "description": "Copyright line in the About panel. Keep the © sign."
+  }
+}

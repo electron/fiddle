@@ -12,7 +12,7 @@ export * from './github';
 export * from './modules';
 export * from './names';
 export * from './package-json';
+export * from './pick';
 export * from './templates';
 export * from './trust';
 export * from './versions';
-export * from './zip';

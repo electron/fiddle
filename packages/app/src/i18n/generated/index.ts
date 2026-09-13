@@ -3,7 +3,7 @@
 export const locales = ["en"] as const;
 export type Locale = (typeof locales)[number];
 
-export const namespaces = ["common","main"] as const;
+export const namespaces = ["about","common","gists","main","mainDocuments","mainPlatform","mainRun","mainSettings","mainUx","onboarding","packages","palette","run","settings","shell"] as const;
 export type Namespace = (typeof namespaces)[number];
 
 export type Messages = Readonly<Record<string, string>>;
@@ -12,7 +12,20 @@ export type Loader = () => Promise<{ default: Messages }>;
 /** One small module per locale and namespace, loaded on demand. */
 export const loaders: Record<Locale, Partial<Record<Namespace, Loader>>> = {
   "en": {
+    "about": () => import('./en/about.js'),
     "common": () => import('./en/common.js'),
+    "gists": () => import('./en/gists.js'),
     "main": () => import('./en/main.js'),
+    "mainDocuments": () => import('./en/mainDocuments.js'),
+    "mainPlatform": () => import('./en/mainPlatform.js'),
+    "mainRun": () => import('./en/mainRun.js'),
+    "mainSettings": () => import('./en/mainSettings.js'),
+    "mainUx": () => import('./en/mainUx.js'),
+    "onboarding": () => import('./en/onboarding.js'),
+    "packages": () => import('./en/packages.js'),
+    "palette": () => import('./en/palette.js'),
+    "run": () => import('./en/run.js'),
+    "settings": () => import('./en/settings.js'),
+    "shell": () => import('./en/shell.js'),
   },
 };

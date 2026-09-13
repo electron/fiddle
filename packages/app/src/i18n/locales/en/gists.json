@@ -1,0 +1,299 @@
+{
+  "publishButton": {
+    "message": "Publish",
+    "description": "Title bar button that publishes the fiddle as a GitHub gist, or opens the gist menu once a gist is loaded.",
+    "maxLength": 16
+  },
+  "menuLabel": {
+    "message": "Gist actions",
+    "description": "Accessible name of the gist menu opened from the Publish button."
+  },
+  "menuUpdate": {
+    "message": "Update gist",
+    "description": "Gist menu item that uploads the current files to the loaded gist."
+  },
+  "menuPublishNew": {
+    "message": "Publish as new gist",
+    "description": "Gist menu item that publishes the fiddle as a separate, new gist."
+  },
+  "menuCopyLink": {
+    "message": "Copy share link",
+    "description": "Gist menu item that copies a link to the loaded gist."
+  },
+  "menuHistory": {
+    "message": "Show history",
+    "description": "Gist menu item that opens the gist's revision history."
+  },
+  "menuVisibility": {
+    "message": "New gists are",
+    "description": "Header above the Secret and Public choices in the gist menu. Applies to the next published gist."
+  },
+  "menuDelete": {
+    "message": "Delete gist",
+    "description": "Gist menu item that deletes the loaded gist from GitHub."
+  },
+  "visibilitySecret": {
+    "message": "Secret",
+    "description": "Gist visibility: only people with the link can see it."
+  },
+  "visibilityPublic": {
+    "message": "Public",
+    "description": "Gist visibility: anyone can find it on GitHub."
+  },
+  "cancel": {
+    "message": "Cancel",
+    "description": "Button that closes a gist dialog without doing anything."
+  },
+  "close": {
+    "message": "Close",
+    "description": "Accessible name of the close button on gist dialogs and toasts."
+  },
+  "signInTitle": {
+    "message": "Sign in to GitHub",
+    "description": "Title of the GitHub sign-in dialog."
+  },
+  "signInDescription": {
+    "message": "Publishing gists needs a personal access token with the gist scope.",
+    "description": "Explanation under the sign-in dialog title."
+  },
+  "signInTokenLabel": {
+    "message": "Personal access token",
+    "description": "Label of the token field in the sign-in dialog."
+  },
+  "signInCreateToken": {
+    "message": "Create a token on GitHub",
+    "description": "Button that opens GitHub's new-token page with the gist scope already selected."
+  },
+  "signInRemember": {
+    "message": "Remember the token on this computer",
+    "description": "Checkbox shown on Linux without a keyring. Checking it stores the token as plain text."
+  },
+  "signInRememberHelp": {
+    "message": "This system has no keyring, so the token would be stored as plain text. Leave this off to sign in until you quit.",
+    "description": "Help text under the remember checkbox in the sign-in dialog."
+  },
+  "signInSessionOnly": {
+    "message": "This system can't store the token securely, so you'll stay signed in until you quit.",
+    "description": "Note in the sign-in dialog when the OS offers no encryption."
+  },
+  "signInSubmit": {
+    "message": "Sign in",
+    "description": "Button that checks the token and signs in to GitHub."
+  },
+  "signInErrorFormat": {
+    "message": "That doesn't look like a GitHub token. Tokens start with ghp_ or github_pat_.",
+    "description": "Sign-in error when the token has the wrong format. ghp_ and github_pat_ are literal prefixes; keep them."
+  },
+  "signInErrorInvalid": {
+    "message": "GitHub didn't accept this token. Check that it's current and copied in full.",
+    "description": "Sign-in error when GitHub rejects the token (401 or 403)."
+  },
+  "signInErrorScope": {
+    "message": "This token doesn't have the gist scope. Create one with gist selected.",
+    "description": "Sign-in error when the token lacks the gist scope. 'gist' is GitHub's scope name; keep it."
+  },
+  "signInErrorNetwork": {
+    "message": "Couldn't reach GitHub. Check your internet connection and try again.",
+    "description": "Sign-in error when the computer is offline or GitHub is unavailable."
+  },
+  "signInErrorOther": {
+    "message": "Couldn't sign in: {{message}}",
+    "description": "Sign-in error for any other failure. {{message}} is the error reported by GitHub."
+  },
+  "signedIn": {
+    "message": "Signed in to GitHub as {{login}}",
+    "description": "Toast after a successful sign-in. {{login}} is the GitHub user name."
+  },
+  "signedInSession": {
+    "message": "You'll stay signed in until you quit.",
+    "description": "Toast detail when the token couldn't be stored and lasts only for this session."
+  },
+  "publishTitle": {
+    "message": "Publish to GitHub",
+    "description": "Title of the dialog that publishes the fiddle as a new gist."
+  },
+  "publishDescriptionLabel": {
+    "message": "Description",
+    "description": "Label of the gist description field in the publish dialog."
+  },
+  "publishDefaultDescription": {
+    "message": "Electron Fiddle Gist",
+    "description": "Default description of a new gist. Electron Fiddle is the product name."
+  },
+  "publishDescriptionError": {
+    "message": "Enter 1 to 256 characters.",
+    "description": "Validation message when the gist description is empty or too long."
+  },
+  "publishVisibilityLabel": {
+    "message": "Visibility",
+    "description": "Label of the Secret or Public choice in the publish dialog."
+  },
+  "publishVisibilityHelp": {
+    "message": "Secret gists are hidden from search, but anyone with the link can see them.",
+    "description": "Help text under the visibility choice in the publish dialog."
+  },
+  "publishSubmit": {
+    "message": "Publish",
+    "description": "Button that publishes the gist."
+  },
+  "published": {
+    "message": "Published to GitHub",
+    "description": "Toast after a gist is published."
+  },
+  "updated": {
+    "message": "Gist updated",
+    "description": "Toast after the loaded gist is updated."
+  },
+  "deleted": {
+    "message": "Gist deleted",
+    "description": "Toast after the loaded gist is deleted."
+  },
+  "copyLink": {
+    "message": "Copy link",
+    "description": "Toast action that copies the gist link."
+  },
+  "linkCopied": {
+    "message": "Link copied",
+    "description": "Toast after the gist link is copied to the clipboard."
+  },
+  "publishFailed": {
+    "message": "Couldn't publish the gist",
+    "description": "Error toast title when publishing fails."
+  },
+  "updateFailed": {
+    "message": "Couldn't update the gist",
+    "description": "Error toast title when updating fails."
+  },
+  "deleteFailed": {
+    "message": "Couldn't delete the gist",
+    "description": "Error toast title when deleting fails."
+  },
+  "errorWithHint": {
+    "message": "{{error}} {{hint}}",
+    "description": "Error toast body: the error GitHub reported, then a hint. Keep both placeholders."
+  },
+  "hintConnectivity": {
+    "message": "Check your internet connection and try again.",
+    "description": "Hint after a gist error caused by being offline or GitHub being unavailable."
+  },
+  "hintOwnership": {
+    "message": "Check that you're signed in as the gist's owner.",
+    "description": "Hint after a gist update or delete fails because the gist belongs to someone else."
+  },
+  "deleteConfirmTitle": {
+    "message": "Delete this gist?",
+    "description": "Title of the confirmation before deleting the loaded gist."
+  },
+  "deleteConfirmMessage": {
+    "message": "The gist and its history are removed from GitHub. Your files stay open here.",
+    "description": "Body of the confirmation before deleting the loaded gist."
+  },
+  "deleteConfirm": {
+    "message": "Delete",
+    "description": "Button that confirms deleting the gist."
+  },
+  "historyTitle": {
+    "message": "Gist history",
+    "description": "Title of the dialog listing the gist's revisions."
+  },
+  "historyDescription": {
+    "message": "Choose a revision to load it.",
+    "description": "Explanation under the history dialog title."
+  },
+  "historyListLabel": {
+    "message": "Revisions",
+    "description": "Accessible name of the list of gist revisions."
+  },
+  "historyCreated": {
+    "message": "Created",
+    "description": "Title of a gist's first revision in the history list."
+  },
+  "historyRevision": {
+    "message": "Revision {{n}}",
+    "description": "Title of a later gist revision. {{n}} is 1, 2, 3…"
+  },
+  "historyMeta": {
+    "message": "{{sha}} · {{date}}",
+    "description": "Revision details: the short commit SHA, then the date and time."
+  },
+  "historyChanges": {
+    "message": "+{{additions}} −{{deletions}}",
+    "description": "Lines added and removed in a revision. Keep the + and − signs."
+  },
+  "historyActive": {
+    "message": "Active",
+    "description": "Tag on the revision that's currently loaded."
+  },
+  "historyEmpty": {
+    "message": "No revisions yet.",
+    "description": "Shown in the history dialog when the gist has no revisions."
+  },
+  "historyFailed": {
+    "message": "Couldn't load the history: {{message}}",
+    "description": "Shown when the revision list can't be loaded. {{message}} is the error."
+  },
+  "loadFailed": {
+    "message": "Couldn't load the gist: {{message}}",
+    "description": "Error when loading a gist or a revision fails. {{message}} is the error."
+  },
+  "openTitle": {
+    "message": "Open a gist",
+    "description": "Title of the dialog that loads a gist by URL or ID."
+  },
+  "openLabel": {
+    "message": "Gist URL or ID",
+    "description": "Label of the field in the open-gist dialog."
+  },
+  "openPlaceholder": {
+    "message": "https://gist.github.com/…",
+    "description": "Placeholder in the open-gist field, an example gist URL."
+  },
+  "openCurrent": {
+    "message": "Loaded now: {{url}}",
+    "description": "Help text in the open-gist dialog showing the URL of the gist that's loaded."
+  },
+  "openInvalid": {
+    "message": "Enter a gist URL or a 32-character gist ID.",
+    "description": "Validation message when the input doesn't contain a gist ID."
+  },
+  "openSubmit": {
+    "message": "Open",
+    "description": "Button that loads the gist."
+  },
+  "noticeDecryptFailed": {
+    "message": "Signed out of GitHub",
+    "description": "Warning toast title when the stored GitHub token couldn't be decrypted at startup."
+  },
+  "noticeDecryptFailedDetail": {
+    "message": "Your saved token couldn't be unlocked, so sign in again to publish gists.",
+    "description": "Warning toast body when the stored GitHub token couldn't be decrypted."
+  },
+  "accountLabel": {
+    "message": "GitHub account",
+    "description": "Label of the GitHub account row in Settings."
+  },
+  "accountSignedInAs": {
+    "message": "Signed in as {{login}}",
+    "description": "Settings text showing the GitHub user name."
+  },
+  "accountSignedOut": {
+    "message": "Not signed in",
+    "description": "Settings text when no GitHub account is signed in."
+  },
+  "accountSignOut": {
+    "message": "Sign out",
+    "description": "Settings button that signs out of GitHub and deletes the stored token."
+  },
+  "accountSignIn": {
+    "message": "Sign in",
+    "description": "Settings button that opens the GitHub sign-in dialog."
+  },
+  "asRevisionLabel": {
+    "message": "Publish as revision",
+    "description": "Settings switch for publishing gists in two steps so the gist history shows a diff."
+  },
+  "asRevisionHelp": {
+    "message": "Creates the gist from the default template first, then updates it with your files, so the gist's history shows your changes.",
+    "description": "Help text under the Publish as revision switch."
+  }
+}

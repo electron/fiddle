@@ -25,6 +25,7 @@ import {
   type InstallerOptions,
   isFiddleCoreError,
 } from '../src/index.js';
+import { safeHostname } from '../src/fs-util.js';
 
 vi.mock('@electron-internal/extract-zip');
 
@@ -36,6 +37,14 @@ const fixture = (name: string) => path.join(import.meta.dirname, 'fixtures', nam
 const zipName = (version: string) =>
   `electron-v${version}-${process.platform}-${process.arch}.zip`;
 const { missing, downloading, downloaded, installing, installed } = InstallState;
+const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
+/** The pid of a process that has already exited. */
+async function deadPid(): Promise<number> {
+  const child = spawn(process.execPath, ['-e', '']);
+  await new Promise((resolve) => child.once('exit', resolve));
+  return child.pid!;
+}
 
 // A local mirror serving the fixture zips and a releases list.
 let server: http.Server;
@@ -128,6 +137,8 @@ describe('fiddle-core 3.0 additions', () => {
 
   const readVersion = (dir: string) =>
     fs.readFileSync(path.join(dir, 'version'), 'utf8').trim();
+  const ls = (dir: string) => fs.readdirSync(dir).sort();
+  const versionsDir = (...names: string[]) => path.join(paths.electronVersions, ...names);
 
   describe("the 'per-version' layout", () => {
     it('installs several versions side by side', async () => {
@@ -135,21 +146,17 @@ describe('fiddle-core 3.0 additions', () => {
       const exec13 = await installer.install('13.1.7');
       const exec12 = await installer.install('12.0.15');
 
-      const dir13 = path.join(paths.electronVersions, '13.1.7');
-      const dir12 = path.join(paths.electronVersions, '12.0.15');
-      expect(exec13).toBe(Installer.getExecPath(dir13));
-      expect(exec12).toBe(Installer.getExecPath(dir12));
-      expect(readVersion(dir13)).toBe('13.1.7');
-      expect(readVersion(dir12)).toBe('12.0.15');
+      expect(exec13).toBe(Installer.getExecPath(versionsDir('13.1.7')));
+      expect(exec12).toBe(Installer.getExecPath(versionsDir('12.0.15')));
+      expect(readVersion(versionsDir('13.1.7'))).toBe('13.1.7');
+      expect(readVersion(versionsDir('12.0.15'))).toBe('12.0.15');
       expect(installer.state('13.1.7')).toBe(installed);
       expect(installer.state('12.0.15')).toBe(installed);
       expect(installer.installedVersions.sort()).toStrictEqual(['12.0.15', '13.1.7']);
 
       // no temp folders or locks left behind, and the current folder is untouched
-      expect(fs.readdirSync(paths.electronVersions).sort()).toStrictEqual([
-        '12.0.15',
-        '13.1.7',
-      ]);
+      expect(ls(paths.electronVersions)).toStrictEqual(['.locks', '12.0.15', '13.1.7']);
+      expect(ls(versionsDir('.locks'))).toStrictEqual([]);
       expect(fs.existsSync(paths.electronInstall)).toBe(false);
     });
 
@@ -175,14 +182,18 @@ describe('fiddle-core 3.0 additions', () => {
       expect(hits).toStrictEqual([]);
     });
 
-    it('shares one install between concurrent calls', async () => {
+    it('shares one install, and its progress, between concurrent calls', async () => {
       const installer = createInstaller({ layout: 'per-version' });
+      const progressA = vi.fn();
+      const progressB = vi.fn();
       const [a, b] = await Promise.all([
-        installer.install('13.1.7'),
-        installer.install('13.1.7'),
+        installer.install('13.1.7', { progressCallback: progressA }),
+        installer.install('13.1.7', { progressCallback: progressB }),
       ]);
       expect(a).toBe(b);
       expect(zipHits()).toHaveLength(1);
+      expect(progressA).toHaveBeenCalled();
+      expect(progressB).toHaveBeenCalled();
     });
 
     it('finds installed versions when constructed', async () => {
@@ -192,6 +203,31 @@ describe('fiddle-core 3.0 additions', () => {
       expect(fresh.installedVersions).toStrictEqual(['13.1.7']);
     });
 
+    it('counts only folders that hold an executable, never lock files', async () => {
+      fs.mkdirSync(versionsDir('.locks'), { recursive: true });
+      fs.writeFileSync(versionsDir('13.0.0-beta.1.lock'), '{}');
+      fs.writeFileSync(versionsDir('.locks', '13.0.0-beta.1.lock'), '{}');
+      fs.mkdirSync(versionsDir('12.0.15'));
+      const exec = Installer.getExecPath(versionsDir('13.1.7'));
+      fs.mkdirSync(path.dirname(exec), { recursive: true });
+      fs.writeFileSync(exec, '');
+
+      const installer = createInstaller({ layout: 'per-version' });
+      expect(installer.installedVersions).toStrictEqual(['13.1.7']);
+      expect(installer.state('13.0.0-beta.1')).toBe(missing);
+      expect(installer.state('12.0.15')).toBe(missing);
+    });
+
+    it('replaces a folder that has no executable', async () => {
+      fs.mkdirSync(versionsDir('13.1.7'), { recursive: true });
+      fs.writeFileSync(versionsDir('13.1.7', 'junk'), '');
+
+      const exec = await createInstaller({ layout: 'per-version' }).install('13.1.7');
+      expect(fs.existsSync(exec)).toBe(true);
+      expect(fs.existsSync(versionsDir('13.1.7', 'junk'))).toBe(false);
+      expect(ls(paths.electronVersions)).toStrictEqual(['.locks', '13.1.7']);
+    });
+
     it('leaves nothing behind when extraction fails', async () => {
       vi.mocked(extract).mockImplementation(
         async (_zip: string, { dir }: ExtractOptions) => {
@@ -199,12 +235,36 @@ describe('fiddle-core 3.0 additions', () => {
           throw new Error('disk full');
         },
       );
-      const installer = createInstaller({ layout: 'per-version' });
+      const installer = createInstaller({ layout: 'per-version', errors: 'typed' });
 
       const err: unknown = await installer.install('13.1.7').catch((e: unknown) => e);
       expect(isFiddleCoreError(err, 'extract-failed')).toBe(true);
-      expect(fs.readdirSync(paths.electronVersions)).toStrictEqual([]);
+      expect((err as Error).cause).toEqual(new Error('disk full'));
+      expect(ls(paths.electronVersions)).toStrictEqual(['.locks']);
       expect(installer.state('13.1.7')).toBe(downloaded);
+    });
+
+    it('sweeps temp and trash folders left by dead or long-gone processes', async () => {
+      const host = safeHostname();
+      const dead = await deadPid();
+      const old = new Date(Date.now() - 60 * 60 * 1000);
+      const leftovers = {
+        deadTmp: `.tmp-13.1.7_${host}_${dead}_abc123`,
+        deadTrash: `.rm-12.0.15_${host}_${dead}_deadbeef`,
+        liveTmp: `.tmp-12.0.15_${host}_${process.pid}_live01`,
+        oldRemote: `.tmp-13.1.7_other-host_1_old001`,
+        freshRemote: `.rm-13.1.7_other-host_1_new001`,
+      };
+      for (const name of Object.values(leftovers)) {
+        fs.mkdirSync(versionsDir(name), { recursive: true });
+        fs.writeFileSync(versionsDir(name, 'file'), '');
+      }
+      fs.utimesSync(versionsDir(leftovers.oldRemote), old, old);
+
+      await createInstaller({ layout: 'per-version' }).install('13.1.7');
+      expect(ls(paths.electronVersions)).toStrictEqual(
+        ['.locks', leftovers.liveTmp, leftovers.freshRemote, '13.1.7'].sort(),
+      );
     });
 
     it('removes an installed version', async () => {
@@ -215,7 +275,7 @@ describe('fiddle-core 3.0 additions', () => {
       await installer.remove('13.1.7');
       expect(installer.state('13.1.7')).toBe(missing);
       expect(installer.state('12.0.15')).toBe(installed);
-      expect(fs.readdirSync(paths.electronVersions)).toStrictEqual(['12.0.15']);
+      expect(ls(paths.electronVersions)).toStrictEqual(['.locks', '12.0.15']);
     });
 
     it('defaults electronVersions to a folder next to electronInstall', async () => {
@@ -229,11 +289,33 @@ describe('fiddle-core 3.0 additions', () => {
       const exec = await installer.install('13.1.7');
       expect(exec).toBe(Installer.getExecPath(path.join(tmpdir, 'versions', '13.1.7')));
     });
+
+    it('extracts through the `extract` option, without touching process.noAsar', async () => {
+      const noAsar: unknown[] = [];
+      const custom = vi.fn(
+        async (zipPath: string, dir: string, _signal?: AbortSignal) => {
+          noAsar.push(process.noAsar);
+          await actual.extract(zipPath, { dir });
+        },
+      );
+      const installer = createInstaller({ layout: 'per-version', extract: custom });
+
+      const exec = await installer.install('13.1.7');
+      expect(fs.existsSync(exec)).toBe(true);
+      expect(custom).toHaveBeenCalledWith(
+        path.join(paths.electronDownloads, zipName('13.1.7')),
+        expect.stringContaining(versionsDir(`.tmp-13.1.7_`)),
+        expect.any(AbortSignal),
+      );
+      expect(noAsar).toStrictEqual([undefined]);
+      expect(extract).not.toHaveBeenCalled();
+    });
   });
 
-  describe('cross-process locks', () => {
+  describe('sharing a cache between installers', () => {
+    const options = { layout: 'per-version' } as const;
+
     it('lets two installers share one cache folder', async () => {
-      const options = { layout: 'per-version', locks: true } as const;
       const a = createInstaller(options);
       const b = createInstaller(options);
 
@@ -245,50 +327,72 @@ describe('fiddle-core 3.0 additions', () => {
       expect(a.state('13.1.7')).toBe(installed);
       expect(b.state('13.1.7')).toBe(installed);
       expect(zipHits()).toHaveLength(1);
-      expect(readVersion(path.join(paths.electronVersions, '13.1.7'))).toBe('13.1.7');
+      expect(readVersion(versionsDir('13.1.7'))).toBe('13.1.7');
 
       // locks are released and removed
-      expect(fs.readdirSync(paths.electronVersions)).toStrictEqual(['13.1.7']);
-      expect(fs.readdirSync(paths.electronDownloads)).toStrictEqual([zipName('13.1.7')]);
+      expect(ls(paths.electronVersions)).toStrictEqual(['.locks', '13.1.7']);
+      expect(ls(versionsDir('.locks'))).toStrictEqual([]);
+      expect(ls(paths.electronDownloads)).toStrictEqual(['.locks', zipName('13.1.7')]);
+      expect(ls(path.join(paths.electronDownloads, '.locks'))).toStrictEqual([]);
     });
 
     it('lets two installers install different versions at once', async () => {
-      const options = { layout: 'per-version', locks: true } as const;
       await Promise.all([
         createInstaller(options).install('13.1.7'),
         createInstaller(options).install('12.0.15'),
       ]);
-      expect(fs.readdirSync(paths.electronVersions).sort()).toStrictEqual([
-        '12.0.15',
-        '13.1.7',
-      ]);
+      expect(ls(paths.electronVersions)).toStrictEqual(['.locks', '12.0.15', '13.1.7']);
     });
 
-    it('serializes installs into the current folder', async () => {
-      const a = createInstaller({ locks: true });
-      const b = createInstaller({ locks: true });
-      await Promise.all([a.install('13.1.7'), b.install('12.0.15')]);
+    it('serializes installs of one version: at most one extract at a time', async () => {
+      let running = 0;
+      let most = 0;
+      vi.mocked(extract).mockImplementation(async (zipPath, opts) => {
+        most = Math.max(most, ++running);
+        await sleep(50);
+        await actual.extract(zipPath, opts);
+        running--;
+      });
 
-      expect(['13.1.7', '12.0.15']).toContain(readVersion(paths.electronInstall));
-      expect(
-        fs.readdirSync(tmpdir).filter((name) => name.endsWith('.lock')),
-      ).toStrictEqual([]);
+      const installers = [1, 2, 3].map(() => createInstaller(options));
+      await Promise.all(installers.map((installer) => installer.install('13.1.7')));
+      expect(most).toBe(1);
+      expect(extract).toHaveBeenCalledTimes(1);
+      for (const installer of installers) {
+        expect(installer.state('13.1.7')).toBe(installed);
+      }
+    });
+
+    it('takes the install lock only after the download finishes', async () => {
+      const locks: { download: boolean; install: boolean }[] = [];
+      onZipRequest = () =>
+        locks.push({
+          download: fs.existsSync(
+            path.join(paths.electronDownloads, '.locks', `${zipName('13.1.7')}.lock`),
+          ),
+          install: fs.existsSync(versionsDir('.locks', '13.1.7.lock')),
+        });
+      await createInstaller(options).install('13.1.7');
+      expect(locks).toStrictEqual([{ download: true, install: false }]);
     });
 
     it('recovers an install lock left behind by a crashed process', async () => {
-      const child = spawn(process.execPath, ['-e', '']);
-      await new Promise((resolve) => child.once('exit', resolve));
-      fs.mkdirSync(paths.electronVersions, { recursive: true });
-      const lockInfo = { pid: child.pid, hostname: os.hostname(), startedAt: Date.now() };
-      fs.writeFileSync(
-        path.join(paths.electronVersions, '13.1.7.lock'),
-        JSON.stringify(lockInfo),
-      );
+      fs.mkdirSync(versionsDir('.locks'), { recursive: true });
+      const lockInfo = { pid: await deadPid(), hostname: os.hostname(), startedAt: 0 };
+      fs.writeFileSync(versionsDir('.locks', '13.1.7.lock'), JSON.stringify(lockInfo));
 
-      const installer = createInstaller({ layout: 'per-version', locks: true });
+      const installer = createInstaller(options);
       await installer.install('13.1.7');
       expect(installer.state('13.1.7')).toBe(installed);
-      expect(fs.readdirSync(paths.electronVersions)).toStrictEqual(['13.1.7']);
+      expect(ls(paths.electronVersions)).toStrictEqual(['.locks', '13.1.7']);
+      expect(ls(versionsDir('.locks'))).toStrictEqual([]);
+    });
+
+    it('accepts the old `locks` option and ignores it', async () => {
+      await createInstaller({ locks: true }).install('13.1.7');
+      expect(readVersion(paths.electronInstall)).toBe('13.1.7');
+      expect(fs.existsSync(path.join(paths.electronDownloads, '.locks'))).toBe(false);
+      expect(fs.existsSync(paths.electronVersions)).toBe(false);
     });
   });
 
@@ -305,16 +409,14 @@ describe('fiddle-core 3.0 additions', () => {
       hangZip = true;
       const controller = new AbortController();
       onZipRequest = () => controller.abort();
-      const installer = createInstaller({ layout: 'per-version', locks: true });
+      const installer = createInstaller({ layout: 'per-version' });
 
       const install = installer.install('13.1.7', { signal: controller.signal });
       await expect(install).rejects.toHaveProperty('code', 'aborted');
-      expect(installer.state('13.1.7')).toBe(missing);
-      expect(fs.existsSync(path.join(paths.electronDownloads, zipName('13.1.7')))).toBe(
-        false,
-      );
-      expect(fs.readdirSync(paths.electronDownloads)).toStrictEqual([]);
-      expect(fs.existsSync(path.join(paths.electronVersions, '13.1.7'))).toBe(false);
+      // the caller stops waiting at once; the download then cleans up
+      await expect.poll(() => installer.state('13.1.7')).toBe(missing);
+      expect(ls(paths.electronDownloads)).toStrictEqual(['.locks']);
+      expect(fs.existsSync(versionsDir('13.1.7'))).toBe(false);
     });
 
     it('cancels ensureDownloaded() too', async () => {
@@ -326,7 +428,7 @@ describe('fiddle-core 3.0 additions', () => {
     });
 
     it('stops waiting for a lock', async () => {
-      const options = { layout: 'per-version', locks: true } as const;
+      const options = { layout: 'per-version' } as const;
       hangZip = true;
       const holder = createInstaller(options);
       const holderController = new AbortController();
@@ -340,6 +442,96 @@ describe('fiddle-core 3.0 additions', () => {
 
       holderController.abort();
       await expect(held).rejects.toHaveProperty('code', 'aborted');
+    });
+
+    it('checks the signal in the extract step', async () => {
+      const controller = new AbortController();
+      const installer = createInstaller({
+        layout: 'per-version',
+        extract: async (zipPath, dir) => {
+          controller.abort();
+          await actual.extract(zipPath, { dir });
+        },
+      });
+
+      const install = installer.install('13.1.7', { signal: controller.signal });
+      await expect(install).rejects.toHaveProperty('code', 'aborted');
+      // let the shared install notice the abort and clean up
+      await expect.poll(() => installer.state('13.1.7')).toBe(downloaded);
+      expect(ls(paths.electronVersions)).toStrictEqual(['.locks']);
+    });
+
+    describe('with concurrent calls', () => {
+      const options = { layout: 'per-version' } as const;
+
+      it('keeps the shared install going while any caller still waits', async () => {
+        const installer = createInstaller(options);
+        const a = new AbortController();
+        const b = new AbortController();
+        onZipRequest = () => a.abort();
+
+        const [resultA, resultB] = await Promise.allSettled([
+          installer.install('13.1.7', { signal: a.signal }),
+          installer.install('13.1.7', { signal: b.signal }),
+        ]);
+        expect(resultA).toMatchObject({
+          status: 'rejected',
+          reason: { code: 'aborted' },
+        });
+        expect(resultB).toStrictEqual({
+          status: 'fulfilled',
+          value: Installer.getExecPath(versionsDir('13.1.7')),
+        });
+        expect(zipHits()).toHaveLength(1);
+        expect(installer.state('13.1.7')).toBe(installed);
+      });
+
+      it('keeps the shared install going for a caller without a signal', async () => {
+        const installer = createInstaller(options);
+        const a = new AbortController();
+        onZipRequest = () => a.abort();
+
+        const [resultA, resultB] = await Promise.allSettled([
+          installer.install('13.1.7', { signal: a.signal }),
+          installer.install('13.1.7'),
+        ]);
+        expect(resultA).toMatchObject({
+          status: 'rejected',
+          reason: { code: 'aborted' },
+        });
+        expect(resultB.status).toBe('fulfilled');
+      });
+
+      it('stops the shared download once every caller has aborted', async () => {
+        hangZip = true;
+        const installer = createInstaller(options);
+        const a = new AbortController();
+        const b = new AbortController();
+        onZipRequest = () => {
+          a.abort();
+          b.abort();
+        };
+
+        const results = await Promise.allSettled([
+          installer.install('13.1.7', { signal: a.signal }),
+          installer.install('13.1.7', { signal: b.signal }),
+        ]);
+        for (const result of results) {
+          expect(result).toMatchObject({
+            status: 'rejected',
+            reason: { code: 'aborted' },
+          });
+        }
+        await expect.poll(() => installer.state('13.1.7')).toBe(missing);
+        expect(ls(paths.electronDownloads)).toStrictEqual(['.locks']);
+
+        // a later call starts afresh instead of joining the stopped one
+        hangZip = false;
+        onZipRequest = undefined;
+        await expect(installer.install('13.1.7')).resolves.toBe(
+          Installer.getExecPath(versionsDir('13.1.7')),
+        );
+      });
     });
   });
 
@@ -369,14 +561,20 @@ describe('fiddle-core 3.0 additions', () => {
     });
   });
 
-  describe('typed errors', () => {
-    it('uses `download-failed` when a release cannot be downloaded', async () => {
-      const installer = createInstaller();
-      await expect(installer.ensureDownloaded('99.0.0')).rejects.toHaveProperty(
-        'code',
-        'download-failed',
-      );
+  describe('errors', () => {
+    it("uses `download-failed` for a failed download with errors: 'typed'", async () => {
+      const installer = createInstaller({ errors: 'typed' });
+      const err: unknown = await installer.ensureDownloaded('99.0.0').catch((e) => e);
+      expect(isFiddleCoreError(err, 'download-failed')).toBe(true);
+      expect((err as Error).cause).toBeInstanceOf(Error);
       expect(installer.state('99.0.0')).toBe(missing);
+    });
+
+    it('throws the original download error by default, as in 2.x', async () => {
+      const installer = createInstaller();
+      const err: unknown = await installer.ensureDownloaded('99.0.0').catch((e) => e);
+      expect(err).toBeInstanceOf(Error);
+      expect(isFiddleCoreError(err)).toBe(false);
     });
 
     it('uses `download-failed` when the releases list cannot be fetched', async () => {
@@ -385,6 +583,22 @@ describe('fiddle-core 3.0 additions', () => {
         releasesUrl: `${mirror}missing.json`,
       });
       await expect(create).rejects.toHaveProperty('code', 'download-failed');
+    });
+
+    it("wraps a network error from the releases fetch only with errors: 'typed'", async () => {
+      const options = {
+        paths: { versionsCache: path.join(tmpdir, 'releases.json') },
+        releasesUrl: 'http://127.0.0.1:1/releases.json',
+      };
+      const legacy: unknown = await ElectronVersions.create(options).catch((e) => e);
+      expect(legacy).toBeInstanceOf(TypeError);
+
+      const typed: unknown = await ElectronVersions.create({
+        ...options,
+        errors: 'typed',
+      }).catch((e) => e);
+      expect(isFiddleCoreError(typed, 'download-failed')).toBe(true);
+      expect((typed as Error).cause).toBeInstanceOf(TypeError);
     });
 
     it('uses `invalid-version` for a bad version', async () => {
@@ -413,10 +627,30 @@ describe('fiddle-core 3.0 additions', () => {
     });
   });
 
-  it('still reports the current install after a restart', async () => {
-    await createInstaller().install('13.1.7');
-    const fresh = createInstaller();
-    expect(fresh.state('13.1.7')).toBe(installed);
-    expect(fresh.installedVersion).toBe('13.1.7');
+  describe("the 'current' layout", () => {
+    it('still reports the current install after a restart', async () => {
+      await createInstaller().install('13.1.7');
+      const fresh = createInstaller();
+      expect(fresh.state('13.1.7')).toBe(installed);
+      expect(fresh.installedVersion).toBe('13.1.7');
+    });
+
+    it('treats a current folder without the completion marker as downloaded', async () => {
+      await createInstaller().install('13.1.7');
+      const marker = path.join(paths.electronInstall, '.fiddle-core-installed');
+      expect(fs.existsSync(marker)).toBe(true);
+      fs.rmSync(marker);
+
+      const fresh = createInstaller();
+      expect(fresh.state('13.1.7')).toBe(downloaded);
+      expect(fresh.installedVersion).toBe(undefined);
+
+      const events = await listenWhile(fresh, () => fresh.install('13.1.7'));
+      expect(events).toStrictEqual([
+        { version: '13.1.7', state: installing },
+        { version: '13.1.7', state: installed },
+      ]);
+      expect(fs.existsSync(marker)).toBe(true);
+    });
   });
 });

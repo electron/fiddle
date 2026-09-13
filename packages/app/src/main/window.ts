@@ -15,13 +15,14 @@ import {
   type BrowserWindowConstructorOptions,
 } from 'electron';
 
-import type { Material, Platform } from '../shared/stores';
+import { DEFAULT_LAYOUT, type Material, type Platform } from '../shared/stores';
 import { APP_ORIGIN } from './bundle';
 import type { CommandRegistry } from './commands';
+import { emptyFiddleState } from './documents/model';
 import { bindWindowIpc } from './ipc';
 import { log } from './log';
 import { blockNavigation } from './security';
-import type { StateHub } from './state-hub';
+import type { StateHub, WindowInit } from './state-hub';
 import { trackWindow, untrackWindow } from './windows';
 
 /** Matches the renderer name in forge.config.ts and vite.renderer.config.ts. */
@@ -120,6 +121,10 @@ export interface CreateWindowOptions {
   registry: CommandRegistry;
   url: string;
   platform: Platform;
+  /** Session restore reopens a window under its old ID. */
+  windowId?: string;
+  /** The window's initial store value; Documents provides the fiddle part. */
+  init?: WindowInit;
 }
 
 export async function createAppWindow({
@@ -127,8 +132,9 @@ export async function createAppWindow({
   registry,
   url,
   platform,
+  windowId = randomUUID(),
+  init,
 }: CreateWindowOptions): Promise<BrowserWindow> {
-  const windowId = randomUUID();
   const win = new BrowserWindow(windowOptions(platform, hub.app.material));
   const contents = win.webContents;
   trackWindow(windowId, win);
@@ -138,7 +144,12 @@ export async function createAppWindow({
   bindWindowIpc({
     contents,
     windowId,
-    init: { title: app.getName() },
+    init: init ?? {
+      title: app.getName(),
+      view: 'editor',
+      fiddle: emptyFiddleState(),
+      layout: DEFAULT_LAYOUT,
+    },
     hub,
     registry,
     // Also called after every reload; only the first one shows the window.

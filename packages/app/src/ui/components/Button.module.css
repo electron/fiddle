@@ -123,7 +123,8 @@
 
 /* Stop (running): secondary with a spark-soft fill and a faint red ring. */
 .button[data-variant="stop"] {
-  color: var(--lu-spark);
+  /* The label and stop square stay ink, not red. */
+  color: var(--lu-ink);
   background: var(--lu-spark-soft);
   box-shadow: var(--lu-shadow-stop);
 }

@@ -1,10 +1,10 @@
 import fs from 'node:fs';
 import path from 'node:path';
 
+import debug from 'debug';
 import { parse as semverParse, SemVer } from 'semver';
 
-import { debug } from './debug.js';
-import { FiddleCoreError } from './errors.js';
+import { type ErrorMode, FiddleCoreError, wrapError } from './errors.js';
 import { writeFileAtomic } from './fs-util.js';
 import { DefaultPaths, type Paths } from './paths.js';
 
@@ -85,6 +85,9 @@ export interface ElectronVersionsCreateOptions {
 
   /** Where to fetch the releases list. Default: https://releases.electronjs.org/releases.json */
   releasesUrl?: string;
+
+  /** With `typed`, a failed fetch is wrapped in a `download-failed` error. Default: `legacy`. */
+  errors?: ErrorMode;
 }
 
 const DEFAULT_RELEASES_URL = 'https://releases.electronjs.org/releases.json';
@@ -311,15 +314,18 @@ export class ElectronVersions extends BaseVersions {
     super(values);
   }
 
-  private static async fetchVersions(cacheFile: string, url: string): Promise<unknown> {
+  private static async fetchVersions(
+    cacheFile: string,
+    url: string,
+    errors?: ErrorMode,
+  ): Promise<unknown> {
     const d = debug('fiddle-core:ElectronVersions:fetchVersions');
     d('fetching releases list from', url);
     let response: Response;
     try {
       response = await fetch(url);
     } catch (err) {
-      const message = err instanceof Error ? err.message : String(err);
-      throw new FiddleCoreError('download-failed', message, { cause: err });
+      throw wrapError(errors, 'download-failed', err);
     }
     if (!response.ok) {
       throw new FiddleCoreError(
@@ -364,7 +370,11 @@ export class ElectronVersions extends BaseVersions {
 
     if (!versions || staleCache) {
       try {
-        versions = await ElectronVersions.fetchVersions(versionsCache, releasesUrl);
+        versions = await ElectronVersions.fetchVersions(
+          versionsCache,
+          releasesUrl,
+          options.errors,
+        );
       } catch (err) {
         d('error fetching versions', err);
         if (!versions) {

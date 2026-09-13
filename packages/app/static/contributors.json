@@ -1,0 +1,377 @@
+{
+  "schemaVersion": 1,
+  "source": "https://api.github.com/repos/electron/fiddle/contributors",
+  "fetchedAt": "2026-09-13",
+  "contributors": [
+    {
+      "login": "felixrieseberg",
+      "url": "https://github.com/felixrieseberg",
+      "contributions": 905
+    },
+    {
+      "login": "dsanders11",
+      "url": "https://github.com/dsanders11",
+      "contributions": 310
+    },
+    {
+      "login": "erickzhao",
+      "url": "https://github.com/erickzhao",
+      "contributions": 177
+    },
+    {
+      "login": "codebytere",
+      "url": "https://github.com/codebytere",
+      "contributions": 122
+    },
+    {
+      "login": "ckerr",
+      "url": "https://github.com/ckerr",
+      "contributions": 102
+    },
+    {
+      "login": "BlackHole1",
+      "url": "https://github.com/BlackHole1",
+      "contributions": 39
+    },
+    {
+      "login": "ajphukan",
+      "url": "https://github.com/ajphukan",
+      "contributions": 28
+    },
+    {
+      "login": "malept",
+      "url": "https://github.com/malept",
+      "contributions": 28
+    },
+    {
+      "login": "MarshallOfSound",
+      "url": "https://github.com/MarshallOfSound",
+      "contributions": 25
+    },
+    {
+      "login": "vhashimotoo",
+      "url": "https://github.com/vhashimotoo",
+      "contributions": 25
+    },
+    {
+      "login": "malloxpb",
+      "url": "https://github.com/malloxpb",
+      "contributions": 14
+    },
+    {
+      "login": "erikian",
+      "url": "https://github.com/erikian",
+      "contributions": 13
+    },
+    {
+      "login": "aryanshridhar",
+      "url": "https://github.com/aryanshridhar",
+      "contributions": 12
+    },
+    {
+      "login": "georgexu99",
+      "url": "https://github.com/georgexu99",
+      "contributions": 11
+    },
+    {
+      "login": "VerteDinde",
+      "url": "https://github.com/VerteDinde",
+      "contributions": 10
+    },
+    {
+      "login": "electron-bot",
+      "url": "https://github.com/electron-bot",
+      "contributions": 10
+    },
+    {
+      "login": "miniak",
+      "url": "https://github.com/miniak",
+      "contributions": 8
+    },
+    {
+      "login": "BeniCheni",
+      "url": "https://github.com/BeniCheni",
+      "contributions": 7
+    },
+    {
+      "login": "thewheat",
+      "url": "https://github.com/thewheat",
+      "contributions": 7
+    },
+    {
+      "login": "zeke",
+      "url": "https://github.com/zeke",
+      "contributions": 6
+    },
+    {
+      "login": "simurai",
+      "url": "https://github.com/simurai",
+      "contributions": 5
+    },
+    {
+      "login": "nornagon",
+      "url": "https://github.com/nornagon",
+      "contributions": 4
+    },
+    {
+      "login": "issacgerges",
+      "url": "https://github.com/issacgerges",
+      "contributions": 4
+    },
+    {
+      "login": "mlaurencin",
+      "url": "https://github.com/mlaurencin",
+      "contributions": 4
+    },
+    {
+      "login": "jkleinsc",
+      "url": "https://github.com/jkleinsc",
+      "contributions": 4
+    },
+    {
+      "login": "CharlieHess",
+      "url": "https://github.com/CharlieHess",
+      "contributions": 4
+    },
+    {
+      "login": "cvr2496",
+      "url": "https://github.com/cvr2496",
+      "contributions": 4
+    },
+    {
+      "login": "bpasero",
+      "url": "https://github.com/bpasero",
+      "contributions": 3
+    },
+    {
+      "login": "clavin",
+      "url": "https://github.com/clavin",
+      "contributions": 3
+    },
+    {
+      "login": "Ayman161803",
+      "url": "https://github.com/Ayman161803",
+      "contributions": 2
+    },
+    {
+      "login": "yangannyx",
+      "url": "https://github.com/yangannyx",
+      "contributions": 2
+    },
+    {
+      "login": "gaspardruan",
+      "url": "https://github.com/gaspardruan",
+      "contributions": 2
+    },
+    {
+      "login": "Santhoshmani1",
+      "url": "https://github.com/Santhoshmani1",
+      "contributions": 2
+    },
+    {
+      "login": "nikwen",
+      "url": "https://github.com/nikwen",
+      "contributions": 2
+    },
+    {
+      "login": "akgupta0777",
+      "url": "https://github.com/akgupta0777",
+      "contributions": 2
+    },
+    {
+      "login": "ada-lovecraft",
+      "url": "https://github.com/ada-lovecraft",
+      "contributions": 2
+    },
+    {
+      "login": "AlokYadavCodes",
+      "url": "https://github.com/AlokYadavCodes",
+      "contributions": 2
+    },
+    {
+      "login": "andersk",
+      "url": "https://github.com/andersk",
+      "contributions": 2
+    },
+    {
+      "login": "Cheerego7",
+      "url": "https://github.com/Cheerego7",
+      "contributions": 2
+    },
+    {
+      "login": "boujeepossum",
+      "url": "https://github.com/boujeepossum",
+      "contributions": 1
+    },
+    {
+      "login": "knqu",
+      "url": "https://github.com/knqu",
+      "contributions": 1
+    },
+    {
+      "login": "Kilian",
+      "url": "https://github.com/Kilian",
+      "contributions": 1
+    },
+    {
+      "login": "letrahoo",
+      "url": "https://github.com/letrahoo",
+      "contributions": 1
+    },
+    {
+      "login": "Loseshape0",
+      "url": "https://github.com/Loseshape0",
+      "contributions": 1
+    },
+    {
+      "login": "mikeesto",
+      "url": "https://github.com/mikeesto",
+      "contributions": 1
+    },
+    {
+      "login": "miqh",
+      "url": "https://github.com/miqh",
+      "contributions": 1
+    },
+    {
+      "login": "natjng",
+      "url": "https://github.com/natjng",
+      "contributions": 1
+    },
+    {
+      "login": "stoichy",
+      "url": "https://github.com/stoichy",
+      "contributions": 1
+    },
+    {
+      "login": "robertgzr",
+      "url": "https://github.com/robertgzr",
+      "contributions": 1
+    },
+    {
+      "login": "RNAdvani",
+      "url": "https://github.com/RNAdvani",
+      "contributions": 1
+    },
+    {
+      "login": "sanz17",
+      "url": "https://github.com/sanz17",
+      "contributions": 1
+    },
+    {
+      "login": "SpacingBat3",
+      "url": "https://github.com/SpacingBat3",
+      "contributions": 1
+    },
+    {
+      "login": "itsananderson",
+      "url": "https://github.com/itsananderson",
+      "contributions": 1
+    },
+    {
+      "login": "fytriht",
+      "url": "https://github.com/fytriht",
+      "contributions": 1
+    },
+    {
+      "login": "amorist",
+      "url": "https://github.com/amorist",
+      "contributions": 1
+    },
+    {
+      "login": "sekarah",
+      "url": "https://github.com/sekarah",
+      "contributions": 1
+    },
+    {
+      "login": "spencer17x",
+      "url": "https://github.com/spencer17x",
+      "contributions": 1
+    },
+    {
+      "login": "Hanaffi",
+      "url": "https://github.com/Hanaffi",
+      "contributions": 1
+    },
+    {
+      "login": "regularfry",
+      "url": "https://github.com/regularfry",
+      "contributions": 1
+    },
+    {
+      "login": "cherniavskii",
+      "url": "https://github.com/cherniavskii",
+      "contributions": 1
+    },
+    {
+      "login": "shastriUF",
+      "url": "https://github.com/shastriUF",
+      "contributions": 1
+    },
+    {
+      "login": "arnitkun",
+      "url": "https://github.com/arnitkun",
+      "contributions": 1
+    },
+    {
+      "login": "arnabrahman",
+      "url": "https://github.com/arnabrahman",
+      "contributions": 1
+    },
+    {
+      "login": "Bug-Reaper",
+      "url": "https://github.com/Bug-Reaper",
+      "contributions": 1
+    },
+    {
+      "login": "cmpscabral",
+      "url": "https://github.com/cmpscabral",
+      "contributions": 1
+    },
+    {
+      "login": "chan95821",
+      "url": "https://github.com/chan95821",
+      "contributions": 1
+    },
+    {
+      "login": "dnltsk",
+      "url": "https://github.com/dnltsk",
+      "contributions": 1
+    },
+    {
+      "login": "drewswaycool",
+      "url": "https://github.com/drewswaycool",
+      "contributions": 1
+    },
+    {
+      "login": "gokaygurcan",
+      "url": "https://github.com/gokaygurcan",
+      "contributions": 1
+    },
+    {
+      "login": "hvohr",
+      "url": "https://github.com/hvohr",
+      "contributions": 1
+    },
+    {
+      "login": "gerges-zz",
+      "url": "https://github.com/gerges-zz",
+      "contributions": 1
+    },
+    {
+      "login": "JEntler",
+      "url": "https://github.com/JEntler",
+      "contributions": 1
+    },
+    {
+      "login": "zenghongtu",
+      "url": "https://github.com/zenghongtu",
+      "contributions": 1
+    },
+    {
+      "login": "radiantly",
+      "url": "https://github.com/radiantly",
+      "contributions": 1
+    }
+  ]
+}

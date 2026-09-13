@@ -1,0 +1,98 @@
+[
+  {
+    "version": "44.3.0",
+    "date": "2026-09-08",
+    "fullDate": "2026-09-08T16:57:51.000Z",
+    "node": "24.20.0",
+    "v8": "15.2.124.19",
+    "uv": "1.52.1",
+    "zlib": "1.3.2.1-motley",
+    "openssl": "0.0.0",
+    "modules": "149",
+    "chrome": "152.0.7977.78",
+    "files": [
+      "darwin-x64",
+      "darwin-x64-symbols",
+      "linux-ia32",
+      "linux-ia32-symbols",
+      "linux-x64",
+      "linux-x64-symbols",
+      "win32-ia32",
+      "win32-ia32-symbols",
+      "win32-x64",
+      "win32-x64-symbols"
+    ]
+  },
+  {
+    "version": "45.0.0-alpha.6",
+    "date": "2026-09-10",
+    "fullDate": "2026-09-10T20:00:16.000Z",
+    "node": "24.21.0",
+    "v8": "15.4.80",
+    "uv": "1.52.1",
+    "zlib": "1.3.2.1-motley",
+    "openssl": "0.0.0",
+    "modules": "150",
+    "chrome": "155.0.8038.2",
+    "files": [
+      "darwin-x64",
+      "darwin-x64-symbols",
+      "linux-ia32",
+      "linux-ia32-symbols",
+      "linux-x64",
+      "linux-x64-symbols",
+      "win32-ia32",
+      "win32-ia32-symbols",
+      "win32-x64",
+      "win32-x64-symbols"
+    ]
+  },
+  {
+    "version": "43.7.0",
+    "date": "2026-09-10",
+    "fullDate": "2026-09-10T06:34:54.000Z",
+    "node": "24.21.0",
+    "v8": "15.0.245.31",
+    "uv": "1.52.1",
+    "zlib": "1.3.2.1-motley",
+    "openssl": "0.0.0",
+    "modules": "148",
+    "chrome": "150.0.7871.250",
+    "files": [
+      "darwin-x64",
+      "darwin-x64-symbols",
+      "linux-ia32",
+      "linux-ia32-symbols",
+      "linux-x64",
+      "linux-x64-symbols",
+      "win32-ia32",
+      "win32-ia32-symbols",
+      "win32-x64",
+      "win32-x64-symbols"
+    ]
+  },
+  {
+    "version": "42.11.3",
+    "date": "2026-09-08",
+    "fullDate": "2026-09-08T16:00:26.000Z",
+    "node": "24.19.0",
+    "v8": "14.8.178.38",
+    "uv": "1.52.1",
+    "zlib": "1.3.2.1-motley",
+    "openssl": "0.0.0",
+    "modules": "146",
+    "chrome": "148.0.7778.280",
+    "files": [
+      "darwin-x64",
+      "darwin-x64-symbols",
+      "linux-ia32",
+      "linux-ia32-symbols",
+      "linux-x64",
+      "linux-x64-symbols",
+      "win32-ia32",
+      "win32-ia32-symbols",
+      "win32-x64",
+      "win32-x64-symbols"
+    ]
+  }
+]

@@ -5,9 +5,11 @@
  */
 import { app, Menu, type MenuItemConstructorOptions } from 'electron';
 
-import { acceleratorFor, commands, type CommandId } from '../shared/commands';
+import { commands, type CommandId } from '../shared/commands';
+import { effectiveAccelerator, type Keybindings } from '../shared/settings';
 import type { Platform } from '../shared/stores';
 import type { CommandRegistry } from './commands';
+import { documentMenus } from './documents/commands';
 import { t } from './i18n';
 import { log } from './log';
 import type { StateHub } from './state-hub';
@@ -19,6 +21,8 @@ export function buildMenuTemplate(
   registry: CommandRegistry,
   platform: Platform,
   focused: string | undefined,
+  /** Settings slice: the user's overrides; `null` unbinds. */
+  keybindings: Keybindings = {},
 ): MenuItemConstructorOptions[] {
   const isMac = platform === 'darwin';
   const name = t('appMenu');
@@ -26,7 +30,7 @@ export function buildMenuTemplate(
   const command = (id: CommandId): MenuItemConstructorOptions => ({
     id,
     label: t(commands[id].label),
-    accelerator: acceleratorFor(id, platform),
+    accelerator: effectiveAccelerator(id, platform, keybindings),
     enabled: registry.isEnabled(id, focused),
     click: (_item, window) => {
       registry
@@ -45,6 +49,8 @@ export function buildMenuTemplate(
           label: name,
           submenu: [
             { role: 'about', label: t('about', { name }) },
+            separator,
+            command('app.preferences'),
             separator,
             { role: 'services', label: t('services') },
             separator,
@@ -75,7 +81,24 @@ export function buildMenuTemplate(
     ...appMenu,
     {
       label: t('file'),
-      submenu: [command('app.newWindow'), ...(isMac ? [] : [separator, quit])],
+      submenu: [
+        // Documents slice: File menu items.
+        command('file.newFiddle'),
+        command('file.newTest'),
+        command('app.newWindow'),
+        separator,
+        command('file.open'),
+        documentMenus(focused).openRecent,
+        separator,
+        command('file.save'),
+        command('file.saveAs'),
+        command('file.saveAsForge'),
+        separator,
+        documentMenus(focused).showMe,
+        separator,
+        command('file.close'),
+        ...(isMac ? [] : [separator, command('app.preferences'), separator, quit]),
+      ],
     },
     {
       label: t('edit'),
@@ -92,13 +115,52 @@ export function buildMenuTemplate(
     {
       label: t('view'),
       submenu: [
+        command('app.commandPalette'),
+        separator,
         command('view.reload'),
         command('view.toggleDevTools'),
+        separator,
+        command('view.toggleSidebar'),
+        command('view.toggleConsole'),
+        command('view.toggleSplit'),
+        command('editor.toggleSoftWrap'),
+        command('editor.toggleMinimap'),
+        command('editor.format'),
         separator,
         { role: 'togglefullscreen', label: t('toggleFullScreen') },
       ],
     },
+    // Versions and run slice. F5 is a second, hidden accelerator for run.toggle.
+    {
+      label: t('runMenu'),
+      submenu: [
+        command('run.toggle'),
+        { ...command('run.toggle'), id: 'run.toggle.f5', accelerator: 'F5', visible: false },
+        separator,
+        command('bisect.toggle'),
+        separator,
+        command('run.package'),
+        command('run.make'),
+      ],
+    },
     { label: t('window'), submenu: windowItems },
+    // App UX slice: other slices add their Help items here.
+    {
+      role: 'help',
+      label: t('help'),
+      submenu: [
+        command('help.showTour'),
+        // Platform slice: links, logs, diagnostics and (outside macOS) About.
+        separator,
+        command('help.fiddleRepository'),
+        command('help.electronRepository'),
+        command('help.reportIssue'),
+        separator,
+        command('help.openLogsFolder'),
+        command('help.copyDiagnostics'),
+        ...(isMac ? [] : [separator, command('help.about')]),
+      ],
+    },
   ];
 }
 
@@ -113,7 +175,12 @@ export function installMenu(
     scheduled = true;
     setImmediate(() => {
       scheduled = false;
-      const template = buildMenuTemplate(registry, platform, focusedWindowId());
+      const template = buildMenuTemplate(
+        registry,
+        platform,
+        focusedWindowId(),
+        hub.app.settings.keybindings,
+      );
       Menu.setApplicationMenu(Menu.buildFromTemplate(template));
     });
   };

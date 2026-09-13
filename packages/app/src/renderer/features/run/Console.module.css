@@ -1,0 +1,132 @@
+/* Console (Lucent window anatomy): the sheet's console area paints
+   surface-sunken and the hairline; this fills it. Bar 46 tall, padding 0 10 0 16.
+   Rows are inset pills: margin 0 8, padding 2 8, radius 8, columns 60 / 70 / rest. */
+.pane {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+}
+
+.bar {
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: 10px;
+  height: var(--lu-size-console-bar);
+  padding: 0 10px 0 16px;
+}
+
+.title {
+  margin: 0 4px 0 0;
+  font: 600 12.5px/16px var(--lu-font-sans);
+  color: var(--lu-ink);
+}
+
+.filter {
+  width: 180px;
+}
+
+.spacer {
+  flex: 1;
+}
+
+.rows {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  padding: 0 0 6px;
+  margin: 0;
+  list-style: none;
+}
+
+.row {
+  display: grid;
+  grid-template-columns: 60px 70px minmax(0, 1fr);
+  column-gap: 12px;
+  margin: 0 8px;
+  padding: 2px 8px;
+  border-radius: var(--lu-radius-item);
+  corner-shape: squircle;
+  font: 400 12px/18px var(--lu-font-mono);
+  color: var(--lu-ink);
+}
+
+.time {
+  color: var(--lu-ink-faint);
+  font-variant-numeric: tabular-nums;
+}
+
+.process {
+  font: 500 11px/18px var(--lu-font-sans);
+  color: var(--lu-ink-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.message {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.row[data-kind="system"] .message,
+.row[data-kind="system"] .process {
+  color: var(--lu-ink-faint);
+}
+
+.row[data-kind="warn"] .message {
+  color: var(--lu-warning);
+}
+
+/* Errors: a spark-soft pill with all three columns in spark. */
+.row[data-kind="error"] {
+  background: var(--lu-spark-soft);
+}
+.row[data-kind="error"] .time,
+.row[data-kind="error"] .process,
+.row[data-kind="error"] .message {
+  color: var(--lu-spark);
+}
+.row[data-kind="error"] .process {
+  font-weight: 600;
+}
+
+/* The location keeps the accent colour with an underline; it is not red. */
+.location {
+  appearance: none;
+  display: inline;
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  color: var(--lu-accent);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  cursor: pointer;
+}
+.location:focus-visible {
+  outline: var(--lu-focus-outline);
+  outline-offset: 1px;
+  border-radius: var(--lu-radius-sm);
+}
+
+.running {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 22px;
+  padding: 0 9px 0 8px;
+  border-radius: var(--lu-radius-capsule);
+  background: var(--lu-spark-soft);
+  color: var(--lu-spark);
+  font: 600 11.5px/14px var(--lu-font-sans);
+}
+
+.dot {
+  width: 6px;
+  height: 6px;
+  border-radius: var(--lu-radius-round);
+  background: currentColor;
+  box-shadow: var(--lu-halo-spark);
+}

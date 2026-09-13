@@ -1,0 +1,149 @@
+/* The sheet: surface fill, radius-sheet, shadow-island (plus the dark top rim).
+   It clips its content, so the console follows the bottom corners. */
+.sheet {
+  position: relative;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+  background: var(--lu-surface);
+  border-radius: var(--lu-radius-sheet);
+  corner-shape: squircle;
+  box-shadow: var(--lu-shadow-sheet);
+  overflow: hidden;
+}
+
+/* Tab row: 46 + a 0.5 hairline, padding 0 8 0 9, 10px gap. */
+.tabrow {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  height: calc(var(--lu-size-tabrow) + var(--lu-size-hairline));
+  padding: 0 8px 0 9px;
+  border-bottom: var(--lu-size-hairline) solid var(--lu-line);
+}
+
+.tabs {
+  flex: 1;
+  min-width: 0;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+/* Process label: 11.5/14 500 in ink-faint. */
+.process {
+  flex: none;
+  color: var(--lu-ink-faint);
+  font: 500 11.5px/14px var(--lu-font-sans);
+  white-space: nowrap;
+}
+
+.panes {
+  flex: 1;
+  display: flex;
+  min-height: 0;
+}
+
+.pane {
+  flex: 1 1 0;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+/* Split panes are separated by a 0.5px line. */
+.divider {
+  flex: none;
+  width: var(--lu-size-hairline);
+  background: var(--lu-line);
+}
+
+/* Pane header in split view: grip, filename, process label, then actions. */
+.paneHeader {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: var(--lu-size-toolbar);
+  padding: 0 8px 0 10px;
+  border-bottom: var(--lu-size-hairline) solid var(--lu-line);
+  font: 500 13px/16px var(--lu-font-sans);
+  white-space: nowrap;
+}
+
+.grip {
+  flex: none;
+  color: var(--lu-ink-faint);
+}
+
+.paneName {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.paneName[data-error] {
+  color: var(--lu-spark);
+}
+
+.paneErrors {
+  color: var(--lu-spark);
+  font-weight: 500;
+}
+
+.paneProcess {
+  margin-left: auto;
+  color: var(--lu-ink-faint);
+  font: 500 11.5px/14px var(--lu-font-sans);
+}
+
+.paneActions {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+/* Console: 160 by default, surface-sunken with a 0.5px hairline on top. */
+.console {
+  flex: none;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  background: var(--lu-surface-sunken);
+  box-shadow: inset 0 var(--lu-size-hairline) 0 var(--lu-line);
+  overflow: hidden;
+}
+
+.empty {
+  flex: 1;
+  display: grid;
+  place-items: center;
+  min-height: 0;
+  padding: var(--lu-space-8);
+}
+
+/* Drop affordance: the sheet dims and takes an accent ring while a link or folder is over it. */
+.drop {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  display: grid;
+  place-items: center;
+  border-radius: inherit;
+  background: color-mix(in srgb, var(--lu-surface) 88%, transparent);
+  box-shadow: inset 0 0 0 2px var(--lu-accent);
+  pointer-events: none;
+}
+
+.settings {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  overflow: auto;
+}

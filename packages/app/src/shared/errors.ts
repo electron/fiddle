@@ -13,6 +13,7 @@ export const ErrorCode = {
   unauthorized: 'unauthorized',
   forbidden: 'forbidden',
   unavailable: 'unavailable',
+  installFailed: 'install-failed',
 } as const;
 
 export type ErrorCode = (typeof ErrorCode)[keyof typeof ErrorCode] | (string & {});

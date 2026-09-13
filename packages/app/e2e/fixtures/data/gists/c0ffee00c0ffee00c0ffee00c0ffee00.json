@@ -1,0 +1,16 @@
+{
+  "description": "E2E fixture gist",
+  "public": true,
+  "owner": { "login": "fiddle-e2e" },
+  "history": [{ "version": "0", "committed_at": "2026-01-01T00:00:00Z" }],
+  "files": {
+    "main.js": {
+      "content": "const { app, BrowserWindow } = require('electron');\n\napp.whenReady().then(() => {\n  const win = new BrowserWindow({ width: 800, height: 600 });\n  win.loadFile('index.html');\n});\n"
+    },
+    "index.html": {
+      "content": "<!doctype html>\n<html>\n  <body>\n    <h1>Hello from the fixture gist</h1>\n    <script src=\"./renderer.js\"></script>\n  </body>\n</html>\n"
+    },
+    "renderer.js": { "content": "console.log('fixture gist renderer');\n" },
+    "preload.js": { "content": "// fixture gist preload\n" }
+  }
+}

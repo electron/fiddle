@@ -72,3 +72,403 @@ interface Window {
     [Event]
     Command(id: CommandId)
 }
+
+// ---------------------------------------------------------------------------
+// Documents slice: the fiddle in each window, its editor mirror and loading.
+
+zod_reference FileMapValue {
+    import = "../../../../shared/stores"
+    type = "FileMapValue"
+    schema = "fileMapSchema"
+}
+
+zod_reference WindowLayout {
+    import = "../../../../shared/stores"
+    type = "WindowLayout"
+    schema = "windowLayoutSchema"
+}
+
+zod_reference WindowView {
+    import = "../../../../shared/stores"
+    type = "WindowView"
+    schema = "windowViewSchema"
+}
+
+subtype FileName = string(
+    minLength: 1
+    maxLength: 255
+)
+
+subtype ShortText = string(
+    minLength: 1
+    maxLength: 2048
+)
+
+// Change methods return the Window store `rev` that includes the change.
+[RendererAPI]
+[Validator=MainFrame]
+[ContextBridge]
+interface Documents {
+    // Every file's text from main's editor mirror, hidden files included.
+    GetFiles() -> FileMapValue
+
+    // The renderer's Monaco text for one file. Dropped if `fiddleRev` is stale.
+    EditFile(name: FileName, text: string, fiddleRev: number) -> number
+
+    AddFile(name: FileName) -> number
+    RenameFile(oldName: FileName, newName: FileName) -> number
+    RemoveFile(name: FileName) -> number
+    SetFileVisible(name: FileName, visible: boolean) -> number
+    SetActiveFile(name: FileName) -> number
+    SetLayout(layout: WindowLayout) -> number
+    SetView(view: WindowView) -> number
+
+    // Loads a gist by URL or ID, optionally at a revision SHA. Asks about
+    // unsaved changes first. Returns the Window rev after the load.
+    LoadGist(idOrUrl: ShortText, revision: string?) -> number
+    // Loads a Show Me example by name.
+    LoadExample(name: ShortText) -> number
+    // Loads `electron/<tag>/<path>` from electron/electron.
+    LoadDocsExample(tag: ShortText, path: ShortText) -> number
+    // Text dropped on the window: a gist URL or an electron-fiddle:// link.
+    OpenDropped(text: ShortText)
+}
+
+// ---------------------------------------------------------------------------
+// Settings slice: settings.json, themes and keybinding overrides.
+
+zod_reference SettingKey {
+    import = "../../../../shared/settings"
+    type = "SettingKey"
+    schema = "settingKeySchema"
+}
+
+// Validated against the key's schema in main.
+zod_reference SettingValue {
+    import = "../../../../shared/settings"
+    type = "SettingValue"
+    schema = "settingValueSchema"
+}
+
+zod_reference ThemeData {
+    import = "../../../../shared/settings"
+    type = "ThemeData"
+    schema = "themeDataSchema"
+}
+
+subtype ThemeId = string(
+    minLength: 1
+    maxLength: 100
+)
+
+subtype NoticeId = string(
+    minLength: 1
+    maxLength: 100
+)
+
+// Change methods return the App store `rev` that includes the change.
+[RendererAPI]
+[Validator=MainFrame]
+[ContextBridge]
+interface Settings {
+    SetSetting(key: SettingKey, value: SettingValue) -> number
+    ResetSetting(key: SettingKey) -> number
+    // Opens settings.json in the default editor. Outside edits apply live.
+    OpenSettingsFile()
+    // File dialogs. Import returns null when cancelled.
+    ImportSettings() -> number?
+    ExportSettings()
+    DismissStorageNotice(id: NoticeId) -> number
+
+    // A custom theme's data, or null if it's gone.
+    GetTheme(id: ThemeId) -> ThemeData?
+    // Rescans <userData>/themes/.
+    RefreshThemes() -> number
+    // Imports a Monaco theme JSON file and selects it. Null when cancelled.
+    ImportTheme() -> number?
+    // Writes a theme file from the current theme, selects it and reveals it.
+    CreateTheme() -> number
+    OpenThemesFolder()
+}
+
+// ---------------------------------------------------------------------------
+// App UX slice: npm modules and the onboarding tour.
+
+zod_reference PackageSearchResults {
+    import = "../../../../shared/stores"
+    type = "PackageSearchResults"
+    schema = "packageSearchResultsSchema"
+}
+
+zod_reference PackageVersions {
+    import = "../../../../shared/stores"
+    type = "PackageVersions"
+    schema = "packageVersionsSchema"
+}
+
+subtype PackageName = string(
+    minLength: 1
+    maxLength: 214
+)
+
+subtype PackageQuery = string(
+    minLength: 1
+    maxLength: 214
+)
+
+subtype VersionSpec = string(
+    minLength: 1
+    maxLength: 256
+)
+
+// The fiddle's modules live in `Window.fiddle.modules`. Change methods return
+// the Window store `rev` that includes the change.
+[RendererAPI]
+[Validator=MainFrame]
+[ContextBridge]
+interface Modules {
+    // npm search: the top 5 packages, an exact name match first.
+    SearchPackages(query: PackageQuery) -> PackageSearchResults
+    // Every published version, newest first, and the latest.
+    GetPackageVersions(name: PackageName) -> PackageVersions
+    // Adds a module at `version`, or at its latest version when omitted.
+    AddModule(name: PackageName, version: VersionSpec?) -> number
+    // Non-semver versions such as `*` become the latest.
+    SetModuleVersion(name: PackageName, version: VersionSpec) -> number
+    RemoveModule(name: PackageName) -> number
+}
+
+[RendererAPI]
+[Validator=MainFrame]
+[ContextBridge]
+interface Onboarding {
+    // True if this window should offer the tour: it hasn't been finished or
+    // dismissed, and no other window has offered it since launch.
+    ShouldOfferTour() -> boolean
+    // The tour was finished or dismissed. It stays available from Help.
+    SetTourDone()
+}
+
+zod_reference NameList {
+    import = "../../../../shared/stores"
+    type = "NameList"
+    schema = "nameListSchema"
+}
+
+// Lists for the command palette that the renderer can't compute itself.
+[RendererAPI]
+[Validator=MainFrame]
+[ContextBridge]
+interface Palette {
+    // The Show Me example names, for `Documents.LoadExample`.
+    GetShowMeExamples() -> NameList
+}
+
+// ---------------------------------------------------------------------------
+// Versions and run slice: Electron versions, running, bisect and editor types.
+// Install state lives in `App.versions`, run status in `Window.run`.
+
+zod_reference ReleaseList {
+    import = "../../../../shared/stores"
+    type = "ReleaseList"
+    schema = "releaseListSchema"
+}
+
+zod_reference VersionList {
+    import = "../../../../shared/stores"
+    type = "VersionList"
+    schema = "versionListSchema"
+}
+
+zod_reference VersionRefValue {
+    import = "../../../../shared/stores"
+    type = "VersionRefValue"
+    schema = "versionRefSchema"
+}
+
+zod_reference OutputLines {
+    import = "../../../../shared/stores"
+    type = "OutputLines"
+    schema = "outputLinesSchema"
+}
+
+zod_reference EditorTypes {
+    import = "../../../../shared/stores"
+    type = "EditorTypes"
+    schema = "editorTypesSchema"
+}
+
+subtype VersionString = string(
+    minLength: 1
+    maxLength: 100
+)
+
+subtype BuildId = string(
+    minLength: 1
+    maxLength: 100
+)
+
+[RendererAPI]
+[Validator=MainFrame]
+[ContextBridge]
+interface Versions {
+    // Every known release, newest first. Fetch again when `App.versions.releasesRev` changes.
+    GetReleases() -> ReleaseList
+    // Fetches the release list from electronjs.org.
+    RefreshReleases()
+    // Sets this window's Electron version and downloads it if needed. Returns the Window rev.
+    SetVersion(ref: VersionRefValue) -> number
+    Download(version: VersionString)
+    Remove(version: VersionString)
+    // Downloads the given versions one at a time until done or stopped.
+    DownloadAll(versions: VersionList)
+    StopDownloadAll()
+    // Deletes every download and local build except the ones windows use.
+    DeleteAll()
+    // Asks for a build folder. False when cancelled.
+    AddLocalBuild() -> boolean
+    RemoveLocalBuild(id: BuildId)
+    // Type definitions for this window's version, for Monaco. Null until available.
+    GetTypes() -> EditorTypes?
+    // The types for this window's version changed; call GetTypes again.
+    [Event]
+    TypesChanged()
+}
+
+// Running goes through the `run.toggle` command, so every trigger shares one path.
+[RendererAPI]
+[Validator=MainFrame]
+[ContextBridge]
+interface Run {
+    // The last 1000 console lines. Lines at or below `Window.run.clearedSeq` are cleared.
+    GetOutput() -> OutputLines
+    ClearOutput()
+    // New console lines, batched every 16 ms.
+    [Event]
+    Output(lines: OutputLines)
+
+    StartBisect(good: VersionString, bad: VersionString, auto: boolean)
+    BisectGood()
+    BisectBad()
+    BisectSkip()
+    StopBisect()
+    // Asks, then opens the GitHub comparison of the bisect result.
+    OpenBisectCompare()
+    // The `bisect.toggle` command asks the window to show the range dialog.
+    [Event]
+    ShowBisect()
+}
+
+// ---------------------------------------------------------------------------
+// Gists slice: GitHub sign-in and gists. The token never leaves main; the App
+// store only carries `githubLogin`. Bound per window in src/main/github/ipc.ts.
+
+subtype GitHubToken = string(
+    minLength: 1
+    maxLength: 255
+)
+
+subtype GistDescription = string(
+    minLength: 1
+    maxLength: 256
+)
+
+subtype GistId = string(
+    minLength: 32
+    maxLength: 32
+)
+
+enum GitHubCredentialStorage {
+    Encrypted = "encrypted"
+    Weak = "weak"
+    Unavailable = "unavailable"
+}
+
+enum GistDialogKind {
+    Publish = "publish"
+    Open = "open"
+    History = "history"
+}
+
+structure GitHubSignInResult {
+    login: string
+    // False when the token is kept for this session only.
+    persisted: boolean
+}
+
+structure GistLinkInfo {
+    id: string
+    url: string
+}
+
+structure GistRevisionInfo {
+    sha: string
+    date: string
+    additions: number
+    deletions: number
+    // 0 for "Created", then 1, 2, 3… for "Revision N".
+    n: number
+}
+
+structure GistHistoryInfo {
+    id: string
+    activeSha?: string
+    // Oldest first.
+    revisions: GistRevisionInfo[]
+}
+
+[RendererAPI]
+[Validator=MainFrame]
+[ContextBridge]
+interface GitHub {
+    GetCredentialStorage() -> GitHubCredentialStorage
+    // Checks format, validity and the gist scope. `allowPlaintext` is the
+    // user's consent to plaintext storage on Linux without a keyring.
+    SignIn(token: GitHubToken, allowPlaintext: boolean) -> GitHubSignInResult
+    SignOut()
+    // The clipboard text when it looks like a token, for prefilling sign-in.
+    ReadClipboardToken() -> string?
+    OpenNewTokenPage()
+    // A pending one-time notice, e.g. `decrypt-failed`.
+    TakeNotice() -> string?
+    // These act on this window's fiddle.
+    Publish(description: GistDescription, isPublic: boolean) -> GistLinkInfo
+    Update() -> GistLinkInfo
+    Delete()
+    GetHistory() -> GistHistoryInfo
+    CopyShareLink(id: GistId)
+
+    // A command asked this window to open a gist dialog.
+    [Event]
+    OpenDialog(kind: GistDialogKind)
+}
+
+// ---------------------------------------------------------------------------
+// Platform slice: renderer logs, crash reporting and update notices.
+
+enum LogLevel {
+    info
+    warn
+    error
+}
+
+subtype LogText = string(
+    minLength: 0
+    maxLength: 10000
+)
+
+[RendererAPI]
+[Validator=MainFrame]
+[ContextBridge]
+interface AppPlatform {
+    // Appends a renderer entry to main's JSON-lines log. Main redacts it.
+    Log(level: LogLevel, message: LogText)
+    // Whether main started Sentry; the renderer starts its SDK only then.
+    IsCrashReportingEnabled() -> boolean
+    // The update toast's action: opens the release page after confirmation.
+    OpenUpdatePage()
+
+    // Linux and MSIX: a newer release is out (daily GitHub releases check).
+    [Event]
+    UpdateAvailable(version: string)
+}

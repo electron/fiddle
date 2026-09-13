@@ -8,7 +8,13 @@ import { app, type WebContents } from 'electron';
 import { App, implement, Window } from '../ipc/main';
 import { ErrorCode, FiddleError } from '../shared/errors';
 import type { CommandRegistry } from './commands';
+import { bindDocumentsIpc } from './documents/ipc';
+import { bindGitHubIpc } from './github/ipc';
+import { bindAppPlatformIpc } from './platform/ipc';
+import { bindRunIpc } from './run/ipc';
+import { bindSettingsIpc } from './settings/ipc';
 import type { StateHub, WindowInit } from './state-hub';
+import { bindAppUxIpc } from './ux/ipc';
 
 export interface WindowIpcOptions {
   contents: WebContents;
@@ -46,6 +52,14 @@ export function bindWindowIpc({
     ReportReady: () => onReady(),
     RunCommand: (id) => registry.run(id, { windowId }),
   });
+
+  bindDocumentsIpc(contents, windowId);
+  bindAppUxIpc({ contents, windowId, hub, registry });
+  bindSettingsIpc(contents, windowId);
+  bindGitHubIpc(contents, windowId, hub);
+  bindAppPlatformIpc(contents);
+
+  bindRunIpc({ contents, windowId, hub });
 
   // The StateHub is the only caller of update*Store.
   hub.registerWindow(windowId, init, {

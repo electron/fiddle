@@ -56,8 +56,9 @@ export function forgeTransformPackageJson(text: string, options: ForgeTransformO
   scripts.lint = 'echo "No linting configured"';
 
   const forge: Record<string, unknown> = { packagerConfig: {} };
-  if (devDependencies['electron-nightly'] && options.nightlyAbi !== undefined) {
-    forge.electronRebuildConfig = { forceABI: Number.parseInt(String(options.nightlyAbi).trim(), 10) };
+  const abi = String(options.nightlyAbi ?? '').trim();
+  if (devDependencies['electron-nightly'] && /^\d+$/.test(abi)) {
+    forge.electronRebuildConfig = { forceABI: Number(abi) };
   }
   if (options.localElectronPath) {
     devDependencies[FORGE_PLUGIN_LOCAL_ELECTRON] = options.forgeVersion;

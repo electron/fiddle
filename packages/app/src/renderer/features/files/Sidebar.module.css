@@ -1,0 +1,39 @@
+/* Sidebar on the material: padding 0 10 12 12, rows 2px apart. */
+.sidebar {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-width: 0;
+  padding: 0 10px 12px 12px;
+  overflow-y: auto;
+  scrollbar-width: none;
+}
+
+.search {
+  margin: 4px 0 2px;
+}
+
+/* Heads: caption 11/14 600 ink-muted, padding 14 8 5 (4 on top for the first). */
+.head {
+  margin: 0;
+  padding: 14px 8px 5px;
+  color: var(--lu-ink-muted);
+  font: var(--lu-type-caption);
+  letter-spacing: var(--lu-type-caption-tracking, 0);
+}
+
+.section:first-of-type .head {
+  padding-top: 4px;
+}
+
+.add {
+  align-self: flex-start;
+  margin-top: 6px;
+}
+
+.anchor {
+  position: fixed;
+  width: 0;
+  height: 0;
+  pointer-events: none;
+}

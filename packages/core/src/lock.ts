@@ -1,9 +1,11 @@
+import { randomBytes } from 'node:crypto';
 import fs from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
 import { setTimeout as sleep } from 'node:timers/promises';
 
 import { FiddleCoreError, abortError, throwIfAborted } from './errors.js';
+import { rename } from './fs-util.js';
 
 /** The contents of a lock file. */
 export interface LockInfo {
@@ -23,18 +25,24 @@ export interface LockOptions {
   timeoutMs?: number;
   /** How often to retry a held lock. Default: 100 ms. */
   pollMs?: number;
-  /** Age after which a lock is stale. Default: {@link LOCK_STALE_MS}. */
+  /**
+   * Age after which a lock from another host is stale. A held lock refreshes
+   * its file's mtime every third of this. Default: {@link LOCK_STALE_MS}.
+   */
   staleMs?: number;
 }
 
-/** A lock older than this is stale, even if its process is still alive. */
+/**
+ * A lock from another host is stale once its file hasn't been touched for this
+ * long. While a lock is held, its mtime is refreshed every third of this.
+ */
 export const LOCK_STALE_MS = 10 * 60 * 1000;
 
 // A lock file with unreadable contents is probably still being written.
 // Give its writer this long before treating it as stale.
 const UNREADABLE_GRACE_MS = 5_000;
 
-function isProcessAlive(pid: number): boolean {
+export function isProcessAlive(pid: number): boolean {
   try {
     process.kill(pid, 0);
     return true;
@@ -59,16 +67,22 @@ function parseLockInfo(text: string): LockInfo | undefined {
   return undefined;
 }
 
+/** A lock file as read from disk. */
+export interface HeldLock {
+  text: string;
+  /** `undefined` if the contents can't be parsed. */
+  info: LockInfo | undefined;
+  mtimeMs: number;
+}
+
 /** Reads a lock file. Returns `undefined` if there is no lock. */
-export async function readLock(
-  lockPath: string,
-): Promise<{ info: LockInfo | undefined; mtimeMs: number } | undefined> {
+export async function readLock(lockPath: string): Promise<HeldLock | undefined> {
   try {
     const [text, st] = await Promise.all([
       fs.readFile(lockPath, 'utf8'),
       fs.stat(lockPath),
     ]);
-    return { info: parseLockInfo(text), mtimeMs: st.mtimeMs };
+    return { text, info: parseLockInfo(text), mtimeMs: st.mtimeMs };
   } catch (err) {
     if ((err as NodeJS.ErrnoException).code === 'ENOENT') return undefined;
     throw err;
@@ -76,27 +90,45 @@ export async function readLock(
 }
 
 /**
- * A lock is stale when its process is dead (checked only on this host) or
- * when it is older than `staleMs`.
+ * Whether a lock is stale:
+ * - A lock from this host is stale when its process is dead.
+ * - A lock from another host is stale when its file hasn't been touched for
+ *   `staleMs`, because its owner stopped refreshing it.
+ * - A lock that can't be parsed is stale after a short grace period.
  */
 export function isLockStale(
-  info: LockInfo,
+  held: Pick<HeldLock, 'info' | 'mtimeMs'>,
   staleMs = LOCK_STALE_MS,
   now = Date.now(),
 ): boolean {
-  if (now - info.startedAt > staleMs) return true;
-  return info.hostname === os.hostname() && !isProcessAlive(info.pid);
+  const { info, mtimeMs } = held;
+  if (!info) return now - mtimeMs > UNREADABLE_GRACE_MS;
+  if (info.hostname === os.hostname()) return !isProcessAlive(info.pid);
+  return now - mtimeMs > staleMs;
 }
 
 /** A held lock. Call {@link Lock.release} when done. */
 export class Lock {
+  private readonly heartbeat: NodeJS.Timeout | undefined;
+
+  /** With `staleMs`, the lock file's mtime is refreshed every `staleMs / 3`. */
   constructor(
     public readonly path: string,
     public readonly info: LockInfo,
-  ) {}
+    staleMs?: number,
+  ) {
+    if (staleMs) {
+      this.heartbeat = setInterval(() => {
+        const now = new Date();
+        fs.utimes(path, now, now).catch(() => {});
+      }, staleMs / 3);
+      this.heartbeat.unref();
+    }
+  }
 
   /** Removes the lock file, unless another process has since taken it over. */
   public async release(): Promise<void> {
+    clearInterval(this.heartbeat);
     const current = await readLock(this.path);
     if (
       current?.info?.pid === this.info.pid &&
@@ -109,10 +141,31 @@ export class Lock {
 }
 
 /**
+ * Removes a stale lock without racing another waiter: moves it aside, then
+ * checks that what was moved is the lock that was judged stale. If another
+ * waiter already replaced it with a live lock, that lock is put back.
+ */
+async function removeStaleLock(lockPath: string, staleText: string): Promise<void> {
+  const aside = `${lockPath}.stale-${process.pid}-${randomBytes(4).toString('hex')}`;
+  try {
+    await rename(lockPath, aside);
+  } catch (err) {
+    if ((err as NodeJS.ErrnoException).code === 'ENOENT') return;
+    throw err;
+  }
+  if ((await fs.readFile(aside, 'utf8')) === staleText) {
+    await fs.rm(aside, { force: true });
+  } else {
+    await rename(aside, lockPath);
+  }
+}
+
+/**
  * Acquires a cross-process lock file at `lockPath`.
  *
  * The file is created with `O_EXCL` and holds a {@link LockInfo}. A held lock
- * is waited on; a stale one is removed and retried.
+ * is waited on; a stale one is moved aside and retried. While held, the
+ * file's mtime is refreshed so other hosts can tell it is still in use.
  */
 export async function acquireLock(
   lockPath: string,
@@ -131,7 +184,7 @@ export async function acquireLock(
     };
     try {
       await fs.writeFile(lockPath, JSON.stringify(info), { flag: 'wx' });
-      return new Lock(lockPath, info);
+      return new Lock(lockPath, info, staleMs);
     } catch (err) {
       if ((err as NodeJS.ErrnoException).code !== 'EEXIST') throw err;
     }
@@ -139,11 +192,8 @@ export async function acquireLock(
     const held = await readLock(lockPath);
     if (!held) continue; // released between our attempt and our read
     const now = Date.now();
-    const stale = held.info
-      ? isLockStale(held.info, staleMs, now)
-      : now - held.mtimeMs > UNREADABLE_GRACE_MS;
-    if (stale) {
-      await fs.rm(lockPath, { force: true });
+    if (isLockStale(held, staleMs, now)) {
+      await removeStaleLock(lockPath, held.text);
       continue;
     }
 

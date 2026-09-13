@@ -1,0 +1,129 @@
+/* Lucent window anatomy: a 56px title bar and a 32px status bar on the material,
+   the sidebar on the material, and the sheet: one opaque panel inset 8px. */
+.shell {
+  position: fixed;
+  inset: 0;
+  display: grid;
+  grid-template-rows: var(--lu-size-titlebar) minmax(0, 1fr) var(--lu-size-statusbar);
+  grid-template-columns: auto minmax(0, 1fr);
+  grid-template-areas:
+    "title title"
+    "side sheet"
+    "status status";
+  background: var(--lu-material-chrome);
+  color: var(--lu-ink);
+  overflow: hidden;
+}
+
+/* Title bar: padding 0 12 0 20, a drag region; every control is no-drag. */
+.titlebar {
+  grid-area: title;
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+  padding: 0 12px 0 20px;
+  -webkit-app-region: drag;
+  user-select: none;
+}
+
+/* macOS: 80px clear for the traffic lights (drawn by the OS at x 20). */
+.shell[data-platform="darwin"] .titlebar {
+  padding-left: calc(20px + 80px - 2px);
+}
+
+/* Windows: 140px clear on the right for the caption buttons. */
+.shell[data-platform="win32"] .titlebar {
+  padding-right: calc(12px + 140px);
+}
+
+.title {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+/* "window-vibrancy": 13px 650, −0.01em. "Edited": 12px 400 ink-muted. */
+.name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font: 650 13px/16px var(--lu-font-sans);
+  letter-spacing: -0.01em;
+}
+
+.edited {
+  flex: none;
+  color: var(--lu-ink-muted);
+  font: 400 12px/16px var(--lu-font-sans);
+}
+
+/* The toolbar capsule, centred in the window. */
+.capsule {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.end {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: auto;
+  -webkit-app-region: no-drag;
+}
+
+.start {
+  flex: none;
+  -webkit-app-region: no-drag;
+}
+
+/* Sidebar column: 228 wide by default, resizable 200 to 320. */
+.side {
+  grid-area: side;
+  position: relative;
+  display: flex;
+  min-height: 0;
+}
+
+.sideInner {
+  flex: 1;
+  min-width: 0;
+}
+
+.sheetArea {
+  grid-area: sheet;
+  display: flex;
+  min-width: 0;
+  min-height: 0;
+  padding-right: var(--lu-size-sheet-inset);
+}
+
+/* With the sidebar hidden, the sheet runs to 8px from the left edge too. */
+.shell[data-sidebar="false"] .sheetArea {
+  padding-left: var(--lu-size-sheet-inset);
+}
+
+/* Status bar: on the material, padding 0 20 0 22, 18px gaps, 11.5/14 500 ink-muted. */
+.statusbar {
+  grid-area: status;
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  min-width: 0;
+  padding: 0 20px 0 22px;
+  color: var(--lu-ink-muted);
+  font: 500 11.5px/14px var(--lu-font-sans);
+  white-space: nowrap;
+}
+
+.statusEnd {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  margin-left: auto;
+}

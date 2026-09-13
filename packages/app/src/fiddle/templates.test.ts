@@ -1,14 +1,17 @@
-import { mkdtemp, readdir, rm } from 'node:fs/promises';
+import { mkdtemp, readdir, readFile, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import * as path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
+import { ErrorCode } from '../shared/errors';
 import { createTemplateLoader, readQuickStart, templateBranch } from './templates';
-import { makeZip } from './test-helpers/zip';
 
 const staticDir = fileURLToPath(new URL('../../static', import.meta.url));
+// A real zip: `minimal-repro-fixture/` holding main.js, index.html, README.md, package.json and sub/nested.js.
+const fixture = fileURLToPath(new URL('./test-fixtures/minimal-repro.zip', import.meta.url));
+const FIXTURE_FILES = { 'main.js': '// fixture main', 'index.html': '<h1>hi</h1>' };
 const released = (major: number) => major >= 1 && major <= 40;
 
 let cacheDir: string;
@@ -19,29 +22,22 @@ afterEach(async () => {
   await rm(cacheDir, { recursive: true, force: true });
 });
 
-function archive(branch: string): Buffer {
-  const root = `minimal-repro-${branch}`;
-  return makeZip({
-    [`${root}/`]: '',
-    [`${root}/main.js`]: `// ${branch} main`,
-    [`${root}/index.html`]: '<h1>hi</h1>',
-    [`${root}/README.md`]: '# readme',
-    [`${root}/package.json`]: '{}',
-    [`${root}/sub/nested.js`]: 'nested',
-    'stray.js': 'outside the root folder',
-  });
-}
-
 function zipFetch(status = 200) {
   const urls: string[] = [];
   const fn = (async (input: string | URL | Request) => {
-    const url = String(input);
-    urls.push(url);
-    const branch = /archive\/(.+)\.zip$/.exec(url)?.[1] ?? '';
-    return status === 200 ? new Response(new Uint8Array(archive(branch))) : new Response('nope', { status });
+    urls.push(String(input));
+    return status === 200 ? new Response(new Uint8Array(await readFile(fixture))) : new Response('nope', { status });
   }) as typeof fetch;
   return { fn, urls };
 }
+
+/** A fetch that never answers, and rejects when its signal aborts. */
+const hangingFetch = ((_input: string | URL | Request, init?: RequestInit) =>
+  new Promise<Response>((_resolve, reject) => {
+    const signal = init!.signal!;
+    if (signal.aborted) reject(signal.reason);
+    signal.addEventListener('abort', () => reject(signal.reason));
+  })) as typeof fetch;
 
 describe('templateBranch', () => {
   it('maps released versions to their x-y branch', () => {
@@ -62,23 +58,31 @@ describe('quick-start', () => {
 });
 
 describe('createTemplateLoader', () => {
-  it('downloads, extracts top-level supported files and caches them', async () => {
+  it('downloads, extracts and caches the archive root', async () => {
     const { fn, urls } = zipFetch();
     const loader = createTemplateLoader({ staticDir, cacheDir, isReleasedMajor: released, fetch: fn });
     const files = await loader.getTemplate('30.1.0');
-    expect(files).toEqual({ 'main.js': '// 30-x-y main', 'index.html': '<h1>hi</h1>' });
+    expect(files).toEqual(FIXTURE_FILES);
     expect(urls).toEqual(['https://github.com/electron/minimal-repro/archive/30-x-y.zip']);
-    expect((await readdir(path.join(cacheDir, 'minimal-repro-30-x-y'))).sort()).toEqual(['index.html', 'main.js']);
+    // The temp files are gone; the extracted root was renamed into place.
+    expect(await readdir(cacheDir)).toEqual(['minimal-repro-30-x-y']);
+    expect((await readdir(path.join(cacheDir, 'minimal-repro-30-x-y'))).sort()).toEqual([
+      'README.md',
+      'index.html',
+      'main.js',
+      'package.json',
+      'sub',
+    ]);
 
     // Cached in memory, and returns a fresh copy each time.
     files['main.js'] = 'mutated';
-    expect((await loader.getTemplate('30.2.0'))['main.js']).toBe('// 30-x-y main');
+    expect((await loader.getTemplate('30.2.0'))['main.js']).toBe('// fixture main');
     expect(urls).toHaveLength(1);
 
     // Cached on disk for a new loader.
     const second = zipFetch();
     const again = createTemplateLoader({ staticDir, cacheDir, isReleasedMajor: released, fetch: second.fn });
-    expect(await again.getTemplate('30.0.0')).toEqual({ 'main.js': '// 30-x-y main', 'index.html': '<h1>hi</h1>' });
+    expect(await again.getTemplate('30.0.0')).toEqual(FIXTURE_FILES);
     expect(second.urls).toHaveLength(0);
   });
 
@@ -92,7 +96,7 @@ describe('createTemplateLoader', () => {
   it('loads the test template from its branch', async () => {
     const { fn, urls } = zipFetch();
     const loader = createTemplateLoader({ staticDir, cacheDir, isReleasedMajor: released, fetch: fn });
-    expect((await loader.getTestTemplate())['main.js']).toBe('// test-template main');
+    expect(await loader.getTestTemplate()).toEqual(FIXTURE_FILES);
     expect(urls).toEqual(['https://github.com/electron/minimal-repro/archive/test-template.zip']);
   });
 
@@ -123,16 +127,48 @@ describe('createTemplateLoader', () => {
     expect(await readdir(cacheDir)).toEqual([]);
   });
 
-  it('falls back when offline or the archive is corrupt', async () => {
+  it('falls back when offline or the archive is corrupt, leaving nothing behind', async () => {
     const offline = (async () => {
       throw new TypeError('fetch failed');
     }) as typeof fetch;
     const corrupt = (async () => new Response('garbage')) as typeof fetch;
     const quickStart = await readQuickStart(staticDir);
     for (const fn of [offline, corrupt]) {
-      const loader = createTemplateLoader({ staticDir, cacheDir, isReleasedMajor: released, fetch: fn });
+      const errors: unknown[] = [];
+      const loader = createTemplateLoader({
+        staticDir,
+        cacheDir,
+        isReleasedMajor: released,
+        fetch: fn,
+        onFallback: (_branch, error) => errors.push(error),
+      });
       expect(await loader.getTemplate('30.0.0')).toEqual(quickStart);
+      expect(errors).toHaveLength(1);
     }
     expect(await readdir(cacheDir)).toEqual([]);
+  });
+
+  it('times out, and can be aborted', async () => {
+    const quickStart = await readQuickStart(staticDir);
+    const errors: unknown[] = [];
+    const onFallback = (_branch: string, error: unknown) => errors.push(error);
+
+    const slow = createTemplateLoader({ staticDir, cacheDir, isReleasedMajor: released, fetch: hangingFetch, timeoutMs: 20, onFallback });
+    expect(await slow.getTemplate('30.0.0')).toEqual(quickStart);
+    expect(errors[0]).toMatchObject({ code: ErrorCode.network });
+
+    const controller = new AbortController();
+    const aborted = createTemplateLoader({
+      staticDir,
+      cacheDir,
+      isReleasedMajor: released,
+      fetch: hangingFetch,
+      signal: controller.signal,
+      onFallback,
+    });
+    const pending = aborted.getTemplate('31.0.0');
+    controller.abort();
+    expect(await pending).toEqual(quickStart);
+    expect(errors[1]).toMatchObject({ code: ErrorCode.cancelled });
   });
 });

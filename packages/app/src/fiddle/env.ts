@@ -1,3 +1,5 @@
+import { buildChildEnv } from '@electron/fiddle-core';
+
 /** Set when "Advanced Electron logging" is on. */
 export const ADVANCED_LOGGING_ENV: Readonly<Record<string, string>> = {
   ELECTRON_ENABLE_LOGGING: 'true',
@@ -5,17 +7,11 @@ export const ADVANCED_LOGGING_ENV: Readonly<Record<string, string>> = {
   ELECTRON_ENABLE_STACK_DUMPING: 'true',
 };
 
-/** Parent-environment variables never passed to fiddle processes (§4). */
-export const DENIED_ENV_KEYS = ['GITHUB_TOKEN', 'GH_TOKEN', 'NPM_TOKEN', 'NODE_AUTH_TOKEN'] as const;
-export const DENIED_ENV_SUFFIXES = ['_TOKEN', '_API_KEY'] as const;
-/** `ELECTRON_FIDDLE_` covers app-internal variables, including the e2e driver's. */
-export const DENIED_ENV_PREFIXES = ['SENTRY_', 'ELECTRON_FIDDLE_'] as const;
-
-export interface EnvDenylist {
-  keys?: readonly string[];
-  prefixes?: readonly string[];
-  suffixes?: readonly string[];
-}
+/**
+ * Parent-environment variables kept from fiddle processes on top of core's
+ * default denylist (§4): app-internal variables, the e2e driver's included.
+ */
+export const FIDDLE_EXTRA_ENV_DENYLIST: readonly string[] = ['ELECTRON_FIDDLE_*'];
 
 export interface ParsedEnvEntries {
   env: Record<string, string>;
@@ -33,17 +29,23 @@ export function isBlockedUserEnvKey(key: string): boolean {
   return upper === 'LD_PRELOAD' || upper.startsWith('DYLD_');
 }
 
-/** True if `key` from the parent environment must not reach a fiddle process. */
-export function isDeniedParentEnvKey(key: string, extra: EnvDenylist = {}): boolean {
-  const upper = key.toUpperCase();
-  const keys = [...DENIED_ENV_KEYS, ...(extra.keys ?? [])];
-  const prefixes = [...DENIED_ENV_PREFIXES, ...(extra.prefixes ?? [])];
-  const suffixes = [...DENIED_ENV_SUFFIXES, ...(extra.suffixes ?? [])];
-  return (
-    keys.some((k) => k.toUpperCase() === upper) ||
-    prefixes.some((p) => upper.startsWith(p.toUpperCase())) ||
-    suffixes.some((s) => upper.endsWith(s.toUpperCase()))
-  );
+/**
+ * Builds an environment from `[name, value]` pairs. Later pairs win and
+ * undefined values are skipped. On Windows, names that differ only in case
+ * are one variable, so the later pair replaces the earlier.
+ */
+export function envFromEntries(
+  entries: Iterable<readonly [string, string | undefined]>,
+  platform: NodeJS.Platform = process.platform,
+): Record<string, string> {
+  const byName = new Map<string, [string, string]>();
+  for (const [name, value] of entries) {
+    if (value === undefined) continue;
+    const key = platform === 'win32' ? name.toUpperCase() : name;
+    byName.delete(key);
+    byName.set(key, [name, value]);
+  }
+  return Object.fromEntries(byName.values());
 }
 
 /** Parses one `KEY=value` entry. Matching surrounding quotes on the value are removed. */
@@ -64,9 +66,9 @@ export function parseEnvEntry(entry: string): [string, string] | null {
 /**
  * Parses the user's `KEY=value` list. Empty entries are dropped; entries that
  * don't parse are reported in `invalid`, blocked keys in `blocked`. Later
- * entries win.
+ * entries win (ignoring case on Windows).
  */
-export function parseEnvEntries(entries: readonly string[]): ParsedEnvEntries {
+export function parseEnvEntries(entries: readonly string[], platform: NodeJS.Platform = process.platform): ParsedEnvEntries {
   const pairs: [string, string][] = [];
   const invalid: string[] = [];
   const blocked: string[] = [];
@@ -77,7 +79,7 @@ export function parseEnvEntries(entries: readonly string[]): ParsedEnvEntries {
     else if (isBlockedUserEnvKey(parsed[0])) blocked.push(parsed[0]);
     else pairs.push(parsed);
   }
-  return { env: Object.fromEntries(pairs), invalid, blocked };
+  return { env: envFromEntries(pairs, platform), invalid, blocked };
 }
 
 /** Drops empty and whitespace-only entries (extra Electron flags). */
@@ -86,27 +88,21 @@ export function cleanFlags(flags: readonly string[]): string[] {
 }
 
 export interface FiddleEnvOptions {
-  parentEnv: Readonly<Record<string, string | undefined>>;
-  /** Already-parsed user variables; blocked keys are dropped again here. */
+  /** Already-parsed user variables. `LD_PRELOAD` and `DYLD_*` are dropped. */
   userEnv?: Readonly<Record<string, string>>;
   advancedLogging?: boolean;
-  denylist?: EnvDenylist;
 }
 
 /**
- * The environment for a fiddle process: the parent minus the denylist, then
- * the advanced-logging variables (or their removal), then the user's variables.
+ * The environment for fiddle processes and module installs, through core's
+ * `buildChildEnv`: `parent` minus core's denylist and
+ * {@link FIDDLE_EXTRA_ENV_DENYLIST}, then the advanced-logging variables,
+ * then the user's. On Windows a variable replaces any differently-cased copy.
  */
-export function buildFiddleEnv(options: FiddleEnvOptions): Record<string, string> {
-  const env: [string, string][] = Object.entries(options.parentEnv).filter(
-    (e): e is [string, string] =>
-      typeof e[1] === 'string' &&
-      !isDeniedParentEnvKey(e[0], options.denylist) &&
-      !Object.hasOwn(ADVANCED_LOGGING_ENV, e[0]),
-  );
-  if (options.advancedLogging) env.push(...Object.entries(ADVANCED_LOGGING_ENV));
-  for (const [key, value] of Object.entries(options.userEnv ?? {})) {
-    if (!isBlockedUserEnvKey(key)) env.push([key, value]);
-  }
-  return Object.fromEntries(env);
+export function fiddleProcessEnv(options: FiddleEnvOptions = {}, parent: NodeJS.ProcessEnv = process.env): NodeJS.ProcessEnv {
+  const vars = envFromEntries([
+    ...Object.entries(options.advancedLogging ? ADVANCED_LOGGING_ENV : {}),
+    ...Object.entries(options.userEnv ?? {}),
+  ]);
+  return buildChildEnv({ extraDenylist: FIDDLE_EXTRA_ENV_DENYLIST, vars }, parent);
 }

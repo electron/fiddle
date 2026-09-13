@@ -1,0 +1,13 @@
+{
+  "versions": [
+    {
+      "version": "0.0.0-local.1700000000000",
+      "localPath": "/src/electron/out/Testing",
+      "name": "My build"
+    },
+    {
+      "version": "0.0.0-local.1700000000001",
+      "localPath": "/src/electron/out/Release"
+    }
+  ]
+}

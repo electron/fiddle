@@ -1,0 +1,60 @@
+/* Gist dialogs and the GitHub account section. Tokens only. */
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--lu-space-3);
+}
+
+.help {
+  margin: 0;
+  font: var(--lu-type-caption);
+  letter-spacing: var(--lu-type-caption-tracking);
+  color: var(--lu-ink-muted);
+}
+
+.tokenLink {
+  align-self: flex-start;
+}
+
+.history {
+  max-height: 360px;
+  overflow-y: auto;
+}
+
+.status {
+  display: flex;
+  justify-content: center;
+  padding: var(--lu-space-4) 0;
+  color: var(--lu-ink-muted);
+  font: var(--lu-type-body);
+  letter-spacing: var(--lu-type-body-tracking);
+}
+
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--lu-space-4);
+}
+
+.account {
+  display: flex;
+  align-items: center;
+  gap: var(--lu-space-2);
+  color: var(--lu-ink);
+  font: var(--lu-type-body);
+  letter-spacing: var(--lu-type-body-tracking);
+}
+
+.accountIcon {
+  flex: none;
+  color: var(--lu-ink-muted);
+}
+
+.accountName {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}

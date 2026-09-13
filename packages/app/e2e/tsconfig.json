@@ -1,0 +1,17 @@
+{
+  // E2E specs, the client and fixtures, and the driver tools. These run under
+  // plain Node (type stripping) or Vitest, so imports carry `.ts` extensions
+  // and only erasable TypeScript syntax is allowed.
+  "extends": "../../../tsconfig.base.json",
+  "compilerOptions": {
+    "module": "preserve",
+    "moduleResolution": "bundler",
+    "allowImportingTsExtensions": true,
+    "erasableSyntaxOnly": true,
+    "lib": ["esnext"],
+    "types": ["node"],
+    "noEmit": true,
+    "tsBuildInfoFile": "../../../node_modules/.tmp/tsc/app-e2e.tsbuildinfo"
+  },
+  "include": ["./**/*.ts", "../tools/driver*.ts"]
+}

@@ -1,0 +1,58 @@
+{
+  "title": {
+    "message": "Packages",
+    "description": "Sidebar section head above the fiddle's npm packages.",
+    "maxLength": 30
+  },
+  "addPlaceholder": {
+    "message": "Add a package",
+    "description": "Placeholder of the sidebar search field that finds npm packages to add to the fiddle.",
+    "maxLength": 30
+  },
+  "addLabel": {
+    "message": "Add a package from npm",
+    "description": "Accessible name of the sidebar field that searches npm for a package to add."
+  },
+  "searching": {
+    "message": "Searching…",
+    "description": "Shown in the package search results while npm is being searched.",
+    "maxLength": 30
+  },
+  "noResults": {
+    "message": "No packages found",
+    "description": "Shown in the package search results when npm has no matching package.",
+    "maxLength": 40
+  },
+  "searchFailed": {
+    "message": "Can't reach npm right now",
+    "description": "Shown in the package search results when the npm search service can't be reached.",
+    "maxLength": 40
+  },
+  "latest": {
+    "message": "latest",
+    "description": "Right-aligned hint next to a package's newest version in the version list. Lower case, like a tag.",
+    "maxLength": 12
+  },
+  "version": {
+    "message": "Version of {{name}}",
+    "description": "Accessible name of the version menu on a package row. {{name}} is the npm package name."
+  },
+  "remove": {
+    "message": "Remove {{name}}",
+    "description": "Accessible name and tooltip of the button that removes a package from the fiddle. {{name}} is the npm package name."
+  },
+  "addFailed": {
+    "message": "Couldn't add {{name}}",
+    "description": "Toast title when a package can't be added to the fiddle. {{name}} is the npm package name.",
+    "maxLength": 60
+  },
+  "changeFailed": {
+    "message": "Couldn't change {{name}}",
+    "description": "Toast title when a package's version can't be changed or it can't be removed. {{name}} is the npm package name.",
+    "maxLength": 60
+  },
+  "list": {
+    "message": "Packages in this fiddle",
+    "description": "Accessible name of the list of npm packages the fiddle uses."
+  }
+}

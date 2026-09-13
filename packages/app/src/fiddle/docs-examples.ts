@@ -1,7 +1,8 @@
 import { ErrorCode, FiddleError } from '../shared/errors';
 import { versionFromTag } from './deep-link';
-import { ensureMainEntry, type FileMap, isReservedFileName, isSupportedFileName } from './files';
+import { type FileMap, findMainEntry, isMainEntry, isReservedFileName, isSupportedFileName, PACKAGE_JSON } from './files';
 import type { GitHubClient } from './github';
+import { type PickedFiles, pickFiddleFiles } from './pick';
 import type { FiddleOrigin } from './trust';
 
 export const ELECTRON_OWNER = 'electron';
@@ -17,9 +18,8 @@ export interface DocsExampleOptions {
   signal?: AbortSignal;
 }
 
-export interface DocsExample {
+export interface DocsExample extends PickedFiles {
   version: string;
-  files: FileMap;
   origin: FiddleOrigin;
 }
 
@@ -30,7 +30,7 @@ function assertExamplePath(p: string): void {
   }
 }
 
-/** Loads `electron/<tag>/<path>`: its supported files laid over the template for the tag's version. */
+/** Loads `electron/<tag>/<path>`: its files and `package.json` laid over the template for the tag's version. */
 export async function loadDocsExample(options: DocsExampleOptions): Promise<DocsExample> {
   const version = versionFromTag(options.tag);
   if (!version) {
@@ -49,8 +49,17 @@ export async function loadDocsExample(options: DocsExampleOptions): Promise<Docs
     options.signal,
   );
   const wanted = entries.filter(
-    (e) => e.type === 'file' && e.downloadUrl && isSupportedFileName(e.name) && !isReservedFileName(e.name),
+    (e) =>
+      e.type === 'file' &&
+      e.downloadUrl &&
+      (e.name === PACKAGE_JSON || (isSupportedFileName(e.name) && !isReservedFileName(e.name))),
   );
+  if (!wanted.some((e) => e.name !== PACKAGE_JSON)) {
+    throw new FiddleError(ErrorCode.invalidArgument, `${options.path} has no supported files`, {
+      reason: 'no-supported-files',
+      path: options.path,
+    });
+  }
   const [template, fetched] = await Promise.all([
     options.getTemplate(version),
     Promise.all(
@@ -58,9 +67,14 @@ export async function loadDocsExample(options: DocsExampleOptions): Promise<Docs
     ),
   ]);
 
+  const example: FileMap = Object.fromEntries(fetched);
+  // The example's main entry replaces the template's, which may have another extension.
+  const base = findMainEntry(Object.keys(example))
+    ? Object.fromEntries(Object.entries(template).filter(([name]) => !isMainEntry(name)))
+    : template;
   return {
+    ...pickFiddleFiles({ ...base, ...example }),
     version,
-    files: ensureMainEntry({ ...template, ...Object.fromEntries(fetched) }),
     origin: { kind: 'electron', tag: options.tag, path: options.path },
   };
 }

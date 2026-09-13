@@ -1,3 +1,4 @@
+import * as semver from 'semver';
 import { z } from 'zod';
 
 import { ErrorCode, FiddleError } from '../shared/errors';
@@ -7,6 +8,8 @@ import {
   assertCanRenameFile,
   ensureMainEntry,
   type FileMap,
+  findMainEntry,
+  getExtension,
   getPlaceholder,
   isEmptyOrPlaceholder,
   sortFileNames,
@@ -114,6 +117,25 @@ export function showFile(fiddle: Fiddle, name: string): Fiddle {
 export function setFileContent(fiddle: Fiddle, name: string, content: string): Fiddle {
   assertHasFile(fiddle, name);
   return { ...fiddle, files: { ...fiddle.files, [name]: content } };
+}
+
+export const ESM_MIN_MAJOR = 28;
+
+/**
+ * Pre-run check: a `main.mjs` entry needs Electron 28 or later. Local builds
+ * and non-semver versions pass. Returns the error that refuses the run, or null.
+ */
+export function checkEsmSupport(files: FileMap, version: VersionRef): FiddleError | null {
+  if (version.kind === 'local') return null;
+  const main = findMainEntry(Object.keys(files));
+  if (!main || getExtension(main) !== '.mjs') return null;
+  const parsed = semver.parse(version.version);
+  if (!parsed || parsed.major >= ESM_MIN_MAJOR) return null;
+  return new FiddleError(ErrorCode.invalidArgument, `${main} needs Electron ${ESM_MIN_MAJOR} or later`, {
+    reason: 'esm-unsupported',
+    file: main,
+    version: version.version,
+  });
 }
 
 /** True if both maps hold the same names with the same content (hidden files included). */

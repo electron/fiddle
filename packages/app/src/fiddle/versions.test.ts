@@ -44,8 +44,8 @@ describe('sorting', () => {
       '2.0.0-alpha.2',
       '2.0.0-nightly.20200101',
       '1.0.0',
-      'abc',
       'local-b',
+      'abc',
     ]);
     expect(input[0]).toBe('1.0.0');
   });
@@ -101,7 +101,8 @@ describe('platform limits', () => {
     expect(isSupportedOnPlatform('1.0.0', 'darwin', 'x64')).toBe(true);
   });
 
-  it('needs >=6.0.8 || >=7.0.0 on Windows arm64', () => {
+  it('needs 6.0.8 or later on Windows arm64', () => {
+    expect(isSupportedOnPlatform('6.1.0', 'win32', 'arm64')).toBe(true);
     expect(isSupportedOnPlatform('6.0.7', 'win32', 'arm64')).toBe(false);
     expect(isSupportedOnPlatform('5.0.0', 'win32', 'arm64')).toBe(false);
     expect(isSupportedOnPlatform('6.0.8', 'win32', 'arm64')).toBe(true);
@@ -140,5 +141,12 @@ describe('bisect ranges', () => {
     expect(getDefaultBisectRange(many)).toEqual({ good: '5.0.0', bad: '15.0.0' });
     expect(getDefaultBisectRange(visible)).toEqual({ good: '1.0.0', bad: '3.0.0' });
     expect(getDefaultBisectRange(['1.0.0'])).toBeUndefined();
+  });
+
+  it('skips local builds', () => {
+    expect(getVersionRange('local-a', '2.0.0', [...visible, 'local-a'])).toEqual([]);
+    expect(getVersionRange('1.0.0', '3.0.0', [...visible, 'local-a'])).toEqual(['1.0.0', '2.0.0', '2.1.0-beta.1', '2.1.0', '3.0.0']);
+    expect(getDefaultBisectRange(['3.0.0', '2.0.0', 'local-a', 'local-b'])).toEqual({ good: '2.0.0', bad: '3.0.0' });
+    expect(getDefaultBisectRange(['3.0.0', 'local-a'])).toBeUndefined();
   });
 });

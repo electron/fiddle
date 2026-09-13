@@ -1,0 +1,48 @@
+/* Global rules for Monaco's own DOM (class names Monaco applies, so no CSS module). */
+
+/* The error line: a full-width spark-soft band with a spark line number. */
+.monaco-editor .lu-error-line {
+  background: var(--lu-spark-soft);
+}
+
+.monaco-editor .line-numbers.lu-error-line-number {
+  color: var(--lu-spark);
+}
+
+/* The error lens: a view zone under the error line, starting at the code column.
+   Margin 6 16 8 (the zone already starts at the code column), padding 9 12,
+   radius-control, spark 6% into surface with a 0.5px ring of spark at 30%. */
+.lu-lens-zone {
+  padding: 6px 16px 8px 0;
+}
+
+.lu-lens {
+  display: flex;
+  gap: 8px;
+  padding: 9px 12px;
+  border-radius: var(--lu-radius-control);
+  corner-shape: squircle;
+  background: color-mix(in srgb, var(--lu-spark) 6%, var(--lu-surface));
+  box-shadow: var(--lu-shadow-stop);
+  color: var(--lu-ink);
+  font: 400 12.5px/18px var(--lu-font-sans);
+  letter-spacing: 0;
+  white-space: normal;
+  cursor: default;
+  user-select: text;
+}
+
+.lu-lens-icon {
+  flex: none;
+  margin-top: 1px;
+  color: var(--lu-spark);
+}
+
+.lu-lens-title {
+  color: var(--lu-spark);
+  font-weight: 600;
+}
+
+.lu-lens-hint {
+  color: var(--lu-ink-muted);
+}

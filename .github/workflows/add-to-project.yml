@@ -1,0 +1,27 @@
+name: Add to Ecosystem WG Project
+
+on:
+  issues:
+    types:
+      - opened
+  pull_request_target: # zizmor: ignore[dangerous-triggers]
+    types:
+      - opened
+
+permissions: {}
+
+jobs:
+  add-to-project:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Generate GitHub App token
+        uses: electron/github-app-auth-action@5f70a3726af01b612f29aac96d05aa524389c9e9 # v2.1.0
+        id: generate-token
+        with:
+          creds: ${{ secrets.ECOSYSTEM_ISSUE_TRIAGE_GH_APP_CREDS }}
+          org: electron
+      - name: Add to Project
+        uses: dsanders11/project-actions/add-item@4b06452b0128cf601dac14399aa668a8eed2d684 # v2.0.1
+        with:
+          project-number: 89
+          token: ${{ steps.generate-token.outputs.token }}

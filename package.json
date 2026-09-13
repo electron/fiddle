@@ -20,7 +20,9 @@
     "format:check": "prettier --check .",
     "test": "yarn generate && vitest run",
     "test:watch": "vitest",
-    "test:e2e": "node -e \"console.log('yarn test:e2e: not implemented yet')\"",
+    "test:e2e": "yarn generate && vitest run -c packages/app/e2e/vitest.config.ts",
+    "driver": "yarn workspace electron-fiddle driver",
+    "features-coverage": "yarn workspace electron-fiddle features-coverage",
     "fiddle": "node -e \"console.log('yarn fiddle: not implemented yet')\"",
     "package": "yarn workspace electron-fiddle package",
     "make": "yarn workspace electron-fiddle make"
@@ -29,6 +31,11 @@
     "electron": {
       "built": true
     }
+  },
+  "resolutions": {
+    "@electron-forge/maker-base": "8.0.0-alpha.10",
+    "@electron-forge/shared-types": "8.0.0-alpha.10",
+    "electron-windows-msix@npm:^2.0.4": "patch:electron-windows-msix@npm%3A2.0.4#~/.yarn/patches/electron-windows-msix-npm-2.0.4-954aec946e.patch"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.0",

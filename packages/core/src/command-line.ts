@@ -1,6 +1,7 @@
 import { inspect } from 'node:util';
 
-import { debug } from './debug.js';
+import debug from 'debug';
+
 import { ElectronVersions } from './versions.js';
 import { type Fiddle, FiddleFactory } from './fiddle.js';
 import { Runner } from './runner.js';

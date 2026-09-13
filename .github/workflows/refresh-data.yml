@@ -1,0 +1,48 @@
+name: Refresh bundled data
+
+# REQUIREMENTS §2: the Electron release list and the contributors list are
+# committed snapshots, refreshed by this scheduled bot PR. Builds never fetch
+# them. Run it by hand before a release to ship the latest list.
+on:
+  schedule:
+    - cron: '0 6 * * 1'
+  workflow_dispatch:
+
+permissions: {}
+
+jobs:
+  refresh:
+    name: Refresh releases and contributors
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Setup Node.js
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version-file: .nvmrc
+          package-manager-cache: false
+      # Plain Node with no dependencies: nothing is installed, so no
+      # dependency code runs in a job that can push.
+      - name: Refresh data
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: node tools/release-data.mjs
+      # PRs opened with GITHUB_TOKEN don't trigger CI. Close and reopen the PR
+      # to run it.
+      - name: Open pull request
+        uses: peter-evans/create-pull-request@5f6978faf089d4d20b00c7766989d076bb2fc7f1 # v8.1.1
+        with:
+          branch: bot/refresh-data
+          delete-branch: true
+          commit-message: 'chore: refresh bundled Electron releases and contributors'
+          title: 'chore: refresh bundled Electron releases and contributors'
+          body: Automated refresh of `packages/app/static/releases.json` and `packages/app/static/contributors.json` by `tools/release-data.mjs`.
+          add-paths: |
+            packages/app/static/releases.json
+            packages/app/static/contributors.json

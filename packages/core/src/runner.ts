@@ -5,11 +5,17 @@ import path from 'node:path';
 import type { Writable } from 'node:stream';
 import { inspect } from 'node:util';
 
+import debug from 'debug';
 import { SemVer } from 'semver';
 
-import { debug } from './debug.js';
 import { type ChildEnvOptions, buildChildEnv } from './env.js';
-import { FiddleCoreError, abortError, throwIfAborted } from './errors.js';
+import {
+  type ErrorMode,
+  FiddleCoreError,
+  abortError,
+  isFiddleCoreError,
+  throwIfAborted,
+} from './errors.js';
 import { Installer } from './installer.js';
 import { ElectronVersions, type Versions } from './versions.js';
 import { type Fiddle, FiddleFactory, type FiddleSource } from './fiddle.js';
@@ -17,6 +23,9 @@ import { DefaultPaths, type Paths } from './paths.js';
 import { registerElectronIdentity } from './windows-identity.js';
 
 const MSIX_EXEC_ALIAS = 'ElectronFiddleMSIX.exe';
+
+/** How long an aborted child gets to exit after SIGTERM before SIGKILL. */
+const KILL_GRACE_MS = 5_000;
 
 export interface InspectOptions {
   /** Default: `127.0.0.1`. */
@@ -40,8 +49,8 @@ export interface RunnerOptions {
   runWithIdentity?: boolean;
   /**
    * Build the child's environment from `env` (or `process.env`) minus a
-   * denylist, plus user variables. `LD_PRELOAD` and `DYLD_*` are always
-   * removed. When unset, the environment is passed through unchanged.
+   * denylist, plus user variables. See {@link buildChildEnv}. When unset, the
+   * environment is passed through unchanged.
    */
   childEnv?: ChildEnvOptions;
   /** Start Electron with `--inspect=host:port`. */
@@ -57,10 +66,22 @@ const DefaultRunnerOpts: RunnerOptions = {
 
 /**
  * Options for {@link Runner.spawn}, {@link Runner.run} and {@link Runner.bisect}.
- * `signal` cancels the install and kills the child; `run` and `bisect` then
- * reject with an `aborted` {@link FiddleCoreError}.
+ * `signal` cancels the install and kills the child with its whole process
+ * tree. See {@link ErrorMode} for how `run` and `bisect` then settle.
  */
 export type RunnerSpawnOptions = SpawnOptions & RunnerOptions;
+
+export interface RunnerCreateOptions {
+  installer?: Installer;
+  fiddleFactory?: FiddleFactory;
+  paths?: Partial<Paths>;
+  versions?: Versions;
+  /**
+   * See {@link ErrorMode}. Also passed to the `Installer` and
+   * `ElectronVersions` that `create()` makes. Default: `legacy`.
+   */
+  errors?: ErrorMode;
+}
 
 export interface TestResult {
   status: 'test_passed' | 'test_failed' | 'test_error' | 'system_error';
@@ -75,26 +96,51 @@ function inspectArg({ host = '127.0.0.1', port = 0 }: InspectOptions): string {
   return `--inspect=${host.includes(':') ? `[${host}]` : host}:${port}`;
 }
 
+/**
+ * Kills a child and everything it started, such as Electron under xvfb-run.
+ * On POSIX the child leads its own process group (it was spawned detached),
+ * which gets SIGTERM, then SIGKILL after a grace period.
+ */
+function killTree(child: ChildProcess): void {
+  const { pid } = child;
+  if (pid === undefined) return;
+  if (process.platform === 'win32') {
+    spawn('taskkill', ['/pid', String(pid), '/T', '/F'], {
+      stdio: 'ignore',
+      windowsHide: true,
+    }).on('error', () => {});
+    return;
+  }
+  const killGroup = (signal: NodeJS.Signals) => {
+    try {
+      process.kill(-pid, signal);
+    } catch {
+      // the group is gone
+    }
+  };
+  killGroup('SIGTERM');
+  setTimeout(() => killGroup('SIGKILL'), KILL_GRACE_MS).unref();
+}
+
 export class Runner {
+  readonly #errors: ErrorMode;
+
   private constructor(
     private readonly installer: Installer,
     private readonly versions: Versions,
     private readonly fiddleFactory: FiddleFactory,
-  ) {}
+    errors: ErrorMode = 'legacy',
+  ) {
+    this.#errors = errors;
+  }
 
-  public static async create(
-    opts: {
-      installer?: Installer;
-      fiddleFactory?: FiddleFactory;
-      paths?: Partial<Paths>;
-      versions?: Versions;
-    } = {},
-  ): Promise<Runner> {
+  public static async create(opts: RunnerCreateOptions = {}): Promise<Runner> {
+    const { errors } = opts;
     const paths = Object.freeze({ ...DefaultPaths, ...opts.paths });
-    const installer = opts.installer || new Installer(paths);
-    const versions = opts.versions || (await ElectronVersions.create({ paths }));
+    const installer = opts.installer || new Installer(paths, { errors });
+    const versions = opts.versions || (await ElectronVersions.create({ paths, errors }));
     const factory = opts.fiddleFactory || new FiddleFactory(paths.fiddles);
-    return new Runner(installer, versions, factory);
+    return new Runner(installer, versions, factory, errors);
   }
 
   /**
@@ -175,7 +221,8 @@ export class Runner {
 
     // process the input parameters
     opts = { ...DefaultRunnerOpts, ...opts };
-    throwIfAborted(opts.signal);
+    const { signal } = opts;
+    throwIfAborted(signal);
     const version = versionIn instanceof SemVer ? versionIn.version : versionIn;
     const fiddle = await this.fiddleFactory.create(fiddleIn, {
       packAsAsar: opts.runFromAsar,
@@ -187,8 +234,8 @@ export class Runner {
       );
 
     // set up the electron binary and the fiddle
-    const electronExec = await this.getExec(version, opts.signal);
-    throwIfAborted(opts.signal);
+    const electronExec = await this.getExec(version, signal);
+    throwIfAborted(signal);
     let exec =
       process.platform === 'win32' && opts.runWithIdentity
         ? MSIX_EXEC_ALIAS
@@ -201,9 +248,13 @@ export class Runner {
       opts.out.write(`${this.spawnInfo(version, electronExec, fiddle)}\n`);
     }
 
-    const spawnOpts = opts.childEnv
-      ? { ...opts, env: buildChildEnv(opts.childEnv, opts.env ?? process.env) }
-      : opts;
+    // The signal is handled below rather than by child_process, so that an
+    // abort kills the child's whole process tree.
+    const { signal: _signal, ...spawnOpts } = opts;
+    if (opts.childEnv) {
+      spawnOpts.env = buildChildEnv(opts.childEnv, opts.env ?? process.env);
+    }
+    if (signal && process.platform !== 'win32') spawnOpts.detached = true;
 
     d(inspect({ exec, args, opts }));
 
@@ -211,6 +262,11 @@ export class Runner {
     if (opts.out) {
       child.stdout?.pipe(opts.out);
       child.stderr?.pipe(opts.out);
+    }
+    if (signal) {
+      const onAbort = () => killTree(child);
+      signal.addEventListener('abort', onAbort, { once: true });
+      child.once('exit', () => signal.removeEventListener('abort', onAbort));
     }
 
     return child;
@@ -243,34 +299,44 @@ export class Runner {
     }
   }
 
+  /** In `legacy` mode, an abort ends a run or bisect with `system_error`, as in 2.x. */
+  private settleAbort<T>(err: unknown, result: T): T {
+    if (this.#errors !== 'typed' && isFiddleCoreError(err, 'aborted')) return result;
+    throw err;
+  }
+
   public async run(
     version: string | SemVer,
     fiddle: FiddleSource,
     opts: RunnerSpawnOptions = DefaultRunnerOpts,
   ): Promise<TestResult> {
     const { signal } = opts;
-    if (process.platform === 'win32' && opts.runWithIdentity) {
-      const electronVersion = version instanceof SemVer ? version.version : version;
-      const electronExec = await this.getExec(electronVersion, signal);
-      const electronDir = path.dirname(electronExec);
-      await registerElectronIdentity(electronVersion, electronDir);
+    try {
+      if (process.platform === 'win32' && opts.runWithIdentity) {
+        const electronVersion = version instanceof SemVer ? version.version : version;
+        const electronExec = await this.getExec(electronVersion, signal);
+        const electronDir = path.dirname(electronExec);
+        await registerElectronIdentity(electronVersion, electronDir);
+      }
+
+      const subprocess = await this.spawn(version, fiddle, opts);
+
+      return await new Promise<TestResult>((resolve, reject) => {
+        subprocess.on('error', () => {
+          if (signal?.aborted) return reject(abortError(signal));
+          return resolve({ status: 'system_error' });
+        });
+
+        subprocess.on('exit', (code) => {
+          if (signal?.aborted) return reject(abortError(signal));
+          if (code === 0) return resolve({ status: 'test_passed' });
+          if (code === 1) return resolve({ status: 'test_failed' });
+          return resolve({ status: 'test_error' });
+        });
+      });
+    } catch (err) {
+      return this.settleAbort(err, { status: 'system_error' });
     }
-
-    const subprocess = await this.spawn(version, fiddle, opts);
-
-    return new Promise((resolve, reject) => {
-      subprocess.on('error', () => {
-        if (signal?.aborted) return reject(abortError(signal));
-        return resolve({ status: 'system_error' });
-      });
-
-      subprocess.on('exit', (code) => {
-        if (signal?.aborted) return reject(abortError(signal));
-        if (code === 0) return resolve({ status: 'test_passed' });
-        if (code === 1) return resolve({ status: 'test_failed' });
-        return resolve({ status: 'test_error' });
-      });
-    });
   }
 
   public async bisect(
@@ -278,6 +344,19 @@ export class Runner {
     version_b: string | SemVer,
     fiddleIn: FiddleSource,
     opts: RunnerSpawnOptions = DefaultRunnerOpts,
+  ): Promise<BisectResult> {
+    try {
+      return await this.bisectImpl(version_a, version_b, fiddleIn, opts);
+    } catch (err) {
+      return this.settleAbort(err, { status: 'system_error' });
+    }
+  }
+
+  private async bisectImpl(
+    version_a: string | SemVer,
+    version_b: string | SemVer,
+    fiddleIn: FiddleSource,
+    opts: RunnerSpawnOptions,
   ): Promise<BisectResult> {
     const { out, signal } = opts;
     const log = (first: unknown, ...rest: unknown[]) => {

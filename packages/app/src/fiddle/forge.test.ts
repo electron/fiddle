@@ -17,6 +17,13 @@ function transform(input: Parameters<typeof generatePackageJson>[0], options: Pa
 }
 
 describe('forge transform', () => {
+  it('omits forceABI when the nightly ABI is unparseable', () => {
+    for (const nightlyAbi of ['', ' ', 'abc', '128abc', 'NaN', '-1']) {
+      const pkg = transform({ name: 'x', electronVersion: '33.0.0-nightly.20240801' }, { nightlyAbi });
+      expect(pkg.config.forge.electronRebuildConfig).toBeUndefined();
+    }
+  });
+
   it('adds Forge config to a generated package.json', () => {
     const pkg = transform({ name: 'app', author: 'me', modules: { lodash: '1.0.0' }, electronVersion: '30.0.0' });
     expect(pkg).toEqual({

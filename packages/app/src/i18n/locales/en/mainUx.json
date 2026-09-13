@@ -1,0 +1,51 @@
+{
+  "bisectDone": {
+    "message": "Bisect finished",
+    "description": "System notification title when an automatic bisect finishes while the app is in the background.",
+    "maxLength": 50
+  },
+  "bisectFailed": {
+    "message": "Bisect failed",
+    "description": "System notification title when an automatic bisect stops with an error while the app is in the background.",
+    "maxLength": 50
+  },
+  "packageDone": {
+    "message": "Packaging finished",
+    "description": "System notification title when packaging a fiddle or making its installers finishes in the background.",
+    "maxLength": 50
+  },
+  "packageFailed": {
+    "message": "Packaging failed",
+    "description": "System notification title when packaging a fiddle or making its installers fails in the background.",
+    "maxLength": 50
+  },
+  "downloadsDone": {
+    "message": "Downloads finished",
+    "description": "System notification title when every Electron version download has finished in the background.",
+    "maxLength": 50
+  },
+  "downloadsFailed": {
+    "message": "A download failed",
+    "description": "System notification title when an Electron version download fails in the background.",
+    "maxLength": 50
+  },
+  "runDone": {
+    "message": "Fiddle exited",
+    "description": "System notification title when a fiddle that ran for more than 10 seconds exits while the app is in the background.",
+    "maxLength": 50
+  },
+  "runFailed": {
+    "message": "Fiddle exited with an error",
+    "description": "System notification title when a fiddle that ran for more than 10 seconds exits with an error while the app is in the background.",
+    "maxLength": 50
+  },
+  "notificationBody": {
+    "message": "{{name}}",
+    "description": "System notification body: the name of the fiddle the operation ran for. {{name}} is the fiddle's name."
+  },
+  "recent": {
+    "message": "Recent",
+    "description": "Heading of the recent fiddles category in the Windows taskbar jump list.",
+    "maxLength": 30
+  }
+}

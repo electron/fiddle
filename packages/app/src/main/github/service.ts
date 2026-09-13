@@ -1,0 +1,225 @@
+/**
+ * GitHub sign-in and the gist flows (REQUIREMENTS §4 and §17.11). The token
+ * lives only here, in main; the `App` store only ever gets the login name.
+ *
+ * No Electron imports: storage, the client, Documents and settings are injected.
+ */
+import { findMainEntry, PACKAGE_JSON, ensureMainEntry, type FileMap } from '../../fiddle/files';
+import { gistUrl } from '../../fiddle/gist-id';
+import type { GistRevision, GitHubClient } from '../../fiddle/github';
+import { generatePackageJson } from '../../fiddle/package-json';
+import { ErrorCode, FiddleError } from '../../shared/errors';
+import type { CredentialStorageKind, CredentialStore } from './credentials';
+import type { GistDocuments, GistFiddle } from './documents-bridge';
+import type { GistPrefs } from './prefs';
+
+/** Shown once to the user; `decrypt-failed` means they were signed out and the file was kept. */
+export type GitHubNotice = 'decrypt-failed';
+
+export interface GistLink {
+  id: string;
+  url: string;
+}
+
+export interface GistHistory {
+  id: string;
+  /** The revision the window has loaded or last saved; undefined when unknown. */
+  activeSha: string | undefined;
+  /** Oldest first, as returned by GitHubClient.listGistRevisions. */
+  revisions: GistRevision[];
+}
+
+export interface GitHubServiceOptions {
+  store: Pick<CredentialStore, 'kind' | 'load' | 'save' | 'delete'>;
+  createClient: (token?: string) => GitHubClient;
+  documents: GistDocuments;
+  prefs: GistPrefs;
+  /** Publishes the login name (or undefined when signed out) to the `App` store. */
+  setLogin: (login: string | undefined) => void;
+  log: { warn(...args: unknown[]): void; error(...args: unknown[]): void };
+}
+
+export class GitHubService {
+  readonly #options: GitHubServiceOptions;
+  #token: string | undefined;
+  #login: string | undefined;
+  #notice: GitHubNotice | undefined;
+
+  constructor(options: GitHubServiceOptions) {
+    this.#options = options;
+  }
+
+  get login(): string | undefined {
+    return this.#login;
+  }
+
+  /**
+   * The startup check. Loads the stored token and asks GitHub who it belongs
+   * to: a 401 or 403 deletes it; being offline or rate limited keeps it.
+   */
+  async init(): Promise<void> {
+    const loaded = await this.#options.store.load();
+    if (loaded.kind === 'none') return;
+    if (loaded.kind === 'decrypt-failed') {
+      this.#notice = 'decrypt-failed';
+      return;
+    }
+    this.#setSignedIn(loaded.credentials.token, loaded.credentials.login);
+    try {
+      const user = await this.#options.createClient(this.#token).getAuthenticatedUser();
+      if (user.login !== this.#login) this.#setSignedIn(loaded.credentials.token, user.login);
+    } catch (error) {
+      const e = FiddleError.from(error);
+      if (e.code === ErrorCode.unauthorized || e.code === ErrorCode.forbidden) {
+        this.#options.log.warn('the stored GitHub token was rejected; signing out', e.code);
+        await this.signOut();
+      } else {
+        this.#options.log.warn('could not check the GitHub token; keeping it', e.code);
+      }
+    }
+  }
+
+  credentialStorage(): Promise<CredentialStorageKind> {
+    return this.#options.store.kind();
+  }
+
+  /**
+   * Verifies a personal access token (format, validity, `gist` scope) and
+   * stores it. Returns whether it was persisted or kept for this session only.
+   */
+  async signIn(token: string, allowPlaintext: boolean): Promise<{ login: string; persisted: boolean }> {
+    const trimmed = token.trim();
+    const login = await this.#options.createClient(trimmed).verifyToken();
+    let persisted = false;
+    try {
+      persisted = await this.#options.store.save({ token: trimmed, login }, { allowPlaintext });
+    } catch (error) {
+      this.#options.log.error('could not store the GitHub token; keeping it for this session', error);
+    }
+    this.#setSignedIn(trimmed, login);
+    return { login, persisted };
+  }
+
+  async signOut(): Promise<void> {
+    this.#token = undefined;
+    this.#login = undefined;
+    this.#options.setLogin(undefined);
+    await this.#options.store.delete();
+  }
+
+  /** Returns the pending notice once. */
+  takeNotice(): GitHubNotice | undefined {
+    const notice = this.#notice;
+    this.#notice = undefined;
+    return notice;
+  }
+
+  /**
+   * Publishes the window's fiddle as a new gist. With "publish as revision",
+   * the gist is created from the default template first and then updated with
+   * the real files, so its history shows the fiddle as a diff.
+   */
+  async publish(windowId: string, input: { description: string; isPublic: boolean }): Promise<GistLink> {
+    const client = this.#authedClient();
+    const fiddle = await this.#options.documents.getFiddle(windowId);
+    const files = gistFiles(fiddle);
+    const { asRevision } = this.#options.prefs.get();
+    this.#options.prefs.setVisibility(input.isPublic);
+
+    if (!asRevision) {
+      const created = await client.createGist({ ...input, files });
+      this.#options.documents.markGistSaved(windowId, created);
+      return { id: created.id, url: created.url };
+    }
+
+    const template = await this.#options.documents.getTemplate(windowId);
+    const created = await client.createGist({
+      ...input,
+      files: { ...template, [PACKAGE_JSON]: files[PACKAGE_JSON]! },
+    });
+    try {
+      const updated = await client.updateGist(created.id, { files });
+      this.#options.documents.markGistSaved(windowId, updated);
+      return { id: updated.id, url: updated.url };
+    } catch (error) {
+      // The gist exists with the template; link it so Update can finish the job.
+      this.#options.documents.markGistSaved(windowId, created);
+      throw error;
+    }
+  }
+
+  /** Syncs the files to the loaded gist. Remote files removed locally are deleted. */
+  async update(windowId: string): Promise<GistLink> {
+    const client = this.#authedClient();
+    const fiddle = await this.#options.documents.getFiddle(windowId);
+    const id = loadedGistId(fiddle);
+    const updated = await client.updateGist(id, { files: gistFiles(fiddle) });
+    this.#options.documents.markGistSaved(windowId, updated);
+    return { id: updated.id, url: updated.url };
+  }
+
+  async delete(windowId: string): Promise<void> {
+    const client = this.#authedClient();
+    const fiddle = await this.#options.documents.getFiddle(windowId);
+    await client.deleteGist(loadedGistId(fiddle));
+    this.#options.documents.markGistDeleted(windowId);
+  }
+
+  /** Works signed out for public gists. */
+  async history(windowId: string): Promise<GistHistory> {
+    const fiddle = await this.#options.documents.getFiddle(windowId);
+    const id = loadedGistId(fiddle);
+    const revisions = await this.#options.createClient(this.#token).listGistRevisions(id);
+    return { id, activeSha: fiddle.source.gistRevision ?? revisions.at(-1)?.sha, revisions };
+  }
+
+  /** A client with the user's token when signed in; used by Documents to load private gists. */
+  client(): GitHubClient {
+    return this.#options.createClient(this.#token);
+  }
+
+  shareLink(id: string): string {
+    // TODO(share): an https redirect to electron-fiddle:// once the web endpoint exists (§17.17).
+    return gistUrl(id);
+  }
+
+  #setSignedIn(token: string, login: string): void {
+    this.#token = token;
+    this.#login = login;
+    this.#options.setLogin(login);
+  }
+
+  #authedClient(): GitHubClient {
+    if (!this.#token) {
+      throw new FiddleError(ErrorCode.unauthorized, 'Sign in to GitHub first', { reason: 'signed-out' });
+    }
+    return this.#options.createClient(this.#token);
+  }
+}
+
+function loadedGistId(fiddle: GistFiddle): string {
+  const id = fiddle.source.gistId;
+  if (!id) throw new FiddleError(ErrorCode.notFound, 'No gist is loaded in this window', { reason: 'no-gist' });
+  return id;
+}
+
+/** The fiddle's files plus a generated package.json with its modules and Electron version. */
+export function gistFiles(fiddle: GistFiddle): FileMap {
+  const files = ensureMainEntry(fiddle.files);
+  const packageJson = generatePackageJson({
+    name: packageName(fiddle.name),
+    main: findMainEntry(Object.keys(files)),
+    modules: fiddle.modules,
+    electronVersion: fiddle.versionRef.kind === 'release' ? fiddle.versionRef.version : undefined,
+  });
+  return { ...files, [PACKAGE_JSON]: packageJson };
+}
+
+function packageName(name: string): string {
+  const cleaned = name
+    .toLowerCase()
+    .replace(/[^a-z0-9._-]+/g, '-')
+    .replace(/^[-._]+|[-._]+$/g, '')
+    .slice(0, 214);
+  return cleaned || 'electron-fiddle';
+}

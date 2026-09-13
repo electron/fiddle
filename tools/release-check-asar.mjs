@@ -1,0 +1,54 @@
+#!/usr/bin/env node
+// Fails if the e2e test driver was packaged into a build (REQUIREMENTS §4
+// "Release integrity" and §11 "Kept out of releases").
+//
+//   node tools/release-check-asar.mjs [outDir]   (default: packages/app/out)
+//
+// Looks through every app.asar under outDir. Asar archives store files
+// uncompressed, so a byte search finds any bundled string.
+import fs from 'node:fs';
+import path from 'node:path';
+
+// Strings that exist only in src/main/test-driver and the renderer test hooks.
+// Keep in sync with MARKERS in packages/app/tools/driver-release-check.ts,
+// which the Test infrastructure slice owns. That script is TypeScript; this one
+// runs on any Node with no dependencies, on every release runner.
+const MARKERS = [
+  'ELECTRON_FIDDLE_DRIVER_SOCKET',
+  'Accessibility.getFullAXTree',
+  'non-loopback request',
+  '__fiddleTest',
+];
+
+const outDir = path.resolve(
+  process.argv[2] ?? path.join(import.meta.dirname, '..', 'packages', 'app', 'out'),
+);
+
+function* findAsars(dir) {
+  for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+    const full = path.join(dir, entry.name);
+    // Dirents for symlinks (macOS framework links) are not directories, so
+    // this never loops.
+    if (entry.isDirectory()) yield* findAsars(full);
+    else if (entry.isFile() && entry.name === 'app.asar') yield full;
+  }
+}
+
+const asars = fs.existsSync(outDir) ? [...findAsars(outDir)] : [];
+if (asars.length === 0) {
+  console.error(`No app.asar found under ${outDir}. Package the app first.`);
+  process.exit(1);
+}
+
+let failed = false;
+for (const asar of asars) {
+  const bytes = fs.readFileSync(asar);
+  const found = MARKERS.filter((marker) => bytes.includes(marker));
+  if (found.length > 0) {
+    failed = true;
+    console.error(`FAIL ${asar}: contains the e2e driver (${found.join(', ')})`);
+  } else {
+    console.log(`ok   ${asar}`);
+  }
+}
+process.exit(failed ? 1 : 0);

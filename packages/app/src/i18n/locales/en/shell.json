@@ -1,0 +1,313 @@
+{
+  "toolbar": {
+    "message": "Toolbar",
+    "description": "Accessible name of the capsule in the title bar that holds the version picker and the Run button."
+  },
+  "hideSidebar": {
+    "message": "Hide sidebar",
+    "description": "Title bar button that hides the file sidebar.",
+    "maxLength": 30
+  },
+  "showSidebar": {
+    "message": "Show sidebar",
+    "description": "Title bar button that shows the file sidebar again.",
+    "maxLength": 30
+  },
+  "edited": {
+    "message": "Edited",
+    "description": "Shown after the fiddle name in the title bar when the fiddle has unsaved changes.",
+    "maxLength": 20
+  },
+  "windowTitleEdited": {
+    "message": "{{name}} (edited)",
+    "description": "The OS window title when the fiddle has unsaved changes. {{name}} is the fiddle name."
+  },
+  "settings": {
+    "message": "Settings",
+    "description": "Title bar button that opens the settings page.",
+    "maxLength": 30
+  },
+  "files": {
+    "message": "Files",
+    "description": "Accessible name of the file list in the sidebar."
+  },
+  "processMain": {
+    "message": "Main process",
+    "description": "Sidebar section head and editor label for files that run in Electron's main process.",
+    "maxLength": 24
+  },
+  "processPreload": {
+    "message": "Preload",
+    "description": "Sidebar section head and editor label for preload scripts.",
+    "maxLength": 24
+  },
+  "processRenderer": {
+    "message": "Renderer",
+    "description": "Sidebar section head and editor label for files that run in the renderer (web page).",
+    "maxLength": 24
+  },
+  "errorCount_one": {
+    "message": "{{count}} error",
+    "description": "Pill on a sidebar file row and in an editor pane header: how many runtime errors the file has. Singular."
+  },
+  "errorCount_other": {
+    "message": "{{count}} errors",
+    "description": "Pill on a sidebar file row and in an editor pane header: how many runtime errors the file has. Plural."
+  },
+  "unsaved": {
+    "message": "Unsaved changes",
+    "description": "Spoken by screen readers for the dot on a file with unsaved changes."
+  },
+  "hiddenFile": {
+    "message": "Hidden",
+    "description": "Spoken by screen readers for a file whose editor is hidden."
+  },
+  "filterFiles": {
+    "message": "Filter files",
+    "description": "Placeholder of the search field that filters the sidebar's file list.",
+    "maxLength": 30
+  },
+  "addFile": {
+    "message": "Add file",
+    "description": "Sidebar button and file menu item that adds a new file to the fiddle.",
+    "maxLength": 24
+  },
+  "addFileTitle": {
+    "message": "New file",
+    "description": "Title of the dialog that asks for a new file's name.",
+    "maxLength": 40
+  },
+  "fileName": {
+    "message": "File name",
+    "description": "Label of the file name field in the new-file and rename dialogs.",
+    "maxLength": 30
+  },
+  "fileNameHint": {
+    "message": "Use .js, .cjs, .mjs, .html, .css or .json.",
+    "description": "Explains which file extensions a fiddle file may have. Shown in the new-file and rename dialogs."
+  },
+  "create": {
+    "message": "Create",
+    "description": "Button that creates the new file.",
+    "maxLength": 20
+  },
+  "cancel": {
+    "message": "Cancel",
+    "description": "Button that closes a dialog without doing anything.",
+    "maxLength": 20
+  },
+  "rename": {
+    "message": "Rename…",
+    "description": "File menu item that renames a file. Opens a dialog.",
+    "maxLength": 24
+  },
+  "renameTitle": {
+    "message": "Rename {{name}}",
+    "description": "Title of the rename dialog. {{name}} is the current file name.",
+    "maxLength": 60
+  },
+  "renameConfirm": {
+    "message": "Rename",
+    "description": "Button that renames the file.",
+    "maxLength": 20
+  },
+  "delete": {
+    "message": "Delete…",
+    "description": "File menu item that removes a file from the fiddle. Asks first.",
+    "maxLength": 24
+  },
+  "deleteTitle": {
+    "message": "Delete {{name}}?",
+    "description": "Title of the dialog that confirms removing a file. {{name}} is the file name.",
+    "maxLength": 60
+  },
+  "deleteMessage": {
+    "message": "The file and its contents are removed from this fiddle.",
+    "description": "Body of the dialog that confirms removing a file."
+  },
+  "deleteConfirm": {
+    "message": "Delete",
+    "description": "Button that removes the file.",
+    "maxLength": 20
+  },
+  "hideFile": {
+    "message": "Hide",
+    "description": "File menu item that hides a file's editor. The file keeps its content.",
+    "maxLength": 24
+  },
+  "showFile": {
+    "message": "Show",
+    "description": "File menu item that shows a hidden file's editor.",
+    "maxLength": 24
+  },
+  "fileActions": {
+    "message": "File actions",
+    "description": "Accessible name of the menu of actions for one file."
+  },
+  "fileChangeFailed": {
+    "message": "Couldn't change the file",
+    "description": "Title of the notification shown when adding, renaming, removing, showing or hiding a file fails."
+  },
+  "openFiles": {
+    "message": "Open files",
+    "description": "Accessible name of the row of editor tabs."
+  },
+  "splitEditor": {
+    "message": "Split editor",
+    "description": "Tooltip and accessible name of the tab row button that opens a second editor pane.",
+    "maxLength": 30
+  },
+  "closeSplit": {
+    "message": "Close split",
+    "description": "Tooltip and accessible name of the tab row button while the editor is split; it closes the second pane.",
+    "maxLength": 30
+  },
+  "popOut": {
+    "message": "Open in a new window",
+    "description": "Editor pane header button that opens the file in its own window.",
+    "maxLength": 40
+  },
+  "maximize": {
+    "message": "Maximize",
+    "description": "Editor pane header button that closes the split and keeps only this pane.",
+    "maxLength": 30
+  },
+  "closePane": {
+    "message": "Close pane",
+    "description": "Editor pane header button that closes this editor pane.",
+    "maxLength": 30
+  },
+  "editorFor": {
+    "message": "{{name}} editor",
+    "description": "Accessible name of the code editor for one file. {{name}} is the file name."
+  },
+  "resizeSidebar": {
+    "message": "Resize sidebar",
+    "description": "Accessible name of the divider between the sidebar and the editor."
+  },
+  "resizeConsole": {
+    "message": "Resize console",
+    "description": "Accessible name of the divider between the editor and the console."
+  },
+  "emptyTitle": {
+    "message": "No editors open",
+    "description": "Title shown in the sheet when every editor pane is closed.",
+    "maxLength": 40
+  },
+  "emptyText": {
+    "message": "Every file is hidden. Reset the layout to bring the editors back.",
+    "description": "Text shown in the sheet when every editor pane is closed."
+  },
+  "resetLayout": {
+    "message": "Reset layout",
+    "description": "Button that restores the default editor layout and shows every file.",
+    "maxLength": 24
+  },
+  "lensHint": {
+    "message": "Thrown in the {{process}} at {{file}}:{{line}}:{{column}}.",
+    "description": "Hint under a runtime error shown in the editor. {{process}} is 'main process', 'preload' or 'renderer'; the rest is the location."
+  },
+  "lensProcessMain": {
+    "message": "main process",
+    "description": "Inserted into the error hint: 'Thrown in the main process at …'. Lower case."
+  },
+  "lensProcessPreload": {
+    "message": "preload",
+    "description": "Inserted into the error hint: 'Thrown in the preload at …'. Lower case."
+  },
+  "lensProcessRenderer": {
+    "message": "renderer",
+    "description": "Inserted into the error hint: 'Thrown in the renderer at …'. Lower case."
+  },
+  "lensErrorTitle": {
+    "message": "Error",
+    "description": "Title of a runtime error shown in the editor when the error has no type name such as TypeError."
+  },
+  "cursorPosition": {
+    "message": "Ln {{line}}, Col {{column}}",
+    "description": "Status bar: the cursor's line and column in the current editor.",
+    "maxLength": 30
+  },
+  "languageJavascript": {
+    "message": "JavaScript",
+    "description": "Status bar: the current file's language. Product name; keep as is."
+  },
+  "languageHtml": {
+    "message": "HTML",
+    "description": "Status bar: the current file's language. Keep as is."
+  },
+  "languageCss": {
+    "message": "CSS",
+    "description": "Status bar: the current file's language. Keep as is."
+  },
+  "languageJson": {
+    "message": "JSON",
+    "description": "Status bar: the current file's language. Keep as is."
+  },
+  "dropToOpen": {
+    "message": "Drop to open",
+    "description": "Shown over the editor while a gist link, an electron-fiddle link or a fiddle folder is dragged over the window.",
+    "maxLength": 30
+  },
+  "dropToOpenHint": {
+    "message": "A gist link, an Electron Fiddle link or a fiddle folder replaces this fiddle.",
+    "description": "Second line shown while something is dragged over the window, explaining what dropping it does."
+  },
+  "status": {
+    "message": "Status",
+    "description": "Accessible name of the status bar at the bottom of the window."
+  },
+  "notifications": {
+    "message": "Notifications",
+    "description": "Accessible name of the region where notifications appear."
+  },
+  "dismiss": {
+    "message": "Dismiss",
+    "description": "Accessible name of the button that closes a notification."
+  },
+  "stubRun": {
+    "message": "Run",
+    "description": "Placeholder Run button until the run feature lands.",
+    "maxLength": 16
+  },
+  "stubPublish": {
+    "message": "Publish",
+    "description": "Placeholder Publish button until the gists feature lands.",
+    "maxLength": 20
+  },
+  "stubConsole": {
+    "message": "Console",
+    "description": "Placeholder console title until the run feature lands.",
+    "maxLength": 20
+  },
+  "stubReady": {
+    "message": "Ready",
+    "description": "Placeholder status bar text until the run feature lands.",
+    "maxLength": 20
+  },
+  "stubPackages": {
+    "message": "Packages",
+    "description": "Placeholder sidebar section head until the packages feature lands.",
+    "maxLength": 24
+  },
+  "stubAddPackage": {
+    "message": "Add a package",
+    "description": "Placeholder package field until the packages feature lands.",
+    "maxLength": 30
+  },
+  "stubVersion": {
+    "message": "Electron",
+    "description": "Placeholder version picker until the versions feature lands.",
+    "maxLength": 24
+  },
+  "stubSettingsTitle": {
+    "message": "Settings",
+    "description": "Placeholder settings page title until the settings feature lands.",
+    "maxLength": 30
+  },
+  "stubCloseSettings": {
+    "message": "Done",
+    "description": "Placeholder button that closes the settings page.",
+    "maxLength": 20
+  }
+}

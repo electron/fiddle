@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 
 import { ErrorCode, FiddleError } from '../shared/errors';
 import { GIST_MAX_FILE_BYTES, GitHubClient, isValidTokenFormat } from './github';
+import { ANONYMOUS_GIST_OWNER } from './trust';
 
 const TOKEN = `ghp_${'a'.repeat(36)}`;
 const ID = '8c5fc0c6a5153d49b5a4a56d3ed9da8f';
@@ -119,6 +120,21 @@ describe('auth', () => {
     expect((await check(offline)).code).toBe(ErrorCode.network);
   });
 
+  it('maps a rate-limited 403 to unavailable, so the startup check keeps the token', async () => {
+    const check = (headers: Record<string, string>) =>
+      codeOf(
+        new GitHubClient({
+          token: TOKEN,
+          fetch: mockFetch(() => json({ message: 'API rate limit exceeded' }, { status: 403, headers })).fn,
+        }).getAuthenticatedUser(),
+      );
+    expect((await check({ 'x-ratelimit-remaining': '0' })).code).toBe(ErrorCode.unavailable);
+    expect((await check({ 'retry-after': '60' })).code).toBe(ErrorCode.unavailable);
+    expect((await check({ 'x-ratelimit-remaining': '42' })).code).toBe(ErrorCode.forbidden);
+    const verify = mockFetch(() => json({}, { status: 403, headers: { 'x-ratelimit-remaining': '0' } }));
+    expect((await codeOf(new GitHubClient({ token: TOKEN, fetch: verify.fn }).verifyToken())).code).toBe(ErrorCode.unavailable);
+  });
+
   it('maps an abort to cancelled', async () => {
     const controller = new AbortController();
     controller.abort();
@@ -209,6 +225,7 @@ describe('loadGist', () => {
       url: `https://gist.github.com/${ID}`,
       revision: SHA,
       files: { 'main.js': 'main()', 'big.js': 'FULL CONTENT' },
+      origin: { kind: 'gist', owner: 'octocat', id: ID, sha: SHA },
     });
     expect(calls[0]!.url).toBe(`https://api.github.com/gists/${ID}`);
     expect(calls.every((c) => c.headers.Authorization === undefined)).toBe(true);
@@ -230,6 +247,21 @@ describe('loadGist', () => {
     expect(calls[0]!.url).toBe(`https://api.github.com/gists/${ID}/${other}`);
     expect(result.revision).toBe(other);
     expect(result.files).toEqual({ 'main.js': 'old' });
+  });
+
+  it('gives anonymous gists a placeholder owner in the origin', async () => {
+    const { fn } = mockFetch(() => json(gist({ 'main.js': { content: 'x' } }, { owner: null })));
+    const result = await new GitHubClient({ fetch: fn }).loadGist(ID);
+    expect(result.owner).toBeNull();
+    expect(result.origin).toEqual({ kind: 'gist', owner: ANONYMOUS_GIST_OWNER, id: ID, sha: SHA });
+  });
+
+  it('throws when the gist has no history', async () => {
+    for (const extra of [{ history: [] }, { history: undefined }]) {
+      const { fn } = mockFetch(() => json(gist({ 'main.js': { content: 'x' } }, extra)));
+      const error = await codeOf(new GitHubClient({ fetch: fn }).loadGist(ID));
+      expect(error).toMatchObject({ code: ErrorCode.internal, details: { reason: 'no-history' } });
+    }
   });
 
   it('validates the ID and revision before any request', async () => {
@@ -304,6 +336,29 @@ describe('writing gists', () => {
       body: { files: { 'main.js': { content: 'new' }, 'add.js': { content: 'y' }, 'old.css': null } },
     });
     expect(result.revision).toBe('b'.repeat(40));
+  });
+
+  it('leaves empty files out of a new gist, since GitHub rejects them', async () => {
+    const { fn, calls } = mockFetch(() => json(gist({}), { status: 201 }));
+    const client = new GitHubClient({ token: TOKEN, fetch: fn });
+    await client.createGist({ description: 'd', files: { 'main.js': 'x', 'styles.css': '', 'blank.js': ' \n' }, isPublic: false });
+    expect(calls[0]!.body).toEqual({ description: 'd', public: false, files: { 'main.js': { content: 'x' } } });
+    const allEmpty = await codeOf(client.createGist({ description: 'd', files: { 'a.js': '' }, isPublic: false }));
+    expect(allEmpty.details).toMatchObject({ reason: 'no-files' });
+    expect(calls).toHaveLength(1);
+  });
+
+  it('deletes files that became empty on update, and never sends empty content', async () => {
+    const { fn, calls } = mockFetch((call) =>
+      call.method === 'GET' ? json(gist({ 'main.js': { content: 'a' }, 'styles.css': { content: 'b' } })) : json(gist({})),
+    );
+    const client = new GitHubClient({ token: TOKEN, fetch: fn });
+    await client.updateGist(ID, { files: { 'main.js': 'new', 'styles.css': '', 'new.js': '' } });
+    expect(calls[1]).toMatchObject({ method: 'PATCH', body: { files: { 'main.js': { content: 'new' }, 'styles.css': null } } });
+    expect(Object.keys((calls[1]!.body as { files: object }).files).sort()).toEqual(['main.js', 'styles.css']);
+    const allEmpty = await codeOf(client.updateGist(ID, { files: { 'main.js': '' } }));
+    expect(allEmpty.details).toMatchObject({ reason: 'no-files' });
+    expect(calls).toHaveLength(2);
   });
 
   it('deletes', async () => {

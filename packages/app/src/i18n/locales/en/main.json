@@ -1,4 +1,79 @@
 {
+  "newFiddle": {
+    "message": "New fiddle",
+    "description": "File menu command that replaces the fiddle with the template for the current Electron version.",
+    "maxLength": 30
+  },
+  "newTest": {
+    "message": "New test",
+    "description": "File menu command that replaces the fiddle with the test template.",
+    "maxLength": 30
+  },
+  "openFolder": {
+    "message": "Open…",
+    "description": "File menu command that opens a fiddle folder.",
+    "maxLength": 30
+  },
+  "openRecent": {
+    "message": "Open recent",
+    "description": "File menu submenu listing recently opened or saved fiddle folders.",
+    "maxLength": 30
+  },
+  "save": {
+    "message": "Save",
+    "description": "File menu command that saves the fiddle to its folder.",
+    "maxLength": 30
+  },
+  "saveAs": {
+    "message": "Save as…",
+    "description": "File menu command that saves the fiddle to a new folder.",
+    "maxLength": 30
+  },
+  "saveAsForge": {
+    "message": "Save as Forge project…",
+    "description": "File menu command that saves the fiddle as an Electron Forge project. Electron Forge is a product name.",
+    "maxLength": 40
+  },
+  "showMe": {
+    "message": "Show me",
+    "description": "File menu submenu listing the built-in Electron API examples.",
+    "maxLength": 30
+  },
+  "closeWindow": {
+    "message": "Close",
+    "description": "File menu command that closes the window.",
+    "maxLength": 30
+  },
+  "toggleSplit": {
+    "message": "Split editor",
+    "description": "View menu item and command that opens or closes a second editor pane.",
+    "maxLength": 30
+  },
+  "toggleSidebar": {
+    "message": "Toggle sidebar",
+    "description": "View menu item and command that shows or hides the file sidebar.",
+    "maxLength": 30
+  },
+  "toggleConsole": {
+    "message": "Toggle console",
+    "description": "View menu item and command that shows or hides the output console.",
+    "maxLength": 30
+  },
+  "toggleSoftWrap": {
+    "message": "Toggle soft wrap",
+    "description": "View menu item and command that turns line wrapping in the editors on or off for this window.",
+    "maxLength": 30
+  },
+  "toggleMinimap": {
+    "message": "Toggle minimap",
+    "description": "View menu item and command that shows or hides the editor minimap for this window.",
+    "maxLength": 30
+  },
+  "formatDocument": {
+    "message": "Format document",
+    "description": "Command that reformats the code in the current editor.",
+    "maxLength": 30
+  },
   "appMenu": {
     "message": "Electron Fiddle",
     "description": "macOS application menu title. The product name; keep it as is.",
@@ -137,5 +212,95 @@
     "message": "Cancel",
     "description": "Button that dismisses a dialog without doing anything.",
     "maxLength": 20
+  },
+  "commandPalette": {
+    "message": "Command palette…",
+    "description": "Command that opens the command palette, a searchable list of every command, file, version and example.",
+    "maxLength": 30
+  },
+  "showTour": {
+    "message": "Show welcome tour",
+    "description": "Help menu command that replays the onboarding tour of the main window.",
+    "maxLength": 30
+  },
+  "help": {
+    "message": "Help",
+    "description": "Top-level Help menu.",
+    "maxLength": 20
+  },
+  "runMenu": {
+    "message": "Run",
+    "description": "Top-level menu with running, packaging and bisecting the fiddle.",
+    "maxLength": 20
+  },
+  "runToggle": {
+    "message": "Run or stop",
+    "description": "Command that runs the fiddle in Electron, or stops it when it is running.",
+    "maxLength": 30
+  },
+  "packageFiddle": {
+    "message": "Package",
+    "description": "Command that packages the fiddle as an app with Electron Forge.",
+    "maxLength": 30
+  },
+  "makeFiddle": {
+    "message": "Make installers",
+    "description": "Command that builds installers for the fiddle with Electron Forge.",
+    "maxLength": 30
+  },
+  "toggleBisect": {
+    "message": "Bisect…",
+    "description": "Command that starts a bisect to find which Electron release changed the fiddle's behavior, or stops the current one.",
+    "maxLength": 30
+  },
+  "preferences": {
+    "message": "Settings…",
+    "description": "Command that opens the settings page in the current window. In the macOS app menu and the File menu elsewhere.",
+    "maxLength": 30
+  },
+  "publishToGist": {
+    "message": "Publish to gist…",
+    "description": "Command that publishes the fiddle as a GitHub gist. Opens a dialog.",
+    "maxLength": 30
+  },
+  "openGist": {
+    "message": "Open gist…",
+    "description": "Command that opens a dialog to load a GitHub gist by URL or ID.",
+    "maxLength": 30
+  },
+  "showGistHistory": {
+    "message": "Show gist history…",
+    "description": "Command that lists the revisions of the loaded gist.",
+    "maxLength": 30
+  },
+  "aboutFiddle": {
+    "message": "About Electron Fiddle",
+    "description": "Help menu command (Windows and Linux) that opens the About panel with the app and Electron versions.",
+    "maxLength": 40
+  },
+  "openLogsFolder": {
+    "message": "Open logs folder",
+    "description": "Help menu command that shows the folder with the app's log files.",
+    "maxLength": 30
+  },
+  "copyDiagnostics": {
+    "message": "Copy diagnostics",
+    "description": "Help menu command that copies versions, OS details and changed settings (without secrets) for a bug report.",
+    "maxLength": 30
+  },
+  "openFiddleRepository": {
+    "message": "Electron Fiddle on GitHub",
+    "description": "Help menu command that opens the Electron Fiddle source repository in the browser.",
+    "maxLength": 40
+  },
+  "openElectronRepository": {
+    "message": "Electron on GitHub",
+    "description": "Help menu command that opens the Electron source repository in the browser.",
+    "maxLength": 40
+  },
+  "reportIssue": {
+    "message": "Report an issue",
+    "description": "Help menu command that opens the Electron Fiddle issue tracker in the browser.",
+    "maxLength": 30
   }
 }

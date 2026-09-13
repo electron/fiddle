@@ -42,18 +42,9 @@ export function compareVersions(a: string, b: string): number {
   return a < b ? -1 : a > b ? 1 : 0;
 }
 
-/** Newest first. Non-semver versions go last, alphabetically. Returns a new array. */
+/** Newest first by {@link compareVersions}, so non-semver versions go last. Returns a new array. */
 export function sortVersions<T extends Versioned>(items: readonly T[]): T[] {
-  return [...items].sort((x, y) => {
-    const a = versionOf(x);
-    const b = versionOf(y);
-    const va = semver.valid(a);
-    const vb = semver.valid(b);
-    if (va && vb) return compareVersions(b, a);
-    if (va) return -1;
-    if (vb) return 1;
-    return a < b ? -1 : a > b ? 1 : 0;
-  });
+  return [...items].sort((x, y) => compareVersions(versionOf(y), versionOf(x)));
 }
 
 export function isObsolete(version: string, oldestSupportedMajor: number): boolean {
@@ -100,12 +91,12 @@ export function filterVersions<T extends Versioned>(items: readonly T[], filter:
 
 /**
  * False for releases this platform can't run: macOS arm64 needs 11 or later,
- * Windows arm64 needs `>=6.0.8 || >=7.0.0`. Non-semver versions pass.
+ * Windows arm64 needs 6.0.8 or later. Non-semver versions pass.
  */
 export function isSupportedOnPlatform(version: string, platform: string, arch: string): boolean {
   if (!semver.valid(version) || arch !== 'arm64') return true;
   if (platform === 'darwin') return !semver.lt(version, '11.0.0');
-  if (platform === 'win32') return semver.satisfies(version, '>=6.0.8 || >=7.0.0', { includePrerelease: true });
+  if (platform === 'win32') return semver.satisfies(version, '>=6.0.8', { includePrerelease: true });
   return true;
 }
 
@@ -124,17 +115,18 @@ export function suggestLocalBuildName(folder: string): string {
   return leader ? `${leader} - ${buildType}` : buildType;
 }
 
-/** Releases from `from` to `to` inclusive, oldest first. Empty unless both are in `versions`. */
+/** Releases from `from` to `to` inclusive, oldest first. Empty unless both are semver releases in `versions`. */
 export function getVersionRange(from: string, to: string, versions: readonly string[]): string[] {
-  if (!versions.includes(from) || !versions.includes(to)) return [];
+  if (!semver.valid(from) || !semver.valid(to) || !versions.includes(from) || !versions.includes(to)) return [];
   const [lo, hi] = compareVersions(from, to) <= 0 ? [from, to] : [to, from];
   return versions
     .filter((v) => semver.valid(v) && compareVersions(v, lo) >= 0 && compareVersions(v, hi) <= 0)
     .sort(compareVersions);
 }
 
-/** Bisect defaults from the visible list (newest first): the 11th version as good, the newest as bad. */
+/** Bisect defaults from the visible releases (newest first): the 11th as good, the newest as bad. Local builds are skipped. */
 export function getDefaultBisectRange(visible: readonly string[]): { good: string; bad: string } | undefined {
-  if (visible.length < 2) return undefined;
-  return { good: visible[Math.min(10, visible.length - 1)]!, bad: visible[0]! };
+  const releases = visible.filter((v) => semver.valid(v));
+  if (releases.length < 2) return undefined;
+  return { good: releases[Math.min(10, releases.length - 1)]!, bad: releases[0]! };
 }

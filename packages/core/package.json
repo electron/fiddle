@@ -28,11 +28,14 @@
   },
   "dependencies": {
     "@electron-internal/extract-zip": "^1.0.1",
+    "@electron/asar": "^4.0.0",
     "@electron/get": "^5.0.0",
+    "debug": "^4.4.3",
+    "env-paths": "^3.0.0",
     "semver": "^7.5.4"
   },
   "devDependencies": {
-    "@electron/asar": "^4.0.0",
+    "@types/debug": "^4.1.12",
     "@types/node": "^22.10.7",
     "@types/semver": "^7.5.6",
     "nock": "^14.0.1",

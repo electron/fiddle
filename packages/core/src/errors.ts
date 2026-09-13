@@ -43,6 +43,31 @@ export function isFiddleCoreError(
   return err instanceof FiddleCoreError && (code === undefined || err.code === code);
 }
 
+/**
+ * How errors are reported. Pass it as the `errors` option of `Installer`,
+ * `Runner.create()` and `ElectronVersions.create()`.
+ *
+ * - `legacy` (default): as in fiddle-core 2.x. Download and extract failures
+ *   throw the original error, and aborting a `Runner` `signal` resolves
+ *   `system_error`.
+ * - `typed`: download and extract failures are wrapped in a
+ *   {@link FiddleCoreError} (`download-failed`, `extract-failed`) with the
+ *   original error in `cause`, and `Runner.run()` and `bisect()` reject with
+ *   an `aborted` error when their `signal` aborts.
+ */
+export type ErrorMode = 'legacy' | 'typed';
+
+/** In `typed` mode, wraps `err` in a {@link FiddleCoreError}. Otherwise returns it. */
+export function wrapError(
+  mode: ErrorMode | undefined,
+  code: FiddleCoreErrorCode,
+  err: unknown,
+): unknown {
+  if (mode !== 'typed') return err;
+  const message = err instanceof Error ? err.message : String(err);
+  return new FiddleCoreError(code, message, { cause: err });
+}
+
 export function abortError(signal?: AbortSignal): FiddleCoreError {
   return new FiddleCoreError('aborted', 'The operation was aborted', {
     cause: signal?.reason,

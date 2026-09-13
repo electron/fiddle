@@ -3,8 +3,10 @@ import { realpath } from 'node:fs/promises';
 import * as path from 'node:path';
 
 import * as semver from 'semver';
+import { z } from 'zod';
 
 import { ErrorCode, FiddleError } from '../shared/errors';
+import { envFromEntries, fiddleProcessEnv } from './env';
 
 export type PackageManager = 'npm' | 'yarn';
 export type ModuleSpecProblem = 'invalid-name' | 'invalid-spec';
@@ -12,11 +14,13 @@ export type ModuleSpecProblem = 'invalid-name' | 'invalid-spec';
 export interface CommandLine {
   command: string;
   args: string[];
+  /** Variables added to the command's environment. */
+  env?: Record<string, string>;
 }
 
-// Registry package names: optional scope, URL-safe characters, no leading `.` or `_`.
-// Upper case is allowed because legacy packages (e.g. JSONStream) use it.
-const NAME_RE = /^(?:@[a-z0-9~-][a-z0-9._~-]*\/)?[a-z0-9~-][a-z0-9._~-]*$/i;
+// Registry package names: optional scope, URL-safe characters, no leading `.`, `_` or `-`
+// (a leading `-` would read as a flag). Upper case is allowed because legacy packages (e.g. JSONStream) use it.
+const NAME_RE = /^(?:@[a-z0-9~][a-z0-9._~-]*\/)?[a-z0-9~][a-z0-9._~-]*$/i;
 const DIST_TAG_RE = /^[a-z][a-z0-9._-]*$/i;
 
 export function isValidPackageName(name: string): boolean {
@@ -70,16 +74,36 @@ export interface InstallCommandOptions {
   sfwPath?: string;
 }
 
-/** `npm install -S <specs>` or `yarn add <specs>` (`yarn install` with no modules). */
+/**
+ * Turns dependency lifecycle scripts off through the environment: npm and
+ * Yarn 1 read `npm_config_ignore_scripts`, Yarn 2+ reads `YARN_ENABLE_SCRIPTS`
+ * (and rejects `--ignore-scripts`).
+ */
+export const IGNORE_SCRIPTS_ENV: Readonly<Record<string, string>> = {
+  npm_config_ignore_scripts: 'true',
+  YARN_ENABLE_SCRIPTS: 'false',
+};
+
+/** `npm install -S -- <specs>` or `yarn add -- <specs>` (`yarn install` with no modules). */
 export function buildInstallCommand(options: InstallCommandOptions): CommandLine {
   const specs = Object.entries(options.modules ?? {}).map(([name, spec]) => {
     assertModuleSpec(name, spec);
     return `${name}@${spec}`;
   });
   const pm = options.packageManager === 'yarn' ? 'yarn' : 'npm';
-  const pmArgs = pm === 'npm' ? ['install', '-S', ...specs] : specs.length > 0 ? ['add', ...specs] : ['install'];
-  if (options.ignoreScripts) pmArgs.push('--ignore-scripts');
-  return options.sfwPath ? { command: 'node', args: [options.sfwPath, pm, ...pmArgs] } : { command: pm, args: pmArgs };
+  const pmArgs =
+    specs.length === 0
+      ? pm === 'npm'
+        ? ['install', '-S']
+        : ['install']
+      : pm === 'npm'
+        ? ['install', '-S', '--', ...specs]
+        : ['add', '--', ...specs];
+  const line: CommandLine = options.sfwPath
+    ? { command: 'node', args: [options.sfwPath, pm, ...pmArgs] }
+    : { command: pm, args: pmArgs };
+  if (options.ignoreScripts) line.env = { ...IGNORE_SCRIPTS_ENV };
+  return line;
 }
 
 /** `<pm> run <script>`, for Forge package and make. */
@@ -223,6 +247,7 @@ export interface InstallModulesOptions extends InstallCommandOptions {
   /** Where to install. Must be `tempRoot` or inside it. */
   dir: string;
   tempRoot: string;
+  /** Default: `fiddleProcessEnv()`, the parent environment minus the denylist. */
   env?: NodeJS.ProcessEnv;
   signal?: AbortSignal;
   onOutput?: (text: string) => void;
@@ -233,19 +258,86 @@ export interface InstallModulesOptions extends InstallCommandOptions {
 export async function installModules(options: InstallModulesOptions): Promise<CommandResult> {
   await assertInsideDir(options.tempRoot, options.dir);
   const line = buildInstallCommand(options);
+  const env = envFromEntries(
+    [...Object.entries(options.env ?? fiddleProcessEnv()), ...Object.entries(line.env ?? {})],
+    options.platform,
+  );
   const result = await runCommand(line, {
     cwd: options.dir,
-    env: options.env,
+    env,
     signal: options.signal,
     onOutput: options.onOutput,
     platform: options.platform,
   });
   if (result.code !== 0) {
-    throw new FiddleError('install-failed', `${options.packageManager} exited with ${result.code ?? result.signal}`, {
-      code: result.code,
-      signal: result.signal,
-      output: result.output.slice(-4000),
-    });
+    throw new FiddleError(
+      ErrorCode.installFailed,
+      `${options.packageManager} exited with ${result.code ?? result.signal}`,
+      { code: result.code, signal: result.signal, output: result.output.slice(-4000) },
+    );
   }
   return result;
+}
+
+/** Fetches a package's registry metadata. */
+export type RegistryFetch = (name: string, signal?: AbortSignal) => Promise<unknown>;
+
+export const NPM_REGISTRY_URL = 'https://registry.npmjs.org';
+
+/** A `RegistryFetch` for the abbreviated metadata, which carries `hasInstallScript` per version. */
+export function createRegistryFetch(options: { fetch?: typeof fetch; registryUrl?: string } = {}): RegistryFetch {
+  const fetchFn = options.fetch ?? fetch;
+  const base = (options.registryUrl ?? NPM_REGISTRY_URL).replace(/\/+$/, '');
+  return async (name, signal) => {
+    if (!isValidPackageName(name)) throw new FiddleError(ErrorCode.invalidArgument, `Invalid package name: ${name}`);
+    const url = `${base}/${name.replace('/', '%2f')}`;
+    let res: Response;
+    try {
+      res = await fetchFn(url, { headers: { accept: 'application/vnd.npm.install-v1+json' }, signal });
+    } catch (error) {
+      if (signal?.aborted) throw new FiddleError(ErrorCode.cancelled, 'The registry request was cancelled');
+      throw new FiddleError(ErrorCode.network, `Could not reach ${base}`, {
+        cause: error instanceof Error ? error.message : String(error),
+      });
+    }
+    if (!res.ok) {
+      const code = res.status === 404 ? ErrorCode.notFound : ErrorCode.network;
+      throw new FiddleError(code, `${url} responded ${res.status}`, { status: res.status, name });
+    }
+    return res.json();
+  };
+}
+
+const PackumentSchema = z.object({
+  'dist-tags': z.record(z.string(), z.string()).optional(),
+  versions: z.record(z.string(), z.object({ hasInstallScript: z.boolean().optional() })),
+});
+
+export interface InstallScriptPackage {
+  name: string;
+  /** The version the spec resolves to. */
+  version: string;
+}
+
+/**
+ * The modules whose resolved version has an install script, from registry
+ * metadata, so the run approval can list them. Only direct dependencies are
+ * checked. Specs that don't resolve are left out, since their install fails.
+ */
+export async function findInstallScripts(
+  modules: Readonly<Record<string, string>>,
+  registryFetch: RegistryFetch,
+  signal?: AbortSignal,
+): Promise<InstallScriptPackage[]> {
+  const found = await Promise.all(
+    Object.entries(modules).map(async ([name, spec]): Promise<InstallScriptPackage | null> => {
+      const parsed = PackumentSchema.safeParse(await registryFetch(name, signal));
+      if (!parsed.success) throw new FiddleError(ErrorCode.internal, `Unexpected registry metadata for ${name}`, { name });
+      const tags = parsed.data['dist-tags'] ?? {};
+      const { versions } = parsed.data;
+      const version = Object.hasOwn(tags, spec) ? tags[spec] : semver.maxSatisfying(Object.keys(versions), spec);
+      return version && Object.hasOwn(versions, version) && versions[version]!.hasInstallScript ? { name, version } : null;
+    }),
+  );
+  return found.filter((p) => p !== null);
 }

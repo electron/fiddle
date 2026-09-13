@@ -1,0 +1,53 @@
+{
+  "importSettingsTitle": {
+    "message": "Import settings",
+    "description": "Title of the file dialog that imports a settings file.",
+    "maxLength": 40
+  },
+  "exportSettingsTitle": {
+    "message": "Export settings",
+    "description": "Title of the save dialog that exports the settings to a file.",
+    "maxLength": 40
+  },
+  "importThemeTitle": {
+    "message": "Import a Monaco theme",
+    "description": "Title of the file dialog that imports a Monaco editor theme.",
+    "maxLength": 40
+  },
+  "jsonFiles": {
+    "message": "JSON files",
+    "description": "File type filter in open and save dialogs.",
+    "maxLength": 30
+  },
+  "notJson": {
+    "message": "{{file}} isn't valid JSON.",
+    "description": "Error when an imported file can't be parsed. {{file}} is the file name."
+  },
+  "notSettings": {
+    "message": "{{file}} doesn't contain settings.",
+    "description": "Error when an imported settings file isn't a JSON object. {{file}} is the file name."
+  },
+  "notTheme": {
+    "message": "{{file}} isn't a Monaco theme. A theme needs \"base\" or \"rules\", with colours as hex values.",
+    "description": "Error when an imported theme file isn't a valid Monaco theme. {{file}} is the file name. Keep \"base\" and \"rules\" untranslated."
+  },
+  "openFailed": {
+    "message": "Couldn't open {{path}}: {{reason}}",
+    "description": "Error when the OS can't open a file or folder. {{path}} is the path, {{reason}} the OS message."
+  },
+  "themeCopyName": {
+    "message": "{{name}} copy",
+    "description": "Name of a new theme created from the current one. {{name}} is the current theme's name.",
+    "maxLength": 100
+  },
+  "lucentDark": {
+    "message": "Lucent dark",
+    "description": "Name of the built-in dark theme. Lucent is the design system's name; keep it as is.",
+    "maxLength": 40
+  },
+  "lucentLight": {
+    "message": "Lucent light",
+    "description": "Name of the built-in light theme. Lucent is the design system's name; keep it as is.",
+    "maxLength": 40
+  }
+}

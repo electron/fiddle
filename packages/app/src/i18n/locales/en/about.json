@@ -1,0 +1,16 @@
+{
+  "updateAvailableTitle": {
+    "message": "Update available",
+    "description": "Title of the toast shown on Linux and in the Microsoft Store version when a newer release exists.",
+    "maxLength": 40
+  },
+  "updateAvailableDescription": {
+    "message": "Electron Fiddle {{version}} is ready to download.",
+    "description": "Body of the update-available toast. {{version}} is the new version number, such as 1.2.0."
+  },
+  "download": {
+    "message": "Download",
+    "description": "Toast action that opens the release page of the new version in the browser.",
+    "maxLength": 20
+  }
+}

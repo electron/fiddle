@@ -3,10 +3,30 @@ import { randomUUID } from 'node:crypto';
 import { describe, expect, it, vi } from 'vitest';
 
 import { ErrorCode, FiddleError } from '../shared/errors';
-import type { AppState, WindowState } from '../shared/stores';
-import { StateHub, type WindowSink } from './state-hub';
+import { defaultSettings } from '../shared/settings';
+import { DEFAULT_LAYOUT, type AppState, type WindowState } from '../shared/stores';
+import { emptyFiddleState } from './documents/model';
+import { StateHub, type WindowInit, type WindowSink } from './state-hub';
 
 const nextTick = () => new Promise((resolve) => setTimeout(resolve, 0));
+
+/** A complete App value with every slice's defaults. */
+function appInit(): Omit<AppState, 'rev'> {
+  return {
+    locale: 'en',
+    platform: 'linux',
+    material: 'none',
+    settings: defaultSettings,
+    themes: [],
+    screenReaderActive: false,
+    storageNotices: [],
+  };
+}
+
+/** A complete Window value with every slice's defaults. */
+function windowInit(title: string): WindowInit {
+  return { title, view: 'editor', fiddle: emptyFiddleState(), layout: DEFAULT_LAYOUT };
+}
 
 function fakeSink() {
   const sink = {
@@ -19,11 +39,11 @@ function fakeSink() {
 }
 
 function setup() {
-  const hub = new StateHub({ locale: 'en', platform: 'linux', material: 'none' });
+  const hub = new StateHub(appInit());
   const a = { id: randomUUID(), sink: fakeSink() };
   const b = { id: randomUUID(), sink: fakeSink() };
-  hub.registerWindow(a.id, { title: 'A' }, a.sink);
-  hub.registerWindow(b.id, { title: 'B' }, b.sink);
+  hub.registerWindow(a.id, windowInit('A'), a.sink);
+  hub.registerWindow(b.id, windowInit('B'), b.sink);
   return { hub, a, b };
 }
 
@@ -31,7 +51,7 @@ describe('StateHub', () => {
   it('starts every store at rev 0', () => {
     const { hub, a } = setup();
     expect(hub.app.rev).toBe(0);
-    expect(hub.getWindow(a.id)).toEqual({ rev: 0, windowId: a.id, title: 'A' });
+    expect(hub.getWindow(a.id)).toMatchObject({ rev: 0, windowId: a.id, title: 'A' });
   });
 
   it('returns the rev that includes each change', () => {
@@ -54,7 +74,9 @@ describe('StateHub', () => {
     const { hub, a, b } = setup();
     hub.updateWindow(b.id, { title: 'Renamed' });
     await nextTick();
-    expect(b.sink.window).toEqual([{ rev: 1, windowId: b.id, title: 'Renamed' }]);
+    expect(b.sink.window).toEqual([
+      expect.objectContaining({ rev: 1, windowId: b.id, title: 'Renamed' }),
+    ]);
     expect(a.sink.pushWindow).not.toHaveBeenCalled();
     expect(a.sink.pushApp).not.toHaveBeenCalled();
   });
@@ -84,7 +106,7 @@ describe('StateHub', () => {
 
   it('keeps pushing to other windows when one sink throws', async () => {
     const log = vi.fn();
-    const hub = new StateHub({ locale: 'en', platform: 'linux', material: 'none' }, log);
+    const hub = new StateHub(appInit(), log);
     const broken: WindowSink = {
       pushApp: () => {
         throw new Error('webContents destroyed');
@@ -92,8 +114,8 @@ describe('StateHub', () => {
       pushWindow: () => {},
     };
     const ok = fakeSink();
-    hub.registerWindow(randomUUID(), { title: 'broken' }, broken);
-    hub.registerWindow(randomUUID(), { title: 'ok' }, ok);
+    hub.registerWindow(randomUUID(), windowInit('broken'), broken);
+    hub.registerWindow(randomUUID(), windowInit('ok'), ok);
     hub.updateApp({ locale: 'de' });
     await nextTick();
     expect(ok.pushApp).toHaveBeenCalledOnce();
@@ -126,7 +148,7 @@ describe('StateHub', () => {
 
   it('refuses to register the same window twice', () => {
     const { hub, a } = setup();
-    expect(() => hub.registerWindow(a.id, { title: 'again' }, fakeSink())).toThrow(
+    expect(() => hub.registerWindow(a.id, windowInit('again'), fakeSink())).toThrow(
       expect.objectContaining({ code: ErrorCode.conflict }),
     );
   });

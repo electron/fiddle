@@ -1,0 +1,89 @@
+/* Coachmark: a tour step with a cut-out. The card uses Popover styling (overlay material,
+   blur, shadow and rims, radius-panel, padding 14 16); the hole rings the target in accent
+   and dims everything else with the scrim. */
+.layer {
+  position: fixed;
+  inset: 0;
+  z-index: var(--lu-z-dialog);
+}
+
+.hole {
+  position: fixed;
+  border-radius: var(--lu-radius-control);
+  corner-shape: squircle;
+  box-shadow:
+    0 0 0 2px var(--lu-accent),
+    0 0 0 100vmax var(--lu-scrim);
+  pointer-events: none;
+  transition:
+    top var(--lu-dur-base) var(--lu-ease),
+    left var(--lu-dur-base) var(--lu-ease),
+    width var(--lu-dur-base) var(--lu-ease),
+    height var(--lu-dur-base) var(--lu-ease);
+}
+
+.dim {
+  position: fixed;
+  inset: 0;
+  background: var(--lu-scrim);
+}
+
+/* The step card (a Modal) and the offer card. */
+.card {
+  position: fixed;
+  z-index: var(--lu-z-dialog);
+  box-sizing: border-box;
+  padding: 14px 16px;
+  border-radius: var(--lu-radius-panel);
+  corner-shape: squircle;
+  background: var(--lu-material-overlay);
+  -webkit-backdrop-filter: var(--lu-blur-overlay);
+  backdrop-filter: var(--lu-blur-overlay);
+  box-shadow: var(--lu-shadow-overlay);
+  color: var(--lu-ink);
+  font: var(--lu-type-body);
+  letter-spacing: var(--lu-type-body-tracking);
+  outline: none;
+  animation: card-in var(--lu-dur-base) var(--lu-ease);
+}
+
+@keyframes card-in {
+  from {
+    opacity: 0;
+    transform: translateY(4px) scale(0.98);
+  }
+}
+
+.dialog {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  outline: none;
+}
+
+.step {
+  font: var(--lu-type-caption);
+  letter-spacing: var(--lu-type-caption-tracking);
+  color: var(--lu-accent);
+}
+
+.title {
+  font: var(--lu-type-label);
+  letter-spacing: var(--lu-type-label-tracking);
+  font-weight: 600;
+}
+
+.body {
+  color: var(--lu-ink-muted);
+}
+
+.foot {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 6px;
+}
+
+.spacer {
+  flex: 1;
+}

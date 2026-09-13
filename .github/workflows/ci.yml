@@ -1,0 +1,118 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+  # Called from release.yml, so tests gate every release.
+  workflow_call:
+
+permissions: {}
+
+jobs:
+  test:
+    name: Test (${{ matrix.os }})
+    strategy:
+      fail-fast: false
+      matrix:
+        os:
+          - ubuntu-latest
+          - macos-latest
+          - windows-latest
+    runs-on: ${{ matrix.os }}
+    permissions:
+      contents: read
+    steps:
+      - run: git config --global core.autocrlf input
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Setup Node.js
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version-file: .nvmrc
+          cache: yarn
+      # This job holds no secrets, so Electron's install script may run
+      # (`dependenciesMeta.electron.built`); e2e tests need its binary.
+      - name: Install dependencies
+        run: yarn install --immutable
+      - name: Generated source is up to date
+        shell: bash
+        run: |
+          yarn generate
+          git diff --exit-code
+      - name: Lint
+        run: yarn lint
+      - name: Typecheck
+        run: yarn typecheck
+      - name: Unit tests
+        run: yarn test
+      - name: End-to-end tests (Linux)
+        if: runner.os == 'Linux'
+        run: xvfb-run --auto-servernum yarn test:e2e
+      - name: End-to-end tests
+        if: runner.os != 'Linux'
+        run: yarn test:e2e
+      # Unsigned: no signing variables are set here.
+      - name: Package smoke test
+        run: yarn package
+      - name: Check that the e2e driver is not packaged
+        run: node tools/release-check-asar.mjs packages/app/out
+
+  identity:
+    name: App identity
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Setup Node.js
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version-file: .nvmrc
+          cache: yarn
+      - name: Install dependencies
+        run: yarn install --immutable --mode=skip-build
+      # REQUIREMENTS §6: the identity must match the previous release, or the
+      # old app's settings, credentials and installs aren't found.
+      - name: Check app identity
+        run: node tools/release-identity.mjs
+
+  # TODO(REQUIREMENTS §6): upgrade test. Deferred; see PROGRESS.md.
+  #   1. Install the latest published release.
+  #   2. Seed it with fixture data, including an encrypted token.
+  #   3. Update to the candidate through Squirrel from a local feed.
+  #   4. Verify the import and that the credentials decrypt.
+  #   5. Update the candidate to candidate+1.
+  # Once it works, drop `if: false`, add it to `gha-done`, and make the
+  # release depend on it.
+  upgrade-test:
+    name: Upgrade test (${{ matrix.os }})
+    if: false
+    strategy:
+      fail-fast: false
+      matrix:
+        os:
+          - macos-latest
+          - windows-latest
+    runs-on: ${{ matrix.os }}
+    permissions:
+      contents: read
+    steps:
+      - run: echo "Upgrade test is not implemented yet" && exit 1
+
+  gha-done:
+    name: GitHub Actions Completed
+    runs-on: ubuntu-latest
+    needs:
+      - test
+      - identity
+    if: always() && !contains(needs.*.result, 'failure')
+    permissions: {}
+    steps:
+      - run: echo "All GitHub Actions jobs are done"

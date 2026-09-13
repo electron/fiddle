@@ -1,0 +1,254 @@
+/* Settings page (Lucent Page + SideNav): title type 22/28, 32px margins, sentence case. */
+
+.aside {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: var(--lu-space-3);
+  min-height: 0;
+}
+
+.actions {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--lu-space-1);
+  margin-top: auto;
+  padding-top: var(--lu-space-3);
+}
+
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--lu-space-6);
+}
+
+.sectionTitle {
+  margin: 0;
+  font: var(--lu-type-title);
+  letter-spacing: var(--lu-type-title-tracking);
+  color: var(--lu-ink);
+}
+
+.subTitle {
+  margin: 0;
+  font: var(--lu-type-headline);
+  letter-spacing: var(--lu-type-headline-tracking);
+  color: var(--lu-ink);
+}
+
+.empty,
+.muted {
+  margin: 0;
+  font: var(--lu-type-body);
+  color: var(--lu-ink-muted);
+}
+
+/* Rows */
+.row {
+  display: flex;
+  flex-direction: column;
+  gap: var(--lu-space-2);
+}
+
+.row[data-inline] {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: start;
+  column-gap: var(--lu-space-6);
+}
+
+.rowText {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.rowHead {
+  display: flex;
+  align-items: center;
+  gap: var(--lu-space-2);
+  min-height: var(--lu-size-control-sm);
+}
+
+.rowTitle {
+  font: var(--lu-type-label);
+  color: var(--lu-ink);
+}
+
+.rowDescription {
+  margin: 0;
+  font: var(--lu-type-body);
+  color: var(--lu-ink-muted);
+}
+
+.modified {
+  flex: none;
+  width: 6px;
+  height: 6px;
+  border-radius: var(--lu-radius-round);
+  background: var(--lu-accent);
+}
+
+.rowControl {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--lu-space-2);
+  min-width: 0;
+}
+
+.row[data-inline] .rowControl {
+  padding-top: 2px;
+}
+
+.field {
+  width: 100%;
+  max-width: 360px;
+}
+
+.stack {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: var(--lu-space-3);
+  width: 100%;
+}
+
+.buttons,
+.inlineGroup {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--lu-space-2);
+}
+
+.inlineGroup {
+  gap: var(--lu-space-4);
+}
+
+/* List settings (flags, environment variables) */
+.list {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--lu-space-2);
+  width: 100%;
+}
+
+.listRow {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--lu-space-1);
+  width: 100%;
+  max-width: 420px;
+}
+
+.listField {
+  flex: 1;
+}
+
+/* Keyboard shortcuts */
+.shortcuts {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.shortcut {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  align-items: center;
+  gap: var(--lu-space-3);
+  min-height: 40px;
+  padding: var(--lu-space-1) 0;
+  border-bottom: 0.5px solid var(--lu-line);
+}
+
+.shortcutText {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.shortcutLabel {
+  display: flex;
+  align-items: center;
+  gap: var(--lu-space-2);
+  font: var(--lu-type-body);
+  color: var(--lu-ink);
+}
+
+.conflict {
+  display: flex;
+  align-items: center;
+  gap: var(--lu-space-1);
+  font: var(--lu-type-caption);
+  letter-spacing: var(--lu-type-caption-tracking);
+  color: var(--lu-warning);
+}
+
+.none {
+  font: var(--lu-type-body);
+  color: var(--lu-ink-faint);
+}
+
+.shortcutActions {
+  display: flex;
+  align-items: center;
+  gap: var(--lu-space-1);
+}
+
+.recorder {
+  width: 150px;
+  height: var(--lu-size-control-sm);
+  padding: 0 var(--lu-space-2);
+  border: 1px solid var(--lu-accent);
+  border-radius: var(--lu-radius-control);
+  corner-shape: squircle;
+  background: var(--lu-field);
+  box-shadow: var(--lu-ring-field);
+  color: var(--lu-ink);
+  font: var(--lu-type-body);
+  outline: none;
+}
+
+.recorder::placeholder {
+  color: var(--lu-ink-muted);
+}
+
+/* About */
+.about {
+  display: flex;
+  flex-direction: column;
+  gap: var(--lu-space-1);
+}
+
+.contributors {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: var(--lu-space-1) var(--lu-space-4);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font: var(--lu-type-body);
+}
+
+.contributors a {
+  color: var(--lu-accent);
+  text-decoration: none;
+}
+
+.contributors a:hover {
+  text-decoration: underline;
+}
+
+.count {
+  margin-inline-start: var(--lu-space-1);
+  font: var(--lu-type-caption);
+  letter-spacing: var(--lu-type-caption-tracking);
+  color: var(--lu-ink-faint);
+}

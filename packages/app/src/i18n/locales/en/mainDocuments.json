@@ -1,0 +1,282 @@
+{
+  "titleEdited": {
+    "message": "{{name}} (edited)",
+    "description": "Window title while the fiddle has unsaved changes. {{name}} is the fiddle's name.",
+    "maxLength": 80
+  },
+  "cancel": {
+    "message": "Cancel",
+    "description": "Dialog button that cancels the action.",
+    "maxLength": 20
+  },
+  "replaceMessage": {
+    "message": "Discard your unsaved changes?",
+    "description": "Confirmation shown before another fiddle replaces one with unsaved changes.",
+    "maxLength": 80
+  },
+  "replaceDetail": {
+    "message": "“{{name}}” has changes that haven't been saved.",
+    "description": "Detail of the discard confirmation. {{name}} is the fiddle's name.",
+    "maxLength": 160
+  },
+  "discard": {
+    "message": "Discard changes",
+    "description": "Button that throws away unsaved changes.",
+    "maxLength": 30
+  },
+  "closeMessage": {
+    "message": "Save changes to “{{name}}” before closing?",
+    "description": "Confirmation shown when closing a window with unsaved changes. {{name}} is the fiddle's name.",
+    "maxLength": 100
+  },
+  "save": {
+    "message": "Save",
+    "description": "Dialog button that saves the fiddle.",
+    "maxLength": 20
+  },
+  "dontSave": {
+    "message": "Don't save",
+    "description": "Dialog button that closes without saving.",
+    "maxLength": 20
+  },
+  "quitMessage": {
+    "message": "Quit with unsaved changes?",
+    "description": "Confirmation shown when quitting while some window has unsaved changes.",
+    "maxLength": 80
+  },
+  "quitDetail": {
+    "message": "Unsaved changes are kept as drafts and offered next time Electron Fiddle starts.",
+    "description": "Detail of the quit confirmation.",
+    "maxLength": 200
+  },
+  "quit": {
+    "message": "Quit",
+    "description": "Dialog button that quits the app.",
+    "maxLength": 20
+  },
+  "openFolderTitle": {
+    "message": "Open a fiddle folder",
+    "description": "Title of the folder picker used to open a fiddle.",
+    "maxLength": 60
+  },
+  "open": {
+    "message": "Open",
+    "description": "Button of the folder picker used to open a fiddle.",
+    "maxLength": 20
+  },
+  "saveFolderTitle": {
+    "message": "Choose a folder for the fiddle",
+    "description": "Title of the folder picker used to save a fiddle.",
+    "maxLength": 60
+  },
+  "overwriteMessage": {
+    "message": "Replace the files in “{{folder}}”?",
+    "description": "Warning before saving into a folder that already has fiddle files. {{folder}} is the folder name.",
+    "maxLength": 100
+  },
+  "overwriteDetail": {
+    "message": "The folder already contains {{files}}.",
+    "description": "Detail of the overwrite warning. {{files}} is a comma-separated list of file names.",
+    "maxLength": 300
+  },
+  "replace": {
+    "message": "Replace",
+    "description": "Button that overwrites existing files.",
+    "maxLength": 20
+  },
+  "addFileMessage": {
+    "message": "Add “{{name}}” to the fiddle?",
+    "description": "Asked when a gist has a supported file that fiddles don't usually contain. {{name}} is the file name.",
+    "maxLength": 100
+  },
+  "addFileDetail": {
+    "message": "Only add files you expect this gist to contain.",
+    "description": "Detail of the add-file question.",
+    "maxLength": 160
+  },
+  "add": {
+    "message": "Add",
+    "description": "Button that adds a file.",
+    "maxLength": 20
+  },
+  "skip": {
+    "message": "Skip",
+    "description": "Button that leaves a file out.",
+    "maxLength": 20
+  },
+  "loadFailed": {
+    "message": "Couldn't load the fiddle",
+    "description": "Error dialog title when a fiddle fails to load.",
+    "maxLength": 80
+  },
+  "saveFailed": {
+    "message": "Couldn't save the fiddle",
+    "description": "Error dialog title when saving fails.",
+    "maxLength": 80
+  },
+  "offline": {
+    "message": "Your computer seems to be offline.",
+    "description": "Error detail when a load fails because of the network.",
+    "maxLength": 120
+  },
+  "noSupportedFiles": {
+    "message": "This gist has no files Electron Fiddle can open.",
+    "description": "Error when a gist contains no supported files.",
+    "maxLength": 120
+  },
+  "loadWarnings": {
+    "message": "The fiddle loaded with warnings",
+    "description": "Title of the notice listing load warnings.",
+    "maxLength": 80
+  },
+  "warnPackageJson": {
+    "message": "package.json isn't valid JSON, so its modules and Electron version were ignored.",
+    "description": "Load warning for an invalid package.json.",
+    "maxLength": 200
+  },
+  "warnVersion": {
+    "message": "Electron {{version}} from package.json can't be used, so the current version was kept.",
+    "description": "Load warning when package.json asks for an unusable Electron version. {{version}} is that version.",
+    "maxLength": 200
+  },
+  "warnModules": {
+    "message": "These modules were skipped: {{modules}}.",
+    "description": "Load warning listing module specs that were rejected. {{modules}} is a comma-separated list.",
+    "maxLength": 300
+  },
+  "linkInvalid": {
+    "message": "This link isn't valid",
+    "description": "Error title for a malformed electron-fiddle:// link.",
+    "maxLength": 80
+  },
+  "linkNeedsNewer": {
+    "message": "This link needs a newer version of Electron Fiddle",
+    "description": "Error title for an electron-fiddle:// link whose kind this version doesn't know.",
+    "maxLength": 100
+  },
+  "linkGistMessage": {
+    "message": "Load this gist?",
+    "description": "Confirmation title before a deep link loads a gist.",
+    "maxLength": 60
+  },
+  "linkDocsMessage": {
+    "message": "Load this Electron docs example?",
+    "description": "Confirmation title before a deep link loads an example from the Electron docs.",
+    "maxLength": 80
+  },
+  "linkUntrusted": {
+    "message": "Only load code from sources you trust.",
+    "description": "Line in the deep link confirmation reminding that the code is untrusted.",
+    "maxLength": 120
+  },
+  "linkOwnerMismatch": {
+    "message": "Warning: the link names {{linkOwner}} as the owner, but the gist belongs to {{owner}}.",
+    "description": "Warning in the deep link confirmation when the owner in the link doesn't match the gist.",
+    "maxLength": 200
+  },
+  "detailOwner": {
+    "message": "Owner: {{owner}}",
+    "description": "Line in a confirmation naming the gist owner's GitHub login.",
+    "maxLength": 80
+  },
+  "detailDescription": {
+    "message": "Description: {{description}}",
+    "description": "Line in a confirmation showing the gist description.",
+    "maxLength": 300
+  },
+  "detailRevision": {
+    "message": "Revision: {{sha}}",
+    "description": "Line in a confirmation showing the gist revision SHA.",
+    "maxLength": 80
+  },
+  "detailVersion": {
+    "message": "Electron version: {{version}}",
+    "description": "Line in a confirmation showing the Electron version.",
+    "maxLength": 80
+  },
+  "detailPath": {
+    "message": "Path: {{path}}",
+    "description": "Line in a confirmation showing the example's path in the electron/electron repository.",
+    "maxLength": 300
+  },
+  "detailOrigin": {
+    "message": "Source: {{origin}}",
+    "description": "Line in a confirmation showing where the fiddle came from.",
+    "maxLength": 300
+  },
+  "detailFiles": {
+    "message": "Files: {{files}}",
+    "description": "Line in a confirmation listing file names.",
+    "maxLength": 1000
+  },
+  "detailDependencies": {
+    "message": "Dependencies: {{dependencies}}",
+    "description": "Line in a confirmation listing npm dependencies.",
+    "maxLength": 1000
+  },
+  "none": {
+    "message": "none",
+    "description": "Shown in a confirmation line when a list is empty.",
+    "maxLength": 20
+  },
+  "unknownOwner": {
+    "message": "unknown",
+    "description": "Shown when a gist has no owner (anonymous gist).",
+    "maxLength": 20
+  },
+  "load": {
+    "message": "Load",
+    "description": "Button that loads a fiddle.",
+    "maxLength": 20
+  },
+  "trustMessage": {
+    "message": "Run code from this fiddle?",
+    "description": "Title of the approval shown before running code from a gist or the Electron docs for the first time.",
+    "maxLength": 80
+  },
+  "trustDetail": {
+    "message": "This fiddle's code came from outside Electron Fiddle and can do anything your user account can. Only continue if you trust the source.",
+    "description": "Explanation in the trust approval.",
+    "maxLength": 300
+  },
+  "trustContinue": {
+    "message": "Trust and continue",
+    "description": "Button that approves running an untrusted fiddle.",
+    "maxLength": 30
+  },
+  "trustAllowScripts": {
+    "message": "Allow install scripts for {{packages}}",
+    "description": "Checkbox in the trust approval that lets these packages run their install scripts. {{packages}} is a comma-separated list.",
+    "maxLength": 200
+  },
+  "restoreMessage": {
+    "message": "Restore unsaved changes?",
+    "description": "Asked at startup when drafts from an earlier session were found.",
+    "maxLength": 80
+  },
+  "restoreDetail": {
+    "message": "Electron Fiddle found unsaved changes from an earlier session: {{names}}.",
+    "description": "Detail of the restore question. {{names}} is a comma-separated list of fiddle names.",
+    "maxLength": 300
+  },
+  "restore": {
+    "message": "Restore",
+    "description": "Button that restores unsaved drafts.",
+    "maxLength": 20
+  },
+  "discardDrafts": {
+    "message": "Discard",
+    "description": "Button that deletes unsaved drafts.",
+    "maxLength": 20
+  },
+  "noRecent": {
+    "message": "No recent folders",
+    "description": "Disabled item in the Open recent menu when there is nothing to show.",
+    "maxLength": 40
+  },
+  "clearRecent": {
+    "message": "Clear recent",
+    "description": "Item in the Open recent menu that clears the list.",
+    "maxLength": 40
+  }
+}

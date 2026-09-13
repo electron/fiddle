@@ -3,8 +3,9 @@ import { createHash } from 'node:crypto';
 import fs from 'node:fs';
 import path from 'node:path';
 
-import { createAsar } from './asar.js';
-import { debug } from './debug.js';
+import * as asar from '@electron/asar';
+import debug from 'debug';
+
 import { FiddleCoreError } from './errors.js';
 import { withNoAsar } from './fs-util.js';
 import { DefaultPaths } from './paths.js';
@@ -148,7 +149,7 @@ export class FiddleFactory {
     const asarOutputDir = path.join(this.fiddles, hashString(sourceDir));
     const asarFilePath = path.join(asarOutputDir, 'app.asar');
 
-    await withNoAsar(() => createAsar(sourceDir, asarFilePath));
+    await withNoAsar(() => asar.createPackage(sourceDir, asarFilePath));
     const packagedFiddle = new Fiddle(asarFilePath, fiddle.source);
 
     await fs.promises.rm(sourceDir, { recursive: true, force: true });

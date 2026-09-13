@@ -9,7 +9,21 @@ import { session } from 'electron';
  * (Monaco, for example) calls `trustedTypes.createPolicy`; an empty list
  * allows none.
  */
-export const trustedTypesPolicies: readonly string[] = [];
+export const trustedTypesPolicies: readonly string[] = [
+  // Monaco (monaco-editor 0.56, `createTrustedTypesPolicy` calls in its ESM build).
+  'defaultWorkerFactory',
+  'diffEditorWidget',
+  'diffReview',
+  'domLineBreaksComputer',
+  'editorGhostText',
+  'editorViewLayer',
+  'richScreenReaderContent',
+  'standaloneColorizer',
+  'stickyScrollViewLayer',
+  'tokenizeToString',
+  // src/renderer/editor/monaco.ts: creates Monaco's workers from bundled URLs.
+  'fiddleMonacoWorker',
+];
 
 type Directives = Record<string, string[]>;
 
@@ -28,7 +42,10 @@ const production: Directives = {
   'form-action': ["'none'"],
   'frame-ancestors': ["'none'"],
   'require-trusted-types-for': ["'script'"],
-  'trusted-types': trustedTypesPolicies.length ? [...trustedTypesPolicies] : ["'none'"],
+  // Monaco's bundle creates `defaultWorkerFactory` from two modules, hence 'allow-duplicates'.
+  'trusted-types': trustedTypesPolicies.length
+    ? [...trustedTypesPolicies, "'allow-duplicates'"]
+    : ["'none'"],
 };
 
 function serialize(directives: Directives): string {

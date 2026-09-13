@@ -1,0 +1,81 @@
+/* Sidebar Packages section, on the material (Lucent window anatomy: sidebar heads in
+   caption style, ink-muted, padding 14 8 5; the package field is 24 tall on-glass). */
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.head {
+  margin: 0;
+  padding: 14px 8px 5px;
+  font: var(--lu-type-caption);
+  letter-spacing: var(--lu-type-caption-tracking);
+  color: var(--lu-ink-muted);
+}
+
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin: 4px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* Rows match tree rows: 28 tall, padding 0 8 (4 on the right for the remove button),
+   16px icon with a 6px gap, ink label. */
+.row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  height: var(--lu-size-row);
+  padding: 0 2px 0 8px;
+  border-radius: var(--lu-radius-item);
+  corner-shape: squircle;
+  color: var(--lu-ink);
+  font: var(--lu-type-body);
+  letter-spacing: var(--lu-type-body-tracking);
+  transition: background-color var(--lu-dur-fast) var(--lu-ease);
+}
+
+.row:hover,
+.row:focus-within {
+  background: var(--lu-capsule);
+}
+
+.icon {
+  flex: none;
+  color: var(--lu-ink-muted);
+}
+
+.name {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.version {
+  flex: none;
+  max-width: 96px;
+  font-family: var(--lu-font-mono);
+}
+
+.result {
+  min-width: 0;
+}
+
+.match {
+  background: none;
+  color: var(--lu-accent);
+  font-weight: 600;
+}
+
+.empty {
+  padding: 5px 10px;
+  font: var(--lu-type-body);
+  color: var(--lu-ink-muted);
+}

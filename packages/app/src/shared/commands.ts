@@ -34,7 +34,8 @@ export const commands = {
   },
   'view.reload': {
     label: 'reload',
-    accelerator: 'CmdOrCtrl+R',
+    // CmdOrCtrl+R runs and stops the fiddle (Lucent); see PROGRESS.md "Decisions".
+    accelerator: 'CmdOrCtrl+Shift+R',
     enabled: hasWindow,
   },
   'view.toggleDevTools': {
@@ -42,6 +43,121 @@ export const commands = {
     accelerator: 'CmdOrCtrl+Alt+I',
     enabled: hasWindow,
   },
+  // Shell slice: view-state commands, sent to the window as `Window.Command`.
+  'view.toggleSplit': {
+    label: 'toggleSplit',
+    accelerator: 'CmdOrCtrl+\\',
+    enabled: hasWindow,
+  },
+  'view.toggleSidebar': {
+    label: 'toggleSidebar',
+    enabled: hasWindow,
+  },
+  'view.toggleConsole': {
+    label: 'toggleConsole',
+    enabled: hasWindow,
+  },
+  'editor.toggleSoftWrap': {
+    label: 'toggleSoftWrap',
+    enabled: hasWindow,
+  },
+  'editor.toggleMinimap': {
+    label: 'toggleMinimap',
+    enabled: hasWindow,
+  },
+  'editor.format': {
+    label: 'formatDocument',
+    accelerator: 'Shift+Alt+F',
+    enabled: hasWindow,
+  },
+  // Documents slice: the File menu. Handlers in src/main/documents/commands.ts.
+  'file.newFiddle': {
+    label: 'newFiddle',
+    accelerator: 'CmdOrCtrl+N',
+  },
+  'file.newTest': {
+    label: 'newTest',
+    accelerator: 'CmdOrCtrl+T',
+  },
+  'file.open': {
+    label: 'openFolder',
+    accelerator: 'CmdOrCtrl+O',
+  },
+  'file.save': {
+    label: 'save',
+    accelerator: 'CmdOrCtrl+S',
+    enabled: hasWindow,
+  },
+  'file.saveAs': {
+    label: 'saveAs',
+    accelerator: 'CmdOrCtrl+Shift+S',
+    enabled: hasWindow,
+  },
+  'file.saveAsForge': {
+    label: 'saveAsForge',
+    enabled: hasWindow,
+  },
+  'file.close': {
+    label: 'closeWindow',
+    accelerator: 'CmdOrCtrl+W',
+    enabled: hasWindow,
+  },
+  // App UX slice: both are sent to the window as `Window.Command`.
+  'app.commandPalette': {
+    label: 'commandPalette',
+    accelerator: 'CmdOrCtrl+Shift+P',
+    enabled: hasWindow,
+  },
+  'help.showTour': {
+    label: 'showTour',
+    enabled: hasWindow,
+  },
+  // Settings slice: shows the settings page in the window (`Window.view`).
+  'app.preferences': {
+    label: 'preferences',
+    accelerator: 'CmdOrCtrl+,',
+    enabled: hasWindow,
+  },
+  // Gists slice: each opens a gist dialog in the window (`GitHub.OpenDialog`).
+  'gist.publish': {
+    label: 'publishToGist',
+    enabled: hasWindow,
+  },
+  'gist.open': {
+    label: 'openGist',
+    enabled: hasWindow,
+  },
+  'gist.history': {
+    label: 'showGistHistory',
+    enabled: (_app, win) => win?.fiddle.source.gistId !== undefined,
+  },
+  // Versions and run slice. Handlers in src/main/run/commands.ts. F5 also
+  // runs 'run.toggle' through a hidden menu item (src/main/menu.ts).
+  'run.toggle': {
+    label: 'runToggle',
+    accelerator: 'CmdOrCtrl+R',
+    enabled: hasWindow,
+  },
+  'run.package': {
+    label: 'packageFiddle',
+    enabled: (_app, win) => win !== undefined && (win.run?.status ?? 'ready') === 'ready',
+  },
+  'run.make': {
+    label: 'makeFiddle',
+    enabled: (_app, win) => win !== undefined && (win.run?.status ?? 'ready') === 'ready',
+  },
+  'bisect.toggle': {
+    label: 'toggleBisect',
+    accelerator: 'CmdOrCtrl+Shift+B',
+    enabled: hasWindow,
+  },
+  // Platform slice: the Help menu. Handlers in src/main/platform/index.ts.
+  'help.about': { label: 'aboutFiddle' },
+  'help.openLogsFolder': { label: 'openLogsFolder' },
+  'help.copyDiagnostics': { label: 'copyDiagnostics' },
+  'help.fiddleRepository': { label: 'openFiddleRepository' },
+  'help.electronRepository': { label: 'openElectronRepository' },
+  'help.reportIssue': { label: 'reportIssue' },
 } as const satisfies Record<string, CommandDefinition>;
 
 export type CommandId = keyof typeof commands;

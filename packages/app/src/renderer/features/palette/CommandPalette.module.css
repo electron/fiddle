@@ -1,0 +1,86 @@
+/* The palette floats on overlay glass under the title bar, like a menu (Menu surface and
+   item styling), 560 wide. No scrim: it's a transient menu, not a dialog. */
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: var(--lu-z-dialog);
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding-top: calc(var(--lu-size-titlebar) + var(--lu-space-2));
+}
+
+.modal {
+  outline: none;
+}
+
+.modal[data-entering] {
+  animation: palette-in var(--lu-dur-base) var(--lu-ease);
+}
+
+@keyframes palette-in {
+  from {
+    opacity: 0;
+    transform: translateY(-4px) scale(0.98);
+  }
+}
+
+/* Overrides the menu's max-content sizing. */
+.surface {
+  display: flex;
+  flex-direction: column;
+  width: min(560px, calc(100vw - 2 * var(--lu-space-4)));
+  max-width: none;
+  overflow: hidden;
+}
+
+.search {
+  display: flex;
+  align-items: center;
+  gap: var(--lu-space-2);
+  height: var(--lu-size-control);
+  padding: 0 10px 5px;
+  margin-bottom: 5px;
+  box-shadow: 0 var(--lu-size-hairline) 0 var(--lu-line);
+}
+
+.searchIcon {
+  flex: none;
+  color: var(--lu-ink-muted);
+}
+
+.input {
+  flex: 1;
+  min-width: 0;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--lu-ink);
+  font: var(--lu-type-label);
+  letter-spacing: var(--lu-type-label-tracking);
+  outline: none;
+}
+
+.input::placeholder {
+  color: var(--lu-ink-faint);
+}
+
+.list {
+  max-height: min(360px, calc(100vh - 160px));
+  margin: 0;
+  padding: 0;
+  overflow-y: auto;
+  list-style: none;
+}
+
+.keys {
+  flex: none;
+  margin-left: var(--lu-space-3);
+}
+
+.empty {
+  padding: 6px 10px;
+  color: var(--lu-ink-muted);
+}

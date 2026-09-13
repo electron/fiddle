@@ -1,0 +1,48 @@
+/* The version select sits in the toolbar capsule at 180 wide. */
+.picker {
+  width: 180px;
+}
+
+/* Version manager: toolbar, table, note. */
+.manager {
+  display: flex;
+  flex-direction: column;
+  gap: var(--lu-space-3);
+  min-width: 0;
+}
+
+.toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--lu-space-3);
+}
+
+.filter {
+  width: 220px;
+}
+
+.spacer {
+  flex: 1;
+}
+
+.state {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.installed {
+  color: var(--lu-success);
+}
+
+.muted {
+  color: var(--lu-ink-muted);
+}
+
+.note {
+  margin: 0;
+  font: var(--lu-type-caption);
+  letter-spacing: var(--lu-type-caption-tracking);
+  color: var(--lu-ink-muted);
+}

@@ -8,3 +8,13 @@
  * `ipcRenderer` itself is never exposed.
  */
 import '../ipc/generated/preload/fiddle';
+
+// Sentry's renderer transport (IPCMode.Classic), the one documented exception
+// to EIPC (REQUIREMENTS §3, §14). Same origin rule as the EIPC bindings. The
+// renderer only uses it when main's Sentry is on (src/main/crash/sentry.ts).
+import { hookupIpc } from '@sentry/electron/preload-namespaced';
+
+const { protocol, host, hostname } = window.location;
+if ((protocol === 'app:' && host === 'main') || (protocol === 'http:' && hostname === 'localhost')) {
+  hookupIpc();
+}

@@ -6,7 +6,7 @@ import type { RepoContentEntry } from './github';
 
 const template = { 'main.js': '// template main', 'preload.js': '// template preload', 'index.html': '<template/>' };
 
-function fakeGitHub(entries: RepoContentEntry[]) {
+function fakeGitHub(entries: RepoContentEntry[], contents: Record<string, string> = {}) {
   const listed: unknown[][] = [];
   const fetched: string[] = [];
   return {
@@ -19,7 +19,8 @@ function fakeGitHub(entries: RepoContentEntry[]) {
       },
       async fetchText(url: string) {
         fetched.push(url);
-        return `content of ${url.split('/').pop()}`;
+        const name = url.split('/').pop()!;
+        return contents[name] ?? `content of ${name}`;
       },
     },
   };
@@ -34,7 +35,7 @@ const file = (name: string, type = 'file'): RepoContentEntry => ({
 
 describe('loadDocsExample', () => {
   it('lays supported files over the template for the tag version', async () => {
-    const fake = fakeGitHub([file('main.js'), file('index.html'), file('README.md'), file('package.json'), file('assets', 'dir')]);
+    const fake = fakeGitHub([file('main.js'), file('index.html'), file('README.md'), file('package-lock.json'), file('assets', 'dir')]);
     const versions: string[] = [];
     const result = await loadDocsExample({
       tag: 'v30.0.0',
@@ -51,14 +52,34 @@ describe('loadDocsExample', () => {
     expect(result).toEqual({
       version: '30.0.0',
       files: { 'main.js': 'content of main.js', 'preload.js': '// template preload', 'index.html': 'content of index.html' },
+      skipped: [],
+      unknown: [],
+      modules: {},
       origin: { kind: 'electron', tag: 'v30.0.0', path: 'docs/fiddles/x' },
     });
+  });
+
+  it('reads package.json and replaces the template main entry with the example one', async () => {
+    const fake = fakeGitHub([file('main.mjs'), file('package.json')], {
+      'package.json': JSON.stringify({ dependencies: { lodash: '4.17.21' } }),
+    });
+    const result = await loadDocsExample({ tag: 'v30.0.0', path: 'a', github: fake.github, getTemplate: async () => template });
+    expect(Object.keys(result.files).sort()).toEqual(['index.html', 'main.mjs', 'preload.js']);
+    expect(result.modules).toEqual({ lodash: '4.17.21' });
   });
 
   it('adds a main entry if neither side has one', async () => {
     const fake = fakeGitHub([file('renderer.js')]);
     const result = await loadDocsExample({ tag: '29.0.0', path: 'a', github: fake.github, getTemplate: async () => ({}) });
     expect(Object.keys(result.files).sort()).toEqual(['main.js', 'renderer.js']);
+  });
+
+  it('refuses a folder without supported files', async () => {
+    const fake = fakeGitHub([file('README.md'), file('package.json')]);
+    await expect(
+      loadDocsExample({ tag: 'v30.0.0', path: 'a', github: fake.github, getTemplate: async () => template }),
+    ).rejects.toMatchObject({ code: ErrorCode.invalidArgument, details: { reason: 'no-supported-files' } });
+    expect(fake.fetched).toHaveLength(0);
   });
 
   it.each(['main', 'vfoo', 'v30'])('rejects the tag %s', async (tag) => {

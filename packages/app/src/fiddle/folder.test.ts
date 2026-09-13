@@ -1,12 +1,11 @@
-import { mkdir, mkdtemp, readdir, readFile, rm, symlink, writeFile } from 'node:fs/promises';
+import { lstat, mkdir, mkdtemp, readdir, readFile, rm, symlink, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import * as path from 'node:path';
 
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
 import { ErrorCode } from '../shared/errors';
-import { assertSafeFileName, findExistingSupportedFiles, GITIGNORE_CONTENT, readFiddleFolder, writeFiddleFolder } from './folder';
-import { thrownReason } from './test-helpers/zip';
+import { findExistingSupportedFiles, GITIGNORE_CONTENT, readFiddleFolder, writeFiddleFolder } from './folder';
 
 let dir: string;
 beforeEach(async () => {
@@ -16,12 +15,12 @@ afterEach(async () => {
   await rm(dir, { recursive: true, force: true });
 });
 
-async function put(files: Record<string, string>) {
-  for (const [name, content] of Object.entries(files)) await writeFile(path.join(dir, name), content);
+async function put(files: Record<string, string>, into = dir) {
+  for (const [name, content] of Object.entries(files)) await writeFile(path.join(into, name), content);
 }
 
 describe('readFiddleFolder', () => {
-  it('reads supported top-level files and package.json', async () => {
+  it('reads supported top-level files and package.json, never symlinks', async () => {
     await put({
       'main.js': 'main',
       'Index.HTML': '<p/>',
@@ -37,20 +36,29 @@ describe('readFiddleFolder', () => {
     const result = await readFiddleFolder(dir);
     expect(result.files).toEqual({ 'main.js': 'main', 'Index.HTML': '<p/>' });
     expect(result.packageJson).toEqual({ modules: { lodash: '4.17.21' }, rejectedModules: [], electronVersion: '30.0.0' });
+    expect(result.modules).toEqual({ lodash: '4.17.21' });
     expect(result.packageJsonError).toBeUndefined();
+    expect(result.skipped.sort()).toEqual(['README.md', 'package-lock.json']);
+    expect(result.unknown).toEqual(['Index.HTML']);
   });
 
-  it('still loads the folder when package.json is invalid', async () => {
+  it('still loads the folder when package.json is invalid, keeping the previous modules', async () => {
     await put({ 'main.js': 'main', 'package.json': '{ nope' });
-    const result = await readFiddleFolder(dir);
+    const result = await readFiddleFolder(dir, { previousModules: { old: '1.0.0' } });
     expect(result.files).toEqual({ 'main.js': 'main' });
     expect(result.packageJson).toBeUndefined();
+    expect(result.modules).toEqual({ old: '1.0.0' });
     expect(result.packageJsonError).toMatchObject({ code: ErrorCode.invalidArgument, details: { reason: 'invalid-json' } });
   });
 
   it('adds a main entry when there is none', async () => {
     await put({ 'index.html': '<p/>' });
     expect((await readFiddleFolder(dir)).files).toEqual({ 'index.html': '<p/>', 'main.js': '// Empty' });
+  });
+
+  it('refuses a folder without supported files', async () => {
+    await put({ 'README.md': 'x', 'package.json': '{}' });
+    await expect(readFiddleFolder(dir)).rejects.toMatchObject({ details: { reason: 'no-supported-files' } });
   });
 
   it('reports a missing folder as not-found', async () => {
@@ -79,14 +87,53 @@ describe('writeFiddleFolder', () => {
     expect((await readdir(target)).sort()).toEqual(['.gitignore', 'main.js']);
   });
 
-  it('rejects path traversal before writing anything', async () => {
-    for (const name of ['../evil.js', '..', '.', 'sub/x.js', 'sub\\x.js', '/etc/x.js', 'C:x.js', '']) {
-      await expect(writeFiddleFolder(dir, { 'main.js': 'x', [name]: 'bad' })).rejects.toMatchObject({
-        details: { reason: 'unsafe-path' },
-      });
-    }
+  it.each([
+    ['../evil.js', 'path-separator'],
+    ['sub/x.js', 'path-separator'],
+    ['sub\\x.js', 'path-separator'],
+    ['/etc/x.js', 'path-separator'],
+    ['..', 'unsupported-extension'],
+    ['.', 'unsupported-extension'],
+    ['.gitignore', 'unsupported-extension'],
+    ['notes.md', 'unsupported-extension'],
+    ['C:x.js', 'invalid-character'],
+    ['a\0.js', 'invalid-character'],
+    ['', 'empty-name'],
+  ])('refuses %j (%s) before writing anything', async (name, reason) => {
+    await expect(writeFiddleFolder(dir, { 'main.js': 'x', [name]: 'bad' })).rejects.toMatchObject({
+      code: ErrorCode.invalidArgument,
+      details: { reason },
+    });
     expect(await readdir(dir)).toEqual([]);
-    expect(thrownReason(() => assertSafeFileName('fine.js'))).toBeNull();
+  });
+
+  it('refuses names that differ only in case, which would overwrite each other', async () => {
+    await expect(writeFiddleFolder(dir, { 'Main.js': 'mine', 'main.js': '// Empty' })).rejects.toMatchObject({
+      details: { reason: 'duplicate-name', name: 'main.js' },
+    });
+    expect(await readdir(dir)).toEqual([]);
+  });
+
+  it('replaces symlinks instead of following them out of the folder', async () => {
+    const outside = await mkdtemp(path.join(tmpdir(), 'fiddle-outside-'));
+    try {
+      await put({ 'secret.js': 'secret', ignore: 'ignore' }, outside);
+      await symlink(path.join(outside, 'secret.js'), path.join(dir, 'main.js'));
+      await symlink(path.join(outside, 'secret.js'), path.join(dir, 'gone.js'));
+      await symlink(path.join(outside, 'ignore'), path.join(dir, '.gitignore'));
+
+      await writeFiddleFolder(dir, { 'main.js': 'new', 'gone.js': '' });
+
+      expect(await readFile(path.join(outside, 'secret.js'), 'utf8')).toBe('secret');
+      expect(await readFile(path.join(outside, 'ignore'), 'utf8')).toBe('ignore');
+      expect((await readdir(outside)).sort()).toEqual(['ignore', 'secret.js']);
+      expect((await readdir(dir)).sort()).toEqual(['.gitignore', 'main.js']);
+      expect((await lstat(path.join(dir, 'main.js'))).isSymbolicLink()).toBe(false);
+      expect(await readFile(path.join(dir, 'main.js'), 'utf8')).toBe('new');
+      expect(await readFile(path.join(dir, '.gitignore'), 'utf8')).toBe(GITIGNORE_CONTENT);
+    } finally {
+      await rm(outside, { recursive: true, force: true });
+    }
   });
 });
 

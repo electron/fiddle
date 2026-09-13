@@ -3,6 +3,7 @@ import { z } from 'zod';
 import { ErrorCode, FiddleError } from '../shared/errors';
 import type { FileMap } from './files';
 import { gistUrl, isGistId, isRevisionSha } from './gist-id';
+import { type FiddleOrigin, gistOrigin } from './trust';
 
 export const GITHUB_API_URL = 'https://api.github.com';
 export const GIST_RAW_ORIGIN = 'https://gist.githubusercontent.com';
@@ -43,6 +44,16 @@ export function assertGistFiles(files: FileMap): void {
       throw invalid('file-too-large', `${name} is larger than 10 MB`, { name });
     }
   }
+}
+
+/**
+ * The files GitHub will accept content for: it rejects blank files with a 422,
+ * so they're left out (and deleted on update). Throws `no-files` if none are left.
+ */
+function nonBlankFiles(files: FileMap): [string, string][] {
+  const kept = Object.entries(files).filter(([, content]) => content.trim() !== '');
+  if (kept.length === 0) throw invalid('no-files', 'A gist needs at least one file that is not empty');
+  return kept;
 }
 
 const GistFileSchema = z
@@ -88,8 +99,10 @@ export interface GistLoadResult {
   url: string;
   /** The loaded revision's SHA. */
   revision: string;
-  /** Every file in the gist; truncated files are fetched in full. The caller filters. */
+  /** Every file in the gist; truncated files are fetched in full. Filter with `pickFiddleFiles`. */
   files: FileMap;
+  /** Anonymous gists get `ANONYMOUS_GIST_OWNER`. */
+  origin: FiddleOrigin;
 }
 
 export interface GistWriteResult {
@@ -141,11 +154,16 @@ async function toResponseError(res: Response): Promise<FiddleError> {
   } catch {
     // Not JSON.
   }
+  // A rate-limited 403 isn't a bad token, so the startup check must keep it.
+  const rateLimited =
+    res.status === 403 && (res.headers.get('x-ratelimit-remaining') === '0' || res.headers.has('retry-after'));
   const code =
     res.status === 401
       ? ErrorCode.unauthorized
-      : res.status === 403
-        ? ErrorCode.forbidden
+      : rateLimited
+        ? ErrorCode.unavailable
+        : res.status === 403
+          ? ErrorCode.forbidden
         : res.status === 404
           ? ErrorCode.notFound
           : res.status === 422
@@ -314,6 +332,8 @@ export class GitHubClient {
     }
     const path = revision ? `/gists/${id}/${revision.toLowerCase()}` : `/gists/${id}`;
     const gist = await this.json(await this.send(this.apiUrl(path), { signal }), GistSchema);
+    const sha = revision?.toLowerCase() ?? gist.history?.[0]?.version;
+    if (!sha) throw new FiddleError(ErrorCode.internal, 'GitHub returned a gist without history', { reason: 'no-history' });
 
     const files = await Promise.all(
       Object.entries(gist.files ?? {}).flatMap(([key, file]) =>
@@ -334,8 +354,9 @@ export class GitHubClient {
       description: gist.description ?? '',
       public: gist.public ?? false,
       url: gist.html_url ?? gistUrl(id),
-      revision: revision?.toLowerCase() ?? gist.history?.[0]?.version ?? '',
+      revision: sha,
       files: Object.fromEntries(files),
+      origin: gistOrigin(id, sha, gist.owner?.login ?? null),
     };
   }
 
@@ -349,13 +370,13 @@ export class GitHubClient {
     const body = {
       description: input.description,
       public: input.isPublic,
-      files: Object.fromEntries(Object.entries(input.files).map(([name, content]) => [name, { content }])),
+      files: Object.fromEntries(nonBlankFiles(input.files).map(([name, content]) => [name, { content }])),
     };
     const res = await this.send(this.apiUrl('/gists'), { method: 'POST', body, signal });
     return this.writeResult(await this.json(res, GistSchema));
   }
 
-  /** Replaces the gist's files: remote files missing from `files` are deleted. */
+  /** Replaces the gist's files: remote files that are empty or missing from `files` are deleted. */
   async updateGist(
     id: string,
     input: { files: FileMap; description?: string },
@@ -364,12 +385,14 @@ export class GitHubClient {
     this.requireToken();
     assertGistId(id);
     assertGistFiles(input.files);
+    const kept = nonBlankFiles(input.files);
     if (input.description !== undefined) assertGistDescription(input.description);
 
     const existing = await this.json(await this.send(this.apiUrl(`/gists/${id}`), { signal }), GistSchema);
-    const removed = Object.keys(existing.files ?? {}).filter((name) => !Object.hasOwn(input.files, name));
+    const keptNames = new Set(kept.map(([name]) => name));
+    const removed = Object.keys(existing.files ?? {}).filter((name) => !keptNames.has(name));
     const files = Object.fromEntries([
-      ...Object.entries(input.files).map(([name, content]) => [name, { content }] as const),
+      ...kept.map(([name, content]) => [name, { content }] as const),
       ...removed.map((name) => [name, null] as const),
     ]);
     const body = input.description === undefined ? { files } : { files, description: input.description };

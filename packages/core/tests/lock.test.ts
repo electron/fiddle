@@ -3,10 +3,25 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 
-import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { FiddleCoreError, LOCK_STALE_MS, acquireLock, withLock } from '../src/index.js';
 import { isLockStale } from '../src/lock.js';
+
+// Lets a test act between a waiter judging a lock stale and moving it aside.
+const hooks = vi.hoisted(() => ({
+  beforeRename: undefined as ((from: string) => void) | undefined,
+}));
+vi.mock('../src/fs-util.js', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('../src/fs-util.js')>();
+  return {
+    ...actual,
+    rename: (from: string, to: string) => {
+      hooks.beforeRename?.(from);
+      return actual.rename(from, to);
+    },
+  };
+});
 
 /** The pid of a process that has already exited. */
 async function deadPid(): Promise<number> {
@@ -14,6 +29,8 @@ async function deadPid(): Promise<number> {
   await new Promise((resolve) => child.once('exit', resolve));
   return child.pid!;
 }
+
+const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 describe('locks', () => {
   let tmpdir: string;
@@ -25,16 +42,20 @@ describe('locks', () => {
   });
 
   afterEach(() => {
+    hooks.beforeRename = undefined;
     fs.rmSync(tmpdir, { recursive: true, force: true });
   });
 
-  function writeLock(contents: string | object): void {
+  function writeLock(contents: string | object, mtime?: Date): void {
     fs.mkdirSync(path.dirname(lockPath), { recursive: true });
     fs.writeFileSync(
       lockPath,
       typeof contents === 'string' ? contents : JSON.stringify(contents),
     );
+    if (mtime) fs.utimesSync(lockPath, mtime, mtime);
   }
+
+  const longAgo = () => new Date(Date.now() - LOCK_STALE_MS - 60_000);
 
   it('creates a lock file holding pid, hostname and startedAt', async () => {
     const lock = await acquireLock(lockPath);
@@ -54,7 +75,7 @@ describe('locks', () => {
       acquired = true;
       return lock;
     });
-    await new Promise((resolve) => setTimeout(resolve, 50));
+    await sleep(50);
     expect(acquired).toBe(false);
 
     await first.release();
@@ -86,14 +107,11 @@ describe('locks', () => {
     await lock.release();
   });
 
-  it('recovers a lock older than 10 minutes, even if its process is alive', async () => {
-    writeLock({
-      pid: process.pid,
-      hostname: os.hostname(),
-      startedAt: Date.now() - LOCK_STALE_MS - 1000,
-    });
-    const lock = await acquireLock(lockPath, { timeoutMs: 1000 });
-    await lock.release();
+  it('trusts a live process on this host, however old its lock', async () => {
+    writeLock({ pid: process.pid, hostname: os.hostname(), startedAt: 0 }, longAgo());
+    await expect(
+      acquireLock(lockPath, { timeoutMs: 50, pollMs: 10 }),
+    ).rejects.toMatchObject({ code: 'locked' });
   });
 
   it('does not check the pid of a lock from another host', async () => {
@@ -109,6 +127,13 @@ describe('locks', () => {
     });
   });
 
+  it('recovers a lock from another host once its mtime is older than staleMs', async () => {
+    writeLock({ pid: 1, hostname: 'some-other-host', startedAt: 0 }, longAgo());
+    const lock = await acquireLock(lockPath, { timeoutMs: 1000 });
+    expect(lock.info.hostname).toBe(os.hostname());
+    await lock.release();
+  });
+
   it('gives an unreadable lock a grace period before treating it as stale', async () => {
     writeLock('');
     await expect(
@@ -121,6 +146,57 @@ describe('locks', () => {
     fs.utimesSync(lockPath, old, old);
     const lock = await acquireLock(lockPath, { timeoutMs: 1000 });
     await lock.release();
+  });
+
+  it('refreshes the mtime of a held lock every staleMs / 3, until released', async () => {
+    const lock = await acquireLock(lockPath, { staleMs: 300 });
+    const past = new Date(Date.now() - 60_000);
+    fs.utimesSync(lockPath, past, past);
+    await expect
+      .poll(() => fs.statSync(lockPath).mtimeMs, { timeout: 2000 })
+      .toBeGreaterThan(past.getTime() + 30_000);
+
+    await lock.release();
+    writeLock('placeholder', past);
+    await sleep(300);
+    expect(fs.statSync(lockPath).mtimeMs).toBeLessThan(past.getTime() + 1000);
+  });
+
+  it('puts back a lock that another waiter replaced before this one moved it aside', async () => {
+    writeLock({ pid: await deadPid(), hostname: os.hostname(), startedAt: 0 });
+    const live = { pid: process.pid, hostname: os.hostname(), startedAt: Date.now() };
+    let raced = false;
+    hooks.beforeRename = (from) => {
+      if (from !== lockPath || raced) return;
+      // another waiter removed the stale lock and took the lock itself
+      raced = true;
+      fs.writeFileSync(lockPath, JSON.stringify(live));
+    };
+
+    await expect(
+      acquireLock(lockPath, { timeoutMs: 100, pollMs: 10 }),
+    ).rejects.toMatchObject({ code: 'locked' });
+    expect(raced).toBe(true);
+    expect(JSON.parse(fs.readFileSync(lockPath, 'utf8'))).toStrictEqual(live);
+    expect(fs.readdirSync(path.dirname(lockPath))).toStrictEqual(['thing.lock']);
+  });
+
+  it('lets only one of two waiters take over a stale lock', async () => {
+    const dead = await deadPid();
+    let holders = 0;
+    let most = 0;
+    const hold = () =>
+      withLock(lockPath, { pollMs: 1 }, async () => {
+        most = Math.max(most, ++holders);
+        await sleep(2);
+        holders--;
+      });
+    for (let round = 0; round < 50; round++) {
+      writeLock({ pid: dead, hostname: os.hostname(), startedAt: round });
+      await Promise.all([hold(), hold()]);
+    }
+    expect(most).toBe(1);
+    expect(fs.readdirSync(path.dirname(lockPath))).toStrictEqual([]);
   });
 
   it('release() leaves alone a lock that someone else took over', async () => {
@@ -171,14 +247,18 @@ describe('locks', () => {
 
   describe('isLockStale()', () => {
     const now = 1_000_000_000;
-    const info = { pid: process.pid, hostname: os.hostname(), startedAt: now };
+    const mine = { pid: process.pid, hostname: os.hostname(), startedAt: 0 };
+    const remote = { ...mine, hostname: 'some-other-host' };
 
-    it('is false for a fresh lock held by a live process', () => {
-      expect(isLockStale(info, LOCK_STALE_MS, now + 1000)).toBe(false);
+    it('trusts the pid of a lock from this host, whatever its age', () => {
+      expect(isLockStale({ info: mine, mtimeMs: 0 }, LOCK_STALE_MS, now)).toBe(false);
     });
 
-    it('is true once the lock is older than the stale age', () => {
-      expect(isLockStale(info, LOCK_STALE_MS, now + LOCK_STALE_MS + 1)).toBe(true);
+    it('goes by the mtime of a lock from another host', () => {
+      const fresh = { info: remote, mtimeMs: now - 1000 };
+      const old = { info: remote, mtimeMs: now - LOCK_STALE_MS - 1 };
+      expect(isLockStale(fresh, LOCK_STALE_MS, now)).toBe(false);
+      expect(isLockStale(old, LOCK_STALE_MS, now)).toBe(true);
     });
   });
 });

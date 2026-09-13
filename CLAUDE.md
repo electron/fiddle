@@ -33,7 +33,33 @@ Run from the repo root.
 - `yarn typecheck` (`tsc -b`), `yarn lint`, `yarn format`.
 - `yarn test`: every Vitest project (`core`, `app:node`, `app:jsdom`). For one project: `yarn vitest run --project app:node`.
 - `yarn package`, `yarn make`: Forge 8, output in `packages/app/out/`.
-- `yarn fiddle` (headless CLI) and `yarn test:e2e` are placeholders for now.
+- `yarn fiddle` (headless CLI) is a placeholder for now.
+- `yarn test:e2e`, `yarn driver <command>`: end-to-end tests and the interactive driver. See "E2E" below.
+
+## E2E
+
+The full guide, with a template spec, is in `packages/app/e2e/README.md`.
+
+- **Run.** `yarn test:e2e` builds the test build once (`packages/app/out/test-build`, Vite mode `test`), then runs every `packages/app/e2e/*.e2e.ts` in parallel forks.
+  - Each spec file gets its own app, temp dir, fixture server and Xvfb display. openbox runs on the display when installed.
+  - Run it outside the Bash sandbox.
+  - `yarn test:e2e smoke` runs one file. `FIDDLE_E2E_SKIP_BUILD=1` reuses the last build, and `FIDDLE_E2E_VERBOSE=1` echoes the app's output.
+- **Explore.** Start with `yarn driver launch`, then run `snapshot`, `click button Settings`, `type`, `press Enter`, `screenshot`, `logs` or `eval-hook`, and finish with `yarn driver quit`. Every command prints JSON, and the app stays up between commands. The full list is in the header of `packages/app/tools/driver.ts`.
+- **Write a spec.** `const app = useApp()`, from `e2e/harness.ts`:
+  - Find elements by role and name, for example `app().click(role('button', 'Run'))`. Queries auto-wait, so never sleep.
+  - `runCommand(id)` runs a command, `stores()` reads state, and `queueDialog()` answers the next native dialog.
+  - Tag each test with `@feature <id>` for `yarn features-coverage`.
+- **Test mode** (`src/main/test-mode.ts`) is on only in test builds launched with `FIDDLE_TEST_MODE=1`, which the launcher sets. Every slice must use:
+  - `getEndpoints()` for every network URL (`src/shared/endpoints.ts`). In test mode these point at the fixture server in `e2e/fixtures/`, and any non-loopback request fails the test.
+  - `getCacheRoot()` for the `core` cache.
+  - `isTestMode()`, or `testFlags().updates`, `.sentry`, `.firstRunPrompts` and `.tour`, to skip what tests must not trigger.
+  - Native dialogs through Electron's `dialog` module, so the driver can script them.
+  - `shell`, protocol, recent-document and notification calls through Electron as usual. Test mode records and stubs them.
+- **Test hooks.** A renderer hook goes on `window.__fiddleTest` under `import.meta.env.MODE === 'test'`. A main hook uses `registerMainTestHook()` under `TEST_BUILD`. Either way, release builds compile it out. `yarn workspace electron-fiddle driver:release-check` verifies that.
+- **Harness internals.** The harness is `src/main/test-driver/` and is compiled in only when `__FIDDLE_TEST_BUILD__` is set:
+  - it serves a socket at `ELECTRON_FIDDLE_DRIVER_SOCKET`;
+  - it drives the page through CDP (`webContents.debugger`) and `sendInputEvent`;
+  - it owns `webRequest.onBeforeRequest`, `onCompleted` and `onErrorOccurred` on every session.
 
 ## Dev differences
 

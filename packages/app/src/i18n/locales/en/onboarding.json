@@ -1,0 +1,134 @@
+{
+  "offerTitle": {
+    "message": "Welcome to Electron Fiddle",
+    "description": "Title of the card that offers the onboarding tour on first launch.",
+    "maxLength": 40
+  },
+  "offerBody": {
+    "message": "Take a one-minute tour of the window?",
+    "description": "Body of the card that offers the onboarding tour on first launch."
+  },
+  "start": {
+    "message": "Take the tour",
+    "description": "Button that starts the onboarding tour.",
+    "maxLength": 20
+  },
+  "notNow": {
+    "message": "Skip",
+    "description": "Button that declines the onboarding tour. It won't be offered again, but stays in the Help menu.",
+    "maxLength": 20
+  },
+  "label": {
+    "message": "Welcome tour",
+    "description": "Accessible name of the onboarding tour's step card."
+  },
+  "stepCount": {
+    "message": "{{current}} of {{total}}",
+    "description": "Progress caption on a tour step, such as \"2 of 6\"."
+  },
+  "skipTour": {
+    "message": "Skip tour",
+    "description": "Button on a tour step that ends the tour.",
+    "maxLength": 20
+  },
+  "back": {
+    "message": "Back",
+    "description": "Button on a tour step that goes to the previous step.",
+    "maxLength": 12
+  },
+  "next": {
+    "message": "Next",
+    "description": "Button on a tour step that goes to the next step.",
+    "maxLength": 12
+  },
+  "done": {
+    "message": "Done",
+    "description": "Button on the last tour step that ends the tour.",
+    "maxLength": 12
+  },
+  "editorTitle": {
+    "message": "Write your fiddle",
+    "description": "Tour step title, pointing at the code editor."
+  },
+  "editorBody": {
+    "message": "Each file of your Electron app has its own tab. Your changes are kept as you type.",
+    "description": "Tour step body, pointing at the code editor."
+  },
+  "versionTitle": {
+    "message": "Choose an Electron version",
+    "description": "Tour step title, pointing at the version picker in the title bar."
+  },
+  "versionBody": {
+    "message": "Pick any release. Fiddle downloads it the first time you run it.",
+    "description": "Tour step body, pointing at the version picker in the title bar."
+  },
+  "runTitle": {
+    "message": "Run your fiddle",
+    "description": "Tour step title, pointing at the Run button."
+  },
+  "runBody": {
+    "message": "Starts Electron with your code. Press it again to stop.",
+    "description": "Tour step body, pointing at the Run button."
+  },
+  "publishTitle": {
+    "message": "Share your fiddle",
+    "description": "Tour step title, pointing at the Publish button."
+  },
+  "publishBody": {
+    "message": "Publish it as a GitHub gist, and anyone can open it in Fiddle.",
+    "description": "Tour step body, pointing at the Publish button."
+  },
+  "consoleTitle": {
+    "message": "Watch the output",
+    "description": "Tour step title, pointing at the console below the editor."
+  },
+  "consoleBody": {
+    "message": "Logs from the main process and every renderer show up here.",
+    "description": "Tour step body, pointing at the console below the editor."
+  },
+  "sidebarTitle": {
+    "message": "Files and packages",
+    "description": "Tour step title, pointing at the sidebar."
+  },
+  "sidebarBody": {
+    "message": "Open, add and hide files, and add the npm packages your fiddle needs.",
+    "description": "Tour step body, pointing at the sidebar."
+  },
+  "basicsTitle": {
+    "message": "New to Electron?",
+    "description": "Title of the last main tour step, which offers an optional walk through a fiddle's files."
+  },
+  "basicsBody": {
+    "message": "Take a quick look at what each file of a fiddle does.",
+    "description": "Body of the last main tour step, which offers an optional walk through a fiddle's files."
+  },
+  "basicsStart": {
+    "message": "Show me",
+    "description": "Button that starts the optional Electron basics part of the tour.",
+    "maxLength": 20
+  },
+  "mainTitle": {
+    "message": "The main process",
+    "description": "Electron basics tour step title about main.js."
+  },
+  "mainBody": {
+    "message": "main.js starts your app and opens its windows. It runs in Node.js and can use every Electron API.",
+    "description": "Electron basics tour step body about main.js. Keep file names as they are."
+  },
+  "htmlTitle": {
+    "message": "The page",
+    "description": "Electron basics tour step title about index.html."
+  },
+  "htmlBody": {
+    "message": "index.html is the page your window shows. It loads the renderer script, like a web page does.",
+    "description": "Electron basics tour step body about index.html. Keep file names as they are."
+  },
+  "rendererTitle": {
+    "message": "The renderer process",
+    "description": "Electron basics tour step title about renderer.js."
+  },
+  "rendererBody": {
+    "message": "renderer.js runs inside the page. It talks to the main process through the preload script.",
+    "description": "Electron basics tour step body about renderer.js. Keep file names as they are."
+  }
+}
