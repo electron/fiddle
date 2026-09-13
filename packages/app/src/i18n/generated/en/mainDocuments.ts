@@ -15,8 +15,10 @@ export default {
   "open": "Open",
   "saveFolderTitle": "Choose a folder for the fiddle",
   "overwriteMessage": "Replace the files in “{{folder}}”?",
-  "overwriteDetail": "The folder already contains {{files}}.",
+  "overwriteDetail": "Saving replaces or deletes these files: {{files}}.",
   "replace": "Replace",
+  "busyMessage": "Stop the fiddle first",
+  "busyDetail": "This window is running, bisecting or packaging its fiddle. Stop that before you open another fiddle here.",
   "addFileMessage": "Add “{{name}}” to the fiddle?",
   "addFileDetail": "Only add files you expect this gist to contain.",
   "add": "Add",
@@ -55,5 +57,8 @@ export default {
   "restore": "Restore",
   "discardDrafts": "Discard",
   "noRecent": "No recent folders",
-  "clearRecent": "Clear recent"
+  "clearRecent": "Clear recent",
+  "linkSignInMessage": "Sign in to GitHub to open this gist?",
+  "linkSignInDetail": "GitHub couldn't find this gist. If it's private, it opens once you sign in.",
+  "signIn": "Sign in"
 } as const;

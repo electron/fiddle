@@ -1,6 +1,7 @@
-/** The versioned `core` cache (REQUIREMENTS §5): `<OS cache dir>/Electron Fiddle/cache-v1/`. */
-import os from 'node:os';
+/** The versioned `core` cache (REQUIREMENTS §5): `<OS cache dir>/Electron Fiddle/cache-v1/`, or `<test dir>/cache` in test mode. */
 import path from 'node:path';
+
+import { getCacheRoot } from '../test-mode';
 
 export interface CachePaths {
   root: string;
@@ -14,17 +15,8 @@ export interface CachePaths {
   types: string;
 }
 
-export function osCacheDir(
-  platform: NodeJS.Platform = process.platform,
-  env: NodeJS.ProcessEnv = process.env,
-  home: string = os.homedir(),
-): string {
-  if (platform === 'darwin') return path.join(home, 'Library', 'Caches');
-  if (platform === 'win32') return env.LOCALAPPDATA || path.join(home, 'AppData', 'Local');
-  return env.XDG_CACHE_HOME || path.join(home, '.cache');
-}
-
-export function cachePaths(root = path.join(osCacheDir(), 'Electron Fiddle', 'cache-v1')): CachePaths {
+/** Call after main's entry has run, like `getCacheRoot()`. */
+export function cachePaths(root = getCacheRoot()): CachePaths {
   return {
     root,
     releases: path.join(root, 'releases.json'),

@@ -25,7 +25,7 @@ export interface WindowSink {
 }
 
 export type AppPatch = Partial<Omit<AppState, 'rev'>>;
-export type WindowPatch = Partial<Omit<WindowState, 'rev' | 'windowId'>>;
+type WindowPatch = Partial<Omit<WindowState, 'rev' | 'windowId'>>;
 export type WindowInit = Omit<WindowState, 'rev' | 'windowId'>;
 
 /** `app` for an App change, otherwise the ID of the window that changed. */

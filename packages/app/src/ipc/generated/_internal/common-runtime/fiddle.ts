@@ -101,10 +101,6 @@ if (!(value.length >= 1)) return false;
 if (!(value.length <= 256)) return false;
   return true;
 }
-import { nameListSchema } from "../../../../shared/stores.js";
-export function $eipc_validator$_NameList(value: unknown) {
-  return nameListSchema.safeParse(value).success;
-}
 import { releaseListSchema } from "../../../../shared/stores.js";
 export function $eipc_validator$_ReleaseList(value: unknown) {
   return releaseListSchema.safeParse(value).success;
@@ -158,10 +154,6 @@ if (!(value.length <= 32)) return false;
 const $eipc_validator$_GitHubCredentialStorage_values = new Set(["encrypted","weak","unavailable"]);
 export function $eipc_validator$_GitHubCredentialStorage(value: any): boolean {
   return $eipc_validator$_GitHubCredentialStorage_values.has(value);
-}
-const $eipc_validator$_GistDialogKind_values = new Set(["publish","open","history"]);
-export function $eipc_validator$_GistDialogKind(value: any): boolean {
-  return $eipc_validator$_GistDialogKind_values.has(value);
 }
 export function $eipc_validator$_GitHubSignInResult(value: any): boolean {
   if (!value || typeof value !== 'object') return false;

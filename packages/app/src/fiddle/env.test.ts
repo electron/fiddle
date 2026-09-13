@@ -62,12 +62,25 @@ describe('parseEnvEntries', () => {
 });
 
 describe('blocked user keys', () => {
-  it('blocks LD_PRELOAD and every DYLD_ variable', () => {
-    for (const key of ['LD_PRELOAD', 'DYLD_INSERT_LIBRARIES', 'DYLD_FRAMEWORK_PATH', 'DYLD_LIBRARY_PATH', 'DYLD_ANYTHING']) {
+  it('blocks every LD_ and DYLD_ variable, as core does', () => {
+    const keys = ['LD_PRELOAD', 'LD_LIBRARY_PATH', 'ld_audit', 'DYLD_INSERT_LIBRARIES', 'DYLD_LIBRARY_PATH', 'dyld_anything'];
+    for (const key of keys) expect(isBlockedUserEnvKey(key)).toBe(true);
+    expect(isBlockedUserEnvKey('NODE_ENV')).toBe(false);
+    expect(isBlockedUserEnvKey('OLD_PATH')).toBe(false);
+    expect(parseEnvEntries(keys.map((key) => `${key}=x`), 'linux')).toEqual({ env: {}, invalid: [], blocked: keys });
+  });
+
+  it('blocks NODE_OPTIONS and ELECTRON_RUN_AS_NODE, which change what Electron runs', () => {
+    for (const key of ['NODE_OPTIONS', 'node_options', 'ELECTRON_RUN_AS_NODE', 'Electron_Run_As_Node']) {
       expect(isBlockedUserEnvKey(key)).toBe(true);
     }
-    expect(isBlockedUserEnvKey('LD_LIBRARY_PATH')).toBe(false);
-    expect(isBlockedUserEnvKey('NODE_ENV')).toBe(false);
+    expect(isBlockedUserEnvKey('NODE_OPTIONS_X')).toBe(false);
+    expect(isBlockedUserEnvKey('ELECTRON_ENABLE_LOGGING')).toBe(false);
+    expect(parseEnvEntries(['NODE_OPTIONS=--require /tmp/x.js', 'ELECTRON_RUN_AS_NODE=1', 'A=1'], 'linux')).toEqual({
+      env: { A: '1' },
+      invalid: [],
+      blocked: ['NODE_OPTIONS', 'ELECTRON_RUN_AS_NODE'],
+    });
   });
 });
 

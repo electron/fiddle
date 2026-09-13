@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { githubApi } from '../../../ipc/renderer';
+import { githubApi, windowApi } from '../../../ipc/renderer';
 import {
   Menu,
   MenuItem,
@@ -26,8 +26,10 @@ import {
 /**
  * The title bar's Publish capsule. With no gist loaded it publishes; once a
  * gist is loaded it opens the gist menu. It also hosts the gist dialogs and
- * answers the gist commands (`GitHub.OpenDialog`).
+ * answers the gist commands (`Window.Command`).
  */
+const DIALOGS = { 'gist.open': 'open', 'gist.history': 'history', 'gist.signIn': 'sign-in' } as const;
+
 export function PublishButton() {
   const { t } = useTranslation('gists');
   const login = useGitHubLogin();
@@ -41,10 +43,9 @@ export function PublishButton() {
 
   useEffect(
     () =>
-      githubApi.onOpenDialog((kind) => {
-        const dialog = String(kind);
-        if (dialog === 'publish') requestPublish(loginRef.current);
-        else if (dialog === 'history' || dialog === 'open') showGistDialog({ kind: dialog });
+      windowApi.onCommand((id) => {
+        if (id === 'gist.publish') requestPublish(loginRef.current);
+        else if (Object.hasOwn(DIALOGS, id)) showGistDialog({ kind: DIALOGS[id as keyof typeof DIALOGS] });
       }),
     [],
   );

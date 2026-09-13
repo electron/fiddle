@@ -7,7 +7,7 @@
 import { useSyncExternalStore } from 'react';
 
 import type { WindowLayout, WindowState } from '../../shared/stores';
-import { documentsApi, useWindowStore } from '../../ipc/renderer';
+import { documentsApi } from '../../ipc/renderer';
 import { showToast } from '../../ui';
 
 type Apply = (state: WindowState) => WindowState;
@@ -47,12 +47,13 @@ export function change(apply: Apply, call: () => Promise<number>, errorTitle: st
   );
 }
 
-/** The Window store with pending changes on top, or null before it's ready. */
-export function useWindowState(): WindowState | null {
-  const store = useWindowStore();
+/**
+ * `base` (the Window store) with pending changes on top, or null before it's
+ * ready. Components read it through `useWindowState()` in `renderer/state.ts`.
+ */
+export function useWithPending(base: WindowState | null): WindowState | null {
   const list = useSyncExternalStore(subscribe, () => pending);
-  if (store.state !== 'ready') return null;
-  const base = store.result;
+  if (!base) return null;
   const live = list.filter((p) => p.rev === null || p.rev > base.rev);
   if (live.length !== list.length) queueMicrotask(() => setPending(pending.filter((p) => p.rev === null || p.rev > base.rev)));
   return live.reduce((state, p) => p.apply(state), base);

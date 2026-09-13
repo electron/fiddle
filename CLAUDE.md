@@ -33,7 +33,7 @@ Run from the repo root.
 - `yarn typecheck` (`tsc -b`), `yarn lint`, `yarn format`.
 - `yarn test`: every Vitest project (`core`, `app:node`, `app:jsdom`). For one project: `yarn vitest run --project app:node`.
 - `yarn package`, `yarn make`: Forge 8, output in `packages/app/out/`.
-- `yarn fiddle` (headless CLI) is a placeholder for now.
+- `yarn fiddle <command>`: the headless CLI against the dev build. See "Headless CLI" below.
 - `yarn test:e2e`, `yarn driver <command>`: end-to-end tests and the interactive driver. See "E2E" below.
 
 ## E2E
@@ -74,22 +74,31 @@ These apply only to `yarn start`, on an unpackaged app. `yarn start:xvfb` and pa
 
 Paths below are in `packages/app/`.
 
-- `src/main/index.ts`: main entry. Registers the scheme, enables the sandbox and runs startup.
+- `src/main/index.ts`: main entry and composition root.
+  - Before `ready`: Squirrel events, the headless CLI, the test harness, crash reporting, the scheme and sandbox, then the single-instance lock and deep-link queue. The harness comes before the lock, because it moves userData.
+  - `main()` runs six numbered steps: disk (logs, then the one-time import, before any store), state (settings, i18n, `StateHub`, flush on quit), security and protocol, services, commands and menu, then platform and windows.
+- `src/main/services.ts`: `createServices()` creates every service once, with explicit dependencies: versions, types, runs, bisect, GitHub, npm, modules, onboarding and the command registry. It also calls `initDocuments({ versions, github, … })`. Main passes the one `Services` object down. Documents (`src/main/documents/service.ts`) stays a module, and other slices call its exports.
 - `src/main/state-hub.ts`: the `StateHub` holds the `App` and `Window` stores, bumps `rev` and fans pushes out. It's the only caller of `update*Store`. Store schemas and types live in `src/shared/stores.ts`.
 - IPC:
   - The schema is `src/ipc/fiddle.eipc`, generated into `src/ipc/generated/`, which is committed.
-  - Main binds each window in `src/main/ipc.ts` through `implement()` from `src/ipc/main.ts`.
+  - Main binds each window in `src/main/ipc.ts`. `bindWindowIpc` calls each slice's `bind<Slice>Ipc({ contents, windowId, services })`, which binds through `implement()` from `src/ipc/main.ts`.
   - The renderer imports only `src/ipc/renderer.ts`: `appApi`, `windowApi`, `useAppStore` and `useWindowStore`.
+  - Main has one channel to a window: the `Window.Command` event, sent with `sendWindowCommand(windowId, id)` from `src/main/windows.ts`. Renderers listen with `windowApi.onCommand`. It carries the forwarded commands (view, editor, palette, tour, `gist.publish`, `gist.open`, `gist.history` and `bisect.toggle`) and `gist.signIn`.
   - Errors cross IPC via `src/shared/error-transport.ts`.
 - Commands:
   - Definitions: `src/shared/commands.ts`.
   - Registry: `src/main/commands.ts`.
-  - Handlers: `src/main/app-commands.ts`.
-  - Native menu: `src/main/menu.ts`.
+  - Handlers: all in `src/main/app-commands.ts`, in `registerCommands(registry, services)`. Handlers that act in the window are in its `FORWARDED` list.
+  - Native menu: `src/main/menu.ts`. It's rebuilt only when enablement, keybindings, recent folders, the locale or the focused window change.
   - The renderer calls `windowApi.RunCommand(id)`.
 - Windows:
-  - `src/main/window.ts`: Lucent window options, web preferences, and showing the window on `ReportReady`.
-  - `src/main/windows.ts`: maps `windowId` to its `BrowserWindow`.
+  - `src/main/window.ts`: `createAppWindow()`. It sets Lucent window options and web preferences, calls Documents' `attachWindow` (close prompt, focus tracking, dropped folders), binds IPC, and shows the window on `ReportReady`.
+  - `src/main/windows.ts`: maps `windowId` to its `BrowserWindow`, and sends `Window.Command`.
+  - `src/main/dialogs.ts`: native dialogs (`messageBox`, `confirm`, `pickFolder`, `pickFile` and `pickSave`), modal to a window given by `windowId` or `BrowserWindow`.
+- Persistence:
+  - `src/main/persistence/json-store.ts`: `createJsonStore()` for every JSON file, and `writeAtomic()` for any other file main replaces.
+  - `lifecycle.ts` holds quit until pending writes are flushed.
+  - `state.json` is Documents' (`getStateStore()`). It also holds onboarding (`tourDone`, `crashNoticeShown`).
 - Security:
   - `src/main/protocol.ts` and `bundle.ts`: `app://` serves only files in `bundle-manifest.json`.
   - `csp.ts`: the CSP. Add a Trusted Types policy name there before calling `trustedTypes.createPolicy`.
@@ -102,3 +111,25 @@ Paths below are in `packages/app/`.
   - `forge.config.ts`.
   - `vite.{main,preload,renderer}.config.mts`, each runnable with plain `vite build -c`.
   - `tools/generate.mjs` and `tools/start-headless.mjs`.
+
+## Headless CLI
+
+REQUIREMENTS §7. The code is `packages/app/src/main/cli/`.
+
+- **Run.** `yarn fiddle <command> [--json]` builds main in development mode, then runs `electron <app> --headless <command>` in your directory (`packages/app/tools/fiddle-cli.mjs`). `FIDDLE_CLI_SKIP_BUILD=1` reuses the last build, and `FIDDLE_CLI_VERBOSE=1` shows main's logs on stderr. Run `yarn generate` first if the catalogs changed. An installed app runs `electron-fiddle --headless <command>`.
+  - Run it outside the Bash sandbox. Headless mode needs no display, but a fiddle that opens windows does: use `xvfb-run -a yarn fiddle run ...`, with `FIDDLE_DEV_ELECTRON_FLAGS=--no-sandbox` as root.
+  - Commands: `run`, `bisect`, `versions list|download|remove`, `gist load|publish|update|delete|history`, `export`, `package`, `make`. `yarn fiddle --help` and `<command> --help` list them and their options.
+- **Startup.** `main/index.ts` checks for `--headless` first and calls `startHeadless()`. It never takes the single-instance lock, opens no windows, and skips the migration, updates, Sentry and the app's stores. Options come from flags, with `defaultSettings` as defaults. It shares the core cache (`getCacheRoot()`).
+- **Descriptors.** `descriptors.ts` has one descriptor per command: a zod input schema, a description key, an output schema and error codes. `argv.ts` builds the `parseArgs` options, the validation and `--help` from it. Positional fields are listed in `positionals`, and every other field is a flag (`electronPath` becomes `--electron-path`). Help strings are `mainCli` keys `cmd<Command>` and `arg<Field>`. To add a command, add a descriptor, its strings, and a handler in `commands.ts`.
+- **Output.** `--json` writes JSON lines to stdout, each with `schemaVersion`: `log` and `output` events, then one `result` with `ok` and `data` or `error: { code, message }`. Without it, results go to stdout, and Fiddle's own lines and errors go to stderr. A fiddle's output goes to the stream it was written to.
+- **Exit codes.** `run` exits with the fiddle's code (128 + n for a signal). Errors exit with 64 (usage), 66 (not found), 69 (unavailable), 70 (internal), 75 (network), 77 (untrusted or unauthorized), 130 (interrupted) or 1.
+- **Trust.** `run`, `bisect`, `package` and `make` on a remote fiddle (a gist, or `electron:<tag>/<path>`) need `--trust` or a "y" at the TTY prompt. Without a TTY they fail with `untrusted` before anything runs. Remote fiddles install modules with install scripts off.
+- **Reuse.** The CLI calls the window-free pieces of each service:
+  - `documents/load.ts`: loading and saving;
+  - `run/process.ts`: run dir, spawn, wait and stop;
+  - `versions/service.ts`: `createInstaller`, `readReleaseList`, `fetchReleaseList`, `loadReleases`, `mirrorsFor`, `installRelease`, `installedExecPath`;
+  - `bisect/auto.ts`;
+  - `packaging/service.ts`: `forgeOptionsFor`, `forgeProject`, `runForgeTask`;
+  - `github/service.ts`: `gistFiles`, `publishGist`.
+
+  Network calls use `net.fetch`. `GITHUB_TOKEN` is the only token.

@@ -31,13 +31,13 @@ import path from 'node:path';
 import { log } from '../log';
 
 /** Anything with a zod-style object `shape`: each key is validated on its own. */
-export interface ObjectSchema {
+interface ObjectSchema {
   shape: Record<string, { safeParse(value: unknown): { success: boolean; data?: unknown; error?: unknown } }>;
 }
 
-export type Migration = (data: Record<string, unknown>) => Record<string, unknown>;
+type Migration = (data: Record<string, unknown>) => Record<string, unknown>;
 
-export interface JsonStoreOptions<T> {
+interface JsonStoreOptions<T> {
   /** Absolute path of the JSON file. */
   file: string;
   /** A loose object schema. Keys are validated one by one. */
@@ -94,10 +94,16 @@ function notify(notice: JsonStoreNotice): void {
 }
 
 const stores = new Set<JsonStore<unknown>>();
+let pendingWrites = 0;
 
 /** Flushes every store. Main awaits this before quitting. */
 export async function flushAll(): Promise<void> {
   await Promise.all([...stores].map((store) => store.flush()));
+}
+
+/** True while any store has a value that isn't on disk yet. */
+export function hasPendingWrites(): boolean {
+  return pendingWrites > 0;
 }
 
 const VERSION_KEY = 'schemaVersion';
@@ -130,7 +136,7 @@ export function createJsonStore<T>(options: JsonStoreOptions<T>): JsonStore<T> {
       const text = content();
       lastText = text;
       try {
-        await writeAtomic(file, text);
+        await writeAtomic(file, text, { backup: true });
         options.onWrite?.(text);
       } catch (error) {
         log.error('failed to write', file, error);
@@ -141,8 +147,11 @@ export function createJsonStore<T>(options: JsonStoreOptions<T>): JsonStore<T> {
   const schedule = (): void => {
     if (loaded.readOnly) return;
     dirty = true;
-    writing ??= drain().finally(() => {
+    if (writing) return;
+    pendingWrites++;
+    writing = drain().finally(() => {
       writing = undefined;
+      pendingWrites--;
     });
   };
 
@@ -290,22 +299,33 @@ export function corruptName(file: string, now = new Date()): string {
   return `${base}${suffix}.corrupt-${stamp}.json`;
 }
 
-async function writeAtomic(file: string, text: string): Promise<void> {
+/**
+ * Replaces `file` atomically: a temp file in the same folder (created with
+ * `mode`), fsync, rename (retried on Windows), then fsync the folder on POSIX.
+ * `backup` first copies the current file to `<file>.bak`.
+ */
+export async function writeAtomic(
+  file: string,
+  data: string | Uint8Array,
+  { mode, backup = false }: { mode?: number; backup?: boolean } = {},
+): Promise<void> {
   const dir = path.dirname(file);
   await fsp.mkdir(dir, { recursive: true });
   const temp = path.join(dir, `.${path.basename(file)}.${randomUUID()}.tmp`);
   try {
-    const handle = await fsp.open(temp, 'w');
+    const handle = await fsp.open(temp, 'w', mode);
     try {
-      await handle.writeFile(text, 'utf8');
+      await handle.writeFile(data);
       await handle.sync();
     } finally {
       await handle.close();
     }
-    try {
-      await fsp.copyFile(file, `${file}.bak`);
-    } catch (error) {
-      if ((error as NodeJS.ErrnoException).code !== 'ENOENT') throw error;
+    if (backup) {
+      try {
+        await fsp.copyFile(file, `${file}.bak`);
+      } catch (error) {
+        if ((error as NodeJS.ErrnoException).code !== 'ENOENT') throw error;
+      }
     }
     await renameWithRetry(temp, file);
   } catch (error) {

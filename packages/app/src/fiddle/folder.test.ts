@@ -5,7 +5,14 @@ import * as path from 'node:path';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
 import { ErrorCode } from '../shared/errors';
-import { findExistingSupportedFiles, GITIGNORE_CONTENT, readFiddleFolder, writeFiddleFolder } from './folder';
+import {
+  findExistingSupportedFiles,
+  findFilesToReplace,
+  GITIGNORE_CONTENT,
+  localPathFromFileUrl,
+  readFiddleFolder,
+  writeFiddleFolder,
+} from './folder';
 
 let dir: string;
 beforeEach(async () => {
@@ -147,5 +154,43 @@ describe('findExistingSupportedFiles', () => {
     expect(await findExistingSupportedFiles(path.join(dir, 'missing'))).toEqual([]);
     await put({ 'notes.md': 'x' });
     expect(await findExistingSupportedFiles(dir)).toEqual([]);
+  });
+});
+
+describe('findFilesToReplace', () => {
+  it('lists every file a save replaces or deletes, .gitignore included, ignoring case', async () => {
+    await put({ 'Main.js': 'x', 'gone.js': 'x', '.gitignore': 'x', 'notes.md': 'x', 'keep.js': 'x' });
+    const files = { 'main.js': 'new', 'gone.js': '', 'package.json': '{}' };
+    expect((await findFilesToReplace(dir, files)).sort()).toEqual(['.gitignore', 'Main.js', 'gone.js']);
+  });
+
+  it('refuses Windows device names before writing anything', async () => {
+    await expect(writeFiddleFolder(dir, { 'main.js': 'x', 'con.js': 'bad' })).rejects.toMatchObject({
+      details: { reason: 'reserved-name', name: 'con.js' },
+    });
+    expect(await readdir(dir)).toEqual([]);
+  });
+
+  it('is empty for a missing folder', async () => {
+    expect(await findFilesToReplace(path.join(dir, 'missing'), { 'main.js': 'x' })).toEqual([]);
+  });
+});
+
+describe('localPathFromFileUrl', () => {
+  it('turns local file URLs into paths', () => {
+    expect(localPathFromFileUrl('file:///home/me/fiddle', 'linux')).toBe('/home/me/fiddle');
+    expect(localPathFromFileUrl('file://localhost/home/me/fiddle', 'linux')).toBe('/home/me/fiddle');
+    expect(localPathFromFileUrl('file:///C:/Users/me/fiddle', 'win32')).toBe('C:\\Users\\me\\fiddle');
+  });
+
+  it.each([
+    'file://server/share/fiddle',
+    'file:////server/share/fiddle',
+    'file://192.168.0.1/share/fiddle',
+    'https://example.com/fiddle',
+    'not a url',
+  ])('refuses %j, which could reach another machine', (url) => {
+    expect(localPathFromFileUrl(url, 'win32')).toBeUndefined();
+    expect(localPathFromFileUrl(url, 'linux')).toBeUndefined();
   });
 });

@@ -57,6 +57,8 @@ export interface TreeRowProps {
   pill?: string;
   unsaved?: boolean;
   unsavedLabel?: string;
+  /** Text direction of the label, e.g. `ltr` for file names in a mirrored locale. */
+  labelDir?: 'ltr' | 'rtl' | 'auto';
   isDisabled?: boolean;
   /** Nested rows. */
   children?: ReactNode;
@@ -64,7 +66,18 @@ export interface TreeRowProps {
 }
 
 /** 28 tall, padding 0 8, radius-item, 16px icon with a 6px gap. */
-export function TreeRow({ id, label, icon = 'file', pill, unsaved, unsavedLabel, isDisabled, children, className }: TreeRowProps) {
+export function TreeRow({
+  id,
+  label,
+  icon = 'file',
+  pill,
+  unsaved,
+  unsavedLabel,
+  labelDir,
+  isDisabled,
+  children,
+  className,
+}: TreeRowProps) {
   return (
     <TreeItem id={id} textValue={label} isDisabled={isDisabled} className={cx(styles.row, className)}>
       <TreeItemContent>
@@ -76,7 +89,9 @@ export function TreeRow({ id, label, icon = 'file', pill, unsaved, unsavedLabel,
               </AriaButton>
             )}
             <Icon name={icon} className={styles.icon} />
-            <span className={styles.label}>{label}</span>
+            <span className={styles.label} dir={labelDir}>
+              {label}
+            </span>
             {pill && <span className={styles.pill}>{pill}</span>}
             {unsaved && <span className={styles.dot} aria-hidden="true" />}
             {unsaved && unsavedLabel && <VisuallyHidden>{`, ${unsavedLabel}`}</VisuallyHidden>}

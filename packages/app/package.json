@@ -12,8 +12,12 @@
   "scripts": {
     "postinstall": "install-electron",
     "generate": "node tools/generate.mjs",
+    "i18n:check": "node tools/i18n-check.mjs",
+    "i18n:translate": "node tools/i18n-translate.mjs",
+    "i18n:test": "node --test tools/i18n-translate.test.mjs",
     "start": "node tools/generate.mjs && electron-forge start",
     "start:xvfb": "node tools/generate.mjs && node tools/start-headless.mjs",
+    "fiddle": "node tools/fiddle-cli.mjs",
     "package": "electron-forge package",
     "make": "electron-forge make",
     "publish": "electron-forge publish",

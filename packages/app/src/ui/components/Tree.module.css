@@ -93,7 +93,7 @@
   border-radius: var(--lu-radius-capsule);
   background: var(--lu-spark-soft);
   color: var(--lu-spark);
-  font: 600 10.5px/16px var(--lu-font-sans);
+  font: var(--lu-type-pill);
 }
 
 .dot {

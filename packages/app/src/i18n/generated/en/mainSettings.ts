@@ -10,5 +10,10 @@ export default {
   "openFailed": "Couldn't open {{path}}: {{reason}}",
   "themeCopyName": "{{name}} copy",
   "lucentDark": "Lucent dark",
-  "lucentLight": "Lucent light"
+  "lucentLight": "Lucent light",
+  "importExecutionMessage": "Import settings that change how fiddles run?",
+  "importExecutionDetail": "These settings control where Electron is downloaded from and what every run starts with. Only import settings from a source you trust.",
+  "importEmpty": "none",
+  "importButton": "Import",
+  "cancel": "Cancel"
 } as const;

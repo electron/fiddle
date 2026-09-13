@@ -55,8 +55,10 @@ export function createTestState(testDir: string): TestState {
     inflight: new Set(),
     pendingIpc: 0,
     violation(message) {
-      if (!state.violations.includes(message)) state.violations.push(message);
-      state.mainLog.push(`[test] VIOLATION ${message}`);
+      if (state.violations.includes(message)) return;
+      state.violations.push(message);
+      // Through console.error so it's in mainLog and app-output.log alike.
+      console.error(`[fiddle-test] VIOLATION ${message}`);
     },
   };
   return state;

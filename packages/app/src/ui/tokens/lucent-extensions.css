@@ -51,6 +51,18 @@
   /* a hairline on the inside right edge (settings nav) */
   --lu-hairline-end: inset calc(-1 * var(--lu-size-hairline)) 0 0 var(--lu-line);
 
+  /* type the scale doesn't name, from the window anatomy and the handover's close-ups */
+  --lu-type-window-title: 650 13px/16px var(--lu-font-sans); --lu-type-window-title-tracking: -0.01em;
+  --lu-type-tab: 500 12.5px/16px var(--lu-font-sans);             /* tabs */
+  --lu-type-console-title: 600 12.5px/16px var(--lu-font-sans);   /* "Console" in its bar */
+  --lu-type-status: 500 11.5px/14px var(--lu-font-sans);          /* status bar, process labels */
+  --lu-type-hint: 400 12px/16px var(--lu-font-sans);              /* "Edited", key-cap hints */
+  --lu-type-lens: 400 12.5px/18px var(--lu-font-sans);            /* the error lens */
+  --lu-type-console: 400 12px/18px var(--lu-font-mono);           /* console rows */
+  --lu-type-console-process: 500 11px/18px var(--lu-font-sans);   /* the console's process column */
+  --lu-type-count: 600 10px/16px var(--lu-font-sans);             /* a tab's error count */
+  --lu-type-pill: 600 10.5px/16px var(--lu-font-sans);            /* a sidebar row's "1 error" */
+
   /* radii the scale doesn't name */
   --lu-radius-tooltip: 8px;
   --lu-radius-switch: 10px;

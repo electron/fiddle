@@ -93,8 +93,6 @@ describe('importOldApp', () => {
     });
     expect(settings).not.toHaveProperty('gistPublishAsRevision');
 
-    expect(await readJson('onboarding.json')).toEqual({ schemaVersion: 1, tourDone: true });
-
     const { builds } = (await readJson('local-builds.json')) as { builds: Record<string, string>[] };
     expect(builds.map(({ id: _id, ...rest }) => rest)).toEqual([
       { name: 'My build', path: '/src/electron/out/Testing', addedAt: '2023-11-14T22:13:20.000Z' },
@@ -125,6 +123,7 @@ describe('importOldApp', () => {
 
     expect(await readJson('state.json')).toEqual({
       schemaVersion: 1,
+      tourDone: true,
       importedFrom: { version: '1.0.0', at: '2026-09-13T12:00:00.000Z' },
     });
     expect(log.warn).toHaveBeenCalledWith('import: ignoring unknown localStorage keys', ['devtools-extension-state']);

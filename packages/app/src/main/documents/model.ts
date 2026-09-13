@@ -28,6 +28,8 @@ export interface Doc {
   fiddle: Fiddle;
   /** The files as last loaded, saved or published. `dirty` compares against it. */
   baseline: FileMap;
+  /** The modules as last loaded, saved or published: they're the saved `package.json`. */
+  baselineModules: Readonly<Record<string, string>>;
   /** Increases whenever a new fiddle, or a new set of names, replaces the mirror. */
   fiddleRev: number;
   activeFile: string | null;
@@ -51,6 +53,7 @@ export function emptyFiddleState(): FiddleState {
     activeFile: null,
     fiddleRev: 0,
     dirty: false,
+    dirtyFiles: [],
   };
 }
 
@@ -66,11 +69,18 @@ function firstVisible(fiddle: Fiddle): string | null {
 export function createDoc(
   fiddle: Fiddle,
   name: string,
-  options: { previous?: Doc; baseline?: FileMap; activeFile?: string | null; gistOwner?: string } = {},
+  options: {
+    previous?: Doc;
+    baseline?: FileMap;
+    baselineModules?: Readonly<Record<string, string>>;
+    activeFile?: string | null;
+    gistOwner?: string;
+  } = {},
 ): Doc {
   const doc: Doc = {
     fiddle,
     baseline: options.baseline ?? fiddle.files,
+    baselineModules: options.baselineModules ?? fiddle.modules,
     fiddleRev: (options.previous?.fiddleRev ?? 0) + 1,
     activeFile:
       options.activeFile && Object.hasOwn(fiddle.files, options.activeFile)
@@ -83,7 +93,29 @@ export function createDoc(
 }
 
 export function isDirty(doc: Doc): boolean {
-  return !sameFiles(doc.fiddle.files, doc.baseline);
+  return !sameFiles(doc.fiddle.files, doc.baseline) || !sameFiles(doc.fiddle.modules, doc.baselineModules);
+}
+
+/** The files whose text differs from the baseline (new files included), in display order. */
+export function dirtyFileNames(doc: Doc): string[] {
+  return fileNames(doc.fiddle).filter((name) => doc.fiddle.files[name] !== doc.baseline[name]);
+}
+
+/**
+ * Replaces the modules. A `normalized` change (a loaded `*` resolved to the
+ * latest version) moves the baseline along for modules the user hadn't
+ * changed, so it doesn't mark the fiddle dirty.
+ */
+export function docSetModules(doc: Doc, modules: Readonly<Record<string, string>>, normalized = false): Doc {
+  let baselineModules = doc.baselineModules;
+  if (normalized) {
+    const next = { ...baselineModules };
+    for (const [name, spec] of Object.entries(modules)) {
+      if (Object.hasOwn(next, name) && next[name] === doc.fiddle.modules[name]) next[name] = spec;
+    }
+    baselineModules = next;
+  }
+  return { ...doc, baselineModules, fiddle: { ...doc.fiddle, modules: { ...modules } } };
 }
 
 /** True for an unedited default template, which a version change replaces. */
@@ -139,7 +171,7 @@ export function docSetActiveFile(doc: Doc, name: string): Doc {
 
 /** After a save or publish: the mirror becomes the baseline. */
 export function markSaved(doc: Doc, source: Fiddle['source']): Doc {
-  return { ...doc, fiddle: { ...doc.fiddle, source }, baseline: doc.fiddle.files };
+  return { ...doc, fiddle: { ...doc.fiddle, source }, baseline: doc.fiddle.files, baselineModules: doc.fiddle.modules };
 }
 
 /** The fiddle part of the `Window` store. */
@@ -163,5 +195,6 @@ export function toFiddleState(doc: Doc): FiddleState {
     activeFile: doc.activeFile,
     fiddleRev: doc.fiddleRev,
     dirty: isDirty(doc),
+    dirtyFiles: dirtyFileNames(doc),
   };
 }

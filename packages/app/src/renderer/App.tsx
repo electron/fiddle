@@ -1,22 +1,25 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { I18nProvider } from 'react-aria-components';
 import { useTranslation } from 'react-i18next';
 
-import { pickLocale } from '../i18n';
-import { settingsApi, useAppStore, useWindowStore, windowApi } from '../ipc/renderer';
+import { useSyncLocale } from '../i18n/renderer';
+import { settingsApi, windowApi } from '../ipc/renderer';
 import { BUILTIN_THEME, type ThemeData } from '../shared/settings';
 import { DialogHost, Toaster } from '../ui';
+import { useModelsSynced } from './editor/models';
 import { CommandPalette } from './features/palette/CommandPalette';
 import { StorageNotices } from './features/settings/StorageNotices';
 import { Shell } from './shell/Shell';
 import { useAppearance } from './shell/theme';
+import { useAppState, useWindowState } from './state';
 
 /** The window: the shell, plus the app-wide mounts (dialogs, toasts, palette). */
 export function App() {
   const { t, i18n } = useTranslation('shell');
-  const app = useAppStore();
-  const win = useWindowStore();
-  const appState = app.state === 'ready' ? app.result : null;
-  const ready = appState !== null && win.state === 'ready';
+  const appState = useAppState() ?? null;
+  const win = useWindowState();
+  const modelsSynced = useModelsSynced();
+  const ready = appState !== null && win !== null && modelsSynced;
   const material = appState?.material;
   const locale = appState?.locale;
 
@@ -46,34 +49,33 @@ export function App() {
     if (material) document.documentElement.classList.toggle('lu-no-material', material === 'none');
   }, [material]);
 
-  // The language switches live when the setting changes.
-  useEffect(() => {
-    if (!locale) return;
-    document.documentElement.lang = locale;
-    const next = pickLocale([locale]);
-    if (i18n.language !== next) void i18n.changeLanguage(next);
-  }, [locale, i18n]);
+  // The language switches live when the setting changes; `<html lang dir>` follows it.
+  useSyncLocale(locale);
 
   // Main shows the window once we report ready: after the first commit with
-  // both stores, plus a frame so the shell has painted. Never shown blank.
+  // both stores and the editor text, plus two frames so the shell and Monaco
+  // (which renders on its own animation frame) have painted. Never shown blank.
   const reported = useRef(false);
   useEffect(() => {
     if (!ready || reported.current) return;
     reported.current = true;
-    requestAnimationFrame(() => {
-      windowApi.ReportReady().catch((error: unknown) => {
-        console.error('[fiddle] ReportReady failed', error);
-      });
-    });
+    requestAnimationFrame(() =>
+      requestAnimationFrame(() => {
+        windowApi.ReportReady().catch((error: unknown) => {
+          console.error('[fiddle] ReportReady failed', error);
+        });
+      }),
+    );
   }, [ready]);
 
+  // react-aria's built-in strings (hidden dismiss buttons and the like) follow the UI locale.
   return (
-    <>
+    <I18nProvider locale={i18n.language}>
       <Shell />
       <CommandPalette />
       <DialogHost />
       <Toaster closeLabel={t('dismiss')} aria-label={t('notifications')} />
       <StorageNotices />
-    </>
+    </I18nProvider>
   );
 }

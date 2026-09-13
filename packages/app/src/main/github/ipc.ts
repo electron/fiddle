@@ -1,34 +1,16 @@
-/**
- * Binds `interface GitHub` for one window and owns the one GitHubService.
- * The service is created with the first window, which also runs the startup
- * token check; the token stays in this process.
- */
-import path from 'node:path';
-
-import { app, clipboard, safeStorage, shell, type WebContents } from 'electron';
+/** Binds `interface GitHub` for one window. The token stays in this process. */
+import { BrowserWindow, clipboard } from 'electron';
 
 import { isGistId } from '../../fiddle/gist-id';
-import { GitHubClient, isValidTokenFormat } from '../../fiddle/github';
-import { GistDialogKind, GitHubCredentialStorage } from '../../ipc/generated/common/fiddle';
-import { GitHub, implement, type IGitHubDispatcher } from '../../ipc/main';
+import { isValidTokenFormat } from '../../fiddle/github';
+import { GitHubCredentialStorage } from '../../ipc/generated/common/fiddle';
+import { GitHub, implement } from '../../ipc/main';
 import { ErrorCode, FiddleError } from '../../shared/errors';
-import { setDocumentHooks } from '../documents/service';
-import { log } from '../log';
-import type { StateHub } from '../state-hub';
-import { getEndpoints } from '../test-mode';
-import { CredentialStore } from './credentials';
-import { createDocumentsBridge } from './documents-bridge';
-import { createGistPrefs } from './prefs';
-import { GitHubService } from './service';
+import type { IpcContext } from '../ipc';
+import { openExternalLink } from '../security';
 
 /** GitHub's new-token page with the `gist` scope prefilled. */
-export const NEW_TOKEN_URL = 'https://github.com/settings/tokens/new?scopes=gist&description=Electron%20Fiddle';
-
-const dialogKinds = {
-  publish: GistDialogKind.Publish,
-  open: GistDialogKind.Open,
-  history: GistDialogKind.History,
-} as const;
+const NEW_TOKEN_URL = 'https://github.com/settings/tokens/new?scopes=gist&description=Electron%20Fiddle';
 
 const storageKinds = {
   encrypted: GitHubCredentialStorage.Encrypted,
@@ -36,49 +18,21 @@ const storageKinds = {
   unavailable: GitHubCredentialStorage.Unavailable,
 } as const;
 
-let service: GitHubService | undefined;
-const dispatchers = new Map<string, IGitHubDispatcher>();
-
-function getService(hub: StateHub): GitHubService {
-  if (service) return service;
-  const created = new GitHubService({
-    store: new CredentialStore({
-      file: path.join(app.getPath('userData'), 'credentials', 'github'),
-      safeStorage,
-      platform: process.platform,
-    }),
-    createClient: (token) => {
-      const endpoints = getEndpoints();
-      return new GitHubClient({ token, apiBaseUrl: endpoints.githubApi, rawOrigins: [endpoints.gistRaw] });
-    },
-    documents: createDocumentsBridge(hub),
-    prefs: createGistPrefs(hub),
-    setLogin: (githubLogin) => hub.updateApp({ githubLogin }),
-    log,
-  });
-  service = created;
-  // Documents loads gists with the signed-in token, so private gists work.
-  setDocumentHooks({ github: () => created.client() });
-  created.init().catch((error: unknown) => log.error('GitHub startup check failed', error));
-  return created;
-}
-
-/** Asks a window to open a gist dialog (used by the gist commands). */
-export function openGistDialog(windowId: string | undefined, kind: keyof typeof dialogKinds): void {
-  if (windowId) dispatchers.get(windowId)?.dispatchOpenDialog(dialogKinds[kind]);
-}
-
-export function bindGitHubIpc(contents: WebContents, windowId: string, hub: StateHub): void {
-  const github = getService(hub);
-  const dispatcher = implement(GitHub, contents, {
+export function bindGitHubIpc({ contents, windowId, services: { github } }: IpcContext): void {
+  implement(GitHub, contents, {
     GetCredentialStorage: async () => storageKinds[await github.credentialStorage()],
     SignIn: (token, allowPlaintext) => github.signIn(token, allowPlaintext),
     SignOut: () => github.signOut(),
-    ReadClipboardToken: async () => {
-      const text = (await clipboard.readText()).trim();
-      return isValidTokenFormat(text) ? text : null;
+    // Main reads the clipboard itself, so a token there never reaches the renderer (§4).
+    SignInFromClipboard: async (allowPlaintext) => {
+      const token = (await clipboard.readText()).trim();
+      if (!isValidTokenFormat(token)) {
+        throw new FiddleError(ErrorCode.invalidArgument, 'There is no token on the clipboard', { reason: 'bad-format' });
+      }
+      return github.signIn(token, allowPlaintext);
     },
-    OpenNewTokenPage: () => shell.openExternal(NEW_TOKEN_URL),
+    HasClipboardToken: async () => isValidTokenFormat((await clipboard.readText()).trim()),
+    OpenNewTokenPage: () => openExternalLink(NEW_TOKEN_URL, BrowserWindow.fromWebContents(contents) ?? undefined),
     TakeNotice: () => github.takeNotice() ?? null,
     Publish: (description, isPublic) => github.publish(windowId, { description, isPublic }),
     Update: () => github.update(windowId),
@@ -102,6 +56,4 @@ export function bindGitHubIpc(contents: WebContents, windowId: string, hub: Stat
       clipboard.writeText(github.shareLink(id));
     },
   });
-  dispatchers.set(windowId, dispatcher);
-  contents.once('destroyed', () => dispatchers.delete(windowId));
 }

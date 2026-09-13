@@ -40,3 +40,13 @@ export function isUntrustedOrigin(origin: FiddleOrigin): boolean {
 export function needsApproval(origin: FiddleOrigin, approvedOrigin?: string): boolean {
   return isUntrustedOrigin(origin) && formatOrigin(origin) !== approvedOrigin;
 }
+
+/**
+ * The origin for a fiddle reloaded from disk (session restore, reopening a
+ * folder). A folder load reports `local`, but a saved untrusted fiddle stays
+ * untrusted until the user approves it: the first untrusted `remembered`
+ * origin wins over `loaded`.
+ */
+export function restoredOrigin(loaded: FiddleOrigin, ...remembered: (FiddleOrigin | undefined)[]): FiddleOrigin {
+  return remembered.find((origin) => origin !== undefined && isUntrustedOrigin(origin)) ?? loaded;
+}

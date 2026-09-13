@@ -7,23 +7,21 @@
 import { app, powerMonitor } from 'electron';
 
 import { log } from '../log';
-import { flushAll } from './json-store';
+import { flushAll, hasPendingWrites } from './json-store';
 
 export function installFlushOnExit(): void {
-  let flushed = false;
+  // `app.quit()` runs on a later turn, never inside a quit event's own
+  // dispatch, where Electron would drop it.
   const flushThenQuit = () => {
     flushAll()
       .catch((error: unknown) => log.error('flush on exit failed', error))
-      .finally(() => {
-        flushed = true;
-        app.quit();
-      });
+      .finally(() => setImmediate(() => app.quit()));
   };
 
   // `will-quit` comes after every window has closed, so state written while
-  // windows close is included.
+  // windows close is included. Once nothing is pending, the quit goes ahead.
   app.on('will-quit', (event) => {
-    if (flushed) return;
+    if (!hasPendingWrites()) return;
     event.preventDefault();
     flushThenQuit();
   });

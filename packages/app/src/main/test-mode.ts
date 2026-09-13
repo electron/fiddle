@@ -45,7 +45,7 @@ export function testFlags(): {
 }
 
 /** The per-run temp directory (userData, cache, logs, artifacts). Test mode only. */
-export function getTestDir(): string | undefined {
+function getTestDir(): string | undefined {
   return isTestMode() ? process.env.FIDDLE_TEST_DIR : undefined;
 }
 
@@ -85,7 +85,7 @@ export function getEndpoints(): Endpoints {
   return fixtureEndpoints(process.env.FIDDLE_TEST_FIXTURE_URL ?? 'http://127.0.0.1:9');
 }
 
-export type MainTestHook = (...args: unknown[]) => unknown;
+type MainTestHook = (...args: unknown[]) => unknown;
 const mainTestHooks = new Map<string, MainTestHook>();
 
 /**

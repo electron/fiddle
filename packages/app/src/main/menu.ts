@@ -1,28 +1,75 @@
 /**
  * The native application menu, built from the shared command definitions.
- * Role items get explicit, translated labels. The menu is rebuilt when a store
- * changes or focus moves, so enablement follows the focused window.
+ * Role items get explicit, translated labels. The menu is rebuilt when
+ * something it shows changes (enablement, keybindings, recent folders,
+ * locale, the focused window), so enablement follows the focused window.
  */
 import { app, Menu, type MenuItemConstructorOptions } from 'electron';
 
-import { commands, type CommandId } from '../shared/commands';
+import { commandIds, commands, type CommandId } from '../shared/commands';
+import { SHOW_ME_EXAMPLES } from '../shared/examples';
 import { effectiveAccelerator, type Keybindings } from '../shared/settings';
 import type { Platform } from '../shared/stores';
 import type { CommandRegistry } from './commands';
-import { documentMenus } from './documents/commands';
-import { t } from './i18n';
+import {
+  clearRecentFolders,
+  currentTemplateName,
+  openFolderIn,
+  recentFolders,
+  showMeIn,
+  withErrorDialog,
+} from './documents/service';
+import { t, tm } from './i18n';
 import { log } from './log';
-import type { StateHub } from './state-hub';
+import type { Services } from './services';
 import { focusedWindowId, windowIdOf } from './windows';
 
 const separator: MenuItemConstructorOptions = { type: 'separator' };
 
-export function buildMenuTemplate(
+/** File → Open recent, from state.json's recent folders. */
+function openRecentMenu(): MenuItemConstructorOptions {
+  const td = tm('mainDocuments');
+  const recent = recentFolders();
+  return {
+    label: t('openRecent'),
+    submenu:
+      recent.length === 0
+        ? [{ label: td('noRecent'), enabled: false }]
+        : [
+            ...recent.map(
+              (dir): MenuItemConstructorOptions => ({
+                label: dir,
+                click: () => void withErrorDialog(focusedWindowId(), () => openFolderIn(focusedWindowId(), dir)),
+              }),
+            ),
+            separator,
+            { label: td('clearRecent'), click: () => clearRecentFolders() },
+          ],
+  };
+}
+
+/** File → Show me, with the focused window's example checked. */
+function showMeMenu(focused: string | undefined): MenuItemConstructorOptions {
+  const current = focused ? currentTemplateName(focused) : undefined;
+  return {
+    label: t('showMe'),
+    submenu: SHOW_ME_EXAMPLES.map(
+      (name): MenuItemConstructorOptions => ({
+        label: name,
+        type: 'radio',
+        checked: current === name,
+        click: () => void withErrorDialog(focusedWindowId(), () => showMeIn(focusedWindowId(), name)),
+      }),
+    ),
+  };
+}
+
+function buildMenuTemplate(
   registry: CommandRegistry,
   platform: Platform,
   focused: string | undefined,
-  /** Settings slice: the user's overrides; `null` unbinds. */
-  keybindings: Keybindings = {},
+  /** The user's overrides; `null` unbinds. */
+  keybindings: Keybindings,
 ): MenuItemConstructorOptions[] {
   const isMac = platform === 'darwin';
   const name = t('appMenu');
@@ -82,19 +129,18 @@ export function buildMenuTemplate(
     {
       label: t('file'),
       submenu: [
-        // Documents slice: File menu items.
         command('file.newFiddle'),
         command('file.newTest'),
         command('app.newWindow'),
         separator,
         command('file.open'),
-        documentMenus(focused).openRecent,
+        openRecentMenu(),
         separator,
         command('file.save'),
         command('file.saveAs'),
         command('file.saveAsForge'),
         separator,
-        documentMenus(focused).showMe,
+        showMeMenu(focused),
         separator,
         command('file.close'),
         ...(isMac ? [] : [separator, command('app.preferences'), separator, quit]),
@@ -130,7 +176,7 @@ export function buildMenuTemplate(
         { role: 'togglefullscreen', label: t('toggleFullScreen') },
       ],
     },
-    // Versions and run slice. F5 is a second, hidden accelerator for run.toggle.
+    // F5 is a second, hidden accelerator for run.toggle.
     {
       label: t('runMenu'),
       submenu: [
@@ -144,13 +190,11 @@ export function buildMenuTemplate(
       ],
     },
     { label: t('window'), submenu: windowItems },
-    // App UX slice: other slices add their Help items here.
     {
       role: 'help',
       label: t('help'),
       submenu: [
         command('help.showTour'),
-        // Platform slice: links, logs, diagnostics and (outside macOS) About.
         separator,
         command('help.fiddleRepository'),
         command('help.electronRepository'),
@@ -164,24 +208,29 @@ export function buildMenuTemplate(
   ];
 }
 
-export function installMenu(
-  registry: CommandRegistry,
-  hub: StateHub,
-  platform: Platform,
-): void {
+export function installMenu({ registry, hub, platform }: Services): void {
   let scheduled = false;
+  let shown: string | undefined;
   const refresh = () => {
     if (scheduled) return;
     scheduled = true;
     setImmediate(() => {
       scheduled = false;
-      const template = buildMenuTemplate(
-        registry,
-        platform,
-        focusedWindowId(),
-        hub.app.settings.keybindings,
-      );
-      Menu.setApplicationMenu(Menu.buildFromTemplate(template));
+      const focused = focusedWindowId();
+      const { keybindings } = hub.app.settings;
+      // Store changes come up to 10 times a second during downloads; rebuild
+      // only when something the menu shows has changed.
+      const key = JSON.stringify([
+        focused,
+        hub.app.locale,
+        keybindings,
+        recentFolders(),
+        focused && currentTemplateName(focused),
+        commandIds.filter((id) => registry.isEnabled(id, focused)),
+      ]);
+      if (key === shown) return;
+      shown = key;
+      Menu.setApplicationMenu(Menu.buildFromTemplate(buildMenuTemplate(registry, platform, focused, keybindings)));
     });
   };
   hub.onChange(refresh);

@@ -1,6 +1,11 @@
 /* Lucent: the in-house design system. Import global.css once from the renderer entry. */
 
+import utilities from './utilities.module.css';
+
 export { cx } from './cx';
+
+/** Visually hidden, still read by screen readers: live regions and spoken-only text. */
+export const srOnly = utilities.srOnly;
 export { Icon, iconNames, type IconName, type IconProps } from './icons/Icon';
 
 // Actions

@@ -5,12 +5,13 @@
  * message. Error rows are spark on spark-soft, and their location is a link
  * that reveals it in the editor. Auto-scrolls while at the bottom.
  */
-import { useLayoutEffect, useMemo, useRef, useState, type KeyboardEvent } from 'react';
+import { useLayoutEffect, useRef, useState, type KeyboardEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { useFormat } from '../../../i18n/renderer';
 import { runApi } from '../../../ipc/renderer';
 import type { OutputLine } from '../../../shared/stores';
-import { IconButton, SegmentedControl, TextField, Tooltip } from '../../../ui';
+import { Button, IconButton, SegmentedControl, StatusPill, TextField, Tooltip } from '../../../ui';
 import { revealLocation } from '../../editor/runtime-errors';
 import styles from './Console.module.css';
 import { useConsoleLines, useRunState } from './use-run';
@@ -23,6 +24,9 @@ const processKey = {
   renderer: 'processRenderer',
 } as const satisfies Record<OutputLine['process'], string>;
 
+/** Timestamps in the UI locale, 24-hour, with seconds. */
+const TIME: Intl.DateTimeFormatOptions = { hour: '2-digit', minute: '2-digit', second: '2-digit', hourCycle: 'h23' };
+
 const clear = () => {
   runApi.ClearOutput().catch((error: unknown) => console.error('[fiddle] clearing the console failed', error));
 };
@@ -33,10 +37,7 @@ export function ConsolePane() {
   const run = useRunState();
   const [filter, setFilter] = useState<ProcessFilter>('all');
   const [query, setQuery] = useState('');
-  const time = useMemo(
-    () => new Intl.DateTimeFormat(undefined, { hour: '2-digit', minute: '2-digit', second: '2-digit', hourCycle: 'h23' }),
-    [],
-  );
+  const { formatDate } = useFormat();
 
   const needle = query.trim().toLowerCase();
   const shown = lines.filter(
@@ -85,12 +86,7 @@ export function ConsolePane() {
           className={styles.filter}
         />
         <span className={styles.spacer} />
-        {run.status === 'running' && (
-          <span className={styles.running}>
-            <span className={styles.dot} aria-hidden="true" />
-            {t('running')}
-          </span>
-        )}
+        {run.status === 'running' && <StatusPill>{t('running')}</StatusPill>}
         <Tooltip label={t('clearConsole')}>
           <IconButton icon="trash" size="sm" label={t('clearConsole')} onPress={clear} />
         </Tooltip>
@@ -99,6 +95,7 @@ export function ConsolePane() {
         ref={list}
         className={styles.rows}
         aria-label={t('consoleOutput')}
+        dir="ltr"
         tabIndex={0}
         onScroll={(event) => {
           const el = event.currentTarget;
@@ -107,7 +104,7 @@ export function ConsolePane() {
       >
         {shown.map((line) => (
           <li key={line.seq} className={styles.row} data-kind={line.kind}>
-            <span className={styles.time}>{time.format(line.time)}</span>
+            <span className={styles.time}>{formatDate(line.time, TIME)}</span>
             <span className={styles.process}>{t(processKey[line.process])}</span>
             <span className={styles.message}>
               {line.text}
@@ -126,14 +123,13 @@ function Location({ location }: { location: NonNullable<OutputLine['location']> 
   return (
     <>
       {' ('}
-      <button
-        type="button"
-        className={styles.location}
+      <Button
+        variant="link"
         aria-label={t('revealLocation', { location: text })}
-        onClick={() => revealLocation(location.file, location.line, location.column ?? 1)}
+        onPress={() => revealLocation(location.file, location.line, location.column ?? 1)}
       >
         {text}
-      </button>
+      </Button>
       {')'}
     </>
   );

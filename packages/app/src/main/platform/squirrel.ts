@@ -25,7 +25,7 @@ export function squirrelStubPath(execPath: string = process.execPath): string {
   return path.resolve(path.dirname(execPath), '..', 'electron-fiddle.exe');
 }
 
-export type SquirrelEvent = 'install' | 'updated' | 'uninstall' | 'obsolete';
+type SquirrelEvent = 'install' | 'updated' | 'uninstall' | 'obsolete';
 
 export function squirrelEvent(argv: readonly string[]): SquirrelEvent | undefined {
   const match = /^--squirrel-(install|updated|uninstall|obsolete)$/.exec(argv[1] ?? '');

@@ -17,12 +17,13 @@ import {
 
 import { DEFAULT_LAYOUT, type Material, type Platform } from '../shared/stores';
 import { APP_ORIGIN } from './bundle';
-import type { CommandRegistry } from './commands';
 import { emptyFiddleState } from './documents/model';
+import { attachWindow } from './documents/service';
 import { bindWindowIpc } from './ipc';
 import { log } from './log';
 import { blockNavigation } from './security';
-import type { StateHub, WindowInit } from './state-hub';
+import type { Services } from './services';
+import type { WindowInit } from './state-hub';
 import { trackWindow, untrackWindow } from './windows';
 
 /** Matches the renderer name in forge.config.ts and vite.renderer.config.ts. */
@@ -45,7 +46,7 @@ export function detectMaterial(platform: Platform): Material {
   return 'none';
 }
 
-export interface RendererEntry {
+interface RendererEntry {
   /** What windows load. */
   url: string;
   /** Built renderer served over app://. */
@@ -68,7 +69,7 @@ export function rendererEntry(): RendererEntry {
 
 const inkColor = () => (nativeTheme.shouldUseDarkColors ? INK.dark : INK.light);
 
-export function windowOptions(
+function windowOptions(
   platform: Platform,
   material: Material,
 ): BrowserWindowConstructorOptions {
@@ -116,52 +117,37 @@ export function windowOptions(
   return common;
 }
 
-export interface CreateWindowOptions {
-  hub: StateHub;
-  registry: CommandRegistry;
+export async function createAppWindow({
+  services,
+  url,
+  windowId = randomUUID(),
+  init,
+}: {
+  services: Services;
   url: string;
-  platform: Platform;
   /** Session restore reopens a window under its old ID. */
   windowId?: string;
   /** The window's initial store value; Documents provides the fiddle part. */
   init?: WindowInit;
-}
-
-export async function createAppWindow({
-  hub,
-  registry,
-  url,
-  platform,
-  windowId = randomUUID(),
-  init,
-}: CreateWindowOptions): Promise<BrowserWindow> {
+}): Promise<BrowserWindow> {
+  const { hub, platform } = services;
   const win = new BrowserWindow(windowOptions(platform, hub.app.material));
   const contents = win.webContents;
   trackWindow(windowId, win);
   blockNavigation(contents);
+  // Documents: close prompts, focus tracking and dropped folders. Its
+  // `destroyed` handler runs before the one below, while the window is registered.
+  attachWindow(windowId, contents);
 
   let shown = false;
-  bindWindowIpc({
-    contents,
-    windowId,
-    init: init ?? {
-      title: app.getName(),
-      view: 'editor',
-      fiddle: emptyFiddleState(),
-      layout: DEFAULT_LAYOUT,
-    },
-    hub,
-    registry,
-    // Also called after every reload; only the first one shows the window.
-    onReady: () => {
-      if (shown || win.isDestroyed()) return;
-      shown = true;
-      win.show();
-      log.info('window ready', windowId, contents.getURL());
-      devScreenshot(win).catch((error: unknown) =>
-        log.error('dev screenshot failed', error),
-      );
-    },
+  const initial = init ?? { title: app.getName(), view: 'editor', fiddle: emptyFiddleState(), layout: DEFAULT_LAYOUT };
+  // Also called after every reload; only the first one shows the window.
+  bindWindowIpc({ contents, windowId, services }, initial, () => {
+    if (shown || win.isDestroyed()) return;
+    shown = true;
+    win.show();
+    log.info('window ready', windowId, contents.getURL());
+    devScreenshot(win).catch((error: unknown) => log.error('dev screenshot failed', error));
   });
 
   contents.once('destroyed', () => {

@@ -27,7 +27,7 @@ const READ_ALL = `JSON.stringify(Object.fromEntries(
 ))`;
 
 /** Keeps string values only. */
-export function parseStorageDump(json: unknown): Record<string, string> {
+function parseStorageDump(json: unknown): Record<string, string> {
   const data: unknown = typeof json === 'string' ? JSON.parse(json) : undefined;
   const out: Record<string, string> = {};
   if (typeof data !== 'object' || data === null) return out;

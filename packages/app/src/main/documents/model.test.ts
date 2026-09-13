@@ -9,6 +9,7 @@ import {
   docRemoveFile,
   docRenameFile,
   docSetActiveFile,
+  docSetModules,
   docSetFileVisible,
   isDirty,
   isTrusted,
@@ -100,6 +101,24 @@ describe('editor mirror', () => {
     expect(isDirty(saved)).toBe(false);
     expect(saved.fiddle.source.localPath).toBe('/tmp/f');
   });
+
+  it('counts module changes as unsaved, but not normalizing a loaded `*`', () => {
+    const doc = createDoc(createFiddle({ files: { 'main.js': '' }, version, modules: { a: '*', b: '1.0.0' } }), 'x');
+    const normalized = docSetModules(doc, { a: '2.0.0', b: '1.0.0' }, true);
+    expect(isDirty(normalized)).toBe(false);
+    expect(toFiddleState(normalized).modules).toEqual({ a: '2.0.0', b: '1.0.0' });
+
+    const changed = docSetModules(normalized, { a: '2.0.0', b: '1.1.0' });
+    expect(isDirty(changed)).toBe(true);
+    expect(isDirty(docSetModules(changed, { a: '2.0.0', b: '1.0.0' }))).toBe(false);
+    expect(isDirty(markSaved(changed, {}))).toBe(false);
+
+    // Normalizing one module keeps the user's change to another unsaved.
+    const edited = docSetModules(doc, { a: '*', b: '1.1.0' });
+    expect(isDirty(docSetModules(edited, { a: '2.0.0', b: '1.1.0' }, true))).toBe(true);
+    // Removing a module is a change too.
+    expect(isDirty(docSetModules(normalized, { a: '2.0.0' }))).toBe(true);
+  });
 });
 
 describe('toFiddleState', () => {
@@ -112,6 +131,14 @@ describe('toFiddleState', () => {
     ]);
     expect(state.source).toEqual({ origin: 'local', trusted: true, templateName: DEFAULT_TEMPLATE });
     expect(state.dirty).toBe(false);
+    expect(state.dirtyFiles).toEqual([]);
+  });
+
+  it('lists the files that differ from the last save, new files included', () => {
+    const doc = docAddFile(templateDoc(), 'extra.js');
+    const edited = applyEdit(doc, 'main.js', 'changed', doc.fiddleRev)!;
+    expect([...toFiddleState(edited).dirtyFiles].sort()).toEqual(['extra.js', 'main.js']);
+    expect(toFiddleState(markSaved(edited, edited.fiddle.source)).dirtyFiles).toEqual([]);
   });
 
   it('marks remote fiddles untrusted until their origin is approved', () => {

@@ -6,11 +6,11 @@
 import path from 'node:path';
 
 export const APP_SCHEME = 'app';
-export const APP_HOST = 'main';
+const APP_HOST = 'main';
 export const APP_ORIGIN = `${APP_SCHEME}://${APP_HOST}`;
 export const BUNDLE_MANIFEST = 'bundle-manifest.json';
 
-export const MIME_TYPES: Readonly<Record<string, string>> = {
+const MIME_TYPES: Readonly<Record<string, string>> = {
   '.html': 'text/html; charset=utf-8',
   '.js': 'text/javascript; charset=utf-8',
   '.mjs': 'text/javascript; charset=utf-8',
@@ -29,7 +29,7 @@ export const MIME_TYPES: Readonly<Record<string, string>> = {
   '.wasm': 'application/wasm',
 };
 
-export interface BundleFile {
+interface BundleFile {
   /** Path relative to the renderer output directory. */
   file: string;
   mimeType: string;

@@ -10,9 +10,10 @@
  *
  * No Electron imports: `safeStorage` is injected, so this runs in plain Node tests.
  */
-import { randomUUID } from 'node:crypto';
-import { mkdir, readFile, rename, rm, writeFile } from 'node:fs/promises';
+import { mkdir, readFile, rm } from 'node:fs/promises';
 import path from 'node:path';
+
+import { writeAtomic } from '../persistence/json-store';
 
 /** The subset of Electron's `safeStorage` this module uses. */
 export interface SafeStorageLike {
@@ -25,7 +26,7 @@ export interface SafeStorageLike {
 /** `encrypted`: stored safely. `weak`: Linux without a keyring. `unavailable`: no encryption at all. */
 export type CredentialStorageKind = 'encrypted' | 'weak' | 'unavailable';
 
-export interface StoredCredentials {
+interface StoredCredentials {
   token: string;
   /** The login the token belonged to when it was saved, so an offline start still knows it. */
   login: string;
@@ -38,7 +39,7 @@ export type LoadResult =
 
 const WEAK_LINUX_BACKENDS = new Set(['basic_text', 'unknown']);
 
-export interface CredentialStoreOptions {
+interface CredentialStoreOptions {
   /** Absolute path, normally `<userData>/credentials/github`. */
   file: string;
   safeStorage: SafeStorageLike;
@@ -109,14 +110,7 @@ export class CredentialStore {
   async #write(credentials: StoredCredentials): Promise<void> {
     const encrypted = await this.#safeStorage.encryptStringAsync(JSON.stringify(credentials));
     await mkdir(path.dirname(this.#file), { recursive: true, mode: 0o700 });
-    const tmp = `${this.#file}.${randomUUID()}.tmp`;
-    try {
-      await writeFile(tmp, encrypted, { mode: 0o600 });
-      await rename(tmp, this.#file);
-    } catch (error) {
-      await rm(tmp, { force: true });
-      throw error;
-    }
+    await writeAtomic(this.#file, encrypted, { mode: 0o600 });
   }
 }
 

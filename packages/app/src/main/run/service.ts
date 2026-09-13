@@ -15,16 +15,12 @@
  */
 import type { ChildProcess } from 'node:child_process';
 import fsp from 'node:fs/promises';
-import os from 'node:os';
-import path from 'node:path';
 
-import { Fiddle, Installer, Runner } from '@electron/fiddle-core';
+import { Installer } from '@electron/fiddle-core';
 
-import { cleanFlags, fiddleProcessEnv, parseEnvEntries } from '../../fiddle/env';
-import { findMainEntry, PACKAGE_JSON } from '../../fiddle/files';
-import { writeFiddleFolder } from '../../fiddle/folder';
-import { findPackageManager, installModules, loadLoginShellPath } from '../../fiddle/modules';
-import { generatePackageJson } from '../../fiddle/package-json';
+import { parseEnvEntries } from '../../fiddle/env';
+import { findMainEntry } from '../../fiddle/files';
+import { findPackageManager, installModules } from '../../fiddle/modules';
 import { FiddleError } from '../../shared/errors';
 import type { OutputLine, RunState, VersionRefValue } from '../../shared/stores';
 import * as documents from '../documents/service';
@@ -34,10 +30,17 @@ import type { StateHub } from '../state-hub';
 import type { VersionsService } from '../versions/service';
 import { classifyRun, esmNeedsNewerElectron, toPackageName, type RunOutcome, type RunResult } from './logic';
 import { OutputBuffer } from './output-buffer';
-import { devElectronFlags } from './dev';
 import { OutputParser, type ParseResult } from './output-parser';
+import {
+  makeRunDir,
+  spawnElectron,
+  stopChild,
+  toolEnv as loadToolEnv,
+  userName,
+  waitForExit,
+  writeRunApp,
+} from './process';
 
-const STOP_GRACE_MS = 1000;
 const MAX_ERRORS = 50;
 const MIN_CONSOLE_HEIGHT = 96;
 const DEFAULT_CONSOLE_HEIGHT = 160;
@@ -58,21 +61,20 @@ interface WindowRun {
   child?: ChildProcess;
 }
 
-export interface RunOptions {
+interface RunOptions {
   /** Run this version instead of the fiddle's (auto bisect). */
   versionRef?: VersionRefValue;
-  /** Trust was already checked by the caller (auto bisect). */
-  trusted?: { allowScripts: boolean };
+  /** The operation the trust check approves. Default `run`. */
+  trustOperation?: documents.CodeExecutingOperation;
 }
 
-export type ConsoleKind = OutputLine['kind'];
+type ConsoleKind = OutputLine['kind'];
 
 export class RunService {
   readonly #hub: StateHub;
   readonly #versions: VersionsService;
   readonly #send: (windowId: string, lines: OutputLine[]) => void;
   readonly #runs = new Map<string, WindowRun>();
-  #shellPath: Promise<string | undefined> | undefined;
 
   constructor(hub: StateHub, versions: VersionsService, send: (windowId: string, lines: OutputLine[]) => void) {
     this.#hub = hub;
@@ -142,12 +144,8 @@ export class RunService {
   }
 
   /** The environment for npm, yarn and Forge: filtered like a fiddle's, with the login shell's PATH. */
-  async toolEnv(): Promise<NodeJS.ProcessEnv> {
-    this.#shellPath ??= loadLoginShellPath();
-    const shellPath = await this.#shellPath;
-    const env = fiddleProcessEnv();
-    if (shellPath) env.PATH = shellPath;
-    return env;
+  toolEnv(): Promise<NodeJS.ProcessEnv> {
+    return loadToolEnv();
   }
 
   /** Runs the fiddle and resolves when it exits. A second run in a busy window is ignored. */
@@ -191,13 +189,7 @@ export class RunService {
     const entry = this.#runs.get(windowId);
     if (!entry) return;
     entry.abort?.abort();
-    const child = entry.child;
-    if (!child || child.exitCode !== null || child.signalCode !== null) return;
-    child.kill('SIGTERM');
-    const timer = setTimeout(() => {
-      if (child.exitCode === null && child.signalCode === null) child.kill('SIGKILL');
-    }, STOP_GRACE_MS);
-    child.once('exit', () => clearTimeout(timer));
+    if (entry.child) stopChild(entry.child);
   }
 
   /** The window closed: stop its run and forget its console. */
@@ -232,11 +224,14 @@ export class RunService {
     const settings = this.#hub.app.settings;
     const pm = settings.packageManager;
 
-    const trust = options.trusted ?? (await documents.ensureTrusted(windowId, 'run'));
-    if ('approved' in trust && !trust.approved) throw new Refused(t('untrusted'));
+    // Every run checks trust, auto-bisect steps included: it's free once the
+    // fiddle is approved, and asks again if the window's fiddle has another
+    // origin since. Exactly the approved fiddle runs, whatever the window loads next.
+    const trust = await documents.ensureTrusted(windowId, options.trustOperation ?? 'run');
+    if (!trust.approved) throw new Refused(t('untrusted'));
 
-    const fiddle = documents.getFiddle(windowId);
-    const files = documents.getFiddleFiles(windowId);
+    const fiddle = trust.fiddle;
+    const files = { ...fiddle.files };
     const name = this.#hub.getWindow(windowId)?.fiddle.name ?? 'fiddle';
     const { exec, label, release } = await this.#resolveElectron(windowId, options.versionRef ?? fiddle.version, signal);
     const mainEntry = findMainEntry(Object.keys(files)) ?? 'main.js';
@@ -250,16 +245,14 @@ export class RunService {
     }
 
     this.setState(windowId, { status: 'starting', version: label, percent: undefined });
-    const dir = await fsp.mkdtemp(path.join(os.tmpdir(), 'electron-fiddle-'));
+    const dir = await makeRunDir();
     onDir(dir);
-    const appDir = path.join(dir, 'app');
-    const packageJson = generatePackageJson({
+    const appDir = await writeRunApp(dir, files, {
       name: toPackageName(name),
       main: mainEntry,
       author: settings.packageAuthor || userName(),
       modules,
     });
-    await writeFiddleFolder(appDir, { ...files, [PACKAGE_JSON]: packageJson });
 
     if (hasModules) {
       this.log(windowId, trust.allowScripts ? t('installingModules', { pm }) : t('installingModulesNoScripts', { pm }));
@@ -287,25 +280,18 @@ export class RunService {
     const userEnv = parseEnvEntries(settings.environmentVariables);
     if (userEnv.invalid.length > 0) this.log(windowId, t('envInvalid', { entries: userEnv.invalid.join(', ') }), 'warn');
     if (userEnv.blocked.length > 0) this.log(windowId, t('envBlocked', { keys: userEnv.blocked.join(', ') }), 'warn');
-    const args = [...cleanFlags(settings.electronFlags), ...devElectronFlags()];
-    if (!settings.keepUserDataDirs) args.unshift(`--user-data-dir=${path.join(dir, 'user-data')}`);
-
-    const runner = await Runner.create({
+    const child = await spawnElectron({
       installer: this.#versions.installer,
       versions: this.#versions.electronVersions,
-      errors: 'typed',
-    });
-    const child = await runner.spawn(exec, new Fiddle(appDir, 'fiddle'), {
-      args,
-      showConfig: false,
-      cwd: appDir,
-      stdio: ['ignore', 'pipe', 'pipe'],
+      exec,
+      appDir,
+      runDir: dir,
+      flags: settings.electronFlags,
+      keepUserDataDirs: settings.keepUserDataDirs,
       // Always log: renderer console messages reach stderr, for runtime errors.
-      env: fiddleProcessEnv({
-        userEnv: { ELECTRON_ENABLE_LOGGING: 'true', ...userEnv.env },
-        advancedLogging: settings.electronLogging,
-      }),
-      inspect: { host: '127.0.0.1', port: 0 },
+      env: { ELECTRON_ENABLE_LOGGING: 'true', ...userEnv.env },
+      advancedLogging: settings.electronLogging,
+      inspect: true,
     });
     const entry = this.#entry(windowId);
     entry.child = child;
@@ -323,14 +309,9 @@ export class RunService {
     child.stdout?.on('data', (chunk: string) => this.#consume(windowId, parser.push('stdout', chunk)));
     child.stderr?.on('data', (chunk: string) => this.#consume(windowId, parser.push('stderr', chunk)));
 
-    const result = await new Promise<RunOutcome>((resolve) => {
-      let failed = false;
-      child.once('error', (error) => {
-        failed = true;
-        this.log(windowId, t('spawnFailed', { message: error.message }), 'error');
-      });
-      child.once('close', (code, exitSignal) => resolve(failed ? { spawnFailed: true } : { code, signal: exitSignal }));
-    });
+    const result = await waitForExit(child, (error) =>
+      this.log(windowId, t('spawnFailed', { message: error.message }), 'error'),
+    );
     this.#consume(windowId, parser.flush());
     if (!result.spawnFailed) {
       this.log(
@@ -379,13 +360,5 @@ export class RunService {
     if (result.errors.length > 0) {
       this.setState(windowId, { errors: [...this.state(windowId).errors, ...result.errors].slice(0, MAX_ERRORS) });
     }
-  }
-}
-
-function userName(): string {
-  try {
-    return os.userInfo().username;
-  } catch {
-    return '';
   }
 }

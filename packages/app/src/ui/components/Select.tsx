@@ -113,7 +113,8 @@ export function Select({
       <AriaButton className={styles.trigger}>
         {icon && <Icon name={icon} className={styles.icon} />}
         <SelectValue className={styles.value}>
-          {({ isPlaceholder, selectedText, defaultChildren }) => (isPlaceholder ? defaultChildren : selectedText)}
+          {/* Never react-aria's own "Select an item": only the caller's catalog string. */}
+          {({ isPlaceholder, selectedText }) => (isPlaceholder ? placeholder : selectedText)}
         </SelectValue>
         <Icon name="chevron-down" className={styles.chevron} />
       </AriaButton>

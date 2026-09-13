@@ -7,33 +7,27 @@ import { app, type WebContents } from 'electron';
 
 import { App, implement, Window } from '../ipc/main';
 import { ErrorCode, FiddleError } from '../shared/errors';
-import type { CommandRegistry } from './commands';
 import { bindDocumentsIpc } from './documents/ipc';
 import { bindGitHubIpc } from './github/ipc';
+import { bindModulesIpc } from './modules/ipc';
 import { bindAppPlatformIpc } from './platform/ipc';
 import { bindRunIpc } from './run/ipc';
+import type { Services } from './services';
 import { bindSettingsIpc } from './settings/ipc';
-import type { StateHub, WindowInit } from './state-hub';
-import { bindAppUxIpc } from './ux/ipc';
+import type { WindowInit } from './state-hub';
+import { bindOnboardingIpc } from './ux/ipc';
 
-export interface WindowIpcOptions {
+/** What every `bind*Ipc` gets. */
+export interface IpcContext {
   contents: WebContents;
   windowId: string;
-  init: WindowInit;
-  hub: StateHub;
-  registry: CommandRegistry;
-  /** The renderer has read both stores and painted. */
-  onReady(): void;
+  services: Services;
 }
 
-export function bindWindowIpc({
-  contents,
-  windowId,
-  init,
-  hub,
-  registry,
-  onReady,
-}: WindowIpcOptions): void {
+/** `onReady`: the renderer has read both stores and painted. */
+export function bindWindowIpc(ctx: IpcContext, init: WindowInit, onReady: () => void): void {
+  const { contents, windowId, services } = ctx;
+  const { hub, registry } = services;
   const appDispatcher = implement(App, contents, {
     getInitialAppState: () => hub.app,
     GetAppInfo: () => ({
@@ -42,7 +36,6 @@ export function bindWindowIpc({
       electronVersion: process.versions.electron,
     }),
   });
-
   const windowDispatcher = implement(Window, contents, {
     getInitialWindowState: () => {
       const state = hub.getWindow(windowId);
@@ -53,13 +46,13 @@ export function bindWindowIpc({
     RunCommand: (id) => registry.run(id, { windowId }),
   });
 
-  bindDocumentsIpc(contents, windowId);
-  bindAppUxIpc({ contents, windowId, hub, registry });
-  bindSettingsIpc(contents, windowId);
-  bindGitHubIpc(contents, windowId, hub);
-  bindAppPlatformIpc(contents);
-
-  bindRunIpc({ contents, windowId, hub });
+  bindDocumentsIpc(ctx);
+  bindModulesIpc(ctx);
+  bindOnboardingIpc(ctx);
+  bindSettingsIpc(ctx);
+  bindGitHubIpc(ctx);
+  bindAppPlatformIpc(ctx);
+  bindRunIpc(ctx);
 
   // The StateHub is the only caller of update*Store.
   hub.registerWindow(windowId, init, {

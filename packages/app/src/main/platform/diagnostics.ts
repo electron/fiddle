@@ -11,7 +11,7 @@ import { toSparse, type Settings } from '../../shared/settings';
 import { redactSecrets } from '../crash/scrub';
 import type { StateHub } from '../state-hub';
 
-export interface DiagnosticsInput {
+interface DiagnosticsInput {
   appVersion: string;
   packaged: boolean;
   versions: { electron?: string; chrome?: string; node?: string };
@@ -20,7 +20,7 @@ export interface DiagnosticsInput {
   settings: Settings;
 }
 
-export function diagnosticsText(input: DiagnosticsInput, home: string): string {
+function diagnosticsText(input: DiagnosticsInput, home: string): string {
   const sparse: Record<string, unknown> = { ...toSparse(input.settings) };
   // Environment variables may hold secrets: only their names are kept.
   if (Array.isArray(sparse.environmentVariables)) {

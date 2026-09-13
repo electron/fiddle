@@ -23,7 +23,7 @@ export interface OldLocalVersion {
   name?: string;
 }
 
-export interface MappedOldSettings {
+interface MappedOldSettings {
   settings: SparseSettings;
   /** The old `hasShownTour`: the onboarding tour was already seen. */
   tourDone: boolean;
@@ -38,7 +38,7 @@ export interface MappedOldSettings {
   invalid: string[];
 }
 
-export interface MapOldSettingsOptions {
+interface MapOldSettingsOptions {
   /** Imported custom themes: old file name without `.json` → new theme ID. */
   themeIds: ReadonlyMap<string, string>;
   /** The OS user name. An old author equal to it stays unset, which means the same thing. */

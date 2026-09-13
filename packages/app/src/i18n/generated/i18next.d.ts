@@ -3,6 +3,7 @@ import type about from './en/about';
 import type common from './en/common';
 import type gists from './en/gists';
 import type main from './en/main';
+import type mainCli from './en/mainCli';
 import type mainDocuments from './en/mainDocuments';
 import type mainPlatform from './en/mainPlatform';
 import type mainRun from './en/mainRun';
@@ -24,6 +25,7 @@ declare module 'i18next' {
       common: typeof common;
       gists: typeof gists;
       main: typeof main;
+      mainCli: typeof mainCli;
       mainDocuments: typeof mainDocuments;
       mainPlatform: typeof mainPlatform;
       mainRun: typeof mainRun;

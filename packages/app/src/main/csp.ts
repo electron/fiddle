@@ -9,7 +9,7 @@ import { session } from 'electron';
  * (Monaco, for example) calls `trustedTypes.createPolicy`; an empty list
  * allows none.
  */
-export const trustedTypesPolicies: readonly string[] = [
+const trustedTypesPolicies: readonly string[] = [
   // Monaco (monaco-editor 0.56, `createTrustedTypesPolicy` calls in its ESM build).
   'defaultWorkerFactory',
   'diffEditorWidget',
@@ -62,7 +62,7 @@ export const PRODUCTION_CSP = serialize(production);
  *   Refresh preamble as an inline module script.
  * - `connect-src` adds the dev server's ws:// origin for hot module reload.
  */
-export function devCsp(devServerUrl: string): string {
+function devCsp(devServerUrl: string): string {
   const { host } = new URL(devServerUrl);
   return serialize({
     ...production,

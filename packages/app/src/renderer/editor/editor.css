@@ -25,7 +25,7 @@
   background: color-mix(in srgb, var(--lu-spark) 6%, var(--lu-surface));
   box-shadow: var(--lu-shadow-stop);
   color: var(--lu-ink);
-  font: 400 12.5px/18px var(--lu-font-sans);
+  font: var(--lu-type-lens);
   letter-spacing: 0;
   white-space: normal;
   cursor: default;

@@ -7,12 +7,13 @@ import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { getDefaultBisectRange, compareVersions } from '../../../fiddle/versions';
-import { runApi } from '../../../ipc/renderer';
+import { runApi, windowApi } from '../../../ipc/renderer';
 import type { RunState } from '../../../shared/stores';
 import { visibleVersions } from '../../../main/versions/releases';
 import { Button, Dialog, InlineCode, Select } from '../../../ui';
 import styles from '../run/Run.module.css';
-import { useAppState, useReleases } from '../run/use-run';
+import { useAppState } from '../../state';
+import { useReleases } from '../run/use-run';
 
 const call = (promise: Promise<unknown>) =>
   promise.catch((error: unknown) => console.error('[fiddle] bisect failed', error));
@@ -65,7 +66,9 @@ export function BisectDialogs({ run }: { run: RunState }) {
   const [open, setOpen] = useState(false);
   useEffect(() => {
     try {
-      return runApi.onShowBisect(() => setOpen(true));
+      return windowApi.onCommand((id) => {
+        if (id === 'bisect.toggle') setOpen(true);
+      });
     } catch {
       return undefined;
     }
@@ -139,9 +142,16 @@ function RangeDialog({ onClose }: { onClose: () => void }) {
         </>
       }
     >
-      <Select label={t('bisectGoodVersion')} items={items} value={goodValue} onChange={setGood} />
+      <Select
+        label={t('bisectGoodVersion')}
+        placeholder={t('versionPicker')}
+        items={items}
+        value={goodValue}
+        onChange={setGood}
+      />
       <Select
         label={t('bisectBadVersion')}
+        placeholder={t('versionPicker')}
         items={items}
         value={badValue}
         onChange={setBad}

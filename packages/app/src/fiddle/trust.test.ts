@@ -1,6 +1,14 @@
 import { describe, expect, it } from 'vitest';
 
-import { ANONYMOUS_GIST_OWNER, type FiddleOrigin, formatOrigin, gistOrigin, isUntrustedOrigin, needsApproval } from './trust';
+import {
+  ANONYMOUS_GIST_OWNER,
+  type FiddleOrigin,
+  formatOrigin,
+  gistOrigin,
+  isUntrustedOrigin,
+  needsApproval,
+  restoredOrigin,
+} from './trust';
 
 const id = '8c5fc0c6a5153d49b5a4a56d3ed9da8f';
 const sha = 'a'.repeat(40);
@@ -39,8 +47,29 @@ describe('needsApproval', () => {
     expect(needsApproval(docs, formatOrigin(docs))).toBe(false);
   });
 
+  it('binds an approval to its origin: a fiddle swapped in afterwards needs its own', () => {
+    const approved = formatOrigin(gistOrigin(id, sha, 'octocat'));
+    const swapped = gistOrigin('0'.repeat(32), sha, 'mallory');
+    expect(needsApproval(swapped, approved)).toBe(true);
+  });
+
   it('never asks for local fiddles and examples', () => {
     expect(needsApproval({ kind: 'local' })).toBe(false);
     expect(needsApproval({ kind: 'example' }, 'something-else')).toBe(false);
+  });
+});
+
+describe('restoredOrigin', () => {
+  const gist = gistOrigin(id, sha, 'octocat');
+
+  it('keeps a saved untrusted origin when the folder load reports local', () => {
+    expect(restoredOrigin({ kind: 'local' }, gist)).toBe(gist);
+    expect(restoredOrigin({ kind: 'local' }, undefined, gist)).toBe(gist);
+    expect(needsApproval(restoredOrigin({ kind: 'local' }, gist))).toBe(true);
+  });
+
+  it('keeps the loaded origin when nothing untrusted is remembered', () => {
+    expect(restoredOrigin({ kind: 'local' })).toEqual({ kind: 'local' });
+    expect(restoredOrigin({ kind: 'local' }, undefined, { kind: 'example' })).toEqual({ kind: 'local' });
   });
 });

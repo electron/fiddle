@@ -1,37 +1,34 @@
 /**
  * Whether to offer the onboarding tour. It's offered on each launch until the
  * user finishes or dismisses it, and only in the first window of a launch.
- * Persisted in <userData>/onboarding.json.
+ * Also whether the first-run crash-reports notice (§14) was shown. Both are
+ * kept in state.json (Documents' `getStateStore()`). No Electron imports.
  */
-import path from 'node:path';
+import type { AppStateFile } from '../documents/service';
+import type { JsonStore } from '../persistence/json-store';
 
-import { app } from 'electron';
-import { z } from 'zod';
+export function createOnboarding(store: JsonStore<AppStateFile>) {
+  let offeredThisLaunch = false;
+  return {
+    shouldOfferTour(): boolean {
+      if (offeredThisLaunch || store.get().tourDone) return false;
+      offeredThisLaunch = true;
+      return true;
+    },
 
-import { createJsonStore, type JsonStore } from '../persistence/json-store';
+    setTourDone(): void {
+      store.set((prev) => ({ ...prev, tourDone: true }));
+    },
 
-const schema = z.object({ tourDone: z.boolean() });
-type OnboardingState = z.infer<typeof schema>;
-
-let store: JsonStore<OnboardingState> | undefined;
-let offeredThisLaunch = false;
-
-function getStore(): JsonStore<OnboardingState> {
-  store ??= createJsonStore<OnboardingState>({
-    file: path.join(app.getPath('userData'), 'onboarding.json'),
-    schema,
-    defaults: { tourDone: false },
-    version: 1,
-  });
-  return store;
-}
-
-export function shouldOfferTour(): boolean {
-  if (offeredThisLaunch || getStore().get().tourDone) return false;
-  offeredThisLaunch = true;
-  return true;
-}
-
-export function setTourDone(): void {
-  getStore().set({ tourDone: true });
+    /**
+     * The first-run notice that crash reports are on (§14). True once, ever,
+     * for the first window that asks, and only if `crashReportsOn`. The first
+     * call records it either way.
+     */
+    takeCrashReportsNotice(crashReportsOn: boolean): boolean {
+      if (store.get().crashNoticeShown) return false;
+      store.set((prev) => ({ ...prev, crashNoticeShown: true }));
+      return crashReportsOn;
+    },
+  };
 }

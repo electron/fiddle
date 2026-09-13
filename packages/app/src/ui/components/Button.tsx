@@ -6,8 +6,11 @@ import { useInCapsule } from './capsule';
 import { ProgressRing, Spinner } from './Progress';
 import styles from './Button.module.css';
 
-/** primary, secondary, ghost and danger, plus stop: the running Run button. */
-export type ButtonVariant = 'primary' | 'secondary' | 'ghost' | 'danger' | 'stop';
+/**
+ * primary, secondary, ghost and danger, plus stop (the running Run button) and
+ * link (inline accent text with an underline, such as a console location).
+ */
+export type ButtonVariant = 'primary' | 'secondary' | 'ghost' | 'danger' | 'stop' | 'link';
 
 type BaseProps = Omit<AriaButtonProps, 'children' | 'className' | 'style' | 'isPending'>;
 

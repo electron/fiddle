@@ -70,7 +70,7 @@ export const commands = {
     accelerator: 'Shift+Alt+F',
     enabled: hasWindow,
   },
-  // Documents slice: the File menu. Handlers in src/main/documents/commands.ts.
+  // Documents slice: the File menu.
   'file.newFiddle': {
     label: 'newFiddle',
     accelerator: 'CmdOrCtrl+N',
@@ -118,7 +118,7 @@ export const commands = {
     accelerator: 'CmdOrCtrl+,',
     enabled: hasWindow,
   },
-  // Gists slice: each opens a gist dialog in the window (`GitHub.OpenDialog`).
+  // Gists slice: each opens a gist dialog in the window (`Window.Command`).
   'gist.publish': {
     label: 'publishToGist',
     enabled: hasWindow,
@@ -131,8 +131,9 @@ export const commands = {
     label: 'showGistHistory',
     enabled: (_app, win) => win?.fiddle.source.gistId !== undefined,
   },
-  // Versions and run slice. Handlers in src/main/run/commands.ts. F5 also
-  // runs 'run.toggle' through a hidden menu item (src/main/menu.ts).
+  // Versions and run slice. F5 also runs 'run.toggle' through a hidden menu
+  // item (src/main/menu.ts). `bisect.toggle` stops a bisect, or is sent to the
+  // window (`Window.Command`) to show the range dialog.
   'run.toggle': {
     label: 'runToggle',
     accelerator: 'CmdOrCtrl+R',
@@ -151,7 +152,7 @@ export const commands = {
     accelerator: 'CmdOrCtrl+Shift+B',
     enabled: hasWindow,
   },
-  // Platform slice: the Help menu. Handlers in src/main/platform/index.ts.
+  // Platform slice: the Help menu.
   'help.about': { label: 'aboutFiddle' },
   'help.openLogsFolder': { label: 'openLogsFolder' },
   'help.copyDiagnostics': { label: 'copyDiagnostics' },
@@ -161,6 +162,12 @@ export const commands = {
 } as const satisfies Record<string, CommandDefinition>;
 
 export type CommandId = keyof typeof commands;
+
+/**
+ * IDs main sends to a window as `Window.Command`: forwarded commands, plus
+ * `gist.signIn`, which Documents sends to retry a private deep-linked gist.
+ */
+export type WindowCommandId = CommandId | 'gist.signIn';
 
 export const commandIds = Object.keys(commands) as CommandId[];
 

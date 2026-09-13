@@ -11,14 +11,18 @@ import { ErrorCode, FiddleError } from '../../shared/errors';
 import type { FiddleState } from '../../shared/stores';
 import type { ChangeListener } from '../state-hub';
 
-/** The part of the StateHub this service needs. */
+/** The parts of the StateHub and Documents this service needs. */
 export interface ModulesHub {
   getWindow(windowId: string): { fiddle: Pick<FiddleState, 'modules'> } | undefined;
-  updateWindow(windowId: string, patch: { fiddle: FiddleState }): number;
   onChange(listener: ChangeListener): () => void;
+  /**
+   * Documents' `setFiddleModules`, so a change marks the fiddle dirty.
+   * `normalized` (`*` resolved to the latest) doesn't. Returns the Window rev.
+   */
+  setModules(windowId: string, modules: Record<string, string>, normalized: boolean): number;
 }
 
-export interface LatestVersionSource {
+interface LatestVersionSource {
   latestVersion(name: string): Promise<string>;
 }
 
@@ -77,7 +81,7 @@ export class ModulesService {
           const current = this.#hub.getWindow(windowId)?.fiddle.modules;
           // Only if nobody changed it meanwhile.
           if (current?.[name] !== spec) return;
-          this.#write(windowId, { ...current, [name]: normalizeModuleVersion(spec, latest) });
+          this.#write(windowId, { ...current, [name]: normalizeModuleVersion(spec, latest) }, true);
           this.#seen.delete(`${windowId} ${name} ${spec}`);
         } catch (error) {
           this.#log(`could not normalize ${name}@${spec}`, error);
@@ -101,9 +105,8 @@ export class ModulesService {
     return win.fiddle.modules;
   }
 
-  #write(windowId: string, modules: Record<string, string>): number {
-    const win = this.#hub.getWindow(windowId);
-    if (!win) throw new FiddleError(ErrorCode.notFound, `Window ${windowId} is not registered`);
-    return this.#hub.updateWindow(windowId, { fiddle: { ...(win.fiddle as FiddleState), modules } });
+  #write(windowId: string, modules: Record<string, string>, normalized = false): number {
+    if (!this.#hub.getWindow(windowId)) throw new FiddleError(ErrorCode.notFound, `Window ${windowId} is not registered`);
+    return this.#hub.setModules(windowId, modules, normalized);
   }
 }

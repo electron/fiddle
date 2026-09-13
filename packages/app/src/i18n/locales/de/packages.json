@@ -1,0 +1,14 @@
+{
+  "title": "Pakete",
+  "addPlaceholder": "Paket hinzufügen",
+  "addLabel": "Paket von npm hinzufügen",
+  "searching": "Suche läuft …",
+  "noResults": "Keine Pakete gefunden",
+  "searchFailed": "npm ist gerade nicht erreichbar",
+  "latest": "neueste",
+  "version": "Version von {{name}}",
+  "remove": "{{name}} entfernen",
+  "addFailed": "{{name}} konnte nicht hinzugefügt werden",
+  "changeFailed": "{{name}} konnte nicht geändert werden",
+  "list": "Pakete in diesem Fiddle"
+}

@@ -155,8 +155,10 @@ function EditorArea({
                   id={file.name}
                   errorCount={errors.get(file.name)}
                   errorLabel={errorLabel(file.name)}
+                  unsaved={fiddle.dirtyFiles.includes(file.name)}
+                  unsavedLabel={t('unsaved')}
                 >
-                  {file.name}
+                  <span dir="ltr">{file.name}</span>
                 </Tab>
               ))}
             </TabList>
@@ -220,7 +222,7 @@ function PaneHeader({ name, errors, onMaximize, onClose }: PaneHeaderProps) {
       <Icon name="grip" className={styles.grip} />
       <span className={styles.paneName} data-error={errors ? true : undefined}>
         {errors && <Icon name="warning" />}
-        {name}
+        <span dir="ltr">{name}</span>
         {errors && <span className={styles.paneErrors}>{errors}</span>}
       </span>
       <span className={styles.paneProcess}>{t(processLabelKey[processOf(name)])}</span>

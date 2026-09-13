@@ -19,6 +19,7 @@ import type { StateHub } from '../state-hub';
 import type { RunService } from '../run/service';
 import { visibleVersions } from '../versions/releases';
 import type { VersionsService } from '../versions/service';
+import { autoBisect } from './auto';
 
 interface Session {
   auto: boolean;
@@ -62,7 +63,7 @@ export class BisectService {
       const session: Session = { auto: true, stopped: false };
       this.#sessions.set(windowId, session);
       this.#setBisect(windowId, { good, bad, auto: true, current: null, result: null });
-      void this.#auto(windowId, session, range, trust.allowScripts).catch((error: unknown) => {
+      void this.#auto(windowId, session, range).catch((error: unknown) => {
         log.error('auto bisect failed', error);
         this.stop(windowId);
       });
@@ -116,16 +117,17 @@ export class BisectService {
     }
   }
 
-  async #auto(windowId: string, session: Session, range: string[], allowScripts: boolean): Promise<void> {
+  async #auto(windowId: string, session: Session, range: string[]): Promise<void> {
     const t = tm('mainRun');
     const check = async (version: string): Promise<boolean | undefined> => {
       if (session.stopped) return undefined;
       const current = this.#runs.state(windowId).bisect;
       if (current) this.#setBisect(windowId, { ...current, current: version });
       this.#runs.log(windowId, t('bisectStep', { version }));
+      // Each step checks trust again, so a fiddle loaded mid-bisect never runs unapproved.
       const result = await this.#runs.run(windowId, {
         versionRef: { kind: 'release', version },
-        trusted: { allowScripts },
+        trustOperation: 'auto-bisect',
       });
       if (session.stopped) return undefined;
       if (result === 'invalid') {
@@ -137,21 +139,9 @@ export class BisectService {
       return good;
     };
 
-    const first = range[0]!;
-    const last = range[range.length - 1]!;
-    const firstGood = await check(first);
-    if (firstGood !== true) return this.#abort(windowId, firstGood === false ? first : undefined);
-    const lastGood = await check(last);
-    if (lastGood !== false) return this.#abort(windowId, lastGood === true ? last : undefined);
-
-    const bisector = new Bisector(range);
-    let step = bisector.current();
-    while (!step.done) {
-      const good = await check(step.version);
-      if (good === undefined) return this.#abort(windowId, undefined);
-      step = good ? bisector.good() : bisector.bad();
-    }
-    this.#finish(windowId, step.good, step.bad);
+    const result = await autoBisect(range, check);
+    if ('stopped' in result) return this.#abort(windowId, result.unexpected);
+    this.#finish(windowId, result.good, result.bad);
   }
 
   #abort(windowId: string, unexpected: string | undefined): void {

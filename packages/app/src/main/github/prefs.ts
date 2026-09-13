@@ -4,7 +4,7 @@
  * settings and written through the Settings slice, so they persist in
  * settings.json and show up in the Settings page.
  */
-import { settingsContext } from '../settings';
+import type { SettingsService } from '../settings/service';
 import type { StateHub } from '../state-hub';
 
 export interface PublishOptions {
@@ -18,14 +18,14 @@ export interface GistPrefs {
   setVisibility(isPublic: boolean): void;
 }
 
-export function createGistPrefs(hub: StateHub): GistPrefs {
+export function createGistPrefs(hub: StateHub, settings: Pick<SettingsService, 'set'>): GistPrefs {
   return {
     get: () => ({
       isPublic: hub.app.settings.gistVisibility === 'public',
       asRevision: hub.app.settings.gistPublishAsRevision,
     }),
     setVisibility: (isPublic) => {
-      settingsContext().service.set('gistVisibility', isPublic ? 'public' : 'secret');
+      settings.set('gistVisibility', isPublic ? 'public' : 'secret');
     },
   };
 }

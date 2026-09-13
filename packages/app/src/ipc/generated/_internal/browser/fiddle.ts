@@ -2,10 +2,10 @@
 
 import { app as $$app$$ } from 'electron';
 export * from '../common/fiddle.js';
-import type { AppState, WindowState, CommandId, AppInfo, IAppImpl, IAppRenderer, IWindowImpl, IWindowRenderer, FileMapValue, WindowLayout, WindowView, FileName, ShortText, IDocumentsImpl, IDocumentsRenderer, SettingKey, SettingValue, ThemeData, ThemeId, NoticeId, ISettingsImpl, ISettingsRenderer, PackageSearchResults, PackageVersions, PackageName, PackageQuery, VersionSpec, IModulesImpl, IModulesRenderer, IOnboardingImpl, IOnboardingRenderer, NameList, IPaletteImpl, IPaletteRenderer, ReleaseList, VersionList, VersionRefValue, OutputLines, EditorTypes, VersionString, BuildId, IVersionsImpl, IVersionsRenderer, IRunImpl, IRunRenderer, GitHubToken, GistDescription, GistId, GitHubCredentialStorage, GistDialogKind, GitHubSignInResult, GistLinkInfo, GistRevisionInfo, GistHistoryInfo, IGitHubImpl, IGitHubRenderer, LogLevel, LogText, IAppPlatformImpl, IAppPlatformRenderer } from '../common/fiddle.js';
-import { $eipc_validator$_AppState, $eipc_validator$_WindowState, $eipc_validator$_CommandId, $eipc_validator$_AppInfo, $eipc_validator$_FileMapValue, $eipc_validator$_WindowLayout, $eipc_validator$_WindowView, $eipc_validator$_FileName, $eipc_validator$_ShortText, $eipc_validator$_SettingKey, $eipc_validator$_SettingValue, $eipc_validator$_ThemeData, $eipc_validator$_ThemeId, $eipc_validator$_NoticeId, $eipc_validator$_PackageSearchResults, $eipc_validator$_PackageVersions, $eipc_validator$_PackageName, $eipc_validator$_PackageQuery, $eipc_validator$_VersionSpec, $eipc_validator$_NameList, $eipc_validator$_ReleaseList, $eipc_validator$_VersionList, $eipc_validator$_VersionRefValue, $eipc_validator$_OutputLines, $eipc_validator$_EditorTypes, $eipc_validator$_VersionString, $eipc_validator$_BuildId, $eipc_validator$_GitHubToken, $eipc_validator$_GistDescription, $eipc_validator$_GistId, $eipc_validator$_GitHubCredentialStorage, $eipc_validator$_GistDialogKind, $eipc_validator$_GitHubSignInResult, $eipc_validator$_GistLinkInfo, $eipc_validator$_GistRevisionInfo, $eipc_validator$_GistHistoryInfo, $eipc_validator$_LogLevel, $eipc_validator$_LogText } from '../common-runtime/fiddle.js';
+import type { AppState, WindowState, CommandId, AppInfo, IAppImpl, IAppRenderer, IWindowImpl, IWindowRenderer, FileMapValue, WindowLayout, WindowView, FileName, ShortText, IDocumentsImpl, IDocumentsRenderer, SettingKey, SettingValue, ThemeData, ThemeId, NoticeId, ISettingsImpl, ISettingsRenderer, PackageSearchResults, PackageVersions, PackageName, PackageQuery, VersionSpec, IModulesImpl, IModulesRenderer, IOnboardingImpl, IOnboardingRenderer, ReleaseList, VersionList, VersionRefValue, OutputLines, EditorTypes, VersionString, BuildId, IVersionsImpl, IVersionsRenderer, IRunImpl, IRunRenderer, GitHubToken, GistDescription, GistId, GitHubCredentialStorage, GitHubSignInResult, GistLinkInfo, GistRevisionInfo, GistHistoryInfo, IGitHubImpl, IGitHubRenderer, LogLevel, LogText, IAppPlatformImpl, IAppPlatformRenderer } from '../common/fiddle.js';
+import { $eipc_validator$_AppState, $eipc_validator$_WindowState, $eipc_validator$_CommandId, $eipc_validator$_AppInfo, $eipc_validator$_FileMapValue, $eipc_validator$_WindowLayout, $eipc_validator$_WindowView, $eipc_validator$_FileName, $eipc_validator$_ShortText, $eipc_validator$_SettingKey, $eipc_validator$_SettingValue, $eipc_validator$_ThemeData, $eipc_validator$_ThemeId, $eipc_validator$_NoticeId, $eipc_validator$_PackageSearchResults, $eipc_validator$_PackageVersions, $eipc_validator$_PackageName, $eipc_validator$_PackageQuery, $eipc_validator$_VersionSpec, $eipc_validator$_ReleaseList, $eipc_validator$_VersionList, $eipc_validator$_VersionRefValue, $eipc_validator$_OutputLines, $eipc_validator$_EditorTypes, $eipc_validator$_VersionString, $eipc_validator$_BuildId, $eipc_validator$_GitHubToken, $eipc_validator$_GistDescription, $eipc_validator$_GistId, $eipc_validator$_GitHubCredentialStorage, $eipc_validator$_GitHubSignInResult, $eipc_validator$_GistLinkInfo, $eipc_validator$_GistRevisionInfo, $eipc_validator$_GistHistoryInfo, $eipc_validator$_LogLevel, $eipc_validator$_LogText } from '../common-runtime/fiddle.js';
 import * as $eipc$ from '../browser-runtime.js';
-const $$ipcPrefix$$ = '$eipc_message$_36f70a81-8ba6-702c-7ea5-504d1cfe18c9_$_fiddle_$_';
+const $$ipcPrefix$$ = '$eipc_message$_7cd5b181-7186-f885-6239-2e30edcf0176_$_fiddle_$_';
 // Interfaces are declared as data and wired up by ../browser-runtime.ts:
 //   methods: [name, [[argName, validator], ...], resultValidator?]  ([Sync] methods append null|validator, 'sync')
 //   stores:  [name, stateValidator]
@@ -104,13 +104,6 @@ export const Onboarding = /*#__PURE__*/ $eipc$.defineInterface<IOnboardingImpl, 
     ['SetTourDone', []],
   ],
 });
-export interface IPaletteDispatcher {
-}
-export const Palette = /*#__PURE__*/ $eipc$.defineInterface<IPaletteImpl, IPaletteRenderer, IPaletteDispatcher>($$ipcPrefix$$, 'Palette', $eipc_event_validator$_MainFrame, {
-  methods: [
-    ['GetShowMeExamples', [], $eipc_validator$_NameList],
-  ],
-});
 export interface IVersionsDispatcher {
   dispatchTypesChanged(): void;
 }
@@ -134,7 +127,6 @@ export const Versions = /*#__PURE__*/ $eipc$.defineInterface<IVersionsImpl, IVer
 });
 export interface IRunDispatcher {
   dispatchOutput(arg_lines: OutputLines): void;
-  dispatchShowBisect(): void;
 }
 export const Run = /*#__PURE__*/ $eipc$.defineInterface<IRunImpl, IRunRenderer, IRunDispatcher>($$ipcPrefix$$, 'Run', $eipc_event_validator$_MainFrame, {
   methods: [
@@ -149,18 +141,17 @@ export const Run = /*#__PURE__*/ $eipc$.defineInterface<IRunImpl, IRunRenderer, 
   ],
   events: [
     ['Output', [['lines', $eipc_validator$_OutputLines]]],
-    ['ShowBisect', []],
   ],
 });
 export interface IGitHubDispatcher {
-  dispatchOpenDialog(arg_kind: GistDialogKind): void;
 }
 export const GitHub = /*#__PURE__*/ $eipc$.defineInterface<IGitHubImpl, IGitHubRenderer, IGitHubDispatcher>($$ipcPrefix$$, 'GitHub', $eipc_event_validator$_MainFrame, {
   methods: [
     ['GetCredentialStorage', [], $eipc_validator$_GitHubCredentialStorage],
     ['SignIn', [['token', $eipc_validator$_GitHubToken], ['allowPlaintext', $eipc$.boolean]], $eipc_validator$_GitHubSignInResult],
+    ['SignInFromClipboard', [['allowPlaintext', $eipc$.boolean]], $eipc_validator$_GitHubSignInResult],
     ['SignOut', []],
-    ['ReadClipboardToken', [], $eipc$.nullable($eipc$.string)],
+    ['HasClipboardToken', [], $eipc$.boolean],
     ['OpenNewTokenPage', []],
     ['TakeNotice', [], $eipc$.nullable($eipc$.string)],
     ['Publish', [['description', $eipc_validator$_GistDescription], ['isPublic', $eipc$.boolean]], $eipc_validator$_GistLinkInfo],
@@ -168,9 +159,6 @@ export const GitHub = /*#__PURE__*/ $eipc$.defineInterface<IGitHubImpl, IGitHubR
     ['Delete', []],
     ['GetHistory', [], $eipc_validator$_GistHistoryInfo],
     ['CopyShareLink', [['id', $eipc_validator$_GistId]]],
-  ],
-  events: [
-    ['OpenDialog', [['kind', $eipc_validator$_GistDialogKind]]],
   ],
 });
 export interface IAppPlatformDispatcher {
@@ -181,6 +169,7 @@ export const AppPlatform = /*#__PURE__*/ $eipc$.defineInterface<IAppPlatformImpl
     ['Log', [['level', $eipc_validator$_LogLevel], ['message', $eipc_validator$_LogText]]],
     ['IsCrashReportingEnabled', [], $eipc$.boolean],
     ['OpenUpdatePage', []],
+    ['TakeCrashReportsNotice', [], $eipc$.boolean],
   ],
   events: [
     ['UpdateAvailable', [['version', $eipc$.string]]],

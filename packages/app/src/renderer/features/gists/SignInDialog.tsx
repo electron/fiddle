@@ -23,10 +23,15 @@ export interface SignInDialogProps {
   onSignedIn?: () => void;
 }
 
-/** Personal access token sign-in. Mount it only while it's open. */
+/**
+ * Personal access token sign-in. Mount it only while it's open. A token on
+ * the clipboard is used when the field is left empty; main reads it, so the
+ * renderer never sees it (§4).
+ */
 export function SignInDialog({ onClose, onSignedIn }: SignInDialogProps) {
   const { t } = useTranslation('gists');
   const [token, setToken] = useState('');
+  const [clipboardToken, setClipboardToken] = useState(false);
   const [error, setError] = useState<string>();
   const [busy, setBusy] = useState(false);
   const [storage, setStorage] = useState<string>('encrypted');
@@ -34,9 +39,9 @@ export function SignInDialog({ onClose, onSignedIn }: SignInDialogProps) {
 
   useEffect(() => {
     let live = true;
-    githubApi.ReadClipboardToken().then(
-      (text) => {
-        if (live && text) setToken((previous) => previous || text);
+    githubApi.HasClipboardToken().then(
+      (has) => {
+        if (live) setClipboardToken(has);
       },
       () => undefined,
     );
@@ -51,13 +56,17 @@ export function SignInDialog({ onClose, onSignedIn }: SignInDialogProps) {
     };
   }, []);
 
-  const canSubmit = token.trim().length > 0 && !busy;
+  const fromClipboard = clipboardToken && token.trim() === '';
+  const canSubmit = (token.trim().length > 0 || fromClipboard) && !busy;
   const submit = async () => {
     if (!canSubmit) return;
     setBusy(true);
     setError(undefined);
     try {
-      const result = await githubApi.SignIn(token.trim(), storage === 'weak' && remember);
+      const allowPlaintext = storage === 'weak' && remember;
+      const result = fromClipboard
+        ? await githubApi.SignInFromClipboard(allowPlaintext)
+        : await githubApi.SignIn(token.trim(), allowPlaintext);
       showToast({
         tone: 'success',
         title: t('signedIn', { login: result.login }),
@@ -86,7 +95,7 @@ export function SignInDialog({ onClose, onSignedIn }: SignInDialogProps) {
           <Button variant="ghost" onPress={onClose}>
             {t('cancel')}
           </Button>
-          <Button variant="primary" loading={busy} isDisabled={!token.trim()} onPress={() => void submit()}>
+          <Button variant="primary" loading={busy} isDisabled={!token.trim() && !fromClipboard} onPress={() => void submit()}>
             {t('signInSubmit')}
           </Button>
         </>
@@ -109,6 +118,7 @@ export function SignInDialog({ onClose, onSignedIn }: SignInDialogProps) {
             setToken(value);
             setError(undefined);
           }}
+          {...(fromClipboard ? { description: t('signInClipboardHint') } : {})}
           isInvalid={error !== undefined}
           errorMessage={error}
         />

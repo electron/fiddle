@@ -17,9 +17,9 @@ import { fileURLToPath } from 'node:url';
 
 import type { OutputLine, RuntimeErrorValue, SourceLocation } from '../../shared/stores';
 
-export type ParsedLine = Omit<OutputLine, 'seq' | 'time'>;
+type ParsedLine = Omit<OutputLine, 'seq' | 'time'>;
 
-export interface ParserOptions {
+interface ParserOptions {
   /** The run directory, plus its real path if that differs (macOS /var → /private/var). */
   roots: readonly string[];
   /** The fiddle's file names. Only these are mapped. */

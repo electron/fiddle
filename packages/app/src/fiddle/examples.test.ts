@@ -5,7 +5,8 @@ import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
 
 import { ErrorCode, FiddleError } from '../shared/errors';
-import { findExample, listExamples, loadExample, SHOW_ME_EXAMPLES } from './examples';
+import { SHOW_ME_EXAMPLES } from '../shared/examples';
+import { findExample, listExamples, loadExample } from './examples';
 
 const staticDir = fileURLToPath(new URL('../../static', import.meta.url));
 

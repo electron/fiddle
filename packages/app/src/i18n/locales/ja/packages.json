@@ -1,0 +1,14 @@
+{
+  "title": "パッケージ",
+  "addPlaceholder": "パッケージを追加",
+  "addLabel": "npm からパッケージを追加",
+  "searching": "検索中…",
+  "noResults": "パッケージが見つかりません",
+  "searchFailed": "現在 npm に接続できません",
+  "latest": "最新",
+  "version": "{{name}} のバージョン",
+  "remove": "{{name}} を削除",
+  "addFailed": "{{name}} を追加できませんでした",
+  "changeFailed": "{{name}} を変更できませんでした",
+  "list": "この Fiddle のパッケージ"
+}

@@ -8,11 +8,12 @@ import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ComboBox, Input, ListBox, ListBoxItem, Popover, type Key } from 'react-aria-components';
 
-import { modulesApi, useWindowStore } from '../../../ipc/renderer';
+import { modulesApi } from '../../../ipc/renderer';
 import type { PackageSearchResults, PackageVersions } from '../../../shared/stores';
 import { cx, Icon, IconButton, Select, showToast, type SelectOption } from '../../../ui';
 import field from '../../../ui/components/Field.module.css';
 import menu from '../../../ui/components/Menu.module.css';
+import { useWindowState } from '../../state';
 import { highlightParts } from './highlight';
 import styles from './PackagesSection.module.css';
 
@@ -194,8 +195,8 @@ function ModuleRow({ name, version }: { name: string; version: string }) {
 
 export function PackagesSection() {
   const { t } = useTranslation('packages');
-  const win = useWindowStore();
-  const modules = win.state === 'ready' ? Object.entries(win.result.fiddle.modules) : [];
+  const win = useWindowState();
+  const modules = win ? Object.entries(win.fiddle.modules) : [];
 
   return (
     <section className={styles.section} aria-labelledby="packages-title" data-tour="packages">

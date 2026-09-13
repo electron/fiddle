@@ -40,7 +40,8 @@ export function parseTheme(id: string, text: string): ThemeData | undefined {
   return { ...result.data, id };
 }
 
-export async function loadThemes(dir: string): Promise<ThemeData[]> {
+/** Every valid theme in `dir`, sorted by name in the UI `locale`. */
+export async function loadThemes(dir: string, locale?: string): Promise<ThemeData[]> {
   let names: string[];
   try {
     names = await fsp.readdir(dir);
@@ -60,7 +61,7 @@ export async function loadThemes(dir: string): Promise<ThemeData[]> {
       log.warn('failed to read theme', name, error);
     }
   }
-  return themes.sort((a, b) => a.name.localeCompare(b.name));
+  return themes.sort((a, b) => a.name.localeCompare(b.name, locale));
 }
 
 export function summarize(theme: ThemeData): ThemeSummary {

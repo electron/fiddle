@@ -1,18 +1,9 @@
 import * as path from 'node:path';
 
 import { ErrorCode, FiddleError } from '../shared/errors';
+import { SHOW_ME_EXAMPLES, type ShowMeExampleName } from '../shared/examples';
 import type { FileMap } from './files';
 import { readFiddleFolder } from './folder';
-
-/** The built-in "Show Me" examples, with their display names, in menu order (§17.4). */
-export const SHOW_ME_EXAMPLES = [
-  'App', 'AutoUpdater', 'BrowserView', 'BrowserWindow', 'Clipboard', 'ContentTracing', 'Cookies', 'CrashReporter',
-  'Debugger', 'DesktopCapturer', 'Dialog', 'GlobalShortcut', 'IPC', 'Menu', 'NativeImage', 'Net',
-  'Notification', 'PowerMonitor', 'PowerSaveBlocker', 'Screen', 'Session', 'Shell', 'SystemPreferences', 'TouchBar',
-  'Tray', 'utilityProcess', 'WebContents', 'WebContentsView', 'WebFrame',
-] as const;
-
-export type ShowMeExampleName = (typeof SHOW_ME_EXAMPLES)[number];
 
 export interface ExampleInfo {
   name: ShowMeExampleName;

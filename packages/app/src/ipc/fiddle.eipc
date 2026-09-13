@@ -68,7 +68,8 @@ interface Window {
     // Runs a command from the registry in the context of this window.
     RunCommand(id: CommandId)
 
-    // Commands whose handlers act on Monaco or view state are sent here.
+    // Main's one channel to the window: commands whose handlers act on Monaco,
+    // view state or a dialog there (`sendWindowCommand` in src/main/windows.ts).
     [Event]
     Command(id: CommandId)
 }
@@ -249,21 +250,6 @@ interface Onboarding {
     SetTourDone()
 }
 
-zod_reference NameList {
-    import = "../../../../shared/stores"
-    type = "NameList"
-    schema = "nameListSchema"
-}
-
-// Lists for the command palette that the renderer can't compute itself.
-[RendererAPI]
-[Validator=MainFrame]
-[ContextBridge]
-interface Palette {
-    // The Show Me example names, for `Documents.LoadExample`.
-    GetShowMeExamples() -> NameList
-}
-
 // ---------------------------------------------------------------------------
 // Versions and run slice: Electron versions, running, bisect and editor types.
 // Install state lives in `App.versions`, run status in `Window.run`.
@@ -354,9 +340,6 @@ interface Run {
     StopBisect()
     // Asks, then opens the GitHub comparison of the bisect result.
     OpenBisectCompare()
-    // The `bisect.toggle` command asks the window to show the range dialog.
-    [Event]
-    ShowBisect()
 }
 
 // ---------------------------------------------------------------------------
@@ -382,12 +365,6 @@ enum GitHubCredentialStorage {
     Encrypted = "encrypted"
     Weak = "weak"
     Unavailable = "unavailable"
-}
-
-enum GistDialogKind {
-    Publish = "publish"
-    Open = "open"
-    History = "history"
 }
 
 structure GitHubSignInResult {
@@ -425,9 +402,12 @@ interface GitHub {
     // Checks format, validity and the gist scope. `allowPlaintext` is the
     // user's consent to plaintext storage on Linux without a keyring.
     SignIn(token: GitHubToken, allowPlaintext: boolean) -> GitHubSignInResult
+    // SignIn with the token on the clipboard. Main reads the clipboard, so
+    // the token never reaches the renderer.
+    SignInFromClipboard(allowPlaintext: boolean) -> GitHubSignInResult
     SignOut()
-    // The clipboard text when it looks like a token, for prefilling sign-in.
-    ReadClipboardToken() -> string?
+    // True when the clipboard holds something token-shaped.
+    HasClipboardToken() -> boolean
     OpenNewTokenPage()
     // A pending one-time notice, e.g. `decrypt-failed`.
     TakeNotice() -> string?
@@ -437,10 +417,6 @@ interface GitHub {
     Delete()
     GetHistory() -> GistHistoryInfo
     CopyShareLink(id: GistId)
-
-    // A command asked this window to open a gist dialog.
-    [Event]
-    OpenDialog(kind: GistDialogKind)
 }
 
 // ---------------------------------------------------------------------------
@@ -467,6 +443,9 @@ interface AppPlatform {
     IsCrashReportingEnabled() -> boolean
     // The update toast's action: opens the release page after confirmation.
     OpenUpdatePage()
+    // True once, for the first window to ask: show the first-run notice that
+    // crash reports are on (§14). Recorded in state.json.
+    TakeCrashReportsNotice() -> boolean
 
     // Linux and MSIX: a newer release is out (daily GitHub releases check).
     [Event]

@@ -1,6 +1,7 @@
 // @ts-check
 import js from '@eslint/js';
 import { defineConfig, globalIgnores } from 'eslint/config';
+import i18next from 'eslint-plugin-i18next';
 import reactHooks from 'eslint-plugin-react-hooks';
 import tseslint from 'typescript-eslint';
 
@@ -9,6 +10,25 @@ const ipcRendererBan = {
   message:
     'ipcRenderer is never used or exposed. Use the EIPC bindings in src/ipc/renderer.ts.',
 };
+
+// REQUIREMENTS §9: native menu and dialog text comes from the catalog.
+const MENU_DIALOG_TEXT =
+  '/^(label|sublabel|toolTip|title|message|detail|checkboxLabel|buttonLabel|nameFieldLabel|placeholder)$/';
+const catalogTextMessage = 'Menu and dialog text comes from the i18n catalog: use t() or tm().';
+const menuDialogLiterals = [
+  {
+    selector: `Property[key.name=${MENU_DIALOG_TEXT}] > Literal[value=/[A-Za-z]/]`,
+    message: catalogTextMessage,
+  },
+  {
+    selector: `Property[key.name=${MENU_DIALOG_TEXT}] > TemplateLiteral > TemplateElement[value.raw=/[A-Za-z]/]`,
+    message: catalogTextMessage,
+  },
+  {
+    selector: "Property[key.name='buttons'] > ArrayExpression > Literal[value=/[A-Za-z]/]",
+    message: catalogTextMessage,
+  },
+];
 
 export default defineConfig(
   globalIgnores([
@@ -98,5 +118,18 @@ export default defineConfig(
   {
     files: ['packages/app/src/preload/**'],
     rules: { 'no-restricted-syntax': ['error', ipcRendererBan] },
+  },
+  // REQUIREMENTS §9: no string literals in JSX text or in menu and dialog
+  // definitions. `warn` while the wave 2 slices land, then `error` (PROGRESS.md).
+  {
+    files: ['packages/app/src/{renderer,ui}/**/*.tsx'],
+    ignores: ['**/*.test.tsx', 'packages/app/src/ui/gallery/**'],
+    plugins: { i18next },
+    rules: { 'i18next/no-literal-string': ['warn', { mode: 'jsx-text-only' }] },
+  },
+  {
+    files: ['packages/app/src/main/**/*.ts'],
+    ignores: ['**/*.test.ts', 'packages/app/src/main/test-driver/**'],
+    rules: { 'no-restricted-syntax': ['warn', ...menuDialogLiterals] },
   },
 );

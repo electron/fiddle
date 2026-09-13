@@ -2,10 +2,12 @@ import { describe, expect, it } from 'vitest';
 
 import {
   acceleratorFromKey,
+  changedExecutionSettings,
   defaultSettings,
   effectiveAccelerator,
   findConflicts,
   fromSparse,
+  isHttpsUrl,
   isModified,
   isSafeTokenValue,
   localePreference,
@@ -19,6 +21,33 @@ import {
   toSparse,
   type KeyInput,
 } from './settings';
+
+describe('execution settings', () => {
+  it('accepts only https mirrors', () => {
+    expect(isHttpsUrl('https://example.com/electron/')).toBe(true);
+    expect(isHttpsUrl('http://example.com/electron/')).toBe(false);
+    expect(isHttpsUrl('not a url')).toBe(false);
+    expect(parseSetting('customMirrorElectron', 'http://example.com/electron/')).toBeUndefined();
+    expect(parseSetting('customMirrorNightly', 'http://127.0.0.1:8080/')).toBeUndefined();
+    expect(parseSetting('customMirrorNightly', 'https://example.com/nightly/')).toBeDefined();
+  });
+
+  it('lists the flags, variables and mirrors a settings import changes', () => {
+    const next = {
+      ...defaultSettings,
+      electronFlags: ['--inspect'],
+      environmentVariables: ['A=1'],
+      customMirrorElectron: 'https://m/',
+      packageManager: 'yarn' as const,
+    };
+    expect(changedExecutionSettings(defaultSettings, next)).toEqual([
+      'electronFlags',
+      'environmentVariables',
+      'customMirrorElectron',
+    ]);
+    expect(changedExecutionSettings(defaultSettings, { ...defaultSettings, electronFlags: [] })).toEqual([]);
+  });
+});
 
 describe('schema and defaults', () => {
   it('has a default for every setting', () => {

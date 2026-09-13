@@ -1,3 +1,4 @@
+import { app } from 'electron';
 import i18next, { type TFunction } from 'i18next';
 
 import {
@@ -8,27 +9,37 @@ import {
   type Locale,
   type Namespace,
 } from '../i18n';
+import { isTestMode } from './test-mode';
 
 const instance = i18next.createInstance();
+
+/**
+ * `FIDDLE_LOCALE` (e.g. `en-XA`, `ar-XB`, `de`) wins over the setting and the
+ * OS in dev and test runs. Packaged builds ignore it.
+ */
+function withOverride(preferred: readonly string[]): readonly string[] {
+  const forced = process.env.FIDDLE_LOCALE;
+  return forced && (!app.isPackaged || isTestMode()) ? [forced, ...preferred] : preferred;
+}
 
 /**
  * Main loads `main` (command labels and menus) plus every slice namespace
  * named `main<Slice>` (e.g. `mainDocuments`) for its dialogs and notices.
  * Renderer namespaces are never loaded here.
  */
-export const mainNamespaces = namespaces.filter(
+const mainNamespaces = namespaces.filter(
   (ns) => ns === 'main' || /^main[A-Z]/.test(ns),
 ) as Namespace[];
 
 export async function initMainI18n(preferred: readonly string[]): Promise<Locale> {
-  const locale = pickLocale(preferred);
+  const locale = pickLocale(withOverride(preferred));
   await instance.use(catalogBackend).init(i18nOptions(locale, mainNamespaces));
   return locale;
 }
 
 /** Switches main's strings to the best shipped match for `preferred` (Settings slice). */
 export async function setMainLocale(preferred: readonly string[]): Promise<Locale> {
-  const locale = pickLocale(preferred);
+  const locale = pickLocale(withOverride(preferred));
   if (instance.language !== locale) await instance.changeLanguage(locale);
   return locale;
 }

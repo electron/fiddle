@@ -9,8 +9,9 @@
  * down: hidden, sandboxed, no preload and no IPC, navigation and new windows
  * blocked, a `default-src 'none'` CSP, and it's destroyed right after reading.
  */
-import { app, BrowserWindow, dialog, session, shell, type WebContents } from 'electron';
+import { app, BrowserWindow, session, shell, type WebContents } from 'electron';
 
+import { messageBox } from './dialogs';
 import { t } from './i18n';
 import { log } from './log';
 
@@ -36,6 +37,8 @@ export function applySessionSecurity(ses = session.defaultSession): void {
     event.preventDefault();
     callback();
   });
+  // Windows and Linux only; macOS pairs through the OS.
+  if (process.platform !== 'darwin') ses.setBluetoothPairingHandler((_details, callback) => callback({ confirmed: false }));
 }
 
 /** Every webContents: no new windows (http(s) links open in the browser) and no webviews. */
@@ -46,6 +49,10 @@ export function hardenAllWebContents(): void {
       return { action: 'deny' };
     });
     contents.on('will-attach-webview', (event) => event.preventDefault());
+    contents.on('select-bluetooth-device', (event, _devices, callback) => {
+      event.preventDefault();
+      callback('');
+    });
   });
 }
 
@@ -76,16 +83,13 @@ export async function openExternalLink(
     return;
   }
   if (parsed.protocol !== 'https:' && parsed.protocol !== 'http:') return;
-  const options: Electron.MessageBoxOptions = {
+  const { response } = await messageBox(parent, {
     type: 'question',
     message: t('openLinkMessage'),
     detail: parsed.href,
     buttons: [t('openLink'), t('cancel')],
     defaultId: 0,
     cancelId: 1,
-  };
-  const { response } = parent
-    ? await dialog.showMessageBox(parent, options)
-    : await dialog.showMessageBox(options);
+  });
   if (response === 0) await shell.openExternal(parsed.href);
 }

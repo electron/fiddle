@@ -19,7 +19,7 @@
 
 .title {
   margin: 0 4px 0 0;
-  font: 600 12.5px/16px var(--lu-font-sans);
+  font: var(--lu-type-console-title);
   color: var(--lu-ink);
 }
 
@@ -48,7 +48,7 @@
   padding: 2px 8px;
   border-radius: var(--lu-radius-item);
   corner-shape: squircle;
-  font: 400 12px/18px var(--lu-font-mono);
+  font: var(--lu-type-console);
   color: var(--lu-ink);
 }
 
@@ -58,7 +58,7 @@
 }
 
 .process {
-  font: 500 11px/18px var(--lu-font-sans);
+  font: var(--lu-type-console-process);
   color: var(--lu-ink-muted);
   white-space: nowrap;
   overflow: hidden;
@@ -90,43 +90,4 @@
 }
 .row[data-kind="error"] .process {
   font-weight: 600;
-}
-
-/* The location keeps the accent colour with an underline; it is not red. */
-.location {
-  appearance: none;
-  display: inline;
-  padding: 0;
-  border: 0;
-  background: none;
-  font: inherit;
-  color: var(--lu-accent);
-  text-decoration: underline;
-  text-underline-offset: 2px;
-  cursor: pointer;
-}
-.location:focus-visible {
-  outline: var(--lu-focus-outline);
-  outline-offset: 1px;
-  border-radius: var(--lu-radius-sm);
-}
-
-.running {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  height: 22px;
-  padding: 0 9px 0 8px;
-  border-radius: var(--lu-radius-capsule);
-  background: var(--lu-spark-soft);
-  color: var(--lu-spark);
-  font: 600 11.5px/14px var(--lu-font-sans);
-}
-
-.dot {
-  width: 6px;
-  height: 6px;
-  border-radius: var(--lu-radius-round);
-  background: currentColor;
-  box-shadow: var(--lu-halo-spark);
 }

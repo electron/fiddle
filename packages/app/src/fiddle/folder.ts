@@ -1,5 +1,7 @@
-import { lstat, mkdir, readdir, readFile, rm, unlink, writeFile } from 'node:fs/promises';
+import { randomBytes } from 'node:crypto';
+import { mkdir, readdir, readFile, rename, rm, writeFile } from 'node:fs/promises';
 import * as path from 'node:path';
+import { fileURLToPath } from 'node:url';
 
 import { ErrorCode, FiddleError } from '../shared/errors';
 import {
@@ -9,11 +11,13 @@ import {
   hasName,
   hasPathSeparator,
   isSupportedFileName,
+  isWindowsReservedName,
   PACKAGE_JSON,
 } from './files';
 import { type PickedFiles, pickFiddleFiles, type PickOptions } from './pick';
 
 export const GITIGNORE_CONTENT = 'node_modules\nout';
+const GITIGNORE = '.gitignore';
 
 export type FolderReadResult = PickedFiles;
 
@@ -55,27 +59,52 @@ function assertWritableNames(names: readonly string[]): void {
       if (hasPathSeparator(name)) throw fileRuleError('path-separator', name);
       if (hasInvalidCharacter(name)) throw fileRuleError('invalid-character', name);
       if (!isSupportedFileName(name)) throw fileRuleError('unsupported-extension', name);
+      if (isWindowsReservedName(name)) throw fileRuleError('reserved-name', name);
     }
     if (hasName(seen, name)) throw fileRuleError('duplicate-name', name);
     seen.push(name);
   }
 }
 
-/** Writes `target` as a regular file. A symlink there is replaced, never followed. */
+/**
+ * Writes `target` as a regular file: the content goes to a new temp file in
+ * the same folder, created exclusively (`wx` never opens through an existing
+ * link), which is then renamed over `target`. A rename replaces a symlink at
+ * `target` instead of following it, so a link created after any check is
+ * never written through.
+ */
 async function writeRegularFile(target: string, content: string): Promise<void> {
+  const temp = path.join(path.dirname(target), `.${path.basename(target)}.${randomBytes(6).toString('hex')}.tmp`);
+  await writeFile(temp, content, { encoding: 'utf8', flag: 'wx' });
   try {
-    if ((await lstat(target)).isSymbolicLink()) await unlink(target);
+    await rename(temp, target);
   } catch (error) {
-    if ((error as NodeJS.ErrnoException).code !== 'ENOENT') throw error;
+    await rm(temp, { force: true });
+    throw error;
   }
-  await writeFile(target, content, 'utf8');
 }
 
-/** Supported files already in `dir`, for the overwrite warning. Empty if `dir` doesn't exist. */
+/** Supported files already in `dir`. Empty if `dir` doesn't exist. */
 export async function findExistingSupportedFiles(dir: string): Promise<string[]> {
   try {
     const entries = await readdir(dir, { withFileTypes: true });
     return entries.filter((e) => e.isFile() && isSupportedFileName(e.name)).map((e) => e.name);
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code === 'ENOENT') return [];
+    throw error;
+  }
+}
+
+/**
+ * Everything in `dir` that `writeFiddleFolder(dir, files)` would replace or
+ * delete, for the overwrite warning: each name in `files` (empty ones are
+ * deleted) and `.gitignore`, matched ignoring case as on macOS and Windows.
+ * Empty if `dir` doesn't exist.
+ */
+export async function findFilesToReplace(dir: string, files: FileMap): Promise<string[]> {
+  const targets = [...Object.keys(files), GITIGNORE];
+  try {
+    return (await readdir(dir)).filter((name) => hasName(targets, name));
   } catch (error) {
     if ((error as NodeJS.ErrnoException).code === 'ENOENT') return [];
     throw error;
@@ -96,5 +125,28 @@ export async function writeFiddleFolder(dir: string, files: FileMap): Promise<vo
     if (content === '') await rm(target, { force: true });
     else await writeRegularFile(target, content);
   }
-  await writeRegularFile(path.join(dir, '.gitignore'), GITIGNORE_CONTENT);
+  await writeRegularFile(path.join(dir, GITIGNORE), GITIGNORE_CONTENT);
+}
+
+/**
+ * The local path of a dropped `file:` URL, or undefined if it could reach
+ * another machine: a host other than none or `localhost` (the URL parser
+ * turns `localhost` into none), or a UNC path such as `\\server\share` or
+ * `//server/share`.
+ */
+export function localPathFromFileUrl(url: string, platform: NodeJS.Platform = process.platform): string | undefined {
+  let parsed: URL;
+  try {
+    parsed = new URL(url);
+  } catch {
+    return undefined;
+  }
+  if (parsed.protocol !== 'file:' || parsed.hostname !== '') return undefined;
+  let target: string;
+  try {
+    target = fileURLToPath(parsed, { windows: platform === 'win32' });
+  } catch {
+    return undefined;
+  }
+  return /^[\\/]{2}/.test(target) ? undefined : target;
 }

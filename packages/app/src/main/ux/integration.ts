@@ -6,7 +6,7 @@
  * - the window flashes, or the dock icon bounces, when one fails;
  * - the Windows jump list and the macOS dock menu, with New window, New
  *   fiddle and recent folders.
- * Installed once, when the first window is bound.
+ * Installed once, by main/index.ts.
  */
 import path from 'node:path';
 
@@ -19,13 +19,13 @@ import {
   type MenuItemConstructorOptions,
 } from 'electron';
 
+import { findDeepLinkInArgv } from '../../fiddle/deep-link';
 import { commands, isCommandId } from '../../shared/commands';
 import type { RunState, WindowState } from '../../shared/stores';
-import type { CommandRegistry } from '../commands';
 import { openFolderIn, recentFolders } from '../documents/service';
 import { t, tm } from '../i18n';
 import { log } from '../log';
-import type { StateHub } from '../state-hub';
+import type { Services } from '../services';
 import { focusedWindowId, getWindow } from '../windows';
 import {
   downloadsFinished,
@@ -36,21 +36,12 @@ import {
   type OperationKind,
 } from './progress';
 
-const TITLES: Record<OperationKind, { ok: MainUxKey; failed: MainUxKey }> = {
+const TITLES = {
   bisect: { ok: 'bisectDone', failed: 'bisectFailed' },
   package: { ok: 'packageDone', failed: 'packageFailed' },
   downloads: { ok: 'downloadsDone', failed: 'downloadsFailed' },
   run: { ok: 'runDone', failed: 'runFailed' },
-};
-type MainUxKey =
-  | 'bisectDone'
-  | 'bisectFailed'
-  | 'packageDone'
-  | 'packageFailed'
-  | 'downloadsDone'
-  | 'downloadsFailed'
-  | 'runDone'
-  | 'runFailed';
+} as const satisfies Record<OperationKind, { ok: string; failed: string }>;
 
 /** Jump list tasks start a second instance with one of these. */
 const ARG_NEW_WINDOW = '--fiddle-new-window';
@@ -60,12 +51,7 @@ const ARG_OPEN_FOLDER = '--fiddle-open-folder';
 /** `Window.run` belongs to the Versions and run slice; absent means ready. */
 const runOf = (state: WindowState | undefined): RunState | undefined => state?.run;
 
-let installed = false;
-
-export function installOsIntegration(hub: StateHub, registry: CommandRegistry): void {
-  if (installed) return;
-  installed = true;
-
+export function installOsIntegration({ hub, registry }: Services): void {
   const runs = new Map<string, RunState | undefined>();
   const runStarts = new Map<string, number>();
   const shownProgress = new Map<string, string>();
@@ -183,13 +169,20 @@ export function installOsIntegration(hub: StateHub, registry: CommandRegistry): 
   });
 
   app.on('second-instance', (_event, argv) => {
+    // A link's argv is Documents' to handle; a crafted link must not also act as a jump list task.
+    if (findDeepLinkInArgv(argv)) return;
     if (argv.includes(ARG_NEW_WINDOW)) runCommand('app.newWindow');
     if (argv.includes(ARG_NEW_FIDDLE)) runCommand('file.newFiddle');
     const dir = argv[argv.indexOf(ARG_OPEN_FOLDER) + 1];
-    if (argv.includes(ARG_OPEN_FOLDER) && dir) openFolder(dir);
+    // The jump list only offers recent folders, so nothing else is opened.
+    if (argv.includes(ARG_OPEN_FOLDER) && dir && isRecentFolder(dir)) openFolder(dir);
   });
 
   setImmediate(refreshSessionMenus);
+}
+
+function isRecentFolder(dir: string): boolean {
+  return recentFolders().includes(dir);
 }
 
 /** The label of a command, if that command exists (other slices own some of them). */
@@ -197,7 +190,7 @@ function commandLabel(id: string): string | undefined {
   return isCommandId(id) ? t(commands[id].label) : undefined;
 }
 
-export function dockMenu(
+function dockMenu(
   recent: readonly string[],
   runCommand: (id: string) => void,
   openFolder: (dir: string) => void,

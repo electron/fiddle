@@ -8,32 +8,27 @@ import * as semver from 'semver';
 import { isValidPackageName, pickLatestVersion } from '../../fiddle/modules';
 import { ErrorCode, FiddleError } from '../../shared/errors';
 
-export interface PackageSearchResult {
+interface PackageSearchResult {
   name: string;
   version: string;
   description: string;
 }
 
-export interface PackageVersionList {
+interface PackageVersionList {
   /** The `latest` dist-tag, or the newest stable version. Null if there are none. */
   latest: string | null;
   /** Every published version, newest first. */
   versions: string[];
 }
 
-export interface NpmEndpoints {
+interface NpmEndpoints {
   /** Algolia query endpoint for the `npm-search` index. */
   searchUrl: string;
   /** npm registry root, without a trailing slash. */
   registryUrl: string;
 }
 
-export const DEFAULT_NPM_ENDPOINTS: NpmEndpoints = {
-  searchUrl: 'https://OFCNCOG2CU-dsn.algolia.net/1/indexes/npm-search/query',
-  registryUrl: 'https://registry.npmjs.org',
-};
-
-/** The npm endpoints from the app's endpoint set (src/shared/endpoints.ts). */
+/** The npm endpoints from the app's endpoint set: `getEndpoints()` (src/shared/endpoints.ts). */
 export function npmEndpoints(base: { algolia: string; npmRegistry: string }): NpmEndpoints {
   return {
     searchUrl: `${base.algolia}/1/indexes/npm-search/query`,
@@ -46,15 +41,15 @@ export function npmEndpoints(base: { algolia: string; npmRegistry: string }): Np
 const ALGOLIA_APP_ID = 'OFCNCOG2CU';
 const ALGOLIA_API_KEY = '4efa2042cf4dba11be6e96e5c394e1a4';
 
-export const SEARCH_LIMIT = 5;
+const SEARCH_LIMIT = 5;
 const VERSIONS_TTL_MS = 5 * 60_000;
 const CACHE_SIZE = 100;
 
 export type FetchFn = (url: string, init?: RequestInit) => Promise<Response>;
 
-export interface NpmClientOptions {
+interface NpmClientOptions {
   fetch: FetchFn;
-  endpoints?: Partial<NpmEndpoints>;
+  endpoints: NpmEndpoints;
   now?: () => number;
 }
 
@@ -133,7 +128,7 @@ export class NpmClient {
 
   constructor(options: NpmClientOptions) {
     this.#fetch = options.fetch;
-    this.#endpoints = { ...DEFAULT_NPM_ENDPOINTS, ...options.endpoints };
+    this.#endpoints = options.endpoints;
     this.#now = options.now ?? Date.now;
   }
 

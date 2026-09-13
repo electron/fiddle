@@ -22,7 +22,8 @@ import {
   type TableColumn,
   type TableSection,
 } from '../../../ui';
-import { useAppState, useReleases } from '../run/use-run';
+import { useAppState } from '../../state';
+import { useReleases } from '../run/use-run';
 import styles from './Versions.module.css';
 
 const ROW_LIMIT = 200;

@@ -44,6 +44,26 @@ export function getModel(name: string | null | undefined): Model | undefined {
   return name ? models.get(name) : undefined;
 }
 
+let synced = false;
+
+/** Called after the first sync, successful or not, so the window can be shown. */
+export function markModelsSynced(): void {
+  if (synced) return;
+  synced = true;
+  emit();
+}
+
+/** True once the first `syncModels` has finished: the editors have text to show. */
+export function useModelsSynced(): boolean {
+  return useSyncExternalStore(
+    (listener) => {
+      listeners.add(listener);
+      return () => listeners.delete(listener);
+    },
+    () => synced,
+  );
+}
+
 /** Re-renders when models are created or disposed; returns the file's model. */
 export function useModel(name: string | null | undefined): Model | undefined {
   useSyncExternalStore(

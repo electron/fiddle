@@ -17,6 +17,7 @@ import {
   isMainEntry,
   isReservedFileName,
   isSupportedFileName,
+  isWindowsReservedName,
   sortFileNames,
 } from './files';
 import { thrownReason } from './test-helpers/errors';
@@ -30,6 +31,21 @@ describe('isSupportedFileName', () => {
   it.each(['readme.md', 'a.ts', 'a/b.js', 'a\\b.js', '.js', '', 'noext', 'main.js\0', 'C:x.js', 'a?.js', 'a*.js', 'a|b.js', 'a<b.js', 'a"b.js', 'tab\t.js'])('rejects %j', (name) =>
     expect(isSupportedFileName(name)).toBe(false),
   );
+});
+
+describe('Windows reserved names', () => {
+  it.each(['con.js', 'CON.JS', 'nul.html', 'Aux.css', 'prn.json', 'com1.js', 'LPT9.mjs', 'con', 'con.min.js', 'main.js.', 'main.js ', 'x.'])(
+    'refuses %j on every platform',
+    (name) => {
+      expect(isWindowsReservedName(name)).toBe(true);
+      expect(isReservedFileName(name)).toBe(true);
+      expect(() => assertValidFileName(name)).toThrowError(/reserved-name/);
+    },
+  );
+
+  it.each(['console.js', 'icon.js', 'com.js', 'lpt.js', 'aux1.js', 'nul-x.js', 'main.js'])('allows %j', (name) => {
+    expect(isWindowsReservedName(name)).toBe(false);
+  });
 });
 
 describe('names', () => {

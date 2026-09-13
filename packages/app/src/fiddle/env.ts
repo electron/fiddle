@@ -17,16 +17,26 @@ export interface ParsedEnvEntries {
   env: Record<string, string>;
   /** Entries that couldn't be parsed as `KEY=value`. */
   invalid: string[];
-  /** Keys refused because they're blocked (`LD_PRELOAD`, `DYLD_*`). */
+  /** Keys refused because they're blocked (see {@link isBlockedUserEnvKey}). */
   blocked: string[];
 }
 
 const KEY_RE = /^[A-Za-z_][A-Za-z0-9_]*$/;
 
-/** `LD_PRELOAD` and `DYLD_*` can't be set by the user. */
+/** Blocked by exact name, ignoring case. */
+const BLOCKED_USER_ENV_KEYS: readonly string[] = ['NODE_OPTIONS', 'ELECTRON_RUN_AS_NODE'];
+
+/**
+ * Variables the user can't set, ignoring case, because they change what
+ * Electron runs rather than what the fiddle sees:
+ * - `LD_*` and `DYLD_*` load code into every process through the dynamic
+ *   loader. Core drops them too (`ALWAYS_BLOCKED_ENV`).
+ * - `NODE_OPTIONS` can `--require` any file into the fiddle's main process.
+ * - `ELECTRON_RUN_AS_NODE` turns Electron into plain Node.js running the fiddle's entry point.
+ */
 export function isBlockedUserEnvKey(key: string): boolean {
   const upper = key.toUpperCase();
-  return upper === 'LD_PRELOAD' || upper.startsWith('DYLD_');
+  return upper.startsWith('LD_') || upper.startsWith('DYLD_') || BLOCKED_USER_ENV_KEYS.includes(upper);
 }
 
 /**
@@ -88,7 +98,7 @@ export function cleanFlags(flags: readonly string[]): string[] {
 }
 
 export interface FiddleEnvOptions {
-  /** Already-parsed user variables. `LD_PRELOAD` and `DYLD_*` are dropped. */
+  /** Already-parsed user variables. `LD_*` and `DYLD_*` are dropped. */
   userEnv?: Readonly<Record<string, string>>;
   advancedLogging?: boolean;
 }

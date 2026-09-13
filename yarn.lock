@@ -2492,6 +2492,7 @@ __metadata:
     "@eslint/js": "npm:^10.0.0"
     "@types/node": "npm:^24.9.0"
     eslint: "npm:^10.10.0"
+    eslint-plugin-i18next: "npm:^6.1.5"
     eslint-plugin-react-hooks: "npm:^7.1.1"
     jsdom: "npm:^30.0.1"
     prettier: "npm:^3.9.6"
@@ -2728,6 +2729,15 @@ __metadata:
   version: 4.0.0
   resolution: "escape-string-regexp@npm:4.0.0"
   checksum: 10c0/9497d4dd307d845bd7f75180d8188bb17ea8c151c1edbf6b6717c100e104d629dc2dfb687686181b0f4b7d732c7dfdc4d5e7a8ff72de1b0ca283a75bbb3a9cd9
+  languageName: node
+  linkType: hard
+
+"eslint-plugin-i18next@npm:^6.1.5":
+  version: 6.1.5
+  resolution: "eslint-plugin-i18next@npm:6.1.5"
+  dependencies:
+    requireindex: "npm:~1.1.0"
+  checksum: 10c0/500cb271999e49c630015bcfa7cc635c860a1385b71731f90ca77d37eae4f15c80bd1bb50b6d8b67a468b239fbe6fe73b5346aebdf457100b553b98618a817be
   languageName: node
   linkType: hard
 
@@ -4303,6 +4313,13 @@ __metadata:
     debug: "npm:^4.3.5"
     module-details-from-path: "npm:^1.0.3"
   checksum: 10c0/4b3d29adfff873585dceffa9ddb8f33bb6599001ddff758503e0e5ade2ae6d20d691314125bb13679fa75a19893338e11953d4702dd2fea181e95c0f8316b29b
+  languageName: node
+  linkType: hard
+
+"requireindex@npm:~1.1.0":
+  version: 1.1.0
+  resolution: "requireindex@npm:1.1.0"
+  checksum: 10c0/4d57e7c6d160c4d043a233a6a95a22c792ada72ff378c5ebd415be505b328f3c719f9188dd100f8fcaa8af513a85f39eee0a5047838d715e22e79544a3b7d002
   languageName: node
   linkType: hard
 

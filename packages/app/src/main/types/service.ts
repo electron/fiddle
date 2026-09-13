@@ -16,11 +16,12 @@ import path from 'node:path';
 
 import type { EditorTypes, LocalBuild } from '../../shared/stores';
 import { log } from '../log';
+import { writeAtomic } from '../persistence/json-store';
+import { getEndpoints } from '../test-mode';
 
-const UNPKG = 'https://unpkg.com';
 const FETCH_CONCURRENCY = 8;
 
-export interface TypesServiceOptions {
+interface TypesServiceOptions {
   /** `<cache>/types`. */
   dir: string;
   fetch: (url: string) => Promise<Response>;
@@ -37,7 +38,7 @@ interface MetaEntry {
 }
 
 /** unpkg `?meta`, flat (`files: [{ path }]`) or nested (`type: 'directory'`), → `.d.ts` paths. */
-export function typeFilesFromMeta(meta: unknown): string[] {
+function typeFilesFromMeta(meta: unknown): string[] {
   const out: string[] = [];
   const walk = (entry: MetaEntry) => {
     if (Array.isArray(entry.files)) for (const child of entry.files as MetaEntry[]) walk(child);
@@ -97,7 +98,7 @@ export class TypesService {
     const cached = await fsp.readFile(file, 'utf8').catch(() => undefined);
     if (cached !== undefined) return cached;
     const pkg = version.includes('nightly') ? 'electron-nightly' : 'electron';
-    const text = await this.#text(`${UNPKG}/${pkg}@${version}/electron.d.ts`);
+    const text = await this.#text(`${getEndpoints().unpkg}/${pkg}@${version}/electron.d.ts`);
     if (text !== undefined) await writeCache(file, text);
     return text ?? null;
   }
@@ -111,10 +112,10 @@ export class TypesService {
     }
     const major = nodeVersion.split('.')[0] ?? nodeVersion;
     let spec = nodeVersion;
-    let meta = await this.#json(`${UNPKG}/@types/node@${spec}/?meta`);
+    let meta = await this.#json(`${getEndpoints().unpkg}/@types/node@${spec}/?meta`);
     if (meta === undefined) {
       spec = major;
-      meta = await this.#json(`${UNPKG}/@types/node@${spec}/?meta`);
+      meta = await this.#json(`${getEndpoints().unpkg}/@types/node@${spec}/?meta`);
     }
     if (meta === undefined) return {};
     const resolved = (meta as { version?: unknown }).version;
@@ -125,7 +126,7 @@ export class TypesService {
     for (let i = 0; i < paths.length; i += FETCH_CONCURRENCY) {
       await Promise.all(
         paths.slice(i, i + FETCH_CONCURRENCY).map(async (p) => {
-          const text = await this.#text(`${UNPKG}/@types/node@${spec}${p}`);
+          const text = await this.#text(`${getEndpoints().unpkg}/@types/node@${spec}${p}`);
           if (text !== undefined) files[p.slice(1)] = text;
         }),
       );
@@ -172,10 +173,7 @@ export class TypesService {
 
 async function writeCache(file: string, text: string): Promise<void> {
   try {
-    await fsp.mkdir(path.dirname(file), { recursive: true });
-    const tmp = `${file}.${process.pid}.tmp`;
-    await fsp.writeFile(tmp, text);
-    await fsp.rename(tmp, file);
+    await writeAtomic(file, text);
   } catch (error) {
     log.warn('caching types failed', file, error);
   }

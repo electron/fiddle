@@ -73,8 +73,8 @@ export function showToast(content: ToastContent, options: { timeout?: number } =
 export interface ToasterProps {
   /** Accessible name for the dismiss buttons. */
   closeLabel: string;
-  /** Accessible name for the region. */
-  'aria-label'?: string;
+  /** Accessible name for the region. Required: react-aria's default isn't from the catalog. */
+  'aria-label': string;
   queue?: ToastQueue<ToastContent>;
 }
 

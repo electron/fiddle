@@ -34,7 +34,30 @@ export const MIRRORS = {
   },
 } as const;
 
-const mirrorUrl = z.union([z.literal(''), z.url({ protocol: /^https?$/ }).max(2000)]);
+/** Custom mirrors serve the Electron binaries Fiddle runs, so only https is accepted. */
+export function isHttpsUrl(value: string): boolean {
+  try {
+    return new URL(value).protocol === 'https:';
+  } catch {
+    return false;
+  }
+}
+
+const mirrorUrl = z.union([z.literal(''), z.url({ protocol: /^https$/ }).max(2000)]);
+
+/** Settings that change what a run executes or where Electron comes from. */
+export const EXECUTION_SETTINGS = [
+  'electronFlags',
+  'environmentVariables',
+  'mirror',
+  'customMirrorElectron',
+  'customMirrorNightly',
+] as const;
+
+/** The execution settings `next` changes from `current`, e.g. for the settings import confirmation. */
+export function changedExecutionSettings(current: Settings, next: Settings): (typeof EXECUTION_SETTINGS)[number][] {
+  return EXECUTION_SETTINGS.filter((key) => JSON.stringify(current[key]) !== JSON.stringify(next[key]));
+}
 /** Theme IDs are file names in `<userData>/themes/`, without `.json`. */
 export const themeIdSchema = z.string().regex(/^[A-Za-z0-9][\w.-]{0,99}$/);
 export const acceleratorSchema = z.string().min(1).max(100);

@@ -13,8 +13,6 @@ import {
   Documents as GeneratedDocuments,
   Modules as GeneratedModules,
   Onboarding as GeneratedOnboarding,
-  Palette as GeneratedPalette,
-  type IPaletteRenderer,
   Run as GeneratedRun,
   Versions as GeneratedVersions,
   Window as GeneratedWindow,
@@ -57,7 +55,6 @@ export const documentsApi = bind<IDocumentsRenderer>(GeneratedDocuments, 'Docume
 export type { IDocumentsRenderer } from './generated/renderer/fiddle';
 export const modulesApi = bind<IModulesRenderer>(GeneratedModules, 'Modules');
 export const onboardingApi = bind<IOnboardingRenderer>(GeneratedOnboarding, 'Onboarding');
-export const paletteApi = bind<IPaletteRenderer>(GeneratedPalette, 'Palette');
 // Versions and run slice.
 export const versionsApi = bind<IVersionsRenderer>(GeneratedVersions, 'Versions');
 export const runApi = bind<IRunRenderer>(GeneratedRun, 'Run');

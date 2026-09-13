@@ -241,7 +241,8 @@
   border-radius: var(--lu-radius-capsule);
   background: var(--lu-spark-soft);
   color: var(--lu-spark);
-  font: 600 11.5px/14px var(--lu-font-sans);
+  font: var(--lu-type-status);
+  font-weight: 600;
   white-space: nowrap;
 }
 

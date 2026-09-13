@@ -11,7 +11,7 @@ import { app } from 'electron';
 
 import { tm } from '../i18n';
 
-export const WEBSITE = 'https://electronjs.org/fiddle';
+const WEBSITE = 'https://electronjs.org/fiddle';
 const CONTRIBUTORS_PAGE = 'https://github.com/electron/fiddle/graphs/contributors';
 
 const contributorFiles = import.meta.glob<unknown>('../../../static/contributors.json', {
@@ -20,7 +20,7 @@ const contributorFiles = import.meta.glob<unknown>('../../../static/contributors
 });
 
 /** Display names from contributors.json (`[{ name, login, … }]`), falling back to the login. */
-export function contributorNames(data: unknown): string[] {
+function contributorNames(data: unknown): string[] {
   if (!Array.isArray(data)) return [];
   return data.flatMap((entry: unknown) => {
     const { name, login } = (entry ?? {}) as { name?: unknown; login?: unknown };

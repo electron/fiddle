@@ -17,7 +17,8 @@ export async function withNoAsar<T>(fn: () => Promise<T>): Promise<T> {
   try {
     return await fn();
   } finally {
-    if (--noAsarDepth === 0) process.noAsar = savedNoAsar ?? false;
+    // Restore exactly, including `undefined` (Electron's type says boolean).
+    if (--noAsarDepth === 0) (process as { noAsar?: boolean }).noAsar = savedNoAsar;
   }
 }
 

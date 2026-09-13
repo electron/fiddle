@@ -12,6 +12,7 @@ import jsonWorkerUrl from 'monaco-editor/languages/features/json/json.worker.js?
 import tsWorkerUrl from 'monaco-editor/languages/features/typescript/ts.worker.js?worker&url';
 
 import type { MonacoTheme } from '../../shared/settings';
+import { registerPrettierFormatter } from './format';
 import { buildLucentTheme, LUCENT_THEME, readEditorTokens } from './theme';
 
 function workerUrl(label: string): string {
@@ -72,6 +73,17 @@ monaco.typescript.javascriptDefaults.setCompilerOptions({
 });
 // Fiddles are CommonJS on purpose; skip "convert to ES module" style hints.
 monaco.typescript.javascriptDefaults.setDiagnosticsOptions({ noSuggestionDiagnostics: true });
+
+// Formatting is Prettier's (./format.ts). Monaco uses the first formatter it
+// finds, so the built-in JavaScript, HTML and CSS ones are turned off.
+// setModeConfiguration replaces the whole configuration, so keep the rest.
+const js = monaco.typescript.javascriptDefaults;
+js.setModeConfiguration({ ...js.modeConfiguration, documentRangeFormattingEdits: false });
+const html = monaco.html.htmlDefaults;
+html.setModeConfiguration({ ...html.modeConfiguration, documentFormattingEdits: false, documentRangeFormattingEdits: false });
+const css = monaco.css.cssDefaults;
+css.setModeConfiguration({ ...css.modeConfiguration, documentFormattingEdits: false, documentRangeFormattingEdits: false });
+registerPrettierFormatter(monaco.languages);
 
 /**
  * (Re)defines the editor theme and applies it: Lucent, built from the current

@@ -10,19 +10,14 @@ import { useEffect, useId, useMemo, useRef, useState, type KeyboardEvent } from 
 import { useTranslation } from 'react-i18next';
 import { Dialog, Modal, ModalOverlay } from 'react-aria-components';
 
-import {
-  documentsApi,
-  paletteApi,
-  useAppStore,
-  useWindowStore,
-  versionsApi,
-  windowApi,
-} from '../../../ipc/renderer';
+import { documentsApi, versionsApi, windowApi } from '../../../ipc/renderer';
 import { commandIds, commands, isCommandEnabled } from '../../../shared/commands';
+import { SHOW_ME_EXAMPLES } from '../../../shared/examples';
 import { effectiveAccelerator } from '../../../shared/settings';
 import type { AppState, ReleaseList, WindowState } from '../../../shared/stores';
 import { cx, Icon, Kbd, showToast, type IconName } from '../../../ui';
 import menu from '../../../ui/components/Menu.module.css';
+import { useAppState, useWindowState } from '../../state';
 import { OnboardingTour } from '../onboarding/OnboardingTour';
 import styles from './CommandPalette.module.css';
 import { getEditorActions } from './editor-actions';
@@ -51,25 +46,23 @@ function readRecent(): string[] {
   }
 }
 
-/** Releases and examples are fetched once per window, the first time the palette opens. */
+/** Releases are fetched once per window, the first time the palette opens. */
 function useRemoteLists(open: boolean) {
   const [releases, setReleases] = useState<ReleaseList>([]);
-  const [examples, setExamples] = useState<string[]>([]);
   const loaded = useRef(false);
   useEffect(() => {
     if (!open || loaded.current) return;
     loaded.current = true;
     versionsApi.GetReleases().then(setReleases, () => {});
-    paletteApi.GetShowMeExamples().then(setExamples, () => {});
   }, [open]);
-  return { releases, examples };
+  return { releases, examples: SHOW_ME_EXAMPLES };
 }
 
 function useEntries(
   app: AppState | undefined,
   win: WindowState | undefined,
   releases: ReleaseList,
-  examples: string[],
+  examples: readonly string[],
   open: boolean,
 ): Entry[] {
   const { t } = useTranslation('palette');
@@ -129,10 +122,8 @@ function useEntries(
 
 export function CommandPalette() {
   const { t } = useTranslation('palette');
-  const appStore = useAppStore();
-  const winStore = useWindowStore();
-  const app = appStore.state === 'ready' ? appStore.result : undefined;
-  const win = winStore.state === 'ready' ? winStore.result : undefined;
+  const app = useAppState();
+  const win = useWindowState() ?? undefined;
 
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState('');

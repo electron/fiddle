@@ -154,11 +154,22 @@ describe('auth', () => {
 describe('where the token goes', () => {
   const ok = () => json({ login: 'x' }, { headers: { 'x-oauth-scopes': 'gist' } });
 
-  it('is sent to a loopback fixture server', async () => {
+  it('is sent to a loopback fixture server only when that is allowed (test mode)', async () => {
     const { fn, calls } = mockFetch(ok);
-    await new GitHubClient({ token: TOKEN, apiBaseUrl: 'http://127.0.0.1:4567/api', fetch: fn }).getAuthenticatedUser();
+    const apiBaseUrl = 'http://127.0.0.1:4567/api';
+    await new GitHubClient({ token: TOKEN, apiBaseUrl, fetch: fn, allowLoopbackHttp: true }).getAuthenticatedUser();
     expect(calls[0]!.url).toBe('http://127.0.0.1:4567/api/user');
     expect(calls[0]!.headers.Authorization).toBe(`Bearer ${TOKEN}`);
+
+    await new GitHubClient({ token: TOKEN, apiBaseUrl, fetch: fn }).getAuthenticatedUser();
+    expect(calls[1]!.headers.Authorization).toBeUndefined();
+  });
+
+  it('fetches plain http from loopback only when that is allowed', async () => {
+    const { fn } = mockFetch(() => new Response('text'));
+    const url = 'http://localhost:4567/raw/main.js';
+    expect((await codeOf(new GitHubClient({ fetch: fn }).fetchText(url))).code).toBe(ErrorCode.invalidArgument);
+    await expect(new GitHubClient({ fetch: fn, allowLoopbackHttp: true }).fetchText(url)).resolves.toBe('text');
   });
 
   it('is never sent over plain http to other hosts', async () => {

@@ -4,7 +4,7 @@
  */
 import { useSyncExternalStore } from 'react';
 
-import { useAppStore, useWindowStore } from '../../../ipc/renderer';
+import { useAppState, useWindowState } from '../../state';
 
 export type GistDialog =
   | { kind: 'sign-in'; then?: () => void }
@@ -41,14 +41,12 @@ export function requestPublish(login: string | undefined): void {
 
 /** The signed-in GitHub login, if any. The token never reaches the renderer. */
 export function useGitHubLogin(): string | undefined {
-  const app = useAppStore();
-  return app.state === 'ready' ? app.result.githubLogin : undefined;
+  return useAppState()?.githubLogin;
 }
 
 /** `gistVisibility` and `gistPublishAsRevision` from the effective settings. */
 export function useGistSettings(): { isPublic: boolean; asRevision: boolean } {
-  const app = useAppStore();
-  const settings = app.state === 'ready' ? app.result.settings : undefined;
+  const settings = useAppState()?.settings;
   return {
     isPublic: settings?.gistVisibility === 'public',
     asRevision: settings?.gistPublishAsRevision ?? true,
@@ -63,8 +61,8 @@ export interface LoadedGist {
 
 /** The gist this window's fiddle is linked to, if any. */
 export function useLoadedGist(): LoadedGist | undefined {
-  const win = useWindowStore();
-  if (win.state !== 'ready') return undefined;
-  const { gistId, gistRevision, gistOwner } = win.result.fiddle.source;
+  const win = useWindowState();
+  if (!win) return undefined;
+  const { gistId, gistRevision, gistOwner } = win.fiddle.source;
   return gistId ? { id: gistId, revision: gistRevision, owner: gistOwner } : undefined;
 }

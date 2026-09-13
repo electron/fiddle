@@ -1,3 +1,5 @@
+// First: before any module can parse a zod schema.
+import './zod-jitless';
 import '../ui/global.css';
 
 import { StrictMode } from 'react';
@@ -8,6 +10,7 @@ import { initRendererI18n } from '../i18n/renderer';
 import { appApi, windowApi } from '../ipc/renderer';
 import { App } from './App';
 import { installPlatformRenderer } from './features/about';
+import { StoreProvider } from './state';
 
 async function start(): Promise<void> {
   // Read both stores before first paint. App reports ready once it has painted
@@ -32,7 +35,9 @@ async function start(): Promise<void> {
   createRoot(container).render(
     <StrictMode>
       <I18nextProvider i18n={i18n}>
-        <App />
+        <StoreProvider>
+          <App />
+        </StoreProvider>
       </I18nextProvider>
     </StrictMode>,
   );

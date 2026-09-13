@@ -19,7 +19,7 @@ export default defineConfig({
           name: 'app:node',
           root: './packages/app',
           environment: 'node',
-          include: ['src/{main,fiddle,shared}/**/*.test.ts'],
+          include: ['src/{main,fiddle,shared,i18n}/**/*.test.ts'],
         },
       },
       {

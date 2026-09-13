@@ -8,12 +8,12 @@ import { isCommandEnabled, isCommandId, type CommandId } from '../shared/command
 import { ErrorCode, FiddleError } from '../shared/errors';
 import type { StateHub } from './state-hub';
 
-export interface CommandContext {
+interface CommandContext {
   /** The window the command runs in, if any. */
   windowId: string | undefined;
 }
 
-export type CommandHandler = (context: CommandContext) => void | Promise<void>;
+type CommandHandler = (context: CommandContext) => void | Promise<void>;
 
 export class CommandRegistry {
   readonly #handlers = new Map<CommandId, CommandHandler>();

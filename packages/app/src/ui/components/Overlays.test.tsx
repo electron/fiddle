@@ -59,7 +59,7 @@ describe('promptDialog', () => {
 describe('Toaster', () => {
   it('shows queued toasts and closes them', async () => {
     const queue = new ToastQueue<ToastContent>();
-    render(<Toaster closeLabel="Dismiss" queue={queue} />);
+    render(<Toaster closeLabel="Dismiss" aria-label="Notifications" queue={queue} />);
     act(() => {
       queue.add({ tone: 'success', title: 'Published', description: 'gist.github.com/8f3a2c' });
     });
@@ -71,7 +71,7 @@ describe('Toaster', () => {
   it('runs a toast action and closes the toast', async () => {
     const queue = new ToastQueue<ToastContent>();
     let ran = false;
-    render(<Toaster closeLabel="Dismiss" queue={queue} />);
+    render(<Toaster closeLabel="Dismiss" aria-label="Notifications" queue={queue} />);
     act(() => {
       queue.add({ title: 'Electron 44.0.0-beta.3 is ready', actionLabel: 'Switch', onAction: () => (ran = true) });
     });

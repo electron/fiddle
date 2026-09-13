@@ -86,7 +86,7 @@ export async function loadShowMe(staticDir: string, name: string, context: LoadC
  * ones, and a usable Electron version replaces the current version. Without a
  * `package.json` the current modules and version are kept.
  */
-export function applyPackageJson(
+function applyPackageJson(
   context: LoadContext,
   pkg: ParsedPackageJson | undefined,
   isUsableVersion: (version: string) => boolean,
@@ -121,7 +121,7 @@ export async function loadFolder(dir: string, context: LoadContext): Promise<Loa
   };
 }
 
-export interface GistRulesOptions {
+interface GistRulesOptions {
   context: LoadContext;
   /** Asked for each supported file that fiddles don't usually contain. */
   confirmAddFile: (name: string) => Promise<boolean>;
@@ -203,7 +203,7 @@ export async function loadElectronExample(
   };
 }
 
-export interface SaveOptions {
+interface SaveOptions {
   name: string;
   author?: string;
   /** Set for "Save as Forge project". */

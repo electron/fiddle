@@ -1,0 +1,12 @@
+{
+  "label": "Befehlspalette",
+  "placeholder": "Befehle, Dateien, Versionen und Beispiele durchsuchen",
+  "empty": "Keine Treffer",
+  "kindCommand": "Befehl",
+  "kindEditor": "Editor",
+  "kindFile": "Datei",
+  "kindVersion": "Version",
+  "kindExample": "Beispiel",
+  "runFailed": "{{label}} konnte nicht ausgeführt werden",
+  "electronVersion": "Electron {{version}}"
+}

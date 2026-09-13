@@ -1,0 +1,59 @@
+{
+  "$comment": "Read by `yarn i18n:translate` and by anyone translating by hand. `untranslated` terms stay exactly as written (case may follow the language's rules where noted). `fixed` terms always use the given translation. `style` is per-locale guidance.",
+  "untranslated": {
+    "Electron": "Product name.",
+    "Electron Fiddle": "Product name. Never translate or shorten.",
+    "fiddle": "A small Electron project that this app edits and runs. Keep the English word. German: \"Fiddle\" (neuter, das Fiddle, plural Fiddles). Japanese: \"Fiddle\".",
+    "gist": "A GitHub Gist. Keep the English word. German: \"Gist\" (der Gist, plural Gists). Japanese: \"Gist\".",
+    "GitHub": "Product name.",
+    "npm": "Package manager name; always lowercase.",
+    "yarn": "Package manager name; always lowercase.",
+    "Node.js": "Product name.",
+    "Chromium": "Product name.",
+    "V8": "Product name.",
+    "Electron Forge": "Product name. \"Forge\" on its own also stays.",
+    "Monaco": "Editor name.",
+    "DevTools": "Chromium's developer tools.",
+    "macOS": "OS name.",
+    "Windows": "OS name.",
+    "Linux": "OS name.",
+    "API names and code": "Code identifiers (BrowserWindow, ipcMain, app.whenReady(), process.versions), file names (main.js, preload.js, renderer.js, index.html, package.json), command-line flags, environment variables, URLs and keyboard shortcuts stay exactly as written.",
+    "Placeholders": "{{name}} placeholders and $t(...) references stay exactly as written, including their names. They may move within the sentence."
+  },
+  "fixed": {
+    "Settings": { "de": "Einstellungen", "ja": "設定" },
+    "Run": { "de": "Ausführen", "ja": "実行" },
+    "Stop": { "de": "Stoppen", "ja": "停止" },
+    "Save": { "de": "Speichern", "ja": "保存" },
+    "Save as…": { "de": "Speichern unter …", "ja": "名前を付けて保存…" },
+    "Cancel": { "de": "Abbrechen", "ja": "キャンセル" },
+    "Console": { "de": "Konsole", "ja": "コンソール" },
+    "Sidebar": { "de": "Seitenleiste", "ja": "サイドバー" },
+    "Command palette": { "de": "Befehlspalette", "ja": "コマンドパレット" },
+    "Template": { "de": "Vorlage", "ja": "テンプレート" },
+    "Theme": { "de": "Design", "ja": "テーマ" },
+    "Appearance": { "de": "Erscheinungsbild", "ja": "外観" },
+    "Bisect": { "de": "Bisect", "ja": "二分探索" },
+    "Publish": { "de": "Veröffentlichen", "ja": "公開" },
+    "Sign in": { "de": "Anmelden", "ja": "サインイン" },
+    "Sign out": { "de": "Abmelden", "ja": "サインアウト" },
+    "Package (Forge command)": { "de": "Paketieren", "ja": "パッケージ化" },
+    "Make (Forge command)": { "de": "Installer erstellen", "ja": "インストーラーを作成" },
+    "Main process": { "de": "Hauptprozess", "ja": "メインプロセス" },
+    "Renderer process": { "de": "Renderer-Prozess", "ja": "レンダラープロセス" },
+    "Preload script": { "de": "Preload-Skript", "ja": "プリロードスクリプト" },
+    "Electron version": { "de": "Electron-Version", "ja": "Electron のバージョン" },
+    "Stable / Beta / Nightly (release channels)": {
+      "de": "Stabil / Beta / Nightly",
+      "ja": "安定版 / ベータ版 / ナイトリー"
+    },
+    "Download mirror": { "de": "Download-Mirror", "ja": "ダウンロードミラー" },
+    "Keyboard shortcut": { "de": "Tastenkürzel", "ja": "キーボードショートカット" },
+    "Trust (a fiddle's code)": { "de": "vertrauen", "ja": "信頼する" }
+  },
+  "style": {
+    "*": "Sentence case where the language has case. Keep the ellipsis character (…) on labels that open a dialog. Keep it short: buttons and menu items must fit their maxLength. Don't add trailing punctuation to labels, buttons or menu items.",
+    "de": "Informal \"du\", as in GitHub's German UI. Use imperatives for buttons and menu items (\"Speichern\", \"Datei öffnen …\"). Put a space before the ellipsis (\"Öffnen …\"). Use German quotation marks („…“).",
+    "ja": "Polite です／ます form for sentences; noun or verb phrases without です for buttons, menu items and titles. Full-width punctuation (、。「」). No 。 at the end of labels or buttons. Put a space between Latin words and Japanese text only where it aids readability (e.g. \"Electron のバージョン\")."
+  }
+}

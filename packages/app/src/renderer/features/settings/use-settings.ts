@@ -7,11 +7,12 @@
 import { useCallback, useEffect, useMemo, useSyncExternalStore } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { settingsApi, useAppStore } from '../../../ipc/renderer';
+import { settingsApi } from '../../../ipc/renderer';
 import { FiddleError } from '../../../shared/errors';
 import { defaultSettings, type SettingKey, type Settings } from '../../../shared/settings';
 import type { AppState } from '../../../shared/stores';
 import { showToast } from '../../../ui';
+import { useAppState } from '../../state';
 import { outstanding, withPending, type PendingChange } from './optimistic';
 
 // One pending list per window, shared by every component that shows settings.
@@ -56,8 +57,7 @@ export interface UseSettings {
 
 export function useSettings(): UseSettings {
   const { t } = useTranslation('settings');
-  const store = useAppStore();
-  const app = store.state === 'ready' ? store.result : undefined;
+  const app = useAppState();
   const rev = app?.rev ?? 0;
   const list = useSyncExternalStore(subscribe, () => pending);
 

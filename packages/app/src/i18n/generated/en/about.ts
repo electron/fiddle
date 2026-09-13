@@ -2,5 +2,9 @@
 export default {
   "updateAvailableTitle": "Update available",
   "updateAvailableDescription": "Electron Fiddle {{version}} is ready to download.",
-  "download": "Download"
+  "download": "Download",
+  "crashNoticeTitle": "Crash reports are on",
+  "crashNoticeDescription": "If Electron Fiddle crashes, it sends a report so the bug can be fixed. Reports never include your code. You can turn them off in Settings.",
+  "crashNoticeAction": "Privacy settings",
+  "openSettingsFailed": "Couldn't open settings"
 } as const;

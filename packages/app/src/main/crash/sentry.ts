@@ -28,9 +28,6 @@ import { testFlags } from '../test-mode';
 import { prepareEvent, scrubBreadcrumb } from './scrub';
 
 export const SENTRY_DSN = 'https://966a5b01ac8d4941b81e4ebd0ab4c991@sentry.io/1882540';
-/** Used by CI to upload Debug-ID source maps. */
-export const SENTRY_ORG = 'electronjs';
-export const SENTRY_PROJECT = 'electron-fiddle';
 
 let enabled = false;
 
@@ -44,17 +41,17 @@ export function isCrashReportingEnabled(): boolean {
  * `@sentry/electron`'s default format, which the release workflow uses too
  * (PROGRESS.md, "Sentry release name").
  */
-export function releaseName(appName: string, version: string): string {
+function releaseName(appName: string, version: string): string {
   return `${appName.replace(/\W/g, '-')}@${version.replace(/^v/, '')}`;
 }
 
 /** Headless CLI mode (REQUIREMENTS §7) never sends crash reports. */
-export function isHeadless(argv: readonly string[] = process.argv): boolean {
+function isHeadless(argv: readonly string[] = process.argv): boolean {
   return argv.includes('--headless');
 }
 
 /** Reads `crashReports` straight from settings.json: Sentry starts before the settings store. */
-export function readCrashReportsSetting(userData: string): boolean {
+function readCrashReportsSetting(userData: string): boolean {
   try {
     const data: unknown = JSON.parse(fs.readFileSync(path.join(userData, 'settings.json'), 'utf8'));
     const value = (data as { crashReports?: unknown } | null)?.crashReports;

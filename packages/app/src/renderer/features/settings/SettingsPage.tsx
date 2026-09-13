@@ -9,7 +9,8 @@ import { useTranslation } from 'react-i18next';
 
 import contributors from '../../../../static/contributors.json';
 import { locales } from '../../../i18n';
-import { appApi, settingsApi, useWindowStore, type AppInfo } from '../../../ipc/renderer';
+import { appApi, settingsApi, type AppInfo } from '../../../ipc/renderer';
+import { useWindowState } from '../../state';
 import {
   BUILTIN_THEME,
   MIRRORS,
@@ -44,20 +45,9 @@ import {
   useSettingText,
 } from './controls';
 import { KeybindingsSection } from './KeybindingsSection';
+import { clearRequestedSection, requestedSection, type SectionId } from './sections';
 import styles from './SettingsPage.module.css';
 import { useSettings, useSettingsAction } from './use-settings';
-
-type SectionId =
-  | 'general'
-  | 'editor'
-  | 'execution'
-  | 'electron'
-  | 'github'
-  | 'keybindings'
-  | 'accessibility'
-  | 'privacy'
-  | 'updates'
-  | 'about';
 
 interface SectionDef {
   id: SectionId;
@@ -70,9 +60,11 @@ interface SectionDef {
 export function SettingsPage() {
   const { t } = useTranslation('settings');
   const run = useSettingsAction();
-  const [current, setCurrent] = useState<SectionId>('general');
+  const [current, setCurrent] = useState<SectionId>(() => requestedSection() ?? 'general');
   const [query, setQuery] = useState('');
   const searching = query.trim() !== '';
+
+  useEffect(() => clearRequestedSection(), []);
 
   // Pick up theme files added or edited outside the app.
   useEffect(() => {
@@ -271,8 +263,7 @@ function channelOf(version: string): ReleaseChannel {
 function ElectronSection({ showAll }: { showAll: boolean }) {
   const { t } = useTranslation('settings');
   const { settings, set } = useSettings();
-  const win = useWindowStore();
-  const ref = win.state === 'ready' ? win.result.fiddle.versionRef : undefined;
+  const ref = useWindowState()?.fiddle.versionRef;
   // The current version's channel can't be turned off (§17.13).
   const currentChannel = ref?.kind === 'release' ? channelOf(ref.version) : undefined;
 

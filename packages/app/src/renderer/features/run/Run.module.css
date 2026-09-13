@@ -1,21 +1,17 @@
-/* Run button: min 108 wide, 150 while downloading (Lucent "Run button"). */
+/* Run button: min 108 wide, 150 while downloading (Lucent "Run button").
+   The width never jumps between Run, Starting and Stop. Outside macOS the
+   hint reads "Ctrl+R", which is wider than "⌘R", so the floor is higher. */
 .run {
   min-width: 108px;
   padding: 0 14px 0 12px;
+}
+:root:not([data-platform="darwin"]) .run {
+  min-width: 124px;
 }
 
 .downloading {
   min-width: 150px;
   padding: 0 14px 0 12px;
-}
-
-.srOnly {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  overflow: hidden;
-  clip-path: inset(50%);
-  white-space: nowrap;
 }
 
 /* Status bar content: items sit in the status bar's 18px-gap row. */
@@ -26,27 +22,9 @@
   min-width: 0;
 }
 
-/* "Running" capsule: 600 spark on spark-soft, 6px dot with a 2.5px halo,
-   pulled left so its text lines up with "Ready". */
+/* The "Running" pill is pulled left so its text lines up with "Ready". */
 .runningPill {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
   margin-left: -9px;
-  padding: 2px 9px 2px 8px;
-  border-radius: var(--lu-radius-capsule);
-  background: var(--lu-spark-soft);
-  color: var(--lu-spark);
-  font-weight: 600;
-}
-
-.dot {
-  width: 6px;
-  height: 6px;
-  flex: none;
-  border-radius: var(--lu-radius-round);
-  background: currentColor;
-  box-shadow: var(--lu-halo-spark);
 }
 
 .bisect {

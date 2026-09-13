@@ -12,5 +12,24 @@
     "message": "Download",
     "description": "Toast action that opens the release page of the new version in the browser.",
     "maxLength": 20
+  },
+  "crashNoticeTitle": {
+    "message": "Crash reports are on",
+    "description": "Title of the one-time toast on first launch saying that the app sends crash reports.",
+    "maxLength": 40
+  },
+  "crashNoticeDescription": {
+    "message": "If Electron Fiddle crashes, it sends a report so the bug can be fixed. Reports never include your code. You can turn them off in Settings.",
+    "description": "Body of the first-launch crash reports toast."
+  },
+  "crashNoticeAction": {
+    "message": "Privacy settings",
+    "description": "Toast action that opens Settings at the Privacy section, where crash reports can be turned off.",
+    "maxLength": 20
+  },
+  "openSettingsFailed": {
+    "message": "Couldn't open settings",
+    "description": "Error toast title when the settings page can't be opened.",
+    "maxLength": 60
   }
 }

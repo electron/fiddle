@@ -1,7 +1,6 @@
 /** Binds the `Documents` EIPC interface for one window. Handlers close over `windowId`. */
-import type { WebContents } from 'electron';
-
 import { Documents, implement } from '../../ipc/main';
+import type { IpcContext } from '../ipc';
 import {
   docAddFile,
   docRemoveFile,
@@ -10,7 +9,6 @@ import {
   docSetFileVisible,
 } from './model';
 import {
-  attachWindow,
   editFile,
   getFiddleFiles,
   loadDocsExampleIn,
@@ -22,7 +20,7 @@ import {
   updateDoc,
 } from './service';
 
-export function bindDocumentsIpc(contents: WebContents, windowId: string): void {
+export function bindDocumentsIpc({ contents, windowId }: IpcContext): void {
   implement(Documents, contents, {
     GetFiles: () => getFiddleFiles(windowId),
     EditFile: (name, text, fiddleRev) => editFile(windowId, name, text, fiddleRev),
@@ -38,5 +36,4 @@ export function bindDocumentsIpc(contents: WebContents, windowId: string): void 
     LoadDocsExample: (tag, examplePath) => loadDocsExampleIn(windowId, tag, examplePath),
     OpenDropped: (text) => openDropped(windowId, text),
   });
-  attachWindow(windowId, contents);
 }

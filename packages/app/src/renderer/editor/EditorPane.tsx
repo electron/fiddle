@@ -9,8 +9,9 @@ import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
 import { I18nextProvider, useTranslation } from 'react-i18next';
 
-import { useAppStore, windowApi } from '../../ipc/renderer';
+import { windowApi } from '../../ipc/renderer';
 import { Icon } from '../../ui';
+import { useAppState } from '../state';
 import { setEditorActionProvider } from '../features/palette/editor-actions';
 import { setCursor, setFocusedEditor, useEditorViewState } from './editor-state';
 import styles from './EditorPane.module.css';
@@ -46,14 +47,14 @@ export function EditorPane({ file, primary = false }: EditorPaneProps) {
   const [editor, setEditor] = useState<monaco.editor.IStandaloneCodeEditor | null>(null);
   const model = useModel(file);
   const view = useEditorViewState();
-  const app = useAppStore();
-  const settings = app.state === 'ready' ? app.result.settings : null;
+  const app = useAppState();
+  const settings = app?.settings ?? null;
   // Font changes apply after a reload (REQUIREMENTS §17.2), so read them once.
   const font = useRef({
     family: settings?.editorFontFamily || monoFontFamily(),
     size: settings?.editorFontSize ?? 13,
   });
-  const screenReader = app.state === 'ready' && app.result.screenReaderActive;
+  const screenReader = app?.screenReaderActive ?? false;
   const fileRef = useRef(file);
   useLayoutEffect(() => {
     fileRef.current = file;
@@ -79,6 +80,9 @@ export function EditorPane({ file, primary = false }: EditorPaneProps) {
       lineNumbersMinChars: 5,
       lineDecorationsWidth: 18,
       renderLineHighlight: 'all',
+      // Lucent's syntax palette only: no rainbow brackets or guide lines.
+      bracketPairColorization: { enabled: false },
+      guides: { indentation: false, bracketPairs: false },
       scrollBeyondLastLine: false,
       overviewRulerLanes: 0,
       hideCursorInOverviewRuler: true,
@@ -217,7 +221,8 @@ export function EditorPane({ file, primary = false }: EditorPaneProps) {
   }, [editor, model, mine, i18n]);
 
   return (
-    <div className={styles.pane}>
+    // Code reads left to right in every locale; only the chrome mirrors.
+    <div className={styles.pane} dir="ltr">
       <div ref={host} className={styles.host} />
     </div>
   );

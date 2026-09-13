@@ -1,0 +1,12 @@
+{
+  "label": "コマンドパレット",
+  "placeholder": "コマンド、ファイル、バージョン、サンプルを検索",
+  "empty": "一致する項目がありません",
+  "kindCommand": "コマンド",
+  "kindEditor": "エディター",
+  "kindFile": "ファイル",
+  "kindVersion": "バージョン",
+  "kindExample": "サンプル",
+  "runFailed": "{{label}} を実行できませんでした",
+  "electronVersion": "Electron {{version}}"
+}

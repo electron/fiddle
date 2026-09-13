@@ -7,11 +7,13 @@ import { ModulesService, type ModulesHub } from './service';
 function fakeHub(modules: Record<string, string>) {
   let fiddle = { modules } as FiddleState;
   let rev = 0;
+  const writes: boolean[] = [];
   const listeners = new Set<ChangeListener>();
   const hub: ModulesHub = {
     getWindow: (id) => (id === 'w' ? { fiddle } : undefined),
-    updateWindow: (_id, patch) => {
-      fiddle = patch.fiddle;
+    setModules: (_id, next, normalized) => {
+      fiddle = { ...fiddle, modules: next };
+      writes.push(normalized);
       rev += 1;
       queueMicrotask(() => listeners.forEach((l) => l({ store: 'window', windowId: 'w' })));
       return rev;
@@ -21,7 +23,7 @@ function fakeHub(modules: Record<string, string>) {
       return () => listeners.delete(listener);
     },
   };
-  return { hub, modules: () => fiddle.modules };
+  return { hub, modules: () => fiddle.modules, writes };
 }
 
 const npm = { latestVersion: vi.fn(async (name: string) => (name === 'lodash' ? '4.17.21' : '1.2.3')) };
@@ -65,6 +67,15 @@ describe('ModulesService', () => {
     expect(modules()).toEqual({ lodash: '4.17.21', exact: '1.0.0', range: '1.2.3' });
   });
 
+  it('writes user changes as edits and normalization as not', async () => {
+    const { hub, writes } = fakeHub({ a: '*' });
+    const service = new ModulesService(hub, npm, log);
+    await service.add('w', 'b', '2.0.0');
+    await service.normalize('w');
+    service.remove('w', 'b');
+    expect(writes).toEqual([false, true, false]);
+  });
+
   it("doesn't overwrite a version that changed while fetching, or retry failures", async () => {
     const { hub, modules } = fakeHub({ a: '*' });
     let release = () => {};
@@ -78,7 +89,7 @@ describe('ModulesService', () => {
     };
     const service = new ModulesService(hub, slow, log);
     const pending = service.normalize('w');
-    hub.updateWindow('w', { fiddle: { modules: { a: '1.0.0' } } as unknown as FiddleState });
+    hub.setModules('w', { a: '1.0.0' }, false);
     release();
     await pending;
     expect(modules()).toEqual({ a: '1.0.0' });

@@ -11,8 +11,8 @@ import { versionsApi } from '../../../ipc/renderer';
 import { visibleVersions } from '../../../main/versions/releases';
 import type { VersionRefValue, VersionsState } from '../../../shared/stores';
 import { Select, type IconName, type SelectGroup, type SelectOption } from '../../../ui';
-import { useWindowState } from '../../shell/window-state';
-import { IDLE_RUN, useAppState, useReleases } from '../run/use-run';
+import { useAppState, useWindowState } from '../../state';
+import { IDLE_RUN, useReleases, versionLabel } from '../run/use-run';
 import styles from './Versions.module.css';
 
 export function refId(ref: VersionRefValue): string {
@@ -79,11 +79,16 @@ export function VersionPicker() {
 
   const bisecting = run.bisect !== null && run.bisect.result === null;
   const current = ref ? refId(ref) : null;
+  // Until the release list loads, the current version isn't an option yet:
+  // show its label rather than an empty trigger.
+  const known = versionLabel(ref, app);
+  const currentLabel = ref?.kind === 'release' && known ? t('electronVersion', { version: known }) : known;
 
   return (
     <Select
       data-tour="version-picker"
       aria-label={t('versionPicker')}
+      placeholder={currentLabel || t('versionPicker')}
       items={groups}
       value={current}
       isDisabled={run.status !== 'ready' || bisecting}

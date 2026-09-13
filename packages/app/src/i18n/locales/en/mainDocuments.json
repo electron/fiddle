@@ -75,14 +75,24 @@
     "maxLength": 100
   },
   "overwriteDetail": {
-    "message": "The folder already contains {{files}}.",
-    "description": "Detail of the overwrite warning. {{files}} is a comma-separated list of file names.",
+    "message": "Saving replaces or deletes these files: {{files}}.",
+    "description": "Detail of the overwrite warning. {{files}} is a comma-separated list of every existing file that saving overwrites or deletes.",
     "maxLength": 300
   },
   "replace": {
     "message": "Replace",
     "description": "Button that overwrites existing files.",
     "maxLength": 20
+  },
+  "busyMessage": {
+    "message": "Stop the fiddle first",
+    "description": "Notice when the user loads another fiddle into a window that is running, bisecting, packaging or making.",
+    "maxLength": 80
+  },
+  "busyDetail": {
+    "message": "This window is running, bisecting or packaging its fiddle. Stop that before you open another fiddle here.",
+    "description": "Detail of the notice shown when loading a fiddle into a busy window.",
+    "maxLength": 200
   },
   "addFileMessage": {
     "message": "Add “{{name}}” to the fiddle?",
@@ -278,5 +288,20 @@
     "message": "Clear recent",
     "description": "Item in the Open recent menu that clears the list.",
     "maxLength": 40
+  },
+  "linkSignInMessage": {
+    "message": "Sign in to GitHub to open this gist?",
+    "description": "Question shown when a link's gist wasn't found while signed out. It may be a private gist.",
+    "maxLength": 80
+  },
+  "linkSignInDetail": {
+    "message": "GitHub couldn't find this gist. If it's private, it opens once you sign in.",
+    "description": "Detail of the sign-in question for a gist link that wasn't found while signed out.",
+    "maxLength": 200
+  },
+  "signIn": {
+    "message": "Sign in",
+    "description": "Dialog button that opens the GitHub sign-in dialog.",
+    "maxLength": 20
   }
 }

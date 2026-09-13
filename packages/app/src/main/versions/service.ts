@@ -21,22 +21,23 @@ import {
   type InstallStateEvent,
   type Mirrors,
 } from '@electron/fiddle-core';
-import { app, dialog, type BrowserWindow } from 'electron';
+import { app } from 'electron';
 import { z } from 'zod';
 
 import { suggestLocalBuildName } from '../../fiddle/versions';
 import snapshotText from '../../../static/releases.json?raw';
 import { ErrorCode, FiddleError } from '../../shared/errors';
-import { MIRRORS } from '../../shared/settings';
+import { isHttpsUrl, MIRRORS, type Settings } from '../../shared/settings';
 import type { LocalBuild, ReleaseRow, VersionsState } from '../../shared/stores';
+import { messageBox, pickFolder, type DialogParent } from '../dialogs';
 import { tm } from '../i18n';
 import { log } from '../log';
-import { createJsonStore, type JsonStore } from '../persistence/json-store';
+import { createJsonStore, writeAtomic, type JsonStore } from '../persistence/json-store';
 import type { StateHub } from '../state-hub';
 import type { CachePaths } from './paths';
 import { isReleaseList, toReleaseRows } from './releases';
+import { getEndpoints } from '../test-mode';
 
-export const RELEASES_URL = 'https://releases.electronjs.org/releases.json';
 const PROGRESS_INTERVAL_MS = 100;
 
 const storedBuildSchema = z.object({
@@ -51,7 +52,122 @@ interface LocalBuildsFile {
   builds: StoredBuild[];
 }
 
-export interface VersionsServiceOptions {
+// ---------------------------------------------------------------------------
+// Window-free pieces, shared with the headless CLI (main/cli).
+
+/** core's installer on the shared cache, in the `per-version` layout, which always takes cross-process locks. */
+export function createInstaller(cache: CachePaths): Installer {
+  return new Installer(
+    {
+      electronDownloads: cache.downloads,
+      electronInstall: path.join(cache.root, 'current'),
+      electronVersions: cache.electron,
+      versionsCache: cache.releases,
+    },
+    { layout: 'per-version', errors: 'typed' },
+  );
+}
+
+/** The cached release list, or else the bundled snapshot. */
+export async function readReleaseList(cache: CachePaths): Promise<unknown[]> {
+  try {
+    const data: unknown = JSON.parse(await fsp.readFile(cache.releases, 'utf8'));
+    if (isReleaseList(data)) return data;
+  } catch {
+    // No cached list yet.
+  }
+  return JSON.parse(snapshotText) as unknown[];
+}
+
+/** Fetches releases.json and caches it. Throws on failure. */
+export async function fetchReleaseList(
+  cache: CachePaths,
+  url: string,
+  fetch: (url: string) => Promise<Response>,
+): Promise<unknown[]> {
+  const response = await fetch(url);
+  if (!response.ok) throw new Error(`HTTP ${response.status}`);
+  const data: unknown = await response.json();
+  if (!isReleaseList(data)) throw new Error('Unexpected release list');
+  await writeAtomic(cache.releases, JSON.stringify(data));
+  return data;
+}
+
+/** core's `ElectronVersions` and the release rows for a release list. */
+export async function loadReleases(
+  data: unknown[],
+  cache: CachePaths,
+  url: string,
+): Promise<{ versions: ElectronVersions; rows: ReleaseRow[] }> {
+  const versions = await ElectronVersions.create({
+    initialVersions: data,
+    ignoreCache: true,
+    paths: { versionsCache: cache.releases },
+    releasesUrl: url,
+  });
+  const rows = isReleaseList(data)
+    ? toReleaseRows(data, {
+        stableMajors: versions.stableMajors,
+        supportedMajors: versions.supportedMajors,
+        platform: process.platform,
+        arch: process.arch,
+        numStableBranches: process.env.NUM_STABLE_BRANCHES,
+      })
+    : [];
+  return { versions, rows };
+}
+
+/** Download mirrors for the mirror settings. `auto` picks China's for a zh-CN system locale. */
+export function mirrorsFor(
+  settings: Pick<Settings, 'mirror' | 'customMirrorElectron' | 'customMirrorNightly'>,
+  systemLocale: string,
+): Mirrors {
+  const kind =
+    settings.mirror === 'auto' ? (systemLocale.toLowerCase() === 'zh-cn' ? 'china' : 'default') : settings.mirror;
+  // The default mirror comes from the injected endpoints, so test mode uses the fixture server.
+  const { electronMirror, electronNightlyMirror } = getEndpoints();
+  if (kind === 'custom') {
+    // A mirror serves the binaries every run executes, so only https. The
+    // schema refuses others too; this also covers a hand-edited settings.json.
+    const httpsOr = (url: string, fallback: string) => (isHttpsUrl(url) ? url : fallback);
+    return {
+      electronMirror: httpsOr(settings.customMirrorElectron, electronMirror),
+      electronNightlyMirror: httpsOr(settings.customMirrorNightly, electronNightlyMirror),
+    };
+  }
+  if (kind === 'china') {
+    return { electronMirror: MIRRORS.china.electron, electronNightlyMirror: MIRRORS.china.nightly };
+  }
+  return { electronMirror, electronNightlyMirror };
+}
+
+/** Downloads and unpacks a release, then drops its zip: the folder is all a run needs. Resolves with its executable. */
+export async function installRelease(
+  installer: Installer,
+  cache: CachePaths,
+  version: string,
+  options: { mirror: Mirrors; onProgress?: (fraction: number) => void; signal?: AbortSignal },
+): Promise<string> {
+  const { onProgress, signal } = options;
+  const exec = await installer.install(version, {
+    mirror: options.mirror,
+    progressCallback: ({ percent }) => onProgress?.(percent),
+    ...(signal ? { signal } : {}),
+  });
+  const zip = `electron-v${version}-${process.platform}-${process.arch}.zip`;
+  await fsp.rm(path.join(cache.downloads, zip), { force: true }).catch(() => {});
+  return exec;
+}
+
+/** The executable of an installed release. */
+export function installedExecPath(installer: Installer, cache: CachePaths, version: string): string | undefined {
+  const exec = Installer.getExecPath(path.join(cache.electron, version));
+  return installer.state(version) === InstallState.installed && fs.existsSync(exec) ? exec : undefined;
+}
+
+// ---------------------------------------------------------------------------
+
+interface VersionsServiceOptions {
   hub: StateHub;
   cache: CachePaths;
   userData: string;
@@ -76,17 +192,7 @@ export class VersionsService {
 
   constructor(options: VersionsServiceOptions) {
     this.#options = options;
-    const { cache } = options;
-    this.installer = new Installer(
-      {
-        electronDownloads: cache.downloads,
-        electronInstall: path.join(cache.root, 'current'),
-        electronVersions: cache.electron,
-        versionsCache: cache.releases,
-      },
-      // `per-version` always takes cross-process locks.
-      { layout: 'per-version', errors: 'typed' },
-    );
+    this.installer = createInstaller(options.cache);
     this.installer.on('state-changed', (event: InstallStateEvent) => this.#onState(event));
     this.#builds = createJsonStore<LocalBuildsFile>({
       file: path.join(options.userData, 'local-builds.json'),
@@ -98,8 +204,7 @@ export class VersionsService {
 
   /** Loads the cached or bundled list, publishes the store, then refreshes in the background. */
   async init(): Promise<void> {
-    const cached = await this.#readCache();
-    await this.#setReleases(cached ?? (JSON.parse(snapshotText) as unknown[]));
+    await this.#setReleases(await readReleaseList(this.#options.cache));
     void this.refresh();
   }
 
@@ -119,16 +224,8 @@ export class VersionsService {
   /** Fetches releases.json with Chromium's network stack and caches it. Failures are logged. */
   async refresh(): Promise<void> {
     try {
-      const response = await this.#options.fetch(this.#options.releasesUrl);
-      if (!response.ok) throw new Error(`HTTP ${response.status}`);
-      const data: unknown = await response.json();
-      if (!isReleaseList(data)) throw new Error('Unexpected release list');
-      const file = this.#options.cache.releases;
-      await fsp.mkdir(path.dirname(file), { recursive: true });
-      const tmp = `${file}.${process.pid}.${Date.now()}.tmp`;
-      await fsp.writeFile(tmp, JSON.stringify(data));
-      await fsp.rename(tmp, file);
-      await this.#setReleases(data);
+      const { cache, releasesUrl, fetch } = this.#options;
+      await this.#setReleases(await fetchReleaseList(cache, releasesUrl, fetch));
     } catch (error) {
       log.warn('refreshing the release list failed', error);
     }
@@ -140,21 +237,16 @@ export class VersionsService {
 
   /** The executable of an installed release. */
   execPath(version: string): string | undefined {
-    const exec = Installer.getExecPath(path.join(this.#options.cache.electron, version));
-    return this.state(version) === InstallState.installed && fs.existsSync(exec) ? exec : undefined;
+    return installedExecPath(this.installer, this.#options.cache, version);
   }
 
   /** Downloads and unpacks a release. Resolves with its executable. */
   async install(version: string, signal?: AbortSignal): Promise<string> {
-    const exec = await this.installer.install(version, {
+    return installRelease(this.installer, this.#options.cache, version, {
       mirror: this.#mirrors(),
-      progressCallback: ({ percent }) => this.#progress(version, percent),
+      onProgress: (fraction) => this.#progress(version, fraction),
       ...(signal ? { signal } : {}),
     });
-    // The unpacked folder is all a run needs; drop the zip.
-    const zip = `electron-v${version}-${process.platform}-${process.arch}.zip`;
-    await fsp.rm(path.join(this.#options.cache.downloads, zip), { force: true }).catch(() => {});
-    return exec;
   }
 
   async remove(version: string): Promise<void> {
@@ -218,24 +310,16 @@ export class VersionsService {
   }
 
   /** Asks for a build folder. Returns the build's ID (an existing one if already registered). */
-  async addLocalBuild(win: BrowserWindow | undefined): Promise<string | undefined> {
+  async addLocalBuild(parent: DialogParent): Promise<string | undefined> {
     const t = tm('mainRun');
-    const options = {
-      title: t('addLocalBuildTitle'),
-      buttonLabel: t('addLocalBuildButton'),
-      properties: ['openDirectory' as const],
-    };
-    const result = win ? await dialog.showOpenDialog(win, options) : await dialog.showOpenDialog(options);
-    const folder = result.filePaths[0];
-    if (result.canceled || !folder) return undefined;
+    const folder = await pickFolder(parent, { title: t('addLocalBuildTitle'), buttonLabel: t('addLocalBuildButton') });
+    if (!folder) return undefined;
     if (!fs.existsSync(Installer.getExecPath(folder))) {
-      const box = {
-        type: 'error' as const,
+      await messageBox(parent, {
+        type: 'error',
         message: t('noBinaryTitle'),
         detail: t('noBinaryDetail', { file: Installer.execSubpath(), path: folder }),
-      };
-      if (win) await dialog.showMessageBox(win, box);
-      else await dialog.showMessageBox(box);
+      });
       return undefined;
     }
     return this.registerLocalBuild(folder);
@@ -266,32 +350,10 @@ export class VersionsService {
     this.#publish();
   }
 
-  async #readCache(): Promise<unknown[] | undefined> {
-    try {
-      const data: unknown = JSON.parse(await fsp.readFile(this.#options.cache.releases, 'utf8'));
-      return isReleaseList(data) ? data : undefined;
-    } catch {
-      return undefined;
-    }
-  }
-
   async #setReleases(data: unknown[]): Promise<void> {
-    const versions = await ElectronVersions.create({
-      initialVersions: data,
-      ignoreCache: true,
-      paths: { versionsCache: this.#options.cache.releases },
-      releasesUrl: this.#options.releasesUrl,
-    });
+    const { versions, rows } = await loadReleases(data, this.#options.cache, this.#options.releasesUrl);
     this.#versions = versions;
-    this.#rows = isReleaseList(data)
-      ? toReleaseRows(data, {
-          stableMajors: versions.stableMajors,
-          supportedMajors: versions.supportedMajors,
-          platform: process.platform,
-          arch: process.arch,
-          numStableBranches: process.env.NUM_STABLE_BRANCHES,
-        })
-      : [];
+    this.#rows = rows;
     for (const { version } of this.#rows) {
       const state = this.installer.state(version);
       if (state !== InstallState.missing) this.#installs[version] ??= { state };
@@ -301,20 +363,7 @@ export class VersionsService {
   }
 
   #mirrors(): Mirrors {
-    const settings = this.#options.hub.app.settings;
-    const kind =
-      settings.mirror === 'auto'
-        ? app.getSystemLocale().toLowerCase() === 'zh-cn'
-          ? 'china'
-          : 'default'
-        : settings.mirror;
-    if (kind === 'custom') {
-      return {
-        electronMirror: settings.customMirrorElectron || MIRRORS.default.electron,
-        electronNightlyMirror: settings.customMirrorNightly || MIRRORS.default.nightly,
-      };
-    }
-    return { electronMirror: MIRRORS[kind].electron, electronNightlyMirror: MIRRORS[kind].nightly };
+    return mirrorsFor(this.#options.hub.app.settings, app.getSystemLocale());
   }
 
   #onState({ version, state }: InstallStateEvent): void {

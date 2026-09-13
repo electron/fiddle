@@ -18,11 +18,10 @@ const mocks = vi.hoisted(() => ({
 vi.mock('../../../ipc/renderer', () => ({
   settingsApi: mocks.settingsApi,
   appApi: { GetAppInfo: () => Promise.resolve({ name: 'Fiddle', version: '1.0.0', electronVersion: '44.0.0' }) },
-  useAppStore: () => ({ state: 'ready', result: mocks.app }),
-  useWindowStore: () => ({
-    state: 'ready',
-    result: { fiddle: { versionRef: { kind: 'release', version: '44.0.0' } } },
-  }),
+}));
+vi.mock('../../state', () => ({
+  useAppState: () => mocks.app,
+  useWindowState: () => ({ fiddle: { versionRef: { kind: 'release', version: '44.0.0' } } }),
 }));
 vi.mock('../gists/GitHubAccountSection', () => ({ GitHubAccountSection: () => null }));
 vi.mock('../versions/VersionManager', () => ({ VersionManager: () => null }));

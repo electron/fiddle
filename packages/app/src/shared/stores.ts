@@ -11,6 +11,10 @@
  */
 import { z } from 'zod';
 
+// The CSP enforces Trusted Types, and zod's JIT probe (`new Function`) is reported
+// as a violation even though zod catches it. Every schema is parsed after this runs.
+z.config({ jitless: true });
+
 import { VersionRefSchema } from '../fiddle/fiddle';
 import { settingsSchema, storageNoticeSchema, themeSummarySchema } from './settings';
 
@@ -86,7 +90,7 @@ export const DEFAULT_LAYOUT: WindowLayout = {
   sidebar: true,
   split: null,
   consoleHeight: 160,
-  sidebarWidth: 232,
+  sidebarWidth: 228,
 };
 
 export const fiddleSourceStateSchema = z.object({
@@ -119,6 +123,8 @@ export const fiddleStateSchema = z.object({
   fiddleRev: z.number().int().nonnegative(),
   /** Some file differs from the last save. */
   dirty: z.boolean(),
+  /** The files whose text differs from the last save, in display order. */
+  dirtyFiles: z.array(z.string()),
 });
 export type FiddleState = z.infer<typeof fiddleStateSchema>;
 
@@ -138,10 +144,6 @@ export const packageVersionsSchema = z.object({
   versions: z.array(z.string()),
 });
 export type PackageVersions = z.infer<typeof packageVersionsSchema>;
-
-/** A list of short names, such as the Show Me examples for the command palette. */
-export const nameListSchema = z.array(z.string().min(1).max(200)).max(1000);
-export type NameList = z.infer<typeof nameListSchema>;
 
 // ---------------------------------------------------------------------------
 // Versions and run slice. `App.versions` holds install state and local builds;

@@ -135,14 +135,6 @@ export interface IOnboardingRenderer {
   ShouldOfferTour(): Promise<boolean>;
   SetTourDone(): Promise<void>;
 }
-import type { NameList } from "../../../../shared/stores.js";
-export type { NameList };
-export interface IPaletteImpl {
-  GetShowMeExamples(): Promise<NameList> | NameList;
-}
-export interface IPaletteRenderer {
-  GetShowMeExamples(): Promise<NameList>;
-}
 import type { ReleaseList } from "../../../../shared/stores.js";
 export type { ReleaseList };
 import type { VersionList } from "../../../../shared/stores.js";
@@ -202,7 +194,6 @@ export interface IRunRenderer {
   StopBisect(): Promise<void>;
   OpenBisectCompare(): Promise<void>;
   onOutput(fn: (lines: OutputLines) => void): () => void;
-  onShowBisect(fn: () => void): () => void;
 }
 export type GitHubToken = string;
 export type GistDescription = string;
@@ -211,11 +202,6 @@ export enum GitHubCredentialStorage {
   Encrypted = "encrypted",
   Weak = "weak",
   Unavailable = "unavailable",
-}
-export enum GistDialogKind {
-  Publish = "publish",
-  Open = "open",
-  History = "history",
 }
 export interface GitHubSignInResult {
   login: string;
@@ -240,8 +226,9 @@ export interface GistHistoryInfo {
 export interface IGitHubImpl {
   GetCredentialStorage(): Promise<GitHubCredentialStorage> | GitHubCredentialStorage;
   SignIn(token: GitHubToken, allowPlaintext: boolean): Promise<GitHubSignInResult> | GitHubSignInResult;
+  SignInFromClipboard(allowPlaintext: boolean): Promise<GitHubSignInResult> | GitHubSignInResult;
   SignOut(): Promise<void> | void;
-  ReadClipboardToken(): Promise<string | null> | string | null;
+  HasClipboardToken(): Promise<boolean> | boolean;
   OpenNewTokenPage(): Promise<void> | void;
   TakeNotice(): Promise<string | null> | string | null;
   Publish(description: GistDescription, isPublic: boolean): Promise<GistLinkInfo> | GistLinkInfo;
@@ -253,8 +240,9 @@ export interface IGitHubImpl {
 export interface IGitHubRenderer {
   GetCredentialStorage(): Promise<GitHubCredentialStorage>;
   SignIn(token: GitHubToken, allowPlaintext: boolean): Promise<GitHubSignInResult>;
+  SignInFromClipboard(allowPlaintext: boolean): Promise<GitHubSignInResult>;
   SignOut(): Promise<void>;
-  ReadClipboardToken(): Promise<string | null>;
+  HasClipboardToken(): Promise<boolean>;
   OpenNewTokenPage(): Promise<void>;
   TakeNotice(): Promise<string | null>;
   Publish(description: GistDescription, isPublic: boolean): Promise<GistLinkInfo>;
@@ -262,7 +250,6 @@ export interface IGitHubRenderer {
   Delete(): Promise<void>;
   GetHistory(): Promise<GistHistoryInfo>;
   CopyShareLink(id: GistId): Promise<void>;
-  onOpenDialog(fn: (kind: GistDialogKind) => void): () => void;
 }
 export enum LogLevel {
   info = "info",
@@ -274,10 +261,12 @@ export interface IAppPlatformImpl {
   Log(level: LogLevel, message: LogText): Promise<void> | void;
   IsCrashReportingEnabled(): Promise<boolean> | boolean;
   OpenUpdatePage(): Promise<void> | void;
+  TakeCrashReportsNotice(): Promise<boolean> | boolean;
 }
 export interface IAppPlatformRenderer {
   Log(level: LogLevel, message: LogText): Promise<void>;
   IsCrashReportingEnabled(): Promise<boolean>;
   OpenUpdatePage(): Promise<void>;
+  TakeCrashReportsNotice(): Promise<boolean>;
   onUpdateAvailable(fn: (version: string) => void): () => void;
 }

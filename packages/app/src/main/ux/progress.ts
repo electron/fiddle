@@ -5,7 +5,7 @@
  */
 import type { RunState, VersionsState } from '../../shared/stores';
 
-export type TaskbarProgress =
+type TaskbarProgress =
   | { mode: 'none' }
   | { mode: 'indeterminate' }
   | { mode: 'normal'; progress: number };

@@ -6,15 +6,15 @@
 import { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { settingsApi, useAppStore } from '../../../ipc/renderer';
+import { settingsApi } from '../../../ipc/renderer';
 import { showToast } from '../../../ui';
+import { useAppState } from '../../state';
 
 const shown = new Set<string>();
 
 export function StorageNotices() {
   const { t } = useTranslation('settings');
-  const store = useAppStore();
-  const notices = store.state === 'ready' ? store.result.storageNotices : undefined;
+  const notices = useAppState()?.storageNotices;
 
   useEffect(() => {
     for (const notice of notices ?? []) {

@@ -10,12 +10,12 @@
 import semver from 'semver';
 import { z } from 'zod';
 
-export const updatePolicySchema = z.object({
+const updatePolicySchema = z.object({
   blockedVersions: z.array(z.string().max(100)).max(1000).default([]),
   minVersion: z.string().max(100).optional(),
   message: z.string().max(1000).optional(),
 });
-export type UpdatePolicy = z.infer<typeof updatePolicySchema>;
+type UpdatePolicy = z.infer<typeof updatePolicySchema>;
 
 /** Parses the fetched JSON. Returns undefined when it isn't a valid policy. */
 export function parsePolicy(data: unknown): UpdatePolicy | undefined {
@@ -23,7 +23,7 @@ export function parsePolicy(data: unknown): UpdatePolicy | undefined {
   return result.success ? result.data : undefined;
 }
 
-export interface PolicyVerdict {
+interface PolicyVerdict {
   blocked: boolean;
   /** The policy's message, shown in the blocking notice. */
   message?: string;

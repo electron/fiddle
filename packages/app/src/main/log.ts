@@ -22,12 +22,12 @@ import path from 'node:path';
 import { isSecretKey, REDACTED, redactSecrets } from './crash/scrub';
 
 export type LogLevel = 'debug' | 'info' | 'warn' | 'error';
-export type LogSource = 'main' | 'renderer';
+type LogSource = 'main' | 'renderer';
 
 const PREFIX = '[fiddle]';
-export const LOG_FILE = 'main.log';
-export const MAX_LOG_BYTES = 5 * 1024 * 1024;
-export const MAX_LOG_FILES = 3;
+const LOG_FILE = 'main.log';
+const MAX_LOG_BYTES = 5 * 1024 * 1024;
+const MAX_LOG_FILES = 3;
 /** Entries kept in memory while the log file isn't open yet. */
 const MAX_EARLY_LINES = 1000;
 
@@ -173,11 +173,6 @@ export function initLogFile(dir: string): void {
 /** The logs folder, once `initLogFile()` has run. */
 export function logsDir(): string | undefined {
   return sink?.dir;
-}
-
-/** Resolves once the log file has every entry written so far. */
-export async function flushLog(): Promise<void> {
-  await sink?.flush();
 }
 
 function write(level: LogLevel, message: string, details: unknown[], source: LogSource): void {

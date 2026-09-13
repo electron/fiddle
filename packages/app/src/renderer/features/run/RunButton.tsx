@@ -7,10 +7,10 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { windowApi } from '../../../ipc/renderer';
-import { Button } from '../../../ui';
-import { useWindowState } from '../../shell/window-state';
+import { Button, srOnly } from '../../../ui';
+import { useAppState, useWindowState } from '../../state';
 import styles from './Run.module.css';
-import { IDLE_RUN, useAppState, useRunKbd, versionLabel } from './use-run';
+import { IDLE_RUN, useRunKbd, versionLabel } from './use-run';
 
 export function RunButton() {
   const { t } = useTranslation('run');
@@ -65,7 +65,7 @@ export function RunButton() {
           {t('run')}
         </Button>
       )}
-      <span role="status" className={styles.srOnly}>
+      <span role="status" className={srOnly}>
         {announcement}
       </span>
     </>

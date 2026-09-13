@@ -138,6 +138,11 @@ export interface GitHubClientOptions {
   /** Other origins allowed to receive the token. Default: the gist raw host. */
   rawOrigins?: readonly string[];
   fetch?: typeof fetch;
+  /**
+   * Allow plain http to loopback hosts (the e2e fixture server). Off by
+   * default; main turns it on only in test mode.
+   */
+  allowLoopbackHttp?: boolean;
 }
 
 function isLoopback(hostname: string): boolean {
@@ -195,20 +200,26 @@ export class GitHubClient {
   private readonly apiBase: URL;
   private readonly trustedOrigins: Set<string>;
   private readonly fetchFn: typeof fetch;
+  private readonly allowLoopbackHttp: boolean;
 
   constructor(options: GitHubClientOptions = {}) {
     this.token = options.token;
     this.apiBase = new URL(options.apiBaseUrl ?? GITHUB_API_URL);
     this.trustedOrigins = new Set([this.apiBase.origin, ...(options.rawOrigins ?? [GIST_RAW_ORIGIN])]);
     this.fetchFn = options.fetch ?? fetch;
+    this.allowLoopbackHttp = options.allowLoopbackHttp ?? false;
   }
 
   get hasToken(): boolean {
     return this.token !== undefined;
   }
 
+  private isSecure(url: URL): boolean {
+    return url.protocol === 'https:' || (this.allowLoopbackHttp && isLoopback(url.hostname));
+  }
+
   private mayReceiveToken(url: URL): boolean {
-    return this.trustedOrigins.has(url.origin) && (url.protocol === 'https:' || isLoopback(url.hostname));
+    return this.trustedOrigins.has(url.origin) && this.isSecure(url);
   }
 
   private apiUrl(path: string): URL {
@@ -313,10 +324,10 @@ export class GitHubClient {
     return user.login;
   }
 
-  /** Fetches text from an https (or loopback) URL, with the token only for trusted origins. */
+  /** Fetches text from an https URL (loopback too, if allowed), with the token only for trusted origins. */
   async fetchText(url: string, signal?: AbortSignal): Promise<string> {
     const target = new URL(url);
-    if (target.protocol !== 'https:' && !isLoopback(target.hostname)) {
+    if (!this.isSecure(target)) {
       throw invalid('insecure-url', `Refusing to fetch ${target.origin}`);
     }
     const res = await this.send(target, { signal, accept: '*/*' });

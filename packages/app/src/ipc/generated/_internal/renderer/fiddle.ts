@@ -13,8 +13,6 @@ import type { IModulesRenderer } from '../../common/fiddle.js';
 export const Modules = (globalThis as any)['fiddle']?.['Modules'] as Partial<IModulesRenderer> | undefined;
 import type { IOnboardingRenderer } from '../../common/fiddle.js';
 export const Onboarding = (globalThis as any)['fiddle']?.['Onboarding'] as Partial<IOnboardingRenderer> | undefined;
-import type { IPaletteRenderer } from '../../common/fiddle.js';
-export const Palette = (globalThis as any)['fiddle']?.['Palette'] as Partial<IPaletteRenderer> | undefined;
 import type { IVersionsRenderer } from '../../common/fiddle.js';
 export const Versions = (globalThis as any)['fiddle']?.['Versions'] as Partial<IVersionsRenderer> | undefined;
 import type { IRunRenderer } from '../../common/fiddle.js';

@@ -10,14 +10,23 @@ import fsp from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
 
+import type { ElectronVersions } from '@electron/fiddle-core';
 import { shell } from 'electron';
 
-import { findMainEntry, PACKAGE_JSON } from '../../fiddle/files';
+import type { VersionRef } from '../../fiddle/fiddle';
+import { findMainEntry, PACKAGE_JSON, type FileMap } from '../../fiddle/files';
 import { writeFiddleFolder } from '../../fiddle/folder';
-import { forgeTransform } from '../../fiddle/forge';
-import { buildInstallCommand, buildRunScriptCommand, findPackageManager, runCommand } from '../../fiddle/modules';
+import { forgeTransform, type ForgeTransformOptions } from '../../fiddle/forge';
+import {
+  buildInstallCommand,
+  buildRunScriptCommand,
+  findPackageManager,
+  runCommand,
+  type PackageManager,
+} from '../../fiddle/modules';
 import { generatePackageJson } from '../../fiddle/package-json';
 import { FiddleError } from '../../shared/errors';
+import type { ReleaseRow } from '../../shared/stores';
 import * as documents from '../documents/service';
 import { tm } from '../i18n';
 import { log } from '../log';
@@ -27,7 +36,76 @@ import { PM_INSTALL_URLS, type RunService } from '../run/service';
 import type { VersionsService } from '../versions/service';
 
 /** Same Forge range as "Save as Forge project". */
-export const FORGE_VERSION = '^7.8.0';
+const FORGE_VERSION = '^7.8.0';
+
+/** The Electron a Forge project gets. Window-free, shared with the headless CLI. */
+interface ForgeElectron {
+  /** The release to package with; unset for a local build. */
+  release?: string;
+  /** A local build's folder. */
+  localPath?: string;
+  releases: readonly ReleaseRow[];
+  electronVersions: ElectronVersions;
+}
+
+/** Forge transform options: the nightly's ABI, a local build's path and the latest stable. */
+export function forgeOptionsFor(electron: ForgeElectron): ForgeTransformOptions {
+  const { release, localPath } = electron;
+  const latestStable = electron.releases.find((r) => !r.version.includes('-'))?.version;
+  const nightlyAbi = release?.includes('nightly')
+    ? electron.electronVersions.getReleaseInfo(release)?.modules
+    : undefined;
+  return {
+    forgeVersion: FORGE_VERSION,
+    ...(nightlyAbi !== undefined ? { nightlyAbi } : {}),
+    ...(localPath ? { localElectronPath: localPath } : {}),
+    ...(latestStable ? { latestStableVersion: latestStable } : {}),
+  };
+}
+
+/** The Electron for a fiddle's version: the release, or a local build's folder. */
+export function forgeElectronFor(
+  ref: VersionRef,
+  versions: Pick<VersionsService, 'localBuild' | 'releases' | 'electronVersions'>,
+): ForgeElectron {
+  return {
+    ...(ref.kind === 'release' ? { release: ref.version } : { localPath: versions.localBuild(ref.id)?.path }),
+    releases: versions.releases(),
+    electronVersions: versions.electronVersions,
+  };
+}
+
+/** A fiddle as an Electron Forge project: its files, a generated `package.json`, then the Forge transform. */
+export function forgeProject(
+  fiddle: { files: FileMap; modules: Readonly<Record<string, string>>; name: string; author: string },
+  electron: ForgeElectron,
+): FileMap {
+  const options = forgeOptionsFor(electron);
+  const electronVersion = electron.release ?? options.latestStableVersion;
+  const packageJson = generatePackageJson({
+    name: toPackageName(fiddle.name),
+    main: findMainEntry(Object.keys(fiddle.files)) ?? 'main.js',
+    author: fiddle.author,
+    modules: fiddle.modules,
+    ...(electronVersion ? { electronVersion } : {}),
+  });
+  return forgeTransform({ ...fiddle.files, [PACKAGE_JSON]: packageJson }, options);
+}
+
+/** `<pm> install`, then `<pm> run package|make` in `dir`. Resolves with the command that failed, if any. */
+export async function runForgeTask(
+  dir: string,
+  pm: PackageManager,
+  task: 'package' | 'make',
+  options: { env: NodeJS.ProcessEnv; signal?: AbortSignal; onOutput: (text: string) => void; ignoreScripts?: boolean },
+): Promise<{ command: string; code: number | string } | undefined> {
+  const { ignoreScripts = false, ...commandOptions } = options;
+  for (const line of [buildInstallCommand({ packageManager: pm, ignoreScripts }), buildRunScriptCommand(pm, task)]) {
+    const result = await runCommand(line, { cwd: dir, ...commandOptions, env: { ...commandOptions.env, ...line.env } });
+    if (result.code !== 0) return { command: [line.command, ...line.args].join(' '), code: result.code ?? result.signal ?? '' };
+  }
+  return undefined;
+}
 
 export async function packageFiddle(
   windowId: string,
@@ -39,11 +117,24 @@ export async function packageFiddle(
   if (runs.isBusy(windowId)) return;
   runs.openConsole(windowId);
 
-  const trust = await documents.ensureTrusted(windowId, task);
+  // The approval lists the packages with install scripts. The build needs
+  // them, so an approval that left scripts off is asked again.
+  const scripted = await documents.installScriptPackages(windowId);
+  const trust = await documents.ensureTrusted(windowId, task, {
+    packagesWithInstallScripts: scripted,
+    requireScripts: scripted.length > 0,
+  });
   if (!trust.approved) {
     runs.log(windowId, t('untrusted'), 'error');
     return;
   }
+  if (scripted.length > 0 && !trust.allowScripts) {
+    runs.log(windowId, t('scriptsRequired', { packages: scripted.join(', ') }), 'error');
+    return;
+  }
+  // Exactly the approved fiddle is built, whatever the window loads during the awaits below.
+  const fiddle = trust.fiddle;
+  const name = hub.getWindow(windowId)?.fiddle.name ?? 'fiddle';
 
   const settings = hub.app.settings;
   const pm = settings.packageManager;
@@ -56,47 +147,29 @@ export async function packageFiddle(
   const controller = runs.claim(windowId);
   runs.setState(windowId, { status: 'running', task, errors: [], result: undefined });
   try {
-    const fiddle = documents.getFiddle(windowId);
-    const files = documents.getFiddleFiles(windowId);
-    const name = hub.getWindow(windowId)?.fiddle.name ?? 'fiddle';
-    const ref = fiddle.version;
-    const latestStable = versions.releases().find((r) => !r.version.includes('-'))?.version;
-    const localPath = ref.kind === 'local' ? versions.localBuild(ref.id)?.path : undefined;
-    const electronVersion = ref.kind === 'release' ? ref.version : latestStable;
-    const nightlyAbi =
-      ref.kind === 'release' && ref.version.includes('nightly')
-        ? versions.electronVersions.getReleaseInfo(ref.version)?.modules
-        : undefined;
-
-    const packageJson = generatePackageJson({
-      name: toPackageName(name),
-      main: findMainEntry(Object.keys(files)) ?? 'main.js',
-      author: settings.packageAuthor || os.userInfo().username,
-      modules: fiddle.modules,
-      ...(electronVersion ? { electronVersion } : {}),
-    });
-    const project = forgeTransform(
-      { ...files, [PACKAGE_JSON]: packageJson },
+    const project = forgeProject(
       {
-        forgeVersion: FORGE_VERSION,
-        ...(nightlyAbi !== undefined ? { nightlyAbi } : {}),
-        ...(localPath ? { localElectronPath: localPath } : {}),
-        ...(latestStable ? { latestStableVersion: latestStable } : {}),
+        files: { ...fiddle.files },
+        modules: fiddle.modules,
+        name,
+        author: settings.packageAuthor || os.userInfo().username,
       },
+      forgeElectronFor(fiddle.version, versions),
     );
     const dir = await fsp.mkdtemp(path.join(os.tmpdir(), `electron-fiddle-${task}-`));
     await writeFiddleFolder(dir, project);
     runs.log(windowId, task === 'package' ? t('packaging', { path: dir }) : t('making', { path: dir }));
 
-    const common = { cwd: dir, env, signal: controller.signal, onOutput: (text: string) => runs.logText(windowId, text) };
-    for (const line of [buildInstallCommand({ packageManager: pm }), buildRunScriptCommand(pm, task)]) {
-      const result = await runCommand(line, common);
-      if (result.code !== 0) {
-        const command = [line.command, ...line.args].join(' ');
-        runs.log(windowId, t('commandFailed', { command, code: result.code ?? result.signal ?? '' }), 'error');
-        runs.setState(windowId, { result: 'failure' });
-        return;
-      }
+    const failedCommand = await runForgeTask(dir, pm, task, {
+      env,
+      signal: controller.signal,
+      onOutput: (text) => runs.logText(windowId, text),
+      ignoreScripts: !trust.allowScripts,
+    });
+    if (failedCommand) {
+      runs.log(windowId, t('commandFailed', failedCommand), 'error');
+      runs.setState(windowId, { result: 'failure' });
+      return;
     }
     const out = path.join(dir, 'out');
     runs.log(windowId, t('packageDone', { path: out }));

@@ -64,6 +64,10 @@
     "message": "Create a token on GitHub",
     "description": "Button that opens GitHub's new-token page with the gist scope already selected."
   },
+  "signInClipboardHint": {
+    "message": "There's a token on your clipboard. Leave this empty to sign in with it.",
+    "description": "Help text under the empty token field when the clipboard holds a token. The token itself is never shown."
+  },
   "signInRemember": {
     "message": "Remember the token on this computer",
     "description": "Checkbox shown on Linux without a keyring. Checking it stores the token as plain text."

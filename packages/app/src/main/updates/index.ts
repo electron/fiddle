@@ -21,12 +21,12 @@ import { openExternalLink } from '../security';
 import { getEndpoints, testFlags } from '../test-mode';
 import { evaluatePolicy, parsePolicy, pickUpdate, type AvailableUpdate, type GitHubRelease } from './policy';
 
-export const UPDATE_REPO = 'electron/fiddle';
-export const UPDATE_SERVICE = 'https://update.electronjs.org';
+const UPDATE_REPO = 'electron/fiddle';
+const UPDATE_SERVICE = 'https://update.electronjs.org';
 /** Placeholder until the beta feed exists: StaticStorage, with `<platform>/<arch>/` below it. */
-export const BETA_FEED_URL = 'https://fiddle-updates.electronjs.org/beta';
+const BETA_FEED_URL = 'https://fiddle-updates.electronjs.org/beta';
 /** The kill switch, kept in the electron/fiddle repository. */
-export const UPDATE_POLICY_URL = 'https://raw.githubusercontent.com/electron/fiddle/main/update-policy.json';
+const UPDATE_POLICY_URL = 'https://raw.githubusercontent.com/electron/fiddle/main/update-policy.json';
 const LATEST_RELEASE_PAGE = 'https://github.com/electron/fiddle/releases/latest';
 
 const FIRST_CHECK_MS = 10_000;

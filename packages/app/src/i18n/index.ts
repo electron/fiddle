@@ -11,11 +11,37 @@
  */
 import type { BackendModule, InitOptions } from 'i18next';
 
-import { loaders, locales, type Locale, type Namespace } from './generated/index';
+import { loaders, locales, pseudoLocales, type Locale, type Namespace } from './generated/index';
 
-export { locales, namespaces, type Locale, type Namespace } from './generated/index';
+export {
+  locales,
+  namespaces,
+  pseudoLocales,
+  type Locale,
+  type Namespace,
+} from './generated/index';
 
 export const fallbackLocale: Locale = 'en';
+
+/**
+ * `en-XA` (accented, about 40% longer) and `ar-XB` (right-to-left, mirrored)
+ * are generated from English by `yarn generate`, for e2e and layout checks.
+ * Select one with the locale setting, or `FIDDLE_LOCALE` in dev and test runs.
+ */
+export function isPseudoLocale(locale: string): boolean {
+  return (pseudoLocales as readonly string[]).includes(locale);
+}
+
+/** Real languages: the language setting's choices and macOS's CFBundleLocalizations. */
+export const shippedLocales: readonly Locale[] = locales.filter((locale) => !isPseudoLocale(locale));
+
+const RTL_LANGUAGES = ['ar', 'ckb', 'dv', 'fa', 'he', 'ps', 'sd', 'ug', 'ur', 'yi'];
+
+/** The UI direction of a locale (`ar-XB` is right-to-left, like Arabic). */
+export function localeDirection(locale: string): 'ltr' | 'rtl' {
+  const language = locale.toLowerCase().split('-')[0] ?? '';
+  return RTL_LANGUAGES.includes(language) ? 'rtl' : 'ltr';
+}
 
 /** Picks the best shipped locale for a list of BCP 47 tags, most preferred first. */
 export function pickLocale(preferred: readonly string[]): Locale {

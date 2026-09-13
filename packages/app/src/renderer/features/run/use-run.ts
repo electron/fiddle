@@ -1,17 +1,12 @@
 /** Run state, console lines and the release list, from main's stores and methods. */
 import { useEffect, useMemo, useState } from 'react';
 
-import { runApi, useAppStore, versionsApi } from '../../../ipc/renderer';
+import { runApi, versionsApi } from '../../../ipc/renderer';
 import type { AppState, OutputLine, ReleaseRow, RunState, VersionRefValue } from '../../../shared/stores';
-import { useWindowState } from '../../shell/window-state';
+import { useAppState, useWindowState } from '../../state';
 
 export const IDLE_RUN: RunState = { status: 'ready', task: 'run', errors: [], clearedSeq: 0, bisect: null };
 const CONSOLE_LIMIT = 1000;
-
-export function useAppState(): AppState | undefined {
-  const app = useAppStore();
-  return app.state === 'ready' ? app.result : undefined;
-}
 
 export function useRunState(): RunState {
   return useWindowState()?.run ?? IDLE_RUN;

@@ -6,11 +6,11 @@
 import { useEffect, useEffectEvent, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { runApi, useAppStore, windowApi } from '../../ipc/renderer';
+import { runApi, windowApi } from '../../ipc/renderer';
 import { DEFAULT_LAYOUT, type WindowState } from '../../shared/stores';
 import { SplitHandle } from '../../ui';
 import { formatFocusedEditor, toggleMinimap, toggleSoftWrap } from '../editor/editor-state';
-import { applyRuntimeErrors, syncModels } from '../editor/models';
+import { applyRuntimeErrors, markModelsSynced, syncModels } from '../editor/models';
 import { setRuntimeErrors, useRevealRequest, useRuntimeErrors } from '../editor/runtime-errors';
 import { useDocumentDrop } from '../features/documents/useDocumentDrop';
 import { useEditorTypes } from '../editor/types';
@@ -21,16 +21,17 @@ import styles from './Shell.module.css';
 import { StatusBar } from './StatusBar';
 import { TitleBar } from './TitleBar';
 import { useDraft } from './use-draft';
-import { setActiveFile, setFileVisible, setLayout, setView, useWindowState } from './window-state';
+import { useAppState, useWindowState } from '../state';
+import { setActiveFile, setFileVisible, setLayout, setView } from './window-state';
 
 const SIDEBAR_MIN = 200;
 const SIDEBAR_MAX = 320;
 
 export function Shell() {
   const state = useWindowState();
-  const app = useAppStore();
-  if (!state || app.state !== 'ready') return null;
-  return <ShellView state={state} platform={app.result.platform} />;
+  const app = useAppState();
+  if (!state || !app) return null;
+  return <ShellView state={state} platform={app.platform} />;
 }
 
 function ShellView({ state, platform }: { state: WindowState; platform: 'darwin' | 'win32' | 'linux' }) {
@@ -43,22 +44,26 @@ function ShellView({ state, platform }: { state: WindowState; platform: 'darwin'
 
   // Monaco models follow the file list and fiddleRev.
   useEffect(() => {
-    void syncModels(namesKey ? namesKey.split('\n') : [], fiddle.fiddleRev).catch((error: unknown) => {
-      console.error('[fiddle] syncing editor models failed', error);
-    });
+    syncModels(namesKey ? namesKey.split('\n') : [], fiddle.fiddleRev)
+      .catch((error: unknown) => {
+        console.error('[fiddle] syncing editor models failed', error);
+      })
+      .finally(markModelsSynced);
   }, [namesKey, fiddle.fiddleRev]);
 
   const errors = useRuntimeErrors();
   useEffect(() => applyRuntimeErrors(errors), [errors]);
 
-  // A new fiddle starts without the old one's runtime errors.
-  const lastRev = useRef(fiddle.fiddleRev);
+  // A new fiddle starts without the old one's runtime errors and console. Adding
+  // or renaming a file also bumps fiddleRev, so this keys on the fiddle's identity.
+  const identity = JSON.stringify([fiddle.name, fiddle.source]);
+  const lastIdentity = useRef(identity);
   useEffect(() => {
-    if (lastRev.current === fiddle.fiddleRev) return;
-    lastRev.current = fiddle.fiddleRev;
+    if (lastIdentity.current === identity) return;
+    lastIdentity.current = identity;
     setRuntimeErrors([]);
     runApi.ClearOutput().catch((error: unknown) => console.error('[fiddle] clearing the console failed', error));
-  }, [fiddle.fiddleRev]);
+  }, [identity]);
 
   // Gist links, deep links and folders dropped on the window.
   const dropping = useDocumentDrop();
@@ -128,6 +133,7 @@ function ShellView({ state, platform }: { state: WindowState; platform: 'darwin'
           <div className={styles.sideInner}>
             <Sidebar
               files={fiddle.files}
+              dirtyFiles={fiddle.dirtyFiles}
               activeFile={fiddle.activeFile}
               onOpen={openFile}
               onSetVisible={(name, visible) => void setFileVisible(name, visible, failTitle)}

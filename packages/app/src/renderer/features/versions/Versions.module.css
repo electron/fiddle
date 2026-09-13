@@ -3,6 +3,11 @@
   width: 180px;
 }
 
+/* Before the release list loads, the placeholder is the current version's label: show it as the value. */
+.picker [data-placeholder] {
+  color: inherit;
+}
+
 /* Version manager: toolbar, table, note. */
 .manager {
   display: flex;

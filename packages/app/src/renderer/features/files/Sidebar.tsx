@@ -35,6 +35,8 @@ const FILTER_THRESHOLD = 8;
 
 export interface SidebarProps {
   files: readonly { name: string; visible: boolean }[];
+  /** Files with unsaved changes: their rows show the unsaved dot. */
+  dirtyFiles: readonly string[];
   activeFile: string | null;
   onOpen: (name: string) => void;
   onSetVisible: (name: string, visible: boolean) => void;
@@ -46,7 +48,7 @@ interface MenuState {
   y: number;
 }
 
-export function Sidebar({ files, activeFile, onOpen, onSetVisible }: SidebarProps) {
+export function Sidebar({ files, dirtyFiles, activeFile, onOpen, onSetVisible }: SidebarProps) {
   const { t } = useTranslation('shell');
   const errors = countByFile(useRuntimeErrors());
   const [filter, setFilter] = useState('');
@@ -168,8 +170,11 @@ export function Sidebar({ files, activeFile, onOpen, onSetVisible }: SidebarProp
                     key={file.name}
                     id={file.name}
                     label={file.name}
+                    labelDir="ltr"
                     icon={file.visible ? 'file' : 'eye-off'}
                     pill={count ? t('errorCount', { count }) : undefined}
+                    unsaved={dirtyFiles.includes(file.name)}
+                    unsavedLabel={t('unsaved')}
                   />
                 );
               })}

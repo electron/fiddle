@@ -12,7 +12,7 @@ import {
 import type { Settings } from '../../shared/settings';
 import type { ReleaseRow } from '../../shared/stores';
 
-export type VersionFilterSettings = Pick<Settings, 'channels' | 'showObsolete' | 'showNotDownloaded'>;
+type VersionFilterSettings = Pick<Settings, 'channels' | 'showObsolete' | 'showNotDownloaded'>;
 
 /**
  * The versions the user sees (§17.8): runnable here, in a chosen channel, not
@@ -56,7 +56,7 @@ export function isReleaseList(data: unknown): data is RawRelease[] {
   return Array.isArray(data) && data.length > 0 && data.every(isRawRelease);
 }
 
-export interface RowOptions {
+interface RowOptions {
   stableMajors: readonly number[];
   supportedMajors: readonly number[];
   platform: string;

@@ -2,24 +2,18 @@
 import fsp from 'node:fs/promises';
 import path from 'node:path';
 
-import {
-  app,
-  dialog,
-  nativeTheme,
-  shell,
-  type OpenDialogOptions,
-  type SaveDialogOptions,
-  type WebContents,
-} from 'electron';
+import { app, nativeTheme, shell } from 'electron';
 
 import { implement, Settings } from '../../ipc/main';
 import { ErrorCode, FiddleError } from '../../shared/errors';
-import type { ThemeFile } from '../../shared/settings';
+import { changedExecutionSettings, type Settings as AppSettings, type ThemeFile } from '../../shared/settings';
+import { confirm, pickFile, pickSave } from '../dialogs';
+import { dialogText } from '../documents/deep-link-queue';
 import { tm } from '../i18n';
+import type { IpcContext } from '../ipc';
 import { log } from '../log';
 import { builtinThemeFile, themeFromMonaco, themeId, writeTheme } from '../themes/themes';
-import { getWindow } from '../windows';
-import { settingsContext } from './index';
+import type { SettingsContext } from './index';
 import { sanitizeSettings, SETTINGS_VERSION } from './service';
 
 const t = tm('mainSettings');
@@ -29,15 +23,8 @@ async function openPath(target: string): Promise<void> {
   if (reason) throw new FiddleError(ErrorCode.unavailable, t('openFailed', { path: target, reason }));
 }
 
-async function pickJsonFile(windowId: string, title: string): Promise<string | undefined> {
-  const options: OpenDialogOptions = {
-    title,
-    properties: ['openFile'],
-    filters: [{ name: t('jsonFiles'), extensions: ['json'] }],
-  };
-  const win = getWindow(windowId);
-  const result = win ? await dialog.showOpenDialog(win, options) : await dialog.showOpenDialog(options);
-  return result.canceled ? undefined : result.filePaths[0];
+function pickJsonFile(windowId: string, title: string): Promise<string | undefined> {
+  return pickFile(windowId, { title, filters: [{ name: t('jsonFiles'), extensions: ['json'] }] });
 }
 
 async function readJson(file: string): Promise<unknown> {
@@ -53,26 +40,45 @@ function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null && !Array.isArray(value);
 }
 
+/** Asks before an import changes flags, environment variables or mirrors, listing each with its new value. */
+function confirmExecutionSettings(
+  windowId: string,
+  keys: readonly (keyof AppSettings)[],
+  next: AppSettings,
+): Promise<boolean> {
+  const lines = keys.map((key) => {
+    const value = next[key];
+    const text = Array.isArray(value) ? value.join(', ') : String(value);
+    return `${key}: ${dialogText(text) || t('importEmpty')}`;
+  });
+  return confirm(windowId, {
+    type: 'warning',
+    message: t('importExecutionMessage'),
+    detail: [t('importExecutionDetail'), '', ...lines].join('\n'),
+    ok: t('importButton'),
+    defaultId: 1,
+  });
+}
+
 /** Writes a new theme file, selects it and returns the App rev. */
-async function addTheme(theme: ThemeFile, reveal: boolean): Promise<number> {
-  const ctx = settingsContext();
-  const onDisk = await fsp.readdir(ctx.themesDir).catch(() => [] as string[]);
+async function addTheme(settings: SettingsContext, theme: ThemeFile, reveal: boolean): Promise<number> {
+  const onDisk = await fsp.readdir(settings.themesDir).catch(() => [] as string[]);
   const taken = new Set(onDisk.map((name) => name.replace(/\.json$/, '')));
   const id = themeId(theme.name, taken);
-  const file = await writeTheme(ctx.themesDir, id, theme);
-  await ctx.refreshThemes();
-  const rev = ctx.service.set('theme', id);
+  const file = await writeTheme(settings.themesDir, id, theme);
+  await settings.refreshThemes();
+  const rev = settings.service.set('theme', id);
   if (reveal) shell.showItemInFolder(file);
   return rev;
 }
 
-export function bindSettingsIpc(contents: WebContents, windowId: string): void {
+export function bindSettingsIpc({ contents, windowId, services: { settings } }: IpcContext): void {
+  const { service, store } = settings;
   implement(Settings, contents, {
-    SetSetting: (key, value) => settingsContext().service.set(key, value),
-    ResetSetting: (key) => settingsContext().service.reset(key),
+    SetSetting: (key, value) => service.set(key, value),
+    ResetSetting: (key) => service.reset(key),
 
     OpenSettingsFile: async () => {
-      const { store } = settingsContext();
       await store.flush();
       await fsp.mkdir(path.dirname(store.file), { recursive: true });
       await fsp
@@ -92,28 +98,28 @@ export function bindSettingsIpc(contents: WebContents, windowId: string): void {
       if (!isRecord(data)) {
         throw new FiddleError(ErrorCode.invalidArgument, t('notSettings', { file: path.basename(file) }));
       }
-      const { settings, dropped } = sanitizeSettings(data);
+      const { settings: imported, dropped } = sanitizeSettings(data);
       if (dropped.length > 0) log.warn('settings import dropped keys', dropped);
-      return settingsContext().service.replace(settings);
+      // Flags, variables and mirrors decide what runs, so the user sees them first (§4).
+      const changed = changedExecutionSettings(service.settings, imported);
+      if (changed.length > 0 && !(await confirmExecutionSettings(windowId, changed, imported))) return null;
+      return service.replace(imported);
     },
 
     ExportSettings: async () => {
-      const options: SaveDialogOptions = {
+      const file = await pickSave(windowId, {
         title: t('exportSettingsTitle'),
         defaultPath: path.join(app.getPath('documents'), 'fiddle-settings.json'),
         filters: [{ name: t('jsonFiles'), extensions: ['json'] }],
-      };
-      const win = getWindow(windowId);
-      const result = win ? await dialog.showSaveDialog(win, options) : await dialog.showSaveDialog(options);
-      if (result.canceled || !result.filePath) return;
-      const data = settingsContext().service.exportData();
-      await fsp.writeFile(result.filePath, `${JSON.stringify(data, null, 2)}\n`);
+      });
+      if (!file) return;
+      await fsp.writeFile(file, `${JSON.stringify(service.exportData(), null, 2)}\n`);
     },
 
-    DismissStorageNotice: (id) => settingsContext().service.dismissStorageNotice(id),
+    DismissStorageNotice: (id) => service.dismissStorageNotice(id),
 
-    GetTheme: (id) => settingsContext().themes.find((theme) => theme.id === id) ?? null,
-    RefreshThemes: () => settingsContext().refreshThemes(),
+    GetTheme: (id) => settings.themes.find((theme) => theme.id === id) ?? null,
+    RefreshThemes: () => settings.refreshThemes(),
 
     ImportTheme: async () => {
       const file = await pickJsonFile(windowId, t('importThemeTitle'));
@@ -126,23 +132,21 @@ export function bindSettingsIpc(contents: WebContents, windowId: string): void {
         log.warn('theme import rejected', error);
         throw new FiddleError(ErrorCode.invalidArgument, t('notTheme', { file: path.basename(file) }));
       }
-      return addTheme(theme, false);
+      return addTheme(settings, theme, false);
     },
 
     CreateTheme: async () => {
-      const ctx = settingsContext();
-      const current = ctx.themes.find((theme) => theme.id === ctx.service.settings.theme);
+      const current = settings.themes.find((theme) => theme.id === service.settings.theme);
       const isDark = nativeTheme.shouldUseDarkColors;
       const base: ThemeFile = current
         ? { name: current.name, isDark: current.isDark, editor: current.editor, common: current.common }
         : builtinThemeFile(t(isDark ? 'lucentDark' : 'lucentLight'), isDark);
-      return addTheme({ ...base, name: t('themeCopyName', { name: base.name }) }, true);
+      return addTheme(settings, { ...base, name: t('themeCopyName', { name: base.name }) }, true);
     },
 
     OpenThemesFolder: async () => {
-      const { themesDir } = settingsContext();
-      await fsp.mkdir(themesDir, { recursive: true });
-      await openPath(themesDir);
+      await fsp.mkdir(settings.themesDir, { recursive: true });
+      await openPath(settings.themesDir);
     },
   });
 }

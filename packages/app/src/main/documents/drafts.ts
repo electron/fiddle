@@ -12,8 +12,8 @@ import { z } from 'zod';
 import { VersionRefSchema } from '../../fiddle/fiddle';
 import { createJsonStore, type JsonStore } from '../persistence/json-store';
 
-export const DRAFT_DEBOUNCE_MS = 500;
-export const DRAFT_MAX_WAIT_MS = 5000;
+const DRAFT_DEBOUNCE_MS = 500;
+const DRAFT_MAX_WAIT_MS = 5000;
 
 const fileMap = z.record(z.string(), z.string());
 
@@ -40,12 +40,14 @@ export const storedFiddleSchema = z.object({
 });
 export type StoredFiddle = z.infer<typeof storedFiddleSchema>;
 
-export const draftSchema = z.looseObject({
+const draftSchema = z.looseObject({
   windowId: z.string(),
   savedAt: z.string(),
   name: z.string(),
   fiddle: storedFiddleSchema.nullable(),
   baseline: fileMap,
+  /** Missing in drafts written before modules counted toward `dirty`. */
+  baselineModules: z.record(z.string(), z.string()).optional(),
   activeFile: z.string().nullable(),
   gistOwner: z.string().optional(),
 });

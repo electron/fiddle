@@ -10,7 +10,7 @@
  *
  * What it imports:
  * - localStorage settings (read by ./local-storage.ts) → sparse settings.json,
- *   onboarding.json (`tourDone`). Unknown keys are logged and ignored.
+ *   and `tourDone` in state.json. Unknown keys are logged and ignored.
  * - `local-versions.json` (and the older `local-electron-versions` key) →
  *   local-builds.json `{ schemaVersion, builds: [{ id, name, path, addedAt }] }`.
  * - `.github-credentials` → `credentials/github`, re-encrypted with the Gists
@@ -34,13 +34,14 @@ import { GITHUB_TOKEN_PATTERN } from '../../fiddle/github';
 import { BUILTIN_THEME } from '../../shared/settings';
 import { CredentialStore, type SafeStorageLike } from '../github/credentials';
 import { log } from '../log';
+import { writeAtomic } from '../persistence/json-store';
 import { themeFromMonaco, themeId, writeTheme } from '../themes/themes';
 import { mapOldSettings, oldThemeKey, type OldLocalVersion } from './old-settings';
 
 /** The `schemaVersion` of the files written here (settings, state, onboarding, local builds). */
 const SCHEMA_VERSION = 1;
 
-export interface ImportedFrom {
+interface ImportedFrom {
   /** The version of this app that ran the import. */
   version: string;
   /** ISO timestamp. */
@@ -99,20 +100,8 @@ async function createJsonFile(file: string, data: unknown): Promise<boolean> {
   }
 }
 
-/** Replaces `file` atomically: temp file, then rename. */
-async function writeJsonAtomic(file: string, data: unknown): Promise<void> {
-  const tmp = `${file}.${randomUUID()}.tmp`;
-  try {
-    await fsp.writeFile(tmp, `${JSON.stringify(data, null, 2)}\n`);
-    await fsp.rename(tmp, file);
-  } catch (error) {
-    await fsp.rm(tmp, { force: true });
-    throw error;
-  }
-}
-
 /** Old themes → `<userData>/themes/<id>.json`. Returns old file name (no `.json`) → new ID. */
-export async function importThemes(oldDir: string, newDir: string): Promise<Map<string, string>> {
+async function importThemes(oldDir: string, newDir: string): Promise<Map<string, string>> {
   const ids = new Map<string, string>();
   let names: string[];
   try {
@@ -160,7 +149,7 @@ function readOldLocalVersions(file: string): OldLocalVersion[] {
 }
 
 /** Old local versions → local builds, one per folder. */
-export function toLocalBuilds(versions: readonly OldLocalVersion[], now: Date): LocalBuild[] {
+function toLocalBuilds(versions: readonly OldLocalVersion[], now: Date): LocalBuild[] {
   const byPath = new Map<string, LocalBuild>();
   for (const { version, localPath, name } of versions) {
     if (byPath.has(localPath)) continue;
@@ -233,13 +222,6 @@ export async function importOldApp(deps: ImportDeps): Promise<ImportResult> {
     summary.settings = created ? settingKeys : 'kept';
   }
 
-  if (mapped.tourDone) {
-    await createJsonFile(path.join(userData, 'onboarding.json'), {
-      schemaVersion: SCHEMA_VERSION,
-      tourDone: true,
-    });
-  }
-
   const builds = toLocalBuilds(
     [...readOldLocalVersions(path.join(userData, 'local-versions.json')), ...mapped.localVersions],
     now,
@@ -256,8 +238,10 @@ export async function importOldApp(deps: ImportDeps): Promise<ImportResult> {
   summary.github = await importGitHubToken(deps, mapped.gitHubLogin);
 
   const importedFrom: ImportedFrom = { version: deps.version, at: now.toISOString() };
-  await fsp.mkdir(userData, { recursive: true });
-  await writeJsonAtomic(stateFile, { schemaVersion: SCHEMA_VERSION, ...state, importedFrom });
+  // Onboarding lives in state.json too (../ux/onboarding.ts).
+  const onboarding = mapped.tourDone ? { tourDone: true } : {};
+  const text = `${JSON.stringify({ schemaVersion: SCHEMA_VERSION, ...state, ...onboarding, importedFrom }, null, 2)}\n`;
+  await writeAtomic(stateFile, text);
   return { firstLaunch: true, summary };
 }
 

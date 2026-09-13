@@ -1,0 +1,20 @@
+{
+  "updateReadyTitle": "アップデートの準備完了",
+  "updateReadyDetail": "Electron Fiddle の新しいバージョンをダウンロードしました。アプリを再起動すると新しいバージョンを使用できます。",
+  "restart": "再起動",
+  "later": "後で",
+  "versionBlockedMessage": "このバージョンの Electron Fiddle は使用できなくなりました",
+  "versionBlockedDetail": "Electron Fiddle を引き続き使用するには、最新バージョンをダウンロードしてください。",
+  "downloadLatest": "ダウンロード",
+  "quit": "終了",
+  "moveMessage": "Electron Fiddle を「アプリケーション」フォルダーに移動しますか？",
+  "moveDetail": "アップデートを確実にインストールするには、アプリが「アプリケーション」フォルダーにある必要があります。",
+  "moveButton": "「アプリケーション」に移動",
+  "dontMove": "移動しない",
+  "crashConsentMessage": "ウィンドウがクラッシュしました。クラッシュレポートを送信しますか？",
+  "crashConsentDetail": "レポートにはクラッシュしたウィンドウのメモリのスナップショットが含まれ、開いていたコードが含まれる場合があります。レポートは Electron Fiddle チームがクラッシュを修正するのに役立ちます。",
+  "sendReport": "レポートを送信",
+  "dontSend": "送信しない",
+  "aboutVersion": "{{version}} (Electron {{electron}})",
+  "aboutCopyright": "© Electron authors"
+}

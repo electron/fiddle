@@ -3,17 +3,15 @@
  *
  * - `loadSettings()` reads `<userData>/settings.json` before the StateHub
  *   exists and returns the `App` store fields settings owns.
- * - `startSettings()` binds the service, loads custom themes, registers
- *   `app.preferences`, applies side effects (native theme, locale, screen
- *   reader) whenever the settings change, and applies outside edits to
- *   settings.json live.
+ * - `startSettings()` creates the service, loads custom themes, applies side
+ *   effects (native theme, locale, screen reader) whenever the settings
+ *   change, and applies outside edits to settings.json live.
  */
 import fs from 'node:fs';
 import path from 'node:path';
 
 import { app, nativeTheme } from 'electron';
 
-import { ErrorCode, FiddleError } from '../../shared/errors';
 import {
   fromSparse,
   localePreference,
@@ -23,7 +21,6 @@ import {
   type ThemeData,
 } from '../../shared/settings';
 import type { AppState } from '../../shared/stores';
-import type { CommandRegistry } from '../commands';
 import { setMainLocale } from '../i18n';
 import { log } from '../log';
 import { createJsonStore, onJsonStoreNotice, type JsonStore } from '../persistence/json-store';
@@ -41,17 +38,7 @@ export interface SettingsContext {
   refreshThemes(): Promise<number>;
 }
 
-let context: SettingsContext | undefined;
-
-export function settingsContext(): SettingsContext {
-  if (!context) throw new FiddleError(ErrorCode.unavailable, 'Settings have not started');
-  return context;
-}
-
-export type SettingsAppFields = Pick<
-  AppState,
-  'settings' | 'themes' | 'screenReaderActive' | 'storageNotices'
->;
+type SettingsAppFields = Pick<AppState, 'settings' | 'themes' | 'screenReaderActive' | 'storageNotices'>;
 
 export function loadSettings(userData = app.getPath('userData')): {
   store: JsonStore<SparseSettings>;
@@ -83,17 +70,11 @@ export function preferredLocales(store: JsonStore<SparseSettings>): string[] {
   return localePreference(fromSparse(store.get()).locale, app.getPreferredSystemLanguages());
 }
 
-export async function startSettings({
-  hub,
-  registry,
-  store,
+export async function startSettings(
+  hub: StateHub,
+  store: JsonStore<SparseSettings>,
   userData = app.getPath('userData'),
-}: {
-  hub: StateHub;
-  registry: CommandRegistry;
-  store: JsonStore<SparseSettings>;
-  userData?: string;
-}): Promise<void> {
+): Promise<SettingsContext> {
   const service = new SettingsService(hub, store);
   const themesDir = path.join(userData, 'themes');
   const ctx: SettingsContext = {
@@ -102,11 +83,10 @@ export async function startSettings({
     themesDir,
     themes: [],
     async refreshThemes() {
-      ctx.themes = await loadThemes(themesDir);
+      ctx.themes = await loadThemes(themesDir, hub.app.locale);
       return hub.updateApp({ themes: ctx.themes.map(summarize) });
     },
   };
-  context = ctx;
 
   // Corrupt or too-new files (from any store) become toasts.
   onJsonStoreNotice((notice) => service.addStorageNotice(notice));
@@ -139,11 +119,8 @@ export async function startSettings({
   app.on('accessibility-support-changed', apply);
   apply();
 
-  registry.register('app.preferences', ({ windowId }) => {
-    if (windowId) hub.updateWindow(windowId, { view: 'settings' });
-  });
-
   watchSettingsFile(store, service);
+  return ctx;
 }
 
 /** Applies outside edits to settings.json (from "Open settings.json") live. */

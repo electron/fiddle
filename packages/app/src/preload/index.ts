@@ -15,6 +15,9 @@ import '../ipc/generated/preload/fiddle';
 import { hookupIpc } from '@sentry/electron/preload-namespaced';
 
 const { protocol, host, hostname } = window.location;
-if ((protocol === 'app:' && host === 'main') || (protocol === 'http:' && hostname === 'localhost')) {
+// The Vite dev server origin exists only in `yarn start` (development mode);
+// other builds compile that branch out.
+const devServer = import.meta.env.MODE === 'development' && protocol === 'http:' && hostname === 'localhost';
+if ((protocol === 'app:' && host === 'main') || devServer) {
   hookupIpc();
 }

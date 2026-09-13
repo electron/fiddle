@@ -7,11 +7,12 @@ import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import type { RuntimeErrorValue } from '../../../shared/stores';
+import { srOnly, StatusPill } from '../../../ui';
 import { setRuntimeErrors, type RuntimeError } from '../../editor/runtime-errors';
-import { useWindowState } from '../../shell/window-state';
+import { useAppState, useWindowState } from '../../state';
 import { BisectControls, BisectDialogs } from '../bisect/Bisect';
 import styles from './Run.module.css';
-import { IDLE_RUN, useAppState, versionLabel } from './use-run';
+import { IDLE_RUN, versionLabel } from './use-run';
 
 /** Main's runtime errors in the shape the editor markers use. */
 export function toEditorErrors(errors: readonly RuntimeErrorValue[]): RuntimeError[] {
@@ -52,10 +53,7 @@ export function RunStatus() {
   return (
     <div className={styles.status}>
       {run.status === 'running' ? (
-        <span className={styles.runningPill}>
-          <span className={styles.dot} aria-hidden="true" />
-          {t('running')}
-        </span>
+        <StatusPill className={styles.runningPill}>{t('running')}</StatusPill>
       ) : run.status === 'downloading' ? (
         <span>{t('downloadingPercent', { percent })}</span>
       ) : run.status === 'starting' ? (
@@ -67,7 +65,7 @@ export function RunStatus() {
       {app?.versions?.arch && <span>{app.versions.arch}</span>}
       <BisectControls run={run} />
       <BisectDialogs run={run} />
-      <span aria-live="polite" className={styles.srOnly}>
+      <span aria-live="polite" className={srOnly}>
         {announcement}
       </span>
     </div>

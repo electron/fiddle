@@ -64,7 +64,7 @@
 /* Key-cap hint: sans, at 80% */
 .kbd {
   margin-left: 2px;
-  font: 400 12px/16px var(--lu-font-sans);
+  font: var(--lu-type-hint);
   letter-spacing: 0.02em;
   opacity: 0.8;
 }
@@ -133,6 +133,26 @@
 }
 .button[data-variant="stop"][data-pressed] {
   background: color-mix(in srgb, var(--lu-spark) 14%, var(--lu-spark-soft));
+}
+
+/* Link: inline text in accent with an underline, in the surrounding type.
+   No fill, no height, no press scale. */
+.button[data-variant="link"] {
+  display: inline;
+  height: auto;
+  padding: 0;
+  border-radius: var(--lu-radius-code);
+  corner-shape: round;
+  color: var(--lu-accent);
+  font: inherit;
+  letter-spacing: inherit;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  vertical-align: baseline;
+  cursor: pointer;
+}
+.button[data-variant="link"][data-hovered] {
+  text-decoration-thickness: 2px;
 }
 
 /* Toggled on */

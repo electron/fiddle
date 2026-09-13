@@ -6,7 +6,7 @@
  */
 import { findMainEntry, PACKAGE_JSON, ensureMainEntry, type FileMap } from '../../fiddle/files';
 import { gistUrl } from '../../fiddle/gist-id';
-import type { GistRevision, GitHubClient } from '../../fiddle/github';
+import type { GistRevision, GistWriteResult, GitHubClient } from '../../fiddle/github';
 import { generatePackageJson } from '../../fiddle/package-json';
 import { ErrorCode, FiddleError } from '../../shared/errors';
 import type { CredentialStorageKind, CredentialStore } from './credentials';
@@ -14,14 +14,14 @@ import type { GistDocuments, GistFiddle } from './documents-bridge';
 import type { GistPrefs } from './prefs';
 
 /** Shown once to the user; `decrypt-failed` means they were signed out and the file was kept. */
-export type GitHubNotice = 'decrypt-failed';
+type GitHubNotice = 'decrypt-failed';
 
-export interface GistLink {
+interface GistLink {
   id: string;
   url: string;
 }
 
-export interface GistHistory {
+interface GistHistory {
   id: string;
   /** The revision the window has loaded or last saved; undefined when unknown. */
   activeSha: string | undefined;
@@ -29,7 +29,7 @@ export interface GistHistory {
   revisions: GistRevision[];
 }
 
-export interface GitHubServiceOptions {
+interface GitHubServiceOptions {
   store: Pick<CredentialStore, 'kind' | 'load' | 'save' | 'delete'>;
   createClient: (token?: string) => GitHubClient;
   documents: GistDocuments;
@@ -125,27 +125,13 @@ export class GitHubService {
     const files = gistFiles(fiddle);
     const { asRevision } = this.#options.prefs.get();
     this.#options.prefs.setVisibility(input.isPublic);
-
-    if (!asRevision) {
-      const created = await client.createGist({ ...input, files });
-      this.#options.documents.markGistSaved(windowId, created);
-      return { id: created.id, url: created.url };
-    }
-
-    const template = await this.#options.documents.getTemplate(windowId);
-    const created = await client.createGist({
-      ...input,
-      files: { ...template, [PACKAGE_JSON]: files[PACKAGE_JSON]! },
-    });
-    try {
-      const updated = await client.updateGist(created.id, { files });
-      this.#options.documents.markGistSaved(windowId, updated);
-      return { id: updated.id, url: updated.url };
-    } catch (error) {
-      // The gist exists with the template; link it so Update can finish the job.
-      this.#options.documents.markGistSaved(windowId, created);
-      throw error;
-    }
+    const template = asRevision ? await this.#options.documents.getTemplate(windowId) : undefined;
+    // If the update fails, the gist exists with the template; link it so Update can finish the job.
+    const saved = await publishGist(client, input, files, template, (created) =>
+      this.#options.documents.markGistSaved(windowId, created),
+    );
+    this.#options.documents.markGistSaved(windowId, saved);
+    return { id: saved.id, url: saved.url };
   }
 
   /** Syncs the files to the loaded gist. Remote files removed locally are deleted. */
@@ -213,6 +199,30 @@ export function gistFiles(fiddle: GistFiddle): FileMap {
     electronVersion: fiddle.versionRef.kind === 'release' ? fiddle.versionRef.version : undefined,
   });
   return { ...files, [PACKAGE_JSON]: packageJson };
+}
+
+/**
+ * Creates a gist with `files`, without a window (shared with the headless
+ * CLI). With a `template` ("publish as revision"), it's created from the
+ * template and the fiddle's package.json, then updated with the files, so its
+ * history shows the fiddle as a diff. If that update fails, `onUpdateFailed`
+ * gets the gist, which exists with the template.
+ */
+export async function publishGist(
+  client: GitHubClient,
+  input: { description: string; isPublic: boolean },
+  files: FileMap,
+  template?: FileMap,
+  onUpdateFailed: (created: GistWriteResult) => void = () => {},
+): Promise<GistWriteResult> {
+  if (!template) return client.createGist({ ...input, files });
+  const created = await client.createGist({ ...input, files: { ...template, [PACKAGE_JSON]: files[PACKAGE_JSON]! } });
+  try {
+    return await client.updateGist(created.id, { files });
+  } catch (error) {
+    onUpdateFailed(created);
+    throw error;
+  }
 }
 
 function packageName(name: string): string {

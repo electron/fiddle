@@ -14,8 +14,8 @@ export type { IDocumentsImpl } from './generated/common/fiddle';
 export type { IAppDispatcher, IWindowDispatcher } from './generated/browser/fiddle';
 export type { AppInfo, IAppImpl, IWindowImpl } from './generated/common/fiddle';
 export { Settings } from './generated/browser/fiddle';
-export { Modules, Onboarding, Palette } from './generated/browser/fiddle';
-export { GitHub, type IGitHubDispatcher } from './generated/browser/fiddle';
+export { Modules, Onboarding } from './generated/browser/fiddle';
+export { GitHub } from './generated/browser/fiddle';
 export { Run, Versions } from './generated/browser/fiddle';
 // Platform slice.
 export { AppPlatform } from './generated/browser/fiddle';

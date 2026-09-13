@@ -21,6 +21,12 @@ import packageJson from './package.json';
 // checked against build/identity.json in CI (tools/release-identity.mjs).
 
 const appDir = import.meta.dirname;
+
+// Shipped UI locales (src/i18n/locales/*). Pseudo-locales are generated and never listed.
+const shippedLocales = fs
+  .readdirSync(path.join(appDir, 'src/i18n/locales'), { withFileTypes: true })
+  .filter((entry) => entry.isDirectory())
+  .map((entry) => entry.name);
 const iconDir = path.join(appDir, 'assets', 'icons');
 const buildDir = path.join(appDir, 'build');
 const entitlements = path.join(buildDir, 'entitlements.plist');
@@ -205,8 +211,14 @@ const config: ForgeConfig = {
     name: 'Electron Fiddle',
     executableName: 'electron-fiddle',
     asar: { unpack: '**/*.node' },
+    // Bundled content main reads at runtime: Show Me, the quick-start template,
+    // releases.json, contributors.json and import-local-storage.html. Packaged
+    // builds find it at `<resources>/static`, dev runs at `<app path>/static`
+    // (`staticDir()` in src/main/documents/service.ts).
+    extraResource: [path.join(appDir, 'static')],
     icon: path.join(iconDir, 'fiddle'),
     appBundleId: 'com.electron.fiddle',
+    extendInfo: { CFBundleLocalizations: shippedLocales },
     appCategoryType: 'public.app-category.developer-tools',
     usageDescription: {
       Camera:

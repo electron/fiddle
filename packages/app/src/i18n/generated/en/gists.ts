@@ -16,6 +16,7 @@ export default {
   "signInDescription": "Publishing gists needs a personal access token with the gist scope.",
   "signInTokenLabel": "Personal access token",
   "signInCreateToken": "Create a token on GitHub",
+  "signInClipboardHint": "There's a token on your clipboard. Leave this empty to sign in with it.",
   "signInRemember": "Remember the token on this computer",
   "signInRememberHelp": "This system has no keyring, so the token would be stored as plain text. Leave this off to sign in until you quit.",
   "signInSessionOnly": "This system can't store the token securely, so you'll stay signed in until you quit.",

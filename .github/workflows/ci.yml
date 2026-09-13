@@ -43,6 +43,13 @@ jobs:
         run: |
           yarn generate
           git diff --exit-code
+      # REQUIREMENTS §9: missing or unused keys, placeholder, tag and plural
+      # mismatches, and the translate script's own tests.
+      - name: i18n catalogs
+        shell: bash
+        run: |
+          yarn i18n:check
+          yarn i18n:test
       - name: Lint
         run: yarn lint
       - name: Typecheck
