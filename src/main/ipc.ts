@@ -126,7 +126,7 @@ class IpcMainManager extends EventEmitter {
         this.messageQueue.set(target, [...existing, [channel, args]]);
         return;
       }
-      target.isDestroyed() || target.send(channel, ..._args);
+      if (!target.isDestroyed()) target.send(channel, ..._args);
       return;
     }
 

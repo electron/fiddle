@@ -16,7 +16,7 @@ export function highlightText(
   const words = query
     .split(/\s+/)
     .filter((word) => word.length > 0)
-    .map((s) => s.replace(/([.*+?^=!:${}()|\[\]\/\\])/g, '\\$1'));
+    .map((s) => s.replace(/([.*+?^=!:${}()|[\]/\\])/g, '\\$1'));
 
   if (words.length === 0) return [text];
 

@@ -99,7 +99,11 @@ const ElectronVersionRow = observer(({ index, style, data }: RowProps) => {
         buttonProps.icon = isLocal ? 'trash' : 'cloud-download';
         buttonProps.text = isLocal ? 'Remove' : 'Download';
         buttonProps.onClick = () => {
-          isLocal ? appState.removeVersion(ver) : appState.downloadVersion(ver);
+          if (isLocal) {
+            appState.removeVersion(ver);
+          } else {
+            appState.downloadVersion(ver);
+          }
         };
         break;
     }

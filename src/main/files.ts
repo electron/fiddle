@@ -99,19 +99,15 @@ async function isOkToSaveAt(filePath: string): Promise<boolean> {
  * want to overwrite an existing file
  */
 async function confirmFileOverwrite(filePath: string): Promise<boolean> {
-  try {
-    const result = await dialog.showMessageBox({
-      type: 'warning',
-      buttons: ['Cancel', 'Yes'],
-      message: 'Overwrite files?',
-      detail: `The file ${filePath} already exists. Do you want to overwrite it?`,
-    });
+  // If the dialog fails, let it throw. Let's not overwrite files. We'd rather crash.
+  const result = await dialog.showMessageBox({
+    type: 'warning',
+    buttons: ['Cancel', 'Yes'],
+    message: 'Overwrite files?',
+    detail: `The file ${filePath} already exists. Do you want to overwrite it?`,
+  });
 
-    return result.response === 1;
-  } catch (error) {
-    // Let's not overwrite files. We'd rather crash.
-    throw error;
-  }
+  return result.response === 1;
 }
 
 /**
@@ -169,11 +165,7 @@ export async function saveFilesToTemp(files: Files): Promise<string> {
       console.warn(`saveFilesToTemp: rejected unsafe filename: ${name}`);
       continue;
     }
-    try {
-      await fs.outputFile(path.join(dir, name), content);
-    } catch (error) {
-      throw error;
-    }
+    await fs.outputFile(path.join(dir, name), content);
   }
 
   return dir;

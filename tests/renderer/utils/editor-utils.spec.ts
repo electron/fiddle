@@ -14,8 +14,8 @@ describe('editor-utils', () => {
     it('recognizes known files', () => {
       // setup: id is a known file
       for (const id of [MAIN_CJS, MAIN_JS, MAIN_MJS] as const) {
-        expect(isKnownFile(id));
-        expect(isSupportedFile(id));
+        expect(isKnownFile(id)).toBe(true);
+        expect(isSupportedFile(id)).toBe(true);
 
         expect(getEditorTitle(id)).toBe(`Main Process (${id})`);
       }
@@ -23,8 +23,8 @@ describe('editor-utils', () => {
     it('recognizes supported files', () => {
       // set up: id is supported but not known
       for (const id of ['foo.cjs', 'foo.js', 'foo.mjs'] as const) {
-        expect(!isKnownFile(id));
-        expect(isSupportedFile(id));
+        expect(isKnownFile(id)).toBe(false);
+        expect(isSupportedFile(id)).toBe(true);
 
         expect(getEditorTitle(id)).toBe(id);
       }

@@ -75,7 +75,7 @@ export const GitHubSettings = observer(
       const { gitHubLogin } = this.props.appState;
       const { isPublishingGistAsRevision } = this.props.appState;
 
-      const maybeSignedIn = !!gitHubLogin
+      const maybeSignedIn = gitHubLogin
         ? this.renderSignedIn()
         : this.renderNotSignedIn();
 

@@ -12,8 +12,7 @@
     "format": "prettier src --check --experimental-cli",
     "format:write": "prettier src --write --experimental-cli",
     "lint:style": "stylelint \"./src/less/*.less\"",
-    "lint:ts": "eslint \"./**/*.{ts,tsx}\"",
-    "lint:js": "eslint \"./**/*.js\"",
+    "lint:js": "oxlint",
     "lint:markdown": "markdownlint-cli2 \"*.md\"",
     "lint:templates": "standard \"static/**/*.js\"",
     "lint:links": "lint-roller-markdown-links \"*.md\"",
@@ -99,20 +98,12 @@
     "@types/react-dom": "^16.9.11",
     "@types/react-window": "^1.8.8",
     "@types/semver": "^7.3.4",
-    "@typescript-eslint/eslint-plugin": "^6.0.0",
-    "@typescript-eslint/parser": "^6.0.0",
     "@vercel/webpack-asset-relocator-loader": "^1.7.2",
     "@vitest/coverage-v8": "4.1.0",
     "copy-webpack-plugin": "^14.0.0",
     "css-loader": "^6.7.1",
     "electron": "^42.3.3",
     "electron-devtools-installer": "^4.0.0",
-    "eslint": "^8.45.0",
-    "eslint-config-prettier": "^8.8.0",
-    "eslint-import-resolver-typescript": "^3.5.5",
-    "eslint-plugin-import": "^2.27.5",
-    "eslint-plugin-react": "^7.32.2",
-    "eslint-plugin-tsdoc": "^0.3.0",
     "fork-ts-checker-webpack-plugin": "^8.0.0",
     "husky": "^9.0.11",
     "jsdom": "^26.1.0",
@@ -124,6 +115,7 @@
     "mini-css-extract-plugin": "^2.6.1",
     "monaco-editor-webpack-plugin": "^3.0.0",
     "npm-run-all2": "^7.0.1",
+    "oxlint": "^1.81.0",
     "postcss": "^8.5.23",
     "postcss-less": "^6.0.0",
     "resolve-url-loader": "^5.0.0",
@@ -139,12 +131,8 @@
     "webpack": "^5.104.1"
   },
   "lint-staged": {
-    "./**/*.js": [
+    "./**/*.{js,ts,tsx}": [
       "npm run lint:js -- --fix",
-      "prettier --write --experimental-cli"
-    ],
-    "./**/*.{ts,tsx}": [
-      "npm run lint:ts -- --fix",
       "prettier --write --experimental-cli"
     ],
     "./static/**/*.js": [

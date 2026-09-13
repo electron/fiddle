@@ -133,6 +133,7 @@ export class App {
     }
 
     const [
+      // oxlint-disable-next-line no-unused-vars -- React is used by the JSX below
       { default: React },
       { render },
       { Dialogs },
