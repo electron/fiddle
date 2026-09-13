@@ -1,0 +1,15 @@
+{
+  "appName": {
+    "message": "Electron Fiddle",
+    "description": "Product name, shown in the window title and about box. Keep it as is in every locale."
+  },
+  "loading": {
+    "message": "Loading…",
+    "description": "Shown while the window is loading its first view.",
+    "maxLength": 30
+  },
+  "scaffoldStatus": {
+    "message": "Running on {{platform}}. App store rev {{appRev}}, window store rev {{windowRev}}.",
+    "description": "Temporary developer status line on the placeholder start screen. Removed when the app shell lands."
+  }
+}

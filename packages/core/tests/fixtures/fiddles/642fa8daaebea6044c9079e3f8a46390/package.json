@@ -1,0 +1,16 @@
+{
+  "name": "mushy-stranger-classify-tmg5b",
+  "productName": "mushy-stranger-classify-tmg5b",
+  "description": "My Electron application description",
+  "keywords": [],
+  "main": "./main.js",
+  "version": "1.0.0",
+  "author": "charles",
+  "scripts": {
+    "start": "electron ."
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "electron": "11.4.10"
+  }
+}

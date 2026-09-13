@@ -1,0 +1,105 @@
+.tree {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  color: var(--lu-ink);
+  font: var(--lu-type-body);
+  letter-spacing: var(--lu-type-body-tracking);
+  outline: none;
+}
+
+/* Row: 28 tall, padding 0 8, radius-item squircle. Hover: hover at 60%. Selected: weight 500. */
+.row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  height: var(--lu-size-row);
+  padding: 0 8px 0 calc(8px + (var(--tree-item-level, 1) - 1) * 14px);
+  border-radius: var(--lu-radius-item);
+  corner-shape: squircle;
+  user-select: none;
+  cursor: default;
+  outline: none;
+  -webkit-app-region: no-drag;
+  transition:
+    background-color var(--lu-dur-fast) var(--lu-ease),
+    box-shadow var(--lu-dur-fast) var(--lu-ease);
+}
+
+.row[data-hovered] {
+  background: color-mix(in srgb, var(--lu-hover) 60%, transparent);
+}
+
+.row[data-selected] {
+  font-weight: 500;
+}
+
+.row[data-selected] .icon {
+  color: var(--lu-accent);
+}
+
+.row[data-disabled] {
+  opacity: var(--lu-disabled-opacity);
+}
+
+.row[data-focus-visible] {
+  outline: var(--lu-focus-outline);
+  outline-offset: -3px;
+}
+
+/* On the glass: hover is the capsule tint; selected is a chip lifted with shadow-lift. */
+.tree[data-variant="sidebar"] .row[data-hovered] {
+  background: var(--lu-capsule);
+}
+
+.tree[data-variant="sidebar"] .row[data-selected] {
+  background: var(--lu-chip);
+  box-shadow: var(--lu-shadow-lift);
+}
+
+.tree[data-variant="sidebar"] .dot {
+  background: var(--lu-ink-muted);
+}
+
+.chevron {
+  appearance: none;
+  display: inline-flex;
+  flex: none;
+  width: 12px;
+  margin-left: -2px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--lu-ink-faint);
+  cursor: default;
+}
+
+.icon {
+  color: var(--lu-ink-muted);
+}
+
+.label {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* The "1 error" pill: spark on spark-soft, right-aligned. */
+.pill {
+  flex: none;
+  padding: 0 6px;
+  border-radius: var(--lu-radius-capsule);
+  background: var(--lu-spark-soft);
+  color: var(--lu-spark);
+  font: 600 10.5px/16px var(--lu-font-sans);
+}
+
+.dot {
+  flex: none;
+  width: 6px;
+  height: 6px;
+  border-radius: var(--lu-radius-round);
+  background: var(--lu-ink-faint);
+}

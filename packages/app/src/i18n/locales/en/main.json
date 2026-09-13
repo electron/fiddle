@@ -1,0 +1,141 @@
+{
+  "appMenu": {
+    "message": "Electron Fiddle",
+    "description": "macOS application menu title. The product name; keep it as is.",
+    "maxLength": 30
+  },
+  "about": {
+    "message": "About {{name}}",
+    "description": "macOS app menu item that opens the about box. {{name}} is the product name.",
+    "maxLength": 40
+  },
+  "services": {
+    "message": "Services",
+    "description": "macOS app menu submenu with system services.",
+    "maxLength": 30
+  },
+  "hide": {
+    "message": "Hide {{name}}",
+    "description": "macOS app menu item that hides the app. {{name}} is the product name.",
+    "maxLength": 40
+  },
+  "hideOthers": {
+    "message": "Hide others",
+    "description": "macOS app menu item that hides every other app.",
+    "maxLength": 30
+  },
+  "showAll": {
+    "message": "Show all",
+    "description": "macOS app menu item that shows every hidden app.",
+    "maxLength": 30
+  },
+  "quit": {
+    "message": "Quit {{name}}",
+    "description": "Menu item that quits the app. {{name}} is the product name.",
+    "maxLength": 40
+  },
+  "file": {
+    "message": "File",
+    "description": "Top-level File menu.",
+    "maxLength": 20
+  },
+  "edit": {
+    "message": "Edit",
+    "description": "Top-level Edit menu.",
+    "maxLength": 20
+  },
+  "view": {
+    "message": "View",
+    "description": "Top-level View menu.",
+    "maxLength": 20
+  },
+  "window": {
+    "message": "Window",
+    "description": "Top-level Window menu.",
+    "maxLength": 20
+  },
+  "newWindow": {
+    "message": "New window",
+    "description": "Command that opens a new, empty fiddle window.",
+    "maxLength": 30
+  },
+  "reload": {
+    "message": "Reload",
+    "description": "Command that reloads the current window's view. Unsaved text is kept.",
+    "maxLength": 30
+  },
+  "toggleDevTools": {
+    "message": "Toggle developer tools",
+    "description": "Command that opens or closes Chromium's developer tools for the app window.",
+    "maxLength": 40
+  },
+  "undo": {
+    "message": "Undo",
+    "description": "Edit menu item.",
+    "maxLength": 30
+  },
+  "redo": {
+    "message": "Redo",
+    "description": "Edit menu item.",
+    "maxLength": 30
+  },
+  "cut": {
+    "message": "Cut",
+    "description": "Edit menu item.",
+    "maxLength": 30
+  },
+  "copy": {
+    "message": "Copy",
+    "description": "Edit menu item.",
+    "maxLength": 30
+  },
+  "paste": {
+    "message": "Paste",
+    "description": "Edit menu item.",
+    "maxLength": 30
+  },
+  "selectAll": {
+    "message": "Select all",
+    "description": "Edit menu item.",
+    "maxLength": 30
+  },
+  "toggleFullScreen": {
+    "message": "Toggle full screen",
+    "description": "View menu item that enters or leaves full screen.",
+    "maxLength": 30
+  },
+  "minimize": {
+    "message": "Minimize",
+    "description": "Window menu item.",
+    "maxLength": 30
+  },
+  "zoom": {
+    "message": "Zoom",
+    "description": "macOS Window menu item that zooms the window.",
+    "maxLength": 30
+  },
+  "close": {
+    "message": "Close window",
+    "description": "Window menu item that closes the focused window.",
+    "maxLength": 30
+  },
+  "bringAllToFront": {
+    "message": "Bring all to front",
+    "description": "macOS Window menu item.",
+    "maxLength": 30
+  },
+  "openLinkMessage": {
+    "message": "Open this link in your browser?",
+    "description": "Confirmation dialog shown before a link opens in the default browser. The URL is shown below it."
+  },
+  "openLink": {
+    "message": "Open link",
+    "description": "Button in the open-link confirmation dialog that opens the link.",
+    "maxLength": 20
+  },
+  "cancel": {
+    "message": "Cancel",
+    "description": "Button that dismisses a dialog without doing anything.",
+    "maxLength": 20
+  }
+}

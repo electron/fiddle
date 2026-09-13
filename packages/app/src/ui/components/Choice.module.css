@@ -1,0 +1,148 @@
+/* Checkbox, radio and switch share a row: control, 8px, label in body type. */
+.choice {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--lu-space-2);
+  color: var(--lu-ink);
+  font: var(--lu-type-body);
+  letter-spacing: var(--lu-type-body-tracking);
+  user-select: none;
+  cursor: default;
+  outline: none;
+}
+
+.choice[data-focus-visible] {
+  outline: none;
+}
+
+.choice[data-disabled] {
+  opacity: var(--lu-disabled-opacity);
+}
+
+.text {
+  min-width: 0;
+}
+
+/* Box: 16 × 16, radius-check squircle. */
+.box {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 16px;
+  height: 16px;
+  border: 1px solid var(--lu-line-strong);
+  border-radius: var(--lu-radius-check);
+  corner-shape: squircle;
+  background: var(--lu-field);
+  color: var(--lu-on-action);
+  transition:
+    background-color var(--lu-dur-fast) var(--lu-ease),
+    border-color var(--lu-dur-fast) var(--lu-ease),
+    box-shadow var(--lu-dur-fast) var(--lu-ease);
+}
+
+.box > svg {
+  stroke-width: 2;
+}
+
+.choice[data-selected] .box,
+.choice[data-indeterminate] .box {
+  border-color: transparent;
+  background: var(--lu-sheen-check), var(--lu-action);
+  box-shadow: var(--lu-shadow-check);
+}
+
+.choice[data-invalid] .box {
+  border-color: var(--lu-spark);
+}
+
+.choice[data-focus-visible] .box {
+  outline: var(--lu-focus-outline);
+  outline-offset: 1px;
+}
+
+/* Radio: round, with an on-action dot when chosen. */
+.radio .box {
+  border-radius: var(--lu-radius-round);
+  corner-shape: round;
+}
+
+.radio[data-selected] .box::after {
+  content: "";
+  width: 6px;
+  height: 6px;
+  border-radius: var(--lu-radius-round);
+  background: var(--lu-on-action);
+}
+
+.group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--lu-space-2);
+}
+
+.options {
+  display: flex;
+  flex-direction: column;
+  gap: var(--lu-space-2);
+}
+
+.group[data-orientation="horizontal"] .options {
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: var(--lu-space-2) var(--lu-space-4);
+}
+
+.group[data-disabled] {
+  opacity: var(--lu-disabled-opacity);
+}
+.group[data-disabled] .choice[data-disabled] {
+  opacity: 1;
+}
+
+/* Switch */
+.track {
+  position: relative;
+  flex: none;
+  width: 34px;
+  height: 20px;
+  border-radius: var(--lu-radius-switch);
+  background: color-mix(in srgb, var(--lu-line-strong) 80%, transparent);
+  box-shadow: var(--lu-shadow-track);
+  transition: background-color var(--lu-dur-base) var(--lu-ease);
+}
+
+.knob {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 16px;
+  height: 16px;
+  border-radius: var(--lu-radius-knob);
+  background: var(--lu-knob);
+  box-shadow: var(--lu-shadow-knob);
+  transition:
+    transform var(--lu-dur-slow) var(--lu-ease),
+    width var(--lu-dur-base) var(--lu-ease);
+}
+
+.switch[data-selected] .track {
+  background: var(--lu-action);
+}
+
+.switch[data-selected] .knob {
+  transform: translateX(14px);
+}
+
+.switch[data-pressed] .knob {
+  width: 20px;
+}
+
+.switch[data-selected][data-pressed] .knob {
+  transform: translateX(10px);
+}
+
+.switch[data-focus-visible] .track {
+  outline: var(--lu-focus-outline);
+  outline-offset: 1px;
+}

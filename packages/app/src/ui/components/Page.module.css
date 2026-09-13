@@ -1,0 +1,116 @@
+.page {
+  display: grid;
+  grid-template-columns: 220px minmax(0, 1fr);
+  height: 100%;
+  min-height: 0;
+  background: var(--lu-surface);
+  color: var(--lu-ink);
+  font: var(--lu-type-body);
+  letter-spacing: var(--lu-type-body-tracking);
+}
+
+.aside {
+  display: flex;
+  flex-direction: column;
+  gap: var(--lu-space-3);
+  min-height: 0;
+  padding: var(--lu-space-4) 10px;
+  overflow: auto;
+  background: var(--lu-surface-sunken);
+  box-shadow: var(--lu-hairline-end);
+}
+
+.title {
+  margin: 0;
+  padding: 0 10px;
+  font: var(--lu-type-headline);
+  letter-spacing: var(--lu-type-headline-tracking);
+}
+
+.body {
+  position: relative;
+  min-height: 0;
+  overflow: auto;
+}
+
+.close {
+  position: absolute;
+  top: var(--lu-space-3);
+  right: var(--lu-space-3);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--lu-space-1);
+}
+
+.content {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  max-width: 640px;
+  padding: var(--lu-space-8) 64px var(--lu-space-8) var(--lu-space-8);
+}
+
+/* Side nav */
+.nav {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.heading {
+  padding: 14px 10px 5px;
+  font: var(--lu-type-caption);
+  letter-spacing: var(--lu-type-caption-tracking);
+  color: var(--lu-ink-muted);
+}
+
+.item {
+  appearance: none;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  height: 32px;
+  padding: 0 10px;
+  border: 0;
+  border-radius: var(--lu-radius-item);
+  corner-shape: squircle;
+  background: transparent;
+  color: var(--lu-ink-muted);
+  font: 500 13px/18px var(--lu-font-sans);
+  text-align: left;
+  cursor: default;
+  outline: none;
+  transition:
+    background-color var(--lu-dur-fast) var(--lu-ease),
+    color var(--lu-dur-fast) var(--lu-ease);
+}
+
+.item[data-hovered],
+.item[aria-current="page"] {
+  background: var(--lu-hover);
+  color: var(--lu-ink);
+}
+
+.item[aria-current="page"] .itemIcon {
+  color: var(--lu-accent);
+}
+
+.item[data-focus-visible] {
+  outline: var(--lu-focus-outline);
+  outline-offset: -3px;
+}
+
+.itemLabel {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.badge {
+  flex: none;
+  font: 500 11px/14px var(--lu-font-sans);
+  color: var(--lu-ink-muted);
+}

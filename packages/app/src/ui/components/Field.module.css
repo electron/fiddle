@@ -1,0 +1,147 @@
+/* Fields: 30 tall (24 small), padding 0 11, radius-control squircle, 1px line-strong border.
+   Focus: accent border plus a 3.5px ring of accent at 26%. Invalid: spark border, ring at 22%. */
+.root {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+
+.label {
+  font: var(--lu-type-caption);
+  letter-spacing: var(--lu-type-caption-tracking);
+  color: var(--lu-ink-muted);
+}
+
+.field {
+  display: flex;
+  align-items: center;
+  gap: var(--lu-space-2);
+  height: var(--lu-size-control);
+  min-width: 0;
+  padding: 0 11px;
+  border: 1px solid var(--lu-line-strong);
+  border-radius: var(--lu-radius-control);
+  corner-shape: squircle;
+  background: var(--lu-field);
+  color: var(--lu-ink);
+  font: var(--lu-type-body);
+  letter-spacing: var(--lu-type-body-tracking);
+  cursor: text;
+  transition:
+    border-color var(--lu-dur-fast) var(--lu-ease),
+    background-color var(--lu-dur-fast) var(--lu-ease),
+    box-shadow var(--lu-dur-base) var(--lu-ease);
+}
+
+.root[data-size="sm"] .field {
+  height: var(--lu-size-control-sm);
+}
+
+.field:focus-within {
+  border-color: var(--lu-accent);
+  box-shadow: var(--lu-ring-field);
+}
+
+.root[data-invalid] .field {
+  border-color: var(--lu-spark);
+}
+.root[data-invalid] .field:focus-within {
+  box-shadow: var(--lu-ring-invalid);
+}
+
+.root[data-disabled] {
+  opacity: var(--lu-disabled-opacity);
+}
+.root[data-disabled] .field {
+  cursor: default;
+}
+
+/* On the chrome: field-on-glass with a field-edge-on-glass border. */
+.root[data-glass] .field {
+  background: var(--lu-field-on-glass);
+  border-color: var(--lu-field-edge-on-glass);
+}
+.root[data-glass] .field:focus-within {
+  border-color: var(--lu-accent);
+}
+.root[data-glass] .icon,
+.root[data-glass] .input::placeholder {
+  color: var(--lu-ink-muted);
+}
+
+.icon {
+  color: var(--lu-ink-faint);
+}
+
+.input {
+  flex: 1;
+  min-width: 0;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  outline: none;
+}
+.input:focus-visible,
+.input[data-focus-visible] {
+  outline: none;
+}
+.input::placeholder {
+  color: var(--lu-ink-faint);
+  opacity: 1;
+}
+
+.mono {
+  font-family: var(--lu-font-mono);
+}
+
+.suffix {
+  display: inline-flex;
+  align-items: center;
+  flex: none;
+  color: var(--lu-ink-faint);
+}
+
+.help {
+  font: 400 12px/16px var(--lu-font-sans);
+  color: var(--lu-ink-muted);
+}
+
+.error {
+  color: var(--lu-spark);
+}
+
+/* Form field */
+.formField {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+
+.formField[data-inline] {
+  display: grid;
+  grid-template-columns: 160px minmax(0, 1fr);
+  column-gap: var(--lu-space-4);
+  row-gap: 6px;
+  align-items: center;
+}
+.formField[data-inline] .help {
+  grid-column: 2;
+}
+
+.formField[data-disabled] {
+  opacity: var(--lu-disabled-opacity);
+  pointer-events: none;
+}
+
+.control {
+  display: flex;
+  align-items: center;
+  min-height: var(--lu-size-control-sm);
+  min-width: 0;
+}

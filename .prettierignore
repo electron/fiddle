@@ -1,0 +1,11 @@
+.yarn/
+node_modules/
+out/
+dist/
+.vite/
+coverage/
+docs/design/
+packages/app/static/
+packages/app/src/ipc/generated/
+packages/app/src/i18n/generated/
+REQUIREMENTS.md

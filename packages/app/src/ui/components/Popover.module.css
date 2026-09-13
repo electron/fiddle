@@ -1,0 +1,50 @@
+/* Popover: padding 14 16, radius-panel squircle, overlay material with an arrow. */
+.popover {
+  z-index: var(--lu-z-popover);
+  min-width: 200px;
+  padding: 14px 16px;
+  border-radius: var(--lu-radius-panel);
+  corner-shape: squircle;
+  background: var(--lu-material-overlay);
+  -webkit-backdrop-filter: var(--lu-blur-overlay);
+  backdrop-filter: var(--lu-blur-overlay);
+  box-shadow: var(--lu-shadow-overlay);
+  color: var(--lu-ink);
+  font: var(--lu-type-body);
+  letter-spacing: var(--lu-type-body-tracking);
+  outline: none;
+}
+
+.popover[data-entering] {
+  animation: pop-in var(--lu-dur-base) var(--lu-ease);
+}
+
+@keyframes pop-in {
+  from {
+    opacity: 0;
+    transform: scale(0.97);
+  }
+}
+
+.dialog {
+  outline: none;
+}
+
+.arrow svg {
+  display: block;
+  fill: var(--lu-material-overlay);
+  stroke: var(--lu-button-edge);
+  stroke-width: var(--lu-size-hairline);
+}
+
+.arrow[data-placement="bottom"] svg {
+  transform: rotate(180deg);
+}
+
+.arrow[data-placement="left"] svg {
+  transform: rotate(-90deg);
+}
+
+.arrow[data-placement="right"] svg {
+  transform: rotate(90deg);
+}

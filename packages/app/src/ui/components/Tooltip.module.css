@@ -1,0 +1,46 @@
+/* Tooltip: 26 tall, padding 5 9, 8px, Inter 12/16 500.
+   Tooltip fill, blur-tooltip, a 0.5px white rim at 14%. */
+.tooltip {
+  z-index: var(--lu-z-tooltip);
+  display: inline-flex;
+  align-items: center;
+  gap: var(--lu-space-2);
+  min-height: 26px;
+  padding: 5px 9px;
+  border-radius: var(--lu-radius-tooltip);
+  corner-shape: squircle;
+  background: var(--lu-tooltip);
+  -webkit-backdrop-filter: var(--lu-blur-tooltip);
+  backdrop-filter: var(--lu-blur-tooltip);
+  box-shadow: var(--lu-shadow-tooltip);
+  color: var(--lu-tooltip-ink);
+  font: 500 12px/16px var(--lu-font-sans);
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+.tooltip[data-entering] {
+  animation: tip-in var(--lu-dur-fast) var(--lu-ease);
+}
+
+@keyframes tip-in {
+  from {
+    opacity: 0;
+  }
+}
+
+.kbd {
+  font: 400 12px/14px var(--lu-font-sans);
+  letter-spacing: 0.04em;
+  opacity: 0.72;
+}
+
+/* A disabled control can't take hover or focus, so a wrapper takes them for it. */
+.disabledTrigger {
+  display: inline-flex;
+  border-radius: var(--lu-radius-control);
+}
+
+.disabledTrigger > * {
+  pointer-events: none;
+}

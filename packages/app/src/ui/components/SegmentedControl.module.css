@@ -1,0 +1,61 @@
+/* Segmented control: 30 tall, 2px inset, radius-control squircle, Inter 13/18. */
+.track {
+  display: inline-flex;
+  flex: none;
+  height: var(--lu-size-control);
+  padding: 2px;
+  border-radius: var(--lu-radius-control);
+  corner-shape: squircle;
+  background: var(--lu-fill);
+}
+
+.track[data-size="sm"] {
+  height: var(--lu-size-control-sm);
+}
+
+.track[data-disabled] {
+  opacity: var(--lu-disabled-opacity);
+}
+
+.segment {
+  appearance: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  height: 100%;
+  padding: 0 11px;
+  border: 0;
+  border-radius: calc(var(--lu-radius-control) - 2px);
+  corner-shape: squircle;
+  background: transparent;
+  color: var(--lu-ink-muted);
+  font: var(--lu-type-body);
+  letter-spacing: var(--lu-type-body-tracking);
+  white-space: nowrap;
+  user-select: none;
+  cursor: default;
+  transition:
+    color var(--lu-dur-fast) var(--lu-ease),
+    background-color var(--lu-dur-base) var(--lu-ease),
+    box-shadow var(--lu-dur-base) var(--lu-ease);
+}
+
+.track[data-size="sm"] .segment {
+  padding: 0 9px;
+}
+
+.segment[data-hovered] {
+  color: var(--lu-ink);
+}
+
+.segment[data-selected] {
+  background: var(--lu-thumb);
+  color: var(--lu-ink);
+  box-shadow: var(--lu-shadow-lift);
+}
+
+.segment[data-focus-visible] {
+  outline: var(--lu-focus-outline);
+  outline-offset: 1px;
+}

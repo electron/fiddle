@@ -1,0 +1,25 @@
+{
+  // Main process, fiddle logic, shared code, build configs. No DOM.
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "module": "preserve",
+    "moduleResolution": "bundler",
+    // Resolve @electron/fiddle-core from its TypeScript source. The name must be
+    // unique: some dependencies publish a plain "source" condition.
+    "customConditions": ["fiddle-source"],
+    "lib": ["esnext"],
+    "types": ["node", "vite/client"],
+    "noEmit": true,
+    "tsBuildInfoFile": "../../node_modules/.tmp/tsc/app-node.tsbuildinfo"
+  },
+  "include": [
+    "src/main",
+    "src/fiddle",
+    "src/shared",
+    "src/i18n",
+    "src/ipc/main.ts",
+    "*.config.ts",
+    "*.config.mts"
+  ],
+  "exclude": ["src/i18n/renderer.ts"]
+}

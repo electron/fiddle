@@ -1,0 +1,111 @@
+/* Select trigger: field styling with a chevron in ink-muted. Open: the focus ring. */
+.root {
+  display: inline-flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+
+/* The ring belongs to the trigger, not the whole field. */
+.root[data-focus-visible] {
+  outline: none;
+}
+
+.trigger {
+  appearance: none;
+  display: flex;
+  align-items: center;
+  gap: var(--lu-space-2);
+  width: 100%;
+  height: var(--lu-size-control);
+  min-width: 0;
+  padding: 0 11px;
+  border: 1px solid var(--lu-line-strong);
+  border-radius: var(--lu-radius-control);
+  corner-shape: squircle;
+  background: var(--lu-field);
+  color: var(--lu-ink);
+  font: var(--lu-type-body);
+  letter-spacing: var(--lu-type-body-tracking);
+  text-align: left;
+  cursor: default;
+  -webkit-app-region: no-drag;
+  transition:
+    border-color var(--lu-dur-fast) var(--lu-ease),
+    background-color var(--lu-dur-fast) var(--lu-ease),
+    box-shadow var(--lu-dur-base) var(--lu-ease);
+}
+
+.root[data-size="sm"] .trigger {
+  height: var(--lu-size-control-sm);
+}
+
+.trigger[data-hovered] {
+  background: color-mix(in srgb, var(--lu-field) 92%, var(--lu-ink));
+}
+
+.trigger[data-focus-visible],
+.root[data-open] .trigger {
+  outline: none;
+  border-color: var(--lu-accent);
+  box-shadow: var(--lu-ring-field);
+}
+
+.root[data-invalid] .trigger {
+  border-color: var(--lu-spark);
+}
+.root[data-invalid] .trigger[data-focus-visible],
+.root[data-invalid][data-open] .trigger {
+  box-shadow: var(--lu-ring-invalid);
+}
+
+.root[data-disabled] {
+  opacity: var(--lu-disabled-opacity);
+}
+
+.icon {
+  color: var(--lu-ink-faint);
+}
+
+.value {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+
+.value[data-placeholder] {
+  color: var(--lu-ink-faint);
+}
+
+.chevron {
+  color: var(--lu-ink-muted);
+}
+
+/* In a toolbar capsule: a transparent 30px capsule, padding 0 10 0 14. */
+.root[data-capsule] .trigger {
+  height: var(--lu-size-toolbar-inner);
+  padding: 0 10px 0 14px;
+  border-color: transparent;
+  border-radius: var(--lu-radius-capsule);
+  corner-shape: round;
+  background: transparent;
+  box-shadow: none;
+}
+.root[data-capsule] .trigger[data-hovered],
+.root[data-capsule][data-open] .trigger {
+  background: var(--lu-fill);
+  box-shadow: none;
+  border-color: transparent;
+}
+.root[data-capsule] .trigger[data-focus-visible] {
+  outline: var(--lu-focus-outline);
+  outline-offset: -1px;
+  box-shadow: none;
+  border-color: transparent;
+}
+.root[data-capsule] .value {
+  font-weight: 500;
+}

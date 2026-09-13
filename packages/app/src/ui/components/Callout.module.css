@@ -1,0 +1,97 @@
+/* Callout: padding 10 12, radius-control squircle. fill by default; accent-soft for primary,
+   spark-soft for danger. No border. */
+.callout {
+  display: flex;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: var(--lu-radius-control);
+  corner-shape: squircle;
+  background: var(--lu-fill);
+  color: var(--lu-ink);
+  font: var(--lu-type-body);
+  letter-spacing: var(--lu-type-body-tracking);
+}
+
+.callout[data-intent="primary"] {
+  background: var(--lu-accent-soft);
+}
+
+.callout[data-intent="danger"] {
+  background: var(--lu-spark-soft);
+}
+
+.icon {
+  margin-top: 1px;
+  color: var(--lu-ink-muted);
+}
+
+.callout[data-intent="primary"] .icon {
+  color: var(--lu-accent);
+}
+
+.callout[data-intent="danger"] .icon,
+.callout[data-intent="danger"] .title {
+  color: var(--lu-spark);
+}
+
+.body {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.title {
+  font-weight: 600;
+}
+
+.text {
+  color: var(--lu-ink-muted);
+  text-wrap: pretty;
+}
+
+.action {
+  margin-top: 6px;
+}
+
+/* Empty state */
+.empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  height: 100%;
+  padding: var(--lu-space-8) var(--lu-space-6);
+  color: var(--lu-ink-muted);
+  font: var(--lu-type-body);
+  letter-spacing: var(--lu-type-body-tracking);
+  text-align: center;
+}
+
+.emptyIcon {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  margin-bottom: 6px;
+  border-radius: var(--lu-radius-panel);
+  corner-shape: squircle;
+  background: var(--lu-fill);
+  color: var(--lu-ink-muted);
+}
+
+.emptyTitle {
+  color: var(--lu-ink);
+  font: var(--lu-type-headline);
+  letter-spacing: var(--lu-type-headline-tracking);
+}
+
+.emptyText {
+  max-width: 300px;
+  text-wrap: balance;
+}
+
+.emptyAction {
+  margin-top: 10px;
+}

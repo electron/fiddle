@@ -1,0 +1,114 @@
+/* Scrim: the scrim tint with blur-scrim. */
+.scrim {
+  position: fixed;
+  inset: 0;
+  z-index: var(--lu-z-dialog);
+  display: grid;
+  place-items: center;
+  padding: var(--lu-space-6);
+  background: var(--lu-scrim);
+  -webkit-backdrop-filter: var(--lu-blur-scrim);
+  backdrop-filter: var(--lu-blur-scrim);
+}
+
+.scrim[data-entering] {
+  animation: fade-in var(--lu-dur-fast) var(--lu-ease);
+}
+
+.scrim[data-exiting] {
+  animation: fade-in var(--lu-dur-fast) var(--lu-ease) reverse;
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+}
+
+.modal {
+  width: 100%;
+  outline: none;
+}
+
+.modal[data-entering] {
+  animation: dialog-in var(--lu-dur-base) var(--lu-ease);
+}
+
+@keyframes dialog-in {
+  from {
+    opacity: 0;
+    transform: scale(0.97);
+  }
+}
+
+/* Dialog: 420 wide, radius-dialog squircle, overlay material. Padding 18 20, no footer divider. */
+.surface {
+  width: 100%;
+  border-radius: var(--lu-radius-dialog);
+  corner-shape: squircle;
+  background: var(--lu-material-overlay);
+  -webkit-backdrop-filter: var(--lu-blur-overlay);
+  backdrop-filter: var(--lu-blur-overlay);
+  box-shadow: var(--lu-shadow-overlay);
+  color: var(--lu-ink);
+  font: var(--lu-type-body);
+  letter-spacing: var(--lu-type-body-tracking);
+  outline: none;
+}
+
+.head {
+  display: flex;
+  align-items: center;
+  gap: var(--lu-space-2);
+  min-height: 26px;
+  padding: 18px 20px 0;
+}
+
+.head[data-closable] {
+  padding-right: 12px;
+}
+
+.title {
+  flex: 1;
+  margin: 0;
+  font: 650 15px/20px var(--lu-font-sans);
+  letter-spacing: var(--lu-type-headline-tracking);
+}
+
+.icon {
+  display: inline-flex;
+  color: var(--lu-accent);
+}
+.icon[data-tone="warning"] {
+  color: var(--lu-warning);
+}
+.icon[data-tone="success"] {
+  color: var(--lu-success);
+}
+.icon[data-tone="danger"] {
+  color: var(--lu-spark);
+}
+
+.description {
+  padding: 6px 20px 0;
+  color: var(--lu-ink-muted);
+  text-wrap: pretty;
+}
+
+.body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--lu-space-3);
+  padding: 14px 20px;
+}
+
+.footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--lu-space-2);
+  padding: 6px 20px 18px;
+}
+
+.description + .footer {
+  margin-top: var(--lu-space-4);
+}

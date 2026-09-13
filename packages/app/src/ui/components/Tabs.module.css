@@ -1,0 +1,98 @@
+.tabs {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.list {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  min-width: 0;
+}
+
+/* Tab: 28 tall, padding 0 11, radius-item squircle, 12.5/16 at 500.
+   Others ink-muted; hover at 55% of hover. Selected: hover fill, ink. */
+.tab {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  flex: none;
+  height: var(--lu-size-row);
+  padding: 0 11px;
+  border-radius: var(--lu-radius-item);
+  corner-shape: squircle;
+  color: var(--lu-ink-muted);
+  font: 500 12.5px/16px var(--lu-font-sans);
+  letter-spacing: var(--lu-type-label-tracking);
+  white-space: nowrap;
+  user-select: none;
+  cursor: default;
+  outline: none;
+  -webkit-app-region: no-drag;
+  transition:
+    background-color var(--lu-dur-fast) var(--lu-ease),
+    color var(--lu-dur-fast) var(--lu-ease);
+}
+
+.tab[data-hovered]:not([data-selected]) {
+  background: color-mix(in srgb, var(--lu-hover) 55%, transparent);
+}
+
+.tab[data-selected] {
+  background: var(--lu-hover);
+  color: var(--lu-ink);
+}
+
+.tab[data-disabled] {
+  opacity: var(--lu-disabled-opacity);
+}
+
+/* Inside a tab row the ring is drawn 3px inset. */
+.tab[data-focus-visible] {
+  outline: var(--lu-focus-outline);
+  outline-offset: -3px;
+}
+
+.icon {
+  color: var(--lu-ink-muted);
+}
+
+.label {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Error count: 10px semibold, spark on spark-soft, 16px tall capsule. */
+.errors {
+  flex: none;
+  min-width: 16px;
+  height: 16px;
+  padding: 0 4px;
+  border-radius: var(--lu-radius-capsule);
+  background: var(--lu-spark-soft);
+  color: var(--lu-spark);
+  font: 600 10px/16px var(--lu-font-sans);
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+
+.dot {
+  flex: none;
+  width: 6px;
+  height: 6px;
+  border-radius: var(--lu-radius-round);
+  background: var(--lu-ink-faint);
+}
+
+.panel {
+  outline: none;
+  min-height: 0;
+}
+
+.panel[data-focus-visible] {
+  outline: var(--lu-focus-outline);
+  outline-offset: -3px;
+}

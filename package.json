@@ -1,11 +1,45 @@
 {
   "name": "electron-fiddle-monorepo",
   "private": true,
+  "type": "module",
   "workspaces": [
     "packages/*"
   ],
   "packageManager": "yarn@4.10.3",
   "engines": {
     "node": ">=22.12.0"
+  },
+  "scripts": {
+    "start": "yarn workspace electron-fiddle start",
+    "start:xvfb": "yarn workspace electron-fiddle start:xvfb",
+    "generate": "yarn workspace electron-fiddle generate",
+    "typecheck": "yarn generate && tsc -b",
+    "lint": "yarn generate && eslint --cache .",
+    "lint:fix": "yarn generate && eslint --cache --fix .",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "test": "yarn generate && vitest run",
+    "test:watch": "vitest",
+    "test:e2e": "node -e \"console.log('yarn test:e2e: not implemented yet')\"",
+    "fiddle": "node -e \"console.log('yarn fiddle: not implemented yet')\"",
+    "package": "yarn workspace electron-fiddle package",
+    "make": "yarn workspace electron-fiddle make"
+  },
+  "dependenciesMeta": {
+    "electron": {
+      "built": true
+    }
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.0",
+    "@types/node": "^24.9.0",
+    "eslint": "^10.10.0",
+    "eslint-plugin-react-hooks": "^7.1.1",
+    "jsdom": "^30.0.1",
+    "prettier": "^3.9.6",
+    "typescript": "~6.0.3",
+    "typescript-eslint": "^8.69.0",
+    "vite": "8.2.2",
+    "vitest": "^5.0.0"
   }
 }

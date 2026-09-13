@@ -1,0 +1,102 @@
+/* Badge and Tag: 20 tall capsules, caption type, tone at 14% with tone text. */
+.badge {
+  --tone: var(--lu-ink-muted);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  flex: none;
+  height: 20px;
+  padding: 0 8px;
+  border-radius: var(--lu-radius-capsule);
+  color: var(--tone);
+  background: color-mix(in srgb, var(--tone) 14%, transparent);
+  font: var(--lu-type-caption);
+  letter-spacing: var(--lu-type-caption-tracking);
+  white-space: nowrap;
+}
+
+.badge[data-tone="accent"] {
+  --tone: var(--lu-accent);
+}
+.badge[data-tone="success"] {
+  --tone: var(--lu-success);
+}
+.badge[data-tone="warning"] {
+  --tone: var(--lu-warning);
+}
+.badge[data-tone="danger"] {
+  --tone: var(--lu-spark);
+}
+
+.dot {
+  width: 6px;
+  height: 6px;
+  flex: none;
+  border-radius: var(--lu-radius-round);
+  background: currentColor;
+  box-shadow: var(--lu-halo-current);
+}
+
+.tag {
+  gap: 4px;
+}
+
+.remove {
+  appearance: none;
+  display: grid;
+  place-items: center;
+  width: 14px;
+  height: 14px;
+  margin-right: -3px;
+  padding: 0;
+  border: 0;
+  border-radius: var(--lu-radius-round);
+  background: transparent;
+  color: inherit;
+  opacity: 0.75;
+  cursor: default;
+  transition:
+    opacity var(--lu-dur-fast) var(--lu-ease),
+    background-color var(--lu-dur-fast) var(--lu-ease);
+}
+.remove[data-hovered] {
+  opacity: 1;
+  background: color-mix(in srgb, currentColor 18%, transparent);
+}
+.remove[data-focus-visible] {
+  outline: var(--lu-focus-outline);
+  outline-offset: 1px;
+}
+
+/* Key caps: 19 tall, min 22 wide, padding 4 6, radius-sm squircle, Inter 11/11 500. */
+.kbds {
+  display: inline-flex;
+  gap: 3px;
+  vertical-align: middle;
+}
+
+.kbd {
+  display: inline-block;
+  height: 19px;
+  min-width: 22px;
+  padding: 4px 6px;
+  border-radius: var(--lu-radius-sm);
+  corner-shape: squircle;
+  background: var(--lu-kbd);
+  color: var(--lu-ink-muted);
+  box-shadow: var(--lu-shadow-kbd);
+  font: 500 11px/11px var(--lu-font-sans);
+  text-align: center;
+  white-space: nowrap;
+}
+
+/* Inline code: padding 2 5, radius-code, fill. */
+.code {
+  padding: 2px 5px;
+  border-radius: var(--lu-radius-code);
+  background: var(--lu-fill);
+  color: var(--lu-ink);
+  font-family: var(--lu-font-mono);
+  font-size: 0.92em;
+  line-height: 1;
+}

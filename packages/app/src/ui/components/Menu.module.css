@@ -1,0 +1,131 @@
+/* Menus and select lists: overlay material, blur-overlay, shadow-popover and the two rims.
+   Padding 5, radius-menu (radius-item plus the padding, so corners stay concentric).
+   Grows to fit the longest label, between 200 and 360px. */
+.popover {
+  display: flex;
+  outline: none;
+}
+
+.popover[data-entering] {
+  animation: menu-in var(--lu-dur-base) var(--lu-ease);
+}
+
+@keyframes menu-in {
+  from {
+    opacity: 0;
+    transform: translateY(-4px) scale(0.98);
+  }
+}
+
+.surface {
+  box-sizing: border-box;
+  width: max-content;
+  min-width: max(200px, var(--trigger-width, 0px));
+  max-width: 360px;
+  max-height: inherit;
+  overflow: auto;
+  padding: 5px;
+  border-radius: var(--lu-radius-menu);
+  corner-shape: squircle;
+  background: var(--lu-material-overlay);
+  -webkit-backdrop-filter: var(--lu-blur-overlay);
+  backdrop-filter: var(--lu-blur-overlay);
+  box-shadow: var(--lu-shadow-overlay);
+  color: var(--lu-ink);
+  font: var(--lu-type-body);
+  letter-spacing: var(--lu-type-body-tracking);
+  outline: none;
+}
+
+.section {
+  display: block;
+}
+
+/* Items: 28 tall, padding 0 10 0 6, radius-item. Hover and keyboard-active: fill-strong.
+   Selected: weight 500, no fill. */
+.item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  height: var(--lu-size-row);
+  padding: 0 10px 0 6px;
+  border-radius: var(--lu-radius-item);
+  corner-shape: squircle;
+  cursor: default;
+  user-select: none;
+  outline: none;
+  transition: background-color var(--lu-dur-instant) var(--lu-ease);
+}
+
+.item[data-hovered],
+.item[data-focused] {
+  background: var(--lu-fill-strong);
+}
+
+.item[data-focus-visible] {
+  outline: none;
+}
+
+.item[data-selected] {
+  font-weight: 500;
+}
+
+.item[data-disabled] {
+  opacity: var(--lu-disabled-opacity);
+}
+
+.item[data-danger] {
+  color: var(--lu-spark);
+}
+
+.lead {
+  display: inline-flex;
+  flex: none;
+  width: 16px;
+  color: var(--lu-ink-muted);
+}
+
+.item[data-selected] .lead {
+  color: var(--lu-accent);
+}
+
+.item[data-danger] .lead {
+  color: inherit;
+}
+
+.label {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.hint {
+  flex: none;
+  margin-left: var(--lu-space-3);
+  font: 500 11px/14px var(--lu-font-sans);
+  color: var(--lu-ink-muted);
+}
+
+.kbd {
+  flex: none;
+  margin-left: var(--lu-space-3);
+  font: 400 12px/14px var(--lu-font-sans);
+  letter-spacing: 0.04em;
+  color: var(--lu-ink-muted);
+}
+
+.header {
+  padding: 8px 10px 4px 28px;
+  font: var(--lu-type-caption);
+  letter-spacing: var(--lu-type-caption-tracking);
+  color: var(--lu-ink-muted);
+}
+
+.separator {
+  height: var(--lu-size-hairline);
+  margin: 5px 10px;
+  border: 0;
+  background: var(--lu-line);
+}

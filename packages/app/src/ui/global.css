@@ -1,0 +1,78 @@
+/* Lucent global styles. Import once from the renderer entry. */
+@import "./fonts/fonts.css";
+@import "./tokens/lucent-tokens.css";
+@import "./tokens/lucent-extensions.css";
+
+/* The OS material shows through: the page itself is transparent. */
+html,
+body {
+  background: transparent;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  scrollbar-color: var(--lu-line-strong) transparent;
+  scrollbar-width: thin;
+}
+
+body {
+  margin: 0;
+  color: var(--lu-ink);
+  font: var(--lu-type-body);
+  letter-spacing: var(--lu-type-body-tracking);
+  font-feature-settings: var(--lu-font-features);
+  font-optical-sizing: auto;
+  font-synthesis-weight: none;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+  letter-spacing: inherit;
+  color: inherit;
+  font-feature-settings: inherit;
+}
+
+code,
+kbd,
+pre,
+samp {
+  font-family: var(--lu-font-mono);
+}
+
+/* Focus: a 3px ring in accent at 70%, 1px offset. Components that sit in lists and
+   tab rows draw it inset; fields draw a border and a soft ring instead. */
+/* Zero specificity, so a component's own focus rule always wins. Components built on
+   react-aria style [data-focus-visible] themselves. */
+:where(:focus-visible) {
+  outline: var(--lu-focus-outline);
+  outline-offset: 1px;
+}
+:where(:focus:not(:focus-visible)) {
+  outline: none;
+}
+
+/* Reduce motion: the tokens zero the durations that move things and the press scale.
+   Smooth scrolling travels too, so drop it. Colour changes and spinners stay. */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+}
+
+/* Windows high contrast: let the system colours through and keep focus visible. */
+@media (forced-colors: active) {
+  :where(:focus-visible) {
+    outline: 3px solid Highlight;
+  }
+}

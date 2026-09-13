@@ -1,0 +1,255 @@
+/* Card: surface, 0.5px button-edge ring, padding 12, radius-panel squircle.
+   Hover (clickable cards) adds a soft 10/24 shadow. */
+.card {
+  appearance: none;
+  display: flex;
+  align-items: center;
+  gap: var(--lu-space-3);
+  width: 100%;
+  padding: var(--lu-space-3);
+  border: 0;
+  border-radius: var(--lu-radius-panel);
+  corner-shape: squircle;
+  background: var(--lu-surface);
+  box-shadow: var(--lu-shadow-card);
+  color: var(--lu-ink);
+  font: var(--lu-type-body);
+  letter-spacing: var(--lu-type-body-tracking);
+  text-align: left;
+  transition:
+    box-shadow var(--lu-dur-fast) var(--lu-ease),
+    transform var(--lu-dur-base) var(--lu-ease);
+}
+
+.card[data-interactive] {
+  cursor: default;
+}
+.card[data-interactive][data-hovered] {
+  box-shadow: var(--lu-shadow-card-hover);
+}
+.card[data-interactive][data-pressed] {
+  transform: scale(var(--lu-press-scale-tile));
+}
+.card[data-focus-visible] {
+  outline: var(--lu-focus-outline);
+  outline-offset: 1px;
+}
+
+.avatar {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 36px;
+  height: 36px;
+  border-radius: var(--lu-radius-control);
+  corner-shape: squircle;
+  background: var(--lu-accent-soft);
+  color: var(--lu-accent);
+  font: 600 13px/1 var(--lu-font-sans);
+}
+
+.cardMain {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.cardTitle {
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.cardSub {
+  color: var(--lu-ink-muted);
+  font-size: 12px;
+  line-height: 16px;
+}
+
+/* List rows: min 48 tall, padding 8 10, radius-control. */
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  outline: none;
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 48px;
+  padding: var(--lu-space-2) 10px;
+  border-radius: var(--lu-radius-control);
+  corner-shape: squircle;
+  color: var(--lu-ink);
+  font: var(--lu-type-body);
+  letter-spacing: var(--lu-type-body-tracking);
+  cursor: default;
+  outline: none;
+  transition: background-color var(--lu-dur-fast) var(--lu-ease);
+}
+
+.row[data-hovered] {
+  background: var(--lu-hover);
+}
+
+.row[data-selected] {
+  background: var(--lu-accent-soft);
+}
+
+.row[data-disabled] {
+  opacity: var(--lu-disabled-opacity);
+}
+
+.row[data-focus-visible] {
+  outline: var(--lu-focus-outline);
+  outline-offset: -3px;
+}
+
+.rowIcon {
+  color: var(--lu-ink-muted);
+}
+
+.row[data-selected] .rowIcon {
+  color: var(--lu-accent);
+}
+
+.rowMain {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.rowTitle {
+  font-weight: 500;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.rowMeta {
+  font: 400 11px/15px var(--lu-font-sans);
+  color: var(--lu-ink-faint);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.rowTags {
+  display: inline-flex;
+  flex: none;
+  gap: 6px;
+}
+
+/* Table: surface-sunken head (33 tall, caption type), 32px rows with hairlines. */
+.tableWrap {
+  position: relative;
+  overflow: hidden;
+  border-radius: var(--lu-radius-control);
+  corner-shape: squircle;
+  background: var(--lu-surface);
+}
+
+.tableWrap::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  box-shadow: var(--lu-ring-edge);
+  pointer-events: none;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+  color: var(--lu-ink);
+  font: var(--lu-type-body);
+  letter-spacing: var(--lu-type-body-tracking);
+}
+
+.table thead th {
+  height: 33px;
+  padding: 0 var(--lu-space-3);
+  border-bottom: var(--lu-size-hairline) solid var(--lu-line);
+  background: var(--lu-surface-sunken);
+  color: var(--lu-ink-muted);
+  font: var(--lu-type-caption);
+  letter-spacing: var(--lu-type-caption-tracking);
+  text-align: left;
+  white-space: nowrap;
+}
+
+.table td {
+  height: 32px;
+  padding: 0 var(--lu-space-3);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.table tbody tr + tr > * {
+  border-top: var(--lu-size-hairline) solid var(--lu-line);
+}
+
+.tr {
+  transition: background-color var(--lu-dur-fast) var(--lu-ease);
+}
+
+.tr:hover {
+  background: var(--lu-hover);
+}
+
+.tr[aria-selected="true"] {
+  background: var(--lu-accent-soft);
+}
+
+.mono {
+  font-family: var(--lu-font-mono);
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+}
+
+.section th {
+  height: 32px;
+  padding: 0 var(--lu-space-3) 5px;
+  vertical-align: bottom;
+  color: var(--lu-ink-muted);
+  font: var(--lu-type-caption);
+  letter-spacing: var(--lu-type-caption-tracking);
+  text-align: left;
+}
+
+.empty {
+  height: auto;
+  padding: var(--lu-space-8) var(--lu-space-3);
+  color: var(--lu-ink-faint);
+  text-align: center;
+  white-space: normal;
+}
+
+/* The running pill: spark on spark-soft, 600, with a dot. */
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 2px 9px 2px 8px;
+  border-radius: var(--lu-radius-capsule);
+  background: var(--lu-spark-soft);
+  color: var(--lu-spark);
+  font: 600 11.5px/14px var(--lu-font-sans);
+  white-space: nowrap;
+}
+
+.pillDot {
+  flex: none;
+  width: 6px;
+  height: 6px;
+  border-radius: var(--lu-radius-round);
+  background: currentColor;
+  box-shadow: var(--lu-halo-spark);
+}

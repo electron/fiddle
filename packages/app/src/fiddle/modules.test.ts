@@ -1,0 +1,273 @@
+import { mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
+import * as path from 'node:path';
+
+import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+
+import { ErrorCode } from '../shared/errors';
+import {
+  buildInstallCommand,
+  buildRunScriptCommand,
+  checkModuleSpec,
+  type ExecFn,
+  findPackageManager,
+  installModules,
+  isValidPackageName,
+  isValidVersionSpec,
+  loadLoginShellPath,
+  normalizeModuleVersion,
+  pickLatestVersion,
+  runCommand,
+} from './modules';
+
+describe('module specs', () => {
+  it.each(['lodash', '@types/node', 'JSONStream', 'a-b.c_d~e', '@scope/pkg.name', 'x'])('accepts the name %s', (name) =>
+    expect(isValidPackageName(name)).toBe(true),
+  );
+
+  it.each(['', '.hidden', '_under', '@scope', '@/x', 'a/b', '@a/b/c', 'node_modules', 'a b', 'x'.repeat(215), 'é'])(
+    'rejects the name %j',
+    (name) => expect(isValidPackageName(name)).toBe(false),
+  );
+
+  it.each(['1.2.3', '^1.2.3', '~1.0', '>=1 <2', '1.x || 2.x', '*', '1.0.0-beta.1', 'latest', 'next', 'beta'])(
+    'accepts the spec %s',
+    (spec) => expect(isValidVersionSpec(spec)).toBe(true),
+  );
+
+  it.each([
+    'git+https://github.com/a/b.git',
+    'git://github.com/a/b',
+    'github:user/repo',
+    'user/repo',
+    'https://example.com/x.tgz',
+    'file:../x',
+    '../x',
+    'link:x',
+    'npm:lodash@1',
+    'workspace:*',
+    '1.0.0#abc',
+    '',
+    ' 1.0.0',
+    '1.0.0"',
+    '%PATH%',
+  ])('rejects the spec %j', (spec) => expect(isValidVersionSpec(spec)).toBe(false));
+
+  it('says which part is wrong', () => {
+    expect(checkModuleSpec('ok', '1.0.0')).toBeNull();
+    expect(checkModuleSpec('Bad Name', '1.0.0')).toBe('invalid-name');
+    expect(checkModuleSpec('ok', 'file:x')).toBe('invalid-spec');
+  });
+});
+
+describe('install commands', () => {
+  const modules = { lodash: '4.17.21', '@types/node': '^20' };
+
+  it('uses npm install -S', () => {
+    expect(buildInstallCommand({ packageManager: 'npm', modules })).toEqual({
+      command: 'npm',
+      args: ['install', '-S', 'lodash@4.17.21', '@types/node@^20'],
+    });
+    expect(buildInstallCommand({ packageManager: 'npm' })).toEqual({ command: 'npm', args: ['install', '-S'] });
+  });
+
+  it('uses yarn add, or yarn install with no modules', () => {
+    expect(buildInstallCommand({ packageManager: 'yarn', modules })).toEqual({
+      command: 'yarn',
+      args: ['add', 'lodash@4.17.21', '@types/node@^20'],
+    });
+    expect(buildInstallCommand({ packageManager: 'yarn' })).toEqual({ command: 'yarn', args: ['install'] });
+  });
+
+  it('adds --ignore-scripts', () => {
+    expect(buildInstallCommand({ packageManager: 'npm', modules: { a: '1.0.0' }, ignoreScripts: true }).args).toEqual([
+      'install',
+      '-S',
+      'a@1.0.0',
+      '--ignore-scripts',
+    ]);
+    expect(buildInstallCommand({ packageManager: 'yarn', ignoreScripts: true }).args).toEqual(['install', '--ignore-scripts']);
+  });
+
+  it('wraps with sfw', () => {
+    expect(buildInstallCommand({ packageManager: 'yarn', modules: { a: '1.0.0' }, sfwPath: '/app/sfw/dist/sfw.mjs' })).toEqual({
+      command: 'node',
+      args: ['/app/sfw/dist/sfw.mjs', 'yarn', 'add', 'a@1.0.0'],
+    });
+  });
+
+  it('refuses bad specs', () => {
+    expect(() => buildInstallCommand({ packageManager: 'npm', modules: { a: 'git+ssh://x' } })).toThrow(
+      expect.objectContaining({ code: ErrorCode.invalidArgument, details: { reason: 'invalid-spec', name: 'a', spec: 'git+ssh://x' } }),
+    );
+  });
+
+  it('builds run-script commands', () => {
+    expect(buildRunScriptCommand('npm', 'make')).toEqual({ command: 'npm', args: ['run', 'make'] });
+    expect(buildRunScriptCommand('yarn', 'package')).toEqual({ command: 'yarn', args: ['run', 'package'] });
+  });
+});
+
+describe('versions', () => {
+  it('normalizes non-semver versions to the latest', () => {
+    expect(normalizeModuleVersion('1.2.3', '2.0.0')).toBe('1.2.3');
+    expect(normalizeModuleVersion('*', '2.0.0')).toBe('2.0.0');
+    expect(normalizeModuleVersion('^1.0.0', '2.0.0')).toBe('2.0.0');
+    expect(normalizeModuleVersion('*', undefined)).toBe('*');
+    expect(pickLatestVersion(['1.0.0', '10.0.0', '2.0.0', '11.0.0-beta.1'])).toBe('10.0.0');
+    expect(pickLatestVersion([])).toBeUndefined();
+  });
+});
+
+function fakeExec(result: string | Error) {
+  const calls: { file: string; args: readonly string[]; env?: NodeJS.ProcessEnv }[] = [];
+  const exec: ExecFn = async (file, args, options) => {
+    calls.push({ file, args, env: options.env });
+    if (result instanceof Error) throw result;
+    return result;
+  };
+  return { exec, calls };
+}
+
+describe('host lookups', () => {
+  it('finds the package manager with which or where.exe', async () => {
+    const posix = fakeExec('/usr/local/bin/npm\n');
+    expect(await findPackageManager('npm', { platform: 'darwin', exec: posix.exec })).toBe('/usr/local/bin/npm');
+    expect(posix.calls[0]).toMatchObject({ file: 'which', args: ['npm'] });
+
+    const win = fakeExec('C:\\Program Files\\nodejs\\yarn\r\nC:\\Program Files\\nodejs\\yarn.cmd\r\n');
+    expect(await findPackageManager('yarn', { platform: 'win32', exec: win.exec })).toBe('C:\\Program Files\\nodejs\\yarn');
+    expect(win.calls[0]).toMatchObject({ file: 'where.exe', args: ['yarn'] });
+
+    expect(await findPackageManager('npm', { platform: 'linux', exec: fakeExec(new Error('not found')).exec })).toBeNull();
+    expect(await findPackageManager('npm', { platform: 'linux', exec: fakeExec('').exec })).toBeNull();
+  });
+
+  it('loads PATH from the login shell', async () => {
+    const shell = fakeExec('Welcome!\n\u001b[1m__FIDDLE_SHELL_PATH__\n/opt/homebrew/bin:/usr/bin\n__FIDDLE_SHELL_PATH__bye');
+    const result = await loadLoginShellPath({ platform: 'darwin', env: { SHELL: '/bin/fish', HOME: '/h' }, exec: shell.exec });
+    expect(result).toBe('/opt/homebrew/bin:/usr/bin');
+    expect(shell.calls[0]!.file).toBe('/bin/fish');
+    expect(shell.calls[0]!.args[0]).toBe('-ilc');
+    expect(shell.calls[0]!.env).toMatchObject({ HOME: '/h', DISABLE_AUTO_UPDATE: 'true' });
+  });
+
+  it('defaults the shell and gives up quietly', async () => {
+    const shell = fakeExec('nothing useful');
+    expect(await loadLoginShellPath({ platform: 'linux', env: {}, exec: shell.exec })).toBeUndefined();
+    expect(shell.calls[0]!.file).toBe('/bin/sh');
+    const mac = fakeExec(new Error('timeout'));
+    expect(await loadLoginShellPath({ platform: 'darwin', env: {}, exec: mac.exec })).toBeUndefined();
+    expect(mac.calls[0]!.file).toBe('/bin/zsh');
+    const win = fakeExec('x');
+    expect(await loadLoginShellPath({ platform: 'win32', exec: win.exec })).toBeUndefined();
+    expect(win.calls).toHaveLength(0);
+  });
+
+  it('reads a real login shell PATH on POSIX', async () => {
+    if (process.platform === 'win32') return;
+    const result = await loadLoginShellPath({ env: { ...process.env, SHELL: '/bin/sh' } });
+    expect(result).toBeTruthy();
+  });
+});
+
+describe('runCommand', () => {
+  const node = process.execPath;
+
+  it('collects output and the exit code', async () => {
+    const chunks: string[] = [];
+    const result = await runCommand(
+      { command: node, args: ['-e', 'console.log("out"); console.error("err"); process.exit(3)'] },
+      { onOutput: (t) => chunks.push(t) },
+    );
+    expect(result.code).toBe(3);
+    expect(result.output).toContain('out');
+    expect(result.output).toContain('err');
+    expect(chunks.join('')).toBe(result.output);
+  });
+
+  it('cancels with an AbortSignal', async () => {
+    const controller = new AbortController();
+    const promise = runCommand({ command: node, args: ['-e', 'setTimeout(() => {}, 20000)'] }, { signal: controller.signal });
+    setTimeout(() => controller.abort(), 50);
+    await expect(promise).rejects.toMatchObject({ code: ErrorCode.cancelled });
+    const aborted = AbortSignal.abort();
+    await expect(runCommand({ command: node, args: [] }, { signal: aborted })).rejects.toMatchObject({ code: ErrorCode.cancelled });
+  });
+
+  it('reports a missing command', async () => {
+    await expect(runCommand({ command: 'definitely-not-a-command-xyz', args: [] })).rejects.toMatchObject({
+      code: ErrorCode.unavailable,
+    });
+  });
+
+  it('refuses shell-special arguments on Windows', async () => {
+    await expect(runCommand({ command: 'npm', args: ['a"b'] }, { platform: 'win32' })).rejects.toMatchObject({
+      code: ErrorCode.invalidArgument,
+    });
+    await expect(runCommand({ command: 'npm', args: ['%PATH%'] }, { platform: 'win32' })).rejects.toMatchObject({
+      code: ErrorCode.invalidArgument,
+    });
+  });
+});
+
+describe('installModules', () => {
+  let root: string;
+  let fakeSfw: string;
+  beforeEach(async () => {
+    root = await mkdtemp(path.join(tmpdir(), 'fiddle-install-'));
+    // Stands in for sfw.mjs: records its arguments, then exits with FAKE_EXIT.
+    fakeSfw = path.join(root, 'fake-sfw.mjs');
+    await writeFile(
+      fakeSfw,
+      `import { writeFileSync } from 'node:fs';
+writeFileSync('args.json', JSON.stringify(process.argv.slice(2)));
+console.log('installed');
+process.exit(Number(process.env.FAKE_EXIT ?? 0));`,
+    );
+  });
+  afterEach(async () => {
+    await rm(root, { recursive: true, force: true });
+  });
+
+  it('runs inside the temp dir', async () => {
+    const dir = await mkdtemp(path.join(root, 'run-'));
+    const result = await installModules({
+      dir,
+      tempRoot: root,
+      packageManager: 'npm',
+      modules: { lodash: '4.17.21' },
+      ignoreScripts: true,
+      sfwPath: fakeSfw,
+      env: process.env,
+    });
+    expect(result.output).toContain('installed');
+    expect(JSON.parse(await readFile(path.join(dir, 'args.json'), 'utf8'))).toEqual([
+      'npm',
+      'install',
+      '-S',
+      'lodash@4.17.21',
+      '--ignore-scripts',
+    ]);
+  });
+
+  it('throws install-failed on a non-zero exit', async () => {
+    await expect(
+      installModules({ dir: root, tempRoot: root, packageManager: 'yarn', sfwPath: fakeSfw, env: { ...process.env, FAKE_EXIT: '1' } }),
+    ).rejects.toMatchObject({ code: 'install-failed', details: { code: 1 } });
+  });
+
+  it('refuses directories outside the temp dir', async () => {
+    const outside = await mkdtemp(path.join(tmpdir(), 'fiddle-outside-'));
+    try {
+      await expect(
+        installModules({ dir: outside, tempRoot: root, packageManager: 'npm', sfwPath: fakeSfw }),
+      ).rejects.toMatchObject({ code: ErrorCode.invalidArgument });
+      await expect(
+        installModules({ dir: path.join(root, '..'), tempRoot: root, packageManager: 'npm', sfwPath: fakeSfw }),
+      ).rejects.toMatchObject({ code: ErrorCode.invalidArgument });
+    } finally {
+      await rm(outside, { recursive: true, force: true });
+    }
+  });
+});

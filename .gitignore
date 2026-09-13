@@ -8,3 +8,4 @@ coverage/
 .eslintcache
 *.tsbuildinfo
 /test-results/
+.yarn/install-state.gz

@@ -1,0 +1,107 @@
+/* Toaster: a bottom-right stack, 8px apart. */
+.region {
+  position: fixed;
+  right: var(--lu-space-4);
+  bottom: var(--lu-space-4);
+  z-index: var(--lu-z-toast);
+  display: flex;
+  flex-direction: column-reverse;
+  gap: var(--lu-space-2);
+  width: 360px;
+  max-width: calc(100vw - 2 * var(--lu-space-4));
+  outline: none;
+}
+
+.region[data-focus-visible] {
+  outline: var(--lu-focus-outline);
+  outline-offset: 2px;
+  border-radius: var(--lu-radius-panel);
+}
+
+/* Toast: overlay material, padding 12 12 12 14, radius-panel squircle. Title 600, text ink-muted. */
+.toast {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  width: 100%;
+  padding: 12px 12px 12px 14px;
+  border-radius: var(--lu-radius-panel);
+  corner-shape: squircle;
+  background: var(--lu-material-overlay);
+  -webkit-backdrop-filter: var(--lu-blur-overlay);
+  backdrop-filter: var(--lu-blur-overlay);
+  box-shadow: var(--lu-shadow-overlay);
+  color: var(--lu-ink);
+  font: var(--lu-type-body);
+  letter-spacing: var(--lu-type-body-tracking);
+  outline: none;
+  animation: toast-in var(--lu-dur-base) var(--lu-ease);
+}
+
+.toast[data-focus-visible] {
+  outline: var(--lu-focus-outline);
+  outline-offset: 1px;
+}
+
+@keyframes toast-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.98);
+  }
+}
+
+.icon {
+  margin-top: 1px;
+  color: var(--lu-accent);
+}
+.toast[data-tone="success"] .icon {
+  color: var(--lu-success);
+}
+.toast[data-tone="warning"] .icon {
+  color: var(--lu-warning);
+}
+.toast[data-tone="error"] .icon {
+  color: var(--lu-spark);
+}
+
+.body {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  align-items: flex-start;
+  min-width: 0;
+}
+
+.title {
+  font-weight: 600;
+  letter-spacing: -0.005em;
+}
+
+.text {
+  color: var(--lu-ink-muted);
+}
+
+.action {
+  appearance: none;
+  margin-top: 6px;
+  padding: 0;
+  border: 0;
+  border-radius: var(--lu-radius-sm);
+  background: none;
+  color: var(--lu-accent);
+  font: var(--lu-type-label);
+  letter-spacing: var(--lu-type-label-tracking);
+  cursor: default;
+}
+.action[data-hovered] {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.action[data-focus-visible] {
+  outline: var(--lu-focus-outline);
+  outline-offset: 2px;
+}
+
+.close {
+  margin: -3px -4px 0 0;
+}

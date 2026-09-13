@@ -1,0 +1,74 @@
+module fiddle
+
+// Every interface is limited to the app's own main frame. In production that is
+// app://main. The only dev difference: an unpackaged app may also be served by
+// the Vite dev server on http://localhost (see CLAUDE.md, "Dev differences").
+validator MainFrame = AND(
+    is_main_frame is true
+    OR(
+        origin is "app://main"
+        AND(
+            is_packaged is false
+            protocol is "http:"
+            hostname is "localhost"
+        )
+    )
+)
+
+// Store values are defined as zod schemas in src/shared/stores.ts.
+// Import paths are relative to generated/_internal/<kind>/, where they are emitted.
+zod_reference AppState {
+    import = "../../../../shared/stores"
+    type = "AppState"
+    schema = "appStateSchema"
+}
+
+zod_reference WindowState {
+    import = "../../../../shared/stores"
+    type = "WindowState"
+    schema = "windowStateSchema"
+}
+
+subtype CommandId = string(
+    minLength: 1
+    maxLength: 100
+)
+
+structure AppInfo {
+    name: string
+    version: string
+    electronVersion: string
+}
+
+// Shared state and app-wide methods.
+[RendererAPI]
+[Validator=MainFrame]
+[ContextBridge]
+interface App {
+    // useAppStore() in the renderer; StateHub pushes it with updateAppStore.
+    [Store]
+    App() -> AppState
+
+    GetAppInfo() -> AppInfo
+}
+
+// Per-window state and methods. Bound with .for(webContents); handlers close
+// over the window's ID, so renderers never send one.
+[RendererAPI]
+[Validator=MainFrame]
+[ContextBridge]
+interface Window {
+    // useWindowStore() in the renderer; StateHub pushes it with updateWindowStore.
+    [Store]
+    Window() -> WindowState
+
+    // The renderer has read both stores and painted; main shows the window.
+    ReportReady()
+
+    // Runs a command from the registry in the context of this window.
+    RunCommand(id: CommandId)
+
+    // Commands whose handlers act on Monaco or view state are sent here.
+    [Event]
+    Command(id: CommandId)
+}

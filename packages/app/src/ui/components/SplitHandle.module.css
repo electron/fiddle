@@ -1,0 +1,55 @@
+/* An 8px hit area that overlaps its neighbours, with a 2px accent line shown on hover,
+   while dragging and on keyboard focus. */
+.handle {
+  position: relative;
+  z-index: 1;
+  flex: none;
+  outline: none;
+  touch-action: none;
+  -webkit-app-region: no-drag;
+}
+
+.handle[data-orientation="vertical"] {
+  align-self: stretch;
+  width: 8px;
+  margin: 0 -4px;
+  cursor: col-resize;
+}
+
+.handle[data-orientation="horizontal"] {
+  height: 8px;
+  margin: -4px 0;
+  cursor: row-resize;
+}
+
+.handle::after {
+  content: "";
+  position: absolute;
+  background: var(--lu-accent);
+  opacity: 0;
+  transition: opacity var(--lu-dur-fast) var(--lu-ease);
+}
+
+.handle[data-orientation="vertical"]::after {
+  top: 0;
+  bottom: 0;
+  left: 3px;
+  width: 2px;
+}
+
+.handle[data-orientation="horizontal"]::after {
+  left: 0;
+  right: 0;
+  top: 3px;
+  height: 2px;
+}
+
+.handle:hover::after,
+.handle[data-dragging]::after,
+.handle:focus-visible::after {
+  opacity: 1;
+}
+
+.handle:focus-visible {
+  outline: none;
+}
