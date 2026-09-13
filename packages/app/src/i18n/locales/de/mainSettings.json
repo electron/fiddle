@@ -9,5 +9,10 @@
   "openFailed": "{{path}} konnte nicht geöffnet werden: {{reason}}",
   "themeCopyName": "{{name}} (Kopie)",
   "lucentDark": "Lucent dunkel",
-  "lucentLight": "Lucent hell"
+  "lucentLight": "Lucent hell",
+  "importExecutionMessage": "Einstellungen importieren, die ändern, wie Fiddles ausgeführt werden?",
+  "importExecutionDetail": "Diese Einstellungen legen fest, woher Electron heruntergeladen wird und womit jede Ausführung startet. Importiere Einstellungen nur aus einer Quelle, der du vertraust.",
+  "importEmpty": "keine",
+  "importButton": "Importieren",
+  "cancel": "Abbrechen"
 }

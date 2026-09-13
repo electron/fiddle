@@ -155,7 +155,8 @@ Parallel agents share this checkout, and each owns only the files listed for its
   - Sentry and `update-electron-app` (installed only);
   - JSON-lines logs (`src/main/log.ts` is a console stub);
   - keybinding overrides.
-- **The literal-string lint rules are `warn`, not `error` (§9).** `i18next/no-literal-string` (`jsx-text-only`) covers JSX text in `src/{renderer,ui}`. `no-restricted-syntax` covers literal `label`, `title`, `message`, `detail` and `buttons` values in `src/main`. Tests, the design-system gallery and generated code are excluded. Switch both to `error` in `eslint.config.js` once the wave 2 slices land.
+- **The literal-string lint rules were `warn`, not `error` (§9).** `i18next/no-literal-string` (`jsx-text-only`) covers JSX text in `src/{renderer,ui}`. `no-restricted-syntax` covers literal `label`, `title`, `message`, `detail` and `buttons` values in `src/main`. Tests, the design-system gallery and generated code are excluded.
+  - **Fixed.** Both are `error` in `eslint.config.js`. They had no warnings left when switched, and an AST scan found no letter-bearing JSX text in `src/{renderer,ui}`. Note that the i18next rule skips everything under an all-caps variable (`const A = () => <div>Text</div>`), so name components in PascalCase.
 - **Gist share links (§17.17):** "Copy share link" copies `https://gist.github.com/<id>`. The https URL that redirects to `electron-fiddle://` needs a web endpoint. Swap it in `GitHubService.shareLink` (`src/main/github/service.ts`).
 - **Versions and run:** Installer extraction still runs on the main thread (core's default); a worker needs a second Vite main entry. Socket Firewall isn't bundled, so module installs run without it and say so. The version picker has type-ahead but no search field or "copy version".
 

@@ -120,16 +120,16 @@ export default defineConfig(
     rules: { 'no-restricted-syntax': ['error', ipcRendererBan] },
   },
   // REQUIREMENTS §9: no string literals in JSX text or in menu and dialog
-  // definitions. `warn` while the wave 2 slices land, then `error` (PROGRESS.md).
+  // definitions.
   {
     files: ['packages/app/src/{renderer,ui}/**/*.tsx'],
     ignores: ['**/*.test.tsx', 'packages/app/src/ui/gallery/**'],
     plugins: { i18next },
-    rules: { 'i18next/no-literal-string': ['warn', { mode: 'jsx-text-only' }] },
+    rules: { 'i18next/no-literal-string': ['error', { mode: 'jsx-text-only' }] },
   },
   {
     files: ['packages/app/src/main/**/*.ts'],
     ignores: ['**/*.test.ts', 'packages/app/src/main/test-driver/**'],
-    rules: { 'no-restricted-syntax': ['warn', ...menuDialogLiterals] },
+    rules: { 'no-restricted-syntax': ['error', ...menuDialogLiterals] },
   },
 );

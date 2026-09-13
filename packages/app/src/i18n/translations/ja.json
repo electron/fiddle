@@ -334,6 +334,11 @@
     "translation": "8f3ed6bef2c9",
     "reviewed": false
   },
+  "gists:signInClipboardHint": {
+    "source": "2919bc8524f5",
+    "translation": "b135cd0ecb3b",
+    "reviewed": false
+  },
   "gists:signInCreateToken": {
     "source": "519994e5b519",
     "translation": "413f769d4261",
@@ -1129,6 +1134,16 @@
     "translation": "e37f775400ff",
     "reviewed": false
   },
+  "mainDocuments:busyDetail": {
+    "source": "db5679650500",
+    "translation": "562c747a6beb",
+    "reviewed": false
+  },
+  "mainDocuments:busyMessage": {
+    "source": "0452c74c8e34",
+    "translation": "145611c2aad7",
+    "reviewed": false
+  },
   "mainDocuments:cancel": {
     "source": "19766ed6ccb2",
     "translation": "bca84ea5c65f",
@@ -1285,8 +1300,8 @@
     "reviewed": false
   },
   "mainDocuments:overwriteDetail": {
-    "source": "d2435b1577b9",
-    "translation": "ed9f6f3ec19b",
+    "source": "c6c3d7a3cec9",
+    "translation": "fd2ea7c9ee99",
     "reviewed": false
   },
   "mainDocuments:overwriteMessage": {
@@ -1580,8 +1595,8 @@
     "reviewed": false
   },
   "mainRun:envBlocked": {
-    "source": "23de80ecb01e",
-    "translation": "a1574dd3c952",
+    "source": "8831c8f6d99a",
+    "translation": "c3b1a2c27d30",
     "reviewed": false
   },
   "mainRun:envInvalid": {
@@ -1674,6 +1689,11 @@
     "translation": "18cde8225368",
     "reviewed": false
   },
+  "mainRun:scriptsRequired": {
+    "source": "71761bcd46f1",
+    "translation": "d1de5488072b",
+    "reviewed": false
+  },
   "mainRun:spawnFailed": {
     "source": "38e210360dbe",
     "translation": "3204c7621440",
@@ -1699,9 +1719,34 @@
     "translation": "1bda6d7b6e75",
     "reviewed": false
   },
+  "mainSettings:cancel": {
+    "source": "19766ed6ccb2",
+    "translation": "bca84ea5c65f",
+    "reviewed": false
+  },
   "mainSettings:exportSettingsTitle": {
     "source": "4431ea74c184",
     "translation": "efea2136bc64",
+    "reviewed": false
+  },
+  "mainSettings:importButton": {
+    "source": "2cff9baabf56",
+    "translation": "ad2c5e6338e6",
+    "reviewed": false
+  },
+  "mainSettings:importEmpty": {
+    "source": "140bedbf9c3f",
+    "translation": "868310e193d1",
+    "reviewed": false
+  },
+  "mainSettings:importExecutionDetail": {
+    "source": "3a809edb835d",
+    "translation": "590a52ada47e",
+    "reviewed": false
+  },
+  "mainSettings:importExecutionMessage": {
+    "source": "8f9a463c1572",
+    "translation": "d3c814032c25",
     "reviewed": false
   },
   "mainSettings:importSettingsTitle": {

@@ -15,6 +15,7 @@
   "signInDescription": "Zum Veröffentlichen von Gists brauchst du ein persönliches Zugriffstoken mit dem Bereich „gist“.",
   "signInTokenLabel": "Persönliches Zugriffstoken",
   "signInCreateToken": "Token auf GitHub erstellen",
+  "signInClipboardHint": "In deiner Zwischenablage ist ein Token. Lass das Feld leer, um dich damit anzumelden.",
   "signInRemember": "Token auf diesem Computer speichern",
   "signInRememberHelp": "Dieses System hat keinen Schlüsselbund, daher würde das Token als Klartext gespeichert. Lass die Option aus, dann bleibst du nur bis zum Beenden angemeldet.",
   "signInSessionOnly": "Dieses System kann das Token nicht sicher speichern, daher bleibst du nur bis zum Beenden angemeldet.",

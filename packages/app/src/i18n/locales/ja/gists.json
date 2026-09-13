@@ -15,6 +15,7 @@
   "signInDescription": "Gist を公開するには、gist スコープを持つ個人用アクセストークンが必要です。",
   "signInTokenLabel": "個人用アクセストークン",
   "signInCreateToken": "GitHub でトークンを作成",
+  "signInClipboardHint": "クリップボードにトークンがあります。空欄のままにすると、そのトークンでサインインします。",
   "signInRemember": "このコンピューターでトークンを記憶する",
   "signInRememberHelp": "このシステムにはキーリングがないため、トークンはプレーンテキストで保存されます。オフのままにすると、アプリを終了するまでの間だけサインインします。",
   "signInSessionOnly": "このシステムではトークンを安全に保存できないため、サインインはアプリを終了するまで有効です。",
