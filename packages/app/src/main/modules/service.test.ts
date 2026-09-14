@@ -30,6 +30,7 @@ const npm = { latestVersion: vi.fn(async (name: string) => (name === 'lodash' ? 
 const log = () => {};
 
 describe('ModulesService', () => {
+  // @feature modules.add
   it('adds a module at its latest version', async () => {
     const { hub, modules } = fakeHub({});
     const service = new ModulesService(hub, npm, log);
@@ -37,6 +38,7 @@ describe('ModulesService', () => {
     expect(modules()).toEqual({ lodash: '4.17.21' });
   });
 
+  // @feature modules.edit modules.normalize
   it('keeps an exact version and normalizes anything else', async () => {
     const { hub, modules } = fakeHub({ a: '1.0.0' });
     const service = new ModulesService(hub, npm, log);
@@ -55,12 +57,14 @@ describe('ModulesService', () => {
     await expect(service.add('nope', 'x', '1.0.0')).rejects.toMatchObject({ code: 'not-found' });
   });
 
+  // @feature modules.edit
   it('removes a module', () => {
     const { hub, modules } = fakeHub({ a: '1.0.0', b: '2.0.0' });
     new ModulesService(hub, npm, log).remove('w', 'a');
     expect(modules()).toEqual({ b: '2.0.0' });
   });
 
+  // @feature modules.normalize
   it('normalizes loaded non-semver versions to the latest', async () => {
     const { hub, modules } = fakeHub({ lodash: '*', exact: '1.0.0', range: '^1.0.0' });
     await new ModulesService(hub, npm, log).normalize('w');

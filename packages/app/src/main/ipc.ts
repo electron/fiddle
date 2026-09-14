@@ -7,6 +7,7 @@ import { app, type WebContents } from 'electron';
 
 import { App, implement, Window } from '../ipc/main';
 import { ErrorCode, FiddleError } from '../shared/errors';
+import { reportContextMenu } from './context-menu';
 import { bindDocumentsIpc } from './documents/ipc';
 import { bindGitHubIpc } from './github/ipc';
 import { bindModulesIpc } from './modules/ipc';
@@ -15,7 +16,9 @@ import { bindRunIpc } from './run/ipc';
 import type { Services } from './services';
 import { bindSettingsIpc } from './settings/ipc';
 import type { WindowInit } from './state-hub';
+import { titleBarDoubleClick } from './title-bar';
 import { bindOnboardingIpc } from './ux/ipc';
+import { getWindow } from './windows';
 
 /** What every `bind*Ipc` gets. */
 export interface IpcContext {
@@ -44,6 +47,8 @@ export function bindWindowIpc(ctx: IpcContext, init: WindowInit, onReady: () => 
     },
     ReportReady: () => onReady(),
     RunCommand: (id) => registry.run(id, { windowId }),
+    DoubleClickTitleBar: () => titleBarDoubleClick(getWindow(windowId)),
+    ReportContextMenu: (context) => reportContextMenu(windowId, context),
   });
 
   bindDocumentsIpc(ctx);

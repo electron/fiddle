@@ -95,6 +95,10 @@
   color: var(--lu-spark);
   font: var(--lu-type-pill);
 }
+.pill[data-tone="warning"] {
+  background: color-mix(in srgb, var(--lu-warning) 16%, transparent);
+  color: var(--lu-warning);
+}
 
 .dot {
   flex: none;

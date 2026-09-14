@@ -9,7 +9,7 @@ import { useTranslation } from 'react-i18next';
 import { acceleratorFor, commandIds, commands, type CommandId } from '../../../shared/commands';
 import {
   acceleratorFromKey,
-  effectiveAccelerator,
+  effectiveAccelerators,
   findConflicts,
   normalizeAccelerator,
 } from '../../../shared/settings';
@@ -60,11 +60,14 @@ export function KeybindingsSection() {
         />
         <ul className={styles.shortcuts}>
           {rows.map(({ id, label: name }) => {
-            const accelerator = effectiveAccelerator(id, platform, overrides);
+            // Every shortcut: some commands have two (F5 also runs the fiddle).
+            const accelerators = effectiveAccelerators(id, platform, overrides);
             const overridden = Object.hasOwn(overrides, id);
-            const others = accelerator
-              ? (conflicts.get(normalizeAccelerator(accelerator, platform)) ?? []).filter((other) => other !== id)
-              : [];
+            const others = [
+              ...new Set(
+                accelerators.flatMap((accelerator) => conflicts.get(normalizeAccelerator(accelerator, platform)) ?? []),
+              ),
+            ].filter((other) => other !== id);
             return (
               <li key={id} className={styles.shortcut} data-command={id}>
                 <div className={styles.shortcutText}>
@@ -89,8 +92,12 @@ export function KeybindingsSection() {
                       if (value) save(id, value);
                     }}
                   />
-                ) : accelerator ? (
-                  <Kbd keys={displayKeys(accelerator, platform)} />
+                ) : accelerators.length > 0 ? (
+                  <span className={styles.shortcutKeys}>
+                    {accelerators.map((accelerator) => (
+                      <Kbd key={accelerator} keys={displayKeys(accelerator, platform)} />
+                    ))}
+                  </span>
                 ) : (
                   <span className={styles.none}>{t('keybindings.none')}</span>
                 )}
@@ -103,7 +110,7 @@ export function KeybindingsSection() {
                     variant="ghost"
                     icon="minus"
                     label={t('keybindings.remove')}
-                    isDisabled={!accelerator}
+                    isDisabled={accelerators.length === 0}
                     onPress={() => save(id, null)}
                   />
                   <IconButton
@@ -140,6 +147,8 @@ function Recorder({ label, placeholder, platform, onDone }: RecorderProps) {
     <input
       ref={ref}
       readOnly
+      // The keybinding dispatcher leaves keys pressed here alone.
+      data-keybinding-recorder
       className={styles.recorder}
       aria-label={label}
       placeholder={placeholder}

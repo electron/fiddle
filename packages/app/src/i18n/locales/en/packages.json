@@ -54,5 +54,19 @@
   "list": {
     "message": "Packages in this fiddle",
     "description": "Accessible name of the list of npm packages the fiddle uses."
+  },
+  "searchVersions": {
+    "message": "Search versions",
+    "description": "Placeholder and accessible name of the search field at the top of a package's version menu.",
+    "maxLength": 24
+  },
+  "noVersions": {
+    "message": "No versions match",
+    "description": "Shown in a package's version menu when the search matches no version.",
+    "maxLength": 40
+  },
+  "moreVersions": {
+    "message": "Showing {{shown}} of {{total}}. Type to find the others.",
+    "description": "Note under a package's version menu when it lists only some matching versions. {{shown}} and {{total}} are numbers."
   }
 }

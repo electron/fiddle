@@ -71,6 +71,7 @@ const invalid = [
 ];
 
 describe('parseDeepLink', () => {
+  // @feature load.deep-link new.deep-link-revision
   it.each(valid)('parses %s', (url, link) => {
     expect(parseDeepLink(url)).toEqual({ ok: true, url, link });
   });

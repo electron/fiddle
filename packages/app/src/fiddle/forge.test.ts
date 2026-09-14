@@ -24,6 +24,7 @@ describe('forge transform', () => {
     }
   });
 
+  // @feature save.forge-license save.forge-makers save.forge-scripts
   it('adds Forge config to a generated package.json', () => {
     const pkg = transform({ name: 'app', author: 'me', modules: { lodash: '1.0.0' }, electronVersion: '30.0.0' });
     expect(pkg).toEqual({
@@ -58,6 +59,7 @@ describe('forge transform', () => {
     expect(JSON.parse(text).license).toBe('ISC');
   });
 
+  // @feature save.forge-local
   it('sets forceABI for nightlies from the injected ABI', () => {
     const pkg = transform({ name: 'x', electronVersion: '33.0.0-nightly.20240801' }, { nightlyAbi: ' 128\n' });
     expect(pkg.config.forge.electronRebuildConfig).toEqual({ forceABI: 128 });
@@ -65,6 +67,7 @@ describe('forge transform', () => {
     expect(transform({ name: 'x', electronVersion: '30.0.0' }, { nightlyAbi: 128 }).config.forge.electronRebuildConfig).toBeUndefined();
   });
 
+  // @feature save.forge-local
   it('uses plugin-local-electron for local builds', () => {
     const pkg = transform(
       { name: 'x', electronVersion: '0.0.0-local.1' },

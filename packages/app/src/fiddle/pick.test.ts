@@ -4,6 +4,7 @@ import { ErrorCode } from '../shared/errors';
 import { pickFiddleFiles } from './pick';
 
 describe('pickFiddleFiles', () => {
+  // @feature load.gist-files
   it('keeps supported files, skips the rest, and lists unknown ones', () => {
     const result = pickFiddleFiles({
       'main.js': 'main',
@@ -21,11 +22,13 @@ describe('pickFiddleFiles', () => {
     expect(result.modules).toEqual({});
   });
 
+  // @feature files.add-main
   it('adds a main entry, but not next to a differently-cased one', () => {
     expect(pickFiddleFiles({ 'index.html': '<p/>' }).files).toEqual({ 'index.html': '<p/>', 'main.js': '// Empty' });
     expect(pickFiddleFiles({ 'Main.js': 'mine' }).files).toEqual({ 'Main.js': 'mine' });
   });
 
+  // @feature load.gist-files
   it.each<Record<string, string>>([{}, { 'README.md': 'x', 'package.json': '{}' }, { 'package-lock.json': '{}' }])(
     'throws when there are no supported files: %j',
     (map) => {
@@ -35,6 +38,7 @@ describe('pickFiddleFiles', () => {
     },
   );
 
+  // @feature load.gist-modules load.gist-version
   it('reads modules and the Electron version from package.json', () => {
     const packageJson = JSON.stringify({ dependencies: { lodash: '4.17.21' }, devDependencies: { electron: '^30.0.0' } });
     const result = pickFiddleFiles({ 'main.js': 'x', 'package.json': packageJson }, { previousModules: { old: '1.0.0' } });
@@ -44,6 +48,7 @@ describe('pickFiddleFiles', () => {
     expect(result.skipped).toEqual([]);
   });
 
+  // @feature load.gist-modules
   it('keeps the previous modules without a valid package.json', () => {
     const previousModules = { old: '1.0.0' };
     expect(pickFiddleFiles({ 'main.js': 'x' }, { previousModules }).modules).toEqual(previousModules);

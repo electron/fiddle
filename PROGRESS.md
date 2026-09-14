@@ -5,16 +5,17 @@
 | # | Milestone | Status |
 |---|---|---|
 | 0 | Branch set up, spec and design assets in place | done |
-| 1 | Scaffold: Yarn workspaces, Forge 8, Vite, React, TypeScript, Vitest, ESLint, EIPC wired, app window per Lucent | in progress |
-| 1 | `packages/core`: fiddle-core port with its tests green, plus additive improvements | in progress |
-| 1 | Design system: tokens, fonts, icons, components, gallery | in progress |
-| 2 | Main foundation: StateHub, stores, persistence, command registry, menus, protocol, security | todo |
-| 2 | Fiddle logic: model, validation, templates, examples, gists, modules, Forge export, trust, deep links | todo |
-| 2 | App shell to Lucent window anatomy: title bar, sidebar, sheet, tabs, Monaco, console, status bar | todo |
-| 2 | Test mode, e2e driver, `yarn driver`, fixture server | todo |
-| 3 | Features: run, versions, bisect, gists, settings, themes, modules, deep links, palette, session restore, onboarding | todo |
-| 4 | i18n, accessibility, headless CLI, migration, Sentry, updates, packaging, CI | todo |
-| 5 | Verification: acceptance checklist, feature coverage, critique passes | todo |
+| 1 | Scaffold: Yarn workspaces, Forge 8, Vite, React, TypeScript, Vitest, ESLint, EIPC wired, app window per Lucent | done |
+| 1 | `packages/core`: fiddle-core port with its tests green, plus additive improvements and review fixes | done |
+| 1 | Design system: tokens, fonts, icons, components, gallery | done |
+| 1 | Fiddle logic: model, validation, templates, examples, gists, modules, Forge export, trust, deep links | done |
+| 2 | Main foundation: StateHub, stores, persistence, command registry, menus, protocol, security | done |
+| 2 | App shell to Lucent window anatomy: title bar, sidebar, sheet, tabs, Monaco, console, status bar | done |
+| 2 | Test mode, e2e driver, `yarn driver`, fixture server | done |
+| 3 | Features: run, versions, bisect, gists, settings, themes, modules, deep links, palette, session restore, onboarding | done |
+| 4 | i18n (de, ja, pseudo-locales), headless CLI, migration, Sentry, updates, packaging, CI | done |
+| 5 | Verification: Lucent acceptance checklist (both appearances), security and architecture reviews and their fixes | done |
+| 5 | Feature-coverage audit against §17 | in progress |
 
 ## Wave 2: ownership and contracts
 
@@ -66,7 +67,7 @@ Parallel agents share this checkout, and each owns only the files listed for its
 - Fields:
   - `view: 'editor' | 'settings'`
   - `fiddle: { source, name, versionRef, modules: Record<string, string>, files: { name, visible }[], activeFile, fiddleRev, dirty }`
-  - `layout: { sidebar: boolean, split: string | null, consoleHeight: number, sidebarWidth: number }`
+  - `layout: { sidebar: boolean, split: string | null, consoleHeight: number, sidebarWidth: number, consoleVisible: boolean }`
 - Methods:
   - `GetFiles() -> Record<name, text>`
   - `EditFile(name, text, fiddleRev)`
@@ -75,6 +76,11 @@ Parallel agents share this checkout, and each owns only the files listed for its
   - `SetLayout`, `SetView`
 
 ## Decisions
+
+- **Editor layout follows the design.** It's one editor with tabs, plus an opt-in two-pane split (Lucent "Behaviour"), not one editor per visible file as §17.2 describes. Pop-out windows are deferred: each window binds its IPC once, so a second window can't share a `windowId` without main-side changes.
+- **`.bak` fallback.** `.bak` is only read when the main file exists but can't be parsed. A deleted `settings.json` means defaults, so deleting it is a reliable reset.
+- **Lock staleness.** On the same host, a lock is stale only when its PID is dead. Locks from other hosts go by mtime age, and holders refresh the mtime every staleMs/3.
+- **Migration reader page** loads from `resources/static`, outside the asar, because it must run on a `file://` origin.
 
 - **Assist row:** the design includes an AI "Describe a change" row. AI is parked (§16), so the row isn't built. Its tokens stay in the token file.
 - **Open design questions** (welcome and empty states, settings page layout, Windows and Linux title bars, narrow windows) are decided with the simplest layout the design system supports.
@@ -103,13 +109,29 @@ Parallel agents share this checkout, and each owns only the files listed for its
   - The script is plain `.mjs`, so it runs on any Node. The `.ts` tools need type stripping, which isn't on by default in the Node 22.17 pinned in `.nvmrc`.
 - **Sentry release name.** It's `Electron-Fiddle@<package.json version>`, with no `v` (`@sentry/electron`'s default). The release workflow uses the same name.
 
-- **Run and stop shortcut (Versions and run).** Lucent says ⌘R runs and stops. `run.toggle` is CmdOrCtrl+R, with F5 as a hidden second menu accelerator, and Reload moved to CmdOrCtrl+Shift+R.
-- **Console default (Versions and run).** Lucent's default layout wins over §17.7: the console is visible at 160px. A run, package or make reopens it if it was dragged below 96px.
+- **Run and stop shortcut (Versions and run).** Lucent says ⌘R runs and stops. `run.toggle` is CmdOrCtrl+R, with F5 as its second default keybinding (see "Menus, context menus and keybindings"), and Reload moved to CmdOrCtrl+Shift+R.
+- **Console default (Versions and run).** Lucent's default layout wins over §17.7: the console is visible at 160px. Its visibility is `Window.layout.consoleVisible` (default true, so older sessions restore it shown). View > Toggle console flips it, and dragging the splitter below 48px (or Home on it) closes it. A run, package or make shows it again, at 160px if it was below 96px.
+- **Run states (§17.6).** `Window.run.status` goes ready → checking (trust and pre-run checks) → downloading → unzipping (core's `downloaded`/`installing` states, `installRunStatus` in `run/logic.ts`) → installing (modules) → starting → running. Busy states show a spinner and are announced; Run keeps its 108px floor, and the two long labels (downloading, installing modules) share the 150px size.
+- **New fiddle, new console (§17.4).** `RunService` watches the Window store and clears the window's output buffer and runtime errors when the fiddle's identity (name and source) changes together with `fiddleRev`, then logs the Ready line. So Save As (identity only) and adding a file (`fiddleRev` only) keep the console.
+- **Run `package.json` (§17.3).** The temp dir's `package.json` gets `devDependencies.electron` (or `electron-nightly`). With modules it's written after the install, because `npm install -S` and `yarn add` would otherwise install Electron too. Local builds get none.
+- **Editor diagnostics (§17.2).** Tab badges, sidebar pills and pane headers count runtime errors plus Monaco's own error and warning markers (`renderer/editor/diagnostics.ts`). A file with errors shows its error count in spark; one with only warnings shows its warning count in the warning colour.
+- **Split panes (§17.2).** The divider is a `SplitHandle` (drag, arrow keys, Home/End, Enter or double-click to reset). The ratio is per window and not saved.
+- **Notification list (§10).** The status bar's bell keeps every toast this window showed (newest first, at most 50, `renderer/shell/notifications.ts`), with a count of the ones not seen in the list. Actions stay usable there.
+- **macOS title bar double-click (§17.1).** The renderer reports double-clicks on empty title bar space (`Window.DoubleClickTitleBar`), and main applies `AppleActionOnDoubleClick` (Minimize, Maximize, or None). Not verified on a Mac: this container is Linux, and if Chromium treats the drag region as the caption, the OS handles it and the renderer never sees the event.
 - **Fiddle userData (Versions and run).** Each run passes `--user-data-dir=<run dir>/user-data`, so the fiddle's userData is deleted with the run dir. "Keep user data dirs" drops the flag.
 - **Runtime errors (Versions and run).** Runs always set `ELECTRON_ENABLE_LOGGING`, and Chromium's CONSOLE lines become Renderer rows. Chromium's other log lines only show with advanced logging on. CONSOLE lines carry only a line number, so a renderer error has no column unless its message includes a stack frame.
 - **Trust for package, make and auto-bisect (Versions and run).** All go through `ensureTrusted`, which returns the approved fiddle; callers run that snapshot, never the window's current fiddle. Every run checks trust, auto-bisect steps included, so a fiddle swapped in mid-bisect asks again. The approval lists the modules with install scripts (npm registry `hasInstallScript`; every module if the registry can't say). Untrusted fiddles install with scripts off unless the approval allowed them. Package and make ask again when their modules need scripts and the approval left them off, and refuse if the user still doesn't allow them.
 - **Security review fixes.** A window that's running, bisecting, packaging or making refuses a new fiddle ("Stop the fiddle first"); deep links open in a new window instead. `state.json` `untrustedFolders` keeps a saved untrusted fiddle's origin per folder until it's approved. The token on the clipboard never reaches the renderer: sign-in with an empty field uses it (`SignInFromClipboard`), and the renderer only learns that one is there. Custom mirrors are https only. Importing settings that change flags, variables or mirrors asks first. `NODE_OPTIONS` and `ELECTRON_RUN_AS_NODE` can't be set. `GitHubClient` allows plain-http loopback only with `allowLoopbackHttp` (test mode).
 - **Release snapshot (Versions and run).** `static/releases.json` is bundled into main as a `?raw` string and used until the cache has a fresher list.
+- **Version picker and selection (§17.8, §17.4, §17.10):**
+  - **Groups versus newest first.** The design's groups stay while nothing is typed (local builds, Stable, Pre-release, each newest first). Typing into the menu's search field drops the groups for one flat list, local builds first and then releases newest first (nightly < alpha < beta < stable within an x.y.z). The ordering and filtering live in `pickerGroups` (`main/versions/releases.ts`).
+  - **Rows.** Each row shows the VersionManager's install-state label after the version, with the design's hint on the right. Versions this computer can't run are listed but disabled. "Copy version number" is the last menu item, and main copies the text.
+  - **Selection.** `main/versions/select.ts` (`VersionSelector`) runs `SetVersion`, remembers the user's pick as `lastVersion` in `state.json`, and downloads the version if needed.
+  - **New windows** start with the last-used version while it's usable, otherwise the latest stable release.
+  - **Fallback.** A window that loads or restores an unknown release, a release this computer can't run, or a missing local build falls back to the first usable version in picker order: available local builds, then the visible releases newest first. A failed download falls back only to a version that's already downloaded, since another download would likely fail too. Without one, the version stays and the error shows.
+  - **Notices and retry.** Notices reach the window as `Window.versionNotice`, and the picker shows each as an error toast. The picker's `online` listener calls `RetryDownload`.
+  - **Docs examples** go through the same `select` path. If the example's channel is hidden, the user is asked to show it first; declining keeps the version.
+  - **Module versions** search every published version, but the menu renders at most 150 matches, with a note when there are more.
 - **Platform slice** (`main/{platform,updates,crash,migration}/**`, `main/log.ts`, `renderer/features/about/**`):
   - **Startup order** in `main/index.ts` (the composition root; see CLAUDE.md): Squirrel events first, then the headless CLI, the test harness, Sentry, and last the single-instance lock (all before `ready`). After `ready` come the log file, then `runMigration()`, which must finish before any store is created (`loadSettings`, `createServices`…). Every command is registered before `installMenu`, and `startPlatform()` runs just before the windows.
   - **One-time import** (§6): `importedFrom: { version, at }` in state.json, where `version` is the app version that ran the import (the old app's version isn't recorded anywhere). Files are created only if absent, so an interrupted import can run again. The new files are sparse `settings.json`, `tourDone` in `state.json`, `local-builds.json` (`{ schemaVersion: 1, builds: [{ id, name, path, addedAt }] }`, the Versions slice's to read), `credentials/github` (through `CredentialStore`) and `themes/<old file name>.json` (Monaco `editor` kept, `common: {}`). Old Electron versions are copied into `<cache>/electron/<version>` in the background after the first launch; zips are extracted by core's per-version `Installer`. `static/import-local-storage.html` is the only file:// page (documented in `security.ts`).
@@ -140,6 +162,23 @@ Parallel agents share this checkout, and each owns only the files listed for its
   - Quit can't hang. `app.quit()` after the unsaved-changes prompt, or after the flush on quit, runs on a later turn. Called inside a quit event's own dispatch, Electron drops it.
   - `will-quit` holds the quit only while a store has pending writes.
   - `cachePaths()` defaults to `getCacheRoot()`. Before, the app's Versions service used the OS cache even in test mode, so e2e runs installed Electron into `~/.cache/Electron Fiddle`. Then `run.e2e.ts` failed once a dev run had already cached the version.
+- **Language (§9).** Changing it offers a relaunch (a toast). Before `ready`, `--lang` comes straight from settings.json (`main/platform/locale.ts`). The renderer loads Monaco's `nls` bundle (de, ja) before it imports `App`, and with it Monaco (`src/i18n/monaco-nls.ts`, `renderer/main.tsx`).
+- **High contrast (§10).**
+  - Built-in themes `lucent-hc-dark` and `lucent-hc-light`. OS high contrast (`nativeTheme.shouldUseHighContrastColors`, `App.highContrast`) shows Lucent the same way, never a custom theme.
+  - Both set `data-contrast="high"` (token overrides in `lucent-extensions.css`) and a `hc-black` or `hc-light` Monaco base. `forced-colors: active` maps the tokens to system colours.
+- **Deep links (§8, §17.4).** A link that arrives while a prompt is pending waits its turn instead of being dropped. Queued links and restored gist windows wait for `GitHubService.whenReady()` (the token restore and check). `open-url` turns https gist URLs into gist links. A jump list folder (`--fiddle-open-folder`) also opens at cold start.
+- **Theme files (§5)** carry `schemaVersion: 1` and are written with `writeAtomic`, never over an existing file. "Create from current" on a built-in theme writes the rendered Lucent Monaco theme and token values (the renderer sends a `ThemeSnapshot`).
+- **CLI downloads (§7)** use `net.fetch`: core's `Installer` passes a `downloader` option to `@electron/get`, and the CLI gives it `fetchDownloader(net.fetch)` (`main/cli/downloader.ts`). The app's own downloads still use `@electron/get`'s default.
+- **Menus, context menus and keybindings (§3, §10, §17.14):**
+  - **Dispatcher.** `renderer/features/commands/keybindings.ts` runs every keybinding of the focused window by command ID, after `App.settings.keybindings`. It listens in the capture phase, so Monaco only sees keys the app doesn't use, and `preventDefault`s what it handles, so the native menu doesn't run it again. The menu still registers each command's first accelerator, for keys pressed where no page has focus. Undo, redo and select all keep their native keys.
+  - **Several defaults.** A command's `accelerator` may be a list. Menus show the first; the dispatcher handles all of them: `run.toggle` is CmdOrCtrl+R and F5, `app.commandPalette` CmdOrCtrl+Shift+P and F1. An override replaces the whole list, and conflict detection covers every binding.
+  - **Contexts.** A command's `context` (`editor`, `console` or `running`) limits its defaults to there, and only the dispatcher handles them: Clear console is CmdOrCtrl+K in the console (so Monaco keeps its CmdOrCtrl+K chords), go to definition F12 and find references Shift+F12 in the editor. Scoped overrides are `keybindings` keys `<commandId>@<context>`, which add a binding there (`null` adds none); the settings UI edits unscoped ones only. Conflicts count only bindings that can apply together: the editor and the console never have focus together, and `running` overlaps both.
+  - **Tab-focus mode (§10)** is `editor.toggleTabFocus`, Ctrl+Shift+M on every platform: CmdOrCtrl+M is Minimize, and Ctrl+Shift+M is Monaco's own macOS binding. Monaco's CmdOrCtrl+M binding is removed. It sets Monaco's `tabFocusMode` on every editor, and the status bar says "Tab moves focus" in a live region while it's on.
+  - **Context menus** are native (`main/context-menu.ts`); Monaco's own is off. The renderer reports what was right-clicked (`Window.ReportContextMenu`) during the DOM event, so it reaches main before Chromium's `context-menu` event on the same channel.
+  - **Edit menu.** Undo, redo and select all are commands. The window sends them to the focused Monaco editor, or runs the editing command where its focus is. Another page with focus (DevTools), or a native dialog on macOS (`Menu.sendActionToFirstResponder`), gets them as the roles would.
+  - **Clear console** is `console.clear`, forwarded to the window, which calls `Run.ClearOutput`.
+  - **Zoom** is the native roles (Actual size, Zoom in, Zoom out) in the View menu.
+  - `FIDDLE_DEV_MENU_DUMP=1 yarn start:xvfb` logs the application menu and each context menu's template.
 ## Deferred
 
 - **Electron's install script doesn't run** with `enableScripts: false`, despite `dependenciesMeta.electron.built`. After a fresh install, run `node node_modules/electron/install.js`. Needs a proper allowlist fix in `.yarnrc.yml` or a postinstall.
@@ -154,11 +193,15 @@ Parallel agents share this checkout, and each owns only the files listed for its
 - **Not wired yet:**
   - Sentry and `update-electron-app` (installed only);
   - JSON-lines logs (`src/main/log.ts` is a console stub);
-  - keybinding overrides.
+  - keybinding overrides. **Done:** menus, context menus, the palette and the renderer's dispatcher all follow them.
 - **The literal-string lint rules were `warn`, not `error` (§9).** `i18next/no-literal-string` (`jsx-text-only`) covers JSX text in `src/{renderer,ui}`. `no-restricted-syntax` covers literal `label`, `title`, `message`, `detail` and `buttons` values in `src/main`. Tests, the design-system gallery and generated code are excluded.
   - **Fixed.** Both are `error` in `eslint.config.js`. They had no warnings left when switched, and an AST scan found no letter-bearing JSX text in `src/{renderer,ui}`. Note that the i18next rule skips everything under an all-caps variable (`const A = () => <div>Text</div>`), so name components in PascalCase.
 - **Gist share links (§17.17):** "Copy share link" copies `https://gist.github.com/<id>`. The https URL that redirects to `electron-fiddle://` needs a web endpoint. Swap it in `GitHubService.shareLink` (`src/main/github/service.ts`).
-- **Versions and run:** Installer extraction still runs on the main thread (core's default); a worker needs a second Vite main entry. Socket Firewall isn't bundled, so module installs run without it and say so. The version picker has type-ahead but no search field or "copy version".
+- **Versions and run:** Installer extraction still runs on the main thread (core's default); a worker needs a second Vite main entry.
+- **Socket Firewall (§2, §17.6): fixed.** `sfw@2.0.6` is pinned in `packages/app`. `forge.config.ts` ships `sfw/dist/sfw.mjs` at `<resources>/sfw.mjs` (outside the asar), and `src/main/platform/sfw.ts` finds it in dev, test and packaged builds. With the setting on (default), module installs run as `node <sfw.mjs> npm|yarn …`. On first use sfw downloads the Socket Firewall binary from GitHub releases and checks its checksum.
+- **Beta update feed (§13): the owner must set it up.** `BETA_UPDATE_FEED_URL_PLACEHOLDER` in `src/main/updates/index.ts` points nowhere yet. Needed:
+  - a `StaticStorage` feed for `update-electron-app`, one `<platform>/<arch>/` folder per build (`RELEASES.json` and zips on macOS, `RELEASES` and nupkgs on Windows), that each prerelease publishes to; then the real URL in that constant;
+  - `update-policy.json` (`{ blockedVersions, minVersion, message }`) on electron/fiddle's `main` branch, the kill switch the app fetches at startup.
 
 ## Wave 3: integration checklist
 
@@ -168,7 +211,7 @@ Collected from the wave 2 reports. The orchestrator ticks these off.
 - [ ] **`contributors.json` snapshot** exists and is committed. The About panel and credits read it.
 - [ ] **Versions and run to Documents:**
   - Documents gets `versions` in `initDocuments` (from `createServices`) for the default version, template majors, usable versions and Forge options, including a local build's path. **Done.**
-  - Clear the console when `fiddle.fiddleRev` changes.
+  - Clear the console when `fiddle.fiddleRev` changes. **Done** in `RunService`, keyed on the fiddle's identity (see "New fiddle, new console").
   - Use `ensureTrusted(windowId, op, { packagesWithInstallScripts })`. **Done:** `ensureTrusted` looks them up itself; package and make pass them with `requireScripts`.
 - [x] **Gists to Documents:** `markPublished` and `markGistDeleted` go through `github/documents-bridge.ts`. Documents gets the `GitHubService` in `initDocuments`, so restored and deep-linked private gists load with the user's token.
 - [x] **App UX to Documents:** modules go through `setFiddleModules`. Onboarding lives in `state.json` through `getStateStore()`.
@@ -179,8 +222,8 @@ Collected from the wave 2 reports. The orchestrator ticks these off.
 - [x] **Tour anchors:** `data-tour` on VersionPicker, RunButton, ConsolePane and PublishButton.
 - [x] **`getCacheRoot()`:** uses the OS cache dir (env-paths), not `app.getPath('cache')`.
 - [ ] **Crash-reporting disclosure on first run** (§14).
-- [ ] **Private gists opened from deep links** wait for GitHub sign-in (§17.4).
-- [ ] **Drop a gist URL on the dock** (macOS).
+- [ ] **Private gists opened from deep links** wait for GitHub sign-in (§17.4). **Done:** they wait for `GitHubService.whenReady()`.
+- [ ] **Drop a gist URL on the dock** (macOS). **Done:** `open-url` accepts https gist URLs.
 - [ ] **`parseEnvEntries` reports every blocked name.** Core drops all `LD_*` and `DYLD_*` variables, but parsing only flags `LD_PRELOAD` and `DYLD_*`.
 - [ ] **Headless CLI (§7).**
 - [ ] **E2E specs** for each feature, plus the feature-coverage IDs.

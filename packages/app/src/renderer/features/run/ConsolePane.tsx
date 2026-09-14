@@ -3,17 +3,19 @@
  * with the title, a process filter, a text filter, the Running badge and a
  * clear button, then the lines. Rows are 60 / 70 / rest: time, process and
  * message. Error rows are spark on spark-soft, and their location is a link
- * that reveals it in the editor. Auto-scrolls while at the bottom.
+ * that reveals it in the editor. http(s) URLs are links that ask before they
+ * open in the browser. Auto-scrolls while at the bottom.
  */
-import { useLayoutEffect, useRef, useState, type KeyboardEvent } from 'react';
+import { Fragment, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { useFormat } from '../../../i18n/renderer';
-import { runApi } from '../../../ipc/renderer';
+import { runApi, windowApi } from '../../../ipc/renderer';
 import type { OutputLine } from '../../../shared/stores';
 import { Button, IconButton, SegmentedControl, StatusPill, TextField, Tooltip } from '../../../ui';
 import { revealLocation } from '../../editor/runtime-errors';
 import styles from './Console.module.css';
+import { linkify } from './linkify';
 import { useConsoleLines, useRunState } from './use-run';
 
 type ProcessFilter = 'all' | 'main' | 'renderer';
@@ -39,6 +41,15 @@ export function ConsolePane() {
   const [query, setQuery] = useState('');
   const { formatDate } = useFormat();
 
+  // The `console.clear` command: its menu item, shortcut and palette entry.
+  useEffect(
+    () =>
+      windowApi.onCommand((id) => {
+        if (id === 'console.clear') clear();
+      }),
+    [],
+  );
+
   const needle = query.trim().toLowerCase();
   const shown = lines.filter(
     (line) =>
@@ -53,16 +64,8 @@ export function ConsolePane() {
     if (el && atBottom.current) el.scrollTop = el.scrollHeight;
   }, [shown.length, lines]);
 
-  const onKeyDown = (event: KeyboardEvent) => {
-    // Clear while the console has focus: ⌘K / Ctrl+K.
-    if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === 'k') {
-      event.preventDefault();
-      clear();
-    }
-  };
-
   return (
-    <section className={styles.pane} aria-label={t('console')} onKeyDown={onKeyDown} data-tour="console">
+    <section className={styles.pane} aria-label={t('console')} data-tour="console">
       <div className={styles.bar}>
         <h2 className={styles.title}>{t('console')}</h2>
         <SegmentedControl
@@ -107,13 +110,30 @@ export function ConsolePane() {
             <span className={styles.time}>{formatDate(line.time, TIME)}</span>
             <span className={styles.process}>{t(processKey[line.process])}</span>
             <span className={styles.message}>
-              {line.text}
+              <LinkedText text={line.text} />
               {line.location && <Location location={line.location} />}
             </span>
           </li>
         ))}
       </ol>
     </section>
+  );
+}
+
+/**
+ * A line with its http(s) URLs as links. A link opens as a new window, which
+ * main turns into "Open this link in your browser?" (`openExternalLink`).
+ */
+function LinkedText({ text }: { text: string }) {
+  if (!text.includes('://')) return text;
+  return linkify(text).map((segment, index) =>
+    segment.url ? (
+      <a key={index} href={segment.url} target="_blank" rel="noreferrer" className={styles.link}>
+        {segment.text}
+      </a>
+    ) : (
+      <Fragment key={index}>{segment.text}</Fragment>
+    ),
   );
 }
 

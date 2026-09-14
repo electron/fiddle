@@ -50,6 +50,8 @@ export default {
   "editorFontSize.title": "フォントサイズ",
   "editorFontSize.description": "ピクセル単位で 8～40 の値を指定します。空欄にすると既定値を使用します。",
   "editorFontSize.invalid": "8～40 の整数を入力してください。",
+  "editorFont.reloadHint": "フォントの変更は、ウィンドウの再読み込み後に反映されます。",
+  "editorFont.reload": "ウィンドウを再読み込み",
   "electronFlags.title": "Electron のフラグ",
   "electronFlags.description": "Fiddle の実行時に Electron に渡されます。",
   "environmentVariables.title": "環境変数",
@@ -126,5 +128,14 @@ export default {
   "notice.corrupt.description": "Fiddle は破損したファイルを退避し、バックアップまたは既定値を使用しています。",
   "notice.newer.title": "{{file}} は新しいバージョンの Fiddle で作成されています",
   "notice.newer.description": "Fiddle をアップデートするまで、変更はこのファイルに保存されません。",
-  "notice.dismiss": "閉じる"
+  "notice.dismiss": "閉じる",
+  "theme.highContrastDark": "Lucent ハイコントラスト ダーク",
+  "theme.highContrastLight": "Lucent ハイコントラスト ライト",
+  "locale.relaunchTitle": "言語の切り替えを完了するには再起動してください",
+  "locale.relaunchDescription": "メニューとアプリにはすでに反映されています。エディターとシステムのテキストは再起動後に切り替わります。",
+  "locale.relaunch": "再起動",
+  "privacyReset.title": "プライバシー権限をリセット",
+  "privacyReset.description": "Fiddle は Electron Fiddle として実行されるため、Fiddle に許可したカメラやマイクなどの権限はアプリのものになります。これらをすべて取り消します。",
+  "privacyReset.button": "リセット…",
+  "privacyReset.done": "プライバシー権限をリセットしました"
 } as const;

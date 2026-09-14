@@ -5,15 +5,18 @@ import {
   changedExecutionSettings,
   defaultSettings,
   effectiveAccelerator,
+  effectiveAccelerators,
   findConflicts,
   fromSparse,
   isHttpsUrl,
   isModified,
   isSafeTokenValue,
   localePreference,
+  matchKeybinding,
   monacoThemeSchema,
   normalizeAccelerator,
   parseSetting,
+  resolveKeybindings,
   resolveMirror,
   resolveScreenReader,
   sameValue,
@@ -21,8 +24,10 @@ import {
   toSparse,
   type KeyInput,
 } from './settings';
+import type { KeyContext } from './commands';
 
 describe('execution settings', () => {
+  // @feature versions.mirror-custom
   it('accepts only https mirrors', () => {
     expect(isHttpsUrl('https://example.com/electron/')).toBe(true);
     expect(isHttpsUrl('http://example.com/electron/')).toBe(false);
@@ -50,6 +55,7 @@ describe('execution settings', () => {
 });
 
 describe('schema and defaults', () => {
+  // @feature settings.follow-system settings.channels settings.show-not-downloaded settings.show-obsolete settings.package-manager settings.socket-firewall settings.publish-revision settings.gist-history settings.gist-visibility settings.mirror
   it('has a default for every setting', () => {
     expect(settingsSchema.parse({})).toEqual(defaultSettings);
     expect(defaultSettings).toMatchObject({
@@ -94,6 +100,7 @@ describe('schema and defaults', () => {
     expect(toSparse(defaultSettings)).toEqual({});
   });
 
+  // @feature new.settings-reset
   it('marks modified values structurally', () => {
     expect(isModified({ ...defaultSettings, channels: ['stable', 'beta'] }, 'channels')).toBe(false);
     expect(isModified({ ...defaultSettings, channels: ['stable'] }, 'channels')).toBe(true);
@@ -103,6 +110,7 @@ describe('schema and defaults', () => {
 });
 
 describe('resolvers', () => {
+  // @feature versions.mirror-default versions.mirror-china versions.mirror-custom settings.mirror
   it('picks the mirror', () => {
     const base = { mirror: 'auto' as const, customMirrorElectron: '', customMirrorNightly: '' };
     expect(resolveMirror(base, ['zh-CN']).electron).toContain('npmmirror');
@@ -147,6 +155,64 @@ describe('keybindings', () => {
     expect(findConflicts('linux', { 'app.newWindow': 'Ctrl+N', 'file.newFiddle': null }, ids).size).toBe(0);
   });
 
+  it('has no conflicts between the defaults', () => {
+    for (const platform of ['darwin', 'win32', 'linux'] as const) expect(findConflicts(platform, {}).size).toBe(0);
+  });
+
+  // @feature keys.run
+  it('counts second defaults such as F5 in conflicts', () => {
+    expect(effectiveAccelerators('run.toggle', 'linux', {})).toEqual(['CmdOrCtrl+R', 'F5']);
+    expect(effectiveAccelerator('run.toggle', 'linux', {})).toBe('CmdOrCtrl+R');
+    expect([...findConflicts('linux', { 'file.save': 'F5' })]).toEqual([['f5', ['file.save', 'run.toggle']]]);
+    // An override replaces every default, so F5 goes with it.
+    expect(effectiveAccelerators('run.toggle', 'linux', { 'run.toggle': 'Ctrl+Enter' })).toEqual(['Ctrl+Enter']);
+    expect(findConflicts('linux', { 'file.save': 'F5', 'run.toggle': 'CmdOrCtrl+R' }).size).toBe(0);
+    // F1 opens the palette, in the editor too, where Monaco used it for its own.
+    expect(findConflicts('linux', { 'help.showTour': 'F1' }).get('f1')).toEqual(['app.commandPalette', 'help.showTour']);
+  });
+
+  // @feature keys.clear-console
+  it('only counts conflicts where both bindings can apply', () => {
+    // Clear console's CmdOrCtrl+K only applies in the console.
+    expect(findConflicts('linux', { 'run.toggle@editor': 'CmdOrCtrl+K' }).size).toBe(0);
+    expect([...findConflicts('linux', { 'file.save': 'CmdOrCtrl+K' })]).toEqual([
+      ['Ctrl+K', ['file.save', 'console.clear']],
+    ]);
+    // A fiddle runs whatever has focus.
+    expect(findConflicts('linux', { 'run.toggle@running': 'CmdOrCtrl+K' }).size).toBe(1);
+  });
+
+  it('resolves overrides scoped to a context', () => {
+    const bindings = resolveKeybindings(
+      'linux',
+      {
+        'run.toggle@editor': 'Ctrl+Enter',
+        'run.toggle@nowhere': 'Ctrl+J',
+        'unknown.command@editor': 'Ctrl+J',
+        'console.clear@editor': null,
+      },
+      ['run.toggle', 'console.clear'],
+    );
+    expect(bindings).toEqual([
+      { id: 'run.toggle', accelerator: 'CmdOrCtrl+R' },
+      { id: 'run.toggle', accelerator: 'F5' },
+      { id: 'console.clear', accelerator: 'CmdOrCtrl+K', context: 'console' },
+      { id: 'run.toggle', accelerator: 'Ctrl+Enter', context: 'editor' },
+    ]);
+  });
+
+  it('matches a key press, preferring a scoped binding', () => {
+    const bindings = resolveKeybindings('linux', { 'console.clear@editor': 'Ctrl+Shift+K', 'file.save': 'Ctrl+Shift+K' });
+    const match = (accelerator: string, ...active: KeyContext[]) =>
+      matchKeybinding(bindings, accelerator, new Set(active), 'linux')?.id;
+    expect(match('F5')).toBe('run.toggle');
+    expect(match('CmdOrCtrl+K')).toBeUndefined();
+    expect(match('CmdOrCtrl+K', 'console')).toBe('console.clear');
+    expect(match('CmdOrCtrl+Shift+K')).toBe('file.save');
+    expect(match('CmdOrCtrl+Shift+K', 'editor')).toBe('console.clear');
+    expect(normalizeAccelerator('Escape', 'linux')).toBe(normalizeAccelerator('Esc', 'linux'));
+  });
+
   it('records key presses as accelerators', () => {
     const press = (key: string, mods: Partial<KeyInput> = {}, code?: string): KeyInput => ({
       key,
@@ -172,6 +238,7 @@ describe('keybindings', () => {
 });
 
 describe('theme validation', () => {
+  // @feature themes.custom-tokens
   it('accepts colours and fonts and rejects anything else', () => {
     expect(isSafeTokenValue('accent', '#9feaf9')).toBe(true);
     expect(isSafeTokenValue('accent', 'rgb(1 2 3 / 50%)')).toBe(true);
@@ -183,6 +250,7 @@ describe('theme validation', () => {
     expect(isSafeTokenValue('accent', 'expression(alert(1))')).toBe(false);
   });
 
+  // @feature themes.import
   it('needs base or rules in a Monaco theme', () => {
     expect(monacoThemeSchema.safeParse({ base: 'vs-dark' }).success).toBe(true);
     expect(monacoThemeSchema.safeParse({ rules: [] }).success).toBe(true);

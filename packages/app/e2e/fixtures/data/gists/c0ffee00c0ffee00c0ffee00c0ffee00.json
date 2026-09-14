@@ -2,7 +2,23 @@
   "description": "E2E fixture gist",
   "public": true,
   "owner": { "login": "fiddle-e2e" },
-  "history": [{ "version": "0", "committed_at": "2026-01-01T00:00:00Z" }],
+  "history": [
+    {
+      "version": "3333333333333333333333333333333333333333",
+      "committed_at": "2026-01-03T00:00:00Z",
+      "change_status": { "total": 3, "additions": 2, "deletions": 1 }
+    },
+    {
+      "version": "2222222222222222222222222222222222222222",
+      "committed_at": "2026-01-02T00:00:00Z",
+      "change_status": { "total": 0, "additions": 0, "deletions": 0 }
+    },
+    {
+      "version": "1111111111111111111111111111111111111111",
+      "committed_at": "2026-01-01T00:00:00Z",
+      "change_status": { "total": 12, "additions": 12, "deletions": 0 }
+    }
+  ],
   "files": {
     "main.js": {
       "content": "const { app, BrowserWindow } = require('electron');\n\napp.whenReady().then(() => {\n  const win = new BrowserWindow({ width: 800, height: 600 });\n  win.loadFile('index.html');\n});\n"

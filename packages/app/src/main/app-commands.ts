@@ -1,5 +1,5 @@
 /** Every command handler, for the definitions in src/shared/commands.ts. */
-import { app, shell } from 'electron';
+import { app, BrowserWindow, Menu, shell, webContents } from 'electron';
 
 import type { CommandId } from '../shared/commands';
 import type { CommandRegistry } from './commands';
@@ -9,7 +9,7 @@ import { packageFiddle } from './packaging/service';
 import { copyDiagnostics } from './platform/diagnostics';
 import { openExternalLink } from './security';
 import type { Services } from './services';
-import { getWindow, sendWindowCommand } from './windows';
+import { getWindow, sendWindowCommand, windowIdOf } from './windows';
 
 /** Handlers that act on Monaco, view state or a dialog in the window: sent there as `Window.Command`. */
 const FORWARDED = [
@@ -24,7 +24,30 @@ const FORWARDED = [
   'gist.publish',
   'gist.open',
   'gist.history',
+  // Menus and keybindings (src/renderer/features/commands/window-commands.ts).
+  'console.clear',
+  'editor.formatAll',
+  'editor.formatSelection',
+  'editor.goToDefinition',
+  'editor.findReferences',
+  'editor.toggleTabFocus',
 ] as const satisfies readonly CommandId[];
+
+/**
+ * Undo, redo and select all: the window sends them to the focused Monaco
+ * editor, or runs the editing command where its focus is. Another page with
+ * focus (DevTools) or, on macOS, a native dialog gets them the way the native
+ * roles would send them.
+ */
+function editCommand(windowId: string | undefined, action: 'undo' | 'redo' | 'selectAll'): void {
+  if (!BrowserWindow.getFocusedWindow()) {
+    if (process.platform === 'darwin') Menu.sendActionToFirstResponder(`${action}:`);
+    return;
+  }
+  const focused = webContents.getFocusedWebContents();
+  if (focused && focused !== getWindow(windowId)?.webContents) focused[action]();
+  else sendWindowCommand(windowId, `edit.${action}`);
+}
 
 const LINKS = {
   'help.fiddleRepository': 'https://github.com/electron/fiddle',
@@ -44,6 +67,12 @@ export function registerCommands(registry: CommandRegistry, services: Services):
   });
   registry.register('view.reload', ({ windowId }) => getWindow(windowId)?.webContents.reload());
   registry.register('view.toggleDevTools', ({ windowId }) => getWindow(windowId)?.webContents.toggleDevTools());
+  registry.register('view.reloadAllWindows', () => {
+    for (const win of BrowserWindow.getAllWindows()) if (windowIdOf(win)) win.webContents.reload();
+  });
+  for (const action of ['undo', 'redo', 'selectAll'] as const) {
+    registry.register(`edit.${action}`, ({ windowId }) => editCommand(windowId, action));
+  }
 
   // The File menu.
   registry.register('file.newFiddle', ({ windowId }) => withErrorDialog(windowId, () => newFiddleIn(windowId, 'template')));

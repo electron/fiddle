@@ -52,6 +52,8 @@ describe('smoke', () => {
   });
 
   it('answers native dialogs from a script and records OS side effects', async () => {
+    // window.open is blocked and the link asks before opening in the browser
+    // (@feature platform.navigation).
     await app().queueDialog('messageBox', { response: 0 });
     await app().evaluate(`window.open('https://example.com/docs')`, 0);
     await expect.poll(() => app().sideEffects()).toContainEqual({

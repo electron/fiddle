@@ -6,6 +6,7 @@ function data(values: Record<string, string>) {
   return { getData: (type: string) => values[type] ?? '' };
 }
 
+// @feature new.drop-open
 describe('droppedLink', () => {
   it('takes a gist URL from text/uri-list, skipping comments', () => {
     const link = droppedLink(data({ 'text/uri-list': '# dragged\r\nhttps://gist.github.com/octocat/abc' }));

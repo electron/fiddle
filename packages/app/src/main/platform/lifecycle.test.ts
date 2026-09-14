@@ -31,6 +31,7 @@ describe('quit on last window closed', () => {
     expect(app.quit).not.toHaveBeenCalled();
   });
 
+  // @feature platform.quit-last-window
   it('quits when the last window closes after startup, except on macOS', async () => {
     const linux = await install('linux');
     linux.finishStartup();

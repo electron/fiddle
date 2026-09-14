@@ -59,6 +59,7 @@ describe('rankItems', () => {
     expect(labels(rankItems(items, '', ['command:gone']))[0]).toBe('New window');
   });
 
+  // @feature new.palette
   it('searches every kind once there is a query', () => {
     expect(labels(rankItems(items, 'main', []))).toEqual(['main.js']);
     expect(labels(rankItems(items, '44', []))).toEqual(['44.0.0']);
@@ -91,6 +92,7 @@ describe('pushRecent', () => {
   });
 });
 
+// @feature new.palette
 describe('acceleratorKeys', () => {
   it('formats macOS symbols', () => {
     expect(acceleratorKeys('CmdOrCtrl+Shift+P', 'darwin')).toEqual(['⌘', '⇧', 'P']);

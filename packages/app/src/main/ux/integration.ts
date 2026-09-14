@@ -27,6 +27,7 @@ import { t, tm } from '../i18n';
 import { log } from '../log';
 import type { Services } from '../services';
 import { focusedWindowId, getWindow } from '../windows';
+import { ARG_NEW_FIDDLE, ARG_NEW_WINDOW, ARG_OPEN_FOLDER, jumpListFolder } from './jump-list';
 import {
   downloadsFinished,
   finishedWindowOperations,
@@ -43,10 +44,6 @@ const TITLES = {
   run: { ok: 'runDone', failed: 'runFailed' },
 } as const satisfies Record<OperationKind, { ok: string; failed: string }>;
 
-/** Jump list tasks start a second instance with one of these. */
-const ARG_NEW_WINDOW = '--fiddle-new-window';
-const ARG_NEW_FIDDLE = '--fiddle-new-fiddle';
-const ARG_OPEN_FOLDER = '--fiddle-open-folder';
 
 /** `Window.run` belongs to the Versions and run slice; absent means ready. */
 const runOf = (state: WindowState | undefined): RunState | undefined => state?.run;
@@ -173,16 +170,20 @@ export function installOsIntegration({ hub, registry }: Services): void {
     if (findDeepLinkInArgv(argv)) return;
     if (argv.includes(ARG_NEW_WINDOW)) runCommand('app.newWindow');
     if (argv.includes(ARG_NEW_FIDDLE)) runCommand('file.newFiddle');
-    const dir = argv[argv.indexOf(ARG_OPEN_FOLDER) + 1];
-    // The jump list only offers recent folders, so nothing else is opened.
-    if (argv.includes(ARG_OPEN_FOLDER) && dir && isRecentFolder(dir)) openFolder(dir);
+    const dir = jumpListFolder(argv, recentFolders());
+    if (dir) openFolder(dir);
   });
 
   setImmediate(refreshSessionMenus);
 }
 
-function isRecentFolder(dir: string): boolean {
-  return recentFolders().includes(dir);
+/**
+ * Cold start, once the windows are up: a jump list task's folder
+ * (`--fiddle-open-folder`), accepted only as on `second-instance`.
+ */
+export function openColdStartFolder(argv: readonly string[] = process.argv): void {
+  const dir = jumpListFolder(argv, recentFolders());
+  if (dir) openFolderIn(undefined, dir).catch((error: unknown) => log.error('open recent failed', error));
 }
 
 /** The label of a command, if that command exists (other slices own some of them). */

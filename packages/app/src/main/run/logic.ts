@@ -4,6 +4,8 @@
  */
 import * as semver from 'semver';
 
+import type { InstallStateValue } from '../../shared/stores';
+
 export type RunResult = 'success' | 'failure' | 'invalid';
 
 export interface RunOutcome {
@@ -23,6 +25,16 @@ export function classifyRun(outcome: RunOutcome): RunResult {
   if (outcome.spawnFailed || outcome.installFailed) return 'failure';
   if (outcome.signal) return 'failure';
   return outcome.code === 0 ? 'success' : 'failure';
+}
+
+/**
+ * The Run control's status while the chosen version installs, from core's
+ * install state: downloading, then unzipping. Other states don't change it.
+ */
+export function installRunStatus(state: InstallStateValue): 'downloading' | 'unzipping' | undefined {
+  if (state === 'downloading') return 'downloading';
+  if (state === 'downloaded' || state === 'installing') return 'unzipping';
+  return undefined;
 }
 
 /** ES module entry points (`main.mjs`) need Electron 28 or later. Local builds pass. */

@@ -6,7 +6,7 @@ export type Locale = (typeof locales)[number];
 /** Generated from English for testing (accented and longer; right-to-left). Not real languages. */
 export const pseudoLocales = ["en-XA","ar-XB"] as const;
 
-export const namespaces = ["about","common","gists","main","mainCli","mainDocuments","mainPlatform","mainRun","mainSettings","mainUx","onboarding","packages","palette","run","settings","shell"] as const;
+export const namespaces = ["about","common","gists","main","mainCli","mainDocuments","mainPlatform","mainRun","mainSettings","mainUx","mainVersions","onboarding","packages","palette","run","settings","shell","versions"] as const;
 export type Namespace = (typeof namespaces)[number];
 
 export type Messages = Readonly<Record<string, string>>;
@@ -25,12 +25,14 @@ export const loaders: Record<Locale, Partial<Record<Namespace, Loader>>> = {
     "mainRun": () => import('./en/mainRun.js'),
     "mainSettings": () => import('./en/mainSettings.js'),
     "mainUx": () => import('./en/mainUx.js'),
+    "mainVersions": () => import('./en/mainVersions.js'),
     "onboarding": () => import('./en/onboarding.js'),
     "packages": () => import('./en/packages.js'),
     "palette": () => import('./en/palette.js'),
     "run": () => import('./en/run.js'),
     "settings": () => import('./en/settings.js'),
     "shell": () => import('./en/shell.js'),
+    "versions": () => import('./en/versions.js'),
   },
   "de": {
     "about": () => import('./de/about.js'),
@@ -43,12 +45,14 @@ export const loaders: Record<Locale, Partial<Record<Namespace, Loader>>> = {
     "mainRun": () => import('./de/mainRun.js'),
     "mainSettings": () => import('./de/mainSettings.js'),
     "mainUx": () => import('./de/mainUx.js'),
+    "mainVersions": () => import('./de/mainVersions.js'),
     "onboarding": () => import('./de/onboarding.js'),
     "packages": () => import('./de/packages.js'),
     "palette": () => import('./de/palette.js'),
     "run": () => import('./de/run.js'),
     "settings": () => import('./de/settings.js'),
     "shell": () => import('./de/shell.js'),
+    "versions": () => import('./de/versions.js'),
   },
   "ja": {
     "about": () => import('./ja/about.js'),
@@ -61,12 +65,14 @@ export const loaders: Record<Locale, Partial<Record<Namespace, Loader>>> = {
     "mainRun": () => import('./ja/mainRun.js'),
     "mainSettings": () => import('./ja/mainSettings.js'),
     "mainUx": () => import('./ja/mainUx.js'),
+    "mainVersions": () => import('./ja/mainVersions.js'),
     "onboarding": () => import('./ja/onboarding.js'),
     "packages": () => import('./ja/packages.js'),
     "palette": () => import('./ja/palette.js'),
     "run": () => import('./ja/run.js'),
     "settings": () => import('./ja/settings.js'),
     "shell": () => import('./ja/shell.js'),
+    "versions": () => import('./ja/versions.js'),
   },
   "en-XA": {
     "about": () => import('./en-XA/about.js'),
@@ -79,12 +85,14 @@ export const loaders: Record<Locale, Partial<Record<Namespace, Loader>>> = {
     "mainRun": () => import('./en-XA/mainRun.js'),
     "mainSettings": () => import('./en-XA/mainSettings.js'),
     "mainUx": () => import('./en-XA/mainUx.js'),
+    "mainVersions": () => import('./en-XA/mainVersions.js'),
     "onboarding": () => import('./en-XA/onboarding.js'),
     "packages": () => import('./en-XA/packages.js'),
     "palette": () => import('./en-XA/palette.js'),
     "run": () => import('./en-XA/run.js'),
     "settings": () => import('./en-XA/settings.js'),
     "shell": () => import('./en-XA/shell.js'),
+    "versions": () => import('./en-XA/versions.js'),
   },
   "ar-XB": {
     "about": () => import('./ar-XB/about.js'),
@@ -97,11 +105,13 @@ export const loaders: Record<Locale, Partial<Record<Namespace, Loader>>> = {
     "mainRun": () => import('./ar-XB/mainRun.js'),
     "mainSettings": () => import('./ar-XB/mainSettings.js'),
     "mainUx": () => import('./ar-XB/mainUx.js'),
+    "mainVersions": () => import('./ar-XB/mainVersions.js'),
     "onboarding": () => import('./ar-XB/onboarding.js'),
     "packages": () => import('./ar-XB/packages.js'),
     "palette": () => import('./ar-XB/palette.js'),
     "run": () => import('./ar-XB/run.js'),
     "settings": () => import('./ar-XB/settings.js'),
     "shell": () => import('./ar-XB/shell.js'),
+    "versions": () => import('./ar-XB/versions.js'),
   },
 };

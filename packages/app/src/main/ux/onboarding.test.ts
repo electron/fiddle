@@ -31,6 +31,7 @@ function load() {
 }
 
 describe('onboarding', () => {
+  // @feature onboarding.tour onboarding.offer-repeat
   it('offers the tour once per launch until it is done', () => {
     const first = load();
     expect(first.shouldOfferTour()).toBe(true);

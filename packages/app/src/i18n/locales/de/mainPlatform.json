@@ -16,5 +16,9 @@
   "sendReport": "Bericht senden",
   "dontSend": "Nicht senden",
   "aboutVersion": "{{version}} (Electron {{electron}})",
-  "aboutCopyright": "© Electron-Autoren"
+  "aboutCopyright": "© Electron-Autoren",
+  "resetPrivacyMessage": "Alle Datenschutzberechtigungen zurücksetzen?",
+  "resetPrivacyDetail": "Electron Fiddle und die Fiddles, die es ausführt, verlieren den Zugriff auf Kamera, Mikrofon, Kontakte und andere geschützte Daten. macOS fragt erneut, wenn sie ihn das nächste Mal brauchen.",
+  "resetPrivacyButton": "Zurücksetzen",
+  "resetPrivacyFailed": "Die Datenschutzberechtigungen konnten nicht zurückgesetzt werden."
 }

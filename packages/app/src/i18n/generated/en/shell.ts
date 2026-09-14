@@ -12,6 +12,13 @@ export default {
   "processRenderer": "Renderer",
   "errorCount_one": "{{count}} error",
   "errorCount_other": "{{count}} errors",
+  "warningCount_one": "{{count}} warning",
+  "warningCount_other": "{{count}} warnings",
+  "resizePanes": "Resize editor panes",
+  "notificationsButton_one": "Notifications, {{count}} new",
+  "notificationsButton_other": "Notifications, {{count}} new",
+  "noNotifications": "No notifications yet",
+  "clearNotifications": "Clear all",
   "unsaved": "Unsaved changes",
   "hiddenFile": "Hidden",
   "filterFiles": "Filter files",
@@ -67,5 +74,6 @@ export default {
   "stubAddPackage": "Add a package",
   "stubVersion": "Electron",
   "stubSettingsTitle": "Settings",
-  "stubCloseSettings": "Done"
+  "stubCloseSettings": "Done",
+  "tabFocusMode": "Tab moves focus"
 } as const;

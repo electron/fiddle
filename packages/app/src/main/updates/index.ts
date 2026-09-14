@@ -23,8 +23,13 @@ import { evaluatePolicy, parsePolicy, pickUpdate, type AvailableUpdate, type Git
 
 const UPDATE_REPO = 'electron/fiddle';
 const UPDATE_SERVICE = 'https://update.electronjs.org';
-/** Placeholder until the beta feed exists: StaticStorage, with `<platform>/<arch>/` below it. */
-const BETA_FEED_URL = 'https://fiddle-updates.electronjs.org/beta';
+/**
+ * PLACEHOLDER: nothing is served here yet (see PROGRESS.md, "Deferred"). The
+ * "Beta updates" feed (§13) is a StaticStorage feed for `update-electron-app`,
+ * with one `<platform>/<arch>/` folder per build below this URL. The owner
+ * must create it, publish each prerelease to it, and set the real URL here.
+ */
+export const BETA_UPDATE_FEED_URL_PLACEHOLDER = 'https://fiddle-updates.electronjs.org/beta';
 /** The kill switch, kept in the electron/fiddle repository. */
 const UPDATE_POLICY_URL = 'https://raw.githubusercontent.com/electron/fiddle/main/update-policy.json';
 const LATEST_RELEASE_PAGE = 'https://github.com/electron/fiddle/releases/latest';
@@ -57,7 +62,7 @@ function startAutoUpdates(beta: boolean): void {
     updateSource: beta
       ? {
           type: UpdateSourceType.StaticStorage,
-          baseUrl: `${BETA_FEED_URL}/${process.platform}/${process.arch}`,
+          baseUrl: `${BETA_UPDATE_FEED_URL_PLACEHOLDER}/${process.platform}/${process.arch}`,
         }
       : { type: UpdateSourceType.ElectronPublicUpdateService, repo: UPDATE_REPO, host: UPDATE_SERVICE },
     updateInterval: '1 hour',

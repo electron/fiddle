@@ -138,6 +138,44 @@ function memoryPrefs(initial: PublishOptions = { isPublic: false, asRevision: tr
 
 const stored: LoadResult = { kind: 'ok', credentials: { token: TOKEN, login: 'octocat' } };
 
+describe('whenReady', () => {
+  it('settles at once when init never ran', async () => {
+    const { service } = setup();
+    await expect(service.whenReady()).resolves.toBeUndefined();
+  });
+
+  it('waits until the stored token is restored and checked', async () => {
+    let answer!: () => void;
+    const checked = new Promise<void>((resolve) => (answer = resolve));
+    const user = () =>
+      checked.then(() => json({ login: 'octocat' }, 200, { 'x-oauth-scopes': 'gist' })) as unknown as Response;
+    const { service, store } = setup({ stored, user });
+    void service.init();
+    void service.init();
+    let ready = false;
+    const waiting = service.whenReady().then(() => (ready = true));
+    await new Promise((resolve) => setTimeout(resolve, 10));
+    expect(ready).toBe(false);
+
+    answer();
+    await waiting;
+    expect(service.login).toBe('octocat');
+    expect(store.load).toHaveBeenCalledTimes(1);
+  });
+
+  it('settles when the check fails, keeping the token', async () => {
+    const { service } = setup({
+      stored,
+      user: () => {
+        throw new TypeError('fetch failed');
+      },
+    });
+    void service.init();
+    await service.whenReady();
+    expect(service.login).toBe('octocat');
+  });
+});
+
 describe('startup auth check', () => {
   it('does nothing without a stored token', async () => {
     const { service, github, logins } = setup();
@@ -154,6 +192,7 @@ describe('startup auth check', () => {
     expect(store.delete).not.toHaveBeenCalled();
   });
 
+  // @feature gist.token-startup-check
   it.each([401, 403])('deletes the token on a %i', async (status) => {
     const { service, store, logins } = setup({ stored, user: () => json({ message: 'Bad credentials' }, status) });
     await service.init();
@@ -162,6 +201,7 @@ describe('startup auth check', () => {
     expect(logins.at(-1)).toBeUndefined();
   });
 
+  // @feature gist.token-startup-check
   it('keeps the token and the stored login when offline', async () => {
     const { service, store } = setup({
       stored,
@@ -193,6 +233,7 @@ describe('startup auth check', () => {
 });
 
 describe('sign-in', () => {
+  // @feature gist.sign-in-token gist.token-login-only
   it('verifies the token, stores it and publishes only the login', async () => {
     const { service, store, logins } = setup();
     expect(await service.signIn(` ${TOKEN} `, false)).toEqual({ login: 'octocat', persisted: true });
@@ -200,12 +241,14 @@ describe('sign-in', () => {
     expect(logins).toEqual(['octocat']);
   });
 
+  // @feature gist.sign-in-token
   it('rejects a token without the gist scope', async () => {
     const { service, store } = setup({ user: () => json({ login: 'octocat' }, 200, { 'x-oauth-scopes': 'repo' }) });
     await expect(service.signIn(TOKEN, false)).rejects.toMatchObject({ details: { reason: 'missing-scope' } });
     expect(store.save).not.toHaveBeenCalled();
   });
 
+  // @feature gist.sign-out
   it('signs out by deleting the token', async () => {
     const { service, store } = setup({ stored });
     await service.init();
@@ -223,6 +266,7 @@ describe('publish', () => {
     expect(error).toMatchObject({ code: ErrorCode.unauthorized, details: { reason: 'signed-out' } });
   });
 
+  // @feature gist.publish-revision
   it('as a revision: creates from the template, then updates with the real files', async () => {
     const { service, github, documents } = setup({ stored });
     await service.init();
@@ -248,6 +292,7 @@ describe('publish', () => {
     expect(documents.saved).toEqual([{ id: ID, owner: 'octocat', url: link.url, revision: SHA2 }]);
   });
 
+  // @feature gist.publish-revision
   it('without revision: creates the gist with the real files in one step', async () => {
     const { service, github, documents } = setup({ stored, asRevision: false });
     await service.init();
@@ -287,6 +332,7 @@ describe('publish', () => {
     expect(documents.saved).toMatchObject([{ id: ID, revision: SHA1 }]);
   });
 
+  // @feature gist.publish-visibility
   it('remembers the visibility choice', async () => {
     const { service, prefs } = setup({ stored });
     await service.init();
@@ -294,6 +340,7 @@ describe('publish', () => {
     expect(prefs.get()).toEqual({ isPublic: true, asRevision: true });
   });
 
+  // @feature files.add-main files.pkg-deps files.pkg-electron
   it('adds package.json with the modules and the Electron version', () => {
     const files = gistFiles({
       files: { 'renderer.js': '' },
@@ -310,11 +357,19 @@ describe('publish', () => {
       devDependencies: { electron: '43.0.0' },
     });
   });
+
+  // @feature files.pkg-deps
+  it('sets the author from the "Package author" setting', () => {
+    const fiddle = { files: { 'main.js': '' }, name: 'a', versionRef: { kind: 'release', version: '43.0.0' } as const, modules: {}, source: {} };
+    expect(JSON.parse(gistFiles(fiddle, 'octocat')['package.json']!)).toMatchObject({ author: 'octocat' });
+    expect(JSON.parse(gistFiles(fiddle)['package.json']!)).not.toHaveProperty('author');
+  });
 });
 
 describe('update and delete', () => {
   const loaded = { source: { gistId: ID, gistRevision: SHA1 } };
 
+  // @feature gist.update
   it('update deletes remote files that were removed locally', async () => {
     const remote = { 'main.js': 'old', 'index.html': 'old', 'removed.css': 'x', 'package.json': '{}' };
     const { service, github, documents } = setup({ stored, remote, fiddle: loaded });
@@ -336,6 +391,7 @@ describe('update and delete', () => {
     await expect(service.update('w')).rejects.toMatchObject({ code: ErrorCode.notFound, details: { reason: 'no-gist' } });
   });
 
+  // @feature gist.delete save.gist-delete-dirty
   it('delete removes the gist and marks the fiddle unsaved', async () => {
     const { service, github, documents } = setup({ stored, remote: { 'main.js': 'x' }, fiddle: loaded });
     await service.init();
@@ -344,6 +400,7 @@ describe('update and delete', () => {
     expect(documents.deleted).toBe(1);
   });
 
+  // @feature gist.history
   it('history marks the active revision', async () => {
     // History works signed out; answer /commits directly.
     const commits = [

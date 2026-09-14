@@ -23,6 +23,7 @@ import { installMenu } from './menu';
 import { runMigration } from './migration';
 import { installFlushOnExit } from './persistence/lifecycle';
 import { installQuitOnLastWindowClosed, startPlatform } from './platform';
+import { applyChromiumLanguage } from './platform/locale';
 import { handleSquirrelStartup } from './platform/squirrel';
 import { handleAppProtocol, registerAppScheme } from './protocol';
 import { applySessionSecurity, hardenAllWebContents } from './security';
@@ -31,7 +32,7 @@ import { loadSettings, preferredLocales, startSettings } from './settings';
 import { StateHub } from './state-hub';
 import { installTestHarness } from './test-driver';
 import { isTestMode } from './test-mode';
-import { installOsIntegration } from './ux/integration';
+import { installOsIntegration, openColdStartFolder } from './ux/integration';
 import { detectMaterial, detectPlatform, rendererEntry } from './window';
 
 // Squirrel.Windows install, update and uninstall events: the app only
@@ -53,6 +54,8 @@ if (!squirrelEvent) initCrashReporting();
 // Both must happen before `ready`.
 registerAppScheme();
 app.enableSandbox();
+// Chromium's UI language (`--lang`) follows the language setting (§9).
+if (!squirrelEvent && !headless) applyChromiumLanguage();
 
 // The single-instance lock, and deep links (`argv`, `second-instance`,
 // `open-url`) and `open-file` queued until the windows are up.
@@ -106,6 +109,8 @@ async function main(): Promise<void> {
     if (BrowserWindow.getAllWindows().length === 0) void openFiddleWindow();
   });
   await startDocuments();
+  // A Windows jump list task that started the app opens its folder now.
+  openColdStartFolder();
 }
 
 if (primary) {

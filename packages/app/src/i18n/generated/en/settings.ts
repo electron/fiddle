@@ -32,6 +32,8 @@ export default {
   "theme.title": "Theme",
   "theme.description": "Lucent is built in. Custom themes are JSON files in your themes folder.",
   "theme.lucent": "Lucent",
+  "theme.highContrastDark": "Lucent high contrast dark",
+  "theme.highContrastLight": "Lucent high contrast light",
   "theme.dark": "dark",
   "theme.light": "light",
   "theme.importMonaco": "Import Monaco theme…",
@@ -40,6 +42,9 @@ export default {
   "locale.title": "Language",
   "locale.description": "Menus and the app switch right away. The editor switches after a restart.",
   "locale.system": "System default",
+  "locale.relaunchTitle": "Relaunch to finish switching the language",
+  "locale.relaunchDescription": "Menus and the app use it already. The editor and system texts switch after a relaunch.",
+  "locale.relaunch": "Relaunch",
   "sessionRestore.title": "Restore windows on launch",
   "sessionRestore.description": "Reopen every window from the last session, with its fiddle, version and layout.",
   "notifications.title": "Notifications",
@@ -50,6 +55,8 @@ export default {
   "editorFontSize.title": "Font size",
   "editorFontSize.description": "In pixels, from 8 to 40. Leave it empty for the default.",
   "editorFontSize.invalid": "Enter a whole number from 8 to 40.",
+  "editorFont.reloadHint": "Font changes apply after the windows reload.",
+  "editorFont.reload": "Reload windows",
   "electronFlags.title": "Electron flags",
   "electronFlags.description": "Passed to Electron when a fiddle runs.",
   "environmentVariables.title": "Environment variables",
@@ -127,5 +134,9 @@ export default {
   "notice.corrupt.description": "Fiddle set it aside and is using a backup or the defaults.",
   "notice.newer.title": "{{file}} is from a newer Fiddle",
   "notice.newer.description": "Changes won't be saved to it until you update Fiddle.",
-  "notice.dismiss": "Dismiss"
+  "notice.dismiss": "Dismiss",
+  "privacyReset.title": "Reset privacy permissions",
+  "privacyReset.description": "Fiddles run as Electron Fiddle, so the camera, microphone and other permissions you gave a fiddle belong to the app. This forgets them all.",
+  "privacyReset.button": "Reset…",
+  "privacyReset.done": "Privacy permissions reset"
 } as const;

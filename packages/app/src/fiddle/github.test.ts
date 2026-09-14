@@ -62,6 +62,7 @@ function gist(files: Record<string, unknown>, extra: Record<string, unknown> = {
   };
 }
 
+// @feature gist.sign-in-token
 describe('token format', () => {
   it('accepts classic and fine-grained tokens', () => {
     expect(isValidTokenFormat(TOKEN)).toBe(true);
@@ -80,6 +81,7 @@ describe('token format', () => {
 });
 
 describe('auth', () => {
+  // @feature gist.sign-in-token
   it('returns the login when the token has the gist scope', async () => {
     const { fn, calls } = mockFetch(() => json({ login: 'octocat' }, { headers: { 'x-oauth-scopes': 'repo, gist' } }));
     const client = new GitHubClient({ token: TOKEN, fetch: fn });
@@ -96,6 +98,7 @@ describe('auth', () => {
     expect(calls).toHaveLength(0);
   });
 
+  // @feature gist.sign-in-token
   it('reports a missing gist scope', async () => {
     const { fn } = mockFetch(() => json({ login: 'octocat' }, { headers: { 'x-oauth-scopes': 'repo' } }));
     const result = await codeOf(new GitHubClient({ token: TOKEN, fetch: fn }).verifyToken());
@@ -108,6 +111,7 @@ describe('auth', () => {
     expect(result).toMatchObject({ code: ErrorCode.unauthorized, details: { reason: 'invalid-token' } });
   });
 
+  // @feature gist.token-startup-check
   it('maps 401, 403 and network failures for the startup check', async () => {
     const check = (fetchFn: typeof fetch) => codeOf(new GitHubClient({ token: TOKEN, fetch: fetchFn }).getAuthenticatedUser());
     expect((await check(mockFetch(() => json({ message: 'Bad credentials' }, { status: 401 })).fn)).code).toBe(
@@ -120,6 +124,7 @@ describe('auth', () => {
     expect((await check(offline)).code).toBe(ErrorCode.network);
   });
 
+  // @feature gist.token-startup-check
   it('maps a rate-limited 403 to unavailable, so the startup check keeps the token', async () => {
     const check = (headers: Record<string, string>) =>
       codeOf(
@@ -211,6 +216,7 @@ describe('where the token goes', () => {
 });
 
 describe('loadGist', () => {
+  // @feature load.gist-public
   it('loads a public gist signed out, fetching truncated files in full', async () => {
     const { fn, calls } = mockFetch((call) => {
       if (call.url === `https://gist.githubusercontent.com/octocat/${ID}/raw/big.js`) return new Response('FULL CONTENT');
@@ -251,6 +257,7 @@ describe('loadGist', () => {
     expect(calls[1]).toMatchObject({ url: raw, headers: { Authorization: `Bearer ${TOKEN}` } });
   });
 
+  // @feature load.gist-revision
   it('loads a revision', async () => {
     const other = 'f'.repeat(40);
     const { fn, calls } = mockFetch(() => json(gist({ 'main.js': { content: 'old' } })));
@@ -301,6 +308,7 @@ describe('writing gists', () => {
     expect(calls).toHaveLength(0);
   });
 
+  // @feature gist.publish-visibility
   it('creates a secret or public gist', async () => {
     const { fn, calls } = mockFetch(() => json(gist({}), { status: 201 }));
     const client = new GitHubClient({ token: TOKEN, fetch: fn });
@@ -315,6 +323,7 @@ describe('writing gists', () => {
     expect(calls[1]!.body).toMatchObject({ public: true });
   });
 
+  // @feature gist.publish-description gist.limits
   it('validates the description and files', async () => {
     const { fn, calls } = mockFetch(() => json(gist({})));
     const client = new GitHubClient({ token: TOKEN, fetch: fn });
@@ -334,6 +343,7 @@ describe('writing gists', () => {
     expect(calls).toHaveLength(1);
   });
 
+  // @feature gist.update
   it('updates, deleting remote files removed locally', async () => {
     const { fn, calls } = mockFetch((call) =>
       call.method === 'GET'
@@ -372,6 +382,7 @@ describe('writing gists', () => {
     expect(calls).toHaveLength(2);
   });
 
+  // @feature gist.delete
   it('deletes', async () => {
     const { fn, calls } = mockFetch(() => new Response(null, { status: 204 }));
     await new GitHubClient({ token: TOKEN, fetch: fn }).deleteGist(ID);
@@ -389,6 +400,7 @@ describe('listGistRevisions', () => {
     change_status: { total: additions + deletions, additions, deletions },
   });
 
+  // @feature gist.history gist.history-hide-empty
   it('drops empty revisions except the first, oldest first, with keyed titles', async () => {
     const { fn, calls } = mockFetch(() =>
       json([commit('d'.repeat(40), 0, 3), commit('c'.repeat(40), 0, 0), commit('b'.repeat(40), 2, 0), commit('a'.repeat(40), 0, 0)]),
@@ -416,6 +428,7 @@ describe('listGistRevisions', () => {
 });
 
 describe('repository contents', () => {
+  // @feature load.docs-example-files
   it('lists a directory at a ref', async () => {
     const { fn, calls } = mockFetch(() =>
       json([{ name: 'main.js', path: 'docs/fiddles/x/main.js', type: 'file', download_url: 'https://raw.githubusercontent.com/x' }]),

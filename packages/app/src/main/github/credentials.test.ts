@@ -43,6 +43,7 @@ describe('CredentialStore', () => {
     expect(await open().load()).toEqual({ kind: 'none' });
   });
 
+  // @feature gist.token-encrypted
   it('round-trips encrypted credentials, never as plain text on disk', async () => {
     const store = open();
     expect(await store.save(CREDS, { allowPlaintext: false })).toBe(true);
@@ -50,6 +51,7 @@ describe('CredentialStore', () => {
     expect((await readFile(file)).toString()).not.toContain(CREDS.token);
   });
 
+  // @feature gist.token-encrypted
   it.skipIf(process.platform === 'win32')('writes the file with mode 0600 in a 0700 folder', async () => {
     await open().save(CREDS, { allowPlaintext: false });
     expect((await stat(file)).mode & 0o777).toBe(0o600);
@@ -75,6 +77,7 @@ describe('CredentialStore', () => {
     expect(await open(fakeSafeStorage({ backend: 'basic_text' }), 'darwin').kind()).toBe('encrypted');
   });
 
+  // @feature gist.token-encrypted
   it('never persists when encryption is unavailable, and removes an older file', async () => {
     await open().save(CREDS, { allowPlaintext: false });
     const store = open(fakeSafeStorage({ isAsyncEncryptionAvailable: async () => false }));
@@ -116,6 +119,7 @@ describe('CredentialStore', () => {
     expect(encrypts).toBe(1);
   });
 
+  // @feature gist.sign-out
   it('deletes the file on sign-out', async () => {
     const store = open();
     await store.save(CREDS, { allowPlaintext: false });

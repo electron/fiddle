@@ -4,6 +4,7 @@ import { getGistId, gistUrl, isGistId, isRevisionSha } from './gist-id';
 
 const ID = '8c5fc0c6a5153d49b5a4a56d3ed9da8f';
 
+// @feature load.gist-id-parse
 describe('getGistId', () => {
   it.each([
     '8C5FC0C6A5153D49B5A4A56D3ED9DA8F',

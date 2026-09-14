@@ -60,5 +60,16 @@ export default {
   "copyDiagnostics": "Diagnosedaten kopieren",
   "openFiddleRepository": "Electron Fiddle auf GitHub",
   "openElectronRepository": "Electron auf GitHub",
-  "reportIssue": "Problem melden"
+  "reportIssue": "Problem melden",
+  "actualSize": "Originalgröße",
+  "zoomIn": "Vergrößern",
+  "zoomOut": "Verkleinern",
+  "clearConsole": "Konsole leeren",
+  "formatAll": "Alle Dateien formatieren",
+  "formatSelection": "Auswahl formatieren",
+  "goToDefinition": "Zur Definition wechseln",
+  "findReferences": "Verweise suchen",
+  "toggleTabFocus": "Tab-Taste bewegt Fokus ein/aus",
+  "reloadAllWindows": "Alle Fenster neu laden",
+  "inspectElement": "Element untersuchen"
 } as const;

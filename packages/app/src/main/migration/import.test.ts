@@ -107,6 +107,7 @@ describe('importOldApp', () => {
 
     const theme = JSON.parse(await readFile(path.join(userData, 'themes', 'dracula.json'), 'utf8'));
     expect(theme).toEqual({
+      schemaVersion: 1,
       name: 'Dracula',
       isDark: true,
       editor: {

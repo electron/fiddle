@@ -26,6 +26,7 @@ function gist(files: Record<string, string>): GistLoadResult {
 }
 
 describe('fiddleFromGist', () => {
+  // @feature load.gist-files
   it('skips unsupported files and asks before adding unknown ones', async () => {
     const confirmAddFile = vi.fn(async (name: string) => name === 'keep.js');
     const loaded = await fiddleFromGist(
@@ -39,17 +40,20 @@ describe('fiddleFromGist', () => {
     expect(loaded.gistOwner).toBe('octocat');
   });
 
+  // @feature load.gist-files
   it('errors when the gist has no supported files', async () => {
     await expect(
       fiddleFromGist(gist({ 'README.md': '#', 'package.json': '{}' }), { context: current, confirmAddFile: async () => true }),
     ).rejects.toMatchObject({ details: { reason: 'no-supported-files' } });
   });
 
+  // @feature files.add-main
   it('adds a main entry when the gist has none', async () => {
     const loaded = await fiddleFromGist(gist({ 'index.html': '<p>' }), { context: current, confirmAddFile: async () => true });
     expect(Object.keys(loaded.fiddle.files)).toContain('main.js');
   });
 
+  // @feature load.gist-modules load.gist-version
   it('takes modules and the Electron version from package.json', async () => {
     const pkg = JSON.stringify({ dependencies: { react: '^19.0.0' }, devDependencies: { electron: '^31.1.0' } });
     const loaded = await fiddleFromGist(gist({ 'main.js': '', 'package.json': pkg }), {
@@ -61,12 +65,14 @@ describe('fiddleFromGist', () => {
     expect(loaded.warnings).toEqual([]);
   });
 
+  // @feature load.gist-modules
   it('keeps the previous modules and version without a package.json', async () => {
     const loaded = await fiddleFromGist(gist({ 'main.js': '' }), { context: current, confirmAddFile: async () => true });
     expect(loaded.fiddle.modules).toEqual(current.modules);
     expect(loaded.fiddle.version).toEqual(current.version);
   });
 
+  // @feature load.gist-version
   it('keeps the current version with a warning when package.json asks for an unusable one', async () => {
     const pkg = JSON.stringify({ devDependencies: { electron: '99.0.0' } });
     const loaded = await fiddleFromGist(gist({ 'main.js': '', 'package.json': pkg }), {
@@ -78,6 +84,7 @@ describe('fiddleFromGist', () => {
     expect(loaded.warnings).toEqual([{ kind: 'unusable-version', version: '99.0.0' }]);
   });
 
+  // @feature load.gist-modules
   it('warns about an invalid package.json and keeps the previous modules', async () => {
     const loaded = await fiddleFromGist(gist({ 'main.js': '', 'package.json': '{nope' }), {
       context: current,
@@ -97,6 +104,7 @@ describe('folders', () => {
     await rm(dir, { recursive: true, force: true });
   });
 
+  // @feature load.folder load.folder-invalid-json files.project-name
   it('loads a folder and names the project after it', async () => {
     await writeFile(path.join(dir, 'main.js'), 'm');
     await writeFile(path.join(dir, 'package.json'), '{bad');
@@ -107,6 +115,7 @@ describe('folders', () => {
     expect(loaded.warnings).toEqual([{ kind: 'invalid-package-json' }]);
   });
 
+  // @feature files.pkg-fields save.gitignore
   it('saves the files with a generated package.json and .gitignore', async () => {
     const fiddle = createFiddle({ files: { 'main.js': 'm', 'styles.css': '' }, version: current.version, modules: { a: '1.0.0' } });
     await saveToFolder(dir, fiddle, { name: 'demo', author: 'me' });
@@ -116,6 +125,7 @@ describe('folders', () => {
     expect(await readFile(path.join(dir, '.gitignore'), 'utf8')).toContain('node_modules');
   });
 
+  // @feature save.forge-scripts save.forge-makers
   it('adds Forge config for "Save as Forge project"', () => {
     const fiddle = createFiddle({ files: { 'main.js': 'm' }, version: current.version });
     const files = filesForSave(fiddle, { name: 'demo', forge: { forgeVersion: '^7.8.0' } });
@@ -126,6 +136,7 @@ describe('folders', () => {
 });
 
 describe('newFiddle', () => {
+  // @feature load.new-fiddle
   it('uses the template for the version', async () => {
     const templates: TemplateLoader = {
       getTemplate: vi.fn(async () => ({ 'main.js': 'tpl' })),

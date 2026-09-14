@@ -617,345 +617,345 @@ A desktop app for writing, running, sharing and packaging small Electron experim
 ### 1. Workspace
 
 - A window contains:
-  - A multi-file code editor.
-  - An output console.
-  - A file list and an npm module list.
-  - Controls for version, run, bisect and sharing.
-- Panels can be resized and hidden.
-- Multiple windows are supported, each with its own fiddle, Electron version and run. Settings stay in sync across windows.
-- The window title shows when there are unsaved changes.
-- On macOS, double-clicking empty title bar space follows the system preference (minimize or zoom).
+  - A multi-file code editor. {#workspace.editor}
+  - An output console. {#workspace.console}
+  - A file list and an npm module list. {#workspace.sidebar}
+  - Controls for version, run, bisect and sharing. {#workspace.controls}
+- Panels can be resized and hidden. {#workspace.panels}
+- Multiple windows are supported, each with its own fiddle, Electron version and run. Settings stay in sync across windows. {#workspace.multi-window}
+- The window title shows when there are unsaved changes. {#workspace.title-dirty}
+- On macOS, double-clicking empty title bar space follows the system preference (minimize or zoom). {#workspace.mac-titlebar-dblclick}
 
 ### 2. Editors
 
-- One code editor (Monaco) per visible file.
-- Panes can be rearranged, resized, maximized and hidden. Hiding a pane keeps its content. The layout can be reset.
-- Each pane shows an error or warning indicator taken from the editor's diagnostics.
-- Editor defaults: soft wrap on, minimap off, 2-space tabs.
-  - Soft wrap and minimap can be toggled per window. The toggles aren't saved.
-- Font family and size are configurable. Changes apply after a reload, and a "reload all windows" action is provided.
+- One code editor (Monaco) per visible file. {#editor.per-file}
+- Panes can be rearranged, resized, maximized and hidden. Hiding a pane keeps its content. The layout can be reset. {#editor.panes}
+- Each pane shows an error or warning indicator taken from the editor's diagnostics. {#editor.diagnostics}
+- Editor defaults: soft wrap on, minimap off, 2-space tabs. {#editor.defaults}
+  - Soft wrap and minimap can be toggled per window. The toggles aren't saved. {#editor.wrap-minimap-toggle}
+- Font family and size are configurable. Changes apply after a reload, and a "reload all windows" action is provided. {#editor.font}
 - IntelliSense uses type definitions for the selected Electron version:
-  - `electron.d.ts` from unpkg (`electron` or `electron-nightly`), cached per version and cleared when that version is removed.
-  - `@types/node` for that Electron's Node version, cached. If the exact version doesn't exist, the newest in the same major is used.
-  - Local builds read `<build>/gen/electron/tsc/typings/electron.d.ts` and reload live when it changes.
-- Prettier formatting for JS, HTML and CSS: current document, selection, or all open editors.
-- Go to/Peek Definition, Find References.
-- Clicking a link in an editor or in the console asks before opening it in the browser.
+  - `electron.d.ts` from unpkg (`electron` or `electron-nightly`), cached per version and cleared when that version is removed. {#editor.types-electron}
+  - `@types/node` for that Electron's Node version, cached. If the exact version doesn't exist, the newest in the same major is used. {#editor.types-node}
+  - Local builds read `<build>/gen/electron/tsc/typings/electron.d.ts` and reload live when it changes. {#editor.types-local}
+- Prettier formatting for JS, HTML and CSS: current document, selection, or all open editors. {#editor.format}
+- Go to/Peek Definition, Find References. {#editor.navigation}
+- Clicking a link in an editor or in the console asks before opening it in the browser. {#editor.link-confirm}
 
 ### 3. Fiddle file model
 
-- Allowed extensions: `.cjs .js .mjs .html .css .json` (any case). Names with path separators are rejected.
-- Files can be added, renamed, deleted, shown and hidden.
-- Clicking a hidden file in the file list shows it and focuses it.
+- Allowed extensions: `.cjs .js .mjs .html .css .json` (any case). Names with path separators are rejected. {#files.extensions}
+- Files can be added, renamed, deleted, shown and hidden. {#files.operations}
+- Clicking a hidden file in the file list shows it and focuses it. {#files.show-hidden-on-click}
 - **Validation rules:**
-  - No duplicate names.
-  - `package.json` and `package-lock.json` are reserved.
-  - Exactly one main entry point (`main.js`, `main.cjs` or `main.mjs`).
-  - The main entry can't be deleted.
-- An empty `main.js` is added when a folder, template or example has no main entry, and before publishing a gist.
-- New files get a placeholder comment for their language. Files that are empty or contain only the placeholder load hidden.
+  - No duplicate names. {#files.no-duplicates}
+  - `package.json` and `package-lock.json` are reserved. {#files.reserved-names}
+  - Exactly one main entry point (`main.js`, `main.cjs` or `main.mjs`). {#files.one-main}
+  - The main entry can't be deleted. {#files.main-undeletable}
+- An empty `main.js` is added when a folder, template or example has no main entry, and before publishing a gist. {#files.add-main}
+- New files get a placeholder comment for their language. Files that are empty or contain only the placeholder load hidden. {#files.placeholder}
 - **Unsaved changes:**
-  - Tracked by comparing every file's content, hidden files included, with the last save.
-  - Replacing the fiddle, closing the window or quitting with unsaved edits asks for confirmation.
+  - Tracked by comparing every file's content, hidden files included, with the last save. {#files.dirty-tracking}
+  - Replacing the fiddle, closing the window or quitting with unsaved edits asks for confirmation. {#files.dirty-confirm}
 - **Generated `package.json`** (for save, publish and run):
-  - Fields: name, productName, version "1.0.0", main = the entry file, author (from settings), `start: "electron ."`.
-  - `dependencies` = the modules.
-  - `devDependencies.electron` (or `electron-nightly`) = the selected version.
-- **Project name:** the local folder name, or a random 3-word name.
+  - Fields: name, productName, version "1.0.0", main = the entry file, author (from settings), `start: "electron ."`. {#files.pkg-fields}
+  - `dependencies` = the modules. {#files.pkg-deps}
+  - `devDependencies.electron` (or `electron-nightly`) = the selected version. {#files.pkg-electron}
+- **Project name:** the local folder name, or a random 3-word name. {#files.project-name}
 
 ### 4. Starting points and loading
 
 - **Default template:**
-  - Downloaded per major version from `github.com/electron/minimal-repro/archive/<major>-x-y.zip` and cached in `<userData>/Templates`.
-  - Unreleased majors, local builds and failed downloads use a bundled quick-start (main, preload, index.html, renderer).
-- **New fiddle:** the template for the current version. Clears the modules and the console.
-- **New test:** the `test-template` branch of minimal-repro.
-- **Changing version:** if the fiddle is an unedited template, the new version's template replaces it.
-- **Built-in API examples ("Show Me"):** each API below has a bundled, runnable example. The one currently loaded is marked.
+  - Downloaded per major version from `github.com/electron/minimal-repro/archive/<major>-x-y.zip` and cached in `<userData>/Templates`. {#load.template-download}
+  - Unreleased majors, local builds and failed downloads use a bundled quick-start (main, preload, index.html, renderer). {#load.template-fallback}
+- **New fiddle:** the template for the current version. Clears the modules and the console. {#load.new-fiddle}
+- **New test:** the `test-template` branch of minimal-repro. {#load.new-test}
+- **Changing version:** if the fiddle is an unedited template, the new version's template replaces it. {#load.template-swap}
+- **Built-in API examples ("Show Me"):** each API below has a bundled, runnable example. The one currently loaded is marked. {#load.examples}
   - App, AutoUpdater, BrowserView, BrowserWindow, Clipboard, ContentTracing, Cookies, CrashReporter.
   - Debugger, DesktopCapturer, Dialog, GlobalShortcut, IPC, Menu, NativeImage, Net.
   - Notification, PowerMonitor, PowerSaveBlocker, Screen, Session, Shell, SystemPreferences, TouchBar.
   - Tray, utilityProcess, WebContents, WebContentsView, WebFrame.
 - **Load a gist by URL or ID:**
-  - Accepts `gist.github.com/[user/]<id>` or a bare ID. The first 32-hex substring is used.
-  - Shows the URL of the gist currently loaded.
+  - Accepts `gist.github.com/[user/]<id>` or a bare ID. The first 32-hex substring is used. {#load.gist-id-parse}
+  - Shows the URL of the gist currently loaded. {#load.gist-url-shown}
 - **Electron docs examples:**
-  - Take a path and a tag, e.g. `docs/fiddles/...` at `v30.0.0`.
-  - Files are fetched from `electron/electron` at that tag and laid over the starter template.
-  - The matching version is selected and downloaded if needed. If its release channel is hidden, the app offers to enable it.
+  - Take a path and a tag, e.g. `docs/fiddles/...` at `v30.0.0`. {#load.docs-example}
+  - Files are fetched from `electron/electron` at that tag and laid over the starter template. {#load.docs-example-files}
+  - The matching version is selected and downloaded if needed. If its release channel is hidden, the app offers to enable it. {#load.docs-example-version}
 - **Deep links (`electron-fiddle://`):**
-  - `gist/<id>`, `gist/<owner>/<id>`, and `electron/<tag>/<path>`.
-  - Deep links and docs examples ask for confirmation before loading, because the code is untrusted.
-  - A private gist waits until the GitHub sign-in is restored.
+  - `gist/<id>`, `gist/<owner>/<id>`, and `electron/<tag>/<path>`. {#load.deep-link}
+  - Deep links and docs examples ask for confirmation before loading, because the code is untrusted. {#load.deep-link-confirm}
+  - A private gist waits until the GitHub sign-in is restored. {#load.deep-link-private}
 - **Loading a gist:**
-  - Works while signed out, for public gists. Truncated large files are fetched in full.
-  - A specific revision can be loaded.
-  - Unsupported files are skipped, and the app asks before adding unknown supported files. A gist with no supported files is an error.
-  - `package.json` dependencies become modules. With no `package.json`, the previous modules are kept.
-  - An `electron` dependency sets the version, with range prefixes stripped. The current version is kept, with a warning, if that version is invalid, unreleased, or can't run on this OS/architecture.
+  - Works while signed out, for public gists. Truncated large files are fetched in full. {#load.gist-public}
+  - A specific revision can be loaded. {#load.gist-revision}
+  - Unsupported files are skipped, and the app asks before adding unknown supported files. A gist with no supported files is an error. {#load.gist-files}
+  - `package.json` dependencies become modules. With no `package.json`, the previous modules are kept. {#load.gist-modules}
+  - An `electron` dependency sets the version, with range prefixes stripped. The current version is kept, with a warning, if that version is invalid, unreleased, or can't run on this OS/architecture. {#load.gist-version}
 - **Opening a local folder** (Open dialog, OS recent documents, macOS open-file):
-  - Reads the supported top-level files. `package.json` sets the modules and version as for gists; only semver validity is checked.
-  - Invalid JSON shows an error, and the rest of the folder still loads.
-- **Offline:** load errors say the computer seems to be offline.
+  - Reads the supported top-level files. `package.json` sets the modules and version as for gists; only semver validity is checked. {#load.folder}
+  - Invalid JSON shows an error, and the rest of the folder still loads. {#load.folder-invalid-json}
+- **Offline:** load errors say the computer seems to be offline. {#load.offline}
 
 ### 5. Saving and exporting
 
 - **Save and Save As:**
-  - Save writes to the current folder, asking for one the first time. Save As always asks.
-  - The folder picker can create folders.
-  - The user is warned before overwriting a folder that already contains supported files.
+  - Save writes to the current folder, asking for one the first time. Save As always asks. {#save.save}
+  - The folder picker can create folders. {#save.create-folder}
+  - The user is warned before overwriting a folder that already contains supported files. {#save.overwrite-warning}
 - **What is written:**
-  - Files with empty content are deleted from disk.
-  - Every save writes a `.gitignore` (`node_modules`, `out`).
+  - Files with empty content are deleted from disk. {#save.empty-files}
+  - Every save writes a `.gitignore` (`node_modules`, `out`). {#save.gitignore}
 - **Save as Forge Project** also adds Electron Forge config:
-  - `license: MIT`.
-  - `@electron-forge/cli` and the squirrel, zip (darwin), deb and rpm makers.
-  - start, package, make and publish scripts.
-  - `forceABI` for nightlies, and `plugin-local-electron` for local builds.
+  - `license: MIT`. {#save.forge-license}
+  - `@electron-forge/cli` and the squirrel, zip (darwin), deb and rpm makers. {#save.forge-makers}
+  - start, package, make and publish scripts. {#save.forge-scripts}
+  - `forceABI` for nightlies, and `plugin-local-electron` for local builds. {#save.forge-local}
 - **Gist ↔ folder link:**
-  - Saving to a new folder unlinks the gist.
-  - Publishing a gist unlinks the folder.
-  - Deleting a gist marks the fiddle unsaved.
+  - Saving to a new folder unlinks the gist. {#save.unlink-gist}
+  - Publishing a gist unlinks the folder. {#save.unlink-folder}
+  - Deleting a gist marks the fiddle unsaved. {#save.gist-delete-dirty}
 
 ### 6. Running
 
-- **Run/Stop control states:** checking, downloading (with progress), unzipping, installing modules, ready, running.
+- **Run/Stop control states:** checking, downloading (with progress), unzipping, installing modules, ready, running. {#run.states}
 - **Starting a run:**
-  - Only a click on the Run control, the Run menu item (F5), the context menu or auto-bisect can start a run. Fiddle code and page scripts can't trigger one.
-  - The Run menu item is disabled while the focused window is running. A second run in the same window is ignored.
+  - Only a click on the Run control, the Run menu item (F5), the context menu or auto-bisect can start a run. Fiddle code and page scripts can't trigger one. {#run.start}
+  - The Run menu item is disabled while the focused window is running. A second run in the same window is ignored. {#run.single}
 - **Steps:**
-  1. Open the console, clearing it first if that's enabled.
-  2. Write the files and `package.json` to a new temp dir.
-  3. If the fiddle has modules, install them with `npm install -S` or `yarn add`. Socket Firewall wrapping is optional.
-  4. Spawn `electron <dir> --inspect <user flags>`, with the app's env plus the user's env vars.
+  1. Open the console, clearing it first if that's enabled. {#run.open-console}
+  2. Write the files and `package.json` to a new temp dir. {#run.temp-dir}
+  3. If the fiddle has modules, install them with `npm install -S` or `yarn add`. Socket Firewall wrapping is optional. {#run.install-modules}
+  4. Spawn `electron <dir> --inspect <user flags>`, with the app's env plus the user's env vars. {#run.spawn}
 - **Environment variables:**
-  - Entries that can't be parsed show an error and are skipped. Empty flag and env entries are dropped.
-  - Blocked: `LD_PRELOAD`, `DYLD_INSERT_LIBRARIES`, `DYLD_FRAMEWORK_PATH`, `DYLD_LIBRARY_PATH`.
-  - "Advanced logging" sets `ELECTRON_ENABLE_LOGGING`, `ELECTRON_DEBUG_NOTIFICATIONS` and `ELECTRON_ENABLE_STACK_DUMPING`.
-- **Output:** reports the start (version and app name), streams stdout and stderr, then reports the exit code or signal.
+  - Entries that can't be parsed show an error and are skipped. Empty flag and env entries are dropped. {#run.env-parse}
+  - Blocked: `LD_PRELOAD`, `DYLD_INSERT_LIBRARIES`, `DYLD_FRAMEWORK_PATH`, `DYLD_LIBRARY_PATH`. {#run.env-blocked}
+  - "Advanced logging" sets `ELECTRON_ENABLE_LOGGING`, `ELECTRON_DEBUG_NOTIFICATIONS` and `ELECTRON_ENABLE_STACK_DUMPING`. {#run.advanced-logging}
+- **Output:** reports the start (version and app name), streams stdout and stderr, then reports the exit code or signal. {#run.output}
 - **Results:**
-  - Success: exit code 0.
-  - Failure: non-zero exit, a signal, a spawn failure, or a module install failure.
-  - Invalid: the pre-run checks fail (see below).
+  - Success: exit code 0. {#run.result-success}
+  - Failure: non-zero exit, a signal, a spawn failure, or a module install failure. {#run.result-failure}
+  - Invalid: the pre-run checks fail (see below). {#run.result-invalid}
 - **Pre-run checks that refuse the run:**
-  - The selected version is unusable, e.g. not downloaded or a missing local build.
-  - `main.mjs` on Electron below 28.
-  - Modules need installing but the package manager is missing. The error links to install instructions.
-- **Stop:** SIGTERM, then SIGKILL after 1 second.
-- **Cleanup:** the temp dir is deleted. The fiddle's userData dir is deleted too, unless "keep user data dirs" is on.
+  - The selected version is unusable, e.g. not downloaded or a missing local build. {#run.check-version}
+  - `main.mjs` on Electron below 28. {#run.check-esm}
+  - Modules need installing but the package manager is missing. The error links to install instructions. {#run.check-pm}
+- **Stop:** SIGTERM, then SIGKILL after 1 second. {#run.stop}
+- **Cleanup:** the temp dir is deleted. The fiddle's userData dir is deleted too, unless "keep user data dirs" is on. {#run.cleanup}
 - **Package / Make (Electron Forge):**
-  - Opens the console and requires the package manager.
-  - Applies the Forge transform, then runs `<pm> install` and `<pm> run package|make`.
-  - Reveals `out/` in the file manager.
+  - Opens the console and requires the package manager. {#run.package-console}
+  - Applies the Forge transform, then runs `<pm> install` and `<pm> run package|make`. {#run.package-steps}
+  - Reveals `out/` in the file manager. {#run.package-reveal}
 
 ### 7. Output console
 
-- Hidden by default. Opens automatically on run, package and make. Can be toggled, or hidden by dragging its splitter closed.
-- Read-only lines with timestamps. Keeps the last 1000 entries and auto-scrolls.
-- Filters out Node inspector banner lines. On Windows, output is buffered line by line.
-- Can be cleared with a shortcut (while the console has focus), from the context menu, or automatically on each run (setting).
+- Hidden by default. Opens automatically on run, package and make. Can be toggled, or hidden by dragging its splitter closed. {#console.visibility}
+- Read-only lines with timestamps. Keeps the last 1000 entries and auto-scrolls. {#console.lines}
+- Filters out Node inspector banner lines. On Windows, output is buffered line by line. {#console.filter-banner}
+- Can be cleared with a shortcut (while the console has focus), from the context menu, or automatically on each run (setting). {#console.clear}
 
 ### 8. Electron versions
 
 - **Release list:**
-  - Bundled with the app, cached in userData.
-  - Refreshed from electronjs.org at startup and on demand.
-- **Channels:** Stable, Beta (includes alpha), Nightly.
-- **Obsolete versions:** majors older than the oldest supported major. The `NUM_STABLE_BRANCHES=N` env var overrides the cutoff to the last N stable majors.
+  - Bundled with the app, cached in userData. {#versions.bundled-list}
+  - Refreshed from electronjs.org at startup and on demand. {#versions.refresh}
+- **Channels:** Stable, Beta (includes alpha), Nightly. {#versions.channels}
+- **Obsolete versions:** majors older than the oldest supported major. The `NUM_STABLE_BRANCHES=N` env var overrides the cutoff to the last N stable majors. {#versions.obsolete}
 - **Downloads:**
-  - Any single version can be downloaded or deleted. Files are stored in `<userData>/electron-bin`.
-  - "Download all" fetches the versions currently visible, one at a time, and can be stopped.
-  - "Delete all" removes every download and unregisters every local build except the active version.
-  - Progress and install state (missing, downloading, downloaded, installing, installed) show wherever the version appears.
-- **Platform limits:** versions a platform can't run are disabled (macOS arm64 below 11, Windows arm64 below 6.0.8).
+  - Any single version can be downloaded or deleted. Files are stored in `<userData>/electron-bin`. {#versions.download}
+  - "Download all" fetches the versions currently visible, one at a time, and can be stopped. {#versions.download-all}
+  - "Delete all" removes every download and unregisters every local build except the active version. {#versions.delete-all}
+  - Progress and install state (missing, downloading, downloaded, installing, installed) show wherever the version appears. {#versions.install-state}
+- **Platform limits:** versions a platform can't run are disabled (macOS arm64 below 11, Windows arm64 below 6.0.8). {#versions.platform-limits}
 - **Version picker:**
-  - Searchable. Local builds come first, then releases newest first. Within the same x.y.z: nightly < alpha < beta < stable.
-  - Can copy a version number.
-  - Disabled while running or bisecting.
+  - Searchable. Local builds come first, then releases newest first. Within the same x.y.z: nightly < alpha < beta < stable. {#versions.picker}
+  - Can copy a version number. {#versions.picker-copy}
+  - Disabled while running or bisecting. {#versions.picker-disabled}
 - **Local builds:**
-  - Added by picking a folder, which must contain an Electron binary.
-  - A name is suggested from the path, e.g. "gn/main - testing".
-  - Picking an already registered folder offers to switch to it.
-  - A build whose binary is missing is marked unavailable.
-  - Stored in `<userData>/local-versions.json`.
+  - Added by picking a folder, which must contain an Electron binary. {#versions.local-add}
+  - A name is suggested from the path, e.g. "gn/main - testing". {#versions.local-name}
+  - Picking an already registered folder offers to switch to it. {#versions.local-duplicate}
+  - A build whose binary is missing is marked unavailable. {#versions.local-missing}
+  - Stored in `<userData>/local-versions.json`. {#versions.local-storage}
 - **Selection:**
-  - The last-used version is remembered. The default is the latest stable.
-  - An unknown or failed version shows an error and falls back to the first usable one.
-  - The active version can't be removed.
+  - The last-used version is remembered. The default is the latest stable. {#versions.selection-default}
+  - An unknown or failed version shows an error and falls back to the first usable one. {#versions.selection-fallback}
+  - The active version can't be removed. {#versions.active-undeletable}
 - **Download mirrors:**
-  - Default: GitHub releases.
-  - China: npmmirror.com, which is the default when the locale is zh-CN.
-  - Custom: two URLs, one for releases and one for nightlies.
-- **Offline:** going back online retries the current version's download.
+  - Default: GitHub releases. {#versions.mirror-default}
+  - China: npmmirror.com, which is the default when the locale is zh-CN. {#versions.mirror-china}
+  - Custom: two URLs, one for releases and one for nightlies. {#versions.mirror-custom}
+- **Offline:** going back online retries the current version's download. {#versions.offline-retry}
 
 ### 9. Bisect
 
-- **Range:** choose a known-good (earlier) version and a known-bad (later) version from the visible version list.
-  - Defaults: the 11th visible version and the newest.
-  - The earlier version must be older than the later one.
+- **Range:** choose a known-good (earlier) version and a known-bad (later) version from the visible version list. {#bisect.range}
+  - Defaults: the 11th visible version and the newest. {#bisect.range-defaults}
+  - The earlier version must be older than the later one. {#bisect.range-order}
 - **Manual:**
-  - Switches to the midpoint version. The user marks it Good or Bad, or Skips it, which picks a random version in the range.
-  - Each step stops the running fiddle.
-  - Ends by showing the good...bad range and `github.com/electron/electron/compare/v<good>...v<bad>`.
+  - Switches to the midpoint version. The user marks it Good or Bad, or Skips it, which picks a random version in the range. {#bisect.manual-step}
+  - Each step stops the running fiddle. {#bisect.manual-stop}
+  - Ends by showing the good...bad range and `github.com/electron/electron/compare/v<good>...v<bad>`. {#bisect.manual-result}
 - **Auto:**
-  - A binary search that runs the fiddle on each version. Exit code 0 counts as good.
-  - Every step is logged. An invalid run aborts the bisect.
-  - Both ends are re-verified, then the range and the compare URL are reported.
+  - A binary search that runs the fiddle on each version. Exit code 0 counts as good. {#bisect.auto}
+  - Every step is logged. An invalid run aborts the bisect. {#bisect.auto-log}
+  - Both ends are re-verified, then the range and the compare URL are reported. {#bisect.auto-verify}
 
 ### 10. npm modules
 
-- Search npm through Algolia: top 5 results, debounced, with matches highlighted.
-- A chosen search result is added at its latest version.
-- Each module's version can be changed from its full version list. Modules can be removed.
-- Non-semver versions such as `*` are normalized to the latest.
-- npm or yarn is found on PATH. On macOS and Linux the PATH comes from the login shell.
+- Search npm through Algolia: top 5 results, debounced, with matches highlighted. {#modules.search}
+- A chosen search result is added at its latest version. {#modules.add}
+- Each module's version can be changed from its full version list. Modules can be removed. {#modules.edit}
+- Non-semver versions such as `*` are normalized to the latest. {#modules.normalize}
+- npm or yarn is found on PATH. On macOS and Linux the PATH comes from the login shell. {#modules.find-pm}
 
 ### 11. GitHub and gists
 
 - **Sign-in:**
-  - Personal access token only (`ghp_…` or `github_pat_…`), with the `gist` scope.
-  - Offers a link to GitHub's new-token page with that scope prefilled.
-  - Fills the field from the clipboard if the clipboard holds something that looks like a token.
+  - Personal access token only (`ghp_…` or `github_pat_…`), with the `gist` scope. {#gist.sign-in-token}
+  - Offers a link to GitHub's new-token page with that scope prefilled. {#gist.sign-in-link}
+  - Fills the field from the clipboard if the clipboard holds something that looks like a token. {#gist.sign-in-clipboard}
 - **Token storage:**
-  - Encrypted with OS safe storage in `<userData>/.github-credentials` (mode 0600). Sign-in fails if encryption is unavailable.
-  - The UI only knows the login name.
-  - The startup check deletes the token on a 401 or 403. When the check fails for other reasons, such as being offline, the token is kept.
-  - Signing out deletes it.
+  - Encrypted with OS safe storage in `<userData>/.github-credentials` (mode 0600). Sign-in fails if encryption is unavailable. {#gist.token-encrypted}
+  - The UI only knows the login name. {#gist.token-login-only}
+  - The startup check deletes the token on a 401 or 403. When the check fails for other reasons, such as being offline, the token is kept. {#gist.token-startup-check}
+  - Signing out deletes it. {#gist.sign-out}
 - **Publish:**
-  - Asks for a description (1–256 characters, default "Electron Fiddle Gist").
-  - The gist can be secret or public. Secret is the default, and the choice is remembered.
-- **Publish as revision** (setting): creates the gist from the default template first, then updates it with the real files, so the gist history shows a diff.
-- **Update:** syncs the files and deletes remote files that were removed locally.
-- **Delete:** deletes the gist.
-- Publish, update and delete prompt for sign-in first if needed.
+  - Asks for a description (1–256 characters, default "Electron Fiddle Gist"). {#gist.publish-description}
+  - The gist can be secret or public. Secret is the default, and the choice is remembered. {#gist.publish-visibility}
+- **Publish as revision** (setting): creates the gist from the default template first, then updates it with the real files, so the gist history shows a diff. {#gist.publish-revision}
+- **Update:** syncs the files and deletes remote files that were removed locally. {#gist.update}
+- **Delete:** deletes the gist. {#gist.delete}
+- Publish, update and delete prompt for sign-in first if needed. {#gist.sign-in-prompt}
 - **Results:**
-  - Success offers "copy link".
-  - Failure shows the GitHub error and a hint about connectivity or ownership.
-- **Limits:** 300 files, 10 MB per file.
+  - Success offers "copy link". {#gist.result-copy-link}
+  - Failure shows the GitHub error and a hint about connectivity or ownership. {#gist.result-error}
+- **Limits:** 300 files, 10 MB per file. {#gist.limits}
 - **Revision history:**
-  - Lists revisions ("Created", "Revision N") with SHA, date and +/− counts, and marks the active one.
-  - Revisions with no changes are hidden, except the first.
-  - Any revision can be loaded.
+  - Lists revisions ("Created", "Revision N") with SHA, date and +/− counts, and marks the active one. {#gist.history}
+  - Revisions with no changes are hidden, except the first. {#gist.history-hide-empty}
+  - Any revision can be loaded. {#gist.history-load}
 
 ### 12. Themes
 
-- Built-in dark and light themes. Can follow the OS light/dark setting live.
-- **Custom themes** are JSON files in `~/.electron-fiddle/themes/`:
-  - `name` and `isDark`.
-  - `editor`: Monaco theme data.
-  - `common`: UI color and font tokens, applied as CSS variables.
+- Built-in dark and light themes. Can follow the OS light/dark setting live. {#themes.builtin}
+- **Custom themes** are JSON files in `~/.electron-fiddle/themes/`: {#themes.custom}
+  - `name` and `isDark`. {#themes.custom-meta}
+  - `editor`: Monaco theme data. {#themes.custom-editor}
+  - `common`: UI color and font tokens, applied as CSS variables. {#themes.custom-tokens}
 - **Theme actions:**
-  - Import a Monaco theme JSON (must have `base` or `rules`).
-  - Create a theme file from the current theme.
-  - Open the themes folder.
-- A theme also sets the native light/dark mode.
+  - Import a Monaco theme JSON (must have `base` or `rules`). {#themes.import}
+  - Create a theme file from the current theme. {#themes.create}
+  - Open the themes folder. {#themes.open-folder}
+- A theme also sets the native light/dark mode. {#themes.native-mode}
 
 ### 13. Settings
 
-Settings are saved locally and sync live across windows.
+Settings are saved locally and sync live across windows. {#settings.persist-sync}
 
 | Area | Setting | Default |
 |---|---|---|
-| Appearance | Follow system light/dark | on |
-| | Theme | built-in dark |
-| | Editor font family / size (+ reload windows) | unset |
-| Console | Clear console on run | off |
-| GitHub | Sign in / out | — |
-| | Publish as revision | on |
-| | Gist visibility | secret |
-| | Show gist revision history | on |
-| | package.json author | OS username |
-| Shortcuts | Block Save / Save As (so a fiddle can use those keys itself) | off |
-| Electron | Mirror: Default / China / Custom | locale-based |
-| | Release channels shown: Stable, Beta, Nightly (the current version's channel can't be unchecked) | Stable + Beta |
-| | Show not-downloaded versions | on |
-| | Show obsolete versions | off |
-| | Version manager: filter, download/delete each, download all/stop, delete all, add local build, refresh list | — |
-| Execution | Keep user data dirs | off |
-| | Advanced Electron logging | off |
-| | Extra Electron flags (list) | empty |
-| | Environment variables (list of `KEY=value`) | empty |
-| | Package manager: npm / yarn | npm |
-| | Use Socket Firewall for installs | on |
-| Credits | Contributor list (from `static/contributors.json`) | — |
+| Appearance | Follow system light/dark | on {#settings.follow-system} |
+| | Theme | built-in dark {#settings.theme} |
+| | Editor font family / size (+ reload windows) | unset {#settings.editor-font} |
+| Console | Clear console on run | off {#settings.clear-console} |
+| GitHub | Sign in / out | — {#settings.github-account} |
+| | Publish as revision | on {#settings.publish-revision} |
+| | Gist visibility | secret {#settings.gist-visibility} |
+| | Show gist revision history | on {#settings.gist-history} |
+| | package.json author | OS username {#settings.package-author} |
+| Shortcuts | Block Save / Save As (so a fiddle can use those keys itself) | off {#settings.block-save} |
+| Electron | Mirror: Default / China / Custom | locale-based {#settings.mirror} |
+| | Release channels shown: Stable, Beta, Nightly (the current version's channel can't be unchecked) | Stable + Beta {#settings.channels} |
+| | Show not-downloaded versions | on {#settings.show-not-downloaded} |
+| | Show obsolete versions | off {#settings.show-obsolete} |
+| | Version manager: filter, download/delete each, download all/stop, delete all, add local build, refresh list | — {#settings.version-manager} |
+| Execution | Keep user data dirs | off {#settings.keep-user-data} |
+| | Advanced Electron logging | off {#settings.advanced-logging} |
+| | Extra Electron flags (list) | empty {#settings.electron-flags} |
+| | Environment variables (list of `KEY=value`) | empty {#settings.env-vars} |
+| | Package manager: npm / yarn | npm {#settings.package-manager} |
+| | Use Socket Firewall for installs | on {#settings.socket-firewall} |
+| Credits | Contributor list (from `static/contributors.json`) | — {#settings.credits} |
 
 ### 14. Keyboard shortcuts
 
 | Action | Shortcut |
 |---|---|
-| New Fiddle | CmdOrCtrl+N |
-| New Test | CmdOrCtrl+T |
-| New Window | CmdOrCtrl+Shift+N |
-| Open | CmdOrCtrl+O |
-| Save | CmdOrCtrl+S |
-| Save As | CmdOrCtrl+Shift+S |
-| Preferences | CmdOrCtrl+, |
-| Run Fiddle | F5 |
-| Clear console (console focused) | CmdOrCtrl+K |
-| Toggle Bisect Helper | CmdOrCtrl+Shift+B |
-| Toggle DevTools | CmdOrCtrl+Option+I |
-| Reload | CmdOrCtrl+R |
-| Actual size / Zoom in / Zoom out | CmdOrCtrl+0 / CmdOrCtrl+Plus / CmdOrCtrl+- |
-| Full screen | Ctrl+Cmd+F (macOS), F11 (others) |
-| Minimize / Close window | CmdOrCtrl+M / CmdOrCtrl+W |
-| Undo / Redo / Select All (routed to the editor) | CmdOrCtrl+Z / Shift+CmdOrCtrl+Z / CmdOrCtrl+A |
-| Cut / Copy / Paste | standard |
-| Hide / Hide Others / Quit (macOS) | Cmd+H / Cmd+Shift+H / Cmd+Q |
-| Close Settings | Esc |
-| Confirm input dialog | Enter |
-| New file name: create / cancel | Enter / Esc |
+| New Fiddle | CmdOrCtrl+N {#keys.new-fiddle} |
+| New Test | CmdOrCtrl+T {#keys.new-test} |
+| New Window | CmdOrCtrl+Shift+N {#keys.new-window} |
+| Open | CmdOrCtrl+O {#keys.open} |
+| Save | CmdOrCtrl+S {#keys.save} |
+| Save As | CmdOrCtrl+Shift+S {#keys.save-as} |
+| Preferences | CmdOrCtrl+, {#keys.preferences} |
+| Run Fiddle | F5 {#keys.run} |
+| Clear console (console focused) | CmdOrCtrl+K {#keys.clear-console} |
+| Toggle Bisect Helper | CmdOrCtrl+Shift+B {#keys.bisect} |
+| Toggle DevTools | CmdOrCtrl+Option+I {#keys.devtools} |
+| Reload | CmdOrCtrl+R {#keys.reload} |
+| Actual size / Zoom in / Zoom out | CmdOrCtrl+0 / CmdOrCtrl+Plus / CmdOrCtrl+- {#keys.zoom} |
+| Full screen | Ctrl+Cmd+F (macOS), F11 (others) {#keys.fullscreen} |
+| Minimize / Close window | CmdOrCtrl+M / CmdOrCtrl+W {#keys.minimize-close} |
+| Undo / Redo / Select All (routed to the editor) | CmdOrCtrl+Z / Shift+CmdOrCtrl+Z / CmdOrCtrl+A {#keys.edit} |
+| Cut / Copy / Paste | standard {#keys.clipboard} |
+| Hide / Hide Others / Quit (macOS) | Cmd+H / Cmd+Shift+H / Cmd+Q {#keys.mac-app} |
+| Close Settings | Esc {#keys.close-settings} |
+| Confirm input dialog | Enter {#keys.confirm-dialog} |
+| New file name: create / cancel | Enter / Esc {#keys.new-file-name} |
 
 **Menu actions with no shortcut:**
-- Publish to Gist, Save as Forge Project, Package, Make installers.
-- Toggle soft wrap, Toggle minimap.
-- Show welcome tour, Open the project/Electron repos and the issue tracker, About.
+- Publish to Gist, Save as Forge Project, Package, Make installers. {#keys.menu-file}
+- Toggle soft wrap, Toggle minimap. {#keys.menu-editor}
+- Show welcome tour, Open the project/Electron repos and the issue tracker, About. {#keys.menu-help}
 
 **Context menu:**
-- Everywhere: Run, Clear Console, Cut/Copy/Paste.
-- In editors, also: definition, reference and format commands.
-- In dev mode, also: Inspect Element.
+- Everywhere: Run, Clear Console, Cut/Copy/Paste. {#keys.context-menu}
+- In editors, also: definition, reference and format commands. {#keys.context-menu-editor}
+- In dev mode, also: Inspect Element. {#keys.context-menu-inspect}
 
 ### 15. Onboarding
 
-- First launch offers a guided tour of the main UI areas. An optional extra segment walks through the main, HTML and renderer files.
-- The offer returns on each launch until the tour is dismissed or finished.
-- The tour can be replayed from Help.
+- First launch offers a guided tour of the main UI areas. An optional extra segment walks through the main, HTML and renderer files. {#onboarding.tour}
+- The offer returns on each launch until the tour is dismissed or finished. {#onboarding.offer-repeat}
+- The tour can be replayed from Help. {#onboarding.replay}
 
 ### 16. App platform behavior
 
 - **Instances and windows:**
-  - Single instance: a second launch forwards any `electron-fiddle://` argument to the running app.
-  - Closing the last window quits the app, except on macOS.
-  - Quitting with unsaved changes asks for confirmation.
-- **Navigation:** in-app navigation and `window.open` are blocked. http(s) links open in the default browser.
+  - Single instance: a second launch forwards any `electron-fiddle://` argument to the running app. {#platform.single-instance}
+  - Closing the last window quits the app, except on macOS. {#platform.quit-last-window}
+  - Quitting with unsaved changes asks for confirmation. {#platform.quit-confirm}
+- **Navigation:** in-app navigation and `window.open` are blocked. http(s) links open in the default browser. {#platform.navigation}
 - **Protocol registration for `electron-fiddle://`:**
-  - macOS: via the app bundle.
-  - Linux: via the deb/rpm desktop entry.
-  - Windows: via the Squirrel install.
-- **macOS first run:** offers to move the app to /Applications.
-- **Auto-update** from GitHub releases (`electron/fiddle`): checks every hour, with the first check 10 seconds after launch.
-- **Crash reporting:** Sentry, off in dev mode.
-- **About panel:** app and Electron versions, contributors, website.
+  - macOS: via the app bundle. {#platform.protocol-mac}
+  - Linux: via the deb/rpm desktop entry. {#platform.protocol-linux}
+  - Windows: via the Squirrel install. {#platform.protocol-windows}
+- **macOS first run:** offers to move the app to /Applications. {#platform.mac-move}
+- **Auto-update** from GitHub releases (`electron/fiddle`): checks every hour, with the first check 10 seconds after launch. {#platform.auto-update}
+- **Crash reporting:** Sentry, off in dev mode. {#platform.crash-reporting}
+- **About panel:** app and Electron versions, contributors, website. {#platform.about}
 - **Distribution:**
-  - Windows: Squirrel installer and MSIX.
-  - macOS: signed, notarized zip.
-  - Linux: deb, rpm, AppImage.
+  - Windows: Squirrel installer and MSIX. {#platform.dist-windows}
+  - macOS: signed, notarized zip. {#platform.dist-mac}
+  - Linux: deb, rpm, AppImage. {#platform.dist-linux}
 
 ### 17. New in the rewrite
 
-- **Command palette.** CmdOrCtrl+Shift+P searches commands (showing their keybindings), files, versions and examples. Monaco's F1 palette is merged into it.
-- **Session restore.** Reopens every window from the last session, with its fiddle, version and layout. A setting turns it off (default on).
+- **Command palette.** CmdOrCtrl+Shift+P searches commands (showing their keybindings), files, versions and examples. Monaco's F1 palette is merged into it. {#new.palette}
+- **Session restore.** Reopens every window from the last session, with its fiddle, version and layout. A setting turns it off (default on). {#new.session-restore}
 - **Windows:**
-  - Opening a folder that's already open focuses its window.
-  - Recent items are mirrored to the Windows jump list and the macOS dock menu.
-  - Long operations show progress on the taskbar or dock icon.
-  - A system notification is sent when a long operation finishes while the app is in the background.
+  - Opening a folder that's already open focuses its window. {#new.focus-open-folder}
+  - Recent items are mirrored to the Windows jump list and the macOS dock menu. {#new.recent-items}
+  - Long operations show progress on the taskbar or dock icon. {#new.taskbar-progress}
+  - A system notification is sent when a long operation finishes while the app is in the background. {#new.notification}
 - **Opening and sharing:**
-  - Dropping a folder or a gist URL on a window or on the dock icon opens it.
-  - "Copy share link" produces an https URL. The URL redirects to `electron-fiddle://`, and shows the gist if the app isn't installed.
-  - Deep links accept an optional `?revision=<sha>`.
+  - Dropping a folder or a gist URL on a window or on the dock icon opens it. {#new.drop-open}
+  - "Copy share link" produces an https URL. The URL redirects to `electron-fiddle://`, and shows the gist if the app isn't installed. {#new.share-link}
+  - Deep links accept an optional `?revision=<sha>`. {#new.deep-link-revision}
 - **Settings:**
-  - Search.
-  - Values that differ from their default are marked, and each can be reset.
-  - "Open settings.json".
-  - Import and export.
+  - Search. {#new.settings-search}
+  - Values that differ from their default are marked, and each can be reset. {#new.settings-reset}
+  - "Open settings.json". {#new.settings-open-json}
+  - Import and export. {#new.settings-import-export}

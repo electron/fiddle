@@ -11,6 +11,8 @@ export default {
   "themeCopyName": "{{name}} (Kopie)",
   "lucentDark": "Lucent dunkel",
   "lucentLight": "Lucent hell",
+  "lucentHcDark": "Lucent hoher Kontrast dunkel",
+  "lucentHcLight": "Lucent hoher Kontrast hell",
   "importExecutionMessage": "Einstellungen importieren, die ändern, wie Fiddles ausgeführt werden?",
   "importExecutionDetail": "Diese Einstellungen legen fest, woher Electron heruntergeladen wird und womit jede Ausführung startet. Importiere Einstellungen nur aus einer Quelle, der du vertraust.",
   "importEmpty": "keine",

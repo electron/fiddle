@@ -18,6 +18,7 @@ const mocks = vi.hoisted(() => ({
 vi.mock('../../../ipc/renderer', () => ({
   settingsApi: mocks.settingsApi,
   appApi: { GetAppInfo: () => Promise.resolve({ name: 'Fiddle', version: '1.0.0', electronVersion: '44.0.0' }) },
+  windowApi: { RunCommand: vi.fn(() => Promise.resolve()) },
 }));
 vi.mock('../../state', () => ({
   useAppState: () => mocks.app,
@@ -51,6 +52,7 @@ describe('SettingsPage', () => {
     expect(mocks.settingsApi.RefreshThemes).toHaveBeenCalled();
   });
 
+  // @feature new.settings-search
   it('searches every section by title, description and key', () => {
     render(<SettingsPage />);
     fireEvent.change(screen.getByRole('textbox', { name: 'search' }), { target: { value: 'packagemanager' } });
@@ -63,6 +65,7 @@ describe('SettingsPage', () => {
     expect(screen.getByText('noResults')).toBeTruthy();
   });
 
+  // @feature new.settings-reset
   it('marks changed values and resets them', () => {
     render(<SettingsPage />);
     fireEvent.click(screen.getByRole('button', { name: 'section.execution' }));
@@ -74,6 +77,7 @@ describe('SettingsPage', () => {
     expect(mocks.settingsApi.ResetSetting).toHaveBeenCalledWith('packageManager');
   });
 
+  // @feature settings.socket-firewall
   it('applies a change at once and sends it to main', () => {
     render(<SettingsPage />);
     fireEvent.click(screen.getByRole('button', { name: 'section.execution' }));

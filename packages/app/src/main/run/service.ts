@@ -12,11 +12,15 @@
  * 5. Stop sends SIGTERM, then SIGKILL after a second. Cleanup deletes only the
  *    dir this run created. The fiddle's userData is `<run dir>/user-data`
  *    (`--user-data-dir`), so it goes with it, unless "keep user data dirs" is on.
+ *
+ * The Run control follows `Window.run.status` through §17.6's states:
+ * checking, downloading and unzipping (the version), installing (modules),
+ * starting and running.
  */
 import type { ChildProcess } from 'node:child_process';
 import fsp from 'node:fs/promises';
 
-import { Installer } from '@electron/fiddle-core';
+import { Installer, type InstallStateEvent } from '@electron/fiddle-core';
 
 import { parseEnvEntries } from '../../fiddle/env';
 import { findMainEntry } from '../../fiddle/files';
@@ -26,9 +30,17 @@ import type { OutputLine, RunState, VersionRefValue } from '../../shared/stores'
 import * as documents from '../documents/service';
 import { tm } from '../i18n';
 import { log } from '../log';
+import { sfwEntryPath } from '../platform/sfw';
 import type { StateHub } from '../state-hub';
 import type { VersionsService } from '../versions/service';
-import { classifyRun, esmNeedsNewerElectron, toPackageName, type RunOutcome, type RunResult } from './logic';
+import {
+  classifyRun,
+  esmNeedsNewerElectron,
+  installRunStatus,
+  toPackageName,
+  type RunOutcome,
+  type RunResult,
+} from './logic';
 import { OutputBuffer } from './output-buffer';
 import { OutputParser, type ParseResult } from './output-parser';
 import {
@@ -39,6 +51,7 @@ import {
   userName,
   waitForExit,
   writeRunApp,
+  writeRunPackageJson,
 } from './process';
 
 const MAX_ERRORS = 50;
@@ -75,11 +88,16 @@ export class RunService {
   readonly #versions: VersionsService;
   readonly #send: (windowId: string, lines: OutputLine[]) => void;
   readonly #runs = new Map<string, WindowRun>();
+  /** The fiddle each window showed last, to clear its console when another loads. */
+  readonly #fiddles = new Map<string, { identity: string; rev: number }>();
 
   constructor(hub: StateHub, versions: VersionsService, send: (windowId: string, lines: OutputLine[]) => void) {
     this.#hub = hub;
     this.#versions = versions;
     this.#send = send;
+    hub.onChange((change) => {
+      if (change.store === 'window') this.#onWindowChange(change.windowId);
+    });
   }
 
   state(windowId: string): RunState {
@@ -117,11 +135,15 @@ export class RunService {
     }
   }
 
-  /** Makes sure the console is open, as a run, package or make does (§17.7). */
+  /** Makes sure the console is showing, as a run, package or make does (§17.7). */
   openConsole(windowId: string): void {
     const layout = this.#hub.getWindow(windowId)?.layout;
-    if (layout && layout.consoleHeight < MIN_CONSOLE_HEIGHT) {
-      documents.setLayout(windowId, { ...layout, consoleHeight: DEFAULT_CONSOLE_HEIGHT });
+    if (layout && (!layout.consoleVisible || layout.consoleHeight < MIN_CONSOLE_HEIGHT)) {
+      documents.setLayout(windowId, {
+        ...layout,
+        consoleVisible: true,
+        consoleHeight: layout.consoleHeight < MIN_CONSOLE_HEIGHT ? DEFAULT_CONSOLE_HEIGHT : layout.consoleHeight,
+      });
     }
   }
 
@@ -156,7 +178,7 @@ export class RunService {
     const abort = new AbortController();
     entry.abort = abort;
     if (settings.clearConsoleOnRun) this.clear(windowId);
-    this.setState(windowId, { status: 'starting', task: 'run', errors: [], percent: undefined, result: undefined });
+    this.setState(windowId, { status: 'checking', task: 'run', errors: [], percent: undefined, result: undefined });
     this.openConsole(windowId);
 
     let dir: string | undefined;
@@ -197,6 +219,7 @@ export class RunService {
     this.stop(windowId);
     this.#runs.get(windowId)?.buffer.dispose();
     this.#runs.delete(windowId);
+    this.#fiddles.delete(windowId);
   }
 
   #entry(windowId: string): WindowRun {
@@ -204,10 +227,33 @@ export class RunService {
     if (!entry) {
       entry = { buffer: new OutputBuffer((lines) => this.#send(windowId, lines)) };
       this.#runs.set(windowId, entry);
-      const ref = this.#hub.getWindow(windowId)?.fiddle.versionRef;
-      if (ref) entry.buffer.push({ process: 'fiddle', kind: 'system', text: tm('mainRun')('consoleReady', { version: this.versionLabel(ref) }) });
+      this.#logReady(windowId, entry);
     }
     return entry;
+  }
+
+  /** The console's first line: "Ready. Press Run to start Electron …". */
+  #logReady(windowId: string, entry: WindowRun): void {
+    const ref = this.#hub.getWindow(windowId)?.fiddle.versionRef;
+    if (ref) entry.buffer.push({ process: 'fiddle', kind: 'system', text: tm('mainRun')('consoleReady', { version: this.versionLabel(ref) }) });
+  }
+
+  /**
+   * A different fiddle loaded: it starts with an empty console and no runtime
+   * errors (§17.4). Keyed on the fiddle's identity, like the shell, and only
+   * when the editor text was replaced too: saving under a new name changes the
+   * identity but not `fiddleRev`, and adding a file bumps `fiddleRev` only.
+   */
+  #onWindowChange(windowId: string): void {
+    const fiddle = this.#hub.getWindow(windowId)?.fiddle;
+    if (!fiddle) return;
+    const identity = JSON.stringify([fiddle.name, fiddle.source]);
+    const last = this.#fiddles.get(windowId);
+    this.#fiddles.set(windowId, { identity, rev: fiddle.fiddleRev });
+    if (!last || last.identity === identity || last.rev === fiddle.fiddleRev) return;
+    const entry = this.#entry(windowId);
+    this.setState(windowId, { clearedSeq: entry.buffer.clear(), errors: [], result: undefined });
+    this.#logReady(windowId, entry);
   }
 
   versionLabel(ref: VersionRefValue): string {
@@ -232,8 +278,9 @@ export class RunService {
 
     const fiddle = trust.fiddle;
     const files = { ...fiddle.files };
-    const name = this.#hub.getWindow(windowId)?.fiddle.name ?? 'fiddle';
+    const name = toPackageName(this.#hub.getWindow(windowId)?.fiddle.name ?? 'fiddle');
     const { exec, label, release } = await this.#resolveElectron(windowId, options.versionRef ?? fiddle.version, signal);
+    this.setState(windowId, { status: 'checking', version: label, percent: undefined });
     const mainEntry = findMainEntry(Object.keys(files)) ?? 'main.js';
     if (esmNeedsNewerElectron(mainEntry, release)) throw new Refused(t('esmNeeds28'));
 
@@ -244,20 +291,20 @@ export class RunService {
       throw new Refused(t('pmMissing', { pm, url: PM_INSTALL_URLS[pm] }));
     }
 
-    this.setState(windowId, { status: 'starting', version: label, percent: undefined });
     const dir = await makeRunDir();
     onDir(dir);
-    const appDir = await writeRunApp(dir, files, {
-      name: toPackageName(name),
-      main: mainEntry,
-      author: settings.packageAuthor || userName(),
-      modules,
-    });
+    const packageJson = { name, main: mainEntry, author: settings.packageAuthor || userName(), modules };
+    // devDependencies.electron (§17.3) goes in after the module install, or
+    // npm and yarn would install Electron as well.
+    const withElectron = release ? { ...packageJson, electronVersion: release } : packageJson;
+    const appDir = await writeRunApp(dir, files, hasModules ? packageJson : withElectron);
 
     if (hasModules) {
+      this.setState(windowId, { status: 'installing' });
       this.log(windowId, trust.allowScripts ? t('installingModules', { pm }) : t('installingModulesNoScripts', { pm }));
-      // Socket Firewall isn't bundled yet (§15), so installs run without it.
-      if (settings.socketFirewall) this.log(windowId, t('noSocketFirewall'), 'warn');
+      // Socket Firewall wraps the install when it's on and `sfw.mjs` is there (§4).
+      const sfwPath = settings.socketFirewall ? sfwEntryPath() : undefined;
+      if (settings.socketFirewall && !sfwPath) this.log(windowId, t('noSocketFirewall'), 'warn');
       try {
         await installModules({
           dir: appDir,
@@ -265,6 +312,7 @@ export class RunService {
           packageManager: pm,
           modules,
           ignoreScripts: !trust.allowScripts,
+          ...(sfwPath ? { sfwPath } : {}),
           ...(toolEnv ? { env: toolEnv } : {}),
           signal,
           onOutput: (text) => this.logText(windowId, text),
@@ -274,9 +322,11 @@ export class RunService {
         this.log(windowId, t('modulesFailed', { message: FiddleError.from(error).message }), 'error');
         return { installFailed: true };
       }
+      await writeRunPackageJson(appDir, withElectron);
     }
     if (signal.aborted) throw new Error('aborted');
 
+    this.setState(windowId, { status: 'starting' });
     const userEnv = parseEnvEntries(settings.environmentVariables);
     if (userEnv.invalid.length > 0) this.log(windowId, t('envInvalid', { entries: userEnv.invalid.join(', ') }), 'warn');
     if (userEnv.blocked.length > 0) this.log(windowId, t('envBlocked', { keys: userEnv.blocked.join(', ') }), 'warn');
@@ -296,7 +346,7 @@ export class RunService {
     const entry = this.#entry(windowId);
     entry.child = child;
     this.setState(windowId, { status: 'running' });
-    this.log(windowId, t('started', { version: label, arch: process.arch }));
+    this.log(windowId, t('started', { version: release ? `v${release}` : label, name }));
 
     const realAppDir = await fsp.realpath(appDir).catch(() => appDir);
     const parser = new OutputParser({
@@ -341,11 +391,20 @@ export class RunService {
     if (!exec) {
       this.setState(windowId, { status: 'downloading', version });
       this.log(windowId, t('downloading', { version }));
+      // Downloading, then unzipping, as core's installer reports them.
+      const onState = (event: InstallStateEvent) => {
+        const status = event.version === version ? installRunStatus(event.state) : undefined;
+        if (status && this.state(windowId).status !== status) this.setState(windowId, { status });
+      };
+      const { installer } = this.#versions;
+      installer.on('state-changed', onState);
       try {
         exec = await this.#versions.install(version, signal);
       } catch (error) {
         if (signal.aborted) throw error;
         throw new Refused(t('downloadFailed', { version, message: FiddleError.from(error).message }));
+      } finally {
+        installer.off('state-changed', onState);
       }
     }
     return { exec, label: version, release: version };

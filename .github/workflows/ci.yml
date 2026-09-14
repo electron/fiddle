@@ -62,6 +62,11 @@ jobs:
       - name: End-to-end tests
         if: runner.os != 'Linux'
         run: yarn test:e2e
+      # REQUIREMENTS §11 "Coverage": prints which §17 IDs have a test. It fails
+      # only on unknown or duplicate IDs; add --strict once every ID is covered.
+      - name: Feature coverage
+        if: runner.os == 'Linux'
+        run: yarn features-coverage
       # Unsigned: no signing variables are set here.
       - name: Package smoke test
         run: yarn package

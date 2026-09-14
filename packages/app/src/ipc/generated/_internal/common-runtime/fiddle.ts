@@ -14,6 +14,10 @@ if (!(value.length >= 1)) return false;
 if (!(value.length <= 100)) return false;
   return true;
 }
+import { focusContextSchema } from "../../../../shared/settings.js";
+export function $eipc_validator$_FocusContext(value: unknown) {
+  return focusContextSchema.safeParse(value).success;
+}
 export function $eipc_validator$_AppInfo(value: any): boolean {
   if (!value || typeof value !== 'object') return false;
 
@@ -62,6 +66,10 @@ export function $eipc_validator$_SettingValue(value: unknown) {
 import { themeDataSchema } from "../../../../shared/settings.js";
 export function $eipc_validator$_ThemeData(value: unknown) {
   return themeDataSchema.safeParse(value).success;
+}
+import { themeSnapshotSchema } from "../../../../shared/settings.js";
+export function $eipc_validator$_ThemeSnapshot(value: unknown) {
+  return themeSnapshotSchema.safeParse(value).success;
 }
 export function $eipc_validator$_ThemeId(value: any): boolean {
 if (typeof value !== 'string') return false;

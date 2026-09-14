@@ -49,6 +49,8 @@
   "editorFontSize.title": "Schriftgröße",
   "editorFontSize.description": "In Pixeln, von 8 bis 40. Lass das Feld für den Standardwert leer.",
   "editorFontSize.invalid": "Gib eine ganze Zahl von 8 bis 40 ein.",
+  "editorFont.reloadHint": "Schriftänderungen werden nach dem Neuladen der Fenster wirksam.",
+  "editorFont.reload": "Fenster neu laden",
   "electronFlags.title": "Electron-Flags",
   "electronFlags.description": "Werden beim Ausführen eines Fiddles an Electron übergeben.",
   "environmentVariables.title": "Umgebungsvariablen",
@@ -126,5 +128,14 @@
   "notice.corrupt.description": "Fiddle hat die Datei beiseitegelegt und verwendet eine Sicherung oder die Standardwerte.",
   "notice.newer.title": "{{file}} stammt von einer neueren Fiddle-Version",
   "notice.newer.description": "Änderungen werden erst wieder darin gespeichert, wenn du Fiddle aktualisierst.",
-  "notice.dismiss": "Schließen"
+  "notice.dismiss": "Schließen",
+  "theme.highContrastDark": "Lucent hoher Kontrast dunkel",
+  "theme.highContrastLight": "Lucent hoher Kontrast hell",
+  "locale.relaunchTitle": "Neu starten, um den Sprachwechsel abzuschließen",
+  "locale.relaunchDescription": "Menüs und die App verwenden sie bereits. Der Editor und die Systemtexte wechseln nach einem Neustart.",
+  "locale.relaunch": "Neu starten",
+  "privacyReset.title": "Datenschutzberechtigungen zurücksetzen",
+  "privacyReset.description": "Fiddles laufen als Electron Fiddle, daher gehören Kamera-, Mikrofon- und andere Berechtigungen, die du einem Fiddle gegeben hast, der App. Damit werden alle vergessen.",
+  "privacyReset.button": "Zurücksetzen…",
+  "privacyReset.done": "Datenschutzberechtigungen zurückgesetzt"
 }

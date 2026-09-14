@@ -12,6 +12,13 @@ export default {
   "processRenderer": "[Ŕéñðéŕéŕ one]",
   "errorCount_one": "[{{count}} éŕŕöŕ one]",
   "errorCount_other": "[{{count}} éŕŕöŕš one]",
+  "warningCount_one": "[{{count}} ŵáŕñîñĝ one two]",
+  "warningCount_other": "[{{count}} ŵáŕñîñĝš one two]",
+  "resizePanes": "[Ŕéšîžé éðîţöŕ þáñéš one two]",
+  "notificationsButton_one": "[Ñöţîƒîçáţîöñš, {{count}} ñéŵ one two three]",
+  "notificationsButton_other": "[Ñöţîƒîçáţîöñš, {{count}} ñéŵ one two three]",
+  "noNotifications": "[Ñö ñöţîƒîçáţîöñš ýéţ one two]",
+  "clearNotifications": "[Çļéáŕ áļļ one]",
   "unsaved": "[Ûñšáṽéð çĥáñĝéš one two]",
   "hiddenFile": "[Ĥîððéñ one]",
   "filterFiles": "[Ƒîļţéŕ ƒîļéš one two]",
@@ -67,5 +74,6 @@ export default {
   "stubAddPackage": "[Åðð á þáçķáĝé one two]",
   "stubVersion": "[Éļéçţŕöñ one]",
   "stubSettingsTitle": "[Šéţţîñĝš one]",
-  "stubCloseSettings": "[Ðöñé one]"
+  "stubCloseSettings": "[Ðöñé one]",
+  "tabFocusMode": "[Ţáƀ ɱöṽéš ƒöçûš one two]"
 } as const;

@@ -34,6 +34,12 @@ subtype CommandId = string(
     maxLength: 100
 )
 
+zod_reference FocusContext {
+    import = "../../../../shared/settings"
+    type = "FocusContext"
+    schema = "focusContextSchema"
+}
+
 structure AppInfo {
     name: string
     version: string
@@ -67,6 +73,15 @@ interface Window {
 
     // Runs a command from the registry in the context of this window.
     RunCommand(id: CommandId)
+
+    // macOS: empty title bar space was double-clicked. Main minimizes or zooms
+    // the window, as the system preference says (§17.1).
+    DoubleClickTitleBar()
+
+    // A context menu is about to open over the editor, the console or anything
+    // else. Sent during the DOM event, so it reaches main before Chromium's
+    // `context-menu` event on the same channel (src/main/context-menu.ts).
+    ReportContextMenu(context: FocusContext)
 
     // Main's one channel to the window: commands whose handlers act on Monaco,
     // view state or a dialog there (`sendWindowCommand` in src/main/windows.ts).
@@ -157,6 +172,13 @@ zod_reference ThemeData {
     schema = "themeDataSchema"
 }
 
+// A built-in theme as the renderer draws it, for "Create from current".
+zod_reference ThemeSnapshot {
+    import = "../../../../shared/settings"
+    type = "ThemeSnapshot"
+    schema = "themeSnapshotSchema"
+}
+
 subtype ThemeId = string(
     minLength: 1
     maxLength: 100
@@ -188,7 +210,8 @@ interface Settings {
     // Imports a Monaco theme JSON file and selects it. Null when cancelled.
     ImportTheme() -> number?
     // Writes a theme file from the current theme, selects it and reveals it.
-    CreateTheme() -> number
+    // `builtin` is the built-in theme's current values; null for a custom theme.
+    CreateTheme(builtin: ThemeSnapshot?) -> number
     OpenThemesFolder()
 }
 
@@ -314,6 +337,12 @@ interface Versions {
     // Asks for a build folder. False when cancelled.
     AddLocalBuild() -> boolean
     RemoveLocalBuild(id: BuildId)
+    // Downloads this window's version if it still isn't: the renderer calls it when the computer is back online.
+    RetryDownload()
+    // Copies this window's version number (a local build's name) to the clipboard.
+    CopyVersion()
+    // Clears `Window.versionNotice` once the renderer has shown it.
+    DismissNotice(id: number)
     // Type definitions for this window's version, for Monaco. Null until available.
     GetTypes() -> EditorTypes?
     // The types for this window's version changed; call GetTypes again.
@@ -446,6 +475,11 @@ interface AppPlatform {
     // True once, for the first window to ask: show the first-run notice that
     // crash reports are on (§14). Recorded in state.json.
     TakeCrashReportsNotice() -> boolean
+    // Relaunches the app, e.g. after a language change (§9).
+    Relaunch()
+    // macOS: forgets every privacy grant (camera, microphone, …) after a
+    // confirmation (§4). False when cancelled.
+    ResetPrivacyPermissions() -> boolean
 
     // Linux and MSIX: a newer release is out (daily GitHub releases check).
     [Event]

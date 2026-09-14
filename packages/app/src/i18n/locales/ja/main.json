@@ -59,5 +59,16 @@
   "copyDiagnostics": "診断情報をコピー",
   "openFiddleRepository": "GitHub の Electron Fiddle",
   "openElectronRepository": "GitHub の Electron",
-  "reportIssue": "問題を報告"
+  "reportIssue": "問題を報告",
+  "actualSize": "実際のサイズ",
+  "zoomIn": "拡大",
+  "zoomOut": "縮小",
+  "clearConsole": "コンソールをクリア",
+  "formatAll": "すべてのファイルをフォーマット",
+  "formatSelection": "選択範囲のフォーマット",
+  "goToDefinition": "定義へ移動",
+  "findReferences": "参照を検索",
+  "toggleTabFocus": "Tab キーでフォーカス移動の切り替え",
+  "reloadAllWindows": "すべてのウィンドウを再読み込み",
+  "inspectElement": "要素を検証"
 }

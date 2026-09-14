@@ -33,6 +33,7 @@ describe('rankSearchHits', () => {
     expect(ranked.map((r) => r.name)).toEqual(['lodash', 'lodash.merge']);
   });
 
+  // @feature modules.search
   it('returns at most five results, drops malformed and duplicate hits', () => {
     const hits = [
       { name: 1, version: '1.0.0' },
@@ -57,6 +58,7 @@ describe('rankSearchHits', () => {
 });
 
 describe('toVersionList', () => {
+  // @feature modules.edit
   it('sorts newest first and uses the latest dist-tag', () => {
     expect(toVersionList(['1.0.0', '2.0.0-beta.1', '1.2.0'], '1.2.0')).toEqual({
       latest: '1.2.0',
@@ -78,6 +80,7 @@ describe('toVersionList', () => {
 describe('NpmClient', () => {
   const endpoints = { searchUrl: 'http://fixture.test/search', registryUrl: 'http://fixture.test/npm' };
 
+  // @feature modules.search
   it('queries the search endpoint and caches by query', async () => {
     const fetch = vi.fn<FetchFn>(async () => json({ hits: [hit('lodash-es'), hit('lodash')] }));
     const client = new NpmClient({ fetch, endpoints });

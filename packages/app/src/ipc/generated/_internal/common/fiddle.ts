@@ -10,6 +10,8 @@ export type { AppState };
 import type { WindowState } from "../../../../shared/stores.js";
 export type { WindowState };
 export type CommandId = string;
+import type { FocusContext } from "../../../../shared/settings.js";
+export type { FocusContext };
 export interface AppInfo {
   name: string;
   version: string;
@@ -26,11 +28,15 @@ export interface IAppRenderer {
 export interface IWindowImpl {
   ReportReady(): Promise<void> | void;
   RunCommand(id: CommandId): Promise<void> | void;
+  DoubleClickTitleBar(): Promise<void> | void;
+  ReportContextMenu(context: FocusContext): Promise<void> | void;
   getInitialWindowState(): Promise<WindowState> | WindowState;
 }
 export interface IWindowRenderer {
   ReportReady(): Promise<void>;
   RunCommand(id: CommandId): Promise<void>;
+  DoubleClickTitleBar(): Promise<void>;
+  ReportContextMenu(context: FocusContext): Promise<void>;
   onCommand(fn: (id: CommandId) => void): () => void;
   WindowStore: IPCStore<WindowState>
 }
@@ -78,6 +84,8 @@ import type { SettingValue } from "../../../../shared/settings.js";
 export type { SettingValue };
 import type { ThemeData } from "../../../../shared/settings.js";
 export type { ThemeData };
+import type { ThemeSnapshot } from "../../../../shared/settings.js";
+export type { ThemeSnapshot };
 export type ThemeId = string;
 export type NoticeId = string;
 export interface ISettingsImpl {
@@ -90,7 +98,7 @@ export interface ISettingsImpl {
   GetTheme(id: ThemeId): Promise<ThemeData | null> | ThemeData | null;
   RefreshThemes(): Promise<number> | number;
   ImportTheme(): Promise<number | null> | number | null;
-  CreateTheme(): Promise<number> | number;
+  CreateTheme(builtin: ThemeSnapshot | null): Promise<number> | number;
   OpenThemesFolder(): Promise<void> | void;
 }
 export interface ISettingsRenderer {
@@ -103,7 +111,7 @@ export interface ISettingsRenderer {
   GetTheme(id: ThemeId): Promise<ThemeData | null>;
   RefreshThemes(): Promise<number>;
   ImportTheme(): Promise<number | null>;
-  CreateTheme(): Promise<number>;
+  CreateTheme(builtin: ThemeSnapshot | null): Promise<number>;
   OpenThemesFolder(): Promise<void>;
 }
 import type { PackageSearchResults } from "../../../../shared/stores.js";
@@ -158,6 +166,9 @@ export interface IVersionsImpl {
   DeleteAll(): Promise<void> | void;
   AddLocalBuild(): Promise<boolean> | boolean;
   RemoveLocalBuild(id: BuildId): Promise<void> | void;
+  RetryDownload(): Promise<void> | void;
+  CopyVersion(): Promise<void> | void;
+  DismissNotice(id: number): Promise<void> | void;
   GetTypes(): Promise<EditorTypes | null> | EditorTypes | null;
 }
 export interface IVersionsRenderer {
@@ -171,6 +182,9 @@ export interface IVersionsRenderer {
   DeleteAll(): Promise<void>;
   AddLocalBuild(): Promise<boolean>;
   RemoveLocalBuild(id: BuildId): Promise<void>;
+  RetryDownload(): Promise<void>;
+  CopyVersion(): Promise<void>;
+  DismissNotice(id: number): Promise<void>;
   GetTypes(): Promise<EditorTypes | null>;
   onTypesChanged(fn: () => void): () => void;
 }
@@ -262,11 +276,15 @@ export interface IAppPlatformImpl {
   IsCrashReportingEnabled(): Promise<boolean> | boolean;
   OpenUpdatePage(): Promise<void> | void;
   TakeCrashReportsNotice(): Promise<boolean> | boolean;
+  Relaunch(): Promise<void> | void;
+  ResetPrivacyPermissions(): Promise<boolean> | boolean;
 }
 export interface IAppPlatformRenderer {
   Log(level: LogLevel, message: LogText): Promise<void>;
   IsCrashReportingEnabled(): Promise<boolean>;
   OpenUpdatePage(): Promise<void>;
   TakeCrashReportsNotice(): Promise<boolean>;
+  Relaunch(): Promise<void>;
+  ResetPrivacyPermissions(): Promise<boolean>;
   onUpdateAvailable(fn: (version: string) => void): () => void;
 }

@@ -11,5 +11,8 @@ export default {
   "remove": "Remove {{name}}",
   "addFailed": "Couldn't add {{name}}",
   "changeFailed": "Couldn't change {{name}}",
-  "list": "Packages in this fiddle"
+  "list": "Packages in this fiddle",
+  "searchVersions": "Search versions",
+  "noVersions": "No versions match",
+  "moreVersions": "Showing {{shown}} of {{total}}. Type to find the others."
 } as const;

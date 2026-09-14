@@ -4,6 +4,7 @@ import { ErrorCode, FiddleError } from '../shared/errors';
 import { electronPackageName, generatePackageJson, parsePackageJson, stripRangePrefix } from './package-json';
 
 describe('generatePackageJson', () => {
+  // @feature files.pkg-fields files.pkg-deps files.pkg-electron
   it('writes every field', () => {
     const text = generatePackageJson({
       name: 'sleepy-golden-otter',
@@ -25,6 +26,7 @@ describe('generatePackageJson', () => {
     expect(text).toContain('\n  "name"');
   });
 
+  // @feature files.pkg-electron
   it('uses electron-nightly for nightlies', () => {
     const pkg = JSON.parse(generatePackageJson({ name: 'x', electronVersion: '32.0.0-nightly.20240101' }));
     expect(pkg.devDependencies).toEqual({ 'electron-nightly': '32.0.0-nightly.20240101' });
@@ -38,6 +40,7 @@ describe('generatePackageJson', () => {
 });
 
 describe('parsePackageJson', () => {
+  // @feature load.gist-modules load.gist-version
   it('turns dependencies into modules and takes the Electron version', () => {
     const result = parsePackageJson(
       JSON.stringify({
@@ -52,6 +55,7 @@ describe('parsePackageJson', () => {
     });
   });
 
+  // @feature load.gist-version
   it('handles electron-nightly and ~ prefixes', () => {
     const result = parsePackageJson(JSON.stringify({ devDependencies: { 'electron-nightly': '~33.0.0-nightly.20240801' } }));
     expect(result.electronVersion).toBe('33.0.0-nightly.20240801');
@@ -110,6 +114,7 @@ describe('parsePackageJson', () => {
 });
 
 describe('stripRangePrefix', () => {
+  // @feature load.gist-version
   it('strips up to the first digit', () => {
     expect(stripRangePrefix('^1.2.0')).toBe('1.2.0');
     expect(stripRangePrefix('~2.3.4')).toBe('2.3.4');

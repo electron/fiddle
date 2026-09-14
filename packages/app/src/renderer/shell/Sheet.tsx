@@ -2,13 +2,13 @@
  * The sheet: the tab row, one Monaco pane (or two when split), the console
  * and, when `Window.view` is `settings`, the settings page instead.
  */
-import { useLayoutEffect, useRef, useState } from 'react';
+import { useLayoutEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import type { Platform, WindowState } from '../../shared/stores';
 import { Button, EmptyState, Icon, IconButton, SplitHandle, Tab, TabList, Tabs, Tooltip } from '../../ui';
+import { badgeOf, useDiagnostics } from '../editor/diagnostics';
 import { EditorPane } from '../editor/EditorPane';
-import { countByFile, useRuntimeErrors } from '../editor/runtime-errors';
 import { ConsolePane } from '../features/run/ConsolePane';
 import { SettingsPage } from '../features/settings/SettingsPage';
 import { processOf, type FileProcess } from './processes';
@@ -16,6 +16,11 @@ import styles from './Sheet.module.css';
 import { useDraft } from './use-draft';
 
 const CONSOLE_MIN = 96;
+const CONSOLE_DEFAULT = 160;
+/** Dragging the console's splitter below this closes the console (§17.7). */
+const CONSOLE_COLLAPSE = CONSOLE_MIN / 2;
+/** Each split pane keeps at least this width. */
+const PANE_MIN = 160;
 
 export const processLabelKey = {
   main: 'processMain',
@@ -23,16 +28,44 @@ export const processLabelKey = {
   renderer: 'processRenderer',
 } as const satisfies Record<FileProcess, string>;
 
+type Badge = ReturnType<typeof badgeOf>;
+
+/** A badge's text: "2 errors", or "1 warning" when the file has no errors. */
+export function useBadgeLabel(): (badge: Badge) => string | undefined {
+  const { t } = useTranslation('shell');
+  return (badge) =>
+    badge
+      ? badge.tone === 'error'
+        ? t('errorCount', { count: badge.count })
+        : t('warningCount', { count: badge.count })
+      : undefined;
+}
+
+/** An element's content size, kept current. ResizeObserver reports the first size on `observe`. */
+function useSize(node: HTMLElement | null): { width: number; height: number } {
+  const [size, setSize] = useState({ width: 0, height: 0 });
+  useLayoutEffect(() => {
+    if (!node) return;
+    const observer = new ResizeObserver(([entry]) =>
+      setSize({ width: entry?.contentRect.width ?? 0, height: entry?.contentRect.height ?? 0 }),
+    );
+    observer.observe(node);
+    return () => observer.disconnect();
+  }, [node]);
+  return size;
+}
+
 export interface SheetProps {
   state: WindowState;
   platform: Platform;
-  consoleVisible: boolean;
   onSelectFile: (name: string) => void;
   onToggleSplit: () => void;
   onCloseLeft: () => void;
   onCloseRight: () => void;
   onMaximize: (name: string) => void;
   onConsoleHeight: (height: number) => void;
+  /** The console's splitter was dragged closed. */
+  onHideConsole: () => void;
   onResetLayout: () => void;
   /** Something droppable is being dragged over the window. */
   dropping: boolean;
@@ -41,19 +74,11 @@ export interface SheetProps {
 export function Sheet(props: SheetProps) {
   const { t } = useTranslation('shell');
   const { state } = props;
-  const sheet = useRef<HTMLElement>(null);
-  const [height, setHeight] = useState(0);
-  useLayoutEffect(() => {
-    const node = sheet.current;
-    if (!node) return;
-    setHeight(node.clientHeight);
-    const observer = new ResizeObserver(([entry]) => setHeight(entry?.contentRect.height ?? 0));
-    observer.observe(node);
-    return () => observer.disconnect();
-  }, []);
+  const [sheet, setSheet] = useState<HTMLElement | null>(null);
+  const { height } = useSize(sheet);
 
   return (
-    <section ref={sheet} className={styles.sheet}>
+    <section ref={setSheet} className={styles.sheet}>
       {state.view === 'settings' ? (
         <div className={styles.settings}>
           <SettingsPage />
@@ -75,19 +100,21 @@ export function Sheet(props: SheetProps) {
 function EditorArea({
   state,
   platform,
-  consoleVisible,
   onSelectFile,
   onToggleSplit,
   onCloseLeft,
   onCloseRight,
   onMaximize,
   onConsoleHeight,
+  onHideConsole,
   onResetLayout,
   sheetHeight,
 }: SheetProps & { sheetHeight: number }) {
-  const { t } = useTranslation('shell');
+  const { t, i18n } = useTranslation('shell');
   const { fiddle, layout } = state;
-  const errors = countByFile(useRuntimeErrors());
+  const diagnostics = useDiagnostics();
+  const badgeLabel = useBadgeLabel();
+  const badge = (name: string) => badgeOf(diagnostics.get(name));
   const visible = fiddle.files.filter((file) => file.visible);
   const names = fiddle.files.map((file) => file.name);
   const active =
@@ -95,25 +122,34 @@ function EditorArea({
       ? fiddle.activeFile
       : (visible[0]?.name ?? null);
   const split = layout.split && names.includes(layout.split) ? layout.split : null;
+  const splitKbd = platform === 'darwin' ? '⌘\\' : 'Ctrl+\\';
+
+  // The console: 96px to half the sheet; dragged below half the minimum, it closes.
   const consoleMax = Math.max(CONSOLE_MIN, Math.floor(sheetHeight / 2));
   const [consoleHeight, setConsoleHeight] = useDraft(layout.consoleHeight, onConsoleHeight);
   const shownConsoleHeight = Math.min(Math.max(consoleHeight, CONSOLE_MIN), consoleMax);
-  const splitKbd = platform === 'darwin' ? '⌘\\' : 'Ctrl+\\';
-  const errorLabel = (name: string) => {
-    const count = errors.get(name) ?? 0;
-    return count ? t('errorCount', { count }) : undefined;
+  const resizeConsole = (value: number) => {
+    if (value < CONSOLE_COLLAPSE) onHideConsole();
+    else setConsoleHeight(Math.max(value, CONSOLE_MIN));
   };
 
-  const consoleArea = consoleVisible && (
+  // Split panes: the left pane's share of the width, while this window shows them.
+  const [panes, setPanes] = useState<HTMLDivElement | null>(null);
+  const panesWidth = useSize(panes).width;
+  const [ratio, setRatio] = useState(0.5);
+  const leftMax = Math.max(PANE_MIN, panesWidth - PANE_MIN);
+  const leftWidth = Math.min(leftMax, Math.max(PANE_MIN, Math.round(panesWidth * ratio)));
+
+  const consoleArea = layout.consoleVisible && (
     <>
       <SplitHandle
         orientation="horizontal"
         value={shownConsoleHeight}
-        min={CONSOLE_MIN}
+        min={0}
         max={consoleMax}
         reverse
-        onChange={setConsoleHeight}
-        onReset={() => setConsoleHeight(160)}
+        onChange={resizeConsole}
+        onReset={() => setConsoleHeight(CONSOLE_DEFAULT)}
         label={t('resizeConsole')}
       />
       <div className={styles.console} style={{ height: shownConsoleHeight }}>
@@ -149,18 +185,22 @@ function EditorArea({
         <div className={styles.tabs}>
           <Tabs value={active} onChange={onSelectFile}>
             <TabList aria-label={t('openFiles')}>
-              {visible.map((file) => (
-                <Tab
-                  key={file.name}
-                  id={file.name}
-                  errorCount={errors.get(file.name)}
-                  errorLabel={errorLabel(file.name)}
-                  unsaved={fiddle.dirtyFiles.includes(file.name)}
-                  unsavedLabel={t('unsaved')}
-                >
-                  <span dir="ltr">{file.name}</span>
-                </Tab>
-              ))}
+              {visible.map((file) => {
+                const fileBadge = badge(file.name);
+                return (
+                  <Tab
+                    key={file.name}
+                    id={file.name}
+                    errorCount={fileBadge?.count}
+                    errorTone={fileBadge?.tone}
+                    errorLabel={badgeLabel(fileBadge)}
+                    unsaved={fiddle.dirtyFiles.includes(file.name)}
+                    unsavedLabel={t('unsaved')}
+                  >
+                    <span dir="ltr">{file.name}</span>
+                  </Tab>
+                );
+              })}
             </TabList>
           </Tabs>
         </div>
@@ -175,23 +215,33 @@ function EditorArea({
           />
         </Tooltip>
       </div>
-      <div className={styles.panes} data-tour="editor">
+      <div ref={setPanes} className={styles.panes} data-tour="editor">
         {split ? (
           <>
-            <div className={styles.pane}>
+            <div className={styles.pane} style={panesWidth ? { flex: 'none', width: leftWidth } : undefined}>
               <PaneHeader
                 name={active}
-                errors={errorLabel(active)}
+                badge={badge(active)}
                 onMaximize={() => onMaximize(active)}
                 onClose={onCloseLeft}
               />
               <EditorPane file={active} primary />
             </div>
-            <div className={styles.divider} />
+            <SplitHandle
+              value={leftWidth}
+              min={PANE_MIN}
+              max={leftMax}
+              // In a right-to-left layout the first pane is on the right.
+              reverse={i18n.dir() === 'rtl'}
+              onChange={(width) => panesWidth && setRatio(width / panesWidth)}
+              onReset={() => setRatio(0.5)}
+              label={t('resizePanes')}
+              className={styles.divider}
+            />
             <div className={styles.pane}>
               <PaneHeader
                 name={split}
-                errors={errorLabel(split)}
+                badge={badge(split)}
                 onMaximize={() => onMaximize(split)}
                 onClose={onCloseRight}
               />
@@ -209,21 +259,22 @@ function EditorArea({
 
 interface PaneHeaderProps {
   name: string;
-  errors: string | undefined;
+  badge: Badge;
   onMaximize: () => void;
   onClose: () => void;
 }
 
-/** Split view pane header: grip, filename (spark with its error count), process label, actions. */
-function PaneHeader({ name, errors, onMaximize, onClose }: PaneHeaderProps) {
+/** Split view pane header: grip, filename (spark or warning, with its count), process label, actions. */
+function PaneHeader({ name, badge, onMaximize, onClose }: PaneHeaderProps) {
   const { t } = useTranslation('shell');
+  const label = useBadgeLabel()(badge);
   return (
     <div className={styles.paneHeader}>
       <Icon name="grip" className={styles.grip} />
-      <span className={styles.paneName} data-error={errors ? true : undefined}>
-        {errors && <Icon name="warning" />}
+      <span className={styles.paneName} data-tone={badge?.tone}>
+        {badge && <Icon name="warning" />}
         <span dir="ltr">{name}</span>
-        {errors && <span className={styles.paneErrors}>{errors}</span>}
+        {label && <span className={styles.paneErrors}>{label}</span>}
       </span>
       <span className={styles.paneProcess}>{t(processLabelKey[processOf(name)])}</span>
       <span className={styles.paneActions}>

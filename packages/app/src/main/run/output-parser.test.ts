@@ -20,6 +20,7 @@ describe('mapToFiddleFile', () => {
 });
 
 describe('OutputParser', () => {
+  // @feature run.output
   it('passes stdout through as main output, across chunk boundaries', () => {
     const p = parser();
     expect(p.push('stdout', 'hello wo').lines).toEqual([]);
@@ -29,6 +30,7 @@ describe('OutputParser', () => {
     ]);
   });
 
+  // @feature console.filter-banner
   it('drops the inspector banner and reports its port', () => {
     const result = parser().push(
       'stderr',

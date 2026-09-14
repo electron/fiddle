@@ -72,6 +72,7 @@ describe('Runner with a real child process', () => {
     return { main, started };
   }
 
+  // @feature run.result-success run.result-failure
   it('reports the exit code', async () => {
     const main = 'process.exit(Number(process.env.EXIT_CODE ?? 0));';
     const opts = { out: undefined, showConfig: false };

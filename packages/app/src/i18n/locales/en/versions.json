@@ -1,0 +1,6 @@
+{
+  "searchVersions": { "message": "Search versions", "description": "Placeholder and accessible name of the search field at the top of the Electron version picker's menu.", "maxLength": 24 },
+  "noMatches": { "message": "No versions match", "description": "Shown in the version picker's menu when the search matches no version.", "maxLength": 40 },
+  "copyVersion": { "message": "Copy version number", "description": "Last item of the version picker's menu: copies the chosen Electron version number (or local build name) to the clipboard.", "maxLength": 32 },
+  "copied": { "message": "Copied {{version}}", "description": "Toast after copying the version number. {{version}} is a version such as 43.0.0, or a local build's name.", "maxLength": 60 }
+}

@@ -50,6 +50,16 @@
     "description": "Name of the built-in light theme. Lucent is the design system's name; keep it as is.",
     "maxLength": 40
   },
+  "lucentHcDark": {
+    "message": "Lucent high contrast dark",
+    "description": "Name of the built-in high-contrast dark theme, in the name of a theme copied from it. Lucent is the design system's name; keep it as is.",
+    "maxLength": 40
+  },
+  "lucentHcLight": {
+    "message": "Lucent high contrast light",
+    "description": "Name of the built-in high-contrast light theme, in the name of a theme copied from it. Lucent is the design system's name; keep it as is.",
+    "maxLength": 40
+  },
   "importExecutionMessage": {
     "message": "Import settings that change how fiddles run?",
     "description": "Confirmation when an imported settings file changes Electron flags, environment variables or download mirrors.",

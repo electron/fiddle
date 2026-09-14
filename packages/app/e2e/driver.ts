@@ -413,7 +413,7 @@ function hasCommand(name: string): boolean {
 }
 
 /** Chromium's sandbox needs a setuid chrome-sandbox on Linux, which containers usually lack. */
-function electronArgs(electronPath: string): string[] {
+export function electronArgs(electronPath: string): string[] {
   if (process.platform !== 'linux') return [];
   const args = ['--password-store=basic'];
   try {

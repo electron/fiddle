@@ -209,8 +209,15 @@ export function VersionManager() {
             size="sm"
             variant="secondary"
             icon="download"
+            // Only the rows on screen (§17.8), not the ones past the row limit.
             onPress={() =>
-              report(versionsApi.DownloadAll(matches.filter((r) => r.supported).map((r) => r.version)))
+              report(
+                versionsApi.DownloadAll(
+                  shown
+                    .filter((r) => r.supported && installs[r.version]?.state !== 'installed')
+                    .map((r) => r.version),
+                ),
+              )
             }
           >
             {t('downloadAll')}

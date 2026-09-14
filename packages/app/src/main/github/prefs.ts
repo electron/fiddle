@@ -10,6 +10,8 @@ import type { StateHub } from '../state-hub';
 export interface PublishOptions {
   isPublic: boolean;
   asRevision: boolean;
+  /** The "Package author" setting, for the gist's package.json (§17.3). Unset when empty. */
+  author?: string;
 }
 
 export interface GistPrefs {
@@ -23,6 +25,7 @@ export function createGistPrefs(hub: StateHub, settings: Pick<SettingsService, '
     get: () => ({
       isPublic: hub.app.settings.gistVisibility === 'public',
       asRevision: hub.app.settings.gistPublishAsRevision,
+      ...(hub.app.settings.packageAuthor ? { author: hub.app.settings.packageAuthor } : {}),
     }),
     setVisibility: (isPublic) => {
       settings.set('gistVisibility', isPublic ? 'public' : 'secret');

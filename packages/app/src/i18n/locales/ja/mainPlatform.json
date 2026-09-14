@@ -16,5 +16,9 @@
   "sendReport": "レポートを送信",
   "dontSend": "送信しない",
   "aboutVersion": "{{version}} (Electron {{electron}})",
-  "aboutCopyright": "© Electron authors"
+  "aboutCopyright": "© Electron authors",
+  "resetPrivacyMessage": "すべてのプライバシー権限をリセットしますか？",
+  "resetPrivacyDetail": "Electron Fiddle と、それが実行する Fiddle は、カメラ、マイク、連絡先などの保護されたデータにアクセスできなくなります。次に必要になったときに macOS が再度確認します。",
+  "resetPrivacyButton": "リセット",
+  "resetPrivacyFailed": "プライバシー権限をリセットできませんでした。"
 }

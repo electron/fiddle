@@ -11,6 +11,8 @@ export default {
   "themeCopyName": "[{{name}} çöþý one]",
   "lucentDark": "[Ļûçéñţ ðáŕķ one two]",
   "lucentLight": "[Ļûçéñţ ļîĝĥţ one two]",
+  "lucentHcDark": "[Ļûçéñţ ĥîĝĥ çöñţŕášţ ðáŕķ one two three]",
+  "lucentHcLight": "[Ļûçéñţ ĥîĝĥ çöñţŕášţ ļîĝĥţ one two three]",
   "importExecutionMessage": "[Îɱþöŕţ šéţţîñĝš ţĥáţ çĥáñĝé ĥöŵ ƒîððļéš ŕûñ? one two three four]",
   "importExecutionDetail": "[Ţĥéšé šéţţîñĝš çöñţŕöļ ŵĥéŕé Éļéçţŕöñ îš ðöŵñļöáðéð ƒŕöɱ áñð ŵĥáţ éṽéŕý ŕûñ šţáŕţš ŵîţĥ. Öñļý îɱþöŕţ šéţţîñĝš ƒŕöɱ á šöûŕçé ýöû ţŕûšţ. one two three four five six seven eight nine ten one two]",
   "importEmpty": "[ñöñé one]",

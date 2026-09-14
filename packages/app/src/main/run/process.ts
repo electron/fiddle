@@ -44,6 +44,11 @@ export async function writeRunApp(dir: string, files: FileMap, packageJson: Pack
   return appDir;
 }
 
+/** Replaces `<appDir>/package.json`, for example to add `devDependencies.electron` once modules are installed. */
+export function writeRunPackageJson(appDir: string, packageJson: PackageJsonInput): Promise<void> {
+  return fsp.writeFile(path.join(appDir, PACKAGE_JSON), generatePackageJson(packageJson));
+}
+
 interface SpawnElectronOptions {
   installer: Installer;
   versions: ElectronVersions;

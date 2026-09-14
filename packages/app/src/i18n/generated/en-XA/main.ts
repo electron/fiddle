@@ -60,5 +60,16 @@ export default {
   "copyDiagnostics": "[Çöþý ðîáĝñöšţîçš one two]",
   "openFiddleRepository": "[Éļéçţŕöñ Ƒîððļé öñ ĜîţĤûƀ one two three]",
   "openElectronRepository": "[Éļéçţŕöñ öñ ĜîţĤûƀ one two]",
-  "reportIssue": "[Ŕéþöŕţ áñ îššûé one two]"
+  "reportIssue": "[Ŕéþöŕţ áñ îššûé one two]",
+  "actualSize": "[Åçţûáļ šîžé one two]",
+  "zoomIn": "[Žööɱ îñ one]",
+  "zoomOut": "[Žööɱ öûţ one]",
+  "clearConsole": "[Çļéáŕ çöñšöļé one two]",
+  "formatAll": "[Ƒöŕɱáţ áļļ ƒîļéš one two]",
+  "formatSelection": "[Ƒöŕɱáţ šéļéçţîöñ one two]",
+  "goToDefinition": "[Ĝö ţö ðéƒîñîţîöñ one two]",
+  "findReferences": "[Ƒîñð ŕéƒéŕéñçéš one two]",
+  "toggleTabFocus": "[Ţöĝĝļé Ţáƀ ķéý ɱöṽéš ƒöçûš one two three]",
+  "reloadAllWindows": "[Ŕéļöáð áļļ ŵîñðöŵš one two]",
+  "inspectElement": "[Îñšþéçţ éļéɱéñţ one two]"
 } as const;

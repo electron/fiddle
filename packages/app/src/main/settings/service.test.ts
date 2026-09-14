@@ -53,6 +53,7 @@ describe('SettingsService', () => {
     expect(hub.app.settings.packageManager).toBe('yarn');
   });
 
+  // @feature settings.persist-sync
   it('keeps settings.json sparse', async () => {
     const { store, service } = open();
     service.set('packageManager', 'yarn');
@@ -86,6 +87,7 @@ describe('SettingsService', () => {
     });
   });
 
+  // @feature new.settings-import-export
   it('replaces everything on import and exports the sparse values', () => {
     const { hub, service } = open();
     service.set('showObsolete', true);

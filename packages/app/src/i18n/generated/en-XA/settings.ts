@@ -32,6 +32,8 @@ export default {
   "theme.title": "[Ţĥéɱé one]",
   "theme.description": "[Ļûçéñţ îš ƀûîļţ îñ. Çûšţöɱ ţĥéɱéš áŕé ĴŠÖÑ ƒîļéš îñ ýöûŕ ţĥéɱéš ƒöļðéŕ. one two three four five six seven]",
   "theme.lucent": "[Ļûçéñţ one]",
+  "theme.highContrastDark": "[Ļûçéñţ ĥîĝĥ çöñţŕášţ ðáŕķ one two three]",
+  "theme.highContrastLight": "[Ļûçéñţ ĥîĝĥ çöñţŕášţ ļîĝĥţ one two three]",
   "theme.dark": "[ðáŕķ one]",
   "theme.light": "[ļîĝĥţ one]",
   "theme.importMonaco": "[Îɱþöŕţ Ṁöñáçö ţĥéɱé… one two]",
@@ -40,6 +42,9 @@ export default {
   "locale.title": "[Ļáñĝûáĝé one]",
   "locale.description": "[Ṁéñûš áñð ţĥé áþþ šŵîţçĥ ŕîĝĥţ áŵáý. Ţĥé éðîţöŕ šŵîţçĥéš áƒţéŕ á ŕéšţáŕţ. one two three four five six seven]",
   "locale.system": "[Šýšţéɱ ðéƒáûļţ one two]",
+  "locale.relaunchTitle": "[Ŕéļáûñçĥ ţö ƒîñîšĥ šŵîţçĥîñĝ ţĥé ļáñĝûáĝé one two three four]",
+  "locale.relaunchDescription": "[Ṁéñûš áñð ţĥé áþþ ûšé îţ áļŕéáðý. Ţĥé éðîţöŕ áñð šýšţéɱ ţéẋţš šŵîţçĥ áƒţéŕ á ŕéļáûñçĥ. one two three four five six seven eight]",
+  "locale.relaunch": "[Ŕéļáûñçĥ one]",
   "sessionRestore.title": "[Ŕéšţöŕé ŵîñðöŵš öñ ļáûñçĥ one two three]",
   "sessionRestore.description": "[Ŕéöþéñ éṽéŕý ŵîñðöŵ ƒŕöɱ ţĥé ļášţ šéššîöñ, ŵîţĥ îţš ƒîððļé, ṽéŕšîöñ áñð ļáýöûţ. one two three four five six seven]",
   "notifications.title": "[Ñöţîƒîçáţîöñš one two]",
@@ -50,6 +55,8 @@ export default {
   "editorFontSize.title": "[Ƒöñţ šîžé one]",
   "editorFontSize.description": "[Îñ þîẋéļš, ƒŕöɱ 8 ţö 40. Ļéáṽé îţ éɱþţý ƒöŕ ţĥé ðéƒáûļţ. one two three four five]",
   "editorFontSize.invalid": "[Éñţéŕ á ŵĥöļé ñûɱƀéŕ ƒŕöɱ 8 ţö 40. one two three]",
+  "editorFont.reloadHint": "[Ƒöñţ çĥáñĝéš áþþļý áƒţéŕ ţĥé ŵîñðöŵš ŕéļöáð. one two three four]",
+  "editorFont.reload": "[Ŕéļöáð ŵîñðöŵš one two]",
   "electronFlags.title": "[Éļéçţŕöñ ƒļáĝš one two]",
   "electronFlags.description": "[Þáššéð ţö Éļéçţŕöñ ŵĥéñ á ƒîððļé ŕûñš. one two three four]",
   "environmentVariables.title": "[Éñṽîŕöñɱéñţ ṽáŕîáƀļéš one two three]",
@@ -127,5 +134,9 @@ export default {
   "notice.corrupt.description": "[Ƒîððļé šéţ îţ ášîðé áñð îš ûšîñĝ á ƀáçķûþ öŕ ţĥé ðéƒáûļţš. one two three four five]",
   "notice.newer.title": "[{{file}} îš ƒŕöɱ á ñéŵéŕ Ƒîððļé one two three]",
   "notice.newer.description": "[Çĥáñĝéš ŵöñ'ţ ƀé šáṽéð ţö îţ ûñţîļ ýöû ûþðáţé Ƒîððļé. one two three four five]",
-  "notice.dismiss": "[Ðîšɱîšš one]"
+  "notice.dismiss": "[Ðîšɱîšš one]",
+  "privacyReset.title": "[Ŕéšéţ þŕîṽáçý þéŕɱîššîöñš one two three]",
+  "privacyReset.description": "[Ƒîððļéš ŕûñ áš Éļéçţŕöñ Ƒîððļé, šö ţĥé çáɱéŕá, ɱîçŕöþĥöñé áñð öţĥéŕ þéŕɱîššîöñš ýöû ĝáṽé á ƒîððļé ƀéļöñĝ ţö ţĥé áþþ. Ţĥîš ƒöŕĝéţš ţĥéɱ áļļ. one two three four five six seven eight nine ten one two]",
+  "privacyReset.button": "[Ŕéšéţ… one]",
+  "privacyReset.done": "[Þŕîṽáçý þéŕɱîššîöñš ŕéšéţ one two three]"
 } as const;

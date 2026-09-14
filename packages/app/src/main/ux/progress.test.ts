@@ -35,6 +35,7 @@ const bisect = (current: string | null, result: { good: string; bad: string } | 
   result,
 });
 
+// @feature new.taskbar-progress
 describe('taskbarProgress', () => {
   it('shows nothing when idle', () => {
     expect(taskbarProgress(versions(), run())).toEqual({ mode: 'none' });
@@ -70,6 +71,7 @@ describe('taskbarProgress', () => {
   });
 });
 
+// @feature new.notification
 describe('finishedWindowOperations', () => {
   it('reports a finished auto-bisect', () => {
     const prev = run({ bisect: bisect('1.5.0') });

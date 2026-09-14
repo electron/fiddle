@@ -54,6 +54,35 @@
     "message": "{{count}} errors",
     "description": "Pill on a sidebar file row and in an editor pane header: how many runtime errors the file has. Plural."
   },
+  "warningCount_one": {
+    "message": "{{count}} warning",
+    "description": "Pill on a sidebar file row, tab badge and editor pane header: how many editor warnings the file has, when it has no errors. Singular."
+  },
+  "warningCount_other": {
+    "message": "{{count}} warnings",
+    "description": "Pill on a sidebar file row, tab badge and editor pane header: how many editor warnings the file has, when it has no errors. Plural."
+  },
+  "resizePanes": {
+    "message": "Resize editor panes",
+    "description": "Accessible name of the divider between the two editor panes in split view."
+  },
+  "notificationsButton_one": {
+    "message": "Notifications, {{count}} new",
+    "description": "Accessible name of the status bar bell button when there is one notification the user hasn't seen in the list. Singular."
+  },
+  "notificationsButton_other": {
+    "message": "Notifications, {{count}} new",
+    "description": "Accessible name of the status bar bell button when there are notifications the user hasn't seen in the list. Plural."
+  },
+  "noNotifications": {
+    "message": "No notifications yet",
+    "description": "Shown in the notification list when no notification has appeared in this window."
+  },
+  "clearNotifications": {
+    "message": "Clear all",
+    "description": "Button in the notification list header that removes every past notification from the list.",
+    "maxLength": 20
+  },
   "unsaved": {
     "message": "Unsaved changes",
     "description": "Spoken by screen readers for the dot on a file with unsaved changes."
@@ -309,5 +338,10 @@
     "message": "Done",
     "description": "Placeholder button that closes the settings page.",
     "maxLength": 20
+  },
+  "tabFocusMode": {
+    "message": "Tab moves focus",
+    "description": "Status bar indicator shown while tab-focus mode is on: the Tab key moves keyboard focus out of the editor instead of inserting a tab. Tab is the key's name.",
+    "maxLength": 30
   }
 }

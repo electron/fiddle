@@ -66,6 +66,7 @@ describe('module specs', () => {
 describe('install commands', () => {
   const modules = { lodash: '4.17.21', '@types/node': '^20' };
 
+  // @feature run.install-modules
   it('uses npm install -S, with -- before the specs', () => {
     expect(buildInstallCommand({ packageManager: 'npm', modules })).toEqual({
       command: 'npm',
@@ -74,6 +75,7 @@ describe('install commands', () => {
     expect(buildInstallCommand({ packageManager: 'npm' })).toEqual({ command: 'npm', args: ['install', '-S'] });
   });
 
+  // @feature run.install-modules
   it('uses yarn add, or yarn install with no modules', () => {
     expect(buildInstallCommand({ packageManager: 'yarn', modules })).toEqual({
       command: 'yarn',
@@ -96,6 +98,7 @@ describe('install commands', () => {
     expect(buildInstallCommand({ packageManager: 'npm', modules: { a: '1.0.0' } }).env).toBeUndefined();
   });
 
+  // @feature run.install-modules
   it('wraps with sfw', () => {
     expect(buildInstallCommand({ packageManager: 'yarn', modules: { a: '1.0.0' }, sfwPath: '/app/sfw/dist/sfw.mjs' })).toEqual({
       command: 'node',
@@ -117,6 +120,7 @@ describe('install commands', () => {
     );
   });
 
+  // @feature run.package-steps
   it('builds run-script commands', () => {
     expect(buildRunScriptCommand('npm', 'make')).toEqual({ command: 'npm', args: ['run', 'make'] });
     expect(buildRunScriptCommand('yarn', 'package')).toEqual({ command: 'yarn', args: ['run', 'package'] });
@@ -124,6 +128,7 @@ describe('install commands', () => {
 });
 
 describe('versions', () => {
+  // @feature modules.normalize
   it('normalizes non-semver versions to the latest', () => {
     expect(normalizeModuleVersion('1.2.3', '2.0.0')).toBe('1.2.3');
     expect(normalizeModuleVersion('*', '2.0.0')).toBe('2.0.0');
@@ -145,6 +150,7 @@ function fakeExec(result: string | Error) {
 }
 
 describe('host lookups', () => {
+  // @feature modules.find-pm
   it('finds the package manager with which or where.exe', async () => {
     const posix = fakeExec('/usr/local/bin/npm\n');
     expect(await findPackageManager('npm', { platform: 'darwin', exec: posix.exec })).toBe('/usr/local/bin/npm');
@@ -158,6 +164,7 @@ describe('host lookups', () => {
     expect(await findPackageManager('npm', { platform: 'linux', exec: fakeExec('').exec })).toBeNull();
   });
 
+  // @feature modules.find-pm
   it('loads PATH from the login shell', async () => {
     const shell = fakeExec('Welcome!\n\u001b[1m__FIDDLE_SHELL_PATH__\n/opt/homebrew/bin:/usr/bin\n__FIDDLE_SHELL_PATH__bye');
     const result = await loadLoginShellPath({ platform: 'darwin', env: { SHELL: '/bin/fish', HOME: '/h' }, exec: shell.exec });
@@ -179,6 +186,7 @@ describe('host lookups', () => {
     expect(win.calls).toHaveLength(0);
   });
 
+  // @feature modules.find-pm
   it('runs the login shell and reads PATH between the markers', async () => {
     if (process.platform === 'win32') return;
     const dir = await mkdtemp(path.join(tmpdir(), 'fiddle-shell-'));

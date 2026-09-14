@@ -27,6 +27,7 @@ describe('OutputBuffer', () => {
     expect(batches[1]?.map((l) => l.seq)).toEqual([3]);
   });
 
+  // @feature console.lines
   it('keeps the last 1000 lines and caps a batch at the same size', () => {
     const batches: OutputLine[][] = [];
     const buffer = new OutputBuffer((lines) => batches.push(lines));
@@ -37,6 +38,7 @@ describe('OutputBuffer', () => {
     expect(batches[0]).toHaveLength(OUTPUT_LIMIT);
   });
 
+  // @feature console.clear
   it('clears the backlog but never reuses sequence numbers', () => {
     const buffer = new OutputBuffer(() => {});
     buffer.push(line('a'));

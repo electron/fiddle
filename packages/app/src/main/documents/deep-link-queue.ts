@@ -67,6 +67,28 @@ export function shouldOfferSignIn(error: unknown, signedIn: boolean): boolean {
   return code === ErrorCode.notFound || code === ErrorCode.unauthorized;
 }
 
+/**
+ * A gist page URL (`https://gist.github.com/[<owner>/]<id>[/<sha>]`), for
+ * example one dropped on the macOS dock icon, as the matching
+ * `electron-fiddle://gist/…` link, so it gets the same parsing and trust
+ * prompt. Undefined for anything else.
+ */
+export function gistUrlToDeepLink(text: string): string | undefined {
+  let url: URL;
+  try {
+    url = new URL(text);
+  } catch {
+    return undefined;
+  }
+  if (url.protocol !== 'https:' || url.hostname !== 'gist.github.com' || url.port || url.username || url.password) {
+    return undefined;
+  }
+  const match = /^\/(?:([^/]+)\/)?([0-9a-f]{32})(?:\/([0-9a-f]{40}))?\/?$/i.exec(url.pathname);
+  if (!match) return undefined;
+  const [, owner, id, sha] = match;
+  return `electron-fiddle://gist/${owner ? `${owner}/` : ''}${id}${sha ? `?revision=${sha}` : ''}`;
+}
+
 export class DeepLinkQueue {
   #ready = false;
   #busy = false;
@@ -76,39 +98,47 @@ export class DeepLinkQueue {
 
   /**
    * @param handle Parses, confirms and loads one link. Errors are its to show.
-   * @param onBusy Called for a link that arrives while another is pending.
+   * @param onBusy Called for a link that arrives while another is pending; it waits its turn.
    */
   constructor(handle: (url: string) => Promise<void>, onBusy: (url: string) => void = () => {}) {
     this.#handle = handle;
     this.#onBusy = onBusy;
   }
 
+  /** Queues a link. Once the app is ready, links are handled in order, one prompt at a time. */
   push(url: string): void {
-    if (!this.#ready) {
-      this.#queued.push(url);
-      return;
-    }
-    void this.#run(url);
+    this.#queued.push(url);
+    if (!this.#ready) return;
+    if (this.#busy) this.#onBusy(url);
+    else void this.#drain();
   }
 
   /** The app is ready: handle queued links in order, one at a time. */
   async start(): Promise<void> {
     this.#ready = true;
-    while (this.#queued.length > 0) await this.#run(this.#queued.shift()!);
+    await this.#drain();
   }
 
   get busy(): boolean {
     return this.#busy;
   }
 
-  async #run(url: string): Promise<void> {
-    if (this.#busy) {
-      this.#onBusy(url);
-      return;
-    }
+  /** Links waiting for the pending one. */
+  get waiting(): number {
+    return this.#queued.length;
+  }
+
+  async #drain(): Promise<void> {
+    if (this.#busy) return;
     this.#busy = true;
     try {
-      await this.#handle(url);
+      while (this.#queued.length > 0) {
+        try {
+          await this.#handle(this.#queued.shift()!);
+        } catch {
+          // The handler shows its own errors; the next link still gets its turn.
+        }
+      }
     } finally {
       this.#busy = false;
     }

@@ -44,6 +44,7 @@ export class GitHubService {
   #token: string | undefined;
   #login: string | undefined;
   #notice: GitHubNotice | undefined;
+  #init: Promise<void> | undefined;
 
   constructor(options: GitHubServiceOptions) {
     this.#options = options;
@@ -54,10 +55,24 @@ export class GitHubService {
   }
 
   /**
-   * The startup check. Loads the stored token and asks GitHub who it belongs
-   * to: a 401 or 403 deletes it; being offline or rate limited keeps it.
+   * The startup check, run once. Loads the stored token and asks GitHub who it
+   * belongs to: a 401 or 403 deletes it; being offline or rate limited keeps it.
    */
-  async init(): Promise<void> {
+  init(): Promise<void> {
+    this.#init ??= this.#restore();
+    return this.#init;
+  }
+
+  /**
+   * Settles once `init` has restored and checked the stored token, or at once
+   * if it never ran. Session restore and deep links wait for it, so private
+   * gists load with the user's token (§17.4). Never rejects.
+   */
+  whenReady(): Promise<void> {
+    return (this.#init ?? Promise.resolve()).catch(() => undefined);
+  }
+
+  async #restore(): Promise<void> {
     const loaded = await this.#options.store.load();
     if (loaded.kind === 'none') return;
     if (loaded.kind === 'decrypt-failed') {
@@ -122,8 +137,8 @@ export class GitHubService {
   async publish(windowId: string, input: { description: string; isPublic: boolean }): Promise<GistLink> {
     const client = this.#authedClient();
     const fiddle = await this.#options.documents.getFiddle(windowId);
-    const files = gistFiles(fiddle);
-    const { asRevision } = this.#options.prefs.get();
+    const { asRevision, author } = this.#options.prefs.get();
+    const files = gistFiles(fiddle, author);
     this.#options.prefs.setVisibility(input.isPublic);
     const template = asRevision ? await this.#options.documents.getTemplate(windowId) : undefined;
     // If the update fails, the gist exists with the template; link it so Update can finish the job.
@@ -139,7 +154,7 @@ export class GitHubService {
     const client = this.#authedClient();
     const fiddle = await this.#options.documents.getFiddle(windowId);
     const id = loadedGistId(fiddle);
-    const updated = await client.updateGist(id, { files: gistFiles(fiddle) });
+    const updated = await client.updateGist(id, { files: gistFiles(fiddle, this.#options.prefs.get().author) });
     this.#options.documents.markGistSaved(windowId, updated);
     return { id: updated.id, url: updated.url };
   }
@@ -189,12 +204,13 @@ function loadedGistId(fiddle: GistFiddle): string {
   return id;
 }
 
-/** The fiddle's files plus a generated package.json with its modules and Electron version. */
-export function gistFiles(fiddle: GistFiddle): FileMap {
+/** The fiddle's files plus a generated package.json with its modules, Electron version and author (§17.3). */
+export function gistFiles(fiddle: GistFiddle, author?: string): FileMap {
   const files = ensureMainEntry(fiddle.files);
   const packageJson = generatePackageJson({
     name: packageName(fiddle.name),
     main: findMainEntry(Object.keys(files)),
+    ...(author ? { author } : {}),
     modules: fiddle.modules,
     electronVersion: fiddle.versionRef.kind === 'release' ? fiddle.versionRef.version : undefined,
   });

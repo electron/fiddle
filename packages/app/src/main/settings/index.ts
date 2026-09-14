@@ -38,7 +38,7 @@ export interface SettingsContext {
   refreshThemes(): Promise<number>;
 }
 
-type SettingsAppFields = Pick<AppState, 'settings' | 'themes' | 'screenReaderActive' | 'storageNotices'>;
+type SettingsAppFields = Pick<AppState, 'settings' | 'themes' | 'screenReaderActive' | 'storageNotices' | 'highContrast'>;
 
 export function loadSettings(userData = app.getPath('userData')): {
   store: JsonStore<SparseSettings>;
@@ -61,6 +61,7 @@ export function loadSettings(userData = app.getPath('userData')): {
         app.isAccessibilitySupportEnabled(),
       ),
       storageNotices: [],
+      highContrast: nativeTheme.shouldUseHighContrastColors,
     },
   };
 }
@@ -104,6 +105,10 @@ export async function startSettings(
     );
     if (screenReaderActive !== hub.app.screenReaderActive) hub.updateApp({ screenReaderActive });
 
+    // OS high contrast shows Lucent's high-contrast variant (§10).
+    const highContrast = nativeTheme.shouldUseHighContrastColors;
+    if (highContrast !== hub.app.highContrast) hub.updateApp({ highContrast });
+
     if (settings.locale !== appliedLocale) {
       appliedLocale = settings.locale;
       setMainLocale(localePreference(settings.locale, app.getPreferredSystemLanguages()))
@@ -117,6 +122,7 @@ export async function startSettings(
     if (change.store === 'app') apply();
   });
   app.on('accessibility-support-changed', apply);
+  nativeTheme.on('updated', apply);
   apply();
 
   watchSettingsFile(store, service);

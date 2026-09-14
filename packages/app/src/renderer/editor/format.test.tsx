@@ -45,6 +45,7 @@ function register() {
 
 const token = { isCancellationRequested: false } as never;
 
+// @feature editor.format
 describe('formatText', () => {
   it('formats JavaScript, CSS and HTML in the templates’ style', async () => {
     expect(await formatText('const a = {b:"c"};', 'javascript', spaces)).toBe("const a = { b: 'c' }\n");
@@ -63,6 +64,7 @@ describe('formatText', () => {
   });
 });
 
+// @feature editor.format
 describe('registerPrettierFormatter', () => {
   it('registers a document and a range formatter for JavaScript, HTML and CSS', () => {
     const { documents, ranges, disposables } = register();

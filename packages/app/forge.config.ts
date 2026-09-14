@@ -194,6 +194,21 @@ async function copyNativeModules(buildPath: string, platform: string, arch: stri
   }
 }
 
+/**
+ * Socket Firewall (§2): module installs spawn `node sfw.mjs npm …`, so the
+ * `sfw` package's entry ships outside the asar, at `<resources>/sfw.mjs`
+ * (`extraResource`; src/main/platform/sfw.ts finds it). Without the package,
+ * installs run without it and the console says so.
+ */
+function sfwEntry(): string[] {
+  try {
+    return [createRequire(import.meta.url).resolve('sfw/dist/sfw.mjs')];
+  } catch {
+    console.warn('The sfw package is not installed, so this build ships without Socket Firewall.');
+    return [];
+  }
+}
+
 const config: ForgeConfig = {
   hooks: {
     // `yarn generate`: offline and idempotent. The Electron release list and
@@ -215,7 +230,7 @@ const config: ForgeConfig = {
     // releases.json, contributors.json and import-local-storage.html. Packaged
     // builds find it at `<resources>/static`, dev runs at `<app path>/static`
     // (`staticDir()` in src/main/documents/service.ts).
-    extraResource: [path.join(appDir, 'static')],
+    extraResource: [path.join(appDir, 'static'), ...sfwEntry()],
     icon: path.join(iconDir, 'fiddle'),
     appBundleId: 'com.electron.fiddle',
     extendInfo: { CFBundleLocalizations: shippedLocales },

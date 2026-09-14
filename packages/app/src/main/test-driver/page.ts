@@ -67,7 +67,9 @@ const BOX_FUNCTION = `function () {
   const x = r.left + r.width / 2;
   const y = r.top + r.height / 2;
   const hit = document.elementFromPoint(x, y);
-  const ok = !!hit && (hit === el || el.contains(hit) || !!(hit.shadowRoot && hit.shadowRoot.contains(el)));
+  // A hit inside the element's <label> counts too: a switch's input sits under its visual track.
+  const inLabel = !!hit && !!el.labels && Array.from(el.labels).some((label) => label.contains(hit));
+  const ok = !!hit && (hit === el || el.contains(hit) || inLabel || !!(hit.shadowRoot && hit.shadowRoot.contains(el)));
   const describe = (node) => node
     ? node.tagName.toLowerCase() + (node.id ? '#' + node.id : '') +
       (typeof node.className === 'string' && node.className.trim() ? '.' + node.className.trim().split(/\\s+/).join('.') : '')

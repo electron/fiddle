@@ -44,6 +44,8 @@ export const appStateSchema = z.object({
   screenReaderActive: z.boolean(),
   /** Corrupt or too-new data files; shown as toasts until dismissed. */
   storageNotices: z.array(storageNoticeSchema),
+  /** OS high contrast (`nativeTheme.shouldUseHighContrastColors`): Lucent shows its high-contrast variant (§10). */
+  highContrast: z.boolean().optional(),
   // Versions and run slice: install state, local builds and `releasesRev`.
   versions: z.lazy(() => versionsStateSchema).optional(),
   // Gists slice: the signed-in GitHub login. The token itself never leaves main.
@@ -64,8 +66,17 @@ export const windowStateSchema = z.object({
   layout: z.lazy(() => windowLayoutSchema),
   // Versions and run slice: run, package and bisect status. Absent means ready.
   run: z.lazy(() => runStateSchema).optional(),
+  // Versions and run slice: the last version fallback or failed download, shown as a toast, then dismissed.
+  versionNotice: z.lazy(() => versionNoticeSchema).nullable().optional(),
 });
 export type WindowState = z.infer<typeof windowStateSchema>;
+
+export const versionNoticeSchema = z.object({
+  /** Increases with every notice, so each is shown once. */
+  id: z.number().int().positive(),
+  message: z.string(),
+});
+export type VersionNotice = z.infer<typeof versionNoticeSchema>;
 
 // ---------------------------------------------------------------------------
 // Documents slice: the fiddle part of the Window store.
@@ -83,6 +94,8 @@ export const windowLayoutSchema = z.object({
   split: z.string().nullable(),
   consoleHeight: z.number().nonnegative(),
   sidebarWidth: z.number().nonnegative(),
+  /** View > Toggle console, or its splitter dragged closed. Runs, package and make open it (§17.7). */
+  consoleVisible: z.boolean().default(true),
 });
 export type WindowLayout = z.infer<typeof windowLayoutSchema>;
 
@@ -91,6 +104,7 @@ export const DEFAULT_LAYOUT: WindowLayout = {
   split: null,
   consoleHeight: 160,
   sidebarWidth: 228,
+  consoleVisible: true,
 };
 
 export const fiddleSourceStateSchema = z.object({
@@ -231,7 +245,12 @@ export const bisectStateSchema = z.object({
 export type BisectState = z.infer<typeof bisectStateSchema>;
 
 export const runStateSchema = z.object({
-  status: z.enum(['ready', 'downloading', 'starting', 'running']),
+  /**
+   * §17.6 "Run/Stop control states": `checking` (pre-run checks), `downloading`
+   * and `unzipping` (installing the version), `installing` (modules), then
+   * `starting` and `running`.
+   */
+  status: z.enum(['ready', 'checking', 'downloading', 'unzipping', 'installing', 'starting', 'running']),
   /** What the status is about: the fiddle, or Forge package or make. */
   task: z.enum(['run', 'package', 'make']),
   /** Download progress, 0–100, while `downloading`. */

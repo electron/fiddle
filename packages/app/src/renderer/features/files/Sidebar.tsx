@@ -2,6 +2,7 @@
  * The sidebar's file list, grouped by process (Main process, Preload,
  * Renderer), then the Packages slot. File operations (add, rename, delete,
  * show and hide) go through the Documents methods; main validates them too.
+ * Each row's pill counts the file's errors, or its warnings when it has none.
  */
 import { useRef, useState, type MouseEvent } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -24,10 +25,10 @@ import {
   Tree,
   TreeRow,
 } from '../../../ui';
-import { countByFile, useRuntimeErrors } from '../../editor/runtime-errors';
+import { badgeOf, useDiagnostics } from '../../editor/diagnostics';
 import { PackagesSection } from '../packages/PackagesSection';
 import { groupByProcess, PROCESS_ORDER } from '../../shell/processes';
-import { processLabelKey } from '../../shell/Sheet';
+import { processLabelKey, useBadgeLabel } from '../../shell/Sheet';
 import styles from './Sidebar.module.css';
 
 /** Past this many files the sidebar offers a filter field. */
@@ -50,7 +51,8 @@ interface MenuState {
 
 export function Sidebar({ files, dirtyFiles, activeFile, onOpen, onSetVisible }: SidebarProps) {
   const { t } = useTranslation('shell');
-  const errors = countByFile(useRuntimeErrors());
+  const diagnostics = useDiagnostics();
+  const badgeLabel = useBadgeLabel();
   const [filter, setFilter] = useState('');
   const [menu, setMenu] = useState<MenuState | null>(null);
   const anchor = useRef<HTMLSpanElement>(null);
@@ -164,7 +166,7 @@ export function Sidebar({ files, dirtyFiles, activeFile, onOpen, onSetVisible }:
               onChange={onOpen}
             >
               {group.map((file) => {
-                const count = errors.get(file.name) ?? 0;
+                const badge = badgeOf(diagnostics.get(file.name));
                 return (
                   <TreeRow
                     key={file.name}
@@ -172,7 +174,8 @@ export function Sidebar({ files, dirtyFiles, activeFile, onOpen, onSetVisible }:
                     label={file.name}
                     labelDir="ltr"
                     icon={file.visible ? 'file' : 'eye-off'}
-                    pill={count ? t('errorCount', { count }) : undefined}
+                    pill={badgeLabel(badge)}
+                    pillTone={badge?.tone}
                     unsaved={dirtyFiles.includes(file.name)}
                     unsavedLabel={t('unsaved')}
                   />

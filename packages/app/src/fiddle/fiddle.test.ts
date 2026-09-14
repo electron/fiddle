@@ -30,6 +30,7 @@ function base(): Fiddle {
 describe('checkEsmSupport', () => {
   const mjs = { 'main.mjs': 'import { app } from "electron";' };
 
+  // @feature run.check-esm
   it('refuses a main.mjs entry before Electron 28', () => {
     expect(checkEsmSupport(mjs, { kind: 'release', version: '27.3.0' })).toMatchObject({
       code: ErrorCode.invalidArgument,
@@ -38,6 +39,7 @@ describe('checkEsmSupport', () => {
     expect(checkEsmSupport({ 'Main.MJS': '' }, { kind: 'release', version: '22.0.0' })).toBeInstanceOf(FiddleError);
   });
 
+  // @feature run.check-esm
   it('allows Electron 28 and later, local builds, and CommonJS entries', () => {
     expect(checkEsmSupport(mjs, { kind: 'release', version: '28.0.0' })).toBeNull();
     expect(checkEsmSupport(mjs, { kind: 'release', version: '28.0.0-alpha.1' })).toBeNull();
@@ -48,6 +50,7 @@ describe('checkEsmSupport', () => {
 });
 
 describe('createFiddle', () => {
+  // @feature files.placeholder
   it('hides empty and placeholder-only files and fills defaults', () => {
     const fiddle = base();
     expect(fiddle.hidden).toEqual(['renderer.js', 'styles.css']);
@@ -58,6 +61,7 @@ describe('createFiddle', () => {
     expect(fiddle.templateName).toBeUndefined();
   });
 
+  // @feature files.add-main
   it('adds a hidden main.js when there is no main entry', () => {
     const fiddle = createFiddle({ files: { 'index.html': 'x' }, version, templateName: 'App' });
     expect(fileNames(fiddle)).toEqual(['main.js', 'index.html']);
@@ -67,6 +71,7 @@ describe('createFiddle', () => {
 });
 
 describe('file operations', () => {
+  // @feature files.operations files.placeholder
   it('adds a visible file with its placeholder', () => {
     const fiddle = addFile(base(), 'extra.css');
     expect(fiddle.files['extra.css']).toBe('/* Empty */');
@@ -74,6 +79,7 @@ describe('file operations', () => {
     expect(addFile(base(), 'a.js', 'x').files['a.js']).toBe('x');
   });
 
+  // @feature files.no-duplicates files.reserved-names files.one-main files.extensions
   it('validates adds', () => {
     expect(thrownReason(() => addFile(base(), 'index.html'))).toBe('duplicate-name');
     expect(thrownReason(() => addFile(base(), 'main.mjs'))).toBe('second-main-entry');
@@ -81,6 +87,7 @@ describe('file operations', () => {
     expect(thrownReason(() => addFile(base(), 'x.txt'))).toBe('unsupported-extension');
   });
 
+  // @feature files.operations
   it('renames, keeping content and visibility', () => {
     const fiddle = renameFile(renameFile(base(), 'styles.css', 'app.css'), 'main.js', 'main.mjs');
     expect(fiddle.files['app.css']).toBe('/* Empty */');
@@ -90,6 +97,7 @@ describe('file operations', () => {
     expect(thrownReason(() => renameFile(base(), 'main.js', 'app.js'))).toBe('no-main-entry');
   });
 
+  // @feature files.operations files.main-undeletable
   it('removes files but never the main entry', () => {
     const fiddle = removeFile(base(), 'styles.css');
     expect(fiddle.files['styles.css']).toBeUndefined();
@@ -97,6 +105,7 @@ describe('file operations', () => {
     expect(thrownReason(() => removeFile(base(), 'main.js'))).toBe('remove-main-entry');
   });
 
+  // @feature files.operations
   it('hides and shows files, keeping content', () => {
     const hidden = hideFile(base(), 'index.html');
     expect(hidden.hidden).toContain('index.html');

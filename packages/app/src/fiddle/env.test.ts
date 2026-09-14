@@ -22,6 +22,7 @@ function withPlatform<T>(platform: NodeJS.Platform, fn: () => T): T {
 }
 
 describe('parseEnvEntries', () => {
+  // @feature run.env-parse run.env-blocked
   it('parses, drops empties, and reports bad and blocked entries', () => {
     const result = parseEnvEntries(
       [
@@ -62,6 +63,7 @@ describe('parseEnvEntries', () => {
 });
 
 describe('blocked user keys', () => {
+  // @feature run.env-blocked
   it('blocks every LD_ and DYLD_ variable, as core does', () => {
     const keys = ['LD_PRELOAD', 'LD_LIBRARY_PATH', 'ld_audit', 'DYLD_INSERT_LIBRARIES', 'DYLD_LIBRARY_PATH', 'dyld_anything'];
     for (const key of keys) expect(isBlockedUserEnvKey(key)).toBe(true);
@@ -117,6 +119,7 @@ describe('fiddleProcessEnv', () => {
     });
   });
 
+  // @feature run.advanced-logging run.env-blocked
   it('adds advanced logging, then the user variables, except blocked ones', () => {
     const env = withPlatform('linux', () =>
       fiddleProcessEnv(
@@ -155,6 +158,7 @@ describe('fiddleProcessEnv', () => {
 });
 
 describe('cleanFlags', () => {
+  // @feature run.env-parse
   it('drops empty flags', () => {
     expect(cleanFlags(['--a', '', '  ', ' --b ', 'x\0y'])).toEqual(['--a', '--b']);
   });

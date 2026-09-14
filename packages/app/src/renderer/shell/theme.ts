@@ -1,23 +1,42 @@
 /**
- * Applies the appearance (REQUIREMENTS §17.12): following the system (the
+ * Applies the appearance (REQUIREMENTS §17.12, §10): following the system (the
  * default) leaves `data-theme` off so the tokens' media queries decide;
  * otherwise `data-theme` is `light` or `dark`. A custom theme sets its own
- * light/dark mode and its `common` tokens as CSS variables.
+ * light/dark mode and its `common` tokens as CSS variables. High contrast (a
+ * built-in high-contrast theme, or OS high contrast with Lucent) sets
+ * `data-contrast="high"`, and Monaco gets a `hc-black` or `hc-light` base.
  */
 import { useEffect, useLayoutEffect } from 'react';
 
-import type { Settings, ThemeData } from '../../shared/settings';
+import { BUILTIN_THEME, HIGH_CONTRAST_THEMES, type Settings, type ThemeData } from '../../shared/settings';
 import { applyEditorTheme } from '../editor/monaco';
+import { useAppState } from '../state';
+import { currentThemeSnapshot } from './theme-snapshot';
 
 let customProperties: string[] = [];
+
+/** High contrast: a built-in high-contrast theme fixes light or dark; OS high contrast keeps the appearance. */
+export interface HighContrast {
+  mode?: 'light' | 'dark';
+}
+
+/** Whether to draw high contrast. OS high contrast applies to Lucent, never to a custom theme. */
+export function highContrastFor(themeId: string, osHighContrast: boolean): HighContrast | undefined {
+  if (themeId === HIGH_CONTRAST_THEMES.dark) return { mode: 'dark' };
+  if (themeId === HIGH_CONTRAST_THEMES.light) return { mode: 'light' };
+  return osHighContrast && themeId === BUILTIN_THEME ? {} : undefined;
+}
 
 export function applyAppearance(
   root: HTMLElement,
   appearance: Settings['appearance'],
   custom?: Pick<ThemeData, 'isDark' | 'common'> | null,
+  contrast?: HighContrast,
 ): void {
   for (const property of customProperties) root.style.removeProperty(property);
   customProperties = [];
+  if (contrast) root.dataset.contrast = 'high';
+  else delete root.dataset.contrast;
   if (custom) {
     root.dataset.theme = custom.isDark ? 'dark' : 'light';
     for (const [name, value] of Object.entries(custom.common)) {
@@ -25,6 +44,8 @@ export function applyAppearance(
       root.style.setProperty(property, value);
       customProperties.push(property);
     }
+  } else if (contrast?.mode) {
+    root.dataset.theme = contrast.mode;
   } else if (appearance === 'system') {
     delete root.dataset.theme;
   } else {
@@ -32,19 +53,34 @@ export function applyAppearance(
   }
 }
 
-/** Keeps `<html>` and Monaco's theme in step with the settings and the OS. */
+function applyEditor(custom?: Pick<ThemeData, 'editor'> | null): void {
+  if (custom) applyEditorTheme(custom.editor);
+  else if (document.documentElement.dataset.contrast === 'high') applyEditorTheme(currentThemeSnapshot().editor);
+  else applyEditorTheme();
+}
+
+/** Keeps `<html>` and Monaco's theme in step with the settings, OS high contrast and the OS appearance. */
 export function useAppearance(
   appearance: Settings['appearance'],
   custom?: Pick<ThemeData, 'isDark' | 'common' | 'editor'> | null,
 ): void {
+  const app = useAppState();
+  const contrast = highContrastFor(app?.settings.theme ?? BUILTIN_THEME, app?.highContrast ?? false);
+  const contrastKey = contrast ? (contrast.mode ?? 'os') : undefined;
+
   useLayoutEffect(() => {
-    applyAppearance(document.documentElement, appearance, custom);
-    applyEditorTheme(custom?.editor);
-  }, [appearance, custom]);
+    applyAppearance(
+      document.documentElement,
+      appearance,
+      custom,
+      contrastKey === undefined ? undefined : contrastKey === 'os' ? {} : { mode: contrastKey },
+    );
+    applyEditor(custom);
+  }, [appearance, custom, contrastKey]);
 
   useEffect(() => {
     const query = window.matchMedia('(prefers-color-scheme: dark)');
-    const onChange = () => applyEditorTheme(custom?.editor);
+    const onChange = () => applyEditor(custom);
     query.addEventListener('change', onChange);
     return () => query.removeEventListener('change', onChange);
   }, [custom]);

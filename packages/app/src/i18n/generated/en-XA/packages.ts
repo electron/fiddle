@@ -11,5 +11,8 @@ export default {
   "remove": "[Ŕéɱöṽé {{name}} one]",
   "addFailed": "[Çöûļðñ'ţ áðð {{name}} one two]",
   "changeFailed": "[Çöûļðñ'ţ çĥáñĝé {{name}} one two]",
-  "list": "[Þáçķáĝéš îñ ţĥîš ƒîððļé one two three]"
+  "list": "[Þáçķáĝéš îñ ţĥîš ƒîððļé one two three]",
+  "searchVersions": "[Šéáŕçĥ ṽéŕšîöñš one two]",
+  "noVersions": "[Ñö ṽéŕšîöñš ɱáţçĥ one two]",
+  "moreVersions": "[Šĥöŵîñĝ {{shown}} öƒ {{total}}. Ţýþé ţö ƒîñð ţĥé öţĥéŕš. one two three four]"
 } as const;

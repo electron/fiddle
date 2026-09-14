@@ -53,6 +53,8 @@ export interface TabProps {
   errorCount?: number;
   /** Spoken with the badge, such as "1 error". */
   errorLabel?: string;
+  /** `warning` draws the badge in the warning colour, for a count of warnings. */
+  errorTone?: 'error' | 'warning';
   /** Unsaved dot after the badge. */
   unsaved?: boolean;
   /** Spoken with the dot, such as "Unsaved changes". */
@@ -64,13 +66,24 @@ export interface TabProps {
 }
 
 /** 28 tall, padding 0 11, 12.5/16 at 500. Selected: hover fill, ink. */
-export function Tab({ id, children, errorCount, errorLabel, unsaved, unsavedLabel, icon, isDisabled, className }: TabProps) {
+export function Tab({
+  id,
+  children,
+  errorCount,
+  errorLabel,
+  errorTone,
+  unsaved,
+  unsavedLabel,
+  icon,
+  isDisabled,
+  className,
+}: TabProps) {
   return (
     <AriaTab id={id} isDisabled={isDisabled} className={cx(styles.tab, className)}>
       {icon && <Icon name={icon} className={styles.icon} />}
       <span className={styles.label}>{children}</span>
       {errorCount ? (
-        <span className={styles.errors} aria-hidden="true">
+        <span className={styles.errors} data-tone={errorTone} aria-hidden="true">
           {errorCount}
         </span>
       ) : null}

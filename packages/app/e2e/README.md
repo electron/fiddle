@@ -104,5 +104,10 @@ only for a new endpoint.
 
 ## Feature coverage
 
-`yarn features-coverage` lists the `@feature <id>` tags that specs reference. With `--strict` it
-fails when a Feature catalog ID has no spec. This is a stub until REQUIREMENTS §17 has IDs.
+Every REQUIREMENTS §17 bullet, settings row and shortcut ends with a stable ID such as
+`{#run.stop}`. Tests reference IDs with `@feature <id>`: in an e2e test title, or in a
+`// @feature <id> [<id>...]` comment above a unit test (many rules are best tested there).
+
+`yarn features-coverage` prints the covered and uncovered IDs, grouped by section (`--json` for
+details). It fails on a tag that names no ID or on a duplicate ID; `--strict` also fails when any
+ID has no test.

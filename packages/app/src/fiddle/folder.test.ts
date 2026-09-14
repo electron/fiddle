@@ -27,6 +27,7 @@ async function put(files: Record<string, string>, into = dir) {
 }
 
 describe('readFiddleFolder', () => {
+  // @feature load.folder
   it('reads supported top-level files and package.json, never symlinks', async () => {
     await put({
       'main.js': 'main',
@@ -49,6 +50,7 @@ describe('readFiddleFolder', () => {
     expect(result.unknown).toEqual(['Index.HTML']);
   });
 
+  // @feature load.folder-invalid-json
   it('still loads the folder when package.json is invalid, keeping the previous modules', async () => {
     await put({ 'main.js': 'main', 'package.json': '{ nope' });
     const result = await readFiddleFolder(dir, { previousModules: { old: '1.0.0' } });
@@ -58,6 +60,7 @@ describe('readFiddleFolder', () => {
     expect(result.packageJsonError).toMatchObject({ code: ErrorCode.invalidArgument, details: { reason: 'invalid-json' } });
   });
 
+  // @feature files.add-main
   it('adds a main entry when there is none', async () => {
     await put({ 'index.html': '<p/>' });
     expect((await readFiddleFolder(dir)).files).toEqual({ 'index.html': '<p/>', 'main.js': '// Empty' });
@@ -74,6 +77,7 @@ describe('readFiddleFolder', () => {
 });
 
 describe('writeFiddleFolder', () => {
+  // @feature save.empty-files save.gitignore
   it('writes files, deletes empty ones, and writes .gitignore', async () => {
     await put({ 'old.css': 'stale', 'keep.txt': 'untouched' });
     const target = path.join(dir, 'new', 'project');
@@ -145,6 +149,7 @@ describe('writeFiddleFolder', () => {
 });
 
 describe('findExistingSupportedFiles', () => {
+  // @feature save.overwrite-warning
   it('lists supported files so the user can be warned', async () => {
     await put({ 'main.js': 'x', 'package.json': '{}', 'notes.md': 'x' });
     expect((await findExistingSupportedFiles(dir)).sort()).toEqual(['main.js', 'package.json']);

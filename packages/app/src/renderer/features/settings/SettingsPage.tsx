@@ -9,10 +9,11 @@ import { useTranslation } from 'react-i18next';
 
 import contributors from '../../../../static/contributors.json';
 import { locales } from '../../../i18n';
-import { appApi, settingsApi, type AppInfo } from '../../../ipc/renderer';
+import { appApi, appPlatformApi, settingsApi, windowApi, type AppInfo } from '../../../ipc/renderer';
 import { useWindowState } from '../../state';
 import {
   BUILTIN_THEME,
+  HIGH_CONTRAST_THEMES,
   MIRRORS,
   type Mirror,
   type ReleaseChannel,
@@ -27,6 +28,7 @@ import {
   RadioGroup,
   SegmentedControl,
   Select,
+  showToast,
   SideNav,
   TextField,
   type IconName,
@@ -34,6 +36,7 @@ import {
 } from '../../../ui';
 import { GitHubAccountSection } from '../gists/GitHubAccountSection';
 import { VersionManager } from '../versions/VersionManager';
+import { currentThemeSnapshot } from '../../shell/theme-snapshot';
 import { setView } from '../../shell/window-state';
 import {
   ListRow,
@@ -143,9 +146,29 @@ function GeneralSection() {
   const run = useSettingsAction();
   const themes = app?.themes ?? [];
   const custom = themes.find((theme) => theme.id === settings.theme);
+  const highContrastNames: Record<string, string> = {
+    [HIGH_CONTRAST_THEMES.dark]: t('theme.highContrastDark'),
+    [HIGH_CONTRAST_THEMES.light]: t('theme.highContrastLight'),
+  };
+  // A custom or high-contrast theme sets light or dark itself.
+  const fixedBy = custom?.name ?? highContrastNames[settings.theme];
+
+  const changeLocale = (id: string) => {
+    if (id === settings.locale) return;
+    set('locale', id);
+    // The editor's own strings and Chromium's follow after a relaunch (§9).
+    showToast({
+      title: t('locale.relaunchTitle'),
+      description: t('locale.relaunchDescription'),
+      actionLabel: t('locale.relaunch'),
+      onAction: () => run(() => appPlatformApi.Relaunch()),
+    });
+  };
 
   const themeItems: SelectOption[] = [
     { id: BUILTIN_THEME, label: t('theme.lucent') },
+    { id: HIGH_CONTRAST_THEMES.dark, label: t('theme.highContrastDark') },
+    { id: HIGH_CONTRAST_THEMES.light, label: t('theme.highContrastLight') },
     ...themes.map((theme) => ({
       id: theme.id,
       label: theme.name,
@@ -167,7 +190,7 @@ function GeneralSection() {
 
   return (
     <>
-      <Row setting="appearance" note={custom ? t('appearance.fromTheme', { theme: custom.name }) : undefined}>
+      <Row setting="appearance" note={fixedBy ? t('appearance.fromTheme', { theme: fixedBy }) : undefined}>
         <SegmentedControl
           label={t('appearance.title')}
           options={(['system', 'light', 'dark'] as const).map((value) => ({
@@ -175,7 +198,7 @@ function GeneralSection() {
             label: t(`appearance.${value}`),
           }))}
           value={settings.appearance}
-          isDisabled={custom !== undefined}
+          isDisabled={fixedBy !== undefined}
           onChange={(value) => set('appearance', value as Settings['appearance'])}
         />
       </Row>
@@ -192,7 +215,7 @@ function GeneralSection() {
             <Button size="sm" onPress={() => run(() => settingsApi.ImportTheme())}>
               {t('theme.importMonaco')}
             </Button>
-            <Button size="sm" onPress={() => run(() => settingsApi.CreateTheme())}>
+            <Button size="sm" onPress={() => run(() => settingsApi.CreateTheme(custom ? null : currentThemeSnapshot()))}>
               {t('theme.create')}
             </Button>
             <Button size="sm" variant="ghost" icon="folder" onPress={() => run(() => settingsApi.OpenThemesFolder())}>
@@ -207,7 +230,7 @@ function GeneralSection() {
           aria-label={t('locale.title')}
           items={localeItems}
           value={settings.locale}
-          onChange={(id) => set('locale', id)}
+          onChange={changeLocale}
         />
       </Row>
       <SwitchRow setting="sessionRestore" />
@@ -218,10 +241,22 @@ function GeneralSection() {
 
 function EditorSection() {
   const { t } = useTranslation('settings');
+  const run = useSettingsAction();
   return (
     <>
       <TextRow setting="editorFontFamily" invalidMessage={t('editorFontFamily.invalid')} />
       <TextRow setting="editorFontSize" invalidMessage={t('editorFontSize.invalid')} />
+      {/* Font changes apply after a reload (REQUIREMENTS §17.2). */}
+      <div className={styles.row} data-inline>
+        <div className={styles.rowText}>
+          <p className={styles.rowDescription}>{t('editorFont.reloadHint')}</p>
+        </div>
+        <div className={styles.rowControl}>
+          <Button size="sm" onPress={() => run(() => windowApi.RunCommand('view.reloadAllWindows'))}>
+            {t('editorFont.reload')}
+          </Button>
+        </div>
+      </div>
     </>
   );
 }
@@ -405,7 +440,39 @@ function AboutSection() {
   );
 }
 
-const CrashReports = () => <SwitchRow setting="crashReports" />;
+/** Crash reports, and on macOS "Reset privacy permissions" (§4). */
+function PrivacySection() {
+  const { t } = useTranslation('settings');
+  const { app } = useSettings();
+  const run = useSettingsAction();
+  const { query, showAll } = useContext(SearchContext);
+  const title = t('privacyReset.title');
+  const description = t('privacyReset.description');
+  const showReset = app?.platform === 'darwin' && (showAll || matchesQuery(query, title, description));
+  const reset = async () => {
+    if (await appPlatformApi.ResetPrivacyPermissions()) showToast({ tone: 'success', title: t('privacyReset.done') });
+  };
+  return (
+    <>
+      <SwitchRow setting="crashReports" />
+      {showReset && (
+        <div className={styles.row} data-inline>
+          <div className={styles.rowText}>
+            <div className={styles.rowHead}>
+              <span className={styles.rowTitle}>{title}</span>
+            </div>
+            <p className={styles.rowDescription}>{description}</p>
+          </div>
+          <div className={styles.rowControl}>
+            <Button size="sm" onPress={() => run(reset)}>
+              {t('privacyReset.button')}
+            </Button>
+          </div>
+        </div>
+      )}
+    </>
+  );
+}
 const BetaUpdates = () => <SwitchRow setting="betaUpdates" />;
 
 const SECTIONS: readonly SectionDef[] = [
@@ -444,7 +511,7 @@ const SECTIONS: readonly SectionDef[] = [
   },
   { id: 'keybindings', icon: 'keyboard', keys: ['keybindings'], body: KeybindingsSection },
   { id: 'accessibility', icon: 'eye', keys: ['screenReader'], body: AccessibilitySection },
-  { id: 'privacy', icon: 'lock', keys: ['crashReports'], body: CrashReports },
+  { id: 'privacy', icon: 'lock', keys: ['crashReports'], body: PrivacySection },
   { id: 'updates', icon: 'refresh', keys: ['betaUpdates'], body: BetaUpdates },
   { id: 'about', icon: 'info', keys: [], body: AboutSection },
 ];

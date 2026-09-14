@@ -36,6 +36,7 @@ describe('origins', () => {
 });
 
 describe('needsApproval', () => {
+  // @feature load.deep-link-confirm
   it('asks for remote fiddles until that exact origin is approved', () => {
     const gist = gistOrigin(id, sha, 'octocat');
     expect(needsApproval(gist)).toBe(true);

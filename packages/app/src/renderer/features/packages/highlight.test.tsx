@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 
 import { highlightParts } from './highlight';
 
+// @feature modules.search
 describe('highlightParts', () => {
   it('marks every case-insensitive match', () => {
     expect(highlightParts('React-react', 'REACT')).toEqual([

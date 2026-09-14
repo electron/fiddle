@@ -1,8 +1,9 @@
 /**
  * The sidebar's Packages section: an "Add a package" field that searches npm
  * (debounced, top 5, matches highlighted), then one row per module with a
- * version menu and a remove button. Modules live in `Window.fiddle.modules`;
- * every change goes through the `Modules` methods in main.
+ * searchable version menu and a remove button. Modules live in
+ * `Window.fiddle.modules`; every change goes through the `Modules` methods in
+ * main.
  */
 import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -10,16 +11,20 @@ import { ComboBox, Input, ListBox, ListBoxItem, Popover, type Key } from 'react-
 
 import { modulesApi } from '../../../ipc/renderer';
 import type { PackageSearchResults, PackageVersions } from '../../../shared/stores';
-import { cx, Icon, IconButton, Select, showToast, type SelectOption } from '../../../ui';
+import { cx, Icon, IconButton, showToast } from '../../../ui';
 import field from '../../../ui/components/Field.module.css';
 import menu from '../../../ui/components/Menu.module.css';
 import { useWindowState } from '../../state';
+import { SearchSelect, type SearchOption } from '../versions/SearchSelect';
 import { highlightParts } from './highlight';
 import styles from './PackagesSection.module.css';
 
 const SEARCH_DEBOUNCE_MS = 250;
-/** Enough history for the version menu without rendering thousands of rows. */
-const MAX_VERSIONS = 150;
+/**
+ * The version menu searches every published version but renders at most
+ * this many matches, so packages with thousands of versions stay fast.
+ */
+const MAX_LISTED = 150;
 
 type SearchStatus = 'idle' | 'loading' | 'done' | 'error';
 
@@ -38,6 +43,20 @@ function loadVersions(name: string): Promise<PackageVersions> {
     request.catch(() => versionRequests.delete(name));
   }
   return request;
+}
+
+/** The versions a module's menu lists for `query`: matches newest first, capped, with the current one kept. */
+export function listedVersions(
+  all: readonly string[],
+  current: string,
+  query: string,
+  limit = MAX_LISTED,
+): { listed: string[]; total: number } {
+  const needle = query.trim().toLowerCase();
+  const matches = needle ? all.filter((v) => v.toLowerCase().includes(needle)) : all;
+  const listed = matches.slice(0, limit);
+  if (!needle && !listed.includes(current)) listed.unshift(current);
+  return { listed, total: matches.length };
 }
 
 function PackageSearch() {
@@ -141,6 +160,7 @@ function PackageSearch() {
 function ModuleRow({ name, version }: { name: string; version: string }) {
   const { t } = useTranslation('packages');
   const [versions, setVersions] = useState<PackageVersions | null>(null);
+  const [query, setQuery] = useState('');
 
   useEffect(() => {
     let live = true;
@@ -153,13 +173,13 @@ function ModuleRow({ name, version }: { name: string; version: string }) {
     };
   }, [name]);
 
-  const listed = versions?.versions.slice(0, MAX_VERSIONS) ?? [];
-  if (!listed.includes(version)) listed.unshift(version);
-  const items: SelectOption[] = listed.map((v) => ({
+  const { listed, total } = listedVersions(versions?.versions ?? [], version, query);
+  const options: SearchOption[] = listed.map((v) => ({
     id: v,
     label: v,
-    hint: v === versions?.latest ? t('latest') : undefined,
+    ...(v === versions?.latest ? { hint: t('latest') } : {}),
   }));
+  const shown = Math.min(total, MAX_LISTED);
 
   const failed = (error: unknown) =>
     showToast({ title: t('changeFailed', { name }), description: errorText(error), tone: 'error' });
@@ -170,11 +190,17 @@ function ModuleRow({ name, version }: { name: string; version: string }) {
       <span className={styles.name} title={name}>
         {name}
       </span>
-      <Select
+      <SearchSelect
         aria-label={t('version', { name })}
         size="sm"
-        items={items}
+        groups={[{ options }]}
         value={version}
+        placeholder={version}
+        query={query}
+        onQueryChange={setQuery}
+        searchLabel={t('searchVersions')}
+        emptyLabel={t('noVersions')}
+        {...(total > shown ? { note: t('moreVersions', { shown, total }) } : {})}
         onChange={(next) => {
           if (next !== version) modulesApi.SetModuleVersion(name, next).catch(failed);
         }}

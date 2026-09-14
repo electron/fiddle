@@ -302,5 +302,60 @@
     "message": "Report an issue",
     "description": "Help menu command that opens the Electron Fiddle issue tracker in the browser.",
     "maxLength": 30
+  },
+  "actualSize": {
+    "message": "Actual size",
+    "description": "View menu item that resets the window's zoom level to 100%.",
+    "maxLength": 30
+  },
+  "zoomIn": {
+    "message": "Zoom in",
+    "description": "View menu item that makes everything in the window larger.",
+    "maxLength": 30
+  },
+  "zoomOut": {
+    "message": "Zoom out",
+    "description": "View menu item that makes everything in the window smaller.",
+    "maxLength": 30
+  },
+  "clearConsole": {
+    "message": "Clear console",
+    "description": "Command that removes every line from the output console. In context menus and the command palette.",
+    "maxLength": 30
+  },
+  "formatAll": {
+    "message": "Format all files",
+    "description": "Command that reformats the code in every file of the fiddle.",
+    "maxLength": 30
+  },
+  "formatSelection": {
+    "message": "Format selection",
+    "description": "Editor context menu command that reformats only the selected code.",
+    "maxLength": 30
+  },
+  "goToDefinition": {
+    "message": "Go to definition",
+    "description": "Editor context menu command that jumps to where the symbol under the cursor is defined.",
+    "maxLength": 30
+  },
+  "findReferences": {
+    "message": "Find references",
+    "description": "Editor context menu command that lists every place the symbol under the cursor is used.",
+    "maxLength": 30
+  },
+  "toggleTabFocus": {
+    "message": "Toggle Tab key moves focus",
+    "description": "Accessibility command. While it's on, the Tab key moves keyboard focus out of the editor instead of inserting a tab. Tab is the key's name.",
+    "maxLength": 40
+  },
+  "reloadAllWindows": {
+    "message": "Reload all windows",
+    "description": "Command that reloads every open window's view, for example to apply a new editor font. Unsaved text is kept.",
+    "maxLength": 30
+  },
+  "inspectElement": {
+    "message": "Inspect element",
+    "description": "Context menu item, only in development builds, that opens the developer tools at the clicked element.",
+    "maxLength": 30
   }
 }

@@ -65,6 +65,7 @@ import {
   readReleaseList,
 } from '../versions/service';
 import { t } from './argv';
+import { fetchDownloader } from './downloader';
 import type { CommandId, CommandInput, CommandOutput } from './descriptors';
 import { CliErrorCode, exitCodeForRun, type Reporter } from './output';
 import { ensureTrusted, type TrustPrompt } from './trust';
@@ -363,7 +364,7 @@ async function runOnce(ctx: Ctx, spec: RunSpec, electron: ElectronChoice, versio
     });
     const stop = () => stopChild(child);
     ctx.signal.addEventListener('abort', stop);
-    ctx.reporter.log(tr('started', { version: electron.label, arch: process.arch }));
+    ctx.reporter.log(tr('started', { version: electron.label, name: toPackageName(loaded.name) }));
     child.stdout?.setEncoding('utf8');
     child.stderr?.setEncoding('utf8');
     child.stdout?.on('data', (chunk: string) => ctx.reporter.output('stdout', chunk));
@@ -633,7 +634,8 @@ export async function runCommand(
   const ctx: Ctx = {
     ...options,
     cache,
-    installer: createInstaller(cache),
+    // Electron downloads through net.fetch too, so the system proxy applies (§7).
+    installer: createInstaller(cache, { downloader: fetchDownloader(netFetch) }),
     releasesUrl: getEndpoints().releasesJson,
     memo: {},
   };

@@ -9,12 +9,14 @@ import type mainPlatform from './en/mainPlatform';
 import type mainRun from './en/mainRun';
 import type mainSettings from './en/mainSettings';
 import type mainUx from './en/mainUx';
+import type mainVersions from './en/mainVersions';
 import type onboarding from './en/onboarding';
 import type packages from './en/packages';
 import type palette from './en/palette';
 import type run from './en/run';
 import type settings from './en/settings';
 import type shell from './en/shell';
+import type versions from './en/versions';
 
 declare module 'i18next' {
   interface CustomTypeOptions {
@@ -31,12 +33,14 @@ declare module 'i18next' {
       mainRun: typeof mainRun;
       mainSettings: typeof mainSettings;
       mainUx: typeof mainUx;
+      mainVersions: typeof mainVersions;
       onboarding: typeof onboarding;
       packages: typeof packages;
       palette: typeof palette;
       run: typeof run;
       settings: typeof settings;
       shell: typeof shell;
+      versions: typeof versions;
     };
   }
 }

@@ -4,7 +4,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { inspect } from 'node:util';
 
-import { download as electronDownload } from '@electron/get';
+import { download as electronDownload, type ElectronDownloadRequestOptions } from '@electron/get';
 import debug from 'debug';
 import semver from 'semver';
 
@@ -134,6 +134,12 @@ export interface InstallerOptions {
    * in a worker thread to avoid that.
    */
   extract?: ExtractFunction;
+  /**
+   * Downloads each file (`@electron/get`'s `downloader`). The default uses
+   * Node's `fetch`; Electron apps can pass one backed by `net.fetch`, so the
+   * system proxy and certificate store apply.
+   */
+  downloader?: ElectronDownloadRequestOptions['downloader'];
 }
 
 /** Work shared by concurrent callers. See {@link Installer.shared}. */
@@ -166,6 +172,7 @@ export class Installer extends EventEmitter {
     mirror: Partial<Mirrors>;
     errors: ErrorMode | undefined;
     extract: ExtractFunction;
+    downloader: InstallerOptions['downloader'];
   }>;
   private readonly stateMap = new Map<string, InstallState>();
   /** Downloads and per-version installs in flight, keyed `download:<version>` and `install:<version>`. */
@@ -187,6 +194,7 @@ export class Installer extends EventEmitter {
       mirror: { ...options.mirror },
       errors: options.errors,
       extract: options.extract ?? defaultExtract,
+      downloader: options.downloader,
     });
     this.rebuildStates();
   }
@@ -524,6 +532,7 @@ export class Installer extends EventEmitter {
           getProgressCallback,
           ...(signal ? { signal } : {}),
         },
+        ...(this.options.downloader ? { downloader: this.options.downloader } : {}),
       });
     } catch (err) {
       if (signal?.aborted) throw abortError(signal);

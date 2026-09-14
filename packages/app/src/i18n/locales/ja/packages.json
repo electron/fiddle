@@ -10,5 +10,8 @@
   "remove": "{{name}} を削除",
   "addFailed": "{{name}} を追加できませんでした",
   "changeFailed": "{{name}} を変更できませんでした",
-  "list": "この Fiddle のパッケージ"
+  "list": "この Fiddle のパッケージ",
+  "searchVersions": "バージョンを検索",
+  "noVersions": "一致するバージョンはありません",
+  "moreVersions": "{{total}} 件中 {{shown}} 件を表示しています。入力すると他のバージョンも探せます。"
 }

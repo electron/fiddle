@@ -6,9 +6,9 @@ import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { I18nextProvider } from 'react-i18next';
 
+import { loadMonacoMessages } from '../i18n/monaco-nls';
 import { initRendererI18n } from '../i18n/renderer';
 import { appApi, windowApi } from '../ipc/renderer';
-import { App } from './App';
 import { installPlatformRenderer } from './features/about';
 import { StoreProvider } from './state';
 
@@ -26,7 +26,11 @@ async function start(): Promise<void> {
   // Lucent: without an OS material, the tokens swap to their opaque fallbacks.
   root.classList.toggle('lu-no-material', app.material === 'none');
 
-  const i18n = await initRendererI18n(app.locale);
+  // Monaco reads its strings (§9) while its modules load, and App imports it: the locale's bundle goes first.
+  const [i18n, { App }] = await Promise.all([
+    initRendererI18n(app.locale),
+    loadMonacoMessages(app.locale).then(() => import('./App')),
+  ]);
   // Platform slice: log forwarding, Sentry and the update toast.
   void installPlatformRenderer(i18n);
   const container = document.getElementById('root');

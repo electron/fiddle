@@ -3,15 +3,15 @@
  * sheet and status bar. Main owns the state; this renders the Window store
  * (with optimistic changes) and requests changes through Documents.
  */
-import { useEffect, useEffectEvent, useRef, useState } from 'react';
+import { useEffect, useEffectEvent, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { runApi, windowApi } from '../../ipc/renderer';
+import { windowApi } from '../../ipc/renderer';
 import { DEFAULT_LAYOUT, type WindowState } from '../../shared/stores';
 import { SplitHandle } from '../../ui';
 import { formatFocusedEditor, toggleMinimap, toggleSoftWrap } from '../editor/editor-state';
 import { applyRuntimeErrors, markModelsSynced, syncModels } from '../editor/models';
-import { setRuntimeErrors, useRevealRequest, useRuntimeErrors } from '../editor/runtime-errors';
+import { useRevealRequest, useRuntimeErrors } from '../editor/runtime-errors';
 import { useDocumentDrop } from '../features/documents/useDocumentDrop';
 import { useEditorTypes } from '../editor/types';
 import { Sidebar } from '../features/files/Sidebar';
@@ -38,7 +38,6 @@ function ShellView({ state, platform }: { state: WindowState; platform: 'darwin'
   const { t } = useTranslation('shell');
   const { fiddle, layout } = state;
   const failTitle = t('fileChangeFailed');
-  const [consoleVisible, setConsoleVisible] = useState(true);
   const names = fiddle.files.map((file) => file.name);
   const namesKey = names.join('\n');
 
@@ -51,19 +50,9 @@ function ShellView({ state, platform }: { state: WindowState; platform: 'darwin'
       .finally(markModelsSynced);
   }, [namesKey, fiddle.fiddleRev]);
 
+  // When another fiddle loads, main clears its console and runtime errors (RunService).
   const errors = useRuntimeErrors();
   useEffect(() => applyRuntimeErrors(errors), [errors]);
-
-  // A new fiddle starts without the old one's runtime errors and console. Adding
-  // or renaming a file also bumps fiddleRev, so this keys on the fiddle's identity.
-  const identity = JSON.stringify([fiddle.name, fiddle.source]);
-  const lastIdentity = useRef(identity);
-  useEffect(() => {
-    if (lastIdentity.current === identity) return;
-    lastIdentity.current = identity;
-    setRuntimeErrors([]);
-    runApi.ClearOutput().catch((error: unknown) => console.error('[fiddle] clearing the console failed', error));
-  }, [identity]);
 
   // Gist links, deep links and folders dropped on the window.
   const dropping = useDocumentDrop();
@@ -94,7 +83,7 @@ function ShellView({ state, platform }: { state: WindowState; platform: 'darwin'
   const onCommand = useEffectEvent((id: string) => {
     if (id === 'view.toggleSplit') toggleSplit();
     else if (id === 'view.toggleSidebar') changeLayout({ sidebar: !layout.sidebar });
-    else if (id === 'view.toggleConsole') setConsoleVisible((visible) => !visible);
+    else if (id === 'view.toggleConsole') changeLayout({ consoleVisible: !layout.consoleVisible });
     else if (id === 'editor.toggleSoftWrap') toggleSoftWrap();
     else if (id === 'editor.toggleMinimap') toggleMinimap();
     else if (id === 'editor.format') void formatFocusedEditor();
@@ -114,7 +103,6 @@ function ShellView({ state, platform }: { state: WindowState; platform: 'darwin'
 
   const resetLayout = () => {
     changeLayout({ ...DEFAULT_LAYOUT });
-    setConsoleVisible(true);
     for (const file of fiddle.files) if (!file.visible) void setFileVisible(file.name, true, failTitle);
   };
 
@@ -123,6 +111,7 @@ function ShellView({ state, platform }: { state: WindowState; platform: 'darwin'
       <TitleBar
         name={fiddle.name}
         dirty={fiddle.dirty}
+        platform={platform}
         sidebar={layout.sidebar}
         settingsOpen={state.view === 'settings'}
         onToggleSidebar={() => changeLayout({ sidebar: !layout.sidebar })}
@@ -153,7 +142,6 @@ function ShellView({ state, platform }: { state: WindowState; platform: 'darwin'
         <Sheet
           state={state}
           platform={platform}
-          consoleVisible={consoleVisible}
           onSelectFile={openFile}
           onToggleSplit={toggleSplit}
           onCloseLeft={() => {
@@ -167,6 +155,7 @@ function ShellView({ state, platform }: { state: WindowState; platform: 'darwin'
             if (name !== fiddle.activeFile) openFile(name);
           }}
           onConsoleHeight={(height) => changeLayout({ consoleHeight: height })}
+          onHideConsole={() => changeLayout({ consoleVisible: false })}
           onResetLayout={resetLayout}
           dropping={dropping}
         />

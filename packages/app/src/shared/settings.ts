@@ -10,11 +10,27 @@
  */
 import { z } from 'zod';
 
-import { acceleratorFor, commandIds, type CommandId } from './commands';
+import {
+  acceleratorsFor,
+  commandIds,
+  getCommand,
+  isCommandId,
+  keyContexts,
+  type CommandId,
+  type KeyContext,
+} from './commands';
 import type { Platform } from './stores';
 
 /** The built-in theme: Lucent dark or Lucent light, following `appearance`. */
 export const BUILTIN_THEME = 'lucent';
+
+/** The built-in high-contrast themes (REQUIREMENTS §10). OS high contrast shows Lucent this way too. */
+export const HIGH_CONTRAST_THEMES = { dark: 'lucent-hc-dark', light: 'lucent-hc-light' } as const;
+
+/** Lucent and its high-contrast variants: themes without a file. */
+export function isBuiltinTheme(id: string): boolean {
+  return id === BUILTIN_THEME || id === HIGH_CONTRAST_THEMES.dark || id === HIGH_CONTRAST_THEMES.light;
+}
 
 export const releaseChannelSchema = z.enum(['stable', 'beta', 'nightly']);
 export type ReleaseChannel = z.infer<typeof releaseChannelSchema>;
@@ -174,7 +190,11 @@ export const themeTokensSchema = z
     message: 'Theme tokens must be colours or font names',
   });
 
+/** Written into every theme file. Files without one are version 1. */
+export const THEME_SCHEMA_VERSION = 1;
+
 export const themeFileSchema = z.object({
+  schemaVersion: z.number().int().positive().optional(),
   name: z.string().min(1).max(100),
   isDark: z.boolean(),
   editor: monacoThemeSchema.optional(),
@@ -184,6 +204,14 @@ export type ThemeFile = z.infer<typeof themeFileSchema>;
 
 export const themeDataSchema = themeFileSchema.extend({ id: themeIdSchema });
 export type ThemeData = z.infer<typeof themeDataSchema>;
+
+/** A built-in theme as the renderer draws it: its Monaco theme and token values ("Create from current"). */
+export const themeSnapshotSchema = z.object({
+  isDark: z.boolean(),
+  editor: monacoThemeSchema,
+  common: themeTokensSchema,
+});
+export type ThemeSnapshot = z.infer<typeof themeSnapshotSchema>;
 
 export const themeSummarySchema = z.object({
   id: themeIdSchema,
@@ -281,14 +309,92 @@ export function resolveScreenReader(
 
 // Keybindings
 
-/** The accelerator a command has after overrides, or undefined when it has none or is unbound. */
+/**
+ * A command's keybindings after overrides. An override (or `null`) replaces
+ * all of the command's defaults, so overriding `run.toggle` drops F5 too.
+ */
+export function effectiveAccelerators(id: CommandId, platform: Platform, keybindings: Keybindings): string[] {
+  if (Object.hasOwn(keybindings, id)) {
+    const override = keybindings[id];
+    return override ? [override] : [];
+  }
+  return acceleratorsFor(id, platform);
+}
+
+/** The accelerator menus show after overrides, or undefined when it has none or is unbound. */
 export function effectiveAccelerator(
   id: CommandId,
   platform: Platform,
   keybindings: Keybindings,
 ): string | undefined {
-  if (Object.hasOwn(keybindings, id)) return keybindings[id] ?? undefined;
-  return acceleratorFor(id, platform);
+  return effectiveAccelerators(id, platform, keybindings)[0];
+}
+
+/** What has focus, or was right-clicked, in a window (`Window.SetFocusContext`). */
+export const focusContextSchema = z.enum(['editor', 'console', 'other']);
+export type FocusContext = z.infer<typeof focusContextSchema>;
+
+/** One key that runs a command; `context` limits where. */
+export interface Keybinding {
+  id: CommandId;
+  accelerator: string;
+  context?: KeyContext;
+}
+
+function isKeyContext(value: string): value is KeyContext {
+  return (keyContexts as readonly string[]).includes(value);
+}
+
+/**
+ * Every keybinding after overrides (REQUIREMENTS §3). A command's bindings
+ * take its definition's context. An override key `<commandId>@<context>`
+ * (`editor`, `console` or `running`) adds a binding that only applies there,
+ * e.g. `{ "run.toggle@editor": "CmdOrCtrl+Enter" }`; `null` there adds none.
+ */
+export function resolveKeybindings(
+  platform: Platform,
+  keybindings: Keybindings,
+  ids: readonly CommandId[] = commandIds,
+): Keybinding[] {
+  const bindings: Keybinding[] = [];
+  const add = (id: CommandId, accelerator: string, context: KeyContext | undefined) =>
+    bindings.push(context ? { id, accelerator, context } : { id, accelerator });
+  for (const id of ids) {
+    for (const accelerator of effectiveAccelerators(id, platform, keybindings)) add(id, accelerator, getCommand(id).context);
+  }
+  for (const [key, accelerator] of Object.entries(keybindings)) {
+    const at = key.lastIndexOf('@');
+    if (at < 0 || !accelerator) continue;
+    const id = key.slice(0, at);
+    const context = key.slice(at + 1);
+    if (isCommandId(id) && ids.includes(id) && isKeyContext(context)) add(id, accelerator, context);
+  }
+  return bindings;
+}
+
+/** The editor and the console never have focus together; the fiddle runs whatever has focus. */
+function contextsOverlap(a: KeyContext | undefined, b: KeyContext | undefined): boolean {
+  return a === undefined || b === undefined || a === b || a === 'running' || b === 'running';
+}
+
+/**
+ * The binding a key press runs, given the contexts that are active. A scoped
+ * binding wins over one that applies everywhere.
+ */
+export function matchKeybinding(
+  bindings: readonly Keybinding[],
+  accelerator: string,
+  active: ReadonlySet<KeyContext>,
+  platform: Platform,
+): Keybinding | undefined {
+  const key = normalizeAccelerator(accelerator, platform);
+  let everywhere: Keybinding | undefined;
+  for (const binding of bindings) {
+    if (normalizeAccelerator(binding.accelerator, platform) !== key) continue;
+    if (binding.context === undefined) everywhere ??= binding;
+    else if (active.has(binding.context)) return binding;
+  }
+  return everywhere;
 }
 
 const MODIFIER_ORDER = ['Ctrl', 'Alt', 'AltGr', 'Shift', 'Cmd', 'Super'] as const;
@@ -329,6 +435,16 @@ export function normalizeAccelerator(accelerator: string, platform: Platform): s
       case 'meta':
         modifiers.add(isMac ? 'Cmd' : 'Super');
         break;
+      // Electron's synonyms for the same key.
+      case 'plus':
+        key = '+';
+        break;
+      case 'escape':
+        key = 'esc';
+        break;
+      case 'return':
+        key = 'enter';
+        break;
       default:
         key = part.length === 1 ? part.toUpperCase() : part.toLowerCase();
     }
@@ -336,20 +452,30 @@ export function normalizeAccelerator(accelerator: string, platform: Platform): s
   return [...MODIFIER_ORDER.filter((m) => modifiers.has(m)), key].join('+');
 }
 
-/** Commands that share an accelerator: normalized accelerator → command IDs (two or more). */
+/**
+ * Commands that share an accelerator where both can apply: normalized
+ * accelerator → command IDs (two or more). Covers every binding, second
+ * defaults such as F5 and F1 and scoped overrides included.
+ */
 export function findConflicts(
   platform: Platform,
   keybindings: Keybindings,
   ids: readonly CommandId[] = commandIds,
 ): Map<string, CommandId[]> {
-  const byAccelerator = new Map<string, CommandId[]>();
-  for (const id of ids) {
-    const accelerator = effectiveAccelerator(id, platform, keybindings);
-    if (!accelerator) continue;
-    const key = normalizeAccelerator(accelerator, platform);
-    byAccelerator.set(key, [...(byAccelerator.get(key) ?? []), id]);
+  const byAccelerator = new Map<string, Keybinding[]>();
+  for (const binding of resolveKeybindings(platform, keybindings, ids)) {
+    const key = normalizeAccelerator(binding.accelerator, platform);
+    byAccelerator.set(key, [...(byAccelerator.get(key) ?? []), binding]);
   }
-  return new Map([...byAccelerator].filter(([, list]) => list.length > 1));
+  const conflicts = new Map<string, CommandId[]>();
+  for (const [key, list] of byAccelerator) {
+    const clashing = new Set<CommandId>();
+    for (const a of list) {
+      if (list.some((b) => b.id !== a.id && contextsOverlap(a.context, b.context))) clashing.add(a.id);
+    }
+    if (clashing.size > 1) conflicts.set(key, [...clashing]);
+  }
+  return conflicts;
 }
 
 export interface KeyInput {

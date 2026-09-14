@@ -8,16 +8,21 @@
  *   once per animation frame.
  *
  * Runtime errors are drawn here too, as model decorations and markers, so
- * every editor showing a file shows its errors.
+ * every editor showing a file shows its errors. Monaco's own errors and
+ * warnings are reported to `diagnostics.ts` for the badges.
  */
 import { useSyncExternalStore } from 'react';
 
 import { getEditorLanguage } from '../../fiddle/files';
 import { documentsApi } from '../../ipc/renderer';
+import { setEditorMarkers, type EditorMarker } from './diagnostics';
 import { monaco } from './monaco';
 import { getRuntimeErrors, type RuntimeError } from './runtime-errors';
 
 type Model = monaco.editor.ITextModel;
+
+/** The marker owner of the runtime errors drawn below; they count through runtime-errors.ts instead. */
+const RUNTIME_OWNER = 'fiddle-runtime';
 
 const models = new Map<string, Model>();
 let fiddleRev = -1;
@@ -30,6 +35,7 @@ let version = 0;
 const listeners = new Set<() => void>();
 /** Decoration IDs of the error lines, per file. */
 const errorDecorations = new Map<string, string[]>();
+let markerListener: monaco.IDisposable | undefined;
 
 function emit() {
   version += 1;
@@ -111,11 +117,25 @@ function setText(model: Model, text: string) {
   }
 }
 
+/** Monaco's errors and warnings on the fiddle's files (syntax errors, CSS and JSON problems). */
+function publishMarkers(): void {
+  const list: EditorMarker[] = [];
+  for (const [name, model] of models) {
+    for (const marker of monaco.editor.getModelMarkers({ resource: model.uri })) {
+      if (marker.owner === RUNTIME_OWNER) continue;
+      if (marker.severity === monaco.MarkerSeverity.Error) list.push({ file: name, severity: 'error' });
+      else if (marker.severity === monaco.MarkerSeverity.Warning) list.push({ file: name, severity: 'warning' });
+    }
+  }
+  setEditorMarkers(list);
+}
+
 /**
  * Brings the models in line with the store. Call it whenever the file list or
  * `fiddleRev` changes.
  */
 export async function syncModels(names: readonly string[], rev: number): Promise<void> {
+  markerListener ??= monaco.editor.onDidChangeMarkers(publishMarkers);
   const revChanged = rev !== fiddleRev;
   fiddleRev = rev;
   let changed = false;
@@ -127,6 +147,7 @@ export async function syncModels(names: readonly string[], rev: number): Promise
     pendingEdits.delete(name);
     changed = true;
   }
+  if (changed) publishMarkers();
   const missing = names.filter((name) => !models.has(name));
   if (revChanged) pendingEdits.clear();
   if (!revChanged && missing.length === 0) {
@@ -153,7 +174,7 @@ export function applyRuntimeErrors(errors: readonly RuntimeError[]): void {
     const mine = errors.filter((error) => error.file === name && error.line <= model.getLineCount());
     monaco.editor.setModelMarkers(
       model,
-      'fiddle-runtime',
+      RUNTIME_OWNER,
       mine.map((error) => {
         const word = model.getWordAtPosition({ lineNumber: error.line, column: error.column });
         return {

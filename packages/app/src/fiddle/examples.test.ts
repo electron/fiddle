@@ -11,6 +11,7 @@ import { findExample, listExamples, loadExample } from './examples';
 const staticDir = fileURLToPath(new URL('../../static', import.meta.url));
 
 describe('Show Me examples', () => {
+  // @feature load.examples
   it('lists the §17 names in order', () => {
     expect(listExamples().map((e) => e.name)).toEqual([...SHOW_ME_EXAMPLES]);
     expect(SHOW_ME_EXAMPLES).toHaveLength(29);
@@ -37,6 +38,7 @@ describe('Show Me examples', () => {
     expect(Object.keys(files).sort()).toEqual(['index.html', 'main.js', 'preload.js']);
   });
 
+  // @feature load.examples
   it('loads every example', async () => {
     for (const { name } of listExamples()) {
       const files = await loadExample(staticDir, name);

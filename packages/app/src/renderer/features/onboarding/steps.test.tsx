@@ -36,6 +36,7 @@ describe('placeCard', () => {
 });
 
 describe('tour steps', () => {
+  // @feature onboarding.tour
   it('covers the main areas and the basics files', () => {
     expect(new Set(MAIN_STEPS.map((step) => step.target))).toEqual(
       new Set(['editor', 'version-picker', 'run', 'publish', 'console', 'sidebar']),

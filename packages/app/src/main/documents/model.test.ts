@@ -37,6 +37,7 @@ describe('editor mirror', () => {
     expect(doc.activeFile).toBe('main.js');
   });
 
+  // @feature files.dirty-tracking
   it('applies edits for the current fiddleRev and derives dirty from the baseline', () => {
     const doc = templateDoc();
     const edited = applyEdit(doc, 'main.js', 'changed', doc.fiddleRev)!;
@@ -47,6 +48,7 @@ describe('editor mirror', () => {
     expect(isDirty(reverted)).toBe(false);
   });
 
+  // @feature files.dirty-tracking
   it('counts hidden files when tracking changes', () => {
     const doc = templateDoc();
     expect(doc.fiddle.hidden).toContain('styles.css');
@@ -81,6 +83,7 @@ describe('editor mirror', () => {
     expect(isDirty(doc)).toBe(false);
   });
 
+  // @feature files.show-hidden-on-click
   it('shows a hidden file when it is focused, and moves focus off a hidden one', () => {
     let doc = docSetActiveFile(templateDoc(), 'styles.css');
     expect(doc.fiddle.hidden).not.toContain('styles.css');
@@ -89,12 +92,14 @@ describe('editor mirror', () => {
     expect(doc.activeFile).toBe('main.js');
   });
 
+  // @feature load.template-swap
   it('knows an unedited template', () => {
     const doc = templateDoc();
     expect(isUneditedTemplate(doc)).toBe(true);
     expect(isUneditedTemplate(applyEdit(doc, 'main.js', 'x', doc.fiddleRev)!)).toBe(false);
   });
 
+  // @feature files.dirty-tracking
   it('resets the baseline on save', () => {
     const doc = applyEdit(templateDoc(), 'main.js', 'x', 1)!;
     const saved = markSaved(doc, { localPath: '/tmp/f' });
@@ -134,6 +139,7 @@ describe('toFiddleState', () => {
     expect(state.dirtyFiles).toEqual([]);
   });
 
+  // @feature files.dirty-tracking
   it('lists the files that differ from the last save, new files included', () => {
     const doc = docAddFile(templateDoc(), 'extra.js');
     const edited = applyEdit(doc, 'main.js', 'changed', doc.fiddleRev)!;

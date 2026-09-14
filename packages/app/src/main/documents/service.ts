@@ -20,7 +20,7 @@ import { z } from 'zod';
 
 import { findDeepLinkInArgv, isDeepLink, parseDeepLink } from '../../fiddle/deep-link';
 import { findExample } from '../../fiddle/examples';
-import type { Fiddle, VersionRef } from '../../fiddle/fiddle';
+import { VersionRefSchema, type Fiddle, type VersionRef } from '../../fiddle/fiddle';
 import type { FileMap } from '../../fiddle/files';
 import { findFilesToReplace, localPathFromFileUrl } from '../../fiddle/folder';
 import { getGistId } from '../../fiddle/gist-id';
@@ -44,9 +44,10 @@ import { forgeElectronFor, forgeOptionsFor } from '../packaging/service';
 import { createJsonStore, type JsonStore } from '../persistence/json-store';
 import type { StateHub, WindowInit } from '../state-hub';
 import { getCacheRoot, getEndpoints } from '../test-mode';
+import { defaultVersionFor } from '../versions/selection';
 import type { VersionsService } from '../versions/service';
 import { getWindow, sendWindowCommand } from '../windows';
-import { DeepLinkQueue, dialogText, gistLinkDetail, shouldOfferSignIn } from './deep-link-queue';
+import { DeepLinkQueue, dialogText, gistLinkDetail, gistUrlToDeepLink, shouldOfferSignIn } from './deep-link-queue';
 import { DraftScheduler, DraftStore, storedFiddleSchema, type Draft, type StoredFiddle } from './drafts';
 import {
   fiddleFromGist,
@@ -103,6 +104,8 @@ const stateSchema = z.looseObject({
   /** Onboarding (../ux/onboarding.ts): the tour was finished or dismissed, and the crash-reports notice was shown. */
   tourDone: z.boolean().optional(),
   crashNoticeShown: z.boolean().optional(),
+  /** The Electron version the user last picked (../versions/select.ts). New windows start with it (§17.8). */
+  lastVersion: VersionRefSchema.optional(),
 });
 export type AppStateFile = z.infer<typeof stateSchema>;
 
@@ -111,9 +114,11 @@ interface Deps {
   platform: Platform;
   /** The release list: default version, template majors, usable gist versions and Forge options. */
   versions: Pick<VersionsService, 'releases' | 'release' | 'localBuild' | 'electronVersions'>;
-  /** Gists load with the signed-in user's client, so private gists work. */
-  github: Pick<GitHubService, 'client'>;
+  /** Gists load with the signed-in user's client, so private gists work, once the stored token is restored (`whenReady`). */
+  github: Pick<GitHubService, 'client' | 'whenReady'>;
   createWindow(windowId: string, init: WindowInit): Promise<unknown>;
+  /** A docs example loaded into the window: the Versions slice selects its version like `SetVersion` (§17.4). */
+  onDocsExampleLoaded?(windowId: string): void;
 }
 
 let deps: Deps | undefined;
@@ -144,10 +149,15 @@ function hub(): StateHub {
 
 const isStable = (version: string): boolean => !version.includes('-');
 
-/** The version new windows start with: the latest supported stable release. */
+/** The version new windows start with (§17.8): the last one the user picked while it's usable, else the latest stable release. */
 function defaultVersion(): VersionRef {
-  const latest = requireDeps().versions.releases().find((r) => r.supported && isStable(r.version));
-  return { kind: 'release', version: latest?.version ?? process.versions.electron };
+  const { versions } = requireDeps();
+  return (
+    defaultVersionFor(versions.releases(), stateStore?.get().lastVersion, versions) ?? {
+      kind: 'release',
+      version: process.versions.electron,
+    }
+  );
 }
 
 /** False for versions that are unreleased or can't run here (gist `package.json`). */
@@ -191,7 +201,8 @@ export function installEarlyDocumentHandlers(): boolean {
   });
   app.on('open-url', (event, url) => {
     event.preventDefault();
-    deepLinks.push(url);
+    // A gist URL dropped on the dock icon gets the gist link's load and trust prompt (§17.17).
+    deepLinks.push(gistUrlToDeepLink(url) ?? url);
   });
   app.on('open-file', (event, file) => {
     event.preventDefault();
@@ -263,6 +274,8 @@ export async function startDocuments(): Promise<void> {
   }
 
   started = true;
+  // A private gist in a link loads with the restored token (§17.4).
+  await requireDeps().github.whenReady();
   await deepLinks.start();
   for (const file of pendingOpenFiles.splice(0)) {
     await withErrorDialog(lastFocused, () => openFolderIn(lastFocused, file));
@@ -297,6 +310,8 @@ async function docFromSession(entry: SessionEntry): Promise<Doc> {
       const folder = stored.source.localPath;
       loaded = withFolderTrust(folder, await loadFolder(folder, context), origin);
     } else if (stored.source.gistId) {
+      // A private gist loads with the restored token (§17.4).
+      await requireDeps().github.whenReady();
       loaded = await loadGist(github(), stored.source.gistId, stored.source.gistRevision, {
         context,
         confirmAddFile: (name) => Promise.resolve(stored.fileNames.includes(name)),
@@ -782,10 +797,18 @@ export async function loadGistIn(windowId: string, idOrUrl: string, revision?: s
   );
 }
 
-/** `LoadDocsExample`: asks first, because the code is untrusted (§17.4). */
+/** `LoadDocsExample`: asks first, because the code is untrusted (§17.4), then selects the example's version. */
 export async function loadDocsExampleIn(windowId: string, tag: string, examplePath: string): Promise<number> {
   if (!(await confirmDocsExample(windowId, tag, examplePath))) return revOf(windowId);
-  return replaceIn(windowId, () => loadElectronExample(github(), templates, tag, examplePath));
+  const before = docs.get(windowId);
+  const rev = await replaceIn(windowId, () => loadElectronExample(github(), templates, tag, examplePath));
+  if (docs.get(windowId) !== before) docsExampleLoaded(windowId);
+  return rev;
+}
+
+/** A docs example's version goes through the Versions slice: the hidden-channel prompt, then `SetVersion` (§17.4). */
+function docsExampleLoaded(windowId: string): void {
+  requireDeps().onDocsExampleLoaded?.(windowId);
 }
 
 function confirmDocsExample(windowId: string | undefined, version: string, examplePath: string): Promise<boolean> {
@@ -993,13 +1016,15 @@ async function handleDeepLink(url: string): Promise<void> {
       loaded = await loadElectronExample(github(), templates, link.tag, link.path);
     }
     const current = target === undefined ? undefined : docs.get(target);
+    let loadedIn: string;
     if (target !== undefined && current && !isDirty(current) && !isBusy(target)) {
       commit(target, docFromLoaded(loaded, current));
-      showWarnings(target, loaded.warnings);
+      loadedIn = target;
     } else {
-      const id = await openFiddleWindow({ doc: docFromLoaded(loaded) });
-      showWarnings(id, loaded.warnings);
+      loadedIn = await openFiddleWindow({ doc: docFromLoaded(loaded) });
     }
+    showWarnings(loadedIn, loaded.warnings);
+    if (link.kind !== 'gist') docsExampleLoaded(loadedIn);
   } catch (error) {
     if (link.kind === 'gist' && shouldOfferSignIn(error, Boolean(hub().app.githubLogin))) {
       await offerSignIn(target ?? lastFocused, url);

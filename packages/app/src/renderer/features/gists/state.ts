@@ -44,12 +44,13 @@ export function useGitHubLogin(): string | undefined {
   return useAppState()?.githubLogin;
 }
 
-/** `gistVisibility` and `gistPublishAsRevision` from the effective settings. */
-export function useGistSettings(): { isPublic: boolean; asRevision: boolean } {
+/** `gistVisibility`, `gistPublishAsRevision` and `gistShowHistory` from the effective settings. */
+export function useGistSettings(): { isPublic: boolean; asRevision: boolean; showHistory: boolean } {
   const settings = useAppState()?.settings;
   return {
     isPublic: settings?.gistVisibility === 'public',
     asRevision: settings?.gistPublishAsRevision ?? true,
+    showHistory: settings?.gistShowHistory ?? true,
   };
 }
 

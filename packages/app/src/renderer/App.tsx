@@ -7,6 +7,8 @@ import { settingsApi, windowApi } from '../ipc/renderer';
 import { BUILTIN_THEME, type ThemeData } from '../shared/settings';
 import { DialogHost, Toaster } from '../ui';
 import { useModelsSynced } from './editor/models';
+import { useKeybindings } from './features/commands/keybindings';
+import { useWindowCommands } from './features/commands/window-commands';
 import { CommandPalette } from './features/palette/CommandPalette';
 import { StorageNotices } from './features/settings/StorageNotices';
 import { Shell } from './shell/Shell';
@@ -18,6 +20,9 @@ export function App() {
   const { t, i18n } = useTranslation('shell');
   const appState = useAppState() ?? null;
   const win = useWindowState();
+  // Keybindings for every command, and the window's side of the editor and console commands.
+  useKeybindings();
+  useWindowCommands();
   const modelsSynced = useModelsSynced();
   const ready = appState !== null && win !== null && modelsSynced;
   const material = appState?.material;

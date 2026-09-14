@@ -34,7 +34,7 @@ export function PublishButton() {
   const { t } = useTranslation('gists');
   const login = useGitHubLogin();
   const gist = useLoadedGist();
-  const { isPublic } = useGistSettings();
+  const { isPublic, showHistory } = useGistSettings();
 
   const loginRef = useRef(login);
   useEffect(() => {
@@ -102,9 +102,11 @@ export function PublishButton() {
               <MenuItem id="copy" icon="link">
                 {t('menuCopyLink')}
               </MenuItem>
-              <MenuItem id="history" icon="history">
-                {t('menuHistory')}
-              </MenuItem>
+              {showHistory && (
+                <MenuItem id="history" icon="history">
+                  {t('menuHistory')}
+                </MenuItem>
+              )}
               <MenuSeparator />
               <MenuSection
                 title={t('menuVisibility')}

@@ -40,6 +40,7 @@ const hangingFetch = ((_input: string | URL | Request, init?: RequestInit) =>
   })) as typeof fetch;
 
 describe('templateBranch', () => {
+  // @feature load.template-download
   it('maps released versions to their x-y branch', () => {
     expect(templateBranch('30.1.0', released)).toBe('30-x-y');
     expect(templateBranch('31.0.0-beta.2', released)).toBe('31-x-y');
@@ -58,6 +59,7 @@ describe('quick-start', () => {
 });
 
 describe('createTemplateLoader', () => {
+  // @feature load.template-download
   it('downloads, extracts and caches the archive root', async () => {
     const { fn, urls } = zipFetch();
     const loader = createTemplateLoader({ staticDir, cacheDir, isReleasedMajor: released, fetch: fn });
@@ -93,6 +95,7 @@ describe('createTemplateLoader', () => {
     expect(urls).toHaveLength(1);
   });
 
+  // @feature load.new-test
   it('loads the test template from its branch', async () => {
     const { fn, urls } = zipFetch();
     const loader = createTemplateLoader({ staticDir, cacheDir, isReleasedMajor: released, fetch: fn });
@@ -100,6 +103,7 @@ describe('createTemplateLoader', () => {
     expect(urls).toEqual(['https://github.com/electron/minimal-repro/archive/test-template.zip']);
   });
 
+  // @feature load.template-fallback
   it('uses the bundled template for unreleased majors and local builds', async () => {
     const { fn, urls } = zipFetch();
     const loader = createTemplateLoader({ staticDir, cacheDir, isReleasedMajor: released, fetch: fn });
@@ -109,6 +113,7 @@ describe('createTemplateLoader', () => {
     expect(urls).toHaveLength(0);
   });
 
+  // @feature load.template-fallback
   it('falls back on failed downloads and retries later', async () => {
     const { fn, urls } = zipFetch(404);
     const fallbacks: string[] = [];
@@ -127,6 +132,7 @@ describe('createTemplateLoader', () => {
     expect(await readdir(cacheDir)).toEqual([]);
   });
 
+  // @feature load.template-fallback
   it('falls back when offline or the archive is corrupt, leaving nothing behind', async () => {
     const offline = (async () => {
       throw new TypeError('fetch failed');

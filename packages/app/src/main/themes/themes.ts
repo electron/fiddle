@@ -1,9 +1,10 @@
 /**
- * Themes (REQUIREMENTS §17.12). The built-in theme is Lucent, dark or light.
- * Custom themes are JSON files in `<userData>/themes/<id>.json` holding a
- * name, `isDark`, Monaco `editor` data and Lucent `common` tokens. Every file
- * is validated with the shared schema: token values must be colours or font
- * names, and `url(` is rejected.
+ * Themes (REQUIREMENTS §17.12, §10). Built in: Lucent, dark or light, and its
+ * high-contrast dark and light variants. Custom themes are JSON files in
+ * `<userData>/themes/<id>.json` holding a `schemaVersion`, a name, `isDark`,
+ * Monaco `editor` data and Lucent `common` tokens. Every file is validated
+ * with the shared schema: token values must be colours or font names, and
+ * `url(` is rejected.
  *
  * No Electron imports.
  */
@@ -13,7 +14,10 @@ import path from 'node:path';
 import { ErrorCode, FiddleError } from '../../shared/errors';
 import {
   BUILTIN_THEME,
+  HIGH_CONTRAST_THEMES,
+  isBuiltinTheme,
   monacoThemeSchema,
+  THEME_SCHEMA_VERSION,
   themeFileSchema,
   themeIdSchema,
   type Settings,
@@ -22,8 +26,13 @@ import {
   type ThemeSummary,
 } from '../../shared/settings';
 import { log } from '../log';
+import { writeAtomic } from '../persistence/json-store';
 
-/** Parses one theme file. Returns undefined (and logs) when it isn't a valid theme. */
+/**
+ * Parses one theme file. Returns undefined (and logs) when it isn't a valid
+ * theme. A file from a newer app version is shown as far as this one
+ * understands it; the app never writes existing theme files.
+ */
 export function parseTheme(id: string, text: string): ThemeData | undefined {
   let data: unknown;
   try {
@@ -37,6 +46,7 @@ export function parseTheme(id: string, text: string): ThemeData | undefined {
     log.warn('invalid theme', id, result.error.message);
     return undefined;
   }
+  if ((result.data.schemaVersion ?? 1) > THEME_SCHEMA_VERSION) log.warn('theme is from a newer version', id);
   return { ...result.data, id };
 }
 
@@ -53,7 +63,7 @@ export async function loadThemes(dir: string, locale?: string): Promise<ThemeDat
   for (const name of names) {
     if (!name.endsWith('.json')) continue;
     const id = name.slice(0, -'.json'.length);
-    if (id === BUILTIN_THEME || !themeIdSchema.safeParse(id).success) continue;
+    if (isBuiltinTheme(id) || !themeIdSchema.safeParse(id).success) continue;
     try {
       const theme = parseTheme(id, await fsp.readFile(path.join(dir, name), 'utf8'));
       if (theme) themes.push(theme);
@@ -68,11 +78,13 @@ export function summarize(theme: ThemeData): ThemeSummary {
   return { id: theme.id, name: theme.name, isDark: theme.isDark };
 }
 
-/** `nativeTheme.themeSource` for the settings: a custom theme sets light or dark itself. */
+/** `nativeTheme.themeSource` for the settings: a custom or high-contrast theme sets light or dark itself. */
 export function themeSource(
   settings: Pick<Settings, 'appearance' | 'theme'>,
   themes: readonly ThemeSummary[],
 ): 'system' | 'light' | 'dark' {
+  if (settings.theme === HIGH_CONTRAST_THEMES.dark) return 'dark';
+  if (settings.theme === HIGH_CONTRAST_THEMES.light) return 'light';
   if (settings.theme !== BUILTIN_THEME) {
     const theme = themes.find((candidate) => candidate.id === settings.theme);
     if (theme) return theme.isDark ? 'dark' : 'light';
@@ -101,22 +113,7 @@ export function themeFromMonaco(name: string, data: unknown): ThemeFile {
   return { name: name.slice(0, 100) || 'Theme', isDark, editor, common: {} };
 }
 
-/** A few Lucent tokens to start from, so a new theme file shows how `common` works. */
-const STARTER_TOKENS = {
-  dark: { accent: '#9feaf9', surface: '#1b1c26', ink: '#eef1f8' },
-  light: { accent: '#006f85', surface: '#ffffff', ink: '#1b1c26' },
-} as const;
-
-export function builtinThemeFile(name: string, isDark: boolean): ThemeFile {
-  return {
-    name,
-    isDark,
-    editor: { base: isDark ? 'vs-dark' : 'vs', inherit: true, rules: [], colors: {} },
-    common: { ...STARTER_TOKENS[isDark ? 'dark' : 'light'] },
-  };
-}
-
-/** A file-name-safe ID for a theme name that doesn't clash with `taken`. */
+/** A file-name-safe ID for a theme name that doesn't clash with `taken` or a built-in theme. */
 export function themeId(name: string, taken: ReadonlySet<string>): string {
   const base =
     name
@@ -124,15 +121,24 @@ export function themeId(name: string, taken: ReadonlySet<string>): string {
       .replace(/[^a-z0-9]+/g, '-')
       .replace(/^-+|-+$/g, '')
       .slice(0, 60) || 'theme';
-  let id = base === BUILTIN_THEME ? `${base}-custom` : base;
+  let id = isBuiltinTheme(base) ? `${base}-custom` : base;
   for (let n = 2; taken.has(id); n++) id = `${base}-${n}`;
   return id;
 }
 
-/** Writes a new theme file and returns its path. Never overwrites. */
+/**
+ * Writes a new theme file with the current `schemaVersion`, atomically
+ * (`writeAtomic`), and returns its path. Never overwrites: an existing file
+ * fails with `EEXIST`.
+ */
 export async function writeTheme(dir: string, id: string, theme: ThemeFile): Promise<string> {
-  await fsp.mkdir(dir, { recursive: true });
   const file = path.join(dir, `${id}.json`);
-  await fsp.writeFile(file, `${JSON.stringify(theme, null, 2)}\n`, { flag: 'wx' });
+  const exists = await fsp.stat(file).then(
+    () => true,
+    () => false,
+  );
+  if (exists) throw Object.assign(new Error(`${file} already exists`), { code: 'EEXIST' });
+  const { schemaVersion: _ignored, ...data } = theme;
+  await writeAtomic(file, `${JSON.stringify({ schemaVersion: THEME_SCHEMA_VERSION, ...data }, null, 2)}\n`);
   return file;
 }

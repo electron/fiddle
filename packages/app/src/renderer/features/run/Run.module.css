@@ -1,6 +1,7 @@
-/* Run button: min 108 wide, 150 while downloading (Lucent "Run button").
-   The width never jumps between Run, Starting and Stop. Outside macOS the
-   hint reads "Ctrl+R", which is wider than "⌘R", so the floor is higher. */
+/* Run button: min 108 wide, 150 for the long labels (Lucent "Run button"):
+   downloading and installing modules. The width never jumps between Run,
+   Checking, Unzipping, Starting and Stop. Outside macOS the hint reads
+   "Ctrl+R", which is wider than "⌘R", so the floor is higher. */
 .run {
   min-width: 108px;
   padding: 0 14px 0 12px;
@@ -9,7 +10,7 @@
   min-width: 124px;
 }
 
-.downloading {
+.wide {
   min-width: 150px;
   padding: 0 14px 0 12px;
 }

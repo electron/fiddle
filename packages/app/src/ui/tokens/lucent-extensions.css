@@ -132,3 +132,201 @@
     --lu-material-chrome: rgba(22,24,36,0.9);
   }
 }
+
+/* High contrast (REQUIREMENTS §10). The built-in high-contrast themes and OS high
+   contrast (nativeTheme.shouldUseHighContrastColors) set data-contrast="high" on <html>.
+   Glass goes opaque, hairlines go 1px, text reaches 7:1 and UI lines 3:1. */
+:root[data-contrast="high"] {
+  --lu-size-hairline: 1px;
+  --lu-blur-chrome: none;
+  --lu-blur-overlay: none;
+  --lu-blur-thin: none;
+  --lu-blur-tooltip: none;
+  --lu-blur-scrim: none;
+  --lu-window: #ffffff;
+  --lu-surface: #ffffff;
+  --lu-surface-raised: #ffffff;
+  --lu-surface-sunken: #f0f0f0;
+  --lu-hover: rgba(0,0,0,0.10);
+  --lu-fill: rgba(0,0,0,0.10);
+  --lu-fill-strong: rgba(0,0,0,0.18);
+  --lu-line: #6e6e6e;
+  --lu-line-strong: #000000;
+  --lu-material-chrome: #ffffff;
+  --lu-material-thin: #ffffff;
+  --lu-material-overlay: #ffffff;
+  --lu-capsule: #ffffff;
+  --lu-capsule-hover: #e8e8e8;
+  --lu-chip: #e8e8e8;
+  --lu-rim: #000000;
+  --lu-rim-soft: #6e6e6e;
+  --lu-scrim: rgba(0,0,0,0.6);
+  --lu-ink: #000000;
+  --lu-ink-muted: #262626;
+  --lu-ink-faint: #3d3d3d;
+  --lu-accent: #0f4a85;
+  --lu-accent-soft: #d6e6f5;
+  --lu-action: #0f4a85;
+  --lu-on-action: #ffffff;
+  --lu-focus-ring: #b83b00;
+  --lu-spark: #a1150a;
+  --lu-spark-soft: #fbe3e1;
+  --lu-success: #0e6b2c;
+  --lu-warning: #7a4a00;
+  --lu-field: #ffffff;
+  --lu-field-on-glass: #ffffff;
+  --lu-field-edge-on-glass: #000000;
+  --lu-button: #ffffff;
+  --lu-button-hover: #e8e8e8;
+  --lu-button-edge: #000000;
+  --lu-thumb: #6e6e6e;
+  --lu-kbd: #ffffff;
+  --lu-tooltip: #000000;
+  --lu-tooltip-ink: #ffffff;
+  --lu-syntax-keyword: #0f4a85;
+  --lu-syntax-string: #8b2500;
+  --lu-syntax-function: #5c2699;
+  --lu-syntax-number: #0e6b2c;
+  --lu-syntax-comment: #4d4d4d;
+  --lu-cursor-line: #ececec;
+}
+@media (prefers-color-scheme: dark) {
+  :root[data-contrast="high"]:not([data-theme="light"]) {
+    --lu-window: #000000;
+    --lu-surface: #000000;
+    --lu-surface-raised: #0d0d0d;
+    --lu-surface-sunken: #000000;
+    --lu-hover: rgba(255,255,255,0.16);
+    --lu-fill: rgba(255,255,255,0.14);
+    --lu-fill-strong: rgba(255,255,255,0.24);
+    --lu-line: #8c8c8c;
+    --lu-line-strong: #ffffff;
+    --lu-material-chrome: #000000;
+    --lu-material-thin: #000000;
+    --lu-material-overlay: #000000;
+    --lu-capsule: #000000;
+    --lu-capsule-hover: #1f1f1f;
+    --lu-chip: #262626;
+    --lu-rim: #ffffff;
+    --lu-rim-soft: #8c8c8c;
+    --lu-scrim: rgba(0,0,0,0.7);
+    --lu-ink: #ffffff;
+    --lu-ink-muted: #e0e0e0;
+    --lu-ink-faint: #c7c7c7;
+    --lu-accent: #9feaf9;
+    --lu-accent-soft: #0a3c4a;
+    --lu-action: #9feaf9;
+    --lu-on-action: #000000;
+    --lu-focus-ring: #f38518;
+    --lu-spark: #ff8a8a;
+    --lu-spark-soft: #3d0a0a;
+    --lu-success: #7ee8a4;
+    --lu-warning: #ffd479;
+    --lu-field: #000000;
+    --lu-field-on-glass: #000000;
+    --lu-field-edge-on-glass: #ffffff;
+    --lu-button: #000000;
+    --lu-button-hover: #1f1f1f;
+    --lu-button-edge: #ffffff;
+    --lu-thumb: #8c8c8c;
+    --lu-kbd: #000000;
+    --lu-tooltip: #ffffff;
+    --lu-tooltip-ink: #000000;
+    --lu-syntax-keyword: #9feaf9;
+    --lu-syntax-string: #ffc799;
+    --lu-syntax-function: #a8c8ff;
+    --lu-syntax-number: #ffb0b0;
+    --lu-syntax-comment: #b3b3b3;
+    --lu-cursor-line: #1a1a1a;
+  }
+}
+:root[data-contrast="high"][data-theme="dark"] {
+  --lu-window: #000000;
+  --lu-surface: #000000;
+  --lu-surface-raised: #0d0d0d;
+  --lu-surface-sunken: #000000;
+  --lu-hover: rgba(255,255,255,0.16);
+  --lu-fill: rgba(255,255,255,0.14);
+  --lu-fill-strong: rgba(255,255,255,0.24);
+  --lu-line: #8c8c8c;
+  --lu-line-strong: #ffffff;
+  --lu-material-chrome: #000000;
+  --lu-material-thin: #000000;
+  --lu-material-overlay: #000000;
+  --lu-capsule: #000000;
+  --lu-capsule-hover: #1f1f1f;
+  --lu-chip: #262626;
+  --lu-rim: #ffffff;
+  --lu-rim-soft: #8c8c8c;
+  --lu-scrim: rgba(0,0,0,0.7);
+  --lu-ink: #ffffff;
+  --lu-ink-muted: #e0e0e0;
+  --lu-ink-faint: #c7c7c7;
+  --lu-accent: #9feaf9;
+  --lu-accent-soft: #0a3c4a;
+  --lu-action: #9feaf9;
+  --lu-on-action: #000000;
+  --lu-focus-ring: #f38518;
+  --lu-spark: #ff8a8a;
+  --lu-spark-soft: #3d0a0a;
+  --lu-success: #7ee8a4;
+  --lu-warning: #ffd479;
+  --lu-field: #000000;
+  --lu-field-on-glass: #000000;
+  --lu-field-edge-on-glass: #ffffff;
+  --lu-button: #000000;
+  --lu-button-hover: #1f1f1f;
+  --lu-button-edge: #ffffff;
+  --lu-thumb: #8c8c8c;
+  --lu-kbd: #000000;
+  --lu-tooltip: #ffffff;
+  --lu-tooltip-ink: #000000;
+  --lu-syntax-keyword: #9feaf9;
+  --lu-syntax-string: #ffc799;
+  --lu-syntax-function: #a8c8ff;
+  --lu-syntax-number: #ffb0b0;
+  --lu-syntax-comment: #b3b3b3;
+  --lu-cursor-line: #1a1a1a;
+}
+
+/* Forced colours (Windows high contrast): glass and tints drop to system colours.
+   `:root` is repeated so this outranks the appearance and high-contrast rules above. */
+@media (forced-colors: active) {
+  :root:root:root:root {
+    --lu-size-hairline: 1px;
+    --lu-blur-chrome: none;
+    --lu-blur-overlay: none;
+    --lu-blur-thin: none;
+    --lu-blur-tooltip: none;
+    --lu-blur-scrim: none;
+    --lu-window: Canvas;
+    --lu-surface: Canvas;
+    --lu-surface-raised: Canvas;
+    --lu-surface-sunken: Canvas;
+    --lu-material-chrome: Canvas;
+    --lu-material-thin: Canvas;
+    --lu-material-overlay: Canvas;
+    --lu-capsule: ButtonFace;
+    --lu-capsule-hover: ButtonFace;
+    --lu-button: ButtonFace;
+    --lu-button-hover: ButtonFace;
+    --lu-button-edge: ButtonText;
+    --lu-field: Field;
+    --lu-field-on-glass: Field;
+    --lu-field-edge-on-glass: FieldText;
+    --lu-ink: CanvasText;
+    --lu-ink-muted: CanvasText;
+    --lu-ink-faint: GrayText;
+    --lu-line: CanvasText;
+    --lu-line-strong: CanvasText;
+    --lu-rim: CanvasText;
+    --lu-rim-soft: CanvasText;
+    --lu-accent: Highlight;
+    --lu-accent-soft: Highlight;
+    --lu-action: Highlight;
+    --lu-on-action: HighlightText;
+    --lu-focus-ring: Highlight;
+    --lu-tooltip: Canvas;
+    --lu-tooltip-ink: CanvasText;
+  }
+}

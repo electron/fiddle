@@ -60,5 +60,16 @@ export default {
   "copyDiagnostics": "Copy diagnostics",
   "openFiddleRepository": "Electron Fiddle on GitHub",
   "openElectronRepository": "Electron on GitHub",
-  "reportIssue": "Report an issue"
+  "reportIssue": "Report an issue",
+  "actualSize": "Actual size",
+  "zoomIn": "Zoom in",
+  "zoomOut": "Zoom out",
+  "clearConsole": "Clear console",
+  "formatAll": "Format all files",
+  "formatSelection": "Format selection",
+  "goToDefinition": "Go to definition",
+  "findReferences": "Find references",
+  "toggleTabFocus": "Toggle Tab key moves focus",
+  "reloadAllWindows": "Reload all windows",
+  "inspectElement": "Inspect element"
 } as const;

@@ -8,6 +8,50 @@
   color: inherit;
 }
 
+/* Searchable menus (version picker, module versions): a search field above a
+   scrolling list, inside the menu's glass surface. */
+.searchMenu {
+  display: flex;
+  flex-direction: column;
+}
+
+.search {
+  flex: none;
+  padding-bottom: var(--lu-space-1);
+}
+
+/* Chromium's own clear button isn't Lucent; Escape clears the field instead. */
+.search input::-webkit-search-cancel-button {
+  display: none;
+}
+
+.searchList {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: auto;
+  outline: none;
+}
+
+/* The install state after a version's label. */
+.detail {
+  flex: none;
+  margin-left: var(--lu-space-3);
+  font: var(--lu-type-hint);
+  color: var(--lu-ink-faint);
+}
+
+.empty {
+  padding: var(--lu-space-2) 10px;
+  color: var(--lu-ink-muted);
+}
+
+.searchNote {
+  margin: 0;
+  padding: var(--lu-space-2) 10px var(--lu-space-1);
+  font: var(--lu-type-hint);
+  color: var(--lu-ink-muted);
+}
+
 /* Version manager: toolbar, table, note. */
 .manager {
   display: flex;

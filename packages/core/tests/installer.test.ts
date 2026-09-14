@@ -165,6 +165,7 @@ describe('Installer', () => {
   });
 
   describe('ensureDownloaded()', () => {
+    // @feature versions.download
     it('downloads the version if needed', async () => {
       // setup: version is not installed
       expect(installer.state(version)).toBe(missing);
@@ -253,6 +254,7 @@ describe('Installer', () => {
   });
 
   describe('remove()', () => {
+    // @feature versions.download
     it('removes a download', async () => {
       // setup: version is already installed
       await doDownload(installer, version);

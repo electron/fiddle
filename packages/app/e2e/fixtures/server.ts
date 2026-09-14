@@ -5,14 +5,17 @@
  *
  * Routes, relative to its URL:
  *   /releases.json                         data/releases.json
- *   /electron-mirror/<v>/<file>            Electron zips from a local cache, and SHASUMS256.txt
+ *   /electron-mirror/<v>/<file>            Electron zips from a local cache, and SHASUMS256.txt;
+ *                                          other versions get the installed Electron's zip
  *   /nightly-mirror/<v>/<file>             the same
- *   /github-api/user                       a signed-in user
- *   /github-api/gists/<id>[/commits]       data/gists/<id>.json (GET), created or updated (POST, PATCH)
+ *   /github-api/user                       a signed-in user whose token has the gist scope
+ *   /github-api/gists/<id>[/<sha>]         data/gists/<id>.json, or a gist created here (GET);
+ *                                          create (POST), update (PATCH), delete (DELETE), kept in memory
+ *   /github-api/gists/<id>/commits         the gist's `history`
  *   /gist-raw/<owner>/<id>/raw/<rev>/<f>   a file from data/gists/<id>.json
  *   /unpkg/<pkg>@<v>/<path>.d.ts, ?meta    small type definitions
  *   /algolia/1/indexes/...                 data/npm-search.json
- *   /npm/<name>                            a one-version packument
+ *   /npm/<name>                            a packument with versions 1.0.0 and 1.1.0 (latest)
  *   /minimal-repro/archive/<branch>.zip    data/minimal-repro/ as a zip
  *
  * Electron zips come from FIDDLE_E2E_ELECTRON_ZIPS (a directory), ELECTRON_CACHE
@@ -52,7 +55,9 @@ export interface FixtureServer {
 /** The fixture gist every spec can load. */
 export const FIXTURE_GIST_ID = 'c0ffee00c0ffee00c0ffee00c0ffee00';
 
-type Reply = { status: number; type: string; body: Buffer | string } | { file: string };
+type Reply =
+  | { status: number; type: string; body: Buffer | string; headers?: Record<string, string> }
+  | { file: string };
 
 const json = (value: unknown, status = 200): Reply => ({
   status,
@@ -135,16 +140,29 @@ function sha256(file: string): string {
   return hash;
 }
 
+/**
+ * The zip for `file`, or else the installed Electron's zip under that name,
+ * so specs can switch between the fixture's versions offline.
+ */
+function zipFor(file: string): string | undefined {
+  const zip = findElectronZip(file);
+  if (zip) return zip;
+  const installed = installedElectron();
+  const suffix = `-${process.platform}-${process.arch}.zip`;
+  if (!installed || !file.startsWith('electron-v') || !file.endsWith(suffix)) return undefined;
+  return findElectronZip(`electron-v${installed.version}${suffix}`);
+}
+
 function electronMirror(dir: string, file: string): Reply {
   if (file === 'SHASUMS256.txt') {
     const lines: string[] = [];
     for (const name of [`electron-${dir}-${process.platform}-${process.arch}.zip`]) {
-      const zip = findElectronZip(name);
+      const zip = zipFor(name);
       if (zip) lines.push(`${sha256(zip)} *${name}`);
     }
     return lines.length > 0 ? text(`${lines.join('\n')}\n`) : notFound(`SHASUMS256.txt for ${dir}`);
   }
-  const zip = file.endsWith('.zip') ? findElectronZip(file) : undefined;
+  const zip = file.endsWith('.zip') ? zipFor(file) : undefined;
   return zip ? { file: zip } : notFound(`${dir}/${file} (no cached Electron zip)`);
 }
 
@@ -185,36 +203,80 @@ function loadGist(id: string, base: string): Record<string, unknown> | undefined
   };
 }
 
+/** Files as GitHub returns them: `null` in a PATCH deletes, anything else adds or replaces. */
+function applyFiles(
+  current: Record<string, unknown>,
+  changes: Record<string, GistFile | null> = {},
+): Record<string, unknown> {
+  const files = { ...current };
+  for (const [name, change] of Object.entries(changes)) {
+    if (change) files[name] = { filename: name, type: 'text/plain', size: change.content.length, content: change.content };
+    else delete files[name];
+  }
+  return files;
+}
+
+/** Gists created, updated or deleted through this process's fixture servers. `null` is deleted. */
+const written = new Map<string, Record<string, unknown> | null>();
+
+function revision(seed: string, changes: number) {
+  return {
+    version: crypto.createHash('sha1').update(seed).digest('hex'),
+    committed_at: new Date(Date.UTC(2026, 1, 1) + written.size * 60_000).toISOString(),
+    change_status: { total: changes, additions: changes, deletions: 0 },
+  };
+}
+
 function github(method: string, parts: string[], body: string, base: string): Reply {
   const [resource, id, sub] = parts;
   if (resource === 'user' && method === 'GET') {
-    return json({ login: 'fiddle-e2e', id: 1, name: 'Fiddle E2E', avatar_url: '' });
+    return {
+      ...json({ login: 'fiddle-e2e', id: 1, name: 'Fiddle E2E', avatar_url: '' }),
+      headers: { 'X-OAuth-Scopes': 'gist' },
+    } as Reply;
   }
   if (resource !== 'gists') return notFound(`GitHub ${parts.join('/')}`);
   if (method === 'POST' && !id) {
-    const input = JSON.parse(body || '{}') as { description?: string; files?: Record<string, GistFile> };
-    const newId = crypto.createHash('sha1').update(body).digest('hex').slice(0, 32);
-    return json(
-      {
-        id: newId,
-        description: input.description ?? '',
-        html_url: `https://gist.github.com/fiddle-e2e/${newId}`,
-        files: input.files ?? {},
-        owner: { login: 'fiddle-e2e' },
-      },
-      201,
-    );
+    const input = JSON.parse(body || '{}') as {
+      description?: string;
+      public?: boolean;
+      files?: Record<string, GistFile>;
+    };
+    const first = revision(body, Object.keys(input.files ?? {}).length);
+    const newId = first.version.slice(0, 32);
+    const gist = {
+      id: newId,
+      description: input.description ?? '',
+      public: input.public ?? false,
+      url: `${base}/github-api/gists/${newId}`,
+      html_url: `https://gist.github.com/fiddle-e2e/${newId}`,
+      files: applyFiles({}, input.files),
+      owner: { login: 'fiddle-e2e' },
+      history: [first],
+    };
+    written.set(newId, gist);
+    return json(gist, 201);
   }
   if (!id) return notFound('GitHub gists listing');
-  const gist = loadGist(id, base);
-  if (method === 'PATCH') {
-    const input = JSON.parse(body || '{}') as Record<string, unknown>;
-    return json({ ...(gist ?? { id, owner: { login: 'fiddle-e2e' } }), ...input, id });
-  }
+  const gist = written.has(id) ? written.get(id) : loadGist(id, base);
   if (!gist) return json({ message: 'Not Found' }, 404);
-  if (sub === 'commits') {
-    return json([{ version: '0', committed_at: '2026-01-01T00:00:00Z', change_status: {} }]);
+  if (method === 'DELETE') {
+    written.set(id, null);
+    return { status: 204, type: 'text/plain', body: '' };
   }
+  if (method === 'PATCH') {
+    const input = JSON.parse(body || '{}') as { description?: string; files?: Record<string, GistFile | null> };
+    const updated = {
+      ...gist,
+      ...(input.description === undefined ? {} : { description: input.description }),
+      files: applyFiles(gist.files as Record<string, unknown>, input.files),
+      history: [revision(`${id}${body}`, Object.keys(input.files ?? {}).length), ...((gist.history as unknown[]) ?? [])],
+    };
+    written.set(id, updated);
+    return json(updated);
+  }
+  if (sub === 'commits') return json(gist.history ?? []);
+  // `/gists/<id>` or `/gists/<id>/<sha>`: the fixture has the same files at every revision.
   return json(gist);
 }
 
@@ -240,10 +302,11 @@ function unpkg(pathname: string, search: string): Reply {
 function npm(parts: string[]): Reply {
   const name = decodeURIComponent(parts.join('/'));
   if (!name) return notFound('npm registry root');
+  const version = (v: string) => ({ name, version: v, dist: { tarball: '' } });
   return json({
     name,
-    'dist-tags': { latest: '1.0.0' },
-    versions: { '1.0.0': { name, version: '1.0.0', dist: { tarball: '' } } },
+    'dist-tags': { latest: '1.1.0' },
+    versions: { '1.0.0': version('1.0.0'), '1.1.0': version('1.1.0') },
   });
 }
 
@@ -314,7 +377,7 @@ export async function startFixtureServer(): Promise<FixtureServer> {
         fs.createReadStream(reply.file).pipe(response);
         return;
       }
-      response.writeHead(reply.status, { 'Content-Type': reply.type });
+      response.writeHead(reply.status, { 'Content-Type': reply.type, ...reply.headers });
       response.end(reply.body);
     });
   });

@@ -5,6 +5,7 @@ import { autoBisect } from './auto';
 const range = ['1.0.0', '2.0.0', '3.0.0', '4.0.0', '5.0.0'];
 
 describe('autoBisect', () => {
+  // @feature bisect.auto bisect.auto-verify
   it('finds the last good and first bad version', async () => {
     const checked: string[] = [];
     const result = await autoBisect(range, async (version) => {
@@ -15,11 +16,13 @@ describe('autoBisect', () => {
     expect(checked.slice(0, 2)).toEqual(['1.0.0', '5.0.0']);
   });
 
+  // @feature bisect.auto-verify
   it('stops when an end gives the wrong result', async () => {
     expect(await autoBisect(range, async () => false)).toEqual({ stopped: true, unexpected: '1.0.0' });
     expect(await autoBisect(range, async () => true)).toEqual({ stopped: true, unexpected: '5.0.0' });
   });
 
+  // @feature bisect.auto-log
   it('stops when a check is invalid', async () => {
     const result = await autoBisect(range, async (version) =>
       version === '3.0.0' ? undefined : version === '1.0.0',

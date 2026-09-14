@@ -1,6 +1,6 @@
 {
   "consoleReady": "Bereit. Klicke auf „Ausführen“, um Electron {{version}} zu starten.",
-  "started": "Electron {{version}} gestartet ({{arch}})",
+  "started": "Electron {{version}} als \"{{name}}\" gestartet",
   "inspector": "Inspector lauscht auf 127.0.0.1:{{port}}",
   "exitedCode": "Electron wurde mit Code {{code}} beendet",
   "exitedSignal": "Electron wurde durch {{signal}} gestoppt",

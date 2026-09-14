@@ -28,6 +28,7 @@ const parent = {
 };
 
 describe('buildChildEnv()', () => {
+  // @feature run.env-blocked
   it('removes the default denylist and blocked variables from the parent', () => {
     expect(buildChildEnv({}, parent)).toStrictEqual({
       PATH: '/usr/bin',
@@ -84,6 +85,7 @@ describe('buildChildEnv()', () => {
     expect(buildChildEnv({ vars }, parent)).toMatchObject(vars);
   });
 
+  // @feature run.env-blocked
   it('never passes LD_* or DYLD_* from user variables', () => {
     const vars = {
       LD_PRELOAD: '/x.so',

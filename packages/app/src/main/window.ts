@@ -17,6 +17,7 @@ import {
 
 import { DEFAULT_LAYOUT, type Material, type Platform } from '../shared/stores';
 import { APP_ORIGIN } from './bundle';
+import { attachContextMenu } from './context-menu';
 import { emptyFiddleState } from './documents/model';
 import { attachWindow } from './documents/service';
 import { bindWindowIpc } from './ipc';
@@ -138,6 +139,7 @@ export async function createAppWindow({
   // Documents: close prompts, focus tracking and dropped folders. Its
   // `destroyed` handler runs before the one below, while the window is registered.
   attachWindow(windowId, contents);
+  attachContextMenu(windowId, contents, services);
 
   let shown = false;
   const initial = init ?? { title: app.getName(), view: 'editor', fiddle: emptyFiddleState(), layout: DEFAULT_LAYOUT };

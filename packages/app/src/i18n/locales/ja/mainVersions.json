@@ -1,0 +1,18 @@
+{
+  "cannotChange": "Electron のバージョンを変更する前に Fiddle を停止してください。",
+  "versionUnknown": "Electron {{version}} は既知のリリースではありません。",
+  "versionUnsupported": "Electron {{version}} はこのコンピューターでは実行できません。",
+  "localBuildUnknown": "このローカルビルドはもう追加されていません。",
+  "localBuildMissing": "ローカルビルド「{{name}}」に Electron のバイナリがありません。",
+  "downloadFailed": "Electron {{version}} をダウンロードできませんでした（{{message}}）。",
+  "fallback": "{{problem}}この Fiddle は現在 {{fallback}} を使用しています。",
+  "electronVersion": "Electron {{version}}",
+  "showStableTitle": "安定版リリースを表示しますか？",
+  "showBetaTitle": "ベータ版リリースを表示しますか？",
+  "showNightlyTitle": "ナイトリーリリースを表示しますか？",
+  "showChannelDetail": "この例は Electron {{version}} を使用していますが、この種類のリリースはバージョン一覧に表示されていません。後でこのバージョンを選べるように表示しますか？",
+  "showChannelOk": "表示する",
+  "switchToBuild": "{{name}} に切り替えますか？",
+  "switchToBuildDetail": "このフォルダーはすでにローカルビルドとして追加されています。",
+  "switchButton": "切り替える"
+}

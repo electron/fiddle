@@ -1,6 +1,6 @@
 {
   "consoleReady": { "message": "Ready. Press Run to start Electron {{version}}.", "description": "First console line in a new window. {{version}} is the selected Electron version." },
-  "started": { "message": "Started Electron {{version}} ({{arch}})", "description": "Console line when the fiddle starts. {{arch}} is the processor, e.g. arm64." },
+  "started": { "message": "Electron {{version}} started as \"{{name}}\"", "description": "Console line when the fiddle starts. {{version}} is e.g. v43.0.0 or a local build's name; {{name}} is the app name from the fiddle's package.json." },
   "inspector": { "message": "Inspector listening on 127.0.0.1:{{port}}", "description": "Console line with the Node inspector port of the running fiddle." },
   "exitedCode": { "message": "Electron exited with code {{code}}", "description": "Console line when the fiddle exits." },
   "exitedSignal": { "message": "Electron was stopped by {{signal}}", "description": "Console line when the fiddle is killed by a signal, e.g. SIGTERM." },

@@ -11,6 +11,7 @@ import { SHOW_ME_EXAMPLES } from '../shared/examples';
 import { effectiveAccelerator, type Keybindings } from '../shared/settings';
 import type { Platform } from '../shared/stores';
 import type { CommandRegistry } from './commands';
+import { dumpMenu } from './context-menu';
 import {
   clearRecentFolders,
   currentTemplateName,
@@ -140,6 +141,10 @@ function buildMenuTemplate(
         command('file.saveAs'),
         command('file.saveAsForge'),
         separator,
+        command('gist.publish'),
+        command('gist.open'),
+        command('gist.history'),
+        separator,
         showMeMenu(focused),
         separator,
         command('file.close'),
@@ -149,13 +154,14 @@ function buildMenuTemplate(
     {
       label: t('edit'),
       submenu: [
-        { role: 'undo', label: t('undo') },
-        { role: 'redo', label: t('redo') },
+        // Commands, not roles, so they reach the focused Monaco editor (src/main/app-commands.ts).
+        command('edit.undo'),
+        command('edit.redo'),
         separator,
         { role: 'cut', label: t('cut') },
         { role: 'copy', label: t('copy') },
         { role: 'paste', label: t('paste') },
-        { role: 'selectAll', label: t('selectAll') },
+        command('edit.selectAll'),
       ],
     },
     {
@@ -164,6 +170,7 @@ function buildMenuTemplate(
         command('app.commandPalette'),
         separator,
         command('view.reload'),
+        command('view.reloadAllWindows'),
         command('view.toggleDevTools'),
         separator,
         command('view.toggleSidebar'),
@@ -171,17 +178,23 @@ function buildMenuTemplate(
         command('view.toggleSplit'),
         command('editor.toggleSoftWrap'),
         command('editor.toggleMinimap'),
+        command('editor.toggleTabFocus'),
         command('editor.format'),
+        command('editor.formatAll'),
+        separator,
+        // §17.14. The app must stay usable at 200% (§10).
+        { role: 'resetZoom', label: t('actualSize'), accelerator: 'CmdOrCtrl+0' },
+        { role: 'zoomIn', label: t('zoomIn'), accelerator: 'CmdOrCtrl+Plus' },
+        { role: 'zoomOut', label: t('zoomOut'), accelerator: 'CmdOrCtrl+-' },
         separator,
         { role: 'togglefullscreen', label: t('toggleFullScreen') },
       ],
     },
-    // F5 is a second, hidden accelerator for run.toggle.
+    // run.toggle's second default, F5, is dispatched by the renderer.
     {
       label: t('runMenu'),
       submenu: [
         command('run.toggle'),
-        { ...command('run.toggle'), id: 'run.toggle.f5', accelerator: 'F5', visible: false },
         separator,
         command('bisect.toggle'),
         separator,
@@ -230,7 +243,9 @@ export function installMenu({ registry, hub, platform }: Services): void {
       ]);
       if (key === shown) return;
       shown = key;
-      Menu.setApplicationMenu(Menu.buildFromTemplate(buildMenuTemplate(registry, platform, focused, keybindings)));
+      const template = buildMenuTemplate(registry, platform, focused, keybindings);
+      dumpMenu('application menu', template);
+      Menu.setApplicationMenu(Menu.buildFromTemplate(template));
     });
   };
   hub.onChange(refresh);

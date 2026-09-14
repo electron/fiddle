@@ -18,6 +18,7 @@ import {
   ElectronVersions,
   Installer,
   InstallState,
+  type InstallerOptions,
   type InstallStateEvent,
   type Mirrors,
 } from '@electron/fiddle-core';
@@ -29,7 +30,7 @@ import snapshotText from '../../../static/releases.json?raw';
 import { ErrorCode, FiddleError } from '../../shared/errors';
 import { isHttpsUrl, MIRRORS, type Settings } from '../../shared/settings';
 import type { LocalBuild, ReleaseRow, VersionsState } from '../../shared/stores';
-import { messageBox, pickFolder, type DialogParent } from '../dialogs';
+import { confirm, messageBox, pickFolder, type DialogParent } from '../dialogs';
 import { tm } from '../i18n';
 import { log } from '../log';
 import { createJsonStore, writeAtomic, type JsonStore } from '../persistence/json-store';
@@ -55,8 +56,12 @@ interface LocalBuildsFile {
 // ---------------------------------------------------------------------------
 // Window-free pieces, shared with the headless CLI (main/cli).
 
-/** core's installer on the shared cache, in the `per-version` layout, which always takes cross-process locks. */
-export function createInstaller(cache: CachePaths): Installer {
+/**
+ * core's installer on the shared cache, in the `per-version` layout, which
+ * always takes cross-process locks. The headless CLI passes a `net.fetch`
+ * downloader (`options.downloader`).
+ */
+export function createInstaller(cache: CachePaths, options: Pick<InstallerOptions, 'downloader'> = {}): Installer {
   return new Installer(
     {
       electronDownloads: cache.downloads,
@@ -64,7 +69,7 @@ export function createInstaller(cache: CachePaths): Installer {
       electronVersions: cache.electron,
       versionsCache: cache.releases,
     },
-    { layout: 'per-version', errors: 'typed' },
+    { layout: 'per-version', errors: 'typed', ...options },
   );
 }
 
@@ -309,11 +314,28 @@ export class VersionsService {
     return this.localBuilds().find((b) => b.id === id);
   }
 
-  /** Asks for a build folder. Returns the build's ID (an existing one if already registered). */
+  isInstalled(version: string): boolean {
+    return this.installer.state(version) === InstallState.installed;
+  }
+
+  /**
+   * Asks for a build folder. Returns the build's ID. A folder that's already
+   * registered asks "Switch to <name>?" and returns its ID if the user agrees.
+   */
   async addLocalBuild(parent: DialogParent): Promise<string | undefined> {
     const t = tm('mainRun');
     const folder = await pickFolder(parent, { title: t('addLocalBuildTitle'), buttonLabel: t('addLocalBuildButton') });
     if (!folder) return undefined;
+    const existing = this.#builds.get().builds.find((b) => path.resolve(b.path) === path.resolve(folder));
+    if (existing) {
+      const tv = tm('mainVersions');
+      const ok = await confirm(parent, {
+        message: tv('switchToBuild', { name: existing.name }),
+        detail: tv('switchToBuildDetail'),
+        ok: tv('switchButton'),
+      });
+      return ok ? existing.id : undefined;
+    }
     if (!fs.existsSync(Installer.getExecPath(folder))) {
       await messageBox(parent, {
         type: 'error',

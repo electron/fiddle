@@ -1,9 +1,44 @@
 import type { TFunction } from 'i18next';
 import { describe, expect, it, vi } from 'vitest';
 
-import { findDeepLinkInArgv } from '../../fiddle/deep-link';
+import { findDeepLinkInArgv, parseDeepLink } from '../../fiddle/deep-link';
 import { ErrorCode, FiddleError } from '../../shared/errors';
-import { DeepLinkQueue, DIALOG_TEXT_MAX, dialogText, gistLinkDetail, shouldOfferSignIn } from './deep-link-queue';
+import {
+  DeepLinkQueue,
+  DIALOG_TEXT_MAX,
+  dialogText,
+  gistLinkDetail,
+  gistUrlToDeepLink,
+  shouldOfferSignIn,
+} from './deep-link-queue';
+
+describe('gistUrlToDeepLink', () => {
+  const id = '8c5fc0c6a5153d49b5a4a56d3ed9da8f';
+  const sha = 'a'.repeat(40);
+
+  it('turns a gist page URL (dropped on the dock) into the matching gist link', () => {
+    expect(gistUrlToDeepLink(`https://gist.github.com/${id}`)).toBe(`electron-fiddle://gist/${id}`);
+    expect(gistUrlToDeepLink(`https://GIST.github.com/octocat/${id}/`)).toBe(`electron-fiddle://gist/octocat/${id}`);
+    const withRevision = gistUrlToDeepLink(`https://gist.github.com/octocat/${id}/${sha}`);
+    expect(withRevision).toBe(`electron-fiddle://gist/octocat/${id}?revision=${sha}`);
+    expect(parseDeepLink(withRevision!)).toMatchObject({ ok: true, link: { kind: 'gist', id, owner: 'octocat', revision: sha } });
+  });
+
+  it('accepts nothing else', () => {
+    for (const text of [
+      `http://gist.github.com/${id}`,
+      `https://gist.github.com.evil.test/${id}`,
+      `https://github.com/octocat/${id}`,
+      `https://gist.github.com/octocat/${id}/raw/main.js`,
+      `https://user@gist.github.com/${id}`,
+      `https://gist.github.com:8443/${id}`,
+      `electron-fiddle://gist/${id}`,
+      'not a url',
+    ]) {
+      expect(gistUrlToDeepLink(text), text).toBeUndefined();
+    }
+  });
+});
 
 describe('DeepLinkQueue', () => {
   it('queues links until the app is ready, then handles them in order', async () => {
@@ -18,9 +53,9 @@ describe('DeepLinkQueue', () => {
     expect(handled).toEqual(['electron-fiddle://gist/1', 'electron-fiddle://gist/2']);
   });
 
-  it('keeps only one prompt pending at a time', async () => {
-    let release!: () => void;
-    const handle = vi.fn(() => new Promise<void>((resolve) => (release = resolve)));
+  it('keeps one prompt pending at a time, and handles a link that arrives meanwhile next', async () => {
+    const releases: Array<() => void> = [];
+    const handle = vi.fn(() => new Promise<void>((resolve) => releases.push(resolve)));
     const onBusy = vi.fn();
     const queue = new DeepLinkQueue(handle, onBusy);
     await queue.start();
@@ -30,11 +65,15 @@ describe('DeepLinkQueue', () => {
     queue.push('electron-fiddle://gist/b');
     expect(handle).toHaveBeenCalledTimes(1);
     expect(onBusy).toHaveBeenCalledWith('electron-fiddle://gist/b');
+    expect(queue.waiting).toBe(1);
 
-    release();
+    releases[0]!();
+    await vi.waitFor(() => expect(handle).toHaveBeenCalledTimes(2));
+    expect(handle).toHaveBeenLastCalledWith('electron-fiddle://gist/b');
+    releases[1]!();
     await vi.waitFor(() => expect(queue.busy).toBe(false));
     queue.push('electron-fiddle://gist/c');
-    expect(handle).toHaveBeenCalledTimes(2);
+    expect(handle).toHaveBeenCalledTimes(3);
   });
 
   it('keeps going after a handler fails', async () => {
@@ -42,7 +81,8 @@ describe('DeepLinkQueue', () => {
     const queue = new DeepLinkQueue(handle);
     queue.push('electron-fiddle://gist/a');
     queue.push('electron-fiddle://gist/b');
-    await expect(queue.start()).rejects.toThrow('boom');
+    await queue.start();
+    expect(handle).toHaveBeenCalledTimes(2);
     expect(queue.busy).toBe(false);
   });
 
@@ -62,6 +102,7 @@ describe('gistLinkDetail', () => {
     files: { 'main.js': '', 'package.json': '{}' },
   };
 
+  // @feature load.deep-link-confirm
   it('shows the owner, revision, files, dependencies, and the description last', () => {
     const detail = gistLinkDetail({}, gist, { lodash: '^4.0.0' }, t);
     expect(detail.split('\n')).toEqual([
@@ -109,6 +150,7 @@ describe('dialogText', () => {
 });
 
 describe('shouldOfferSignIn', () => {
+  // @feature load.deep-link-private
   it('offers sign-in for a gist that is missing or unauthorized while signed out', () => {
     const notFound = new FiddleError(ErrorCode.notFound, 'GitHub responded 404');
     const unauthorized = new FiddleError(ErrorCode.unauthorized, 'GitHub responded 401');

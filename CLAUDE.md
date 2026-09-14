@@ -27,6 +27,7 @@ Run from the repo root.
 - `yarn start`: dev run. Forge serves the renderer from the Vite dev server with hot reload.
 - `yarn start:xvfb`: headless dev run for agents. It builds main, preload and renderer in development mode, then starts Electron under `xvfb-run`, loading `app://main` exactly like a packaged build. Extra arguments go to Electron.
   - `FIDDLE_DEV_SCREENSHOT=/tmp/x.png FIDDLE_DEV_QUIT=1 yarn start:xvfb` saves a screenshot of the first window, then quits.
+  - `FIDDLE_DEV_MENU_DUMP=1` logs the application menu and the context menus' templates.
   - Logs are prefixed `[fiddle]`.
   - In this container, run it outside the Bash sandbox, because Xvfb can't start inside it.
 - `yarn generate`: EIPC bindings and compiled i18n catalogs. It's offline and idempotent, and start, typecheck, lint, test, package and make all run it.
@@ -90,6 +91,8 @@ Paths below are in `packages/app/`.
   - Registry: `src/main/commands.ts`.
   - Handlers: all in `src/main/app-commands.ts`, in `registerCommands(registry, services)`. Handlers that act in the window are in its `FORWARDED` list.
   - Native menu: `src/main/menu.ts`. It's rebuilt only when enablement, keybindings, recent folders, the locale or the focused window change.
+  - Context menus: `src/main/context-menu.ts`, native, from the registry. The renderer reports what was right-clicked with `Window.ReportContextMenu`.
+  - Keybindings: `src/renderer/features/commands/keybindings.ts` dispatches every keybinding of the focused window by command ID, after overrides. The native menu registers only each command's first accelerator, and never a scoped one (a definition's `context`, or a `<commandId>@<context>` override).
   - The renderer calls `windowApi.RunCommand(id)`.
 - Windows:
   - `src/main/window.ts`: `createAppWindow()`. It sets Lucent window options and web preferences, calls Documents' `attachWindow` (close prompt, focus tracking, dropped folders), binds IPC, and shows the window on `ReportReady`.

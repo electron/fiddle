@@ -79,5 +79,24 @@
   "aboutCopyright": {
     "message": "© Electron authors",
     "description": "Copyright line in the About panel. Keep the © sign."
+  },
+  "resetPrivacyMessage": {
+    "message": "Reset all privacy permissions?",
+    "description": "Confirmation before resetting the macOS privacy permissions given to the app.",
+    "maxLength": 100
+  },
+  "resetPrivacyDetail": {
+    "message": "Electron Fiddle and the fiddles it runs lose access to the camera, microphone, contacts and other protected data. macOS asks again the next time they need it.",
+    "description": "Detail of the reset privacy permissions confirmation.",
+    "maxLength": 300
+  },
+  "resetPrivacyButton": {
+    "message": "Reset",
+    "description": "Button that confirms resetting the privacy permissions.",
+    "maxLength": 20
+  },
+  "resetPrivacyFailed": {
+    "message": "The privacy permissions couldn't be reset.",
+    "description": "Error when macOS's tccutil command fails."
   }
 }

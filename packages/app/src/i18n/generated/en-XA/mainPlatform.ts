@@ -17,5 +17,9 @@ export default {
   "sendReport": "[Šéñð ŕéþöŕţ one two]",
   "dontSend": "[Ðöñ'ţ šéñð one]",
   "aboutVersion": "[{{version}} (Éļéçţŕöñ {{electron}}) one two]",
-  "aboutCopyright": "[© Éļéçţŕöñ áûţĥöŕš one two]"
+  "aboutCopyright": "[© Éļéçţŕöñ áûţĥöŕš one two]",
+  "resetPrivacyMessage": "[Ŕéšéţ áļļ þŕîṽáçý þéŕɱîššîöñš? one two three]",
+  "resetPrivacyDetail": "[Éļéçţŕöñ Ƒîððļé áñð ţĥé ƒîððļéš îţ ŕûñš ļöšé áççéšš ţö ţĥé çáɱéŕá, ɱîçŕöþĥöñé, çöñţáçţš áñð öţĥéŕ þŕöţéçţéð ðáţá. ɱáçÖŠ ášķš áĝáîñ ţĥé ñéẋţ ţîɱé ţĥéý ñééð îţ. one two three four five six seven eight nine ten one two three four]",
+  "resetPrivacyButton": "[Ŕéšéţ one]",
+  "resetPrivacyFailed": "[Ţĥé þŕîṽáçý þéŕɱîššîöñš çöûļðñ'ţ ƀé ŕéšéţ. one two three four]"
 } as const;

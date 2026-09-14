@@ -34,6 +34,7 @@ const file = (name: string, type = 'file'): RepoContentEntry => ({
 });
 
 describe('loadDocsExample', () => {
+  // @feature load.docs-example load.docs-example-files
   it('lays supported files over the template for the tag version', async () => {
     const fake = fakeGitHub([file('main.js'), file('index.html'), file('README.md'), file('package-lock.json'), file('assets', 'dir')]);
     const versions: string[] = [];
@@ -59,6 +60,7 @@ describe('loadDocsExample', () => {
     });
   });
 
+  // @feature load.docs-example-files
   it('reads package.json and replaces the template main entry with the example one', async () => {
     const fake = fakeGitHub([file('main.mjs'), file('package.json')], {
       'package.json': JSON.stringify({ dependencies: { lodash: '4.17.21' } }),

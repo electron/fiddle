@@ -1,18 +1,28 @@
 /**
- * The status bar's left side: "Ready" or the "Running" pill, then the Electron
- * version and processor. Also hosts the bisect controls and dialogs, and hands
- * runtime errors to the editor's error markers.
+ * The status bar's left side: "Ready", the run's current step or the
+ * "Running" pill, then the Electron version and processor. Also hosts the
+ * bisect controls and dialogs, and hands runtime errors to the editor's error
+ * markers.
  */
 import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import type { RuntimeErrorValue } from '../../../shared/stores';
+import type { RunState, RuntimeErrorValue } from '../../../shared/stores';
 import { srOnly, StatusPill } from '../../../ui';
 import { setRuntimeErrors, type RuntimeError } from '../../editor/runtime-errors';
 import { useAppState, useWindowState } from '../../state';
 import { BisectControls, BisectDialogs } from '../bisect/Bisect';
 import styles from './Run.module.css';
 import { IDLE_RUN, versionLabel } from './use-run';
+
+/** Status bar text for every state except downloading (with its percent) and running (the pill). */
+const STATUS_LABEL = {
+  ready: 'ready',
+  checking: 'checking',
+  unzipping: 'unzipping',
+  installing: 'installingModules',
+  starting: 'starting',
+} as const satisfies Partial<Record<RunState['status'], string>>;
 
 /** Main's runtime errors in the shape the editor markers use. */
 export function toEditorErrors(errors: readonly RuntimeErrorValue[]): RuntimeError[] {
@@ -31,7 +41,7 @@ export function RunStatus() {
   const app = useAppState();
   const run = win?.run ?? IDLE_RUN;
 
-  // Errors clear on the next run: main empties the list when a run starts.
+  // Errors clear on the next run, and when another fiddle loads: main empties the list.
   const errors = run.errors;
   useEffect(() => setRuntimeErrors(toEditorErrors(errors)), [errors]);
 
@@ -56,10 +66,8 @@ export function RunStatus() {
         <StatusPill className={styles.runningPill}>{t('running')}</StatusPill>
       ) : run.status === 'downloading' ? (
         <span>{t('downloadingPercent', { percent })}</span>
-      ) : run.status === 'starting' ? (
-        <span>{t('starting')}</span>
       ) : (
-        <span>{t('ready')}</span>
+        <span>{t(STATUS_LABEL[run.status])}</span>
       )}
       {version && <span>{t('electronVersion', { version })}</span>}
       {app?.versions?.arch && <span>{app.versions.arch}</span>}

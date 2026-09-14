@@ -91,3 +91,15 @@
 .row[data-kind="error"] .process {
   font-weight: 600;
 }
+
+/* http(s) URLs in a line: they ask before opening in the browser. */
+.link {
+  color: var(--lu-accent);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  border-radius: var(--lu-radius-code);
+}
+.link:focus-visible {
+  outline: var(--lu-focus-outline);
+  outline-offset: 1px;
+}

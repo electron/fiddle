@@ -384,6 +384,7 @@ describe('ElectronVersions', () => {
       expect(scope.isDone());
     });
 
+    // @feature versions.refresh
     it('fetches with a stale cache', async () => {
       const scope = nockScope.get('/releases.json').reply(
         200,
@@ -411,6 +412,7 @@ describe('ElectronVersions', () => {
       expect(versions.length).toBe(3);
     });
 
+    // @feature versions.bundled-list
     it('uses stale cache when fetch fails', async () => {
       const scope = nockScope.get('/releases.json').replyWithError('Error');
       const staleCacheMtime = Date.now() / 1000 - 5 * 60 * 60;
@@ -422,6 +424,7 @@ describe('ElectronVersions', () => {
       expect(versions.length).toBe(1027);
     });
 
+    // @feature versions.bundled-list
     it('uses options.initialVersions if missing cache', async () => {
       await fs.promises.rm(versionsCache, { force: true });
       expect(nockScope.isDone()); // No mocks

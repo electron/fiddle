@@ -15,10 +15,12 @@ function run(bisector: Bisector, firstBad: number): BisectStep {
 }
 
 describe('Bisector', () => {
+  // @feature bisect.manual-step
   it('starts at the midpoint', () => {
     expect(new Bisector(versions).current()).toEqual({ done: false, version: '5.0.0' });
   });
 
+  // @feature bisect.manual-step
   it.each(Array.from({ length: 9 }, (_, i) => i + 1))('finds the first bad version at index %i', (firstBad) => {
     expect(run(new Bisector(versions), firstBad)).toEqual({
       done: true,
@@ -35,6 +37,7 @@ describe('Bisector', () => {
     expect(() => new Bisector(['1.0.0'])).toThrow(FiddleError);
   });
 
+  // @feature bisect.manual-step
   it('skips to a weighted-random version and never revisits it', () => {
     const bisector = new Bisector(versions, () => 0);
     expect(bisector.current()).toEqual({ done: false, version: '5.0.0' });
@@ -70,6 +73,7 @@ describe('Bisector', () => {
 });
 
 describe('bisectCompareUrl', () => {
+  // @feature bisect.manual-result
   it('links the electron compare view', () => {
     expect(bisectCompareUrl('30.0.0', '30.0.1')).toBe('https://github.com/electron/electron/compare/v30.0.0...v30.0.1');
   });

@@ -11,6 +11,11 @@ export default {
   "processPreload": "プリロード",
   "processRenderer": "レンダラー",
   "errorCount_other": "{{count}} 件のエラー",
+  "warningCount_other": "{{count}} 件の警告",
+  "resizePanes": "エディターペインのサイズを変更",
+  "notificationsButton_other": "通知、新着 {{count}} 件",
+  "noNotifications": "通知はまだありません",
+  "clearNotifications": "すべて消去",
   "unsaved": "未保存の変更",
   "hiddenFile": "非表示",
   "filterFiles": "ファイルをフィルター",
@@ -66,5 +71,6 @@ export default {
   "stubAddPackage": "パッケージを追加",
   "stubVersion": "Electron",
   "stubSettingsTitle": "設定",
-  "stubCloseSettings": "完了"
+  "stubCloseSettings": "完了",
+  "tabFocusMode": "Tab でフォーカス移動"
 } as const;

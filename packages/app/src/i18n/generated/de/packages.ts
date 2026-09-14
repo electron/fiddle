@@ -11,5 +11,8 @@ export default {
   "remove": "{{name}} entfernen",
   "addFailed": "{{name}} konnte nicht hinzugefügt werden",
   "changeFailed": "{{name}} konnte nicht geändert werden",
-  "list": "Pakete in diesem Fiddle"
+  "list": "Pakete in diesem Fiddle",
+  "searchVersions": "Versionen suchen",
+  "noVersions": "Keine passenden Versionen",
+  "moreVersions": "{{shown}} von {{total}} angezeigt. Tippe, um die anderen zu finden."
 } as const;

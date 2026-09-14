@@ -2,17 +2,22 @@
 import fsp from 'node:fs/promises';
 import path from 'node:path';
 
-import { app, nativeTheme, shell } from 'electron';
+import { app, shell } from 'electron';
 
 import { implement, Settings } from '../../ipc/main';
 import { ErrorCode, FiddleError } from '../../shared/errors';
-import { changedExecutionSettings, type Settings as AppSettings, type ThemeFile } from '../../shared/settings';
+import {
+  changedExecutionSettings,
+  type Settings as AppSettings,
+  type ThemeFile,
+  type ThemeSnapshot,
+} from '../../shared/settings';
 import { confirm, pickFile, pickSave } from '../dialogs';
 import { dialogText } from '../documents/deep-link-queue';
 import { tm } from '../i18n';
 import type { IpcContext } from '../ipc';
 import { log } from '../log';
-import { builtinThemeFile, themeFromMonaco, themeId, writeTheme } from '../themes/themes';
+import { themeFromMonaco, themeId, writeTheme } from '../themes/themes';
 import type { SettingsContext } from './index';
 import { sanitizeSettings, SETTINGS_VERSION } from './service';
 
@@ -58,6 +63,12 @@ function confirmExecutionSettings(
     ok: t('importButton'),
     defaultId: 1,
   });
+}
+
+/** The name of the built-in theme a snapshot was taken from. */
+function builtinThemeName({ isDark, editor }: ThemeSnapshot) {
+  if (editor.base === 'hc-black' || editor.base === 'hc-light') return isDark ? 'lucentHcDark' : 'lucentHcLight';
+  return isDark ? 'lucentDark' : 'lucentLight';
 }
 
 /** Writes a new theme file, selects it and returns the App rev. */
@@ -135,12 +146,17 @@ export function bindSettingsIpc({ contents, windowId, services: { settings } }: 
       return addTheme(settings, theme, false);
     },
 
-    CreateTheme: async () => {
+    CreateTheme: async (builtin) => {
       const current = settings.themes.find((theme) => theme.id === service.settings.theme);
-      const isDark = nativeTheme.shouldUseDarkColors;
-      const base: ThemeFile = current
-        ? { name: current.name, isDark: current.isDark, editor: current.editor, common: current.common }
-        : builtinThemeFile(t(isDark ? 'lucentDark' : 'lucentLight'), isDark);
+      let base: ThemeFile;
+      if (current) {
+        base = { name: current.name, isDark: current.isDark, editor: current.editor, common: current.common };
+      } else if (builtin) {
+        // A built-in theme as the window renders it: Lucent's Monaco theme and token values.
+        base = { name: t(builtinThemeName(builtin)), ...builtin };
+      } else {
+        throw new FiddleError(ErrorCode.invalidArgument, 'A built-in theme is copied from its current values');
+      }
       return addTheme(settings, { ...base, name: t('themeCopyName', { name: base.name }) }, true);
     },
 

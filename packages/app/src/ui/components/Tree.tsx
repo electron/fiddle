@@ -55,6 +55,8 @@ export interface TreeRowProps {
   icon?: IconName;
   /** Right-aligned pill in spark on spark-soft, such as "1 error". */
   pill?: string;
+  /** `warning` draws the pill in the warning colour, such as "2 warnings". */
+  pillTone?: 'error' | 'warning';
   unsaved?: boolean;
   unsavedLabel?: string;
   /** Text direction of the label, e.g. `ltr` for file names in a mirrored locale. */
@@ -71,6 +73,7 @@ export function TreeRow({
   label,
   icon = 'file',
   pill,
+  pillTone,
   unsaved,
   unsavedLabel,
   labelDir,
@@ -92,7 +95,11 @@ export function TreeRow({
             <span className={styles.label} dir={labelDir}>
               {label}
             </span>
-            {pill && <span className={styles.pill}>{pill}</span>}
+            {pill && (
+              <span className={styles.pill} data-tone={pillTone}>
+                {pill}
+              </span>
+            )}
             {unsaved && <span className={styles.dot} aria-hidden="true" />}
             {unsaved && unsavedLabel && <VisuallyHidden>{`, ${unsavedLabel}`}</VisuallyHidden>}
           </>

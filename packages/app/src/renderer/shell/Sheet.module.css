@@ -54,9 +54,14 @@
   min-width: 0;
 }
 
-/* Split panes are separated by a 0.5px line. */
-.divider {
-  flex: none;
+/* Split panes are separated by a 0.5px line, drawn on the resize handle
+   (whose own 2px accent line shows on hover, drag and focus). */
+.divider::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: calc(50% - var(--lu-size-hairline) / 2);
   width: var(--lu-size-hairline);
   background: var(--lu-line);
 }

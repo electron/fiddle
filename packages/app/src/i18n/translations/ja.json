@@ -434,6 +434,11 @@
     "translation": "0aca4a14a81f",
     "reviewed": false
   },
+  "main:actualSize": {
+    "source": "74cdbe70e394",
+    "translation": "d24147ca6330",
+    "reviewed": false
+  },
   "main:appMenu": {
     "source": "ec28e55d864c",
     "translation": "ec28e55d864c",
@@ -447,6 +452,11 @@
   "main:cancel": {
     "source": "19766ed6ccb2",
     "translation": "bca84ea5c65f",
+    "reviewed": false
+  },
+  "main:clearConsole": {
+    "source": "888c33cff71b",
+    "translation": "03a781e9cbe3",
     "reviewed": false
   },
   "main:close": {
@@ -489,9 +499,29 @@
     "translation": "2b39ec3da17e",
     "reviewed": false
   },
+  "main:findReferences": {
+    "source": "e83095998601",
+    "translation": "b80b1a4c1267",
+    "reviewed": false
+  },
+  "main:formatAll": {
+    "source": "9869b1dc2200",
+    "translation": "6ed059dc4db9",
+    "reviewed": false
+  },
   "main:formatDocument": {
     "source": "452c55a3f6d2",
     "translation": "8e824dece7ff",
+    "reviewed": false
+  },
+  "main:formatSelection": {
+    "source": "3ad931de390c",
+    "translation": "9cc008d37b90",
+    "reviewed": false
+  },
+  "main:goToDefinition": {
+    "source": "06f4d0b891e1",
+    "translation": "fae6c0fe2bef",
     "reviewed": false
   },
   "main:help": {
@@ -507,6 +537,11 @@
   "main:hideOthers": {
     "source": "74376e4337d2",
     "translation": "6f826bba6934",
+    "reviewed": false
+  },
+  "main:inspectElement": {
+    "source": "f6493a99c5a3",
+    "translation": "6cac6b7d19a0",
     "reviewed": false
   },
   "main:makeFiddle": {
@@ -609,6 +644,11 @@
     "translation": "2322ab250336",
     "reviewed": false
   },
+  "main:reloadAllWindows": {
+    "source": "d896c941f52e",
+    "translation": "c03c5f337ade",
+    "reviewed": false
+  },
   "main:reportIssue": {
     "source": "635ae219ad13",
     "translation": "8a3ab721381a",
@@ -709,6 +749,11 @@
     "translation": "33d09de522c4",
     "reviewed": false
   },
+  "main:toggleTabFocus": {
+    "source": "49d9cea5d567",
+    "translation": "428938840457",
+    "reviewed": false
+  },
   "main:undo": {
     "source": "a8283ade3185",
     "translation": "dc65bd3603e8",
@@ -727,6 +772,16 @@
   "main:zoom": {
     "source": "509c517ede79",
     "translation": "ee7cebb9592a",
+    "reviewed": false
+  },
+  "main:zoomIn": {
+    "source": "0e47f09a748f",
+    "translation": "da39c794fbce",
+    "reviewed": false
+  },
+  "main:zoomOut": {
+    "source": "bc7b631a689b",
+    "translation": "092a4a0ba550",
     "reviewed": false
   },
   "mainCli:argBad": {
@@ -1700,9 +1755,9 @@
     "reviewed": false
   },
   "mainRun:started": {
-    "source": "be18acb1342a",
-    "translation": "fc67f9846592",
-    "reviewed": false
+    "source": "6ebdbd2b12ee",
+    "translation": "5fd8a7f27181",
+    "reviewed": true
   },
   "mainRun:untrusted": {
     "source": "dcb157063c2b",
@@ -1848,6 +1903,86 @@
     "source": "22b156bed4aa",
     "translation": "33d6c89f2f35",
     "reviewed": false
+  },
+  "mainVersions:cannotChange": {
+    "source": "bc31d120b783",
+    "translation": "30f9981c8242",
+    "reviewed": true
+  },
+  "mainVersions:downloadFailed": {
+    "source": "fae62659099e",
+    "translation": "fdde1197eaf5",
+    "reviewed": true
+  },
+  "mainVersions:electronVersion": {
+    "source": "8c69cff12cea",
+    "translation": "8c69cff12cea",
+    "reviewed": true
+  },
+  "mainVersions:fallback": {
+    "source": "7d8c336c71ba",
+    "translation": "63136e8b3c59",
+    "reviewed": true
+  },
+  "mainVersions:localBuildMissing": {
+    "source": "e77ab917c380",
+    "translation": "f62654282692",
+    "reviewed": true
+  },
+  "mainVersions:localBuildUnknown": {
+    "source": "0b2917b84827",
+    "translation": "ecabc3bc6e01",
+    "reviewed": true
+  },
+  "mainVersions:showBetaTitle": {
+    "source": "56a991fb236d",
+    "translation": "3888c3a9cb43",
+    "reviewed": true
+  },
+  "mainVersions:showChannelDetail": {
+    "source": "a2b06e655b8a",
+    "translation": "4611931ff546",
+    "reviewed": true
+  },
+  "mainVersions:showChannelOk": {
+    "source": "cab88e281cc4",
+    "translation": "4b098134c0ca",
+    "reviewed": true
+  },
+  "mainVersions:showNightlyTitle": {
+    "source": "949fd2705412",
+    "translation": "7dadcc6772a6",
+    "reviewed": true
+  },
+  "mainVersions:showStableTitle": {
+    "source": "f21936baa12b",
+    "translation": "3efbbdf58aee",
+    "reviewed": true
+  },
+  "mainVersions:switchButton": {
+    "source": "39921a740bf2",
+    "translation": "1fbf6d7a2cda",
+    "reviewed": true
+  },
+  "mainVersions:switchToBuild": {
+    "source": "b3f8d7da26d4",
+    "translation": "5f7578aeeb1c",
+    "reviewed": true
+  },
+  "mainVersions:switchToBuildDetail": {
+    "source": "6925a2428461",
+    "translation": "af7699583014",
+    "reviewed": true
+  },
+  "mainVersions:versionUnknown": {
+    "source": "4a09edbbb383",
+    "translation": "1bda6d7b6e75",
+    "reviewed": true
+  },
+  "mainVersions:versionUnsupported": {
+    "source": "d9b594d4abc8",
+    "translation": "332a21526129",
+    "reviewed": true
   },
   "onboarding:back": {
     "source": "76900f1bfd16",
@@ -2034,10 +2169,20 @@
     "translation": "253b62e5c8d0",
     "reviewed": false
   },
+  "packages:moreVersions": {
+    "source": "8b8b62f47ab0",
+    "translation": "2cc218d294f8",
+    "reviewed": true
+  },
   "packages:noResults": {
     "source": "0d977800db55",
     "translation": "92b699858b41",
     "reviewed": false
+  },
+  "packages:noVersions": {
+    "source": "1c3e2f174528",
+    "translation": "d1402a24c3c0",
+    "reviewed": true
   },
   "packages:remove": {
     "source": "43e1269ac88a",
@@ -2053,6 +2198,11 @@
     "source": "c31723ab3302",
     "translation": "fae1b098d092",
     "reviewed": false
+  },
+  "packages:searchVersions": {
+    "source": "2af5bdafa2e7",
+    "translation": "ad7dfa768e30",
+    "reviewed": true
   },
   "packages:title": {
     "source": "40a2085371b8",
@@ -2119,10 +2269,20 @@
     "translation": "a10812761015",
     "reviewed": false
   },
+  "run:announceChecking": {
+    "source": "556ca2b5e6bf",
+    "translation": "bc21072ef469",
+    "reviewed": true
+  },
   "run:announceDownloading": {
     "source": "8708b29a3627",
     "translation": "9f5c6833e275",
     "reviewed": false
+  },
+  "run:announceInstalling": {
+    "source": "1e67a10d3cd1",
+    "translation": "dc4706894923",
+    "reviewed": true
   },
   "run:announceReady": {
     "source": "c2e2ee67d426",
@@ -2138,6 +2298,11 @@
     "source": "aeed4d26bb5f",
     "translation": "6f22025cd5bf",
     "reviewed": false
+  },
+  "run:announceUnzipping": {
+    "source": "c25d55ecc69c",
+    "translation": "30838632285d",
+    "reviewed": true
   },
   "run:bisectAuto": {
     "source": "0286249762f7",
@@ -2228,6 +2393,11 @@
     "source": "90ee305714d7",
     "translation": "9993637b3fee",
     "reviewed": false
+  },
+  "run:checking": {
+    "source": "0dfe1d63c9d8",
+    "translation": "06256b0c4d70",
+    "reviewed": true
   },
   "run:clearConsole": {
     "source": "888c33cff71b",
@@ -2374,6 +2544,11 @@
     "translation": "6eae0dff5b4b",
     "reviewed": false
   },
+  "run:installingModules": {
+    "source": "1e67a10d3cd1",
+    "translation": "ad2f14325fe1",
+    "reviewed": true
+  },
   "run:newError": {
     "source": "22cf52b5750b",
     "translation": "93e26c9da98a",
@@ -2493,6 +2668,11 @@
     "source": "cb598c7ee971",
     "translation": "a7fee8981b6f",
     "reviewed": false
+  },
+  "run:unzipping": {
+    "source": "88eb20c03626",
+    "translation": "6c6ad4e2b4a0",
+    "reviewed": true
   },
   "run:versionPicker": {
     "source": "2817888487f2",
@@ -2642,6 +2822,16 @@
   "settings:customMirrorNightly.title": {
     "source": "babe9698327d",
     "translation": "0146fcc655a9",
+    "reviewed": false
+  },
+  "settings:editorFont.reload": {
+    "source": "2e65aa0021f8",
+    "translation": "7b00c5904f80",
+    "reviewed": false
+  },
+  "settings:editorFont.reloadHint": {
+    "source": "f596498424b0",
+    "translation": "dc38c7d34160",
     "reviewed": false
   },
   "settings:editorFontFamily.description": {
@@ -3149,6 +3339,11 @@
     "translation": "bca84ea5c65f",
     "reviewed": false
   },
+  "shell:clearNotifications": {
+    "source": "29a390f9237e",
+    "translation": "8b9d8439e0a9",
+    "reviewed": true
+  },
   "shell:closePane": {
     "source": "7fa0f9613d91",
     "translation": "f99fa57cc5e0",
@@ -3324,10 +3519,20 @@
     "translation": "82c4aa13b7ca",
     "reviewed": false
   },
+  "shell:noNotifications": {
+    "source": "37ecf3603dbf",
+    "translation": "3fa2716fb861",
+    "reviewed": true
+  },
   "shell:notifications": {
     "source": "788011833a5a",
     "translation": "4b6ded8a7f18",
     "reviewed": false
+  },
+  "shell:notificationsButton": {
+    "source": "b99ab5925428",
+    "translation": "910a9104e64d",
+    "reviewed": true
   },
   "shell:openFiles": {
     "source": "3faecf01527d",
@@ -3378,6 +3583,11 @@
     "source": "89cb4b995288",
     "translation": "05de6a8c54b9",
     "reviewed": false
+  },
+  "shell:resizePanes": {
+    "source": "39056de4c03d",
+    "translation": "1058b981d101",
+    "reviewed": true
   },
   "shell:resizeSidebar": {
     "source": "243854b4d0c7",
@@ -3454,6 +3664,11 @@
     "translation": "61a62a841f54",
     "reviewed": false
   },
+  "shell:tabFocusMode": {
+    "source": "d81a0d194b1c",
+    "translation": "173d211d45e1",
+    "reviewed": false
+  },
   "shell:toolbar": {
     "source": "451aa51a0fb5",
     "translation": "c0d8d83c52c3",
@@ -3464,9 +3679,34 @@
     "translation": "050ccdc85452",
     "reviewed": false
   },
+  "shell:warningCount": {
+    "source": "460638ad9286",
+    "translation": "305ffad555b4",
+    "reviewed": true
+  },
   "shell:windowTitleEdited": {
     "source": "805efedfe877",
     "translation": "83d34cb56ebd",
     "reviewed": false
+  },
+  "versions:copied": {
+    "source": "886e05896e1b",
+    "translation": "14d5e235a897",
+    "reviewed": true
+  },
+  "versions:copyVersion": {
+    "source": "ae76d89fd36a",
+    "translation": "b462ce106f1c",
+    "reviewed": true
+  },
+  "versions:noMatches": {
+    "source": "1c3e2f174528",
+    "translation": "d1402a24c3c0",
+    "reviewed": true
+  },
+  "versions:searchVersions": {
+    "source": "2af5bdafa2e7",
+    "translation": "ad7dfa768e30",
+    "reviewed": true
   }
 }

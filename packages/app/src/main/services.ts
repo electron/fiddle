@@ -14,11 +14,13 @@ import { Run, Versions } from '../ipc/main';
 import type { Platform } from '../shared/stores';
 import { BisectService } from './bisect/service';
 import { CommandRegistry } from './commands';
-import { getStateStore, initDocuments, setFiddleModules } from './documents/service';
+import { confirm } from './dialogs';
+import { getStateStore, initDocuments, setFiddleModules, setFiddleVersion } from './documents/service';
 import { CredentialStore } from './github/credentials';
 import { createDocumentsBridge } from './github/documents-bridge';
 import { createGistPrefs } from './github/prefs';
 import { GitHubService } from './github/service';
+import { tm } from './i18n';
 import { log } from './log';
 import { NpmClient, npmEndpoints } from './modules/npm-client';
 import { ModulesService } from './modules/service';
@@ -29,6 +31,7 @@ import { getEndpoints, isTestMode } from './test-mode';
 import { TypesService } from './types/service';
 import { createOnboarding } from './ux/onboarding';
 import { cachePaths } from './versions/paths';
+import { VersionSelector } from './versions/select';
 import { VersionsService } from './versions/service';
 import { createAppWindow } from './window';
 import { getWindow } from './windows';
@@ -39,6 +42,8 @@ export interface Services {
   platform: Platform;
   settings: SettingsContext;
   versions: VersionsService;
+  /** Every version choice: `SetVersion`, fallbacks, docs examples and the last-used version. */
+  versionSelector: VersionSelector;
   types: TypesService;
   runs: RunService;
   bisect: BisectService;
@@ -110,6 +115,36 @@ export async function createServices({
   });
   const bisect = new BisectService(hub, runs, versions);
 
+  let noticeId = 0;
+  // i18next types each key's own placeholders; the selector passes them as one record.
+  const tv = tm('mainVersions') as (key: string, values?: Record<string, string>) => string;
+  const versionSelector = new VersionSelector({
+    versions,
+    settings: () => hub.app.settings,
+    showChannel: (channel) => {
+      const { channels } = hub.app.settings;
+      if (!channels.includes(channel)) settings.service.set('channels', [...channels, channel]);
+    },
+    isBusy: (windowId) => {
+      const step = hub.getWindow(windowId)?.run?.bisect;
+      return runs.isBusy(windowId) || (step !== undefined && step !== null && step.result === null);
+    },
+    getVersion: (windowId) => hub.getWindow(windowId)?.fiddle.versionRef,
+    setVersion: (windowId, ref) => setFiddleVersion(windowId, ref),
+    remember: (ref) => getStateStore().set((prev) => ({ ...prev, lastVersion: ref })),
+    notify: (windowId, message) => {
+      noticeId += 1;
+      if (hub.getWindow(windowId)) hub.updateWindow(windowId, { versionNotice: { id: noticeId, message } });
+    },
+    typesChanged: (windowId) => {
+      const contents = contentsOf(windowId);
+      if (contents && !contents.isDestroyed()) Versions.getDispatcher(contents)?.dispatchTypesChanged();
+    },
+    confirm: (windowId, options) => confirm(windowId, options),
+    text: (key, values) => tv(key, values),
+    warn: (message, error) => log.warn(message, error),
+  });
+
   // The token stays in this process; the App store only gets the login.
   const github = new GitHubService({
     store: new CredentialStore({
@@ -145,6 +180,11 @@ export async function createServices({
     versions,
     github,
     createWindow: (windowId, init) => createAppWindow({ services, url: rendererUrl, windowId, init }),
+    onDocsExampleLoaded: (windowId) => {
+      versionSelector
+        .docsExampleLoaded(windowId)
+        .catch((error: unknown) => log.warn('selecting the docs example version failed', error));
+    },
   });
 
   const services: Services = {
@@ -153,6 +193,7 @@ export async function createServices({
     platform,
     settings,
     versions,
+    versionSelector,
     types,
     runs,
     bisect,

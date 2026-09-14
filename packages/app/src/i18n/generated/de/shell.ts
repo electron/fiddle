@@ -12,6 +12,13 @@ export default {
   "processRenderer": "Renderer",
   "errorCount_one": "{{count}} Fehler",
   "errorCount_other": "{{count}} Fehler",
+  "warningCount_one": "{{count}} Warnung",
+  "warningCount_other": "{{count}} Warnungen",
+  "resizePanes": "Größe der Editorbereiche ändern",
+  "notificationsButton_one": "Benachrichtigungen, {{count}} neu",
+  "notificationsButton_other": "Benachrichtigungen, {{count}} neu",
+  "noNotifications": "Noch keine Benachrichtigungen",
+  "clearNotifications": "Alle löschen",
   "unsaved": "Nicht gespeicherte Änderungen",
   "hiddenFile": "Ausgeblendet",
   "filterFiles": "Dateien filtern",
@@ -67,5 +74,6 @@ export default {
   "stubAddPackage": "Paket hinzufügen",
   "stubVersion": "Electron",
   "stubSettingsTitle": "Einstellungen",
-  "stubCloseSettings": "Fertig"
+  "stubCloseSettings": "Fertig",
+  "tabFocusMode": "Tab bewegt den Fokus"
 } as const;
