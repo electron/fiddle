@@ -4,7 +4,7 @@
  * filters every section by title, description and key; changed values are
  * marked and can be reset; settings.json can be opened, imported and exported.
  */
-import { useContext, useEffect, useState, type ComponentType } from 'react';
+import { useContext, useEffect, useEffectEvent, useState, type ComponentType } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import contributors from '../../../../static/contributors.json';
@@ -52,6 +52,9 @@ import { clearRequestedSection, requestedSection, type SectionId } from './secti
 import styles from './SettingsPage.module.css';
 import { useSettings, useSettingsAction } from './use-settings';
 
+/** Elements whose Escape belongs to an open menu, popover or dialog. */
+const OVERLAY = '[role="dialog"], [role="alertdialog"], [role="menu"], [role="listbox"]';
+
 interface SectionDef {
   id: SectionId;
   icon: IconName;
@@ -68,6 +71,27 @@ export function SettingsPage() {
   const searching = query.trim() !== '';
 
   useEffect(() => clearRequestedSection(), []);
+
+  // Escape closes settings wherever focus is, not only inside the page (§17.14).
+  // An open menu, popover or dialog gets it first: React Aria stops Escape there,
+  // and a press in one, or on a control whose popup is open, is left alone.
+  const close = useEffectEvent(() => void setView('editor', t('actionFailed')));
+  useEffect(() => {
+    let forOverlay = false;
+    const onCapture = (event: KeyboardEvent) => {
+      const target = event.target instanceof Element ? event.target : null;
+      forOverlay = !!target && (!!target.closest(OVERLAY) || target.getAttribute('aria-expanded') === 'true');
+    };
+    const onBubble = (event: KeyboardEvent) => {
+      if (event.key === 'Escape' && !event.defaultPrevented && !event.isComposing && !forOverlay) close();
+    };
+    window.addEventListener('keydown', onCapture, true);
+    window.addEventListener('keydown', onBubble);
+    return () => {
+      window.removeEventListener('keydown', onCapture, true);
+      window.removeEventListener('keydown', onBubble);
+    };
+  }, []);
 
   // Pick up theme files added or edited outside the app.
   useEffect(() => {

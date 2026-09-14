@@ -15,7 +15,7 @@
 | 3 | Features: run, versions, bisect, gists, settings, themes, modules, deep links, palette, session restore, onboarding | done |
 | 4 | i18n (de, ja, pseudo-locales), headless CLI, migration, Sentry, updates, packaging, CI | done |
 | 5 | Verification: Lucent acceptance checklist (both appearances), security and architecture reviews and their fixes | done |
-| 5 | Feature-coverage audit against §17 | in progress |
+| 5 | Feature-coverage audit against §17, gaps closed, IDs and e2e coverage (200 of 241) | done |
 
 ## Wave 2: ownership and contracts
 

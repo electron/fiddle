@@ -119,7 +119,8 @@ function PackageSearch() {
         selectedKey={null}
         onSelectionChange={add}
         menuTrigger="input"
-        allowsEmptyCollection
+        // Only while there's a query, so the suggestions close once a package is added (which clears it).
+        allowsEmptyCollection={query.trim() !== ''}
         allowsCustomValue
       >
         <div className={field.field}>

@@ -4,6 +4,7 @@ import type { TFunction } from 'i18next';
 import { githubApi, settingsApi } from '../../../ipc/renderer';
 import { ErrorCode, FiddleError } from '../../../shared/errors';
 import { confirmDialog, showToast } from '../../../ui';
+import { gistErrorHint } from './error-hint';
 import { showGistDialog } from './state';
 
 export type GistT = TFunction<'gists'>;
@@ -32,7 +33,7 @@ export function showGistSaved(t: GistT, title: 'published' | 'updated', id: stri
 
 /**
  * Signed out: sign in, then retry. Anything else: the error GitHub reported,
- * plus a hint about ownership (update and delete) or connectivity.
+ * plus a hint about ownership or connectivity when one applies (`gistErrorHint`).
  */
 export function reportGistError(t: GistT, action: GistAction, error: unknown, retry?: () => void): void {
   const e = FiddleError.from(error);
@@ -40,14 +41,9 @@ export function reportGistError(t: GistT, action: GistAction, error: unknown, re
     showGistDialog({ kind: 'sign-in', then: retry });
     return;
   }
-  const ownership =
-    action !== 'publish' &&
-    (e.code === ErrorCode.notFound || e.code === ErrorCode.forbidden || e.code === ErrorCode.unauthorized);
-  const hint = ownership ? t('hintOwnership') : t('hintConnectivity');
-  showToast(
-    { tone: 'error', title: t(failedTitle[action]), description: t('errorWithHint', { error: e.message, hint }) },
-    { timeout: 10_000 },
-  );
+  const hint = gistErrorHint(e);
+  const description = hint ? t('errorWithHint', { error: e.message, hint: t(hint) }) : e.message;
+  showToast({ tone: 'error', title: t(failedTitle[action]), description }, { timeout: 10_000 });
 }
 
 export async function updateGist(t: GistT): Promise<void> {

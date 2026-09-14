@@ -20,6 +20,7 @@ import { Sheet } from './Sheet';
 import styles from './Shell.module.css';
 import { StatusBar } from './StatusBar';
 import { TitleBar } from './TitleBar';
+import { ErrorBoundary } from './ErrorBoundary';
 import { useDraft } from './use-draft';
 import { useAppState, useWindowState } from '../state';
 import { setActiveFile, setFileVisible, setLayout, setView } from './window-state';
@@ -120,13 +121,15 @@ function ShellView({ state, platform }: { state: WindowState; platform: 'darwin'
       {layout.sidebar && (
         <div className={styles.side} style={{ width: shownSidebarWidth }}>
           <div className={styles.sideInner}>
-            <Sidebar
-              files={fiddle.files}
-              dirtyFiles={fiddle.dirtyFiles}
-              activeFile={fiddle.activeFile}
-              onOpen={openFile}
-              onSetVisible={(name, visible) => void setFileVisible(name, visible, failTitle)}
-            />
+            <ErrorBoundary region="sidebar">
+              <Sidebar
+                files={fiddle.files}
+                dirtyFiles={fiddle.dirtyFiles}
+                activeFile={fiddle.activeFile}
+                onOpen={openFile}
+                onSetVisible={(name, visible) => void setFileVisible(name, visible, failTitle)}
+              />
+            </ErrorBoundary>
           </div>
           <SplitHandle
             value={shownSidebarWidth}
@@ -139,7 +142,8 @@ function ShellView({ state, platform }: { state: WindowState; platform: 'darwin'
         </div>
       )}
       <div className={styles.sheetArea}>
-        <Sheet
+        <ErrorBoundary region="sheet">
+          <Sheet
           state={state}
           platform={platform}
           onSelectFile={openFile}
@@ -158,7 +162,8 @@ function ShellView({ state, platform }: { state: WindowState; platform: 'darwin'
           onHideConsole={() => changeLayout({ consoleVisible: false })}
           onResetLayout={resetLayout}
           dropping={dropping}
-        />
+          />
+        </ErrorBoundary>
       </div>
       <StatusBar files={names} />
     </div>

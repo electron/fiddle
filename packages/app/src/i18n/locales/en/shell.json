@@ -343,5 +343,18 @@
     "message": "Tab moves focus",
     "description": "Status bar indicator shown while tab-focus mode is on: the Tab key moves keyboard focus out of the editor instead of inserting a tab. Tab is the key's name.",
     "maxLength": 30
+  },
+  "regionErrorTitle": {
+    "message": "Something went wrong",
+    "description": "Title shown in place of a part of the window (the sidebar, the editor area) that failed to display because of an internal error."
+  },
+  "regionErrorBody": {
+    "message": "This part of the window stopped working. Reload the window to try again.",
+    "description": "Text under the title shown in place of a part of the window that failed to display."
+  },
+  "regionErrorReload": {
+    "message": "Reload",
+    "description": "Button under the error shown in place of a failed part of the window. Reloads the window.",
+    "maxLength": 20
   }
 }

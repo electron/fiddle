@@ -75,5 +75,8 @@ export default {
   "stubVersion": "[Éļéçţŕöñ one]",
   "stubSettingsTitle": "[Šéţţîñĝš one]",
   "stubCloseSettings": "[Ðöñé one]",
-  "tabFocusMode": "[Ţáƀ ɱöṽéš ƒöçûš one two]"
+  "tabFocusMode": "[Ţáƀ ɱöṽéš ƒöçûš one two]",
+  "regionErrorTitle": "[Šöɱéţĥîñĝ ŵéñţ ŵŕöñĝ one two]",
+  "regionErrorBody": "[Ţĥîš þáŕţ öƒ ţĥé ŵîñðöŵ šţöþþéð ŵöŕķîñĝ. Ŕéļöáð ţĥé ŵîñðöŵ ţö ţŕý áĝáîñ. one two three four five six seven]",
+  "regionErrorReload": "[Ŕéļöáð one]"
 } as const;

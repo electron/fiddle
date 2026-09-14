@@ -33,27 +33,21 @@ describe('features', () => {
     expect((await windowState(app())).view).toBe('editor');
   });
 
+  // Focus stays on the title bar button, outside the page.
   it('opens settings from the title bar and closes them with Escape @feature keys.close-settings', async () => {
     await app().click(role('button', 'Settings'));
     await app().query(role('navigation', 'Settings sections'));
-    // Escape works while focus is in the page (see the known bug below).
-    await app().click(role('button', 'General'));
     await app().press('Escape');
     await app().waitForAbsent(role('navigation', 'Settings sections'));
   });
 
-  // Product bug: Escape closes settings only while focus is inside the page.
-  // Opened with CmdOrCtrl+, (or the title bar button) focus stays outside it,
-  // so Escape does nothing until the user clicks into the page.
-  it.fails('closes settings opened with CmdOrCtrl+, on Escape (known bug)', async () => {
-    try {
-      await app().press('CmdOrCtrl+,');
-      await app().query(role('navigation', 'Settings sections'));
-      await app().press('Escape');
-      await app().waitForAbsent(role('navigation', 'Settings sections', { timeout: 2000 }));
-    } finally {
-      if ((await windowState(app())).view === 'settings') await app().click(role('button', 'Close settings'));
-    }
+  // Focus stays where it was before the shortcut, outside the page.
+  it('closes settings opened with CmdOrCtrl+, on Escape @feature keys.close-settings', async () => {
+    await app().press('CmdOrCtrl+,');
+    await app().query(role('navigation', 'Settings sections'));
+    await app().press('Escape');
+    await app().waitForAbsent(role('navigation', 'Settings sections'));
+    expect((await windowState(app())).view).toBe('editor');
   });
 
   it('runs a command from the palette, which shows keybindings @feature new.palette', async () => {

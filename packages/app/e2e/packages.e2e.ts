@@ -8,15 +8,12 @@ import { makeFolder, readJson, role, useApp, windowState } from './harness.ts';
 describe('packages', () => {
   const app = useApp();
   const modules = async () => (await windowState(app())).fiddle.modules;
-  /** Closes the suggestions, which stay open after a package is added. */
-  const closeSuggestions = async () => {
-    if ((await app().snapshot(0)).includes('listbox "Suggestions"')) await app().press('Escape');
-    await app().waitForAbsent(role('listbox', 'Suggestions'));
-  };
+  /** Adding a package closes the suggestions. */
+  const suggestionsClosed = () => app().waitForAbsent(role('listbox', 'Suggestions'));
   const add = async (query: string, name: string) => {
     await app().type(query, role('combobox', 'Add a package from npm'));
     await app().click(role('option', new RegExp(`^${name}\\b`)));
-    await closeSuggestions();
+    await suggestionsClosed();
   };
 
   it('searches npm and adds the chosen package at its latest version @feature modules.search modules.add', async () => {
@@ -29,7 +26,7 @@ describe('packages', () => {
 
     await app().click(role('option', /^left-pad\b/));
     await expect.poll(modules).toEqual({ 'left-pad': '1.1.0' });
-    await closeSuggestions();
+    await suggestionsClosed();
     await app().query(role('list', 'Packages in this fiddle'));
     expect((await windowState(app())).fiddle.dirty).toBe(true);
   });

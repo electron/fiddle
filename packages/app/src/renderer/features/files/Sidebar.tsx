@@ -43,10 +43,15 @@ export interface SidebarProps {
   onSetVisible: (name: string, visible: boolean) => void;
 }
 
+/**
+ * The file menu's target. It stays set after the menu closes (`open` goes
+ * false), so the items don't change while the menu animates out.
+ */
 interface MenuState {
   name: string;
   x: number;
   y: number;
+  open: boolean;
 }
 
 export function Sidebar({ files, dirtyFiles, activeFile, onOpen, onSetVisible }: SidebarProps) {
@@ -133,10 +138,12 @@ export function Sidebar({ files, dirtyFiles, activeFile, onOpen, onSetVisible }:
       name,
       x: fromKeyboard ? rect.left + 16 : event.clientX,
       y: fromKeyboard ? rect.bottom : event.clientY,
+      open: true,
     });
   };
 
-  const menuFile = menu ? files.find((file) => file.name === menu.name) : undefined;
+  const closeMenu = () => setMenu((current) => current && { ...current, open: false });
+  const menuFileVisible = (menu ? files.find((file) => file.name === menu.name) : undefined)?.visible ?? true;
 
   return (
     <nav className={styles.sidebar} aria-label={t('files')} onContextMenu={onContextMenu} data-tour="sidebar">
@@ -197,34 +204,28 @@ export function Sidebar({ files, dirtyFiles, activeFile, onOpen, onSetVisible }:
       />
       <MenuPopover
         triggerRef={anchor}
-        isOpen={menu !== null}
+        isOpen={menu?.open ?? false}
         onOpenChange={(open) => {
-          if (!open) setMenu(null);
+          if (!open) closeMenu();
         }}
       >
         <Menu
           aria-label={t('fileActions')}
           onAction={(key) => {
             const name = menu?.name;
-            setMenu(null);
+            closeMenu();
             if (!name) return;
             if (key === 'rename') void renameFile(name);
             else if (key === 'delete') void removeFile(name);
-            else if (key === 'hide') onSetVisible(name, false);
-            else if (key === 'show') onSetVisible(name, true);
+            else if (key === 'visibility') onSetVisible(name, !menuFileVisible);
             else if (key === 'add') void addFile();
           }}
           disabledKeys={menu && isMainEntry(menu.name) ? ['delete'] : []}
         >
-          {menuFile?.visible ? (
-            <MenuItem id="hide" icon="eye-off">
-              {t('hideFile')}
-            </MenuItem>
-          ) : (
-            <MenuItem id="show" icon="eye">
-              {t('showFile')}
-            </MenuItem>
-          )}
+          {/* One ID for hide and show: React Aria throws if an item's ID changes while it's mounted. */}
+          <MenuItem id="visibility" icon={menuFileVisible ? 'eye-off' : 'eye'}>
+            {menuFileVisible ? t('hideFile') : t('showFile')}
+          </MenuItem>
           <MenuItem id="rename">{t('rename')}</MenuItem>
           <MenuItem id="add" icon="plus">
             {t('addFile')}

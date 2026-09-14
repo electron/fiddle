@@ -75,5 +75,8 @@ export default {
   "stubVersion": "Electron",
   "stubSettingsTitle": "Einstellungen",
   "stubCloseSettings": "Fertig",
-  "tabFocusMode": "Tab bewegt den Fokus"
+  "tabFocusMode": "Tab bewegt den Fokus",
+  "regionErrorTitle": "Etwas ist schiefgelaufen",
+  "regionErrorBody": "Dieser Teil des Fensters funktioniert nicht mehr. Lade das Fenster neu, um es erneut zu versuchen.",
+  "regionErrorReload": "Neu laden"
 } as const;

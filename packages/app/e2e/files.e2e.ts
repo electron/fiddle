@@ -1,6 +1,5 @@
-// The file list: add files, and the validation errors for names the fiddle
-// can't take. Rename, hide and delete go through the row's context menu,
-// which a product bug breaks (see the last test).
+// The file list: add files, the validation errors for names the fiddle can't
+// take, and the row's context menu (rename, hide, show and delete).
 import { describe, expect, it } from 'vitest';
 
 import { role, useApp, windowState } from './harness.ts';
@@ -51,14 +50,40 @@ describe('files', () => {
     expect(await files()).toEqual(before);
   });
 
-  // Product bug (src/renderer/features/files/Sidebar.tsx): when the file menu
-  // closes, `menu` becomes null, so the first item switches from
-  // <MenuItem id="hide"> to <MenuItem id="show"> while the menu is still
-  // mounted. React Aria throws "Cannot change the id of an item" and the
-  // window goes blank. Any action, or Escape, triggers it. Keep this test last.
-  it.fails('renames a file from its context menu (known bug)', async () => {
+  it('renames, hides, shows and deletes a file from its context menu @feature files.operations', async () => {
+    const fromMenu = async (file: string, item: string) => {
+      await app().press('Shift+F10', role('row', file));
+      await app().click(role('menuitem', item));
+    };
+
+    // Escape closes the menu and leaves the window intact.
     await app().press('Shift+F10', role('row', 'extra.js'));
-    await app().click(role('menuitem', 'Rename…'));
-    await app().query(role('dialog', 'Rename extra.js', { timeout: 3000 }));
+    await app().query(role('menu', 'File actions'));
+    await app().press('Escape');
+    await app().waitForAbsent(role('menu', 'File actions'));
+
+    await fromMenu('extra.js', 'Rename…');
+    await app().query(role('dialog', 'Rename extra.js'));
+    await app().press('CmdOrCtrl+A', role('textbox', 'File name'));
+    await app().type('renamed.js');
+    await app().press('Enter');
+    await expect.poll(names).toContain('renamed.js');
+    expect(await names()).not.toContain('extra.js');
+
+    await fromMenu('renamed.js', 'Hide');
+    await expect.poll(files).toContainEqual({ name: 'renamed.js', visible: false });
+    // Clicking the row would open the file, which shows it again (§17.3), so
+    // reopen the menu from the keyboard on the row, once the closed menu has
+    // given focus back to it.
+    await app().waitForAbsent(role('menu', 'File actions'));
+    await app().waitForIdle();
+    await app().press('Shift+F10');
+    await app().click(role('menuitem', 'Show'));
+    await expect.poll(files).toContainEqual({ name: 'renamed.js', visible: true });
+
+    await fromMenu('renamed.js', 'Delete…');
+    await app().query(role('alertdialog', 'Delete renamed.js?'));
+    await app().click(role('button', 'Delete'));
+    await expect.poll(names).not.toContain('renamed.js');
   });
 });

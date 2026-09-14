@@ -75,5 +75,8 @@ export default {
   "stubVersion": "Electron",
   "stubSettingsTitle": "Settings",
   "stubCloseSettings": "Done",
-  "tabFocusMode": "Tab moves focus"
+  "tabFocusMode": "Tab moves focus",
+  "regionErrorTitle": "Something went wrong",
+  "regionErrorBody": "This part of the window stopped working. Reload the window to try again.",
+  "regionErrorReload": "Reload"
 } as const;

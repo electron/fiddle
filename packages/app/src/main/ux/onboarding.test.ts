@@ -2,12 +2,18 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 
-import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { z } from 'zod';
 
 import type { AppStateFile } from '../documents/service';
 import { createJsonStore, flushAll } from '../persistence/json-store';
 import { createOnboarding } from './onboarding';
+
+const flags = vi.hoisted(() => ({ tour: true }));
+vi.mock('../test-mode', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('../test-mode')>();
+  return { ...actual, testFlags: () => ({ ...actual.testFlags(), tour: flags.tour }) };
+});
 
 let dir = '';
 
@@ -16,6 +22,7 @@ beforeEach(() => {
 });
 
 afterEach(() => {
+  flags.tour = true;
   fs.rmSync(dir, { recursive: true, force: true });
 });
 
@@ -37,6 +44,11 @@ describe('onboarding', () => {
     expect(first.shouldOfferTour()).toBe(true);
     expect(first.shouldOfferTour()).toBe(false);
     expect(load().shouldOfferTour()).toBe(true);
+  });
+
+  it('never offers the tour in test mode', () => {
+    flags.tour = false;
+    expect(load().shouldOfferTour()).toBe(false);
   });
 
   it('shows the crash reports notice once, ever, and keeps it with the tour in state.json', async () => {

@@ -11,6 +11,7 @@ import { useKeybindings } from './features/commands/keybindings';
 import { useWindowCommands } from './features/commands/window-commands';
 import { CommandPalette } from './features/palette/CommandPalette';
 import { StorageNotices } from './features/settings/StorageNotices';
+import { ErrorBoundary } from './shell/ErrorBoundary';
 import { Shell } from './shell/Shell';
 import { useAppearance } from './shell/theme';
 import { useAppState, useWindowState } from './state';
@@ -76,8 +77,12 @@ export function App() {
   // react-aria's built-in strings (hidden dismiss buttons and the like) follow the UI locale.
   return (
     <I18nProvider locale={i18n.language}>
-      <Shell />
-      <CommandPalette />
+      <ErrorBoundary region="shell" fill>
+        <Shell />
+      </ErrorBoundary>
+      <ErrorBoundary region="palette">
+        <CommandPalette />
+      </ErrorBoundary>
       <DialogHost />
       <Toaster closeLabel={t('dismiss')} aria-label={t('notifications')} />
       <StorageNotices />

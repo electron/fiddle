@@ -71,5 +71,8 @@
   "stubVersion": "Electron",
   "stubSettingsTitle": "設定",
   "stubCloseSettings": "完了",
-  "tabFocusMode": "Tab でフォーカス移動"
+  "tabFocusMode": "Tab でフォーカス移動",
+  "regionErrorTitle": "問題が発生しました",
+  "regionErrorBody": "ウィンドウのこの部分が動作を停止しました。ウィンドウを再読み込みして、もう一度お試しください。",
+  "regionErrorReload": "再読み込み"
 }
