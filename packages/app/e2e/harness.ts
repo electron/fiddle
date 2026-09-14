@@ -107,7 +107,10 @@ export interface AppState {
   settings: Record<string, unknown>;
   themes: { id: string; name: string }[];
   githubLogin?: string;
-  versions?: { installs: Record<string, { state: string; percent?: number }> };
+  versions?: {
+    installs: Record<string, { state: string; percent?: number }>;
+    localBuilds: { id: string; name: string; path: string; available: boolean }[];
+  };
 }
 
 /** The Window store of `window` (default: the first window). */

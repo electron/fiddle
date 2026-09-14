@@ -1,7 +1,12 @@
 // The version picker, the version manager and a manual bisect over the
 // fixture release list (44.3.0, 43.7.0, 42.11.3 and 45.0.0-alpha.6).
+import fs from 'node:fs';
+import { createRequire } from 'node:module';
+import path from 'node:path';
+
 import { describe, expect, it } from 'vitest';
 
+import { APP_DIR } from './driver.ts';
 import { appState, dialogMessages, openedUrls, role, text, useApp, windowState } from './harness.ts';
 
 describe('versions', () => {
@@ -131,5 +136,49 @@ describe('versions', () => {
     await expect.poll(() => openedUrls(app())).toContain(compare);
     await app().click(role('button', 'Close'));
     await app().waitForAbsent(role('dialog', 'Bisect finished'));
+  });
+
+  it('deletes every download except the active version @feature versions.delete-all', async () => {
+    const installed = async () =>
+      Object.entries((await appState(app())).versions?.installs ?? {})
+        .filter(([, install]) => install.state === 'installed' || install.state === 'downloaded')
+        .map(([version]) => version);
+    const active = (await fiddle()).versionRef;
+    const others = async () =>
+      (await installed()).filter((version) => active.kind !== 'release' || version !== active.version);
+    // 44.3.0 was downloaded above; the bisect left another version active.
+    expect(await others()).toContain('44.3.0');
+
+    await app().click(role('button', 'Settings'));
+    await app().click(role('button', 'Electron'));
+    await app().click(role('button', 'Delete all'));
+    await app().query(role('alertdialog', 'Delete all downloaded versions?'));
+    await app().click(role('button', 'Delete all'));
+    await expect.poll(others).toEqual([]);
+    expect((await fiddle()).versionRef).toEqual(active);
+  });
+
+  it('adds a local build, and offers to switch to it when it is added again @feature versions.local-add versions.local-storage versions.local-duplicate', async () => {
+    if ((await windowState(app())).view !== 'settings') {
+      await app().click(role('button', 'Settings'));
+      await app().click(role('button', 'Electron'));
+    }
+    const dist = path.dirname(createRequire(path.join(APP_DIR, 'package.json'))('electron') as string);
+    const builds = async () => (await appState(app())).versions?.localBuilds ?? [];
+    await app().queueDialog('open', { filePaths: [dist] });
+    await app().click(role('button', 'Add local build'));
+    await expect.poll(async () => (await builds()).length).toBe(1);
+    const [build] = await builds();
+    expect(build).toMatchObject({ path: dist, available: true });
+    // §5 names the file local-builds.json (§17.8's local-versions.json is the old app's, which §6 imports).
+    const stored = fs.readFileSync(path.join(app().testDir ?? '', 'userData', 'local-builds.json'), 'utf8');
+    expect(stored).toContain(build?.id ?? '?');
+
+    // The same folder again: offer to switch to the registered build.
+    await app().queueDialog('open', { filePaths: [dist] });
+    await app().queueDialog('messageBox', { response: 0 });
+    await app().click(role('button', 'Add local build'));
+    await expect.poll(async () => (await fiddle()).versionRef).toEqual({ kind: 'local', id: build?.id });
+    expect(await builds()).toHaveLength(1);
   });
 });

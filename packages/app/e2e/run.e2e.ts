@@ -40,9 +40,12 @@ describe('run', () => {
     await app().waitForAbsent(text(/^Electron v\d+\.\d+\.\d+ started as/));
   });
 
-  it('runs with F5 and stops with CmdOrCtrl+R @feature keys.run', async () => {
+  it('runs with F5, reopening a hidden console, and stops with CmdOrCtrl+R @feature keys.run run.open-console', async () => {
+    await app().runCommand('view.toggleConsole');
+    await app().waitForAbsent(role('region', 'Console'));
     await app().press('F5');
     await app().query(role('button', 'Stop', { timeout: 60_000 }));
+    await app().query(role('region', 'Console'));
     await app().press('CmdOrCtrl+R');
     await app().query(role('button', 'Run', { timeout: 15_000 }));
   }, 90_000);

@@ -41,7 +41,7 @@ describe('documents', () => {
     await app().query(text('Edited'));
   });
 
-  it('saves to a new folder, asking for it only the first time @feature save.save keys.save save.create-folder save.gitignore files.project-name files.pkg-fields files.pkg-electron settings.package-author', async () => {
+  it('saves to a new folder, asking for it only the first time @feature save.save keys.save save.create-folder save.gitignore files.project-name files.pkg-fields files.pkg-electron settings.package-author new.recent-items', async () => {
     const dir = path.join(makeFolder(app(), 'parent'), 'my-fiddle');
     await app().queueDialog('open', { filePaths: [dir] });
     await app().press('CmdOrCtrl+S');
@@ -68,6 +68,9 @@ describe('documents', () => {
       devDependencies: { electron: version },
     });
     expect(pkg.productName).toBeTruthy();
+    // Saved folders become OS recent documents (the dock menu and the jump list).
+    const recent = (await app().sideEffects()).filter((effect) => effect.kind === 'app.addRecentDocument');
+    expect(recent.map((effect) => effect.args[0])).toContain(dir);
 
     // The folder is known now: saving again doesn't ask.
     const dialogs = (await app().dialogs()).length;

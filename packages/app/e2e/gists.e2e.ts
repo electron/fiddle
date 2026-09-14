@@ -127,6 +127,12 @@ describe('gists', () => {
     await expect.poll(() => app().clipboard()).toContain(published.source.gistId ?? '?');
   });
 
+  it('copies an https share link for the gist @feature new.share-link', async () => {
+    const { gistId } = (await fiddle()).source;
+    await gistMenu('Copy share link');
+    await expect.poll(() => app().clipboard()).toMatch(new RegExp(`^https://\\S+${gistId}`));
+  });
+
   it('updates the gist with the changed files @feature gist.update', async () => {
     const { gistId } = (await fiddle()).source;
     await app().click(role('tab', 'renderer.js'));
