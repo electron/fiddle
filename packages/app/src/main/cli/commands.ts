@@ -44,7 +44,7 @@ import {
   type LoadedFiddle,
   type LoadWarning,
 } from '../documents/load';
-import { staticDir } from '../documents/service';
+import { logTemplateFallback, staticDir } from '../documents/service';
 import { gistFiles, publishGist } from '../github/service';
 import { tm } from '../i18n';
 import { log } from '../log';
@@ -138,6 +138,7 @@ async function templates(ctx: Ctx): Promise<TemplateLoader> {
     archiveBaseUrl: `${getEndpoints().minimalRepro}/archive`,
     fetch: netFetch,
     signal: ctx.signal,
+    onFallback: logTemplateFallback,
   }));
 }
 

@@ -1,4 +1,4 @@
-import { access, mkdir, mkdtemp, readdir, rename, rm, writeFile } from 'node:fs/promises';
+import { access, mkdir, mkdtemp, readdir, rename, rm, stat, writeFile } from 'node:fs/promises';
 import * as path from 'node:path';
 
 import * as semver from 'semver';
@@ -11,6 +11,8 @@ export const MINIMAL_REPRO_ARCHIVE_URL = 'https://github.com/electron/minimal-re
 export const TEST_TEMPLATE_BRANCH = 'test-template';
 export const QUICK_START_DIR = 'electron-quick-start';
 export const TEMPLATE_TIMEOUT_MS = 60_000;
+/** How long a branch minimal-repro doesn't have (a 404) goes without being requested again. */
+export const MISSING_TEMPLATE_TTL_MS = 24 * 60 * 60 * 1000;
 
 export interface TemplateLoaderOptions {
   /** The app's static dir, holding `electron-quick-start/`. */
@@ -24,7 +26,12 @@ export interface TemplateLoaderOptions {
   timeoutMs?: number;
   /** Aborts downloads in flight, e.g. on quit. */
   signal?: AbortSignal;
-  /** Called when a download fails and the bundled template is used instead. */
+  /**
+   * Called when the bundled template is used instead of a download: with a
+   * `not-found` FiddleError when minimal-repro has no branch for the major
+   * yet ({@link isMissingTemplate}), once per branch, or with the error of a
+   * failed download, which the next call retries.
+   */
   onFallback?: (branch: string, error: unknown) => void;
 }
 
@@ -42,6 +49,11 @@ export function templateBranch(version: string, isReleasedMajor: (major: number)
   return `${parsed.major}-x-y`;
 }
 
+/** Whether an `onFallback` error says minimal-repro has no branch for the major (yet), rather than a failed download. */
+export function isMissingTemplate(error: unknown): boolean {
+  return error instanceof FiddleError && error.code === ErrorCode.notFound;
+}
+
 export async function readQuickStart(staticDir: string): Promise<FileMap> {
   return (await readFiddleFolder(path.join(staticDir, QUICK_START_DIR))).files;
 }
@@ -55,12 +67,25 @@ async function exists(p: string): Promise<boolean> {
   }
 }
 
+/** Whether `file` exists and was written less than `ttlMs` ago. */
+async function writtenWithin(file: string, ttlMs: number): Promise<boolean> {
+  try {
+    return Date.now() - (await stat(file)).mtimeMs < ttlMs;
+  } catch {
+    return false;
+  }
+}
+
 async function fetchArchive(options: TemplateLoaderOptions, url: string): Promise<Uint8Array> {
   const timeout = AbortSignal.timeout(options.timeoutMs ?? TEMPLATE_TIMEOUT_MS);
   const signal = options.signal ? AbortSignal.any([options.signal, timeout]) : timeout;
   try {
     const res = await (options.fetch ?? fetch)(url, { signal });
-    if (!res.ok) throw new FiddleError(ErrorCode.network, `${url} responded ${res.status}`, { status: res.status });
+    if (!res.ok) {
+      // A 404 is a branch minimal-repro doesn't have (yet), not a failed download.
+      const code = res.status === 404 ? ErrorCode.notFound : ErrorCode.network;
+      throw new FiddleError(code, `${url} responded ${res.status}`, { status: res.status });
+    }
     return new Uint8Array(await res.arrayBuffer());
   } catch (error) {
     if (error instanceof FiddleError) throw error;
@@ -80,14 +105,35 @@ async function archiveRoot(dir: string): Promise<string> {
 /**
  * The template's files, from `<cacheDir>/minimal-repro-<branch>/`. On a miss,
  * `<branch>.zip` is downloaded to a temp file and extracted into a temp dir,
- * whose root folder is read and then renamed into place.
+ * whose root folder is read and then renamed into place. A 404 leaves a
+ * `minimal-repro-<branch>.missing` marker instead, which fails as `not-found`
+ * without a request for {@link MISSING_TEMPLATE_TTL_MS}, so launches don't
+ * keep asking for a branch minimal-repro doesn't have.
  */
 async function downloadTemplate(options: TemplateLoaderOptions, branch: string): Promise<FileMap> {
   const target = path.join(options.cacheDir, `minimal-repro-${branch}`);
   if (await exists(target)) return (await readFiddleFolder(target)).files;
+  const marker = `${target}.missing`;
+  if (await writtenWithin(marker, MISSING_TEMPLATE_TTL_MS)) {
+    throw new FiddleError(ErrorCode.notFound, `minimal-repro had no ${branch} branch within the last day`);
+  }
 
   const url = `${options.archiveBaseUrl ?? MINIMAL_REPRO_ARCHIVE_URL}/${branch}.zip`;
-  const archive = await fetchArchive(options, url);
+  let archive: Uint8Array;
+  try {
+    archive = await fetchArchive(options, url);
+  } catch (error) {
+    // Only a missing branch is remembered. Offline, 5xx and timeouts are retried on the next call.
+    if (isMissingTemplate(error)) {
+      try {
+        await mkdir(options.cacheDir, { recursive: true });
+        await writeFile(marker, `${new Date().toISOString()}\n`);
+      } catch {
+        // Falling back matters more than remembering the miss.
+      }
+    }
+    throw error;
+  }
   await mkdir(options.cacheDir, { recursive: true });
   const work = await mkdtemp(path.join(options.cacheDir, `.tmp-${branch}-`));
   try {
@@ -119,16 +165,15 @@ export function createTemplateLoader(options: TemplateLoaderOptions): TemplateLo
   const load = async (branch: string): Promise<FileMap> => {
     let promise = pending.get(branch);
     if (!promise) {
-      promise = downloadTemplate(options, branch);
+      promise = downloadTemplate(options, branch).catch((error: unknown) => {
+        // A missing branch stays missing for this process. Any other failure is retried on the next call.
+        if (!isMissingTemplate(error)) pending.delete(branch);
+        options.onFallback?.(branch, error);
+        return getQuickStart();
+      });
       pending.set(branch, promise);
     }
-    try {
-      return { ...(await promise) };
-    } catch (error) {
-      pending.delete(branch);
-      options.onFallback?.(branch, error);
-      return getQuickStart();
-    }
+    return { ...(await promise) };
   };
 
   return {

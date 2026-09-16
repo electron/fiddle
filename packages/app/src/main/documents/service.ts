@@ -26,7 +26,7 @@ import { findFilesToReplace, localPathFromFileUrl } from '../../fiddle/folder';
 import { getGistId } from '../../fiddle/gist-id';
 import { createRegistryFetch, findInstallScripts } from '../../fiddle/modules';
 import { getProjectName } from '../../fiddle/names';
-import { createTemplateLoader, type TemplateLoader } from '../../fiddle/templates';
+import { createTemplateLoader, isMissingTemplate, type TemplateLoader } from '../../fiddle/templates';
 import { formatOrigin, isUntrustedOrigin, needsApproval, restoredOrigin, type FiddleOrigin } from '../../fiddle/trust';
 import { ErrorCode, FiddleError } from '../../shared/errors';
 import {
@@ -213,6 +213,12 @@ export function installEarlyDocumentHandlers(): boolean {
   return true;
 }
 
+/** The template loader's `onFallback`, here and in the CLI: a missing branch is expected, a failed download is worth a warning. */
+export function logTemplateFallback(branch: string, error: unknown): void {
+  if (isMissingTemplate(error)) log.info(`no minimal-repro template for ${branch}, using the bundled quick-start`);
+  else log.warn(`template download failed for ${branch}, using the bundled quick-start: ${FiddleError.from(error).message}`);
+}
+
 /** After `ready` and i18n, before menus and windows. */
 export function initDocuments(options: Deps): void {
   deps = options;
@@ -224,7 +230,7 @@ export function initDocuments(options: Deps): void {
     isReleasedMajor: (major) =>
       options.versions.releases().some((r) => isStable(r.version) && Number.parseInt(r.version, 10) === major),
     archiveBaseUrl: `${getEndpoints().minimalRepro}/archive`,
-    onFallback: (branch, error) => log.warn('template download failed, using the quick-start', branch, error),
+    onFallback: logTemplateFallback,
   });
   stateStore = createJsonStore<AppStateFile>({
     file: path.join(userData, 'state.json'),

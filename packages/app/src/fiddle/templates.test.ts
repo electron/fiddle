@@ -1,4 +1,4 @@
-import { mkdtemp, readdir, readFile, rm } from 'node:fs/promises';
+import { mkdtemp, readdir, readFile, rm, utimes } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import * as path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -6,7 +6,7 @@ import { fileURLToPath } from 'node:url';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
 import { ErrorCode } from '../shared/errors';
-import { createTemplateLoader, readQuickStart, templateBranch } from './templates';
+import { createTemplateLoader, isMissingTemplate, MISSING_TEMPLATE_TTL_MS, readQuickStart, templateBranch } from './templates';
 
 const staticDir = fileURLToPath(new URL('../../static', import.meta.url));
 // A real zip: `minimal-repro-fixture/` holding main.js, index.html, README.md, package.json and sub/nested.js.
@@ -115,21 +115,88 @@ describe('createTemplateLoader', () => {
 
   // @feature load.template-fallback
   it('falls back on failed downloads and retries later', async () => {
-    const { fn, urls } = zipFetch(404);
+    const { fn, urls } = zipFetch(500);
     const fallbacks: string[] = [];
+    const errors: unknown[] = [];
     const loader = createTemplateLoader({
       staticDir,
       cacheDir,
       isReleasedMajor: released,
       fetch: fn,
-      onFallback: (branch) => fallbacks.push(branch),
+      onFallback: (branch, error) => {
+        fallbacks.push(branch);
+        errors.push(error);
+      },
     });
     const quickStart = await readQuickStart(staticDir);
     expect(await loader.getTemplate('30.0.0')).toEqual(quickStart);
     expect(await loader.getTemplate('30.0.0')).toEqual(quickStart);
     expect(urls).toHaveLength(2);
     expect(fallbacks).toEqual(['30-x-y', '30-x-y']);
+    expect(errors[0]).toMatchObject({ code: ErrorCode.network, details: { status: 500 } });
+    expect(isMissingTemplate(errors[0])).toBe(false);
+    // A failed download leaves no marker behind.
     expect(await readdir(cacheDir)).toEqual([]);
+  });
+
+  // @feature load.template-fallback
+  it('remembers a major without a minimal-repro branch, in memory and on disk for a day', async () => {
+    const quickStart = await readQuickStart(staticDir);
+    const { fn, urls } = zipFetch(404);
+    const errors: unknown[] = [];
+    const loader = createTemplateLoader({
+      staticDir,
+      cacheDir,
+      isReleasedMajor: released,
+      fetch: fn,
+      onFallback: (_branch, error) => errors.push(error),
+    });
+    expect(await loader.getTemplate('30.0.0')).toEqual(quickStart);
+    expect(urls).toEqual(['https://github.com/electron/minimal-repro/archive/30-x-y.zip']);
+    expect(errors).toHaveLength(1);
+    expect(errors[0]).toMatchObject({ code: ErrorCode.notFound, details: { status: 404 } });
+    expect(isMissingTemplate(errors[0])).toBe(true);
+    expect(await readdir(cacheDir)).toEqual(['minimal-repro-30-x-y.missing']);
+
+    // The same process doesn't ask again, and reports the fallback once.
+    expect(await loader.getTemplate('30.1.0')).toEqual(quickStart);
+    expect(urls).toHaveLength(1);
+    expect(errors).toHaveLength(1);
+
+    // Nor does the next launch, while the marker is fresh.
+    const next = zipFetch(404);
+    const onFallback = (_branch: string, error: unknown) => errors.push(error);
+    const relaunched = createTemplateLoader({ staticDir, cacheDir, isReleasedMajor: released, fetch: next.fn, onFallback });
+    expect(await relaunched.getTemplate('30.0.0')).toEqual(quickStart);
+    expect(next.urls).toHaveLength(0);
+    expect(errors).toHaveLength(2);
+    expect(isMissingTemplate(errors[1])).toBe(true);
+
+    // A day later the branch is requested again, and used once it exists.
+    const dayAgo = new Date(Date.now() - MISSING_TEMPLATE_TTL_MS - 1000);
+    await utimes(path.join(cacheDir, 'minimal-repro-30-x-y.missing'), dayAgo, dayAgo);
+    const later = zipFetch();
+    const nextDay = createTemplateLoader({ staticDir, cacheDir, isReleasedMajor: released, fetch: later.fn });
+    expect(await nextDay.getTemplate('30.0.0')).toEqual(FIXTURE_FILES);
+    expect(later.urls).toEqual(['https://github.com/electron/minimal-repro/archive/30-x-y.zip']);
+    expect((await readdir(cacheDir)).sort()).toEqual(['minimal-repro-30-x-y', 'minimal-repro-30-x-y.missing']);
+  });
+
+  it('refreshes an expired marker when the branch is still missing', async () => {
+    const quickStart = await readQuickStart(staticDir);
+    const first = zipFetch(404);
+    await createTemplateLoader({ staticDir, cacheDir, isReleasedMajor: released, fetch: first.fn }).getTemplate('30.0.0');
+    const marker = path.join(cacheDir, 'minimal-repro-30-x-y.missing');
+    const dayAgo = new Date(Date.now() - MISSING_TEMPLATE_TTL_MS - 1000);
+    await utimes(marker, dayAgo, dayAgo);
+
+    const second = zipFetch(404);
+    const expired = createTemplateLoader({ staticDir, cacheDir, isReleasedMajor: released, fetch: second.fn });
+    expect(await expired.getTemplate('30.0.0')).toEqual(quickStart);
+    expect(second.urls).toHaveLength(1);
+    const third = zipFetch(404);
+    await createTemplateLoader({ staticDir, cacheDir, isReleasedMajor: released, fetch: third.fn }).getTemplate('30.0.0');
+    expect(third.urls).toHaveLength(0);
   });
 
   // @feature load.template-fallback

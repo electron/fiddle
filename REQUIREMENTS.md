@@ -667,8 +667,8 @@ A desktop app for writing, running, sharing and packaging small Electron experim
 ### 4. Starting points and loading
 
 - **Default template:**
-  - Downloaded per major version from `github.com/electron/minimal-repro/archive/<major>-x-y.zip` and cached in `<userData>/Templates`. {#load.template-download}
-  - Unreleased majors, local builds and failed downloads use a bundled quick-start (main, preload, index.html, renderer). {#load.template-fallback}
+  - Downloaded per major version from `github.com/electron/minimal-repro/archive/<major>-x-y.zip` and cached in `<userData>/Templates`. When minimal-repro has no branch for a major yet (a 404), the miss is remembered for a day, so the archive isn't requested again on every new fiddle and launch. {#load.template-download}
+  - Unreleased majors, majors without a minimal-repro branch, local builds and failed downloads use a bundled quick-start (main, preload, index.html, renderer). {#load.template-fallback}
 - **New fiddle:** the template for the current version. Clears the modules and the console. {#load.new-fiddle}
 - **New test:** the `test-template` branch of minimal-repro. {#load.new-test}
 - **Changing version:** if the fiddle is an unedited template, the new version's template replaces it. {#load.template-swap}
