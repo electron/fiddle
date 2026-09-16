@@ -18,7 +18,9 @@
 - **Fiddle logic:** `packages/app/src/fiddle/` must not import `electron`, so it runs under plain Node in tests.
 - **Tests:** no Playwright or WebDriver. End-to-end tests use the in-house driver.
 - **Installs:** run `yarn install` only through `flock /tmp/fiddle-2027-yarn.lock yarn install`, because several agents share this checkout.
-- **Commits:** agents don't commit. The orchestrator commits at milestones.
+- **Git:** pull before you start changing code, and pull with rebase before you commit. Commit when asked.
+  - Stage your own files by name. Several agents share this checkout, so leave their changes out.
+  - `origin` uses SSH, which the Bash sandbox blocks. Fetch `https://github.com/electron/fiddle.git fiddle-2027` instead, then rebase onto `FETCH_HEAD`.
 
 ## Commands
 
