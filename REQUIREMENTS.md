@@ -658,8 +658,8 @@ A desktop app for writing, running, sharing and packaging small Electron experim
 - **Unsaved changes:**
   - Tracked by comparing every file's content, hidden files included, with the last save. {#files.dirty-tracking}
   - Replacing the fiddle, closing the window or quitting with unsaved edits asks for confirmation. {#files.dirty-confirm}
-- **Generated `package.json`** (for save, publish and run):
-  - Fields: name, productName, version "1.0.0", main = the entry file, author (from settings), `start: "electron ."`. {#files.pkg-fields}
+- **Generated `package.json`** (for save, publish, run, package and make):
+  - Fields: name, productName, description (a fixed placeholder, because Forge's deb, rpm and Squirrel makers need one), keywords (empty), main = the entry file, version "1.0.0", author (from settings), `start: "electron ."`. {#files.pkg-fields}
   - `dependencies` = the modules. {#files.pkg-deps}
   - `devDependencies.electron` (or `electron-nightly`) = the selected version. {#files.pkg-electron}
 - **Project name:** the local folder name, or a random 3-word name. {#files.project-name}
@@ -746,7 +746,7 @@ A desktop app for writing, running, sharing and packaging small Electron experim
 - **Cleanup:** the temp dir is deleted. The fiddle's userData dir is deleted too, unless "keep user data dirs" is on. {#run.cleanup}
 - **Package / Make (Electron Forge):**
   - Opens the console and requires the package manager. {#run.package-console}
-  - Applies the Forge transform, then runs `<pm> install` and `<pm> run package|make`. {#run.package-steps}
+  - Applies the Forge transform, then runs `<pm> install` (through Socket Firewall when that setting is on, as for a run's modules) and `<pm> run package|make`. {#run.package-steps}
   - Reveals `out/` in the file manager. {#run.package-reveal}
 
 ### 7. Output console

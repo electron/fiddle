@@ -22,6 +22,7 @@ import {
   buildRunScriptCommand,
   findPackageManager,
   runCommand,
+  type CommandLine,
   type PackageManager,
 } from '../../fiddle/modules';
 import { generatePackageJson } from '../../fiddle/package-json';
@@ -92,15 +93,26 @@ export function forgeProject(
   return forgeTransform({ ...fiddle.files, [PACKAGE_JSON]: packageJson }, options);
 }
 
+interface ForgeInstallOptions {
+  ignoreScripts?: boolean;
+  /** `sfw.mjs`: the install runs through Socket Firewall, like a run's module install (§4). */
+  sfwPath?: string;
+}
+
+/** The commands of a Forge task: `<pm> install` (`node <sfw.mjs> <pm> install` with Socket Firewall), then `<pm> run package|make`. */
+export function forgeTaskCommands(pm: PackageManager, task: 'package' | 'make', options: ForgeInstallOptions = {}): CommandLine[] {
+  return [buildInstallCommand({ packageManager: pm, ...options }), buildRunScriptCommand(pm, task)];
+}
+
 /** `<pm> install`, then `<pm> run package|make` in `dir`. Resolves with the command that failed, if any. */
 export async function runForgeTask(
   dir: string,
   pm: PackageManager,
   task: 'package' | 'make',
-  options: { env: NodeJS.ProcessEnv; signal?: AbortSignal; onOutput: (text: string) => void; ignoreScripts?: boolean },
+  options: ForgeInstallOptions & { env: NodeJS.ProcessEnv; signal?: AbortSignal; onOutput: (text: string) => void },
 ): Promise<{ command: string; code: number | string } | undefined> {
-  const { ignoreScripts = false, ...commandOptions } = options;
-  for (const line of [buildInstallCommand({ packageManager: pm, ignoreScripts }), buildRunScriptCommand(pm, task)]) {
+  const { ignoreScripts, sfwPath, ...commandOptions } = options;
+  for (const line of forgeTaskCommands(pm, task, { ignoreScripts, sfwPath })) {
     const result = await runCommand(line, { cwd: dir, ...commandOptions, env: { ...commandOptions.env, ...line.env } });
     if (result.code !== 0) return { command: [line.command, ...line.args].join(' '), code: result.code ?? result.signal ?? '' };
   }
@@ -165,6 +177,7 @@ export async function packageFiddle(
       signal: controller.signal,
       onOutput: (text) => runs.logText(windowId, text),
       ignoreScripts: !trust.allowScripts,
+      sfwPath: runs.sfwPath(windowId),
     });
     if (failedCommand) {
       runs.log(windowId, t('commandFailed', failedCommand), 'error');

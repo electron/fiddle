@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 
 import { ErrorCode } from '../shared/errors';
 import { forgeTransform, forgeTransformPackageJson } from './forge';
-import { generatePackageJson } from './package-json';
+import { DEFAULT_DESCRIPTION, generatePackageJson } from './package-json';
 
 const FORGE = '8.0.0-alpha.10';
 const makers = [
@@ -30,8 +30,11 @@ describe('forge transform', () => {
     expect(pkg).toEqual({
       name: 'app',
       productName: 'app',
-      version: '1.0.0',
+      // The deb and rpm makers throw without a description (§17.3 files.pkg-fields).
+      description: DEFAULT_DESCRIPTION,
+      keywords: [],
       main: './main.js',
+      version: '1.0.0',
       author: 'me',
       scripts: {
         start: 'electron-forge start',

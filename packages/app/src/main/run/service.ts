@@ -170,6 +170,18 @@ export class RunService {
     return loadToolEnv();
   }
 
+  /**
+   * `sfw.mjs`, to wrap an install with when the Socket Firewall setting is on
+   * (§4), for runs, package and make alike. Undefined when the setting is off,
+   * and, with a console warning, when it's on but `sfw.mjs` is missing.
+   */
+  sfwPath(windowId: string): string | undefined {
+    const enabled = this.#hub.app.settings.socketFirewall;
+    const file = enabled ? sfwEntryPath() : undefined;
+    if (enabled && !file) this.log(windowId, tm('mainRun')('noSocketFirewall'), 'warn');
+    return file;
+  }
+
   /** Runs the fiddle and resolves when it exits. A second run in a busy window is ignored. */
   async run(windowId: string, options: RunOptions = {}): Promise<RunResult> {
     if (this.isBusy(windowId)) return 'invalid';
@@ -303,8 +315,7 @@ export class RunService {
       this.setState(windowId, { status: 'installing' });
       this.log(windowId, trust.allowScripts ? t('installingModules', { pm }) : t('installingModulesNoScripts', { pm }));
       // Socket Firewall wraps the install when it's on and `sfw.mjs` is there (§4).
-      const sfwPath = settings.socketFirewall ? sfwEntryPath() : undefined;
-      if (settings.socketFirewall && !sfwPath) this.log(windowId, t('noSocketFirewall'), 'warn');
+      const sfwPath = this.sfwPath(windowId);
       try {
         await installModules({
           dir: appDir,

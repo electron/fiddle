@@ -1,11 +1,11 @@
 import { describe, expect, it } from 'vitest';
 
 import { ErrorCode, FiddleError } from '../shared/errors';
-import { electronPackageName, generatePackageJson, parsePackageJson, stripRangePrefix } from './package-json';
+import { DEFAULT_DESCRIPTION, electronPackageName, generatePackageJson, parsePackageJson, stripRangePrefix } from './package-json';
 
 describe('generatePackageJson', () => {
   // @feature files.pkg-fields files.pkg-deps files.pkg-electron
-  it('writes every field', () => {
+  it('writes every field, in the original order', () => {
     const text = generatePackageJson({
       name: 'sleepy-golden-otter',
       main: 'main.mjs',
@@ -13,17 +13,38 @@ describe('generatePackageJson', () => {
       modules: { lodash: '4.17.21' },
       electronVersion: '30.0.0',
     });
-    expect(JSON.parse(text)).toEqual({
+    const pkg = JSON.parse(text);
+    expect(pkg).toEqual({
       name: 'sleepy-golden-otter',
       productName: 'sleepy-golden-otter',
-      version: '1.0.0',
+      description: DEFAULT_DESCRIPTION,
+      keywords: [],
       main: './main.mjs',
+      version: '1.0.0',
       author: 'octocat',
       scripts: { start: 'electron .' },
       dependencies: { lodash: '4.17.21' },
       devDependencies: { electron: '30.0.0' },
     });
+    expect(Object.keys(pkg)).toEqual([
+      'name',
+      'productName',
+      'description',
+      'keywords',
+      'main',
+      'version',
+      'author',
+      'scripts',
+      'dependencies',
+      'devDependencies',
+    ]);
     expect(text).toContain('\n  "name"');
+  });
+
+  // @feature files.pkg-fields
+  it('always has a description, because Forge’s deb, rpm and Squirrel makers need one', () => {
+    const pkg = JSON.parse(generatePackageJson({ name: 'x' }));
+    expect(pkg.description).toMatch(/\S/);
   });
 
   // @feature files.pkg-electron
@@ -35,7 +56,15 @@ describe('generatePackageJson', () => {
 
   it('leaves out optional parts', () => {
     const pkg = JSON.parse(generatePackageJson({ name: 'x' }));
-    expect(pkg).toEqual({ name: 'x', productName: 'x', version: '1.0.0', main: './main.js', scripts: { start: 'electron .' } });
+    expect(pkg).toEqual({
+      name: 'x',
+      productName: 'x',
+      description: DEFAULT_DESCRIPTION,
+      keywords: [],
+      main: './main.js',
+      version: '1.0.0',
+      scripts: { start: 'electron .' },
+    });
   });
 });
 

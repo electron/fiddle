@@ -1,8 +1,9 @@
 /**
  * The native About panel (REQUIREMENTS §17.16): app and Electron versions,
  * contributors and the website. Contributors come from
- * `static/contributors.json`, bundled at build time; until that file exists
- * the list is empty and macOS links to the contributors page instead.
+ * `static/contributors.json`, which tools/release-data.mjs writes and the
+ * build bundles (the Settings credits read the same file). When it's missing
+ * or empty, the list is empty and macOS links to the contributors page instead.
  */
 import fs from 'node:fs';
 import path from 'node:path';
@@ -19,10 +20,15 @@ const contributorFiles = import.meta.glob<unknown>('../../../static/contributors
   import: 'default',
 });
 
-/** Display names from contributors.json (`[{ name, login, … }]`), falling back to the login. */
-function contributorNames(data: unknown): string[] {
-  if (!Array.isArray(data)) return [];
-  return data.flatMap((entry: unknown) => {
+/**
+ * Display names from contributors.json: `{ contributors: [{ login, url,
+ * contributions }] }` as tools/release-data.mjs writes it, or a bare array of
+ * the same entries. An entry's `name` wins over its login when it has one.
+ */
+export function contributorNames(data: unknown): string[] {
+  const list = Array.isArray(data) ? data : (data as { contributors?: unknown } | null | undefined)?.contributors;
+  if (!Array.isArray(list)) return [];
+  return list.flatMap((entry: unknown) => {
     const { name, login } = (entry ?? {}) as { name?: unknown; login?: unknown };
     const label = typeof name === 'string' && name.trim() ? name.trim() : typeof login === 'string' ? login : '';
     return label ? [label] : [];

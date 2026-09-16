@@ -37,12 +37,21 @@ export function electronPackageName(version: string): ElectronPackageName {
   return version.includes('nightly') ? 'electron-nightly' : 'electron';
 }
 
+/**
+ * The placeholder `description`. Forge's deb and rpm makers throw without a
+ * description, and Squirrel.Windows' nuspec needs a non-empty one.
+ */
+export const DEFAULT_DESCRIPTION = 'My Electron application description';
+
+/** Field order follows the original Fiddle's (and `npm init`'s). */
 export function generatePackageJson(input: PackageJsonInput): string {
   const pkg: Record<string, unknown> = {
     name: input.name,
     productName: input.name,
-    version: '1.0.0',
+    description: DEFAULT_DESCRIPTION,
+    keywords: [],
     main: `./${input.main ?? DEFAULT_MAIN_ENTRY}`,
+    version: '1.0.0',
   };
   if (input.author !== undefined) pkg.author = input.author;
   pkg.scripts = { start: 'electron .' };
