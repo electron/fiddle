@@ -45,6 +45,11 @@ export function setFocusedEditor(editor: monaco.editor.IStandaloneCodeEditor | n
   focused = editor;
 }
 
+/** A disposed editor stops being the focused one; another pane's editor stays it. */
+export function clearFocusedEditor(editor: monaco.editor.IStandaloneCodeEditor): void {
+  if (focused === editor) focused = null;
+}
+
 /** Runs Monaco's format action in the focused editor. */
 export async function formatFocusedEditor(): Promise<void> {
   await focused?.getAction('editor.action.formatDocument')?.run();

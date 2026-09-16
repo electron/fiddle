@@ -26,61 +26,191 @@ describe('workspace', () => {
 
   it('splits the editor and closes the split @feature editor.panes', async () => {
     await app().click(role('button', 'Split editor'));
-    await expect.poll(async () => (await layout()).split).toBe('renderer.js');
+    // A second pane opens beside the focused one, showing renderer.js (§17.2).
+    await expect.poll(async () => (await layout()).panes).toEqual(['main.js', 'renderer.js']);
     expect(await app().query(role('code'))).toHaveLength(2);
     await app().click(role('button', 'Close split', { nth: 0 }));
-    await expect.poll(async () => (await layout()).split).toBe(null);
+    await expect.poll(async () => (await layout()).panes).toEqual([]);
     expect(await app().query(role('code'))).toHaveLength(1);
   });
 
-  it('closes tabs and opens a dragged tab beside the editor @feature editor.tabs', async () => {
-    const visible = async () =>
-      (await windowState(app())).fiddle.files.filter((file) => file.visible).map((file) => file.name);
-    const active = async () => (await windowState(app())).fiddle.activeFile;
-    const tabNamed = (name: string) => `[...document.querySelectorAll('[role="tab"]')].find((tab) => tab.textContent.startsWith(${JSON.stringify(name)}))`;
-    // Drags a tab onto the first ("here") or second ("beside") half of the editor.
-    const dragTab = (name: string, zone: 'here' | 'beside') =>
-      app().evaluate(`(async () => {
-        const tab = ${tabNamed(name)};
-        const data = new DataTransfer();
-        tab.dispatchEvent(new DragEvent('dragstart', { bubbles: true, dataTransfer: data }));
-        let zones = [];
-        for (let i = 0; i < 100 && zones.length === 0; i++) {
-          await new Promise((resolve) => setTimeout(resolve, 20));
-          zones = document.querySelectorAll('[data-drop-zone]');
-        }
-        const target = zones[${zone === 'here' ? 0 : 1}];
-        for (const type of ['dragenter', 'dragover', 'drop'])
-          target.dispatchEvent(new DragEvent(type, { bubbles: true, cancelable: true, dataTransfer: data }));
-        tab.dispatchEvent(new DragEvent('dragend', { bubbles: true, dataTransfer: data }));
-      })()`);
+  // ---- Tabs and panes ------------------------------------------------------
+  // Synthetic drag and drop: the driver has no pointer drag, so these dispatch
+  // the DragEvents a real drag produces, sharing one DataTransfer.
 
+  const visibleTabs = async () =>
+    (await windowState(app())).fiddle.files.filter((file) => file.visible).map((file) => file.name);
+  const activeFile = async () => (await windowState(app())).fiddle.activeFile;
+  const panes = async () => (await layout()).panes;
+  const tabNamed = (name: string) =>
+    `[...document.querySelectorAll('[role="tab"]')].find((tab) => tab.textContent.startsWith(${JSON.stringify(name)}))`;
+  /** Starts dragging `name`'s tab and waits until the sheet has taken note (drop zones are up). Leaves `tab` and `data` in scope. */
+  const startDrag = (name: string) => `
+    const tab = ${tabNamed(name)};
+    const data = new DataTransfer();
+    tab.dispatchEvent(new DragEvent('dragstart', { bubbles: true, dataTransfer: data }));
+    for (let i = 0; i < 100 && !document.querySelector('[data-tab-dragging]'); i++) {
+      await new Promise((resolve) => setTimeout(resolve, 20));
+    }
+    if (!document.querySelector('[data-tab-dragging]')) throw new Error('The tab drag did not start');`;
+  /** Drops `name`'s tab on a zone ('before', 'center' or 'after') of the pane at `index`. */
+  const dragTabToPane = (name: string, index: number, zone: 'before' | 'center' | 'after') =>
+    app().evaluate(`(async () => {
+      ${startDrag(name)}
+      const target = document.querySelector('[data-pane-index="${index}"] [data-drop-zone="${zone}"]');
+      if (!target) throw new Error('No ${zone} drop zone on pane ${index}');
+      for (const type of ['dragenter', 'dragover', 'drop'])
+        target.dispatchEvent(new DragEvent(type, { bubbles: true, cancelable: true, dataTransfer: data }));
+      tab.dispatchEvent(new DragEvent('dragend', { bubbles: true, dataTransfer: data }));
+    })()`);
+  /** Drops `name`'s tab on the near or far half of `onto`'s tab, or past the last tab (`onto` null). */
+  const dragTabAlongRow = (name: string, onto: string | null, side: 'before' | 'after' = 'before') =>
+    app().evaluate(`(async () => {
+      ${startDrag(name)}
+      const onto = ${onto === null ? 'null' : tabNamed(onto)};
+      const row = tab.closest('[role="tablist"]').parentElement.parentElement;
+      const rect = (onto ?? row).getBoundingClientRect();
+      const rtl = getComputedStyle(row).direction === 'rtl';
+      // The near (start) half of a tab is its left half, or its right half in a right-to-left layout.
+      const left = onto ? (${JSON.stringify(side)} === 'before') !== rtl : rtl;
+      const clientX = onto ? (left ? rect.left + 4 : rect.right - 4) : (left ? rect.left + 2 : rect.right - 2);
+      const init = { bubbles: true, cancelable: true, dataTransfer: data, clientX, clientY: rect.top + rect.height / 2 };
+      for (const type of ['dragenter', 'dragover', 'drop']) (onto ?? row).dispatchEvent(new DragEvent(type, init));
+      tab.dispatchEvent(new DragEvent('dragend', { bubbles: true, dataTransfer: data }));
+    })()`);
+  /** The zones each pane offers while `name`'s tab is dragged, e.g. `['before center', '', 'center after']`; ends the drag. */
+  const dropZonesWhileDragging = (name: string) =>
+    app().evaluate(`(async () => {
+      ${startDrag(name)}
+      const zones = [...document.querySelectorAll('[data-pane-index]')].map((pane) =>
+        [...pane.querySelectorAll('[data-drop-zone]')].map((zone) => zone.dataset.dropZone).join(' '));
+      tab.dispatchEvent(new DragEvent('dragend', { bubbles: true, dataTransfer: data }));
+      return zones;
+    })()`);
+
+  it('closes tabs and opens a dragged tab in a pane or beside it @feature editor.tabs', async () => {
     // Delete closes the focused tab. The file stays in the sidebar, and clicking it there reopens the tab.
     await app().click(role('tab', /^main\.js\b/));
     await app().press('Delete', role('tab', /^main\.js\b/));
-    await expect.poll(visible).not.toContain('main.js');
+    await expect.poll(visibleTabs).not.toContain('main.js');
     await app().waitForAbsent(role('tab', /^main\.js\b/));
     await app().click(role('row', 'main.js'));
     await app().query(role('tab', /^main\.js\b/));
-    await expect.poll(active).toBe('main.js');
+    await expect.poll(activeFile).toBe('main.js');
 
-    // Dropping a tab on the second half splits the editor.
-    await dragTab('renderer.js', 'beside');
-    await expect.poll(async () => (await layout()).split).toBe('renderer.js');
-    expect(await app().query(role('code'))).toHaveLength(2);
-    // Dropping the split file on the first half swaps the panes.
-    await dragTab('renderer.js', 'here');
-    await expect.poll(async () => (await layout()).split).toBe('main.js');
-    await expect.poll(active).toBe('renderer.js');
+    // Dropping a tab on the far edge of the pane opens it in a second pane and focuses it.
+    await dragTabToPane('renderer.js', 0, 'after');
+    await expect.poll(panes).toEqual(['main.js', 'renderer.js']);
+    await expect.poll(activeFile).toBe('renderer.js');
+    await expect.poll(async () => (await app().query(role('code'))).length).toBe(2);
+    // Clicking the other pane's tab moves focus there; the panes stay.
+    await app().click(role('tab', /^main\.js\b/));
+    await expect.poll(activeFile).toBe('main.js');
+    expect(await panes()).toEqual(['main.js', 'renderer.js']);
+    // Clicking a tab that no pane shows puts its file in the focused pane.
+    await app().click(role('tab', /^index\.html\b/));
+    await expect.poll(panes).toEqual(['index.html', 'renderer.js']);
+    // Dropping a pane's file in the middle of the other pane shows it there and closes its own pane.
+    await dragTabToPane('renderer.js', 0, 'center');
+    await expect.poll(panes).toEqual([]);
+    await expect.poll(activeFile).toBe('renderer.js');
+    await expect.poll(async () => (await app().query(role('code'))).length).toBe(1);
 
-    // The close glyph on the split file's tab closes it and the split.
+    // The close glyph on a pane's tab closes the tab and its pane; focus moves to the neighbour.
+    await dragTabToPane('main.js', 0, 'before');
+    await expect.poll(panes).toEqual(['main.js', 'renderer.js']);
+    await expect.poll(activeFile).toBe('main.js');
     await app().evaluate(`${tabNamed('main.js')}.querySelector('[data-tab-close]').click()`);
-    await expect.poll(async () => (await layout()).split).toBe(null);
-    await expect.poll(visible).not.toContain('main.js');
-    expect(await active()).toBe('renderer.js');
+    await expect.poll(panes).toEqual([]);
+    await expect.poll(visibleTabs).not.toContain('main.js');
+    expect(await activeFile()).toBe('renderer.js');
     await app().click(role('row', 'main.js'));
-    await expect.poll(visible).toContain('main.js');
+    await expect.poll(visibleTabs).toContain('main.js');
     await app().query(role('tab', /^main\.js\b/));
+  });
+
+  it('moves tabs by dragging them along the row, and with Move tab left and right @feature editor.tab-reorder keys.move-tab', async () => {
+    const before = await visibleTabs();
+    expect(before.length).toBeGreaterThanOrEqual(3);
+    const [first, second] = before as [string, string];
+    const last = before.at(-1)!;
+    const tabPattern = (name: string) => new RegExp(`^${name.replaceAll('.', '\\.')}\\b`);
+
+    // Drag the last tab in front of the first.
+    await dragTabAlongRow(last, first, 'before');
+    await expect.poll(visibleTabs).toEqual([last, ...before.slice(0, -1)]);
+    // The sidebar follows: within its group, the file moved too (main owns one order for both).
+    expect((await windowState(app())).fiddle.files.map((file) => file.name).indexOf(last)).toBe(0);
+
+    // Move tab right acts on the selected tab.
+    await app().click(role('tab', tabPattern(last)));
+    await expect.poll(activeFile).toBe(last);
+    await app().runCommand('editor.moveTabRight');
+    await expect.poll(visibleTabs).toEqual([first, last, ...before.slice(1, -1)]);
+    // Ctrl+Shift+PageUp moves it back (Ctrl+Shift+PageDown the other way), as in VS Code.
+    await app().press('Ctrl+Shift+PageUp');
+    await expect.poll(visibleTabs).toEqual([last, ...before.slice(0, -1)]);
+    await app().press('Ctrl+Shift+PageDown');
+    await app().press('Ctrl+Shift+PageDown');
+    await expect.poll(visibleTabs).toEqual([first, second, last, ...before.slice(2, -1)]);
+
+    // Dropping a tab past the last one moves it to the end; on a tab's far half, after that tab.
+    await dragTabAlongRow(last, null);
+    await expect.poll(visibleTabs).toEqual(before);
+    await dragTabAlongRow(first, second, 'after');
+    await expect.poll(visibleTabs).toEqual([second, first, ...before.slice(2)]);
+    await app().click(role('tab', tabPattern(first)));
+    await app().runCommand('editor.moveTabLeft');
+    await expect.poll(visibleTabs).toEqual(before);
+  });
+
+  it('splits a split view: up to four panes side by side, each its own drop target @feature editor.split-n editor.panes keys.split', async () => {
+    const files = await visibleTabs();
+    expect(files.length).toBeGreaterThanOrEqual(4);
+    const [a, b, c, d] = files as [string, string, string, string];
+    await app().click(role('tab', new RegExp(`^${a.replaceAll('.', '\\.')}\\b`)));
+    await expect.poll(activeFile).toBe(a);
+    await expect.poll(panes).toEqual([]);
+
+    // Each drop on a far edge adds a pane after that one; the dropped file takes focus.
+    await dragTabToPane(b, 0, 'after');
+    await expect.poll(panes).toEqual([a, b]);
+    await dragTabToPane(c, 1, 'after');
+    await expect.poll(panes).toEqual([a, b, c]);
+    await expect.poll(activeFile).toBe(c);
+    await expect.poll(async () => (await app().query(role('code'))).length).toBe(3);
+    // A near edge opens the new pane before that one.
+    await dragTabToPane(d, 0, 'before');
+    await expect.poll(panes).toEqual([d, a, b, c]);
+    await expect.poll(async () => (await app().query(role('code'))).length).toBe(4);
+
+    // Four is the limit, and every file is showing, so a dragged tab can only move its pane:
+    // a pane offers just the drops that change something, and the file's own pane none.
+    expect(await dropZonesWhileDragging(a)).toEqual(['before center', '', 'center after', 'before center after']);
+    await dragTabToPane(a, 3, 'after');
+    await expect.poll(panes).toEqual([d, b, c, a]);
+    await expect.poll(async () => (await app().query(role('code'))).length).toBe(4);
+    // Dropped in another pane's middle, a showing file takes that pane over and its old pane closes.
+    await dragTabToPane(d, 3, 'center');
+    await expect.poll(panes).toEqual([b, c, d]);
+    await expect.poll(activeFile).toBe(d);
+
+    // Close pane closes one and keeps its tab; Maximize keeps only that pane.
+    await app().click(role('button', 'Close pane', { nth: 0 }));
+    await expect.poll(panes).toEqual([c, d]);
+    expect(await visibleTabs()).toContain(b);
+    await app().click(role('button', 'Maximize', { nth: 1 }));
+    await expect.poll(panes).toEqual([]);
+    await expect.poll(activeFile).toBe(d);
+
+    // CmdOrCtrl+\\ (the Split editor button) splits once; while split, it keeps only the focused pane.
+    await app().press('CmdOrCtrl+\\');
+    await expect.poll(async () => (await panes()).length).toBe(2);
+    await dragTabToPane(a, 1, 'after');
+    await expect.poll(async () => (await panes()).length).toBe(3);
+    await app().click(role('button', 'Close split'));
+    await expect.poll(panes).toEqual([]);
+    await expect.poll(async () => (await app().query(role('code'))).length).toBe(1);
   });
 
   it('hides and shows the sidebar and the console @feature workspace.panels console.visibility', async () => {

@@ -20,8 +20,8 @@ import { z } from 'zod';
 
 import { findDeepLinkInArgv, isDeepLink, parseDeepLink } from '../../fiddle/deep-link';
 import { findExample } from '../../fiddle/examples';
-import { VersionRefSchema, type Fiddle, type VersionRef } from '../../fiddle/fiddle';
-import type { FileMap } from '../../fiddle/files';
+import { VersionRefSchema, visibleFileNames, type Fiddle, type VersionRef } from '../../fiddle/fiddle';
+import { orderFiles, type FileMap } from '../../fiddle/files';
 import { findFilesToReplace, localPathFromFileUrl } from '../../fiddle/folder';
 import { getGistId } from '../../fiddle/gist-id';
 import { createRegistryFetch, findInstallScripts } from '../../fiddle/modules';
@@ -29,11 +29,13 @@ import { getProjectName } from '../../fiddle/names';
 import { createTemplateLoader, isMissingTemplate, type TemplateLoader } from '../../fiddle/templates';
 import { formatOrigin, isUntrustedOrigin, needsApproval, restoredOrigin, type FiddleOrigin } from '../../fiddle/trust';
 import { ErrorCode, FiddleError } from '../../shared/errors';
+import { followActiveFile } from '../../shared/panes';
 import {
   DEFAULT_LAYOUT,
   windowLayoutSchema,
   type Platform,
   type WindowLayout,
+  type WindowState,
   type WindowView,
 } from '../../shared/stores';
 import { confirm, messageBox, pickFolder } from '../dialogs';
@@ -88,7 +90,10 @@ export type CodeExecutingOperation = 'run' | 'install-modules' | 'auto-bisect' |
 const sessionEntrySchema = z.object({
   windowId: z.string(),
   name: z.string(),
+  /** `fileNames`: the files the window had, in display order (the order the user gave the tabs). */
   fiddle: storedFiddleSchema.omit({ files: true }).extend({ fileNames: z.array(z.string()) }),
+  /** Set when `fileNames` is in display order; older sessions listed them in load order. */
+  ordered: z.boolean().optional(),
   activeFile: z.string().nullable(),
   layout: windowLayoutSchema,
   gistOwner: z.string().optional(),
@@ -335,9 +340,11 @@ async function docFromSession(entry: SessionEntry): Promise<Doc> {
     log.warn('restoring from the source failed, using the template', error);
     loaded = await newFiddle(templates, stored.version);
   }
-  const files = loaded.fiddle.files;
+  // The session keeps the order the user gave the tabs, and which files were hidden.
+  const files = entry.ordered ? orderFiles(loaded.fiddle.files, stored.fileNames) : loaded.fiddle.files;
   const fiddle: Fiddle = {
     ...loaded.fiddle,
+    files,
     version: stored.version,
     modules: stored.modules,
     hidden: stored.hidden.filter((name) => Object.hasOwn(files, name)),
@@ -497,11 +504,19 @@ function requireDoc(windowId: string | undefined): Doc {
   return doc;
 }
 
-/** Stores `doc` as the window's fiddle, pushes the store, and keeps title, draft and session in step. */
+/** Stores `doc` as the window's fiddle, pushes the store, and keeps title, panes, draft and session in step. */
 function commit(windowId: string, doc: Doc): number {
+  const previous = docs.get(windowId);
   docs.set(windowId, doc);
   const title = titleOf(doc);
-  const rev = hub().updateWindow(windowId, { fiddle: toFiddleState(doc), title });
+  const patch: Partial<Pick<WindowState, 'fiddle' | 'title' | 'layout'>> = { fiddle: toFiddleState(doc), title };
+  // Split view: a newly focused file takes over the focused pane, and hidden or removed files leave theirs.
+  const layout = hub().getWindow(windowId)?.layout;
+  if (layout) {
+    const panes = followActiveFile(layout.panes, previous?.activeFile ?? null, doc.activeFile, visibleFileNames(doc.fiddle));
+    if (panes !== layout.panes) patch.layout = { ...layout, panes: [...panes] };
+  }
+  const rev = hub().updateWindow(windowId, patch);
   const win = getWindow(windowId);
   if (win) {
     win.setTitle(title);
@@ -1121,6 +1136,7 @@ function sessionEntries(): SessionEntry[] {
       windowId,
       name: doc.name,
       fiddle: { ...fiddle, fileNames: Object.keys(files) },
+      ordered: true,
       activeFile: doc.activeFile,
       layout: deps?.hub.getWindow(windowId)?.layout ?? DEFAULT_LAYOUT,
     };

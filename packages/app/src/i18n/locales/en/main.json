@@ -46,7 +46,17 @@
   },
   "toggleSplit": {
     "message": "Split editor",
-    "description": "View menu item and command that opens or closes a second editor pane.",
+    "description": "View menu item and command that opens a second editor pane, or closes every pane but the focused one.",
+    "maxLength": 30
+  },
+  "moveTabLeft": {
+    "message": "Move tab left",
+    "description": "View menu item and command that moves the current editor tab one place toward the start of the tab row.",
+    "maxLength": 30
+  },
+  "moveTabRight": {
+    "message": "Move tab right",
+    "description": "View menu item and command that moves the current editor tab one place toward the end of the tab row.",
     "maxLength": 30
   },
   "toggleSidebar": {

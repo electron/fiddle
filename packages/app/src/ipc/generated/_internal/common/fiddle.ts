@@ -56,6 +56,7 @@ export interface IDocumentsImpl {
   RemoveFile(name: FileName): Promise<number> | number;
   SetFileVisible(name: FileName, visible: boolean): Promise<number> | number;
   SetActiveFile(name: FileName): Promise<number> | number;
+  MoveFile(name: FileName, before: FileName | null): Promise<number> | number;
   SetLayout(layout: WindowLayout): Promise<number> | number;
   SetView(view: WindowView): Promise<number> | number;
   LoadGist(idOrUrl: ShortText, revision: string | null): Promise<number> | number;
@@ -71,6 +72,7 @@ export interface IDocumentsRenderer {
   RemoveFile(name: FileName): Promise<number>;
   SetFileVisible(name: FileName, visible: boolean): Promise<number>;
   SetActiveFile(name: FileName): Promise<number>;
+  MoveFile(name: FileName, before: FileName | null): Promise<number>;
   SetLayout(layout: WindowLayout): Promise<number>;
   SetView(view: WindowView): Promise<number>;
   LoadGist(idOrUrl: ShortText, revision: string | null): Promise<number>;

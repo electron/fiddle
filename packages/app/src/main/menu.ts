@@ -176,6 +176,8 @@ function buildMenuTemplate(
         command('view.toggleSidebar'),
         command('view.toggleConsole'),
         command('view.toggleSplit'),
+        command('editor.moveTabLeft'),
+        command('editor.moveTabRight'),
         command('editor.toggleSoftWrap'),
         command('editor.toggleMinimap'),
         command('editor.toggleTabFocus'),

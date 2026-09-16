@@ -7,6 +7,7 @@ import {
   addFile,
   fileNames,
   hideFile,
+  moveFile,
   removeFile,
   renameFile,
   sameFiles,
@@ -159,6 +160,12 @@ export function docSetFileVisible(doc: Doc, name: string, visible: boolean): Doc
   if (visible && activeFile === null) activeFile = name;
   if (!visible && activeFile === name) activeFile = visibleFileNames(fiddle)[0] ?? null;
   return { ...doc, fiddle, activeFile };
+}
+
+/** Moves a file's tab and sidebar row (§17.2). The set of names is unchanged, so `fiddleRev` stays. */
+export function docMoveFile(doc: Doc, name: string, before: string | null): Doc {
+  const fiddle = moveFile(doc.fiddle, name, before);
+  return fiddle === doc.fiddle ? doc : { ...doc, fiddle };
 }
 
 /** Focusing a hidden file shows it (§17.3). */

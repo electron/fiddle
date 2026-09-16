@@ -57,8 +57,6 @@ export default {
   "emptyTitle": "開いているエディターはありません",
   "emptyText": "すべてのタブが閉じられています。サイドバーからファイルを開くか、レイアウトをリセットしてタブを元に戻してください。",
   "resetLayout": "レイアウトをリセット",
-  "dropOpenHere": "ここで開く",
-  "dropOpenBeside": "横に開く",
   "lensHint": "{{process}} の {{file}}:{{line}}:{{column}} でスローされました。",
   "lensProcessMain": "メインプロセス",
   "lensProcessPreload": "プリロード",

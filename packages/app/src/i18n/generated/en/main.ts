@@ -10,6 +10,8 @@ export default {
   "showMe": "Show me",
   "closeWindow": "Close",
   "toggleSplit": "Split editor",
+  "moveTabLeft": "Move tab left",
+  "moveTabRight": "Move tab right",
   "toggleSidebar": "Toggle sidebar",
   "toggleConsole": "Toggle console",
   "toggleSoftWrap": "Toggle soft wrap",

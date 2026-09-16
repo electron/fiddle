@@ -8,6 +8,7 @@ import {
   type Fiddle,
   fileNames,
   hideFile,
+  moveFile,
   removeFile,
   renameFile,
   sameFiles,
@@ -118,6 +119,22 @@ describe('file operations', () => {
     } catch (error) {
       expect((error as FiddleError).code).toBe(ErrorCode.notFound);
     }
+  });
+
+  // @feature editor.tab-reorder
+  it('keeps files in display order: sorted when created, new files last, then as moved', () => {
+    const fiddle = addFile(base(), 'extra.css');
+    expect(fileNames(fiddle)).toEqual(['main.js', 'renderer.js', 'index.html', 'styles.css', 'extra.css']);
+    const moved = moveFile(fiddle, 'styles.css', 'main.js');
+    expect(fileNames(moved)).toEqual(['styles.css', 'main.js', 'renderer.js', 'index.html', 'extra.css']);
+    expect(moved.files).toEqual(fiddle.files);
+    expect(fileNames(moveFile(moved, 'styles.css', null)).at(-1)).toBe('styles.css');
+    // Renaming keeps the place; a move onto itself is no change at all.
+    expect(fileNames(renameFile(moved, 'styles.css', 'app.css'))[0]).toBe('app.css');
+    expect(moveFile(fiddle, 'main.js', 'main.js')).toBe(fiddle);
+    expect(moveFile(fiddle, 'main.js', 'renderer.js')).toBe(fiddle);
+    expect(() => moveFile(fiddle, 'nope.js', null)).toThrow(FiddleError);
+    expect(() => moveFile(fiddle, 'main.js', 'nope.js')).toThrow(FiddleError);
   });
 
   it('sets content only on existing files', () => {

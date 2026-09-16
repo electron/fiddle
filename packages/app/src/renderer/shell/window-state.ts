@@ -6,6 +6,8 @@
  */
 import { useSyncExternalStore } from 'react';
 
+import { moveName } from '../../fiddle/files';
+import { followActiveFile } from '../../shared/panes';
 import type { WindowLayout, WindowState } from '../../shared/stores';
 import { documentsApi } from '../../ipc/renderer';
 import { showToast } from '../../ui';
@@ -65,16 +67,25 @@ export function setLayout(current: WindowLayout, patch: Partial<WindowLayout>, e
   return change((state) => ({ ...state, layout: { ...state.layout, ...patch } }), () => documentsApi.SetLayout(layout), errorTitle);
 }
 
+/** Like main (Documents' `commit`): the focused pane follows the active file, and hidden files leave the panes. */
+function withFiles(state: WindowState, files: WindowState['fiddle']['files'], activeFile: string | null): WindowState {
+  const visible = files.filter((f) => f.visible).map((f) => f.name);
+  const panes = followActiveFile(state.layout.panes, state.fiddle.activeFile, activeFile, visible);
+  return {
+    ...state,
+    fiddle: { ...state.fiddle, files, activeFile },
+    layout: panes === state.layout.panes ? state.layout : { ...state.layout, panes: [...panes] },
+  };
+}
+
 export function setActiveFile(name: string, errorTitle: string): Promise<void> {
   return change(
-    (state) => ({
-      ...state,
-      fiddle: {
-        ...state.fiddle,
-        activeFile: name,
-        files: state.fiddle.files.map((f) => (f.name === name ? { ...f, visible: true } : f)),
-      },
-    }),
+    (state) =>
+      withFiles(
+        state,
+        state.fiddle.files.map((f) => (f.name === name ? { ...f, visible: true } : f)),
+        name,
+      ),
     () => documentsApi.SetActiveFile(name),
     errorTitle,
   );
@@ -82,14 +93,26 @@ export function setActiveFile(name: string, errorTitle: string): Promise<void> {
 
 export function setFileVisible(name: string, visible: boolean, errorTitle: string): Promise<void> {
   return change(
-    (state) => ({
-      ...state,
-      fiddle: {
-        ...state.fiddle,
-        files: state.fiddle.files.map((f) => (f.name === name ? { ...f, visible } : f)),
-      },
-    }),
+    (state) =>
+      withFiles(
+        state,
+        state.fiddle.files.map((f) => (f.name === name ? { ...f, visible } : f)),
+        state.fiddle.activeFile,
+      ),
     () => documentsApi.SetFileVisible(name, visible),
+    errorTitle,
+  );
+}
+
+/** Moves a file's tab in front of `before`'s, or to the end. */
+export function moveFile(name: string, before: string | null, errorTitle: string): Promise<void> {
+  return change(
+    (state) => {
+      const byName = new Map(state.fiddle.files.map((f) => [f.name, f]));
+      const names = moveName(state.fiddle.files.map((f) => f.name), name, before);
+      return { ...state, fiddle: { ...state.fiddle, files: names.map((n) => byName.get(n)!) } };
+    },
+    () => documentsApi.MoveFile(name, before),
     errorTitle,
   );
 }

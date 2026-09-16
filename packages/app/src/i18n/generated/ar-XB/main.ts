@@ -10,6 +10,8 @@ export default {
   "showMe": "\u200f\u202eShow\u202c\u200f \u200f\u202eme\u202c\u200f",
   "closeWindow": "\u200f\u202eClose\u202c\u200f",
   "toggleSplit": "\u200f\u202eSplit\u202c\u200f \u200f\u202eeditor\u202c\u200f",
+  "moveTabLeft": "\u200f\u202eMove\u202c\u200f \u200f\u202etab\u202c\u200f \u200f\u202eleft\u202c\u200f",
+  "moveTabRight": "\u200f\u202eMove\u202c\u200f \u200f\u202etab\u202c\u200f \u200f\u202eright\u202c\u200f",
   "toggleSidebar": "\u200f\u202eToggle\u202c\u200f \u200f\u202esidebar\u202c\u200f",
   "toggleConsole": "\u200f\u202eToggle\u202c\u200f \u200f\u202econsole\u202c\u200f",
   "toggleSoftWrap": "\u200f\u202eToggle\u202c\u200f \u200f\u202esoft\u202c\u200f \u200f\u202ewrap\u202c\u200f",

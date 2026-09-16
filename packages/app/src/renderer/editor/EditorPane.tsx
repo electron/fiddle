@@ -13,7 +13,7 @@ import { windowApi } from '../../ipc/renderer';
 import { Icon } from '../../ui';
 import { useAppState } from '../state';
 import { setEditorActionProvider } from '../features/palette/editor-actions';
-import { setCursor, setFocusedEditor, useEditorViewState } from './editor-state';
+import { clearFocusedEditor, setCursor, setFocusedEditor, useEditorViewState } from './editor-state';
 import styles from './EditorPane.module.css';
 import { useModel } from './models';
 import { monaco, monoFontFamily } from './monaco';
@@ -29,8 +29,10 @@ const GUTTER = 66;
 
 export interface EditorPaneProps {
   file: string;
-  /** Reports its cursor to the status bar even before it is focused. */
+  /** The focused pane: reports its cursor to the status bar even before its editor has focus. */
   primary?: boolean;
+  /** The editor's text area took focus. */
+  onFocus?: () => void;
 }
 
 interface Zone {
@@ -41,7 +43,7 @@ interface Zone {
   root: Root;
 }
 
-export function EditorPane({ file, primary = false }: EditorPaneProps) {
+export function EditorPane({ file, primary = false, onFocus }: EditorPaneProps) {
   const { t, i18n } = useTranslation('shell');
   const host = useRef<HTMLDivElement>(null);
   const [editor, setEditor] = useState<monaco.editor.IStandaloneCodeEditor | null>(null);
@@ -56,8 +58,12 @@ export function EditorPane({ file, primary = false }: EditorPaneProps) {
   });
   const screenReader = app?.screenReaderActive ?? false;
   const fileRef = useRef(file);
+  const primaryRef = useRef(primary);
+  const onFocusRef = useRef(onFocus);
   useLayoutEffect(() => {
     fileRef.current = file;
+    primaryRef.current = primary;
+    onFocusRef.current = onFocus;
   });
   const viewStates = useRef(new Map<string, monaco.editor.ICodeEditorViewState | null>());
   const shown = useRef<string | null>(null);
@@ -101,6 +107,7 @@ export function EditorPane({ file, primary = false }: EditorPaneProps) {
       instance.onDidLayoutChange(fitGutter),
       instance.onDidFocusEditorText(() => {
         setFocusedEditor(instance);
+        onFocusRef.current?.();
         // Monaco's actions for the focused editor show up in the app's palette.
         setEditorActionProvider(() =>
           instance.getSupportedActions().map((action) => ({
@@ -113,7 +120,7 @@ export function EditorPane({ file, primary = false }: EditorPaneProps) {
         if (position) setCursor(fileRef.current, position.lineNumber, position.column);
       }),
       instance.onDidChangeCursorPosition(({ position }) => {
-        if (instance.hasTextFocus() || primary)
+        if (instance.hasTextFocus() || primaryRef.current)
           setCursor(fileRef.current, position.lineNumber, position.column);
       }),
     ];
@@ -127,10 +134,10 @@ export function EditorPane({ file, primary = false }: EditorPaneProps) {
     setEditor(instance);
     return () => {
       for (const subscription of subscriptions) subscription.dispose();
-      setFocusedEditor(null);
+      clearFocusedEditor(instance);
       instance.dispose();
     };
-  }, [primary]);
+  }, []);
 
   // Show the file's model, keeping each file's scroll and cursor while switching.
   useEffect(() => {
@@ -142,10 +149,13 @@ export function EditorPane({ file, primary = false }: EditorPaneProps) {
     shown.current = next ? file : null;
     const saved = viewStates.current.get(file);
     if (next && saved) editor.restoreViewState(saved);
-    if (next && primary) {
-      const position = editor.getPosition();
-      if (position) setCursor(file, position.lineNumber, position.column);
-    }
+  }, [editor, model, file]);
+
+  // The focused pane's cursor shows in the status bar, also when focus came from the tab row.
+  useEffect(() => {
+    if (!editor || !primary || !model || editor.getModel() !== model) return;
+    const position = editor.getPosition();
+    if (position) setCursor(file, position.lineNumber, position.column);
   }, [editor, model, file, primary]);
 
   useEffect(() => {

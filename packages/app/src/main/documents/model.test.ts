@@ -6,6 +6,7 @@ import {
   createDoc,
   DEFAULT_TEMPLATE,
   docAddFile,
+  docMoveFile,
   docRemoveFile,
   docRenameFile,
   docSetActiveFile,
@@ -137,6 +138,18 @@ describe('toFiddleState', () => {
     expect(state.source).toEqual({ origin: 'local', trusted: true, templateName: DEFAULT_TEMPLATE });
     expect(state.dirty).toBe(false);
     expect(state.dirtyFiles).toEqual([]);
+  });
+
+  // @feature editor.tab-reorder
+  it('lists files in the order the user moved them, without a new fiddleRev or unsaved changes', () => {
+    const doc = templateDoc();
+    const moved = docMoveFile(doc, 'styles.css', 'main.js');
+    expect(toFiddleState(moved).files.map((file) => file.name)).toEqual(['styles.css', 'main.js', 'index.html']);
+    expect(moved.fiddleRev).toBe(doc.fiddleRev);
+    expect(moved.activeFile).toBe(doc.activeFile);
+    expect(isDirty(moved)).toBe(false);
+    expect(toFiddleState(docMoveFile(moved, 'styles.css', null)).files.at(-1)).toEqual({ name: 'styles.css', visible: false });
+    expect(docMoveFile(doc, 'main.js', 'index.html')).toBe(doc);
   });
 
   // @feature files.dirty-tracking

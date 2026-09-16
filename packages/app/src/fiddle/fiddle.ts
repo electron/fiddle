@@ -12,6 +12,8 @@ import {
   getExtension,
   getPlaceholder,
   isEmptyOrPlaceholder,
+  moveName,
+  orderFiles,
   sortFileNames,
 } from './files';
 import type { FiddleOrigin } from './trust';
@@ -30,6 +32,10 @@ export interface FiddleSource {
 }
 
 export interface Fiddle {
+  /**
+   * The key order is the display order (tabs, and the sidebar within a process):
+   * `sortFileNames` order when created, then as the user arranges the tabs (`moveFile`).
+   */
   files: FileMap;
   /** Names of hidden files. Hidden files keep their content. */
   hidden: readonly string[];
@@ -52,10 +58,11 @@ export interface CreateFiddleInput {
 
 /** Builds a fiddle, adding a main entry if needed. Empty or placeholder-only files start hidden. */
 export function createFiddle(input: CreateFiddleInput): Fiddle {
-  const files = ensureMainEntry(input.files);
+  const withMain = ensureMainEntry(input.files);
+  const files = orderFiles(withMain, sortFileNames(Object.keys(withMain)));
   const fiddle: Fiddle = {
     files,
-    hidden: sortFileNames(Object.keys(files)).filter((name) => isEmptyOrPlaceholder(name, files[name]!)),
+    hidden: Object.keys(files).filter((name) => isEmptyOrPlaceholder(name, files[name]!)),
     version: input.version,
     modules: input.modules ?? {},
     origin: input.origin ?? { kind: 'local' },
@@ -73,7 +80,7 @@ function assertHasFile(fiddle: Fiddle, name: string): void {
 
 /** File names in display order. */
 export function fileNames(fiddle: Fiddle): string[] {
-  return sortFileNames(Object.keys(fiddle.files));
+  return Object.keys(fiddle.files);
 }
 
 export function visibleFileNames(fiddle: Fiddle): string[] {
@@ -112,6 +119,16 @@ export function hideFile(fiddle: Fiddle, name: string): Fiddle {
 export function showFile(fiddle: Fiddle, name: string): Fiddle {
   assertHasFile(fiddle, name);
   return { ...fiddle, hidden: fiddle.hidden.filter((n) => n !== name) };
+}
+
+/** Moves `name` in the display order: in front of `before`, or to the end when `before` is null. */
+export function moveFile(fiddle: Fiddle, name: string, before: string | null): Fiddle {
+  assertHasFile(fiddle, name);
+  if (before !== null) assertHasFile(fiddle, before);
+  const names = fileNames(fiddle);
+  const moved = moveName(names, name, before);
+  if (moved.every((n, i) => n === names[i])) return fiddle;
+  return { ...fiddle, files: orderFiles(fiddle.files, moved) };
 }
 
 export function setFileContent(fiddle: Fiddle, name: string, content: string): Fiddle {

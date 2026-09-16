@@ -4,7 +4,7 @@ import { contextBridge, ipcRenderer } from 'electron';
 export * from '../common/fiddle.js';
 import type { AppState, WindowState, CommandId, FocusContext, AppInfo, IAppImpl, IAppRenderer, IWindowImpl, IWindowRenderer, FileMapValue, WindowLayout, WindowView, FileName, ShortText, IDocumentsImpl, IDocumentsRenderer, SettingKey, SettingValue, ThemeData, ThemeSnapshot, ThemeId, NoticeId, ISettingsImpl, ISettingsRenderer, PackageSearchResults, PackageVersions, PackageName, PackageQuery, VersionSpec, IModulesImpl, IModulesRenderer, IOnboardingImpl, IOnboardingRenderer, ReleaseList, VersionList, VersionRefValue, OutputLines, EditorTypes, VersionString, BuildId, IVersionsImpl, IVersionsRenderer, IRunImpl, IRunRenderer, GitHubToken, GistDescription, GistId, GitHubCredentialStorage, GitHubSignInResult, GistLinkInfo, GistRevisionInfo, GistHistoryInfo, IGitHubImpl, IGitHubRenderer, LogLevel, LogText, IAppPlatformImpl, IAppPlatformRenderer } from '../common/fiddle.js';
 import { $eipc_validator$_AppState, $eipc_validator$_WindowState, $eipc_validator$_CommandId, $eipc_validator$_FocusContext, $eipc_validator$_AppInfo, $eipc_validator$_FileMapValue, $eipc_validator$_WindowLayout, $eipc_validator$_WindowView, $eipc_validator$_FileName, $eipc_validator$_ShortText, $eipc_validator$_SettingKey, $eipc_validator$_SettingValue, $eipc_validator$_ThemeData, $eipc_validator$_ThemeSnapshot, $eipc_validator$_ThemeId, $eipc_validator$_NoticeId, $eipc_validator$_PackageSearchResults, $eipc_validator$_PackageVersions, $eipc_validator$_PackageName, $eipc_validator$_PackageQuery, $eipc_validator$_VersionSpec, $eipc_validator$_ReleaseList, $eipc_validator$_VersionList, $eipc_validator$_VersionRefValue, $eipc_validator$_OutputLines, $eipc_validator$_EditorTypes, $eipc_validator$_VersionString, $eipc_validator$_BuildId, $eipc_validator$_GitHubToken, $eipc_validator$_GistDescription, $eipc_validator$_GistId, $eipc_validator$_GitHubCredentialStorage, $eipc_validator$_GitHubSignInResult, $eipc_validator$_GistLinkInfo, $eipc_validator$_GistRevisionInfo, $eipc_validator$_GistHistoryInfo, $eipc_validator$_LogLevel, $eipc_validator$_LogText } from '../common-runtime/fiddle.js';
-const $$ipcPrefix$$ = '$eipc_message$_b11a9a76-e74d-942f-513b-85e22e05269e_$_fiddle_$_';
+const $$ipcPrefix$$ = '$eipc_message$_2a2d6839-2103-b7db-b9f8-2e28b59832cd_$_fiddle_$_';
 import { webFrame } from "electron/renderer";
 function $eipc_event_validator$_MainFrame() {
   let url: URL;
@@ -104,6 +104,9 @@ export const Documents: Partial<IDocumentsRenderer> = {
   },
   SetActiveFile(name: FileName) {
     return ipcRenderer.invoke($$ipcPrefix$$ + 'Documents_$_SetActiveFile', name);
+  },
+  MoveFile(name: FileName, before: FileName | null) {
+    return ipcRenderer.invoke($$ipcPrefix$$ + 'Documents_$_MoveFile', name, before);
   },
   SetLayout(layout: WindowLayout) {
     return ipcRenderer.invoke($$ipcPrefix$$ + 'Documents_$_SetLayout', layout);

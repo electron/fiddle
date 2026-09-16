@@ -90,8 +90,12 @@ export type WindowView = z.infer<typeof windowViewSchema>;
 
 export const windowLayoutSchema = z.object({
   sidebar: z.boolean(),
-  /** The file shown in the second editor pane, or null when not split. */
-  split: z.string().nullable(),
+  /**
+   * The files in the editor panes, from the start (src/shared/panes.ts). Empty,
+   * or a single entry, means the editor isn't split. The renderer drops names
+   * that aren't visible files; main keeps the focused pane on `activeFile`.
+   */
+  panes: z.array(z.string()).default([]),
   consoleHeight: z.number().nonnegative(),
   sidebarWidth: z.number().nonnegative(),
   /** View > Toggle console, or its splitter dragged closed. Runs, package and make open it (§17.7). */
@@ -101,7 +105,7 @@ export type WindowLayout = z.infer<typeof windowLayoutSchema>;
 
 export const DEFAULT_LAYOUT: WindowLayout = {
   sidebar: true,
-  split: null,
+  panes: [],
   consoleHeight: 160,
   sidebarWidth: 228,
   consoleVisible: true,

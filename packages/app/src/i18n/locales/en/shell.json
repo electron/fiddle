@@ -105,7 +105,7 @@
   },
   "resizePanes": {
     "message": "Resize editor panes",
-    "description": "Accessible name of the divider between the two editor panes in split view."
+    "description": "Accessible name of each divider between two editor panes in split view."
   },
   "notificationsButton_one": {
     "message": "Notifications, {{count}} new",
@@ -229,7 +229,7 @@
   },
   "closeSplit": {
     "message": "Close split",
-    "description": "Tooltip and accessible name of the tab row button while the editor is split; it closes the second pane.",
+    "description": "Tooltip and accessible name of the tab row button while the editor is split; it closes every pane but the focused one.",
     "maxLength": 30
   },
   "popOut": {
@@ -239,7 +239,7 @@
   },
   "maximize": {
     "message": "Maximize",
-    "description": "Editor pane header button that closes the split and keeps only this pane.",
+    "description": "Editor pane header button that closes the other panes and keeps only this one.",
     "maxLength": 30
   },
   "closePane": {
@@ -272,16 +272,6 @@
     "message": "Reset layout",
     "description": "Button that restores the default editor layout and opens every file in a tab.",
     "maxLength": 24
-  },
-  "dropOpenHere": {
-    "message": "Open here",
-    "description": "Shown on the first half of the editor while an editor tab is dragged over it: dropping the tab there shows its file in the main editor pane.",
-    "maxLength": 30
-  },
-  "dropOpenBeside": {
-    "message": "Open to the side",
-    "description": "Shown on the second half of the editor while an editor tab is dragged over it: dropping the tab there opens its file in a second pane beside the main one.",
-    "maxLength": 30
   },
   "lensHint": {
     "message": "Thrown in the {{process}} at {{file}}:{{line}}:{{column}}.",

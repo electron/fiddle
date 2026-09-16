@@ -89,7 +89,8 @@ export interface WindowState {
       trusted: boolean;
     };
   };
-  layout: { sidebar: boolean; split: string | null; consoleHeight: number; sidebarWidth: number };
+  /** `panes`: the files in the editor panes, from the start; empty when the editor isn't split. */
+  layout: { sidebar: boolean; panes: string[]; consoleHeight: number; sidebarWidth: number; consoleVisible: boolean };
   run?: {
     status: string;
     result?: string;

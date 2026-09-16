@@ -99,6 +99,28 @@ describe('Tabs', () => {
     expect(setData).toHaveBeenCalledWith('application/x-test', 'main.js');
   });
 
+  // @feature editor.tab-reorder
+  it('marks where a dragged tab would land', () => {
+    const { rerender } = render(
+      <Tabs defaultValue="main">
+        <TabList aria-label="Open files">
+          <Tab id="main" dropIndicator="before">
+            main.js
+          </Tab>
+        </TabList>
+      </Tabs>,
+    );
+    expect(screen.getByRole('tab', { name: 'main.js' }).getAttribute('data-drop-indicator')).toBe('before');
+    rerender(
+      <Tabs defaultValue="main">
+        <TabList aria-label="Open files">
+          <Tab id="main">main.js</Tab>
+        </TabList>
+      </Tabs>,
+    );
+    expect(screen.getByRole('tab', { name: 'main.js' }).hasAttribute('data-drop-indicator')).toBe(false);
+  });
+
   it('does not select a disabled tab', () => {
     const onChange = vi.fn();
     render(<Example onChange={onChange} />);

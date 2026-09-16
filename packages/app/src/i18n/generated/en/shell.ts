@@ -60,8 +60,6 @@ export default {
   "emptyTitle": "No editors open",
   "emptyText": "Every tab is closed. Open a file from the sidebar, or reset the layout to bring the tabs back.",
   "resetLayout": "Reset layout",
-  "dropOpenHere": "Open here",
-  "dropOpenBeside": "Open to the side",
   "lensHint": "Thrown in the {{process}} at {{file}}:{{line}}:{{column}}.",
   "lensProcessMain": "main process",
   "lensProcessPreload": "preload",

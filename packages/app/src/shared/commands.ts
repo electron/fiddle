@@ -37,6 +37,8 @@ export interface CommandDefinition {
 }
 
 const hasWindow: Enablement = (_app, win) => win !== undefined;
+/** The tab row has at least two tabs (visible files). */
+const hasTabs: Enablement = (_app, win) => (win?.fiddle.files.filter((file) => file.visible).length ?? 0) > 1;
 
 export const commands = {
   'app.newWindow': {
@@ -59,6 +61,17 @@ export const commands = {
     label: 'toggleSplit',
     accelerator: 'CmdOrCtrl+\\',
     enabled: hasWindow,
+  },
+  // Move the active tab along the tab row, as in VS Code.
+  'editor.moveTabLeft': {
+    label: 'moveTabLeft',
+    accelerator: 'Ctrl+Shift+PageUp',
+    enabled: hasTabs,
+  },
+  'editor.moveTabRight': {
+    label: 'moveTabRight',
+    accelerator: 'Ctrl+Shift+PageDown',
+    enabled: hasTabs,
   },
   'view.toggleSidebar': {
     label: 'toggleSidebar',

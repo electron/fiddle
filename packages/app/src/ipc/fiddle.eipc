@@ -136,6 +136,8 @@ interface Documents {
     RemoveFile(name: FileName) -> number
     SetFileVisible(name: FileName, visible: boolean) -> number
     SetActiveFile(name: FileName) -> number
+    // Moves a file (its tab and sidebar row) in front of `before`, or to the end.
+    MoveFile(name: FileName, before: FileName?) -> number
     SetLayout(layout: WindowLayout) -> number
     SetView(view: WindowView) -> number
 

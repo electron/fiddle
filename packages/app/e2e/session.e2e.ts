@@ -21,7 +21,7 @@ describe('session', () => {
         .poll(async () => (await windowState(first!, 0)).fiddle.versionRef)
         .toEqual({ kind: 'release', version: '43.7.0' });
       await first.click(role('button', 'Split editor'));
-      await expect.poll(async () => (await windowState(first!, 0)).layout.split).not.toBeNull();
+      await expect.poll(async () => (await windowState(first!, 0)).layout.panes).toHaveLength(2);
       await first.runCommand('app.newWindow');
       await first.waitForWindow(1);
       const before = [await windowState(first, 0), await windowState(first, 1)];
@@ -34,7 +34,7 @@ describe('session', () => {
       const after = [await windowState(second, 0), await windowState(second, 1)];
       const summary = (states: typeof before) =>
         states
-          .map((s) => ({ name: s.fiddle.name, version: s.fiddle.versionRef, split: s.layout.split }))
+          .map((s) => ({ name: s.fiddle.name, version: s.fiddle.versionRef, panes: s.layout.panes }))
           .sort((a, b) => a.name.localeCompare(b.name));
       expect(summary(after)).toEqual(summary(before));
       await second.assertClean();

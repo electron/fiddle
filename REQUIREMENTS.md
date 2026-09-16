@@ -629,8 +629,10 @@ A desktop app for writing, running, sharing and packaging small Electron experim
 ### 2. Editors
 
 - One code editor (Monaco) per visible file. {#editor.per-file}
-- Panes can be rearranged, resized, maximized and hidden. Hiding a pane keeps its content. The layout can be reset. {#editor.panes}
-- Each open file has a tab. Closing a tab hides its file, which stays in the file list. Dragging a tab onto the editor opens it in the main pane or in a second pane beside it. {#editor.tabs}
+- Panes can be rearranged, resized, maximized and closed. Closing a pane keeps its file's tab and content. The layout can be reset. {#editor.panes}
+- Each open file has a tab, and the selected tab is the focused pane's file: selecting a tab whose file another pane shows focuses that pane, and selecting one no pane shows puts its file in the focused pane. Closing a tab hides its file, which stays in the file list, and closes its pane. Dragging a tab onto a pane shows its file there (the middle) or in a new pane on that side (either edge). {#editor.tabs}
+  - Tabs can be reordered by dragging them along the tab row, or with Move tab left and Move tab right (Ctrl+Shift+PageUp and PageDown). The file list follows the same order, which is saved with the session. {#editor.tab-reorder}
+- Split view: up to four panes side by side, each showing one file, no file in two panes. Split editor (`CmdOrCtrl+\`) opens a second pane showing `renderer.js`, or `main.js` when that's current; while split, it closes every pane but the focused one. Each pane's header has Maximize (keep only this pane) and Close. Pane widths reset to equal shares when a pane opens or closes, and aren't saved. {#editor.split-n}
 - Each pane shows an error or warning indicator taken from the editor's diagnostics. {#editor.diagnostics}
 - Editor defaults: soft wrap on, minimap off, 2-space tabs. {#editor.defaults}
   - Soft wrap and minimap can be toggled per window. The toggles aren't saved. {#editor.wrap-minimap-toggle}
@@ -902,6 +904,8 @@ Settings are saved locally and sync live across windows. {#settings.persist-sync
 | Preferences | CmdOrCtrl+, {#keys.preferences} |
 | Run Fiddle | F5 {#keys.run} |
 | Clear console (console focused) | CmdOrCtrl+K {#keys.clear-console} |
+| Split editor / Close split | `CmdOrCtrl+\` {#keys.split} |
+| Move tab left / right | Ctrl+Shift+PageUp / Ctrl+Shift+PageDown {#keys.move-tab} |
 | Toggle Bisect Helper | CmdOrCtrl+Shift+B {#keys.bisect} |
 | Toggle DevTools | CmdOrCtrl+Option+I {#keys.devtools} |
 | Reload | CmdOrCtrl+R {#keys.reload} |

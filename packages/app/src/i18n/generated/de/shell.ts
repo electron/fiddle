@@ -60,8 +60,6 @@ export default {
   "emptyTitle": "Keine Editoren geöffnet",
   "emptyText": "Alle Tabs sind geschlossen. Öffne eine Datei in der Seitenleiste oder setze das Layout zurück, um die Tabs wiederherzustellen.",
   "resetLayout": "Layout zurücksetzen",
-  "dropOpenHere": "Hier öffnen",
-  "dropOpenBeside": "Daneben öffnen",
   "lensHint": "Ausgelöst im {{process}} in {{file}}:{{line}}:{{column}}.",
   "lensProcessMain": "Hauptprozess",
   "lensProcessPreload": "Preload-Skript",

@@ -60,8 +60,6 @@ export default {
   "emptyTitle": "[Ñö éðîţöŕš öþéñ one two]",
   "emptyText": "[Éṽéŕý ţáƀ îš çļöšéð. Öþéñ á ƒîļé ƒŕöɱ ţĥé šîðéƀáŕ, öŕ ŕéšéţ ţĥé ļáýöûţ ţö ƀŕîñĝ ţĥé ţáƀš ƀáçķ. one two three four five six seven eight]",
   "resetLayout": "[Ŕéšéţ ļáýöûţ one two]",
-  "dropOpenHere": "[Öþéñ ĥéŕé one]",
-  "dropOpenBeside": "[Öþéñ ţö ţĥé šîðé one two]",
   "lensHint": "[Ţĥŕöŵñ îñ ţĥé {{process}} áţ {{file}}:{{line}}:{{column}}. one two three]",
   "lensProcessMain": "[ɱáîñ þŕöçéšš one two]",
   "lensProcessPreload": "[þŕéļöáð one]",

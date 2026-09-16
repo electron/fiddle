@@ -10,6 +10,8 @@ export default {
   "showMe": "[Šĥöŵ ɱé one]",
   "closeWindow": "[Çļöšé one]",
   "toggleSplit": "[Šþļîţ éðîţöŕ one two]",
+  "moveTabLeft": "[Ṁöṽé ţáƀ ļéƒţ one two]",
+  "moveTabRight": "[Ṁöṽé ţáƀ ŕîĝĥţ one two]",
   "toggleSidebar": "[Ţöĝĝļé šîðéƀáŕ one two]",
   "toggleConsole": "[Ţöĝĝļé çöñšöļé one two]",
   "toggleSoftWrap": "[Ţöĝĝļé šöƒţ ŵŕáþ one two]",

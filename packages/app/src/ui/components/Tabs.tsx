@@ -68,6 +68,8 @@ export interface TabProps {
   onClose?: () => void;
   /** Makes the tab draggable, carrying `data` under the `type` media type. */
   drag?: { type: string; data: string };
+  /** While another tab is dragged over the row: an insertion bar before or after this tab. */
+  dropIndicator?: 'before' | 'after';
   isDisabled?: boolean;
   className?: string;
 }
@@ -84,6 +86,7 @@ export function Tab({
   icon,
   onClose,
   drag,
+  dropIndicator,
   isDisabled,
   className,
 }: TabProps) {
@@ -131,6 +134,7 @@ export function Tab({
       isDisabled={isDisabled}
       className={cx(styles.tab, className)}
       data-closable={closable || undefined}
+      data-drop-indicator={dropIndicator}
       onAuxClick={
         onClose
           ? (event) => {

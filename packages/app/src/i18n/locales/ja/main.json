@@ -9,6 +9,8 @@
   "showMe": "サンプル",
   "closeWindow": "閉じる",
   "toggleSplit": "エディターを分割",
+  "moveTabLeft": "タブを左へ移動",
+  "moveTabRight": "タブを右へ移動",
   "toggleSidebar": "サイドバーの表示切り替え",
   "toggleConsole": "コンソールの表示切り替え",
   "toggleSoftWrap": "折り返しの切り替え",

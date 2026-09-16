@@ -123,6 +123,25 @@
   color: var(--lu-ink);
 }
 
+/* Reordering: a 2px accent bar on the edge of the tab the dragged one would
+   land next to (inside the tab, so a scrolling tab row never clips it). */
+.tab[data-drop-indicator]::before {
+  content: "";
+  position: absolute;
+  top: 4px;
+  bottom: 4px;
+  inset-inline-start: 0;
+  width: 2px;
+  border-radius: var(--lu-radius-round);
+  background: var(--lu-accent);
+  pointer-events: none;
+}
+
+.tab[data-drop-indicator="after"]::before {
+  inset-inline-start: auto;
+  inset-inline-end: 0;
+}
+
 .panel {
   outline: none;
   min-height: 0;

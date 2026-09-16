@@ -48,8 +48,18 @@
   min-height: 0;
 }
 
-/* While a tab is dragged, the editor area splits into two drop targets:
-   the first half opens the file in the main pane, the second beside it. */
+.pane {
+  position: relative;
+  flex: 1 1 0;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+/* While a tab is dragged, each pane is a drop target: its middle shows the
+   file in that pane, and each edge (a quarter of the pane) opens it in a new
+   pane on that side. The hint draws what the drop would fill: the whole pane,
+   or its half on that side. */
 .dropZones {
   position: absolute;
   inset: 0;
@@ -59,37 +69,40 @@
 
 .dropZone {
   flex: 1 1 0;
-  display: grid;
-  place-items: center;
-  margin: var(--lu-space-2);
+}
+
+.dropZone[data-drop-zone="before"],
+.dropZone[data-drop-zone="after"] {
+  flex: 0 0 25%;
+}
+
+.dropHint {
+  position: absolute;
+  top: var(--lu-space-2);
+  bottom: var(--lu-space-2);
+  inset-inline: var(--lu-space-2);
   border-radius: var(--lu-radius-control);
   corner-shape: squircle;
-  transition:
-    background-color var(--lu-dur-fast) var(--lu-ease),
-    box-shadow var(--lu-dur-fast) var(--lu-ease);
-}
-
-.dropZone[data-over] {
   background: color-mix(in srgb, var(--lu-accent-soft) 70%, transparent);
   box-shadow: inset 0 0 0 2px var(--lu-accent);
-}
-
-.dropLabel {
-  color: var(--lu-accent);
-  font: var(--lu-type-label);
   opacity: 0;
   pointer-events: none;
+  transition:
+    opacity var(--lu-dur-fast) var(--lu-ease),
+    inset-inline-start var(--lu-dur-fast) var(--lu-ease),
+    inset-inline-end var(--lu-dur-fast) var(--lu-ease);
 }
 
-.dropZone[data-over] .dropLabel {
+.dropZones[data-over] .dropHint {
   opacity: 1;
 }
 
-.pane {
-  flex: 1 1 0;
-  display: flex;
-  flex-direction: column;
-  min-width: 0;
+.dropZones[data-over="before"] .dropHint {
+  inset-inline-end: 50%;
+}
+
+.dropZones[data-over="after"] .dropHint {
+  inset-inline-start: 50%;
 }
 
 /* Split panes are separated by a 0.5px line, drawn on the resize handle

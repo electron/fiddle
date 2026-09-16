@@ -9,6 +9,8 @@
   "showMe": "Beispiele",
   "closeWindow": "Schließen",
   "toggleSplit": "Editor teilen",
+  "moveTabLeft": "Tab nach links verschieben",
+  "moveTabRight": "Tab nach rechts verschieben",
   "toggleSidebar": "Seitenleiste ein-/ausblenden",
   "toggleConsole": "Konsole ein-/ausblenden",
   "toggleSoftWrap": "Zeilenumbruch ein-/ausschalten",

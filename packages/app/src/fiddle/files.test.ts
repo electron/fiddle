@@ -18,6 +18,8 @@ import {
   isReservedFileName,
   isSupportedFileName,
   isWindowsReservedName,
+  moveName,
+  orderFiles,
   sortFileNames,
 } from './files';
 import { thrownReason } from './test-helpers/errors';
@@ -132,6 +134,34 @@ describe('sortFileNames', () => {
       'a.css',
       'z.js',
     ]);
+  });
+});
+
+// @feature editor.tab-reorder
+describe('moveName and orderFiles', () => {
+  const names = ['main.js', 'renderer.js', 'index.html', 'styles.css'];
+
+  it('moves a name in front of another, or to the end', () => {
+    expect(moveName(names, 'styles.css', 'main.js')).toEqual(['styles.css', 'main.js', 'renderer.js', 'index.html']);
+    expect(moveName(names, 'main.js', 'styles.css')).toEqual(['renderer.js', 'index.html', 'main.js', 'styles.css']);
+    expect(moveName(names, 'renderer.js', null)).toEqual(['main.js', 'index.html', 'styles.css', 'renderer.js']);
+  });
+
+  it('changes nothing for a name moved onto itself, an unknown name, or an unknown target (end)', () => {
+    expect(moveName(names, 'main.js', 'main.js')).toEqual(names);
+    expect(moveName(names, 'nope.js', 'main.js')).toEqual(names);
+    expect(moveName(names, 'styles.css', 'nope.js')).toEqual(names);
+  });
+
+  it('reorders a file map, keeping unmentioned names after the ordered ones', () => {
+    const files = { 'main.js': 'm', 'renderer.js': 'r', 'index.html': 'h' };
+    expect(Object.keys(orderFiles(files, ['index.html', 'gone.js', 'main.js']))).toEqual([
+      'index.html',
+      'main.js',
+      'renderer.js',
+    ]);
+    expect(orderFiles(files, [])).toEqual(files);
+    expect(orderFiles(files, ['renderer.js'])['renderer.js']).toBe('r');
   });
 });
 

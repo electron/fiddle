@@ -14,6 +14,8 @@ import { getWindow, sendWindowCommand, windowIdOf } from './windows';
 /** Handlers that act on Monaco, view state or a dialog in the window: sent there as `Window.Command`. */
 const FORWARDED = [
   'view.toggleSplit',
+  'editor.moveTabLeft',
+  'editor.moveTabRight',
   'view.toggleSidebar',
   'view.toggleConsole',
   'editor.toggleSoftWrap',
