@@ -5,22 +5,32 @@
  * does the filtering, so it controls matching and order. Actions (such as
  * "Copy version number") end the menu while nothing is typed; choosing one
  * calls `onAction`, not `onChange`.
+ *
+ * The list can hold thousands of versions, so it's virtualized: only the
+ * rows in view are in the DOM, and the list is rebuilt only when `groups` or
+ * `actions` change. Row text that changes often (download progress) goes in
+ * `details` instead, which re-renders the rows showing it and nothing else.
  */
-import { Fragment } from 'react';
+import { createContext, Fragment, memo, use, useMemo } from 'react';
 import {
   Autocomplete,
   Button,
   Header,
   Input,
+  LayoutInfo,
   ListBox,
   ListBoxItem,
   ListBoxSection,
+  ListLayout,
   Popover,
+  Rect,
   Select,
   SelectValue,
   Separator,
   Text,
   TextField,
+  Virtualizer,
+  type ListLayoutOptions,
 } from 'react-aria-components';
 
 import { cx, Icon, type IconName } from '../../../ui';
@@ -62,11 +72,65 @@ export interface SearchSelectProps {
   placeholder?: string;
   actions?: SearchOption[];
   onAction?: (id: string) => void;
+  /**
+   * Detail text by option id that replaces the option's own and may change
+   * many times a second, such as "Downloading 42%". A change re-renders the
+   * rows in view, not the list.
+   */
+  details?: Readonly<Record<string, string>>;
   /** A note under the list, such as "Showing 150 of 2,000". */
   note?: string;
   isDisabled?: boolean;
   size?: 'md' | 'sm';
   className?: string;
+}
+
+const NO_ACTIONS: SearchOption[] = [];
+const NO_DETAILS: Readonly<Record<string, string>> = {};
+
+/**
+ * Row heights in px for the virtualized list. They mirror Menu.module.css:
+ * an item is size-row tall, a header is a caption line (14) with 8 above and
+ * 4 below, and a separator is a hairline with 5 above and below.
+ */
+const ROW_HEIGHT = 28;
+const HEADING_HEIGHT = 26;
+const SEPARATOR_HEIGHT = 11;
+const LAYOUT_OPTIONS: ListLayoutOptions = {
+  rowSize: ROW_HEIGHT,
+  headingSize: HEADING_HEIGHT,
+};
+/** How many of the longest rows size the menu (see `Sizer`). */
+const SIZER_ROWS = 6;
+
+/** react-aria's list layout, except that separators are hairlines rather than full rows. */
+class MenuLayout extends ListLayout<unknown> {
+  protected override buildNode(
+    ...[node, x, y]: Parameters<ListLayout<unknown>['buildNode']>
+  ) {
+    if (node.type !== 'separator') return super.buildNode(node, x, y);
+    const width = (this.virtualizer?.size.width ?? 0) - this.padding - x;
+    const rect = new Rect(x, y, width, SEPARATOR_HEIGHT);
+    return {
+      layoutInfo: new LayoutInfo(node.type, node.key, rect),
+      children: [],
+      validRect: rect.intersection(this.requestedRect),
+      node,
+    };
+  }
+}
+
+const DetailsContext = createContext(NO_DETAILS);
+
+/** A row's detail: the live one from `details`, else the option's own. */
+function Detail({ id, text }: { id: string; text?: string }) {
+  const detail = use(DetailsContext)[id] ?? text;
+  if (!detail) return null;
+  return (
+    <Text slot="description" className={styles.detail}>
+      {detail}
+    </Text>
+  );
 }
 
 function Option({ option }: { option: SearchOption }) {
@@ -83,14 +147,14 @@ function Option({ option }: { option: SearchOption }) {
       {({ isSelected }) => (
         <>
           <span className={menu.lead}>
-            {isSelected ? <Icon name="check" /> : option.icon ? <Icon name={option.icon} /> : null}
+            {isSelected ? (
+              <Icon name="check" />
+            ) : option.icon ? (
+              <Icon name={option.icon} />
+            ) : null}
           </span>
           <span className={menu.label}>{option.label}</span>
-          {option.detail && (
-            <Text slot="description" className={styles.detail}>
-              {option.detail}
-            </Text>
-          )}
+          <Detail id={option.id} text={option.detail} />
           {option.hint && <span className={menu.hint}>{option.hint}</span>}
         </>
       )}
@@ -98,7 +162,46 @@ function Option({ option }: { option: SearchOption }) {
   );
 }
 
-export function SearchSelect({
+const textLength = (option: SearchOption) =>
+  option.label.length + (option.detail?.length ?? 0) + (option.hint?.length ?? 0);
+
+/**
+ * Virtualized rows are positioned absolutely, so they can't size the menu.
+ * These hidden, zero-height copies of the longest rows do instead, so the
+ * menu still grows to fit its longest label, between 200 and 360px.
+ */
+function Sizer({
+  groups,
+  actions,
+}: {
+  groups: readonly SearchGroup[];
+  actions: readonly SearchOption[];
+}) {
+  const longest = useMemo(
+    () =>
+      groups
+        .flatMap((group) => group.options)
+        .concat(actions)
+        .sort((a, b) => textLength(b) - textLength(a))
+        .slice(0, SIZER_ROWS),
+    [groups, actions],
+  );
+  return (
+    <div className={styles.sizer} aria-hidden>
+      {longest.map((option) => (
+        <div key={option.id} className={menu.item}>
+          <span className={menu.lead} />
+          <span className={menu.label}>{option.label}</span>
+          {option.detail && <span className={styles.detail}>{option.detail}</span>}
+          {option.hint && <span className={menu.hint}>{option.hint}</span>}
+        </div>
+      ))}
+    </div>
+  );
+}
+
+/** Memoized: with stable props, a re-render of the caller costs nothing here. */
+export const SearchSelect = memo(function SearchSelect({
   groups,
   value,
   onChange,
@@ -107,8 +210,9 @@ export function SearchSelect({
   searchLabel,
   emptyLabel,
   placeholder,
-  actions = [],
+  actions = NO_ACTIONS,
   onAction,
+  details = NO_DETAILS,
   note,
   size = 'md',
   className,
@@ -116,6 +220,41 @@ export function SearchSelect({
 }: SearchSelectProps) {
   const inCapsule = useInCapsule();
   const showActions = actions.length > 0 && query.trim() === '';
+  // The same element while the options don't change, so a re-render of the
+  // caller (a store push) skips the list and its collection entirely.
+  const list = useMemo(
+    () => (
+      <Virtualizer layout={MenuLayout} layoutOptions={LAYOUT_OPTIONS}>
+        <ListBox
+          className={styles.searchList}
+          renderEmptyState={() => <div className={styles.empty}>{emptyLabel}</div>}
+        >
+          {groups.map((group, i) => (
+            <Fragment key={group.title ?? `group-${i}`}>
+              {i > 0 && <Separator className={menu.separator} />}
+              <ListBoxSection className={menu.section}>
+                {group.title && <Header className={menu.header}>{group.title}</Header>}
+                {group.options.map((option) => (
+                  <Option key={option.id} option={option} />
+                ))}
+              </ListBoxSection>
+            </Fragment>
+          ))}
+          {showActions && (
+            <Fragment key="actions">
+              {groups.length > 0 && <Separator className={menu.separator} />}
+              <ListBoxSection className={menu.section}>
+                {actions.map((action) => (
+                  <Option key={action.id} option={action} />
+                ))}
+              </ListBoxSection>
+            </Fragment>
+          )}
+        </ListBox>
+      </Virtualizer>
+    ),
+    [groups, actions, showActions, emptyLabel],
+  );
   return (
     <Select
       {...rest}
@@ -137,7 +276,9 @@ export function SearchSelect({
       <Button className={select.trigger}>
         <SelectValue className={select.value}>
           {/* Never react-aria's own "Select an item": only the caller's catalog string. */}
-          {({ isPlaceholder, selectedText }) => (isPlaceholder ? placeholder : selectedText)}
+          {({ isPlaceholder, selectedText }) =>
+            isPlaceholder ? placeholder : selectedText
+          }
         </SelectValue>
         <Icon name="chevron-down" className={select.chevron} />
       </Button>
@@ -156,36 +297,12 @@ export function SearchSelect({
                 <Input type="search" className={field.input} placeholder={searchLabel} />
               </TextField>
             </div>
-            <ListBox
-              className={styles.searchList}
-              renderEmptyState={() => <div className={styles.empty}>{emptyLabel}</div>}
-            >
-              {groups.map((group, i) => (
-                <Fragment key={group.title ?? `group-${i}`}>
-                  {i > 0 && <Separator className={menu.separator} />}
-                  <ListBoxSection className={menu.section}>
-                    {group.title && <Header className={menu.header}>{group.title}</Header>}
-                    {group.options.map((option) => (
-                      <Option key={option.id} option={option} />
-                    ))}
-                  </ListBoxSection>
-                </Fragment>
-              ))}
-              {showActions && (
-                <Fragment key="actions">
-                  {groups.length > 0 && <Separator className={menu.separator} />}
-                  <ListBoxSection className={menu.section}>
-                    {actions.map((action) => (
-                      <Option key={action.id} option={action} />
-                    ))}
-                  </ListBoxSection>
-                </Fragment>
-              )}
-            </ListBox>
+            <DetailsContext value={details}>{list}</DetailsContext>
           </Autocomplete>
           {note && <p className={styles.searchNote}>{note}</p>}
+          <Sizer groups={groups} actions={showActions ? actions : NO_ACTIONS} />
         </div>
       </Popover>
     </Select>
   );
-}
+});

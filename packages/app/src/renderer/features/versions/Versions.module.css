@@ -32,6 +32,15 @@
   outline: none;
 }
 
+/* The list's rows are virtualized and positioned absolutely, so they can't
+   size the menu. These hidden copies of its longest rows do instead. */
+.sizer {
+  flex: none;
+  height: 0;
+  overflow: hidden;
+  visibility: hidden;
+}
+
 /* The install state after a version's label. */
 .detail {
   flex: none;

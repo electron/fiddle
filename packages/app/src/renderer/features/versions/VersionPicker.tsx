@@ -11,20 +11,39 @@
  * It also shows the window's version notices (fallbacks and failed
  * downloads) as toasts, and retries the version's download when the
  * computer comes back online.
+ *
+ * Every store push replaces every object in the store, and a download pushes
+ * ten times a second. So the list is built from stable copies of only what
+ * it depends on (`useStableJson`), and download percentages skip it: they
+ * reach the rows through SearchSelect's `details`.
  */
-import { useEffect, useMemo, useState } from 'react';
+import type { TFunction } from 'i18next';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { versionsApi } from '../../../ipc/renderer';
-import { pickerGroups, type PickerEntry, type PickerGroup } from '../../../main/versions/releases';
-import type { VersionNotice, VersionRefValue, VersionsState } from '../../../shared/stores';
+import {
+  pickerGroups,
+  type PickerEntry,
+  type PickerGroup,
+  type VersionFilterSettings,
+} from '../../../main/versions/releases';
+import type {
+  VersionNotice,
+  VersionRefValue,
+  VersionsState,
+} from '../../../shared/stores';
 import { showToast, type IconName } from '../../../ui';
 import { useAppState, useWindowState } from '../../state';
 import { IDLE_RUN, useReleases, versionLabel } from '../run/use-run';
 import { SearchSelect, type SearchGroup, type SearchOption } from './SearchSelect';
 import styles from './Versions.module.css';
 
+type RunT = TFunction<'run'>;
+type Installs = VersionsState['installs'];
+
 const COPY = 'action:copy';
+const NO_INSTALLS: Installs = {};
 
 const GROUP_TITLES = {
   local: 'groupLocal',
@@ -47,8 +66,85 @@ export function parseRefId(id: string): VersionRefValue | undefined {
 
 export const isStable = (version: string) => !version.includes('-');
 
-export function installIcon(install: VersionsState['installs'][string] | undefined): IconName {
+export function installIcon(install: Installs[string] | undefined): IconName {
   return install?.state === 'installed' ? 'success' : 'cloud';
+}
+
+/**
+ * A copy of `value` that keeps its identity until its content changes, for
+ * memo dependencies: store pushes replace objects that didn't change.
+ */
+function useStableJson<T>(value: T): T {
+  const json = JSON.stringify(value);
+  return useMemo(() => JSON.parse(json) as T, [json]);
+}
+
+/** Install states without download percentages: what the list's shape depends on. */
+function installStates(installs: Installs): Installs {
+  return Object.fromEntries(
+    Object.entries(installs).map(([version, install]) => [
+      version,
+      { state: install.state },
+    ]),
+  );
+}
+
+/** "Downloading 42%" by option id, for the versions downloading now. */
+function downloadDetails(t: RunT, installs: Installs): Record<string, string> {
+  const details: Record<string, string> = {};
+  for (const [version, install] of Object.entries(installs)) {
+    if (install.state === 'downloading') {
+      details[refId({ kind: 'release', version })] = t('stateDownloading', {
+        percent: install.percent ?? 0,
+      });
+    }
+  }
+  return details;
+}
+
+function stateText(t: RunT, entry: PickerEntry): string {
+  switch (entry.state) {
+    case 'installed':
+      return t('stateInstalled');
+    case 'downloaded':
+      return t('stateDownloaded');
+    case 'downloading':
+      return t('stateDownloading', { percent: entry.percent ?? 0 });
+    case 'installing':
+      return t('stateInstalling');
+    case 'unsupported':
+      return t('stateUnsupported');
+    case 'local':
+      return t('stateLocal');
+    case 'localMissing':
+      return t('stateLocalMissing');
+    default:
+      return t('stateMissing');
+  }
+}
+
+function toOption(t: RunT, entry: PickerEntry): SearchOption {
+  return {
+    id: entry.id,
+    label:
+      entry.kind === 'release'
+        ? t('electronVersion', { version: entry.label })
+        : entry.label,
+    ...(entry.kind === 'local' ? { icon: 'folder' as const } : {}),
+    detail: stateText(t, entry),
+    ...(entry.hint ? { hint: t(HINTS[entry.hint]) } : {}),
+    isDisabled: entry.disabled,
+  };
+}
+
+function toSearchGroups(t: RunT, groups: PickerGroup[]): SearchGroup[] {
+  return groups.map((group) => {
+    const title = GROUP_TITLES[group.key];
+    return {
+      ...(title ? { title: t(title) } : {}),
+      options: group.entries.map((entry) => toOption(t, entry)),
+    };
+  });
 }
 
 const shownNotices = new Set<number>();
@@ -69,7 +165,9 @@ function useRetryWhenOnline() {
     const retry = () => {
       versionsApi
         .RetryDownload()
-        .catch((error: unknown) => console.error('[fiddle] retrying the download failed', error));
+        .catch((error: unknown) =>
+          console.error('[fiddle] retrying the download failed', error),
+        );
     };
     window.addEventListener('online', retry);
     return () => window.removeEventListener('online', retry);
@@ -89,94 +187,89 @@ export function VersionPicker() {
   const run = win?.run ?? IDLE_RUN;
   const ref = win?.fiddle.versionRef;
   const settings = app?.settings;
-  const versions = app?.versions;
+  const installs = app?.versions?.installs ?? NO_INSTALLS;
+
+  // The list's inputs, unchanged by pushes that don't change them.
+  const filter = useStableJson<VersionFilterSettings | null>(
+    settings
+      ? {
+          channels: settings.channels,
+          showObsolete: settings.showObsolete,
+          showNotDownloaded: settings.showNotDownloaded,
+        }
+      : null,
+  );
+  const states = useStableJson(installStates(installs));
+  const localBuilds = useStableJson(app?.versions?.localBuilds ?? []);
+  const current = useStableJson(ref ?? null);
   const groups = useMemo(
     () =>
-      settings
-        ? pickerGroups({
-            rows,
-            settings,
-            installs: versions?.installs ?? {},
-            localBuilds: versions?.localBuilds ?? [],
-            current: ref,
-            query,
-          })
+      filter
+        ? toSearchGroups(
+            t,
+            pickerGroups({
+              rows,
+              settings: filter,
+              installs: states,
+              localBuilds,
+              current: current ?? undefined,
+              query,
+            }),
+          )
         : [],
-    [rows, settings, versions, ref, query],
+    [t, rows, filter, states, localBuilds, current, query],
+  );
+  const details = useStableJson(downloadDetails(t, installs));
+  const actions = useMemo(
+    (): SearchOption[] => [{ id: COPY, label: tv('copyVersion'), icon: 'copy' }],
+    [tv],
   );
 
-  const stateText = (entry: PickerEntry): string => {
-    switch (entry.state) {
-      case 'installed':
-        return t('stateInstalled');
-      case 'downloaded':
-        return t('stateDownloaded');
-      case 'downloading':
-        return t('stateDownloading', { percent: entry.percent ?? 0 });
-      case 'installing':
-        return t('stateInstalling');
-      case 'unsupported':
-        return t('stateUnsupported');
-      case 'local':
-        return t('stateLocal');
-      case 'localMissing':
-        return t('stateLocalMissing');
-      default:
-        return t('stateMissing');
-    }
-  };
-
-  const option = (entry: PickerEntry): SearchOption => ({
-    id: entry.id,
-    label: entry.kind === 'release' ? t('electronVersion', { version: entry.label }) : entry.label,
-    ...(entry.kind === 'local' ? { icon: 'folder' as const } : {}),
-    detail: stateText(entry),
-    ...(entry.hint ? { hint: t(HINTS[entry.hint]) } : {}),
-    isDisabled: entry.disabled,
-  });
-  const searchGroups: SearchGroup[] = groups.map((group) => {
-    const title = GROUP_TITLES[group.key];
-    return { ...(title ? { title: t(title) } : {}), options: group.entries.map(option) };
-  });
-
   const bisecting = run.bisect !== null && run.bisect.result === null;
-  const current = ref ? refId(ref) : null;
+  const currentId = ref ? refId(ref) : null;
   // Until the release list loads, the current version isn't an option yet:
   // show its label rather than an empty trigger.
   const known = versionLabel(ref, app);
-  const currentLabel = ref?.kind === 'release' && known ? t('electronVersion', { version: known }) : known;
+  const currentLabel =
+    ref?.kind === 'release' && known ? t('electronVersion', { version: known }) : known;
 
-  const copy = () => {
+  const copy = useCallback(() => {
     versionsApi.CopyVersion().then(
       () => showToast({ tone: 'success', title: tv('copied', { version: known ?? '' }) }),
       (error: unknown) => console.error('[fiddle] copying the version failed', error),
     );
-  };
+  }, [tv, known]);
+  const setVersion = useCallback(
+    (id: string) => {
+      const next = parseRefId(id);
+      if (!next || id === currentId) return;
+      versionsApi.SetVersion(next).catch((error: unknown) =>
+        showToast({
+          tone: 'error',
+          title: error instanceof Error ? error.message : String(error),
+        }),
+      );
+    },
+    [currentId],
+  );
 
   return (
     <SearchSelect
       data-tour="version-picker"
       aria-label={t('versionPicker')}
       placeholder={currentLabel || t('versionPicker')}
-      groups={searchGroups}
-      value={current}
+      groups={groups}
+      value={currentId}
+      onChange={setVersion}
       query={query}
       onQueryChange={setQuery}
       searchLabel={tv('searchVersions')}
       emptyLabel={tv('noMatches')}
-      actions={[{ id: COPY, label: tv('copyVersion'), icon: 'copy' }]}
+      actions={actions}
       onAction={copy}
+      details={details}
       isDisabled={run.status !== 'ready' || bisecting}
       className={styles.picker}
-      onChange={(id) => {
-        const next = parseRefId(id);
-        if (!next || id === current) return;
-        versionsApi
-          .SetVersion(next)
-          .catch((error: unknown) =>
-            showToast({ tone: 'error', title: error instanceof Error ? error.message : String(error) }),
-          );
-      }}
     />
   );
 }
