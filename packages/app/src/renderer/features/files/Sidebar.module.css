@@ -13,17 +13,45 @@
   margin: 4px 0 2px;
 }
 
-/* Heads: caption 11/14 600 ink-muted, padding 14 8 5 (4 on top for the first). */
+/* Group header: the head, then the group's add button, a 24px icon button (the
+   design's minimum target) centred on the head's text. The text keeps its
+   place: 14 above (9 on the header plus 5 on the head), 5 below. */
+.header {
+  display: flex;
+  align-items: center;
+  padding-top: 9px;
+}
+
+/* The first head sits 5px from the top (the design's 4, plus 1 so the button fits). */
+.section:first-of-type .header {
+  padding-top: 0;
+}
+
+/* Heads: caption 11/14 600 ink-muted, padding 0 8. */
 .head {
+  flex: 1;
+  min-width: 0;
   margin: 0;
-  padding: 14px 8px 5px;
+  padding: 5px 8px;
+  overflow: hidden;
   color: var(--lu-ink-muted);
   font: var(--lu-type-caption);
   letter-spacing: var(--lu-type-caption-tracking, 0);
+  white-space: nowrap;
+  text-overflow: ellipsis;
 }
 
-.section:first-of-type .head {
-  padding-top: 4px;
+/* The add button shows while the pointer or focus is in the group. Hidden, it
+   stays in the tab order, so Tab reaches it and focus reveals it. It sits 2px
+   in, level with the package rows' remove buttons. Button fades opacity itself. */
+.groupAdd {
+  margin-right: 2px;
+  opacity: 0;
+}
+
+.section:hover .groupAdd,
+.section:focus-within .groupAdd {
+  opacity: 1;
 }
 
 .add {

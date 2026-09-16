@@ -8,7 +8,7 @@
  */
 import { useSyncExternalStore } from 'react';
 
-import type { FileProcess } from '../shell/processes';
+import type { RuntimeErrorValue } from '../../shared/stores';
 
 export interface RuntimeError {
   /** A fiddle file name, such as `renderer.js`. */
@@ -19,7 +19,8 @@ export interface RuntimeError {
   column: number;
   /** As thrown, such as "TypeError: Cannot read properties of undefined". */
   message: string;
-  process: FileProcess;
+  /** The Electron process it was thrown in (main's report, not the file's sidebar group). */
+  process: RuntimeErrorValue['process'];
 }
 
 export interface RevealRequest {

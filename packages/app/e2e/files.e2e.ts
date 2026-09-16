@@ -86,4 +86,67 @@ describe('files', () => {
     await app().click(role('button', 'Delete'));
     await expect.poll(names).not.toContain('renamed.js');
   });
+
+  /**
+   * The given snapshot lines (`heading "Preload"`, `row "preload.js"`) in the
+   * order the accessibility snapshot has them, leaving out the ones it lacks.
+   * The sidebar lists each group's rows under the group's head.
+   */
+  const snapshotOrder = async (lines: string[]) => {
+    const snapshot = await app().snapshot();
+    return lines
+      .map((line) => [line, snapshot.indexOf(line)] as const)
+      .filter(([, at]) => at !== -1)
+      .sort(([, a], [, b]) => a - b)
+      .map(([line]) => line);
+  };
+
+  it('groups files by name under Main, Preload and Renderer, and shows Other only when it has files @feature files.groups', async () => {
+    await app().query(role('heading', 'Main'));
+    await app().query(role('heading', 'Preload'));
+    await app().query(role('heading', 'Renderer'));
+    // Only template files are left, and none of them is an Other file.
+    await app().waitForAbsent(role('heading', 'Other'));
+
+    // A JSON file belongs to no process: it opens the Other group.
+    await addFile('data.json');
+    await app().press('Enter');
+    await app().query(role('heading', 'Other'));
+    await app().query(role('row', 'data.json'));
+    const expected = [
+      'heading "Main"',
+      'row "main.js"',
+      'heading "Preload"',
+      'row "preload.js"',
+      'heading "Renderer"',
+      'row "index.html"',
+      'heading "Other"',
+      'row "data.json"',
+      'button "Add file"',
+    ];
+    expect(await snapshotOrder(expected)).toEqual(expected);
+  });
+
+  it('adds a file from a group head, starting from a free name for the group @feature files.add-in-group', async () => {
+    // preload.js exists, so the Preload prompt suggests preload-2.js; Enter takes it.
+    await app().click(role('button', 'Add preload file'));
+    await app().query(role('dialog', 'New file'));
+    await app().press('Enter');
+    await app().waitForAbsent(role('dialog', 'New file'));
+    await app().query(role('tab', /^preload-2\.js\b/));
+    expect(await files()).toContainEqual({ name: 'preload-2.js', visible: true });
+    const preload = ['heading "Preload"', 'row "preload.js"', 'row "preload-2.js"', 'heading "Renderer"'];
+    expect(await snapshotOrder(preload)).toEqual(preload);
+
+    // The typed name decides the group: a page added from Main's head lands under Renderer.
+    await app().click(role('button', 'Add main file'));
+    await app().query(role('dialog', 'New file'));
+    await app().press('CmdOrCtrl+A', role('textbox', 'File name'));
+    await app().type('about.html');
+    await app().press('Enter');
+    await expect.poll(names).toContain('about.html');
+    await app().query(role('row', 'about.html'));
+    const renderer = ['heading "Renderer"', 'row "about.html"', 'heading "Other"'];
+    expect(await snapshotOrder(renderer)).toEqual(renderer);
+  });
 });

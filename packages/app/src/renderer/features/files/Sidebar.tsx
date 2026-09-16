@@ -1,8 +1,10 @@
 /**
  * The sidebar's file list: every file in the fiddle, open in a tab or not,
- * grouped by process (Main process, Preload, Renderer), then the Packages
- * slot. Clicking a file opens its tab. File operations (add, rename, delete,
- * open and close) go through the Documents methods; main validates them too.
+ * grouped by name into Main, Preload, Renderer and Other (`processOf`), then
+ * the Packages slot. Clicking a file opens its tab. File operations (add,
+ * rename, delete, open and close) go through the Documents methods; main
+ * validates them too. Each group head has its own add button, which opens the
+ * new-file prompt with the group's naming hint and a free name filled in.
  * Each row's pill counts the file's errors, or its warnings when it has none.
  */
 import { useRef, useState, type MouseEvent } from 'react';
@@ -17,23 +19,40 @@ import { documentsApi } from '../../../ipc/renderer';
 import {
   Button,
   confirmDialog,
+  IconButton,
   Menu,
   MenuItem,
   MenuPopover,
   promptDialog,
   showToast,
   TextField,
+  Tooltip,
   Tree,
   TreeRow,
 } from '../../../ui';
 import { badgeOf, useDiagnostics } from '../../editor/diagnostics';
 import { PackagesSection } from '../packages/PackagesSection';
-import { groupByProcess, PROCESS_ORDER } from '../../shell/processes';
+import { groupByProcess, PROCESS_ORDER, suggestFileName, type FileProcess } from '../../shell/processes';
 import { processLabelKey, useBadgeLabel } from '../../shell/Sheet';
 import styles from './Sidebar.module.css';
 
 /** Past this many files the sidebar offers a filter field. */
 const FILTER_THRESHOLD = 8;
+
+/** Each group head's add button label, and the naming hint its prompt shows. */
+const addInGroupKey = {
+  main: 'addMainFile',
+  preload: 'addPreloadFile',
+  renderer: 'addRendererFile',
+  other: 'addOtherFile',
+} as const satisfies Record<FileProcess, string>;
+
+const groupHintKey = {
+  main: 'groupHintMain',
+  preload: 'groupHintPreload',
+  renderer: 'groupHintRenderer',
+  other: 'groupHintOther',
+} as const satisfies Record<FileProcess, string>;
 
 export interface SidebarProps {
   files: readonly { name: string; visible: boolean }[];
@@ -74,12 +93,18 @@ export function Sidebar({ files, dirtyFiles, activeFile, onOpen, onSetVisible }:
       description: error instanceof Error ? error.message : String(error),
     });
 
-  const addFile = async () => {
+  /**
+   * Asks for a name and adds the file. From a group head, the prompt explains
+   * the group's naming convention and starts with a free name for it; the name
+   * typed still decides the group, and validation is the same either way.
+   */
+  const addFile = async (group?: FileProcess) => {
     const name = (
       await promptDialog({
         title: t('addFileTitle'),
-        message: t('fileNameHint'),
+        message: group ? t(groupHintKey[group]) : t('fileNameHint'),
         label: t('fileName'),
+        defaultValue: group ? suggestFileName(group, names) : undefined,
         confirmLabel: t('create'),
         cancelLabel: t('cancel'),
       })
@@ -162,33 +187,49 @@ export function Sidebar({ files, dirtyFiles, activeFile, onOpen, onSetVisible }:
       )}
       {PROCESS_ORDER.map((process) => {
         const group = groups[process];
-        if (group.length === 0) return null;
+        // Main, Preload and Renderer always show, so a file can be added to an
+        // empty one; Other only lists what it has, and a filter hides empty groups.
+        if (group.length === 0 && (process === 'other' || query)) return null;
         const label = t(processLabelKey[process]);
+        const addLabel = t(addInGroupKey[process]);
         return (
           <section key={process} className={styles.section}>
-            <h4 className={styles.head}>{label}</h4>
-            <Tree
-              aria-label={label}
-              variant="sidebar"
-              value={group.some((file) => file.name === activeFile) ? activeFile : null}
-              onChange={onOpen}
-            >
-              {group.map((file) => {
-                const badge = badgeOf(diagnostics.get(file.name));
-                return (
-                  <TreeRow
-                    key={file.name}
-                    id={file.name}
-                    label={file.name}
-                    labelDir="ltr"
-                    pill={badgeLabel(badge)}
-                    pillTone={badge?.tone}
-                    unsaved={dirtyFiles.includes(file.name)}
-                    unsavedLabel={t('unsaved')}
-                  />
-                );
-              })}
-            </Tree>
+            <div className={styles.header}>
+              <h4 className={styles.head}>{label}</h4>
+              <Tooltip label={addLabel}>
+                <IconButton
+                  icon="plus"
+                  size="sm"
+                  label={addLabel}
+                  className={styles.groupAdd}
+                  onPress={() => void addFile(process)}
+                />
+              </Tooltip>
+            </div>
+            {group.length > 0 && (
+              <Tree
+                aria-label={label}
+                variant="sidebar"
+                value={group.some((file) => file.name === activeFile) ? activeFile : null}
+                onChange={onOpen}
+              >
+                {group.map((file) => {
+                  const badge = badgeOf(diagnostics.get(file.name));
+                  return (
+                    <TreeRow
+                      key={file.name}
+                      id={file.name}
+                      label={file.name}
+                      labelDir="ltr"
+                      pill={badgeLabel(badge)}
+                      pillTone={badge?.tone}
+                      unsaved={dirtyFiles.includes(file.name)}
+                      unsavedLabel={t('unsaved')}
+                    />
+                  );
+                })}
+              </Tree>
+            )}
           </section>
         );
       })}

@@ -29,6 +29,7 @@ export const processLabelKey = {
   main: 'processMain',
   preload: 'processPreload',
   renderer: 'processRenderer',
+  other: 'processOther',
 } as const satisfies Record<FileProcess, string>;
 
 type Badge = ReturnType<typeof badgeOf>;

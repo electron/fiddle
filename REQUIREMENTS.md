@@ -619,7 +619,7 @@ A desktop app for writing, running, sharing and packaging small Electron experim
 - A window contains:
   - A multi-file code editor. {#workspace.editor}
   - An output console. {#workspace.console}
-  - A file list and an npm module list. {#workspace.sidebar}
+  - A file list, grouped into Main, Preload, Renderer and Other (§17.3), and an npm module list. {#workspace.sidebar}
   - Controls for version, run, bisect and sharing. {#workspace.controls}
 - Panels can be resized and hidden. {#workspace.panels}
 - Multiple windows are supported, each with its own fiddle, Electron version and run. Settings stay in sync across windows. {#workspace.multi-window}
@@ -648,6 +648,12 @@ A desktop app for writing, running, sharing and packaging small Electron experim
 - Allowed extensions: `.cjs .js .mjs .html .css .json` (any case). Names with path separators are rejected. {#files.extensions}
 - Files can be added, renamed, deleted, shown and hidden. {#files.operations}
 - Clicking a hidden file in the file list shows it and focuses it. {#files.show-hidden-on-click}
+- **Groups:** the file list groups files by name alone (any case); a file's group changes nothing about how it runs. Main, Preload and Renderer always show; Other shows only when it has files. {#files.groups}
+  - Main: the main entry, and helper scripts named `main-*` or `main.*`, such as `main-menu.js`. Helpers don't count as main entries.
+  - Preload: `preload.js` (`.cjs`, `.mjs`) and scripts named `preload-*` or `preload.*`.
+  - Renderer: every `.html` and `.css` file, `renderer.js` (`.cjs`, `.mjs`) and scripts named `renderer-*` or `renderer.*`.
+  - Other: everything else, such as `.json` files, `utils.js` or `worker.js`.
+- Each group head has an add button (besides the list's own "Add file"). It opens the new-file prompt with a one-line hint of the group's names and a free name filled in: the group's own name (`preload.js`, `renderer.js`), else the first free `preload-2.js`, `preload-3.js`, …; Main gets `main-2.js` onward, since the entry exists, and Other starts empty. The typed name decides the group, and validation is the same as for any new file. {#files.add-in-group}
 - **Validation rules:**
   - No duplicate names. {#files.no-duplicates}
   - `package.json` and `package-lock.json` are reserved. {#files.reserved-names}

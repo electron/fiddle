@@ -32,8 +32,8 @@
     "description": "Accessible name of the file list in the sidebar."
   },
   "processMain": {
-    "message": "Main process",
-    "description": "Sidebar section head and editor label for files that run in Electron's main process.",
+    "message": "Main",
+    "description": "Sidebar section head and editor label for files that run in Electron's main process: the main entry (main.js) and helper scripts named main-….",
     "maxLength": 24
   },
   "processPreload": {
@@ -45,6 +45,47 @@
     "message": "Renderer",
     "description": "Sidebar section head and editor label for files that run in the renderer (web page).",
     "maxLength": 24
+  },
+  "processOther": {
+    "message": "Other",
+    "description": "Sidebar section head and editor label for files whose name doesn't say which process they belong to, such as JSON files and helper scripts like utils.js.",
+    "maxLength": 24
+  },
+  "addMainFile": {
+    "message": "Add main file",
+    "description": "Tooltip and accessible name of the small plus button in the sidebar's Main section head. Opens the new-file dialog with a name for that section filled in.",
+    "maxLength": 40
+  },
+  "addPreloadFile": {
+    "message": "Add preload file",
+    "description": "Tooltip and accessible name of the small plus button in the sidebar's Preload section head. Opens the new-file dialog with a name for that section filled in.",
+    "maxLength": 40
+  },
+  "addRendererFile": {
+    "message": "Add renderer file",
+    "description": "Tooltip and accessible name of the small plus button in the sidebar's Renderer section head. Opens the new-file dialog with a name for that section filled in.",
+    "maxLength": 40
+  },
+  "addOtherFile": {
+    "message": "Add other file",
+    "description": "Tooltip and accessible name of the small plus button in the sidebar's Other section head. Opens the new-file dialog.",
+    "maxLength": 40
+  },
+  "groupHintMain": {
+    "message": "Helper scripts named main-…, like main-menu.js, are listed under Main with the entry file.",
+    "description": "One line in the new-file dialog opened from the Main section: which file names the sidebar lists under Main. main-… and main-menu.js are file name patterns; keep them as written."
+  },
+  "groupHintPreload": {
+    "message": "preload.js and scripts named preload-… are listed under Preload.",
+    "description": "One line in the new-file dialog opened from the Preload section: which file names the sidebar lists under Preload. Keep the file names as written."
+  },
+  "groupHintRenderer": {
+    "message": "HTML and CSS files, renderer.js and scripts named renderer-… are listed under Renderer.",
+    "description": "One line in the new-file dialog opened from the Renderer section: which file names the sidebar lists under Renderer. Keep the file names as written."
+  },
+  "groupHintOther": {
+    "message": "JSON files and scripts with any other name are listed under Other. Use .js, .cjs, .mjs or .json.",
+    "description": "One line in the new-file dialog opened from the Other section: which file names the sidebar lists under Other, and the extensions such a file may have."
   },
   "errorCount_one": {
     "message": "{{count}} error",
