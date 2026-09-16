@@ -14,6 +14,24 @@ export function isGistId(value: string): boolean {
   return GIST_ID_RE.test(value);
 }
 
+/**
+ * The input, trimmed, when all of it is a gist reference: a bare ID or a
+ * `gist.github.com` URL with an ID in its path. Stricter than `getGistId`,
+ * for text nobody typed into the field, such as the clipboard's. Null otherwise.
+ */
+export function asGistReference(input: string): string | null {
+  const value = input.trim();
+  // Documents.LoadGist takes at most 2048 characters (ShortText).
+  if (value === '' || value.length > 2048 || /\s/.test(value)) return null;
+  if (isGistId(value)) return value;
+  try {
+    const url = new URL(/^https?:\/\//i.test(value) ? value : `https://${value}`);
+    return url.hostname === 'gist.github.com' && getGistId(url.pathname) !== null ? value : null;
+  } catch {
+    return null;
+  }
+}
+
 export function isRevisionSha(value: string): boolean {
   return SHA_RE.test(value);
 }

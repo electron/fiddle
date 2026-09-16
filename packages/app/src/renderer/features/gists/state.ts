@@ -44,6 +44,11 @@ export function useGitHubLogin(): string | undefined {
   return useAppState()?.githubLogin;
 }
 
+/** Open gist's default shortcut as people read it: ⌘⇧O on macOS, Ctrl+Shift+O elsewhere. */
+export function useOpenGistKbd(): string {
+  return useAppState()?.platform === 'darwin' ? '⌘⇧O' : 'Ctrl+Shift+O';
+}
+
 /** `gistVisibility`, `gistPublishAsRevision` and `gistShowHistory` from the effective settings. */
 export function useGistSettings(): { isPublic: boolean; asRevision: boolean; showHistory: boolean } {
   const settings = useAppState()?.settings;

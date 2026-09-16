@@ -6,6 +6,7 @@ export default {
   "menuPublishNew": "\u200f\u202ePublish\u202c\u200f \u200f\u202eas\u202c\u200f \u200f\u202enew\u202c\u200f \u200f\u202egist\u202c\u200f",
   "menuCopyLink": "\u200f\u202eCopy\u202c\u200f \u200f\u202eshare\u202c\u200f \u200f\u202elink\u202c\u200f",
   "menuHistory": "\u200f\u202eShow\u202c\u200f \u200f\u202ehistory\u202c\u200f",
+  "openGist": "\u200f\u202eOpen\u202c\u200f \u200f\u202egist…\u202c\u200f",
   "menuVisibility": "\u200f\u202eNew\u202c\u200f \u200f\u202egists\u202c\u200f \u200f\u202eare\u202c\u200f",
   "menuDelete": "\u200f\u202eDelete\u202c\u200f \u200f\u202egist\u202c\u200f",
   "visibilitySecret": "\u200f\u202eSecret\u202c\u200f",

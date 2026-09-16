@@ -1,4 +1,4 @@
-import { useId, type CSSProperties, type ReactNode } from 'react';
+import { useId, type CSSProperties, type ReactNode, type Ref } from 'react';
 import {
   FieldError,
   Input,
@@ -25,6 +25,8 @@ export interface TextFieldProps extends Omit<AriaTextFieldProps, 'className' | '
   /** Trailing content inside the field, such as a Kbd. */
   suffix?: ReactNode;
   mono?: boolean;
+  /** The `<input>`, e.g. to select its text. */
+  inputRef?: Ref<HTMLInputElement>;
   className?: string;
   style?: CSSProperties;
 }
@@ -39,6 +41,7 @@ export function TextField({
   icon,
   suffix,
   mono,
+  inputRef,
   className,
   style,
   ...rest
@@ -54,7 +57,7 @@ export function TextField({
       {label && <Label className={styles.label}>{label}</Label>}
       <div className={styles.field}>
         {icon && <Icon name={icon} size={size === 'sm' ? 14 : 16} className={styles.icon} />}
-        <Input className={cx(styles.input, mono && styles.mono)} placeholder={placeholder} />
+        <Input ref={inputRef} className={cx(styles.input, mono && styles.mono)} placeholder={placeholder} />
         {suffix && <span className={styles.suffix}>{suffix}</span>}
       </div>
       {description && (

@@ -1,7 +1,7 @@
 /** Binds `interface GitHub` for one window. The token stays in this process. */
 import { BrowserWindow, clipboard } from 'electron';
 
-import { isGistId } from '../../fiddle/gist-id';
+import { asGistReference, isGistId } from '../../fiddle/gist-id';
 import { isValidTokenFormat } from '../../fiddle/github';
 import { GitHubCredentialStorage } from '../../ipc/generated/common/fiddle';
 import { GitHub, implement } from '../../ipc/main';
@@ -32,6 +32,8 @@ export function bindGitHubIpc({ contents, windowId, services: { github } }: IpcC
       return github.signIn(token, allowPlaintext);
     },
     HasClipboardToken: async () => isValidTokenFormat((await clipboard.readText()).trim()),
+    // Only a gist URL or ID comes back, so the renderer can't read anything else off the clipboard.
+    ReadClipboardGist: async () => asGistReference(await clipboard.readText()),
     OpenNewTokenPage: () => openExternalLink(NEW_TOKEN_URL, BrowserWindow.fromWebContents(contents) ?? undefined),
     TakeNotice: () => github.takeNotice() ?? null,
     Publish: (description, isPublic) => github.publish(windowId, { description, isPublic }),

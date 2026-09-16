@@ -437,6 +437,9 @@ interface GitHub {
     SignOut()
     // True when the clipboard holds something token-shaped.
     HasClipboardToken() -> boolean
+    // The clipboard's text when all of it is a gist URL or ID, for the
+    // open-gist field; null otherwise. Main reads the clipboard.
+    ReadClipboardGist() -> string?
     OpenNewTokenPage()
     // A pending one-time notice, e.g. `decrypt-failed`.
     TakeNotice() -> string?

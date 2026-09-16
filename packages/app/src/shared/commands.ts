@@ -137,6 +137,8 @@ export const commands = {
   },
   'gist.open': {
     label: 'openGist',
+    // Open folder plus Shift. In the editor it shadows Monaco's "Go to symbol".
+    accelerator: 'CmdOrCtrl+Shift+O',
     enabled: hasWindow,
   },
   'gist.history': {

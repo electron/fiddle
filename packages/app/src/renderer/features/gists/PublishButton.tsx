@@ -20,6 +20,7 @@ import {
   useGistSettings,
   useGitHubLogin,
   useLoadedGist,
+  useOpenGistKbd,
   withSignIn,
 } from './state';
 
@@ -35,6 +36,7 @@ export function PublishButton() {
   const login = useGitHubLogin();
   const gist = useLoadedGist();
   const { isPublic, showHistory } = useGistSettings();
+  const openKbd = useOpenGistKbd();
 
   const loginRef = useRef(login);
   useEffect(() => {
@@ -76,6 +78,9 @@ export function PublishButton() {
       case 'history':
         showGistDialog({ kind: 'history' });
         break;
+      case 'open':
+        showGistDialog({ kind: 'open' });
+        break;
       case 'secret':
       case 'public':
         setGistVisibility(key === 'public');
@@ -107,6 +112,10 @@ export function PublishButton() {
                   {t('menuHistory')}
                 </MenuItem>
               )}
+              <MenuSeparator />
+              <MenuItem id="open" icon="link" kbd={openKbd}>
+                {t('openGist')}
+              </MenuItem>
               <MenuSeparator />
               <MenuSection
                 title={t('menuVisibility')}

@@ -1,14 +1,18 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { getGistId, gistUrl } from '../../../fiddle/gist-id';
-import { documentsApi } from '../../../ipc/renderer';
+import { documentsApi, githubApi } from '../../../ipc/renderer';
 import { FiddleError } from '../../../shared/errors';
 import { Button, Dialog, TextField } from '../../../ui';
 import styles from './gists.module.css';
 import { useLoadedGist } from './state';
 
-/** Loads a gist by URL or ID through Documents. Mount it only while it's open. */
+/**
+ * Loads a gist by URL or ID through Documents. Mount it only while it's open.
+ * A gist URL or ID on the clipboard fills the empty field, selected so that
+ * typing replaces it; main reads the clipboard (§4).
+ */
 export function OpenGistDialog({ onClose }: { onClose: () => void }) {
   const { t } = useTranslation('gists');
   const loaded = useLoadedGist();
@@ -16,6 +20,28 @@ export function OpenGistDialog({ onClose }: { onClose: () => void }) {
   const [touched, setTouched] = useState(false);
   const [error, setError] = useState<string>();
   const [busy, setBusy] = useState(false);
+  const [prefilled, setPrefilled] = useState(false);
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    let live = true;
+    githubApi.ReadClipboardGist().then(
+      (text) => {
+        // Only into a field nobody has typed in yet.
+        if (!live || !text || inputRef.current?.value) return;
+        setValue(text);
+        setPrefilled(true);
+      },
+      () => undefined,
+    );
+    return () => {
+      live = false;
+    };
+  }, []);
+  // Once the clipboard's text is in the field, select it, so typing replaces it.
+  useEffect(() => {
+    if (prefilled) inputRef.current?.select();
+  }, [prefilled]);
 
   const valid = getGistId(value) !== null;
   const invalidMessage = touched && !valid ? t('openInvalid') : undefined;
@@ -67,6 +93,7 @@ export function OpenGistDialog({ onClose }: { onClose: () => void }) {
           placeholder={t('openPlaceholder')}
           description={loaded ? t('openCurrent', { url: gistUrl(loaded.id) }) : undefined}
           autoFocus
+          inputRef={inputRef}
           value={value}
           onChange={(next) => {
             setValue(next);

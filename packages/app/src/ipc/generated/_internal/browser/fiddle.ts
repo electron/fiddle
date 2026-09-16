@@ -157,6 +157,7 @@ export const GitHub = /*#__PURE__*/ $eipc$.defineInterface<IGitHubImpl, IGitHubR
     ['SignInFromClipboard', [['allowPlaintext', $eipc$.boolean]], $eipc_validator$_GitHubSignInResult],
     ['SignOut', []],
     ['HasClipboardToken', [], $eipc$.boolean],
+    ['ReadClipboardGist', [], $eipc$.nullable($eipc$.string)],
     ['OpenNewTokenPage', []],
     ['TakeNotice', [], $eipc$.nullable($eipc$.string)],
     ['Publish', [['description', $eipc_validator$_GistDescription], ['isPublic', $eipc$.boolean]], $eipc_validator$_GistLinkInfo],

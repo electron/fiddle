@@ -312,6 +312,9 @@ export const GitHub: Partial<IGitHubRenderer> = {
   HasClipboardToken() {
     return ipcRenderer.invoke($$ipcPrefix$$ + 'GitHub_$_HasClipboardToken');
   },
+  ReadClipboardGist() {
+    return ipcRenderer.invoke($$ipcPrefix$$ + 'GitHub_$_ReadClipboardGist');
+  },
   OpenNewTokenPage() {
     return ipcRenderer.invoke($$ipcPrefix$$ + 'GitHub_$_OpenNewTokenPage');
   },

@@ -24,6 +24,11 @@
     "message": "Show history",
     "description": "Gist menu item that opens the gist's revision history."
   },
+  "openGist": {
+    "message": "Open gist…",
+    "description": "Title bar button (its accessible name and tooltip) and gist menu item that open the dialog to load a gist by URL or ID. Same wording as the File menu's Open gist command.",
+    "maxLength": 30
+  },
   "menuVisibility": {
     "message": "New gists are",
     "description": "Header above the Secret and Public choices in the gist menu. Applies to the next published gist."

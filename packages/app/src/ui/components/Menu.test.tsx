@@ -33,6 +33,12 @@ describe('Menu', () => {
     expect(onAction.mock.calls.map((call) => call[0])).toEqual(['run']);
   });
 
+  it('is named by its label; the shortcut only describes it', () => {
+    render(<FiddleMenu onAction={vi.fn()} />);
+    const run = screen.getByRole('menuitem', { name: 'Run', description: '⌘R' });
+    expect(run.textContent).toContain('⌘R');
+  });
+
   it('ignores disabled items', () => {
     const onAction = vi.fn();
     render(<FiddleMenu onAction={onAction} />);

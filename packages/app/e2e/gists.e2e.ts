@@ -29,8 +29,19 @@ describe('gists', () => {
   const openGist = async (value: string) => {
     await app().runCommand('gist.open');
     await app().query(role('dialog', 'Open a gist'));
-    await app().type(value, role('textbox', 'Gist URL or ID'));
+    // The field may offer a gist link from the clipboard, selected: typing over a selection replaces it.
+    await app().press('CmdOrCtrl+A', role('textbox', 'Gist URL or ID'));
+    await app().type(value);
   };
+  /** The open-gist field's value and selection. */
+  const openGistField = () =>
+    app().evaluate(
+      `(() => {
+        const input = [...document.querySelectorAll('input')].find((i) => i.labels?.[0]?.textContent?.includes('Gist URL or ID'));
+        return input ? [input.value, input.selectionStart, input.selectionEnd] : null;
+      })()`,
+      0,
+    );
   const gistMenu = async (item: string) => {
     await app().click(role('button', 'Publish'));
     await app().click(role('menuitem', item));
@@ -131,6 +142,27 @@ describe('gists', () => {
     const { gistId } = (await fiddle()).source;
     await gistMenu('Copy share link');
     await expect.poll(() => app().clipboard()).toMatch(new RegExp(`^https://\\S+${gistId}`));
+  });
+
+  it('opens the gist dialog with its shortcut, from the gist menu and from the title bar, offering a gist link on the clipboard @feature keys.open-gist load.gist-open-button load.gist-open-clipboard', async () => {
+    const closeDialog = async () => {
+      await app().click(role('button', 'Cancel'));
+      await app().waitForAbsent(role('dialog', 'Open a gist'));
+    };
+    await app().press('CmdOrCtrl+Shift+O');
+    await app().query(role('dialog', 'Open a gist'));
+    await closeDialog();
+    await gistMenu('Open gist…');
+    await app().query(role('dialog', 'Open a gist'));
+    await closeDialog();
+
+    // The share link copied above is a gist URL, so the field offers it, selected.
+    const link = await app().clipboard();
+    expect(link).toContain((await fiddle()).source.gistId);
+    await app().click(role('button', 'Open gist…'));
+    await app().query(role('dialog', 'Open a gist'));
+    await expect.poll(openGistField).toEqual([link, 0, link.length]);
+    await closeDialog();
   });
 
   it('updates the gist with the changed files @feature gist.update', async () => {

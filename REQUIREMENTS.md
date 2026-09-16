@@ -686,6 +686,8 @@ A desktop app for writing, running, sharing and packaging small Electron experim
 - **Load a gist by URL or ID:**
   - Accepts `gist.github.com/[user/]<id>` or a bare ID. The first 32-hex substring is used. {#load.gist-id-parse}
   - Shows the URL of the gist currently loaded. {#load.gist-url-shown}
+  - Opened from the File menu (CmdOrCtrl+Shift+O), an icon button in the title bar left of Publish, or the gist menu. {#load.gist-open-button}
+  - Fills the field, selected, from the clipboard if the clipboard holds nothing but a gist URL or ID. Main reads the clipboard. {#load.gist-open-clipboard}
 - **Electron docs examples:**
   - Take a path and a tag, e.g. `docs/fiddles/...` at `v30.0.0`. {#load.docs-example}
   - Files are fetched from `electron/electron` at that tag and laid over the starter template. {#load.docs-example-files}
@@ -894,6 +896,7 @@ Settings are saved locally and sync live across windows. {#settings.persist-sync
 | New Test | CmdOrCtrl+T {#keys.new-test} |
 | New Window | CmdOrCtrl+Shift+N {#keys.new-window} |
 | Open | CmdOrCtrl+O {#keys.open} |
+| Open gist | CmdOrCtrl+Shift+O {#keys.open-gist} |
 | Save | CmdOrCtrl+S {#keys.save} |
 | Save As | CmdOrCtrl+Shift+S {#keys.save-as} |
 | Preferences | CmdOrCtrl+, {#keys.preferences} |

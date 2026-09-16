@@ -6,6 +6,7 @@ export default {
   "menuPublishNew": "[Þûƀļîšĥ áš ñéŵ ĝîšţ one two]",
   "menuCopyLink": "[Çöþý šĥáŕé ļîñķ one two]",
   "menuHistory": "[Šĥöŵ ĥîšţöŕý one two]",
+  "openGist": "[Öþéñ ĝîšţ… one]",
   "menuVisibility": "[Ñéŵ ĝîšţš áŕé one two]",
   "menuDelete": "[Ðéļéţé ĝîšţ one two]",
   "visibilitySecret": "[Šéçŕéţ one]",

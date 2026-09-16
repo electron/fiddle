@@ -243,6 +243,7 @@ export interface IGitHubImpl {
   SignInFromClipboard(allowPlaintext: boolean): Promise<GitHubSignInResult> | GitHubSignInResult;
   SignOut(): Promise<void> | void;
   HasClipboardToken(): Promise<boolean> | boolean;
+  ReadClipboardGist(): Promise<string | null> | string | null;
   OpenNewTokenPage(): Promise<void> | void;
   TakeNotice(): Promise<string | null> | string | null;
   Publish(description: GistDescription, isPublic: boolean): Promise<GistLinkInfo> | GistLinkInfo;
@@ -257,6 +258,7 @@ export interface IGitHubRenderer {
   SignInFromClipboard(allowPlaintext: boolean): Promise<GitHubSignInResult>;
   SignOut(): Promise<void>;
   HasClipboardToken(): Promise<boolean>;
+  ReadClipboardGist(): Promise<string | null>;
   OpenNewTokenPage(): Promise<void>;
   TakeNotice(): Promise<string | null>;
   Publish(description: GistDescription, isPublic: boolean): Promise<GistLinkInfo>;

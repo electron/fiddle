@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { getGistId, gistUrl, isGistId, isRevisionSha } from './gist-id';
+import { asGistReference, getGistId, gistUrl, isGistId, isRevisionSha } from './gist-id';
 
 const ID = '8c5fc0c6a5153d49b5a4a56d3ed9da8f';
 
@@ -22,6 +22,30 @@ describe('getGistId', () => {
     expect(getGistId(ID.slice(1))).toBeNull();
     expect(getGistId('')).toBeNull();
   });
+});
+
+// @feature load.gist-open-clipboard
+describe('asGistReference', () => {
+  it.each([
+    ID,
+    `  ${ID}\n`,
+    `https://gist.github.com/${ID}`,
+    `https://gist.github.com/ckerr/${ID}/0123456789abcdef0123456789abcdef01234567`,
+    `HTTPS://Gist.GitHub.com/ckerr/${ID}#file-main-js`,
+    `gist.github.com/ckerr/${ID}`,
+  ])('accepts %s whole', (input) => expect(asGistReference(input)).toBe(input.trim()));
+
+  it.each([
+    '',
+    'not a gist',
+    `see ${ID}`,
+    `https://gist.github.com/${ID} and more`,
+    `https://github.com/electron/fiddle/commit/${ID}deadbeef`,
+    `https://example.com/${ID}`,
+    `https://gist.github.com/?q=${ID}`,
+    'https://gist.github.com/ckerr',
+    'a'.repeat(40),
+  ])('refuses %s', (input) => expect(asGistReference(input)).toBeNull());
 });
 
 describe('checks', () => {

@@ -6,6 +6,7 @@ export default {
   "menuPublishNew": "Als neuen Gist veröffentlichen",
   "menuCopyLink": "Freigabelink kopieren",
   "menuHistory": "Verlauf anzeigen",
+  "openGist": "Gist öffnen …",
   "menuVisibility": "Neue Gists sind",
   "menuDelete": "Gist löschen",
   "visibilitySecret": "Geheim",

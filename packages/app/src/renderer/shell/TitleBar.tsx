@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { windowApi } from '../../ipc/renderer';
 import type { Platform } from '../../shared/stores';
 import { ToolbarButton, ToolbarCapsule, Tooltip } from '../../ui';
+import { OpenGistButton } from '../features/gists/OpenGistButton';
 import { PublishButton } from '../features/gists/PublishButton';
 import { RunButton } from '../features/run/RunButton';
 import { VersionPicker } from '../features/versions/VersionPicker';
@@ -59,6 +60,7 @@ export function TitleBar({
         <RunButton />
       </ToolbarCapsule>
       <div className={styles.end}>
+        <OpenGistButton />
         <PublishButton />
         <Tooltip label={t('settings')}>
           <ToolbarButton icon="settings" label={t('settings')} isPressed={settingsOpen} onPress={onToggleSettings} />

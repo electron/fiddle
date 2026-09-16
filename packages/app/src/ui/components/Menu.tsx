@@ -8,6 +8,7 @@ import {
   MenuTrigger as AriaMenuTrigger,
   Popover as AriaPopover,
   Separator,
+  Text,
   type MenuItemProps as AriaMenuItemProps,
   type MenuProps as AriaMenuProps,
   type MenuSectionProps as AriaMenuSectionProps,
@@ -67,8 +68,15 @@ export function MenuItem({ children, icon, hint, kbd, isDanger, className, textV
           <span className={styles.lead}>
             {isSelected ? <Icon name="check" /> : icon ? <Icon name={icon} /> : null}
           </span>
-          <span className={styles.label}>{children}</span>
-          {hint && <span className={styles.hint}>{hint}</span>}
+          {/* The label slot names the item, so a hint or shortcut only describes it. */}
+          <Text slot="label" className={styles.label}>
+            {children}
+          </Text>
+          {hint && (
+            <Text slot="description" className={styles.hint}>
+              {hint}
+            </Text>
+          )}
           {kbd && <Keyboard className={styles.kbd}>{kbd}</Keyboard>}
         </>
       )}

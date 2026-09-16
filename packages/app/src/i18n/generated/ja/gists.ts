@@ -6,6 +6,7 @@ export default {
   "menuPublishNew": "新しい Gist として公開",
   "menuCopyLink": "共有リンクをコピー",
   "menuHistory": "履歴を表示",
+  "openGist": "Gist を開く…",
   "menuVisibility": "新しい Gist の公開範囲",
   "menuDelete": "Gist を削除",
   "visibilitySecret": "シークレット",
