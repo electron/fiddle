@@ -116,6 +116,25 @@
   }
 }
 
+/* Native materials (macOS vibrancy, Windows acrylic) already blur and tint the
+   desktop, so Lucent's chrome tint is thinner over them than the design's 0.62,
+   which assumed a CSS blur over the raw desktop. Reduce transparency, Increase
+   contrast and high contrast keep their own values: this only applies with no
+   such preference, and `:where()` keeps it below the high-contrast rules. */
+@media (prefers-reduced-transparency: no-preference) and (prefers-contrast: no-preference) {
+  :root:where([data-material="vibrancy"], [data-material="acrylic"]) {
+    --lu-material-chrome: rgba(250,250,253,0.36);
+  }
+  :root[data-theme="dark"]:where([data-material="vibrancy"], [data-material="acrylic"]) {
+    --lu-material-chrome: rgba(22,24,36,0.42);
+  }
+}
+@media (prefers-reduced-transparency: no-preference) and (prefers-contrast: no-preference) and (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]):where([data-material="vibrancy"], [data-material="acrylic"]) {
+    --lu-material-chrome: rgba(22,24,36,0.42);
+  }
+}
+
 /* Increase contrast: hairlines at 1px in line-strong, chrome tint raised to 0.9. */
 @media (prefers-contrast: more) {
   :root {

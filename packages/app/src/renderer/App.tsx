@@ -52,7 +52,9 @@ export function App() {
 
   // Lucent: without an OS material, the tokens swap to their opaque fallbacks.
   useLayoutEffect(() => {
-    if (material) document.documentElement.classList.toggle('lu-no-material', material === 'none');
+    if (!material) return;
+    document.documentElement.classList.toggle('lu-no-material', material === 'none');
+    document.documentElement.dataset.material = material;
   }, [material]);
 
   // The language switches live when the setting changes; `<html lang dir>` follows it.

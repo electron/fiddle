@@ -47,6 +47,15 @@ export function detectMaterial(platform: Platform): Material {
   return 'none';
 }
 
+type Vibrancy = NonNullable<Electron.BrowserWindowConstructorOptions['vibrancy']>;
+const VIBRANCIES: readonly Vibrancy[] = ['appearance-based', 'titlebar', 'selection', 'menu', 'popover', 'sidebar', 'header', 'sheet', 'window', 'hud', 'fullscreen-ui', 'tooltip', 'content', 'under-window', 'under-page'];
+
+/** `FIDDLE_VIBRANCY=fullscreen-ui yarn start`: try another macOS material in an unpackaged app. */
+function devVibrancy(): Vibrancy | undefined {
+  const value = process.env.FIDDLE_VIBRANCY as Vibrancy | undefined;
+  return !app.isPackaged && value && VIBRANCIES.includes(value) ? value : undefined;
+}
+
 interface RendererEntry {
   /** What windows load. */
   url: string;
@@ -98,7 +107,8 @@ function windowOptions(
       titleBarStyle: 'hiddenInset',
       // Traffic lights centred in the 56px title bar.
       trafficLightPosition: { x: 20, y: 22 },
-      vibrancy: 'under-window',
+      // The handover says 'under-window'; 'sidebar' is more translucent and reads closer to the design (owner's call, 2026-09-16).
+      vibrancy: devVibrancy() ?? 'sidebar',
       visualEffectState: 'followWindow',
     };
   }

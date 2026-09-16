@@ -25,6 +25,7 @@ async function start(): Promise<void> {
   root.dataset.platform = app.platform;
   // Lucent: without an OS material, the tokens swap to their opaque fallbacks.
   root.classList.toggle('lu-no-material', app.material === 'none');
+  root.dataset.material = app.material;
 
   // Monaco reads its strings (§9) while its modules load, and App imports it: the locale's bundle goes first.
   const [i18n, { App }] = await Promise.all([
