@@ -72,12 +72,50 @@ function ShellView({ state, platform }: { state: WindowState; platform: 'darwin'
     if (reveal.file !== fiddle.activeFile && reveal.file !== layout.split) openFile(reveal.file);
   });
 
+  // The tab row shows the visible files; its current file is the main pane's.
+  const visibleNames = fiddle.files.filter((file) => file.visible).map((file) => file.name);
+  const current =
+    fiddle.activeFile && visibleNames.includes(fiddle.activeFile) ? fiddle.activeFile : (visibleNames[0] ?? null);
+  const split = layout.split && names.includes(layout.split) ? layout.split : null;
+
   const toggleSplit = () => {
     if (layout.split) changeLayout({ split: null });
     else {
-      const target = splitTarget(fiddle.activeFile, names);
-      if (target) changeLayout({ split: target });
+      const target = splitTarget(current, names);
+      if (!target) return;
+      changeLayout({ split: target });
+      if (!visibleNames.includes(target)) void setFileVisible(target, true, failTitle);
     }
+  };
+
+  // Selecting the split pane's file swaps the panes, so no file shows twice.
+  const selectFile = (name: string) => {
+    if (name === split && current) changeLayout({ split: current });
+    openFile(name);
+  };
+
+  const openBeside = (name: string) => {
+    if (name === split) return;
+    if (name !== current) {
+      changeLayout({ split: name });
+      return;
+    }
+    const left = split ?? splitTarget(name, visibleNames);
+    if (!left) return;
+    changeLayout({ split: name });
+    openFile(left);
+  };
+
+  // Closing a tab hides its file. The main pane moves to the split file, or the next tab.
+  const closeFile = (name: string) => {
+    if (name === split) changeLayout({ split: null });
+    else if (name === current) {
+      const index = visibleNames.indexOf(name);
+      const next = split ?? visibleNames[index + 1] ?? visibleNames[index - 1];
+      if (split) changeLayout({ split: null });
+      if (next) openFile(next);
+    }
+    void setFileVisible(name, false, failTitle);
   };
 
   // Commands whose handlers act on view state and Monaco (Window.Command).
@@ -126,8 +164,10 @@ function ShellView({ state, platform }: { state: WindowState; platform: 'darwin'
                 files={fiddle.files}
                 dirtyFiles={fiddle.dirtyFiles}
                 activeFile={fiddle.activeFile}
-                onOpen={openFile}
-                onSetVisible={(name, visible) => void setFileVisible(name, visible, failTitle)}
+                onOpen={selectFile}
+                onSetVisible={(name, visible) =>
+                  visible ? void setFileVisible(name, true, failTitle) : closeFile(name)
+                }
               />
             </ErrorBoundary>
           </div>
@@ -146,7 +186,12 @@ function ShellView({ state, platform }: { state: WindowState; platform: 'darwin'
           <Sheet
           state={state}
           platform={platform}
-          onSelectFile={openFile}
+          onSelectFile={selectFile}
+          onCloseFile={closeFile}
+          onOpenHere={(name) => {
+            if (name !== current) selectFile(name);
+          }}
+          onOpenBeside={openBeside}
           onToggleSplit={toggleSplit}
           onCloseLeft={() => {
             const right = layout.split;

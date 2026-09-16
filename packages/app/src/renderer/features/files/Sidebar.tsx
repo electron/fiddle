@@ -1,7 +1,8 @@
 /**
- * The sidebar's file list, grouped by process (Main process, Preload,
- * Renderer), then the Packages slot. File operations (add, rename, delete,
- * show and hide) go through the Documents methods; main validates them too.
+ * The sidebar's file list: every file in the fiddle, open in a tab or not,
+ * grouped by process (Main process, Preload, Renderer), then the Packages
+ * slot. Clicking a file opens its tab. File operations (add, rename, delete,
+ * open and close) go through the Documents methods; main validates them too.
  * Each row's pill counts the file's errors, or its warnings when it has none.
  */
 import { useRef, useState, type MouseEvent } from 'react';
@@ -180,7 +181,6 @@ export function Sidebar({ files, dirtyFiles, activeFile, onOpen, onSetVisible }:
                     id={file.name}
                     label={file.name}
                     labelDir="ltr"
-                    icon={file.visible ? 'file' : 'eye-off'}
                     pill={badgeLabel(badge)}
                     pillTone={badge?.tone}
                     unsaved={dirtyFiles.includes(file.name)}
@@ -222,9 +222,9 @@ export function Sidebar({ files, dirtyFiles, activeFile, onOpen, onSetVisible }:
           }}
           disabledKeys={menu && isMainEntry(menu.name) ? ['delete'] : []}
         >
-          {/* One ID for hide and show: React Aria throws if an item's ID changes while it's mounted. */}
-          <MenuItem id="visibility" icon={menuFileVisible ? 'eye-off' : 'eye'}>
-            {menuFileVisible ? t('hideFile') : t('showFile')}
+          {/* One ID for close and open: React Aria throws if an item's ID changes while it's mounted. */}
+          <MenuItem id="visibility" icon={menuFileVisible ? 'close' : 'file'}>
+            {menuFileVisible ? t('closeTab') : t('openTab')}
           </MenuItem>
           <MenuItem id="rename">{t('rename')}</MenuItem>
           <MenuItem id="add" icon="plus">

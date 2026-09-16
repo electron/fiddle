@@ -1,5 +1,5 @@
 // The file list: add files, the validation errors for names the fiddle can't
-// take, and the row's context menu (rename, hide, show and delete).
+// take, and the row's context menu (rename, close tab, open and delete).
 import { describe, expect, it } from 'vitest';
 
 import { role, useApp, windowState } from './harness.ts';
@@ -50,7 +50,7 @@ describe('files', () => {
     expect(await files()).toEqual(before);
   });
 
-  it('renames, hides, shows and deletes a file from its context menu @feature files.operations', async () => {
+  it('renames, closes, opens and deletes a file from its context menu @feature files.operations', async () => {
     const fromMenu = async (file: string, item: string) => {
       await app().press('Shift+F10', role('row', file));
       await app().click(role('menuitem', item));
@@ -70,7 +70,7 @@ describe('files', () => {
     await expect.poll(names).toContain('renamed.js');
     expect(await names()).not.toContain('extra.js');
 
-    await fromMenu('renamed.js', 'Hide');
+    await fromMenu('renamed.js', 'Close tab');
     await expect.poll(files).toContainEqual({ name: 'renamed.js', visible: false });
     // Clicking the row would open the file, which shows it again (§17.3), so
     // reopen the menu from the keyboard on the row, once the closed menu has
@@ -78,7 +78,7 @@ describe('files', () => {
     await app().waitForAbsent(role('menu', 'File actions'));
     await app().waitForIdle();
     await app().press('Shift+F10');
-    await app().click(role('menuitem', 'Show'));
+    await app().click(role('menuitem', 'Open'));
     await expect.poll(files).toContainEqual({ name: 'renamed.js', visible: true });
 
     await fromMenu('renamed.js', 'Delete…');

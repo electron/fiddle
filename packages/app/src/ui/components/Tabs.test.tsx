@@ -52,6 +52,53 @@ describe('Tabs', () => {
     expect(tab).toBeTruthy();
   });
 
+  it('closes a closable tab from its glyph, middle-click and Delete, without selecting it', () => {
+    const onChange = vi.fn();
+    const onClose = vi.fn();
+    render(
+      <Tabs defaultValue="main" onChange={onChange}>
+        <TabList aria-label="Open files">
+          <Tab id="main">main.js</Tab>
+          <Tab id="css" onClose={onClose}>
+            styles.css
+          </Tab>
+        </TabList>
+      </Tabs>,
+    );
+    const tab = screen.getByRole('tab', { name: 'styles.css' });
+    const glyph = tab.querySelector('[data-tab-close]')!;
+    fireEvent.pointerDown(glyph, { pointerType: 'mouse', button: 0 });
+    fireEvent.click(glyph);
+    expect(onClose).toHaveBeenCalledTimes(1);
+    expect(onChange).not.toHaveBeenCalledWith('css');
+
+    fireEvent(tab, new MouseEvent('auxclick', { bubbles: true, button: 1 }));
+    expect(onClose).toHaveBeenCalledTimes(2);
+
+    fireEvent.keyDown(tab, { key: 'Delete' });
+    expect(onClose).toHaveBeenCalledTimes(3);
+    expect(screen.getByRole('tab', { name: 'main.js' }).querySelector('[data-tab-close]')).toBeNull();
+  });
+
+  it('carries its drag data', () => {
+    render(
+      <Tabs defaultValue="main">
+        <TabList aria-label="Open files">
+          <Tab id="main" drag={{ type: 'application/x-test', data: 'main.js' }}>
+            main.js
+          </Tab>
+        </TabList>
+      </Tabs>,
+    );
+    const tab = screen.getByRole('tab', { name: 'main.js' });
+    expect(tab.draggable).toBe(true);
+    const setData = vi.fn();
+    const event = new Event('dragstart', { bubbles: true });
+    Object.defineProperty(event, 'dataTransfer', { value: { setData, effectAllowed: 'all' } });
+    fireEvent(tab, event);
+    expect(setData).toHaveBeenCalledWith('application/x-test', 'main.js');
+  });
+
   it('does not select a disabled tab', () => {
     const onChange = vi.fn();
     render(<Example onChange={onChange} />);

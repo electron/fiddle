@@ -42,9 +42,47 @@
 }
 
 .panes {
+  position: relative;
   flex: 1;
   display: flex;
   min-height: 0;
+}
+
+/* While a tab is dragged, the editor area splits into two drop targets:
+   the first half opens the file in the main pane, the second beside it. */
+.dropZones {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  display: flex;
+}
+
+.dropZone {
+  flex: 1 1 0;
+  display: grid;
+  place-items: center;
+  margin: var(--lu-space-2);
+  border-radius: var(--lu-radius-control);
+  corner-shape: squircle;
+  transition:
+    background-color var(--lu-dur-fast) var(--lu-ease),
+    box-shadow var(--lu-dur-fast) var(--lu-ease);
+}
+
+.dropZone[data-over] {
+  background: color-mix(in srgb, var(--lu-accent-soft) 70%, transparent);
+  box-shadow: inset 0 0 0 2px var(--lu-accent);
+}
+
+.dropLabel {
+  color: var(--lu-accent);
+  font: var(--lu-type-label);
+  opacity: 0;
+  pointer-events: none;
+}
+
+.dropZone[data-over] .dropLabel {
+  opacity: 1;
 }
 
 .pane {

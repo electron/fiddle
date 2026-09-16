@@ -91,6 +91,38 @@
   background: var(--lu-ink-faint);
 }
 
+/* A closable tab ends in a 16px close glyph, shown on the selected, hovered
+   or focused tab. It keeps its space, so tabs don't shift on hover. */
+.tab[data-closable] {
+  padding-inline-end: 6px;
+}
+
+.close {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 16px;
+  height: 16px;
+  border-radius: var(--lu-radius-round);
+  color: var(--lu-ink-faint);
+  opacity: 0;
+  transition:
+    opacity var(--lu-dur-fast) var(--lu-ease),
+    background-color var(--lu-dur-fast) var(--lu-ease),
+    color var(--lu-dur-fast) var(--lu-ease);
+}
+
+.tab[data-selected] .close,
+.tab[data-hovered] .close,
+.tab[data-focus-visible] .close {
+  opacity: 1;
+}
+
+.close:hover {
+  background: var(--lu-hover);
+  color: var(--lu-ink);
+}
+
 .panel {
   outline: none;
   min-height: 0;

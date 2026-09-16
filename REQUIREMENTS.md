@@ -630,6 +630,7 @@ A desktop app for writing, running, sharing and packaging small Electron experim
 
 - One code editor (Monaco) per visible file. {#editor.per-file}
 - Panes can be rearranged, resized, maximized and hidden. Hiding a pane keeps its content. The layout can be reset. {#editor.panes}
+- Each open file has a tab. Closing a tab hides its file, which stays in the file list. Dragging a tab onto the editor opens it in the main pane or in a second pane beside it. {#editor.tabs}
 - Each pane shows an error or warning indicator taken from the editor's diagnostics. {#editor.diagnostics}
 - Editor defaults: soft wrap on, minimap off, 2-space tabs. {#editor.defaults}
   - Soft wrap and minimap can be toggled per window. The toggles aren't saved. {#editor.wrap-minimap-toggle}

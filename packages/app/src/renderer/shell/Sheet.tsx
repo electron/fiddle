@@ -1,8 +1,10 @@
 /**
  * The sheet: the tab row, one Monaco pane (or two when split), the console
- * and, when `Window.view` is `settings`, the settings page instead.
+ * and, when `Window.view` is `settings`, the settings page instead. Tabs are
+ * the visible files: closing one hides its file, and dragging one onto the
+ * editor area opens it in the main pane or beside it.
  */
-import { useLayoutEffect, useState } from 'react';
+import { useLayoutEffect, useState, type DragEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import type { Platform, WindowState } from '../../shared/stores';
@@ -13,6 +15,7 @@ import { ConsolePane } from '../features/run/ConsolePane';
 import { SettingsPage } from '../features/settings/SettingsPage';
 import { processOf, type FileProcess } from './processes';
 import styles from './Sheet.module.css';
+import { isTabDrag, TAB_DRAG_TYPE, useTabDrag } from './tab-drag';
 import { useDraft } from './use-draft';
 
 const CONSOLE_MIN = 96;
@@ -59,6 +62,12 @@ export interface SheetProps {
   state: WindowState;
   platform: Platform;
   onSelectFile: (name: string) => void;
+  /** A tab was closed. */
+  onCloseFile: (name: string) => void;
+  /** A tab was dropped on the main pane's half of the editor area. */
+  onOpenHere: (name: string) => void;
+  /** A tab was dropped on the other half. */
+  onOpenBeside: (name: string) => void;
   onToggleSplit: () => void;
   onCloseLeft: () => void;
   onCloseRight: () => void;
@@ -101,6 +110,9 @@ function EditorArea({
   state,
   platform,
   onSelectFile,
+  onCloseFile,
+  onOpenHere,
+  onOpenBeside,
   onToggleSplit,
   onCloseLeft,
   onCloseRight,
@@ -123,6 +135,7 @@ function EditorArea({
       : (visible[0]?.name ?? null);
   const split = layout.split && names.includes(layout.split) ? layout.split : null;
   const splitKbd = platform === 'darwin' ? '⌘\\' : 'Ctrl+\\';
+  const tabDrag = useTabDrag();
 
   // The console: 96px to half the sheet; dragged below half the minimum, it closes.
   const consoleMax = Math.max(CONSOLE_MIN, Math.floor(sheetHeight / 2));
@@ -191,6 +204,9 @@ function EditorArea({
                   <Tab
                     key={file.name}
                     id={file.name}
+                    icon={file.name === split ? 'columns' : undefined}
+                    onClose={() => onCloseFile(file.name)}
+                    drag={{ type: TAB_DRAG_TYPE, data: file.name }}
                     errorCount={fileBadge?.count}
                     errorTone={fileBadge?.tone}
                     errorLabel={badgeLabel(fileBadge)}
@@ -251,9 +267,45 @@ function EditorArea({
         ) : (
           <EditorPane file={active} primary />
         )}
+        {tabDrag && (
+          <div className={styles.dropZones}>
+            <TabDropZone label={t('dropOpenHere')} onDrop={onOpenHere} />
+            <TabDropZone label={t('dropOpenBeside')} onDrop={onOpenBeside} />
+          </div>
+        )}
       </div>
       {consoleArea}
     </>
+  );
+}
+
+/** Half of the editor area that takes a dragged tab. */
+function TabDropZone({ label, onDrop }: { label: string; onDrop: (name: string) => void }) {
+  const [over, setOver] = useState(false);
+  const accept = (event: DragEvent) => {
+    if (!isTabDrag(event.dataTransfer)) return;
+    event.preventDefault();
+    event.dataTransfer.dropEffect = 'move';
+    setOver(true);
+  };
+  return (
+    <div
+      className={styles.dropZone}
+      data-drop-zone=""
+      data-over={over || undefined}
+      onDragEnter={accept}
+      onDragOver={accept}
+      onDragLeave={() => setOver(false)}
+      onDrop={(event) => {
+        setOver(false);
+        const name = event.dataTransfer.getData(TAB_DRAG_TYPE);
+        if (!name) return;
+        event.preventDefault();
+        onDrop(name);
+      }}
+    >
+      <span className={styles.dropLabel}>{label}</span>
+    </div>
   );
 }
 

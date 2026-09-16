@@ -11,6 +11,7 @@
 import { useEffect, useState } from 'react';
 
 import { documentsApi } from '../../../ipc/renderer';
+import { isTabDrag } from '../../shell/tab-drag';
 
 const LINK_RE = /^(electron-fiddle:|https:\/\/gist\.github\.com\/)/i;
 
@@ -37,11 +38,14 @@ export function useDocumentDrop(): boolean {
 
   useEffect(() => {
     let depth = 0;
-    const onEnter = () => {
+    // Editor tabs dragged within the window are the sheet's business.
+    const onEnter = (event: DragEvent) => {
+      if (isTabDrag(event.dataTransfer)) return;
       depth += 1;
       setDragging(true);
     };
-    const onLeave = () => {
+    const onLeave = (event: DragEvent) => {
+      if (isTabDrag(event.dataTransfer)) return;
       depth = Math.max(0, depth - 1);
       if (depth === 0) setDragging(false);
     };

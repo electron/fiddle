@@ -33,6 +33,56 @@ describe('workspace', () => {
     expect(await app().query(role('code'))).toHaveLength(1);
   });
 
+  it('closes tabs and opens a dragged tab beside the editor @feature editor.tabs', async () => {
+    const visible = async () =>
+      (await windowState(app())).fiddle.files.filter((file) => file.visible).map((file) => file.name);
+    const active = async () => (await windowState(app())).fiddle.activeFile;
+    const tabNamed = (name: string) => `[...document.querySelectorAll('[role="tab"]')].find((tab) => tab.textContent.startsWith(${JSON.stringify(name)}))`;
+    // Drags a tab onto the first ("here") or second ("beside") half of the editor.
+    const dragTab = (name: string, zone: 'here' | 'beside') =>
+      app().evaluate(`(async () => {
+        const tab = ${tabNamed(name)};
+        const data = new DataTransfer();
+        tab.dispatchEvent(new DragEvent('dragstart', { bubbles: true, dataTransfer: data }));
+        let zones = [];
+        for (let i = 0; i < 100 && zones.length === 0; i++) {
+          await new Promise((resolve) => setTimeout(resolve, 20));
+          zones = document.querySelectorAll('[data-drop-zone]');
+        }
+        const target = zones[${zone === 'here' ? 0 : 1}];
+        for (const type of ['dragenter', 'dragover', 'drop'])
+          target.dispatchEvent(new DragEvent(type, { bubbles: true, cancelable: true, dataTransfer: data }));
+        tab.dispatchEvent(new DragEvent('dragend', { bubbles: true, dataTransfer: data }));
+      })()`);
+
+    // Delete closes the focused tab. The file stays in the sidebar, and clicking it there reopens the tab.
+    await app().click(role('tab', /^main\.js\b/));
+    await app().press('Delete', role('tab', /^main\.js\b/));
+    await expect.poll(visible).not.toContain('main.js');
+    await app().waitForAbsent(role('tab', /^main\.js\b/));
+    await app().click(role('row', 'main.js'));
+    await app().query(role('tab', /^main\.js\b/));
+    await expect.poll(active).toBe('main.js');
+
+    // Dropping a tab on the second half splits the editor.
+    await dragTab('renderer.js', 'beside');
+    await expect.poll(async () => (await layout()).split).toBe('renderer.js');
+    expect(await app().query(role('code'))).toHaveLength(2);
+    // Dropping the split file on the first half swaps the panes.
+    await dragTab('renderer.js', 'here');
+    await expect.poll(async () => (await layout()).split).toBe('main.js');
+    await expect.poll(active).toBe('renderer.js');
+
+    // The close glyph on the split file's tab closes it and the split.
+    await app().evaluate(`${tabNamed('main.js')}.querySelector('[data-tab-close]').click()`);
+    await expect.poll(async () => (await layout()).split).toBe(null);
+    await expect.poll(visible).not.toContain('main.js');
+    expect(await active()).toBe('renderer.js');
+    await app().click(role('row', 'main.js'));
+    await expect.poll(visible).toContain('main.js');
+    await app().query(role('tab', /^main\.js\b/));
+  });
+
   it('hides and shows the sidebar and the console @feature workspace.panels console.visibility', async () => {
     await app().query(role('separator', 'Resize sidebar'));
     await app().query(role('separator', 'Resize console'));

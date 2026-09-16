@@ -159,14 +159,14 @@
     "description": "Button that removes the file.",
     "maxLength": 20
   },
-  "hideFile": {
-    "message": "Hide",
-    "description": "File menu item that hides a file's editor. The file keeps its content.",
+  "closeTab": {
+    "message": "Close tab",
+    "description": "File menu item that closes the file's editor tab. The file stays in the fiddle and in the file list.",
     "maxLength": 24
   },
-  "showFile": {
-    "message": "Show",
-    "description": "File menu item that shows a hidden file's editor.",
+  "openTab": {
+    "message": "Open",
+    "description": "File menu item that opens the file in an editor tab.",
     "maxLength": 24
   },
   "fileActions": {
@@ -224,13 +224,23 @@
     "maxLength": 40
   },
   "emptyText": {
-    "message": "Every file is hidden. Reset the layout to bring the editors back.",
-    "description": "Text shown in the sheet when every editor pane is closed."
+    "message": "Every tab is closed. Open a file from the sidebar, or reset the layout to bring the tabs back.",
+    "description": "Text shown in the sheet when every editor tab is closed."
   },
   "resetLayout": {
     "message": "Reset layout",
-    "description": "Button that restores the default editor layout and shows every file.",
+    "description": "Button that restores the default editor layout and opens every file in a tab.",
     "maxLength": 24
+  },
+  "dropOpenHere": {
+    "message": "Open here",
+    "description": "Shown on the first half of the editor while an editor tab is dragged over it: dropping the tab there shows its file in the main editor pane.",
+    "maxLength": 30
+  },
+  "dropOpenBeside": {
+    "message": "Open to the side",
+    "description": "Shown on the second half of the editor while an editor tab is dragged over it: dropping the tab there opens its file in a second pane beside the main one.",
+    "maxLength": 30
   },
   "lensHint": {
     "message": "Thrown in the {{process}} at {{file}}:{{line}}:{{column}}.",
