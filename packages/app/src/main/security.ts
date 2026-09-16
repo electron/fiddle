@@ -59,6 +59,10 @@ export function hardenAllWebContents(): void {
 /** App windows never navigate: content is loaded once, then only reloaded. */
 export function blockNavigation(contents: WebContents): void {
   contents.on('will-navigate', (event) => {
+    // `location.reload()` fires this too, with the URL that's already loaded:
+    // Vite's full reload after it optimizes dependencies on a cold cache
+    // (`yarn start`), and the error boundary's fallback. That's a reload.
+    if (event.url === contents.getURL()) return;
     event.preventDefault();
     void openExternalLink(
       event.url,
