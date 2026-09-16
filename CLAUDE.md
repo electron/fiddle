@@ -44,8 +44,9 @@ Run from the repo root.
 The full guide, with a template spec, is in `packages/app/e2e/README.md`.
 
 - **Run.** `yarn test:e2e` builds the test build once (`packages/app/out/test-build`, Vite mode `test`), then runs every `packages/app/e2e/*.e2e.ts` in parallel forks.
-  - Each spec file gets its own app, temp dir, fixture server and Xvfb display. openbox runs on the display when installed.
-  - Run it outside the Bash sandbox.
+  - Each spec file gets its own app, temp dir and fixture server. On Linux each also gets its own Xvfb display, with openbox when installed. macOS needs no Xvfb: the app runs in the background there (no Dock icon, never the active app, windows one level below normal ones, window focus emulated), so runs don't disturb the desktop. `FIDDLE_E2E_FOREGROUND=1` shows the windows in front.
+  - Files run in parallel: one per core but one on Linux, at most 4 on macOS and Windows. `FIDDLE_E2E_WORKERS=<n>` overrides that.
+  - Run it outside the Bash sandbox (on macOS, in the Terminal panel: Electron can't start in the sandbox).
   - `yarn test:e2e smoke` runs one file. `FIDDLE_E2E_SKIP_BUILD=1` reuses the last build, and `FIDDLE_E2E_VERBOSE=1` echoes the app's output.
 - **Explore.** Start with `yarn driver launch`, then run `snapshot`, `click button Settings`, `type`, `press Enter`, `screenshot`, `logs` or `eval-hook`, and finish with `yarn driver quit`. Every command prints JSON, and the app stays up between commands. The full list is in the header of `packages/app/tools/driver.ts`.
 - **Write a spec.** `const app = useApp()`, from `e2e/harness.ts`:
@@ -57,11 +58,13 @@ The full guide, with a template spec, is in `packages/app/e2e/README.md`.
   - `getCacheRoot()` for the `core` cache.
   - `isTestMode()`, or `testFlags().updates`, `.sentry`, `.firstRunPrompts` and `.tour`, to skip what tests must not trigger.
   - Native dialogs through Electron's `dialog` module, so the driver can script them.
-  - `shell`, protocol, recent-document and notification calls through Electron as usual. Test mode records and stubs them.
+  - `shell`, protocol, recent-document, notification and `Menu.popup` calls through Electron as usual. Test mode records and stubs them.
+  - `win.show()` and `win.focus()` for windows, never `app.focus()` or `webContents.focus()`, which would pull the app in front of whoever runs the tests on macOS.
 - **Test hooks.** A renderer hook goes on `window.__fiddleTest` under `import.meta.env.MODE === 'test'`. A main hook uses `registerMainTestHook()` under `TEST_BUILD`. Either way, release builds compile it out. `yarn workspace electron-fiddle driver:release-check` verifies that.
 - **Harness internals.** The harness is `src/main/test-driver/` and is compiled in only when `__FIDDLE_TEST_BUILD__` is set:
   - it serves a socket at `ELECTRON_FIDDLE_DRIVER_SOCKET`;
-  - it drives the page through CDP (`webContents.debugger`) and `sendInputEvent`;
+  - it drives the page through CDP (`webContents.debugger`): the accessibility tree for queries, `Input.*` for clicks, keys and typing, and focus emulation, so no window needs OS focus. A key the page doesn't handle never reaches the native menu, so shortcuts under test go through the renderer's keybinding dispatcher;
+  - on macOS it patches `win.show()`, `win.focus()` and `win.isFocused()` to keep the app in the background and emulate window focus;
   - it owns `webRequest.onBeforeRequest`, `onCompleted` and `onErrorOccurred` on every session.
 
 ## Dev differences

@@ -1,14 +1,19 @@
 /**
- * One app window's page, driven through `webContents.debugger` (CDP) and real
- * input events (`sendInputEvent`). Every lookup waits for its condition with
- * `poll`, up to a timeout.
+ * One app window's page, driven through `webContents.debugger` (CDP): the
+ * accessibility tree for queries, and `Input.*` for clicks, keys and typing.
+ * CDP input goes straight to the page's widget, so it needs no OS focus, and
+ * the page emulates focus (`Emulation.setFocusEmulationEnabled`): it behaves
+ * as the focused, active page whether or not its window is the key window.
+ * That's what lets spec files run in parallel on one desktop (macOS), and
+ * changes nothing on a display of their own (Xvfb). Every lookup waits for
+ * its condition with `poll`, up to a timeout.
  */
 import fs from 'node:fs/promises';
 
 import type { WebContents } from 'electron';
 
 import { describeQuery, formatSnapshot, matchNodes, nameOf, roleOf, statesOf, type AXNode } from './ax';
-import { parseKeyCombo } from './keys';
+import { keyForCharacter, parseKeyCombo } from './keys';
 import type { ElementInfo, Query } from './protocol';
 
 export const DEFAULT_TIMEOUT = 5000;
@@ -49,19 +54,32 @@ interface Box {
   hitDescription: string;
 }
 
-/** Runs on the resolved DOM node: scrolls it into view if needed, then measures and hit-tests it. */
+/**
+ * Runs on the resolved DOM node: scrolls it into view if needed, then measures
+ * and hit-tests it. A control that's visually hidden inside its <label> (React
+ * Aria clips the real input of a switch, checkbox or radio to a pixel, which
+ * can even drift outside the label) is measured by its label, where a user
+ * would click.
+ */
 const BOX_FUNCTION = `function () {
   const el = this.nodeType === 1 ? this : this.parentElement;
   if (!el) return null;
+  const label = this.nodeType === 1 && el.labels && el.labels.length > 0 ? el.labels[0] : null;
+  let clipped = false;
+  for (let node = el; label && label.contains(el) && node && node !== label; node = node.parentElement) {
+    const style = getComputedStyle(node);
+    if (style.clip !== 'auto' || style.clipPath !== 'none' || (node.offsetWidth <= 1 && node.offsetHeight <= 1)) clipped = true;
+  }
+  const box = clipped ? label : el;
   const measure = () => {
-    if (this.nodeType !== 3) return el.getBoundingClientRect();
+    if (this.nodeType !== 3) return box.getBoundingClientRect();
     const range = document.createRange();
     range.selectNodeContents(this);
     return range.getBoundingClientRect();
   };
   let r = measure();
   if (r.bottom < 0 || r.right < 0 || r.top > innerHeight || r.left > innerWidth) {
-    el.scrollIntoView({ block: 'center', inline: 'center' });
+    box.scrollIntoView({ block: 'center', inline: 'center' });
     r = measure();
   }
   const x = r.left + r.width / 2;
@@ -119,6 +137,9 @@ export class Page {
       if (!dbg.isAttached()) dbg.attach('1.3');
       await dbg.sendCommand('DOM.enable');
       await dbg.sendCommand('Accessibility.enable');
+      // document.hasFocus(), focus and blur events, :focus and the selection all
+      // behave as in the key window, whichever window the OS gives focus to.
+      await dbg.sendCommand('Emulation.setFocusEmulationEnabled', { enabled: true });
       if (pageSetup) {
         await dbg.sendCommand('Emulation.setTimezoneOverride', {
           timezoneId: pageSetup.timezone,
@@ -142,6 +163,22 @@ export class Page {
   async send<T>(method: string, params?: object): Promise<T> {
     await this.attach();
     return (await this.contents.debugger.sendCommand(method, params)) as T;
+  }
+
+  /**
+   * Dispatches an `Input.*` event, which resolves once the page has handled
+   * it. An event that closes its own window (Cmd+W, a Close button) takes the
+   * target away before it or the events after it are acknowledged: that
+   * action is done, not failed.
+   */
+  async #input(method: string, params: object): Promise<void> {
+    if (this.contents.isDestroyed()) return;
+    try {
+      await this.send(method, params);
+    } catch (error) {
+      if (this.contents.isDestroyed() || /target closed/i.test(String(error))) return;
+      throw error;
+    }
   }
 
   async axNodes(): Promise<AXNode[]> {
@@ -249,38 +286,55 @@ export class Page {
     });
   }
 
+  /** A left click at the center of the match. Each event resolves once the renderer has handled it. */
   async click(query: Query): Promise<ElementInfo> {
     const element = await this.actionable(query);
-    const { x, y } = element;
-    this.contents.sendInputEvent({ type: 'mouseMove', x, y });
-    this.contents.sendInputEvent({ type: 'mouseDown', x, y, button: 'left', clickCount: 1 });
-    this.contents.sendInputEvent({ type: 'mouseUp', x, y, button: 'left', clickCount: 1 });
+    const at = { x: element.x, y: element.y };
+    await this.#input('Input.dispatchMouseEvent', { type: 'mouseMoved', ...at, button: 'none', buttons: 0 });
+    await this.#input('Input.dispatchMouseEvent', { type: 'mousePressed', ...at, button: 'left', buttons: 1, clickCount: 1 });
+    await this.#input('Input.dispatchMouseEvent', { type: 'mouseReleased', ...at, button: 'left', buttons: 0, clickCount: 1 });
     return element;
   }
 
-  /** Types into whatever has focus: keyDown, char and keyUp per character. `\n` presses Enter. */
-  type(text: string): void {
-    this.contents.focus();
+  /**
+   * Types into whatever has focus, a key at a time: keydown, keypress and input,
+   * then keyup, as from a US keyboard. Characters it has no key for (é, emoji)
+   * are inserted as text, as an input method would. `\n` presses Enter.
+   */
+  async type(text: string): Promise<void> {
     for (const char of text) {
       if (char === '\n') {
-        this.press('Enter');
+        await this.press('Enter');
         continue;
       }
-      const keyCode = /^[a-z0-9]$/i.test(char) ? char : char === ' ' ? 'Space' : undefined;
-      if (keyCode) this.contents.sendInputEvent({ type: 'keyDown', keyCode });
-      this.contents.sendInputEvent({ type: 'char', keyCode: char });
-      if (keyCode) this.contents.sendInputEvent({ type: 'keyUp', keyCode });
+      const definition = keyForCharacter(char);
+      if (!definition) {
+        await this.#input('Input.insertText', { text: char });
+        continue;
+      }
+      const key = { key: char, code: definition.code, windowsVirtualKeyCode: definition.keyCode };
+      await this.#input('Input.dispatchKeyEvent', { type: 'keyDown', ...key, text: char, unmodifiedText: char });
+      await this.#input('Input.dispatchKeyEvent', { type: 'keyUp', ...key });
     }
   }
 
-  press(combo: string): void {
-    const { keyCode, modifiers, text } = parseKeyCombo(combo, process.platform);
-    this.contents.focus();
-    this.contents.sendInputEvent({ type: 'keyDown', keyCode, modifiers });
-    if (text !== undefined) {
-      this.contents.sendInputEvent({ type: 'char', keyCode: text, modifiers });
-    }
-    this.contents.sendInputEvent({ type: 'keyUp', keyCode, modifiers });
+  /**
+   * Presses a combo such as `Enter`, `Escape`, `CmdOrCtrl+S` or `Shift+Tab`:
+   * one keydown with the modifiers held (and a keypress if it types
+   * something), then the keyup. A key the page doesn't handle goes no further:
+   * the native menu never sees it, exactly as with a display of one's own, so
+   * shortcuts work through the renderer's keybinding dispatcher.
+   */
+  async press(combo: string): Promise<void> {
+    const { key, code, keyCode, modifiers, text, commands } = parseKeyCombo(combo, process.platform);
+    const held = { key, code, windowsVirtualKeyCode: keyCode, modifiers };
+    await this.#input('Input.dispatchKeyEvent', {
+      type: text === undefined ? 'rawKeyDown' : 'keyDown',
+      ...held,
+      ...(text === undefined ? {} : { text, unmodifiedText: text }),
+      ...(commands.length > 0 ? { commands } : {}),
+    });
+    await this.#input('Input.dispatchKeyEvent', { type: 'keyUp', ...held });
   }
 
   async screenshot(file: string): Promise<{ path: string; width: number; height: number }> {

@@ -6,7 +6,10 @@
  * - turns off background throttling and animations, fixes locale, time zone
  *   and randomness, and uses the basic password store on Linux;
  * - fails any request to a non-loopback host (Chromium, `net.fetch`, Node);
- * - records and stubs OS side effects, and answers native dialogs from a queue;
+ * - records and stubs OS side effects (including native context menus), and
+ *   answers native dialogs from a queue;
+ * - on macOS, where the app shares a desktop with whoever runs the tests,
+ *   keeps it in the background and emulates window focus (`stayInBackground`);
  * - captures main and renderer logs;
  * - serves the e2e driver on `ELECTRON_FIDDLE_DRIVER_SOCKET` once attached.
  *
@@ -22,9 +25,12 @@ import { format } from 'node:util';
 
 import {
   app,
+  BrowserWindow,
   dialog,
+  Menu,
   net,
   Notification,
+  powerSaveBlocker,
   session,
   shell,
   type Session,
@@ -96,6 +102,7 @@ export function installTestHarness(): TestHarness {
   guardNodeNetwork(state);
   stubOsSideEffects(state);
   scriptDialogs(state);
+  if (process.platform === 'darwin') stayInBackground(state);
   configurePages({ locale, timezone: 'UTC', initScript: seededRandomScript(seed) });
 
   app.on('session-created', (ses) => guardSession(ses, state));
@@ -304,6 +311,94 @@ function stubOsSideEffects(state: TestState): void {
   Notification.prototype.show = function (this: Notification) {
     record('notification.show', { title: this.title, body: this.body });
   };
+  // A native context menu can't be driven, and on macOS it tracks the mouse in
+  // a modal loop over someone's desktop until dismissed. Record its items instead.
+  Menu.prototype.popup = function (this: Menu) {
+    record('menu.popup', this.items.map((item) => (item.type === 'separator' ? '-' : item.label)));
+  };
+}
+
+/**
+ * macOS has no Xvfb: the app under test shares the desktop with whoever runs
+ * the tests, usually several apps at once. So there it stays out of the way:
+ * - no Dock icon or Cmd-Tab entry, and never the active app (accessory);
+ * - windows are shown without activating, one level below normal windows:
+ *   in front of the desktop, behind everyone's work. FIDDLE_TEST_FOREGROUND=1
+ *   (the launcher's FIDDLE_E2E_FOREGROUND) keeps them at the normal level, to
+ *   watch a `yarn driver` session;
+ * - a power assertion keeps App Nap from throttling an app nobody can see;
+ * - window focus is emulated, the way a window manager hands it out: showing
+ *   or focusing a window makes it the focused one (`isFocused`,
+ *   `getFocusedWindow`, the `focus` and `blur` events), and a closed window
+ *   passes focus back to the one focused before it. The app and the specs see
+ *   what they'd see on a display of their own; the OS never makes a window key.
+ * The driver needs none of this: input goes through CDP and pages emulate
+ * focus (./page.ts).
+ */
+function stayInBackground(state: TestState): void {
+  const foreground = process.env.FIDDLE_TEST_FOREGROUND === '1';
+  const note = (message: string) => state.mainLog.push(`[test] ${message}`);
+  const accessory = () => {
+    try {
+      app.setActivationPolicy('accessory');
+    } catch (error) {
+      note(`setActivationPolicy failed: ${String(error)}`);
+    }
+  };
+  accessory();
+  void app.whenReady().then(() => {
+    accessory();
+    powerSaveBlocker.start('prevent-app-suspension');
+  });
+  app.focus = () => note('app.focus() skipped');
+
+  let focused: BrowserWindow | undefined;
+  /** Most recently focused last. */
+  const history: BrowserWindow[] = [];
+  const forget = (win: BrowserWindow) => {
+    const index = history.indexOf(win);
+    if (index !== -1) history.splice(index, 1);
+  };
+  const event = { preventDefault: () => undefined };
+  /** Makes `win` the focused window: `blur` for the old one, `focus` for the new (unless the OS just sent it). */
+  const setFocused = (win: BrowserWindow | undefined, announce = true) => {
+    if (win === focused) return;
+    const previous = focused;
+    focused = win;
+    if (win) {
+      forget(win);
+      history.push(win);
+    }
+    if (previous && !previous.isDestroyed()) previous.emit('blur', event);
+    if (announce && win && !win.isDestroyed()) win.emit('focus', event);
+  };
+  const refocus = () => setFocused([...history].reverse().find((win) => !win.isDestroyed() && win.isVisible()));
+
+  app.on('browser-window-created', (_event, win) => {
+    if (!foreground) win.setAlwaysOnTop(true, 'normal', -1);
+    const showInactive = win.showInactive.bind(win);
+    Object.assign(win, {
+      show: () => {
+        showInactive();
+        setFocused(win);
+      },
+      focus: () => {
+        if (win.isVisible()) setFocused(win);
+      },
+      isFocused: () => focused === win && !win.isDestroyed(),
+    });
+    // Someone clicked it, and the OS said so: follow, so the driver's default window is the one they look at.
+    win.on('focus', () => {
+      if (!win.isDestroyed()) setFocused(win, false);
+    });
+    win.on('hide', () => {
+      if (focused === win) refocus();
+    });
+    win.on('closed', () => {
+      forget(win);
+      if (focused === win) refocus();
+    });
+  });
 }
 
 /** Only what's useful in assertions; options can hold windows and functions. */

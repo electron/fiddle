@@ -86,13 +86,13 @@ function createHandlers({ hub, registry, state }: DriverContext): Handlers {
     type: async ({ text, query, window }) => {
       const page = pageOf(query?.window ?? window);
       if (query) await page.click(query);
-      page.type(text);
+      await page.type(text);
       return null;
     },
     press: async ({ key, query, window }) => {
       const page = pageOf(query?.window ?? window);
       if (query) await page.click(query);
-      page.press(key);
+      await page.press(key);
       return null;
     },
     runCommand: async ({ id, window }) => {

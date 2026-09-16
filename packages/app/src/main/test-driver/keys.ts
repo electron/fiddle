@@ -1,13 +1,46 @@
-/** Key combos for `press`, in Electron accelerator style. No Electron imports. */
+/**
+ * Key combos for `press` (Electron accelerator style) and characters for
+ * `type`, mapped to what CDP's `Input.dispatchKeyEvent` takes: the DOM `key`
+ * and `code`, the legacy `keyCode`, a modifier bitmask and the text the key
+ * inserts. US keyboard layout. No Electron imports.
+ */
 
 export type Modifier = 'shift' | 'control' | 'alt' | 'meta';
 
-export interface KeyCombo {
-  /** An Electron `sendInputEvent` keyCode, e.g. `Enter`, `Tab`, `S`. */
-  keyCode: string;
-  modifiers: Modifier[];
-  /** Text a `char` event should insert, if the combo types something. */
+/** `Input.dispatchKeyEvent` modifier bits. */
+export const MODIFIER_BIT: Record<Modifier, number> = { alt: 1, control: 2, meta: 4, shift: 8 };
+
+/** One key, as a DOM KeyboardEvent describes it. */
+export interface KeyDefinition {
+  /** `KeyboardEvent.key` with no modifier held: `a`, `,`, `Enter`. */
+  key: string;
+  /** `KeyboardEvent.code`: `KeyA`, `Comma`, `Enter`. */
+  code: string;
+  /** The legacy `KeyboardEvent.keyCode` (a Windows virtual-key code), which Monaco still reads. */
+  keyCode: number;
+  /** What the key types, if anything. */
+  text?: string;
+  /** What it types with Shift. */
+  shiftText?: string;
+}
+
+/** A parsed combo, ready for a keyDown (rawKeyDown when there's no `text`) and a keyUp. */
+export interface KeyPress {
+  key: string;
+  code: string;
+  keyCode: number;
+  /** ORed `MODIFIER_BIT`s. */
+  modifiers: number;
+  /** Text the press inserts; undefined for shortcuts and keys that type nothing. */
   text: string | undefined;
+  /**
+   * Editing commands to send with the key (CDP `commands`). On macOS, Chromium
+   * leaves Cmd+C, V, X, A, Z and Y to the Edit menu, whose roles send `copy:`
+   * and friends to the key window, which attaches them to the key event. A
+   * window that isn't key gets nothing, so the driver attaches them itself.
+   * Empty elsewhere: there Blink maps Ctrl+C and the rest on its own.
+   */
+  commands: string[];
 }
 
 const MODIFIERS: Record<string, Modifier | 'cmdOrCtrl'> = {
@@ -24,38 +57,119 @@ const MODIFIERS: Record<string, Modifier | 'cmdOrCtrl'> = {
   commandorcontrol: 'cmdOrCtrl',
 };
 
-/** DOM `key` names to Electron keyCodes. */
-const ALIASES: Record<string, string> = {
-  arrowup: 'Up',
-  arrowdown: 'Down',
-  arrowleft: 'Left',
-  arrowright: 'Right',
-  esc: 'Escape',
-  return: 'Enter',
-  ' ': 'Space',
-  space: 'Space',
+// The printable keys of a US keyboard: what they type plain and with Shift, and their codes, in one order.
+const PLAIN = "`1234567890-=qwertyuiop[]\\asdfghjkl;'zxcvbnm,./ ";
+const SHIFTED = '~!@#$%^&*()_+QWERTYUIOP{}|ASDFGHJKL:"ZXCVBNM<>? ';
+const CODES = [
+  ...['Backquote', 'Digit1', 'Digit2', 'Digit3', 'Digit4', 'Digit5', 'Digit6', 'Digit7', 'Digit8', 'Digit9', 'Digit0', 'Minus', 'Equal'],
+  ...['KeyQ', 'KeyW', 'KeyE', 'KeyR', 'KeyT', 'KeyY', 'KeyU', 'KeyI', 'KeyO', 'KeyP', 'BracketLeft', 'BracketRight', 'Backslash'],
+  ...['KeyA', 'KeyS', 'KeyD', 'KeyF', 'KeyG', 'KeyH', 'KeyJ', 'KeyK', 'KeyL', 'Semicolon', 'Quote'],
+  ...['KeyZ', 'KeyX', 'KeyC', 'KeyV', 'KeyB', 'KeyN', 'KeyM', 'Comma', 'Period', 'Slash', 'Space'],
+];
+/** keyCodes of the keys that are neither letters (the upper-case letter's code) nor digits (the digit's code). */
+const OTHER_KEY_CODES: Record<string, number> = {
+  ...{ Backquote: 192, Minus: 189, Equal: 187, BracketLeft: 219, BracketRight: 221, Backslash: 220 },
+  ...{ Semicolon: 186, Quote: 222, Comma: 188, Period: 190, Slash: 191, Space: 32 },
 };
 
-/** Parses `CmdOrCtrl+Shift+P`, `Enter`, `ArrowDown`, `a`. `+` alone is the plus key. */
-export function parseKeyCombo(combo: string, platform: NodeJS.Platform): KeyCombo {
+/** Every printable US-layout character, shifted or not, to its key. */
+const PRINTABLE = new Map<string, KeyDefinition>();
+CODES.forEach((code, index) => {
+  const text = PLAIN[index] ?? '';
+  const shiftText = SHIFTED[index] ?? '';
+  const keyCode = OTHER_KEY_CODES[code] ?? (code.startsWith('Key') ? shiftText : text).charCodeAt(0);
+  const definition: KeyDefinition = { key: text, code, keyCode, text, shiftText };
+  PRINTABLE.set(text, definition);
+  if (!PRINTABLE.has(shiftText)) PRINTABLE.set(shiftText, definition);
+});
+
+/** The keys `press` accepts by name: DOM `key` and `code` names plus Electron's accelerator names, lower-cased. */
+const NAMED = new Map<string, KeyDefinition>();
+const name = (aliases: string[], definition: KeyDefinition) => {
+  for (const alias of [definition.key, definition.code, ...aliases]) NAMED.set(alias.toLowerCase(), definition);
+};
+name(['Return'], { key: 'Enter', code: 'Enter', keyCode: 13, text: '\r', shiftText: '\r' });
+name([], { key: 'Tab', code: 'Tab', keyCode: 9 });
+name([], { key: 'Backspace', code: 'Backspace', keyCode: 8 });
+name([], { key: 'Delete', code: 'Delete', keyCode: 46 });
+name([], { key: 'Insert', code: 'Insert', keyCode: 45 });
+name(['Esc'], { key: 'Escape', code: 'Escape', keyCode: 27 });
+name(['Up'], { key: 'ArrowUp', code: 'ArrowUp', keyCode: 38 });
+name(['Down'], { key: 'ArrowDown', code: 'ArrowDown', keyCode: 40 });
+name(['Left'], { key: 'ArrowLeft', code: 'ArrowLeft', keyCode: 37 });
+name(['Right'], { key: 'ArrowRight', code: 'ArrowRight', keyCode: 39 });
+name([], { key: 'Home', code: 'Home', keyCode: 36 });
+name([], { key: 'End', code: 'End', keyCode: 35 });
+name([], { key: 'PageUp', code: 'PageUp', keyCode: 33 });
+name([], { key: 'PageDown', code: 'PageDown', keyCode: 34 });
+// The Menu key of PC keyboards, which opens the focused element's context menu.
+name(['Apps', 'Menu'], { key: 'ContextMenu', code: 'ContextMenu', keyCode: 93 });
+name(['Spacebar'], PRINTABLE.get(' ')!);
+// Electron's name for the key that types "+" (Shift and = on a US keyboard).
+NAMED.set('plus', { key: '+', code: 'Equal', keyCode: 187, text: '+', shiftText: '+' });
+for (let n = 1; n <= 24; n++) name([], { key: `F${n}`, code: `F${n}`, keyCode: 111 + n });
+
+/** The editing commands the Edit menu's roles attach to Cmd+<letter> on macOS (see `KeyPress.commands`). */
+const MAC_EDITING_COMMANDS: Record<string, { plain: string; shift?: string }> = {
+  KeyA: { plain: 'SelectAll' },
+  KeyC: { plain: 'Copy' },
+  KeyX: { plain: 'Cut' },
+  KeyV: { plain: 'Paste', shift: 'PasteAndMatchStyle' },
+  KeyZ: { plain: 'Undo', shift: 'Redo' },
+  KeyY: { plain: 'Redo' },
+};
+
+/** The key that types `char` on a US keyboard; undefined for anything else (é, emoji, CJK), which `type` inserts as text. */
+export function keyForCharacter(char: string): KeyDefinition | undefined {
+  return PRINTABLE.get(char);
+}
+
+/**
+ * Parses `CmdOrCtrl+Shift+P`, `Enter`, `ArrowDown`, `Ctrl+Shift+PageUp`, `a`.
+ * `+` alone (or `Plus`) is the plus key. A letter in a shortcut is the key,
+ * not the capital: `CmdOrCtrl+S` holds no Shift.
+ *
+ * `Shift+F10` opens the focused element's context menu on Windows and Linux.
+ * Chromium ignores it on macOS, where only the Menu key does that, so there
+ * it becomes that key and specs stay platform-neutral.
+ */
+export function parseKeyCombo(combo: string, platform: NodeJS.Platform): KeyPress {
   const parts = combo === '+' ? ['+'] : combo.split('+').filter((part) => part !== '');
-  const key = parts.pop();
-  if (key === undefined) throw new Error(`Empty key combo: ${JSON.stringify(combo)}`);
-  const modifiers: Modifier[] = [];
+  if (combo.length > 1 && combo.endsWith('++')) parts.push('+');
+  const keyName = parts.pop();
+  if (keyName === undefined) throw new Error(`Empty key combo: ${JSON.stringify(combo)}`);
+  const held = new Set<Modifier>();
   for (const part of parts) {
     const modifier = MODIFIERS[part.toLowerCase()];
     if (!modifier) throw new Error(`Unknown modifier ${JSON.stringify(part)} in ${combo}`);
-    modifiers.push(
-      modifier === 'cmdOrCtrl' ? (platform === 'darwin' ? 'meta' : 'control') : modifier,
-    );
+    held.add(modifier === 'cmdOrCtrl' ? (platform === 'darwin' ? 'meta' : 'control') : modifier);
   }
-  const keyCode = ALIASES[key.toLowerCase()] ?? key;
-  const commandLike = modifiers.includes('control') || modifiers.includes('meta');
-  let text: string | undefined;
-  if (!commandLike) {
-    if (keyCode === 'Enter') text = '\r';
-    else if (keyCode === 'Space') text = ' ';
-    else if (key.length === 1) text = modifiers.includes('shift') ? key.toUpperCase() : key;
+
+  let definition = NAMED.get(keyName.toLowerCase()) ?? (keyName.length === 1 ? PRINTABLE.get(keyName) : undefined);
+  if (!definition) throw new Error(`Unknown key ${JSON.stringify(keyName)} in ${combo}`);
+  if (platform === 'darwin' && definition.code === 'F10' && held.size === 1 && held.has('shift')) {
+    definition = NAMED.get('contextmenu')!;
+    held.clear();
   }
-  return { keyCode, modifiers, text };
+
+  const shift = held.has('shift');
+  const shortcut = held.has('control') || held.has('meta');
+  const letter = definition.code.startsWith('Key');
+  // A character written in its shifted form (`?`, `A`) is typed that way, except a letter in a shortcut.
+  const writtenShifted =
+    keyName.length === 1 && keyName !== definition.text && keyName === definition.shiftText && !(letter && shortcut);
+  const typed = shift || writtenShifted ? definition.shiftText : definition.text;
+  const text = shortcut ? undefined : typed;
+  const key = definition.key.length === 1 ? (typed ?? definition.key) : definition.key;
+
+  const commands: string[] = [];
+  const editing = MAC_EDITING_COMMANDS[definition.code];
+  if (platform === 'darwin' && editing && held.has('meta') && !held.has('control') && !held.has('alt')) {
+    const command = shift ? editing.shift : editing.plain;
+    if (command) commands.push(command);
+  }
+
+  let modifiers = 0;
+  for (const modifier of held) modifiers |= MODIFIER_BIT[modifier];
+  return { key, code: definition.code, keyCode: definition.keyCode, modifiers, text, commands };
 }

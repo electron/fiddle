@@ -1,8 +1,11 @@
 /**
  * The e2e client. `launchApp()` starts the test build (out/test-build) with test
  * mode on, a fresh temp dir, its own fixture server and, on Linux, its own
- * headless X display (Xvfb, plus openbox when installed). The returned
- * `FiddleApp` drives it over the driver socket.
+ * headless X display (Xvfb, plus openbox when installed). On macOS the app runs
+ * on the real desktop but in the background: no Dock icon, windows behind
+ * everyone else's and never focused (src/main/test-driver/index.ts);
+ * FIDDLE_E2E_FOREGROUND=1 shows them in front. The returned `FiddleApp` drives
+ * it over the driver socket.
  *
  * Specs use it through ./harness.ts; `yarn driver` (tools/driver.ts) uses it
  * too. Plain Node with type stripping: import with `.ts` extensions, and no
@@ -535,6 +538,7 @@ export async function launchApp(options: LaunchOptions = {}): Promise<FiddleApp>
     LANG: 'en_US.UTF-8',
     LANGUAGE: 'en_US',
     LC_ALL: 'en_US.UTF-8',
+    ...(process.env.FIDDLE_E2E_FOREGROUND === '1' ? { FIDDLE_TEST_FOREGROUND: '1' } : {}),
     ...options.env,
   });
 
