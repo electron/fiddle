@@ -19,7 +19,7 @@ export interface TooltipProps {
   isDisabled?: boolean;
 }
 
-/** Appears after 500ms, below the target by default. */
+/** Appears after 500ms, 10px below the target by default. */
 export function Tooltip({
   label,
   kbd,
@@ -50,7 +50,7 @@ export function Tooltip({
       isDisabled={isDisabled}
     >
       {trigger}
-      <AriaTooltip placement={placement} offset={6} className={styles.tooltip}>
+      <AriaTooltip placement={placement} offset={10} className={styles.tooltip}>
         {label}
         {kbd && <span className={styles.kbd}>{kbd}</span>}
       </AriaTooltip>
