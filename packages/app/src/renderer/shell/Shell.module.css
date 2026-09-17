@@ -15,36 +15,78 @@
   overflow: hidden;
 }
 
-/* Title bar: padding 0 12 0 20, a drag region; every control is no-drag. */
+/* Title bar: a drag region, 12px padding; every control in it is no-drag. Three
+   parts in a row: the start group, the capsule, the end group. The groups flex
+   equally (basis 0) but never below their content, so the capsule is centred in
+   the window while both have room and pushed aside, never overlapped, when one
+   hasn't (TitleBar.tsx folds the menus and hides the name before it comes to that). */
 .titlebar {
   grid-area: title;
-  position: relative;
   display: flex;
   align-items: center;
-  gap: 12px;
   min-width: 0;
-  padding: 0 12px 0 20px;
+  padding: 0 12px;
   -webkit-app-region: drag;
   user-select: none;
 }
 
-/* macOS: 80px clear for the traffic lights (drawn by the OS at x 20). */
-.shell[data-platform="darwin"] .titlebar {
-  padding-left: calc(20px + 80px - 2px);
+.barStart,
+.barEnd {
+  display: flex;
+  align-items: center;
+  flex: 1 1 0;
 }
 
-/* Windows: 140px clear on the right for the caption buttons. */
-.shell[data-platform="win32"] .titlebar {
-  padding-right: calc(12px + 140px);
+/* Sidebar button, menu bar, name; 12px apart and 12px clear of the capsule. */
+.barStart {
+  gap: 12px;
+  padding-inline-end: 12px;
 }
 
+/* Open gist, Publish, Settings; 8px apart and 12px clear of the capsule. */
+.barEnd {
+  justify-content: flex-end;
+  gap: 8px;
+  padding-inline-start: 12px;
+}
+
+/* The sidebar button starts 20px in; on macOS 98px in, clear of the traffic lights
+   (drawn by the OS at x 20), which stay on the left in right-to-left layouts too. */
+.start {
+  flex: none;
+  margin-inline-start: 8px;
+  -webkit-app-region: no-drag;
+}
+
+.shell[data-platform="darwin"] .barStart:dir(ltr)::before,
+.shell[data-platform="darwin"] .barEnd:dir(rtl)::after {
+  content: "";
+  flex: none;
+  width: 66px;
+}
+
+/* Windows: 140px clear at the end for the caption buttons the OS draws over the bar. */
+.shell[data-platform="win32"] .barEnd::after {
+  content: "";
+  flex: none;
+  width: 132px;
+}
+
+/* The name takes what the start group has left and truncates; it adds nothing to
+   the group's least width, so a long name never pushes the capsule. */
 .title {
   display: flex;
   align-items: baseline;
+  flex: 1 1 0;
   gap: 8px;
   min-width: 0;
+  contain: inline-size;
   overflow: hidden;
   white-space: nowrap;
+}
+
+.title[data-hidden] {
+  visibility: hidden;
 }
 
 /* "window-vibrancy": 13px 650, −0.01em. "Edited": 12px 400 ink-muted. */
@@ -61,25 +103,37 @@
   font: var(--lu-type-hint);
 }
 
-/* The toolbar capsule, centred in the window. */
-.capsule {
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  transform: translate(-50%, -50%);
+/* The toolbar capsule: whole while the groups leave it room, then its picker narrows. */
+.titlebar .capsule {
+  flex: 0 1 auto;
 }
 
-.end {
+.capsule .picker {
+  flex: 1 1 180px;
+  width: auto;
+  min-width: 112px;
+  max-width: 180px;
+}
+
+/* Windows and Linux: the menu bar, right after the sidebar button (§17.14). */
+.menus {
   display: flex;
-  align-items: center;
-  gap: 8px;
-  margin-left: auto;
+  flex: none;
+  margin-inline-start: -4px;
   -webkit-app-region: no-drag;
 }
 
-.start {
+/* A 16px hairline between the menus and the fiddle name, which then reads muted:
+   in the titles' type, a name like "Menu" passed for one more menu. */
+.menusDivider {
   flex: none;
-  -webkit-app-region: no-drag;
+  width: var(--lu-size-hairline);
+  height: 16px;
+  background: var(--lu-line-strong);
+}
+
+.title[data-after-menus] .name {
+  color: var(--lu-ink-muted);
 }
 
 /* Sidebar column: 228 wide by default, resizable 200 to 320. */

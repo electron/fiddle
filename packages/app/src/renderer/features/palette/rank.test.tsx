@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { acceleratorKeys, matchScore, pushRecent, rankItems, type PaletteItem } from './rank';
+import { matchScore, pushRecent, rankItems, type PaletteItem } from './rank';
 
 const command = (id: string, label: string, extra: Partial<PaletteItem> = {}): PaletteItem => ({
   id: `command:${id}`,
@@ -89,23 +89,5 @@ describe('pushRecent', () => {
   it('moves the ID to the front without duplicates and caps the list', () => {
     expect(pushRecent(['a', 'b', 'c'], 'b')).toEqual(['b', 'a', 'c']);
     expect(pushRecent(['a', 'b'], 'c', 2)).toEqual(['c', 'a']);
-  });
-});
-
-// @feature new.palette
-describe('acceleratorKeys', () => {
-  it('formats macOS symbols', () => {
-    expect(acceleratorKeys('CmdOrCtrl+Shift+P', 'darwin')).toEqual(['⌘', '⇧', 'P']);
-    expect(acceleratorKeys('CmdOrCtrl+Alt+I', 'darwin')).toEqual(['⌘', '⌥', 'I']);
-  });
-
-  it('formats words elsewhere', () => {
-    expect(acceleratorKeys('CmdOrCtrl+Shift+P', 'win32')).toEqual(['Ctrl', 'Shift', 'P']);
-    expect(acceleratorKeys('F5', 'linux')).toEqual(['F5']);
-  });
-
-  it('handles Plus and missing accelerators', () => {
-    expect(acceleratorKeys('CmdOrCtrl++', 'linux')).toEqual(['Ctrl', '+']);
-    expect(acceleratorKeys(undefined, 'linux')).toEqual([]);
   });
 });

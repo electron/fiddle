@@ -6,7 +6,9 @@
   outline: none;
 }
 
-.popover[data-entering] {
+/* The title bar's menu bar (MenuBar.tsx) draws its menus on the same surface. */
+.popover[data-entering],
+.surface[data-entering] {
   animation: menu-in var(--lu-dur-base) var(--lu-ease);
 }
 
@@ -41,8 +43,8 @@
   display: block;
 }
 
-/* Items: 28 tall, padding 0 10 0 6, radius-item. Hover and keyboard-active: fill-strong.
-   Selected: weight 500, no fill. */
+/* Items: 28 tall, padding 0 10 0 6, radius-item. Hover and keyboard-active: fill-strong,
+   and so is an item whose submenu is open. Selected: weight 500, no fill. */
 .item {
   display: flex;
   align-items: center;
@@ -58,7 +60,9 @@
 }
 
 .item[data-hovered],
-.item[data-focused] {
+.item[data-focused],
+.item[data-open],
+.item:focus {
   background: var(--lu-fill-strong);
 }
 
@@ -114,6 +118,17 @@
   font: 400 12px/14px var(--lu-font-sans);
   letter-spacing: 0.04em;
   color: var(--lu-ink-muted);
+}
+
+/* A submenu's chevron, after the label or key; mirrored in right-to-left layouts. */
+.chevron {
+  flex: none;
+  margin-inline: var(--lu-space-2) -4px;
+  color: var(--lu-ink-muted);
+}
+
+.chevron:dir(rtl) {
+  transform: scaleX(-1);
 }
 
 .header {

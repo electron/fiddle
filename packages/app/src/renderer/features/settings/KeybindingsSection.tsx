@@ -6,17 +6,17 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { acceleratorFor, commandIds, commands, type CommandId } from '../../../shared/commands';
+import { acceleratorFor, commandIds, commands, isCommandListed, type CommandId } from '../../../shared/commands';
 import {
   acceleratorFromKey,
   effectiveAccelerators,
   findConflicts,
   normalizeAccelerator,
 } from '../../../shared/settings';
+import { acceleratorKeys } from '../../../shared/accelerators';
 import type { Platform } from '../../../shared/stores';
 import { Button, Icon, IconButton, Kbd, TextField } from '../../../ui';
 import { matchesQuery, Row } from './controls';
-import { displayKeys } from './keys';
 import styles from './SettingsPage.module.css';
 import { useSettings } from './use-settings';
 
@@ -34,7 +34,9 @@ export function KeybindingsSection() {
   const list = useMemo(() => new Intl.ListFormat(locale, { type: 'conjunction' }), [locale]);
   const label = (id: CommandId) => tMain(commands[id].label);
 
+  // Dev-only commands (the Develop menu's) only in development builds.
   const rows = commandIds
+    .filter((id) => isCommandListed(id, app))
     .map((id) => ({ id, label: label(id) }))
     .filter((row) => matchesQuery(filter, row.label, row.id))
     .sort((a, b) => a.label.localeCompare(b.label, locale));
@@ -95,7 +97,7 @@ export function KeybindingsSection() {
                 ) : accelerators.length > 0 ? (
                   <span className={styles.shortcutKeys}>
                     {accelerators.map((accelerator) => (
-                      <Kbd key={accelerator} keys={displayKeys(accelerator, platform)} />
+                      <Kbd key={accelerator} keys={acceleratorKeys(accelerator, platform)} />
                     ))}
                   </span>
                 ) : (

@@ -36,6 +36,12 @@ export const appStateSchema = z.object({
   locale: z.string(),
   platform: platformSchema,
   material: materialSchema,
+  /**
+   * True in unpackaged (development and test) builds, which have the Develop
+   * menu and its dev-only commands (src/shared/commands.ts). False or absent in
+   * the packaged app.
+   */
+  dev: z.boolean().optional(),
   // Settings slice: effective settings (see src/shared/settings.ts).
   settings: settingsSchema,
   /** Custom themes in `<userData>/themes/`. The data is fetched with `Settings.GetTheme`. */
@@ -68,8 +74,55 @@ export const windowStateSchema = z.object({
   run: z.lazy(() => runStateSchema).optional(),
   // Versions and run slice: the last version fallback or failed download, shown as a toast, then dismissed.
   versionNotice: z.lazy(() => versionNoticeSchema).nullable().optional(),
+  /**
+   * Windows and Linux: the application menu for the title bar's menu bar
+   * (§17.14), built for this window by src/main/menu.ts and pushed whenever
+   * the native menu is rebuilt. Absent on macOS, which has the OS menu bar,
+   * unless a test or dev run forces it; the Develop menu's toggle adds or
+   * removes it on any platform. Absent means the title bar draws no menu bar.
+   */
+  menuBar: z.lazy(() => z.array(menuNodeSchema)).optional(),
 });
 export type WindowState = z.infer<typeof windowStateSchema>;
+
+// ---------------------------------------------------------------------------
+// Menus slice: the serialized application menu (`Window.menuBar`).
+
+/**
+ * One entry of a menu, as the renderer draws it. `id` is what
+ * `Window.ActivateMenuItem` takes: a command ID, `role:<role>`, `recent:<n>`,
+ * `example:<name>` or, for a submenu, `menu:<name>`. `accelerator` is display
+ * text already written for the platform, e.g. `Ctrl+Shift+P`.
+ */
+export type MenuNode =
+  | { kind: 'submenu'; id: string; label: string; enabled: boolean; children: MenuNode[] }
+  | { kind: 'item'; id: string; label: string; enabled: boolean; checked?: boolean; accelerator?: string }
+  | { kind: 'separator' };
+
+export const menuItemIdSchema = z.string().min(1).max(300);
+
+export const menuNodeSchema: z.ZodType<MenuNode> = z.lazy(() =>
+  z.discriminatedUnion('kind', [
+    z.object({
+      kind: z.literal('submenu'),
+      id: menuItemIdSchema,
+      label: z.string(),
+      enabled: z.boolean(),
+      children: z.array(menuNodeSchema),
+    }),
+    z.object({
+      kind: z.literal('item'),
+      id: menuItemIdSchema,
+      label: z.string(),
+      enabled: z.boolean(),
+      checked: z.boolean().optional(),
+      accelerator: z.string().optional(),
+    }),
+    z.object({ kind: z.literal('separator') }),
+  ]),
+);
+export const menuBarSchema = z.array(menuNodeSchema);
+export type MenuBarModel = z.infer<typeof menuBarSchema>;
 
 export const versionNoticeSchema = z.object({
   /** Increases with every notice, so each is shown once. */

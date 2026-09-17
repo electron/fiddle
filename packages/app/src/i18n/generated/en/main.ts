@@ -36,6 +36,8 @@ export default {
   "newWindow": "New window",
   "reload": "Reload",
   "toggleDevTools": "Toggle developer tools",
+  "develop": "Develop",
+  "toggleMenuBar": "Toggle title bar menu bar",
   "undo": "Undo",
   "redo": "Redo",
   "cut": "Cut",

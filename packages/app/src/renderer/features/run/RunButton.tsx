@@ -25,11 +25,14 @@ const BUSY_LABEL = {
   starting: 'starting',
 } as const satisfies Partial<Record<Status, string>>;
 
-export function RunButton() {
+/** `compact`: the narrowest title bar (Windows) drops the key hint and the no-jump floor to make room. */
+export function RunButton({ compact = false }: { compact?: boolean } = {}) {
   const { t } = useTranslation('run');
   const win = useWindowState();
   const app = useAppState();
-  const kbd = useRunKbd();
+  const defaultKbd = useRunKbd();
+  const kbd = compact ? undefined : defaultKbd;
+  const runClass = compact ? styles.runCompact : styles.run;
   const run = win?.run ?? IDLE_RUN;
   // Pressing Run shows "Checking" at once, until main's next Window update.
   const [pendingRev, setPendingRev] = useState<number | null>(null);
@@ -63,15 +66,15 @@ export function RunButton() {
   return (
     <>
       {status === 'running' ? (
-        <Button data-tour="run" variant="stop" icon="stop" kbd={kbd} onPress={toggle} className={styles.run}>
+        <Button data-tour="run" variant="stop" icon="stop" kbd={kbd} onPress={toggle} className={runClass}>
           {t('stop')}
         </Button>
       ) : status === 'downloading' ? (
-        <Button data-tour="run" variant="primary" progress={percent} onPress={toggle} className={styles.wide}>
+        <Button data-tour="run" variant="primary" progress={percent} onPress={toggle} className={compact ? runClass : styles.wide}>
           {t('downloadingPercent', { percent })}
         </Button>
       ) : status === 'ready' ? (
-        <Button data-tour="run" variant="primary" icon="play" kbd={kbd} onPress={toggle} className={styles.run}>
+        <Button data-tour="run" variant="primary" icon="play" kbd={kbd} onPress={toggle} className={runClass}>
           {t('run')}
         </Button>
       ) : (
@@ -80,7 +83,7 @@ export function RunButton() {
           variant="primary"
           loading
           isDisabled
-          className={status === 'installing' ? styles.wide : styles.run}
+          className={compact ? runClass : status === 'installing' ? styles.wide : styles.run}
         >
           {t(BUSY_LABEL[status])}
         </Button>

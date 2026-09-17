@@ -1,0 +1,94 @@
+/* The title bar's menu bar on Windows and Linux (MenuBar.tsx). The menus themselves use
+   Menu.module.css: surface, items, key column, separators. */
+.bar {
+  position: relative;
+  display: flex;
+  align-items: center;
+  flex: none;
+  min-width: 0;
+  -webkit-app-region: no-drag;
+  user-select: none;
+}
+
+/* Titles: 28 tall, padding 0 8, label type (13/16 500), radius-control.
+   Hover and the keyboard's place take fill; the open one takes fill-strong. */
+.title {
+  display: inline-flex;
+  align-items: center;
+  flex: none;
+  height: var(--lu-size-row);
+  padding: 0 8px;
+  border-radius: var(--lu-radius-control);
+  corner-shape: squircle;
+  color: var(--lu-ink);
+  font: var(--lu-type-label);
+  letter-spacing: var(--lu-type-label-tracking);
+  white-space: nowrap;
+  cursor: default;
+  outline: none;
+  transition: background-color var(--lu-dur-fast) var(--lu-ease);
+}
+
+.title:hover,
+.bar[data-engaged] .title:focus {
+  background: var(--lu-fill);
+}
+
+.title[data-open],
+.bar[data-engaged] .title[data-open] {
+  background: var(--lu-fill-strong);
+}
+
+.title:focus-visible {
+  outline: var(--lu-focus-outline);
+  outline-offset: -2px;
+}
+
+.bar[data-engaged] .title:focus-visible {
+  outline: none;
+}
+
+.title[aria-disabled="true"] {
+  opacity: var(--lu-disabled-opacity);
+}
+
+/* The More and Menu icon buttons: 28 × 28. */
+.more {
+  justify-content: center;
+  width: var(--lu-size-row);
+  padding: 0;
+}
+
+/* Mnemonics are underlined only while Alt is down or the bar was reached from the keyboard. */
+.mnemonic {
+  text-decoration: none;
+}
+
+.bar[data-mnemonics] .mnemonic {
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+/* The titles once more at their natural width, unseen, to know when they stop fitting. */
+.measure {
+  position: absolute;
+  top: 0;
+  inset-inline-start: 0;
+  display: flex;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+/* Open menus sit in a layer on <body>, each placed by MenuBar.tsx. */
+.layer {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: var(--lu-z-popover);
+}
+
+/* A menu may overlap the title bar, a drag region: it must still take the clicks. */
+.panel {
+  position: fixed;
+  -webkit-app-region: no-drag;
+}

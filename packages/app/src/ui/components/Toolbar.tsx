@@ -1,4 +1,4 @@
-import type { CSSProperties, ReactNode } from 'react';
+import type { CSSProperties, ReactNode, Ref } from 'react';
 import { Button as AriaButton, type ButtonProps as AriaButtonProps } from 'react-aria-components';
 import { cx } from '../cx';
 import { Icon, type IconName } from '../icons/Icon';
@@ -11,14 +11,15 @@ export interface ToolbarCapsuleProps {
   label?: string;
   className?: string;
   style?: CSSProperties;
+  ref?: Ref<HTMLDivElement>;
 }
 
 /** A glass capsule that gathers toolbar controls: 36 tall, 3px inset, 2px gap.
  *  Buttons and selects inside it become 30px capsules. */
-export function ToolbarCapsule({ children, label, className, style }: ToolbarCapsuleProps) {
+export function ToolbarCapsule({ children, label, className, style, ref }: ToolbarCapsuleProps) {
   return (
     <CapsuleContext.Provider value={true}>
-      <div role="group" aria-label={label} className={cx(styles.capsule, className)} style={style}>
+      <div ref={ref} role="group" aria-label={label} className={cx(styles.capsule, className)} style={style}>
         {children}
       </div>
     </CapsuleContext.Provider>

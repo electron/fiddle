@@ -27,6 +27,20 @@
     "description": "Title bar button that opens the settings page.",
     "maxLength": 30
   },
+  "menuBar": {
+    "message": "Application menu",
+    "description": "Accessible name of the menu bar (File, Edit, View…) drawn in the title bar on Windows and Linux."
+  },
+  "menuBarMore": {
+    "message": "More",
+    "description": "Accessible name of the icon button at the end of the title bar menu bar (Windows and Linux) that holds the menus the window is too narrow to show; its menu lists them (e.g. Window, Help) as submenus.",
+    "maxLength": 20
+  },
+  "menuBarMenu": {
+    "message": "Menu",
+    "description": "Accessible name of the single title bar button the whole menu bar folds into when the window is too narrow for even two menu titles; its menu lists File, Edit, View… as submenus.",
+    "maxLength": 20
+  },
   "files": {
     "message": "Files",
     "description": "Accessible name of the file list in the sidebar."

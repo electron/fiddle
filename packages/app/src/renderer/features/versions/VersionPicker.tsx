@@ -33,7 +33,7 @@ import type {
   VersionRefValue,
   VersionsState,
 } from '../../../shared/stores';
-import { showToast, type IconName } from '../../../ui';
+import { cx, showToast, type IconName } from '../../../ui';
 import { useAppState, useWindowState } from '../../state';
 import { IDLE_RUN, useReleases, versionLabel } from '../run/use-run';
 import { SearchSelect, type SearchGroup, type SearchOption } from './SearchSelect';
@@ -174,7 +174,8 @@ function useRetryWhenOnline() {
   }, []);
 }
 
-export function VersionPicker() {
+/** `className` joins the picker's own: the title bar lets it narrow when the window does. */
+export function VersionPicker({ className }: { className?: string } = {}) {
   const { t } = useTranslation('run');
   const { t: tv } = useTranslation('versions');
   const win = useWindowState();
@@ -269,7 +270,7 @@ export function VersionPicker() {
       onAction={copy}
       details={details}
       isDisabled={run.status !== 'ready' || bisecting}
-      className={styles.picker}
+      className={cx(styles.picker, className)}
     />
   );
 }

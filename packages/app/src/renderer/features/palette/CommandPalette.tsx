@@ -11,9 +11,10 @@ import { useTranslation } from 'react-i18next';
 import { Dialog, Modal, ModalOverlay } from 'react-aria-components';
 
 import { documentsApi, versionsApi, windowApi } from '../../../ipc/renderer';
-import { commandIds, commands, isCommandEnabled } from '../../../shared/commands';
+import { commandIds, commands, isCommandEnabled, isCommandListed } from '../../../shared/commands';
 import { SHOW_ME_EXAMPLES } from '../../../shared/examples';
 import { effectiveAccelerator } from '../../../shared/settings';
+import { acceleratorKeys } from '../../../shared/accelerators';
 import type { AppState, ReleaseList, WindowState } from '../../../shared/stores';
 import { cx, Icon, Kbd, showToast, type IconName } from '../../../ui';
 import menu from '../../../ui/components/Menu.module.css';
@@ -21,7 +22,7 @@ import { useAppState, useWindowState } from '../../state';
 import { OnboardingTour } from '../onboarding/OnboardingTour';
 import styles from './CommandPalette.module.css';
 import { getEditorActions } from './editor-actions';
-import { acceleratorKeys, pushRecent, rankItems, type PaletteItem, type PaletteKind } from './rank';
+import { pushRecent, rankItems, type PaletteItem, type PaletteKind } from './rank';
 
 const RECENT_KEY = 'fiddle.palette.recent';
 
@@ -72,7 +73,8 @@ function useEntries(
     const entries: Entry[] = [];
 
     for (const id of commandIds) {
-      if (id === 'app.commandPalette') continue;
+      // Not the palette itself, nor a dev-only command in the packaged app.
+      if (id === 'app.commandPalette' || !isCommandListed(id, app)) continue;
       entries.push({
         id: `command:${id}`,
         kind: 'command',

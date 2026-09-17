@@ -40,6 +40,12 @@ zod_reference FocusContext {
     schema = "focusContextSchema"
 }
 
+// A `Window.menuBar` entry: a command ID, `role:<role>`, `recent:<n>` or `example:<name>`.
+subtype MenuItemId = string(
+    minLength: 1
+    maxLength: 300
+)
+
 structure AppInfo {
     name: string
     version: string
@@ -82,6 +88,11 @@ interface Window {
     // else. Sent during the DOM event, so it reaches main before Chromium's
     // `context-menu` event on the same channel (src/main/context-menu.ts).
     ReportContextMenu(context: FocusContext)
+
+    // Windows and Linux: an item of the title bar's menu bar (`Window.menuBar`)
+    // was chosen. Main does what the same item of the native menu does: runs
+    // the command, the role, or opens the recent folder or example (§17.14).
+    ActivateMenuItem(id: MenuItemId)
 
     // Main's one channel to the window: commands whose handlers act on Monaco,
     // view state or a dialog there (`sendWindowCommand` in src/main/windows.ts).

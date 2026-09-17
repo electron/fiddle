@@ -2,7 +2,6 @@
  * Filtering and ranking for the command palette. Pure functions, so the
  * palette component only renders what these return.
  */
-import type { Platform } from '../../../shared/stores';
 
 export type PaletteKind = 'command' | 'editor' | 'file' | 'version' | 'example';
 
@@ -105,63 +104,4 @@ export function rankItems<T extends PaletteItem>(
 /** Adds `id` to the front of the recent list, without duplicates. */
 export function pushRecent(recent: readonly string[], id: string, max = 8): string[] {
   return [id, ...recent.filter((other) => other !== id)].slice(0, max);
-}
-
-const MAC_KEYS: Record<string, string> = {
-  cmdorctrl: '⌘',
-  commandorcontrol: '⌘',
-  cmd: '⌘',
-  command: '⌘',
-  ctrl: '⌃',
-  control: '⌃',
-  alt: '⌥',
-  option: '⌥',
-  shift: '⇧',
-  super: '⌘',
-  meta: '⌘',
-  enter: '↵',
-  return: '↵',
-  backspace: '⌫',
-  delete: '⌦',
-  escape: 'Esc',
-  esc: 'Esc',
-  up: '↑',
-  down: '↓',
-  left: '←',
-  right: '→',
-  plus: '+',
-};
-
-const OTHER_KEYS: Record<string, string> = {
-  cmdorctrl: 'Ctrl',
-  commandorcontrol: 'Ctrl',
-  cmd: 'Ctrl',
-  command: 'Ctrl',
-  ctrl: 'Ctrl',
-  control: 'Ctrl',
-  alt: 'Alt',
-  option: 'Alt',
-  shift: 'Shift',
-  super: 'Win',
-  meta: 'Win',
-  return: 'Enter',
-  escape: 'Esc',
-  esc: 'Esc',
-  up: '↑',
-  down: '↓',
-  left: '←',
-  right: '→',
-  plus: '+',
-};
-
-/** An Electron accelerator as key caps: `CmdOrCtrl+Shift+P` → ⌘ ⇧ P on macOS, Ctrl Shift P elsewhere. */
-export function acceleratorKeys(accelerator: string | undefined, platform: Platform): string[] {
-  if (!accelerator) return [];
-  const names = platform === 'darwin' ? MAC_KEYS : OTHER_KEYS;
-  // `CmdOrCtrl++` means Plus: split on `+` that isn't the last character.
-  return accelerator.split(/\+(?!$)/).map((part) => {
-    const key = names[part.toLowerCase()];
-    if (key) return key;
-    return part.length === 1 ? part.toUpperCase() : part;
-  });
 }

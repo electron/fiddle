@@ -104,6 +104,8 @@ name([], { key: 'PageUp', code: 'PageUp', keyCode: 33 });
 name([], { key: 'PageDown', code: 'PageDown', keyCode: 34 });
 // The Menu key of PC keyboards, which opens the focused element's context menu.
 name(['Apps', 'Menu'], { key: 'ContextMenu', code: 'ContextMenu', keyCode: 93 });
+// Alt on its own, which gives the title bar's menu bar the keyboard on Windows and Linux.
+name([], { key: 'Alt', code: 'AltLeft', keyCode: 18 });
 name(['Spacebar'], PRINTABLE.get(' ')!);
 // Electron's name for the key that types "+" (Shift and = on a US keyboard).
 NAMED.set('plus', { key: '+', code: 'Equal', keyCode: 187, text: '+', shiftText: '+' });
@@ -153,7 +155,8 @@ export function parseKeyCombo(combo: string, platform: NodeJS.Platform): KeyPres
   }
 
   const shift = held.has('shift');
-  const shortcut = held.has('control') || held.has('meta');
+  // A chord with Control, Command or Alt acts, it doesn't type (Alt+H is a menu mnemonic on Windows and Linux, and "˙" on a Mac).
+  const shortcut = held.has('control') || held.has('meta') || held.has('alt');
   const letter = definition.code.startsWith('Key');
   // A character written in its shifted form (`?`, `A`) is typed that way, except a letter in a shortcut.
   const writtenShifted =

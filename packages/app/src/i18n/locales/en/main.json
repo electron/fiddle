@@ -171,12 +171,22 @@
   },
   "reload": {
     "message": "Reload",
-    "description": "Command that reloads the current window's view: in the command palette, and in the View menu of development builds. Unsaved text is kept.",
+    "description": "Command that reloads the current window's view: in the command palette, and in the Develop menu of development builds. Unsaved text is kept.",
     "maxLength": 30
   },
   "toggleDevTools": {
     "message": "Toggle developer tools",
     "description": "Help menu command that opens or closes Chromium's developer tools for the app window.",
+    "maxLength": 40
+  },
+  "develop": {
+    "message": "Develop",
+    "description": "Top-level Develop menu, shown only in development builds of the app, with tools for working on Electron Fiddle itself (as Safari names its menu of developer tools).",
+    "maxLength": 20
+  },
+  "toggleMenuBar": {
+    "message": "Toggle title bar menu bar",
+    "description": "Develop menu command (development builds only) that shows or hides the application menu bar drawn inside the window's title bar, on any platform, without a restart. Shown with a check mark while that menu bar is visible.",
     "maxLength": 40
   },
   "undo": {
@@ -400,7 +410,7 @@
   },
   "reloadAllWindows": {
     "message": "Reload all windows",
-    "description": "Command that reloads every open window's view, for example to apply a new editor font: a button in Settings, the command palette, and the View menu of development builds. Unsaved text is kept.",
+    "description": "Command that reloads every open window's view, for example to apply a new editor font: a button in Settings, the command palette, and the Develop menu of development builds. Unsaved text is kept.",
     "maxLength": 30
   },
   "inspectElement": {

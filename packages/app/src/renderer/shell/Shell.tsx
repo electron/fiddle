@@ -169,6 +169,7 @@ function ShellView({ state, platform }: { state: WindowState; platform: 'darwin'
         platform={platform}
         sidebar={layout.sidebar}
         settingsOpen={state.view === 'settings'}
+        menuBar={state.menuBar}
         onToggleSidebar={() => changeLayout({ sidebar: !layout.sidebar })}
         onToggleSettings={() => void setView(state.view === 'settings' ? 'editor' : 'settings', failTitle)}
       />

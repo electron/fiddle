@@ -167,6 +167,7 @@ const paths = {
       <path d="M4 6.5h.01M6.5 6.5h.01M9 6.5h.01M11.5 6.5h.01M5 9.5h6" />
     </>
   ),
+  menu: <path d="M2.5 4.5h11M2.5 8h11M2.5 11.5h11" />,
   more: (
     <>
       <circle cx="4" cy="8" r=".9" fill="currentColor" />

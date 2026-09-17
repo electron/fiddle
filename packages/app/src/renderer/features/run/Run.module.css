@@ -15,6 +15,13 @@
   padding: 0 14px 0 12px;
 }
 
+/* The narrowest title bar (Windows at 600): no key hint and no floor, so the capsule fits. */
+.runCompact {
+  flex: none;
+  min-width: 0;
+  padding: 0 12px 0 10px;
+}
+
 /* Status bar content: items sit in the status bar's 18px-gap row. */
 .status {
   display: inline-flex;

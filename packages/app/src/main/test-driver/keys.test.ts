@@ -24,6 +24,9 @@ describe('parseKeyCombo', () => {
     });
     expect(parseKeyCombo('Ctrl+Shift+PageUp', 'darwin')).toMatchObject({ key: 'PageUp', keyCode: 33, modifiers: control | shift });
     expect(parseKeyCombo('Alt+Cmd+I', 'darwin').modifiers).toBe(alt | meta);
+    // Alt alone is a key of its own (the menu bar's); before another key it's a modifier.
+    expect(parseKeyCombo('Alt', 'linux')).toMatchObject({ key: 'Alt', code: 'AltLeft', keyCode: 18, modifiers: 0, text: undefined });
+    expect(parseKeyCombo('Alt+f', 'win32')).toMatchObject({ key: 'f', code: 'KeyF', modifiers: alt, text: undefined });
   });
 
   it('knows the punctuation keys shortcuts use', () => {

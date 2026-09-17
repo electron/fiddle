@@ -8,6 +8,7 @@ import { app, type WebContents } from 'electron';
 import { App, implement, Window } from '../ipc/main';
 import { ErrorCode, FiddleError } from '../shared/errors';
 import { reportContextMenu } from './context-menu';
+import { activateWindowMenuItem } from './menu';
 import { bindDocumentsIpc } from './documents/ipc';
 import { bindGitHubIpc } from './github/ipc';
 import { bindModulesIpc } from './modules/ipc';
@@ -49,6 +50,7 @@ export function bindWindowIpc(ctx: IpcContext, init: WindowInit, onReady: () => 
     RunCommand: (id) => registry.run(id, { windowId }),
     DoubleClickTitleBar: () => titleBarDoubleClick(getWindow(windowId)),
     ReportContextMenu: (context) => reportContextMenu(windowId, context),
+    ActivateMenuItem: (id) => activateWindowMenuItem(windowId, id),
   });
 
   bindDocumentsIpc(ctx);

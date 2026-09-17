@@ -125,7 +125,10 @@ function windowOptions(
     };
   }
   // Linux: native frame and no material; the renderer adds `lu-no-material`.
-  return common;
+  // The menu bar is drawn in the title bar (§17.14), so the native one stays
+  // hidden: auto-hide keeps `Menu.setApplicationMenu` from showing it, while
+  // the menu it sets still gives the window its accelerators.
+  return { ...common, autoHideMenuBar: true };
 }
 
 export async function createAppWindow({
@@ -143,6 +146,7 @@ export async function createAppWindow({
 }): Promise<BrowserWindow> {
   const { hub, platform } = services;
   const win = new BrowserWindow(windowOptions(platform, hub.app.material));
+  if (platform === 'linux') win.setMenuBarVisibility(false);
   const contents = win.webContents;
   trackWindow(windowId, win);
   blockNavigation(contents);

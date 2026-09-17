@@ -39,6 +39,14 @@ export {
   type MenuSectionProps,
 } from './components/Menu';
 export {
+  deriveMnemonics,
+  MenuBar,
+  type MenuBarMenu,
+  type MenuBarNode,
+  type MenuBarProps,
+  type Mnemonic,
+} from './components/MenuBar';
+export {
   Checkbox,
   Radio,
   RadioGroup,

@@ -5,6 +5,7 @@ import type { CommandId } from '../shared/commands';
 import type { CommandRegistry } from './commands';
 import { closeWindow, newFiddleIn, openFiddleWindow, openFolderIn, saveIn, withErrorDialog } from './documents/service';
 import { log, logsDir } from './log';
+import { toggleWindowMenuBar } from './menu';
 import { packageFiddle } from './packaging/service';
 import { copyDiagnostics } from './platform/diagnostics';
 import { openExternalLink } from './security';
@@ -111,4 +112,9 @@ export function registerCommands(registry: CommandRegistry, services: Services):
   for (const [id, url] of Object.entries(LINKS) as [keyof typeof LINKS, string][]) {
     registry.register(id, () => openExternalLink(url));
   }
+
+  // The Develop menu (unpackaged builds; `devOnly`, so disabled in the packaged app).
+  registry.register('dev.toggleMenuBar', () => {
+    toggleWindowMenuBar();
+  });
 }

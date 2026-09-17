@@ -36,6 +36,8 @@ export default {
   "newWindow": "\u200f\u202eNew\u202c\u200f \u200f\u202ewindow\u202c\u200f",
   "reload": "\u200f\u202eReload\u202c\u200f",
   "toggleDevTools": "\u200f\u202eToggle\u202c\u200f \u200f\u202edeveloper\u202c\u200f \u200f\u202etools\u202c\u200f",
+  "develop": "\u200f\u202eDevelop\u202c\u200f",
+  "toggleMenuBar": "\u200f\u202eToggle\u202c\u200f \u200f\u202etitle\u202c\u200f \u200f\u202ebar\u202c\u200f \u200f\u202emenu\u202c\u200f \u200f\u202ebar\u202c\u200f",
   "undo": "\u200f\u202eUndo\u202c\u200f",
   "redo": "\u200f\u202eRedo\u202c\u200f",
   "cut": "\u200f\u202eCut\u202c\u200f",

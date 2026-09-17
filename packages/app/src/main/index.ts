@@ -76,7 +76,8 @@ async function main(): Promise<void> {
   const settingsFile = loadSettings();
   const locale = await initMainI18n(preferredLocales(settingsFile.store));
   const hub = new StateHub(
-    { locale, platform, material: detectMaterial(platform), ...settingsFile.initialApp },
+    // `dev`: unpackaged (development and test) builds get the Develop menu and its commands.
+    { locale, platform, material: detectMaterial(platform), dev: !app.isPackaged, ...settingsFile.initialApp },
     (error) => log.error('store push failed', error),
   );
   installFlushOnExit();

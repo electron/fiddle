@@ -12,6 +12,7 @@ export type { WindowState };
 export type CommandId = string;
 import type { FocusContext } from "../../../../shared/settings.js";
 export type { FocusContext };
+export type MenuItemId = string;
 export interface AppInfo {
   name: string;
   version: string;
@@ -30,6 +31,7 @@ export interface IWindowImpl {
   RunCommand(id: CommandId): Promise<void> | void;
   DoubleClickTitleBar(): Promise<void> | void;
   ReportContextMenu(context: FocusContext): Promise<void> | void;
+  ActivateMenuItem(id: MenuItemId): Promise<void> | void;
   getInitialWindowState(): Promise<WindowState> | WindowState;
 }
 export interface IWindowRenderer {
@@ -37,6 +39,7 @@ export interface IWindowRenderer {
   RunCommand(id: CommandId): Promise<void>;
   DoubleClickTitleBar(): Promise<void>;
   ReportContextMenu(context: FocusContext): Promise<void>;
+  ActivateMenuItem(id: MenuItemId): Promise<void>;
   onCommand(fn: (id: CommandId) => void): () => void;
   WindowStore: IPCStore<WindowState>
 }

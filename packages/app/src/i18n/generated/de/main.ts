@@ -36,6 +36,8 @@ export default {
   "newWindow": "Neues Fenster",
   "reload": "Neu laden",
   "toggleDevTools": "Entwicklertools ein-/ausblenden",
+  "develop": "Entwickler",
+  "toggleMenuBar": "Titelleisten-Menüleiste ein-/ausblenden",
   "undo": "Rückgängig",
   "redo": "Wiederholen",
   "cut": "Ausschneiden",

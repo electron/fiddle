@@ -11,6 +11,7 @@ import {
   MenuTrigger,
   showToast,
   ToolbarButton,
+  Tooltip,
 } from '../../../ui';
 import { copyShareLink, deleteGist, setGistVisibility, updateGist } from './actions';
 import { GistDialogs } from './GistDialogs';
@@ -31,7 +32,8 @@ import {
  */
 const DIALOGS = { 'gist.open': 'open', 'gist.history': 'history', 'gist.signIn': 'sign-in' } as const;
 
-export function PublishButton() {
+/** `compact`: a narrow title bar shows Publish as an icon button; its tooltip keeps the label. */
+export function PublishButton({ compact = false }: { compact?: boolean } = {}) {
   const { t } = useTranslation('gists');
   const login = useGitHubLogin();
   const gist = useLoadedGist();
@@ -95,7 +97,11 @@ export function PublishButton() {
     <>
       {gist ? (
         <MenuTrigger>
-          <ToolbarButton data-tour="publish" icon="upload">{t('publishButton')}</ToolbarButton>
+          <Tooltip label={t('publishButton')} isDisabled={!compact}>
+            <ToolbarButton data-tour="publish" icon="upload" label={t('publishButton')}>
+              {compact ? undefined : t('publishButton')}
+            </ToolbarButton>
+          </Tooltip>
           <MenuPopover placement="bottom end" offset={10}>
             <Menu aria-label={t('menuLabel')} onAction={(key) => onAction(String(key))}>
               <MenuItem id="update" icon="upload">
@@ -138,9 +144,11 @@ export function PublishButton() {
           </MenuPopover>
         </MenuTrigger>
       ) : (
-        <ToolbarButton data-tour="publish" icon="upload" onPress={() => requestPublish(login)}>
-          {t('publishButton')}
-        </ToolbarButton>
+        <Tooltip label={t('publishButton')} isDisabled={!compact}>
+          <ToolbarButton data-tour="publish" icon="upload" label={t('publishButton')} onPress={() => requestPublish(login)}>
+            {compact ? undefined : t('publishButton')}
+          </ToolbarButton>
+        </Tooltip>
       )}
       <GistDialogs />
     </>

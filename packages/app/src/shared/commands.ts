@@ -35,6 +35,12 @@ export interface CommandDefinition {
   /** Where the default keybindings apply. Unset means everywhere. Menus never register a scoped keybinding. */
   context?: KeyContext;
   enabled?: Enablement;
+  /**
+   * For developing Fiddle itself: the Develop menu (src/main/menu.ts). Enabled
+   * only while `App.dev` is set (unpackaged builds), and left out of the palette
+   * and Settings > Keyboard otherwise (`isCommandListed`).
+   */
+  devOnly?: boolean;
 }
 
 const hasWindow: Enablement = (_app, win) => win !== undefined;
@@ -236,6 +242,9 @@ export const commands = {
   },
   // Font changes apply after a reload (§17.2); Settings offers this next to them.
   'view.reloadAllWindows': { label: 'reloadAllWindows' },
+  // The Develop menu (unpackaged builds): shows or hides the title bar's menu
+  // bar in every window, on any platform, without a restart.
+  'dev.toggleMenuBar': { label: 'toggleMenuBar', devOnly: true },
 } as const satisfies Record<string, CommandDefinition>;
 
 export type CommandId = keyof typeof commands;
@@ -278,5 +287,12 @@ export function isCommandEnabled(
   app: AppState,
   win: WindowState | undefined,
 ): boolean {
-  return getCommand(id).enabled?.(app, win) ?? true;
+  const command = getCommand(id);
+  if (command.devOnly && !app.dev) return false;
+  return command.enabled?.(app, win) ?? true;
+}
+
+/** Whether the palette and Settings > Keyboard list the command: a dev-only one only in development builds. */
+export function isCommandListed(id: CommandId, app: Pick<AppState, 'dev'> | undefined): boolean {
+  return !getCommand(id).devOnly || app?.dev === true;
 }

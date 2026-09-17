@@ -44,6 +44,14 @@ export function testFlags(): {
   return { updates: on, sentry: on, firstRunPrompts: on, tour: on, animations: on };
 }
 
+/**
+ * `FIDDLE_TEST_MENUBAR=1`: draw the Windows and Linux title bar menu bar on
+ * every platform, so e2e specs can drive it on a macOS desktop too.
+ */
+export function testMenuBar(): boolean {
+  return isTestMode() && process.env.FIDDLE_TEST_MENUBAR === '1';
+}
+
 /** The per-run temp directory (userData, cache, logs, artifacts). Test mode only. */
 function getTestDir(): string | undefined {
   return isTestMode() ? process.env.FIDDLE_TEST_DIR : undefined;

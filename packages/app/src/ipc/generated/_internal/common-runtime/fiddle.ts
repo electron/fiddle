@@ -18,6 +18,12 @@ import { focusContextSchema } from "../../../../shared/settings.js";
 export function $eipc_validator$_FocusContext(value: unknown) {
   return focusContextSchema.safeParse(value).success;
 }
+export function $eipc_validator$_MenuItemId(value: any): boolean {
+if (typeof value !== 'string') return false;
+if (!(value.length >= 1)) return false;
+if (!(value.length <= 300)) return false;
+  return true;
+}
 export function $eipc_validator$_AppInfo(value: any): boolean {
   if (!value || typeof value !== 'object') return false;
 
