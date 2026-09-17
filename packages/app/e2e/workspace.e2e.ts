@@ -147,11 +147,13 @@ describe('workspace', () => {
     await expect.poll(activeFile).toBe(last);
     await app().runCommand('editor.moveTabRight');
     await expect.poll(visibleTabs).toEqual([first, last, ...before.slice(1, -1)]);
-    // Ctrl+Shift+PageUp moves it back (Ctrl+Shift+PageDown the other way), as in VS Code.
-    await app().press('Ctrl+Shift+PageUp');
+    // Ctrl+Shift+PageUp moves it back (Ctrl+Shift+PageDown the other way), as in VS Code; Ctrl+Cmd+Left and Right on macOS.
+    const [moveLeft, moveRight] =
+      process.platform === 'darwin' ? ['Ctrl+Cmd+Left', 'Ctrl+Cmd+Right'] : ['Ctrl+Shift+PageUp', 'Ctrl+Shift+PageDown'];
+    await app().press(moveLeft);
     await expect.poll(visibleTabs).toEqual([last, ...before.slice(0, -1)]);
-    await app().press('Ctrl+Shift+PageDown');
-    await app().press('Ctrl+Shift+PageDown');
+    await app().press(moveRight);
+    await app().press(moveRight);
     await expect.poll(visibleTabs).toEqual([first, second, last, ...before.slice(2, -1)]);
 
     // Dropping a tab past the last one moves it to the end; on a tab's far half, after that tab.

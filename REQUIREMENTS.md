@@ -631,7 +631,7 @@ A desktop app for writing, running, sharing and packaging small Electron experim
 - One code editor (Monaco) per visible file. {#editor.per-file}
 - Panes can be rearranged, resized, maximized and closed. Closing a pane keeps its file's tab and content. The layout can be reset. {#editor.panes}
 - Each open file has a tab, and the selected tab is the focused pane's file: selecting a tab whose file another pane shows focuses that pane, and selecting one no pane shows puts its file in the focused pane. Closing a tab hides its file, which stays in the file list, and closes its pane. Dragging a tab onto a pane shows its file there (the middle) or in a new pane on that side (either edge). {#editor.tabs}
-  - Tabs can be reordered by dragging them along the tab row, or with Move tab left and Move tab right (Ctrl+Shift+PageUp and PageDown). The file list follows the same order, which is saved with the session. {#editor.tab-reorder}
+  - Tabs can be reordered by dragging them along the tab row, or with Move tab left and Move tab right in the Window menu (Ctrl+Shift+PageUp and PageDown; on macOS, Ctrl+Cmd+Left and Right). The file list follows the same order, which is saved with the session. {#editor.tab-reorder}
 - Split view: up to four panes side by side, each showing one file, no file in two panes. Split editor (`CmdOrCtrl+\`) opens a second pane showing `renderer.js`, or `main.js` when that's current; while split, it closes every pane but the focused one. Each pane's header has Maximize (keep only this pane) and Close. Pane widths reset to equal shares when a pane opens or closes, and aren't saved. {#editor.split-n}
 - Each pane shows an error or warning indicator taken from the editor's diagnostics. {#editor.diagnostics}
 - Editor defaults: soft wrap on, minimap off, 2-space tabs. {#editor.defaults}
@@ -641,7 +641,7 @@ A desktop app for writing, running, sharing and packaging small Electron experim
   - `electron.d.ts` from unpkg (`electron` or `electron-nightly`), cached per version and cleared when that version is removed. {#editor.types-electron}
   - `@types/node` for that Electron's Node version, cached. If the exact version doesn't exist, the newest in the same major is used. {#editor.types-node}
   - Local builds read `<build>/gen/electron/tsc/typings/electron.d.ts` and reload live when it changes. {#editor.types-local}
-- Prettier formatting for JS, HTML and CSS: current document, selection, or all open editors. {#editor.format}
+- Prettier formatting for JS, HTML and CSS: current document, selection, or all open editors, from the Edit menu (document and selection also from the editor's context menu). {#editor.format}
 - Go to/Peek Definition, Find References. {#editor.navigation}
 - Clicking a link in an editor or in the console asks before opening it in the browser. {#editor.link-confirm}
 
@@ -733,7 +733,7 @@ A desktop app for writing, running, sharing and packaging small Electron experim
 - **Run/Stop control states:** checking, downloading (with progress), unzipping, installing modules, ready, running. {#run.states}
 - **Starting a run:**
   - Only a click on the Run control, the Run menu item (F5), the context menu or auto-bisect can start a run. Fiddle code and page scripts can't trigger one. {#run.start}
-  - The Run menu item is disabled while the focused window is running. A second run in the same window is ignored. {#run.single}
+  - The Run menu item, like the Run control, reads Stop while the focused window is busy, and stops it. A second run in the same window is ignored. {#run.single}
 - **Steps:**
   1. Open the console, clearing it first if that's enabled. {#run.open-console}
   2. Write the files and `package.json` to a new temp dir. {#run.temp-dir}
@@ -764,7 +764,7 @@ A desktop app for writing, running, sharing and packaging small Electron experim
 - Hidden by default. Opens automatically on run, package and make. Can be toggled, or hidden by dragging its splitter closed. {#console.visibility}
 - Read-only lines with timestamps. Keeps the last 1000 entries and auto-scrolls. {#console.lines}
 - Filters out Node inspector banner lines. On Windows, output is buffered line by line. {#console.filter-banner}
-- Can be cleared with a shortcut (while the console has focus), from the context menu, or automatically on each run (setting). {#console.clear}
+- Can be cleared with a shortcut (while the console has focus), from the Edit menu or the context menu, or automatically on each run (setting). {#console.clear}
 
 ### 8. Electron versions
 
@@ -902,13 +902,13 @@ Settings are saved locally and sync live across windows. {#settings.persist-sync
 | Save | CmdOrCtrl+S {#keys.save} |
 | Save As | CmdOrCtrl+Shift+S {#keys.save-as} |
 | Preferences | CmdOrCtrl+, {#keys.preferences} |
-| Run Fiddle | F5 {#keys.run} |
+| Run Fiddle | CmdOrCtrl+R, F5 {#keys.run} |
 | Clear console (console focused) | CmdOrCtrl+K {#keys.clear-console} |
 | Split editor / Close split | `CmdOrCtrl+\` {#keys.split} |
-| Move tab left / right | Ctrl+Shift+PageUp / Ctrl+Shift+PageDown {#keys.move-tab} |
+| Move tab left / right | Ctrl+Shift+PageUp / Ctrl+Shift+PageDown; Ctrl+Cmd+Left / Ctrl+Cmd+Right on macOS {#keys.move-tab} |
 | Toggle Bisect Helper | CmdOrCtrl+Shift+B {#keys.bisect} |
 | Toggle DevTools | CmdOrCtrl+Option+I {#keys.devtools} |
-| Reload | CmdOrCtrl+R {#keys.reload} |
+| Reload | CmdOrCtrl+Shift+R {#keys.reload} |
 | Actual size / Zoom in / Zoom out | CmdOrCtrl+0 / CmdOrCtrl+Plus / CmdOrCtrl+- {#keys.zoom} |
 | Full screen | Ctrl+Cmd+F (macOS), F11 (others) {#keys.fullscreen} |
 | Minimize / Close window | CmdOrCtrl+M / CmdOrCtrl+W {#keys.minimize-close} |
@@ -923,6 +923,14 @@ Settings are saved locally and sync live across windows. {#settings.persist-sync
 - Publish to Gist, Save as Forge Project, Package, Make installers. {#keys.menu-file}
 - Toggle soft wrap, Toggle minimap. {#keys.menu-editor}
 - Show welcome tour, Open the project/Electron repos and the issue tracker, About. {#keys.menu-help}
+
+**Menu bar.** File, Edit, View, Run, Window and Help. macOS adds the app menu (About, Settings…, Services, Hide, Quit); on Windows and Linux, Settings… and Exit (Quit on Linux) are in File and About is in Help. Groups are separated; every item is in sentence case, with an ellipsis only on items that open a dialog asking for more. Items whose state main knows say what they will do (Hide sidebar, Stop); the command palette keeps each command's own name.
+- File: New fiddle, New test, New window | Open…, Open recent, Open gist… | Save, Save as…, Save as Forge project… | Publish to gist…, Show gist history… | Show me | Close window.
+- Edit: Undo, Redo | Cut, Copy, Paste, Select all | Format document, Format selection, Format all files | Clear console (its key applies in the console only, so the menu shows none).
+- View: Command palette… | Hide or Show sidebar, Hide or Show console, Split editor | Toggle soft wrap, Toggle minimap, Use Tab to move focus | Actual size, Zoom in, Zoom out | Enter or Exit full screen (the native item). Development builds add Reload and Reload all windows at the end; their commands and keys exist in every build.
+- Run: Run (Stop while busy) | Bisect… (Stop bisect while one runs) | Package, Make installers.
+- Window: Minimize, Zoom (macOS) | Move tab left, Move tab right | Bring all to front and the open windows (macOS).
+- Help: Show welcome tour | Electron Fiddle on GitHub, Electron on GitHub, Report an issue | Open logs folder, Copy diagnostics | Toggle developer tools | About Electron Fiddle (Windows and Linux).
 
 **Context menu:**
 - Everywhere: Run, Clear Console, Cut/Copy/Paste. {#keys.context-menu}

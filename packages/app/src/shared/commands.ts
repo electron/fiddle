@@ -28,10 +28,11 @@ export type KeyContext = 'editor' | 'console' | 'running';
 export const keyContexts: readonly KeyContext[] = ['editor', 'console', 'running'];
 
 export interface CommandDefinition {
+  /** The palette's and the keyboard settings' label. Menus may say what the command does now instead (Hide sidebar). */
   label: LabelKey;
   /** Default keybindings. Menus show the first; the renderer dispatches every one. */
   accelerator?: Accelerator | readonly Accelerator[];
-  /** Where the default keybindings apply. Unset means everywhere. */
+  /** Where the default keybindings apply. Unset means everywhere. Menus never register a scoped keybinding. */
   context?: KeyContext;
   enabled?: Enablement;
 }
@@ -62,15 +63,18 @@ export const commands = {
     accelerator: 'CmdOrCtrl+\\',
     enabled: hasWindow,
   },
-  // Move the active tab along the tab row, as in VS Code.
+  // Move the active tab along the tab row (the Window menu): Ctrl+Shift+PageUp
+  // and PageDown as in VS Code and Chrome; on macOS, whose laptops have no Page
+  // keys, Ctrl+Cmd+Left and Right (VS Code's "move editor into the previous or
+  // next group"), which Monaco leaves free.
   'editor.moveTabLeft': {
     label: 'moveTabLeft',
-    accelerator: 'Ctrl+Shift+PageUp',
+    accelerator: { default: 'Ctrl+Shift+PageUp', darwin: 'Ctrl+Cmd+Left' },
     enabled: hasTabs,
   },
   'editor.moveTabRight': {
     label: 'moveTabRight',
-    accelerator: 'Ctrl+Shift+PageDown',
+    accelerator: { default: 'Ctrl+Shift+PageDown', darwin: 'Ctrl+Cmd+Right' },
     enabled: hasTabs,
   },
   'view.toggleSidebar': {
@@ -194,7 +198,8 @@ export const commands = {
   'edit.undo': { label: 'undo', accelerator: 'CmdOrCtrl+Z' },
   'edit.redo': { label: 'redo', accelerator: 'Shift+CmdOrCtrl+Z' },
   'edit.selectAll': { label: 'selectAll', accelerator: 'CmdOrCtrl+A' },
-  // Sent to the window (`Window.Command`), like the other editor commands.
+  // Sent to the window (`Window.Command`), like the other editor commands. In
+  // the Edit menu without its key: a scoped keybinding is the renderer's alone.
   'console.clear': {
     label: 'clearConsole',
     accelerator: 'CmdOrCtrl+K',

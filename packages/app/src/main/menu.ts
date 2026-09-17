@@ -1,17 +1,25 @@
 /**
- * The native application menu, built from the shared command definitions.
- * Role items get explicit, translated labels. The menu is rebuilt when
- * something it shows changes (enablement, keybindings, recent folders,
- * locale, the focused window), so enablement follows the focused window.
+ * The native application menu (REQUIREMENTS §17.14), built from the shared
+ * command definitions:
+ * - macOS: Electron Fiddle, File, Edit, View, Run, Window and Help;
+ * - Windows and Linux: the same without the app menu; Settings and Exit are in
+ *   File, and About is in Help.
+ *
+ * Role items get explicit, translated labels. Items whose state main knows
+ * (the sidebar, the console, the run, a bisect, full screen) say what they
+ * will do, as macOS menus do; the palette keeps the command's own label. The
+ * menu is rebuilt whenever anything it shows changes (a label, enablement, a
+ * keybinding, recent folders, the locale, the focused window), so it follows
+ * the focused window.
  */
 import { app, Menu, type MenuItemConstructorOptions } from 'electron';
 
-import { commandIds, commands, type CommandId } from '../shared/commands';
+import { commands, getCommand, type CommandId, type LabelKey } from '../shared/commands';
 import { SHOW_ME_EXAMPLES } from '../shared/examples';
 import { effectiveAccelerator, type Keybindings } from '../shared/settings';
-import type { Platform } from '../shared/stores';
+import type { Platform, WindowState } from '../shared/stores';
 import type { CommandRegistry } from './commands';
-import { dumpMenu } from './context-menu';
+import { describeMenu, dumpMenu } from './context-menu';
 import {
   clearRecentFolders,
   currentTemplateName,
@@ -23,9 +31,23 @@ import {
 import { t, tm } from './i18n';
 import { log } from './log';
 import type { Services } from './services';
-import { focusedWindowId, windowIdOf } from './windows';
+import { focusedWindowId, getWindow, windowIdOf } from './windows';
 
 const separator: MenuItemConstructorOptions = { type: 'separator' };
+
+/** What the menu shows, besides the registry's enablement. */
+export interface MenuState {
+  platform: Platform;
+  /** The focused app window; undefined when none has focus (macOS). */
+  focused: string | undefined;
+  win: WindowState | undefined;
+  /** Whether that window is full screen. */
+  fullScreen: boolean;
+  /** The user's overrides; `null` unbinds. */
+  keybindings: Keybindings;
+  /** Unpackaged (development and test) builds add Reload and Reload all windows to View. */
+  dev: boolean;
+}
 
 /** File → Open recent, from state.json's recent folders. */
 function openRecentMenu(): MenuItemConstructorOptions {
@@ -65,20 +87,18 @@ function showMeMenu(focused: string | undefined): MenuItemConstructorOptions {
   };
 }
 
-function buildMenuTemplate(
-  registry: CommandRegistry,
-  platform: Platform,
-  focused: string | undefined,
-  /** The user's overrides; `null` unbinds. */
-  keybindings: Keybindings,
-): MenuItemConstructorOptions[] {
+export function buildMenuTemplate(registry: CommandRegistry, state: MenuState): MenuItemConstructorOptions[] {
+  const { platform, focused, win, keybindings } = state;
   const isMac = platform === 'darwin';
   const name = t('appMenu');
 
-  const command = (id: CommandId): MenuItemConstructorOptions => ({
+  /** A registry command's item. `label` says what it will do now (Hide sidebar) instead of its own. */
+  const command = (id: CommandId, label?: LabelKey): MenuItemConstructorOptions => ({
     id,
-    label: t(commands[id].label),
-    accelerator: effectiveAccelerator(id, platform, keybindings),
+    label: t(label ?? commands[id].label),
+    // A keybinding scoped to a context (Clear console's, to the console) is the
+    // renderer's to dispatch: registered here, it would fire everywhere.
+    accelerator: getCommand(id).context ? undefined : effectiveAccelerator(id, platform, keybindings),
     enabled: registry.isEnabled(id, focused),
     click: (_item, window) => {
       registry
@@ -89,7 +109,17 @@ function buildMenuTemplate(
     },
   });
 
-  const quit: MenuItemConstructorOptions = { role: 'quit', label: t('quit', { name }) };
+  // What the stateful items will do, from the focused window's store.
+  const layout = win?.layout;
+  const busy = (win?.run?.status ?? 'ready') !== 'ready';
+  const bisect = win?.run?.bisect;
+  const bisecting = bisect != null && bisect.result === null;
+
+  // "Quit Electron Fiddle" (Cmd+Q, Ctrl+Q); Windows says Exit.
+  const quit: MenuItemConstructorOptions = {
+    role: 'quit',
+    label: platform === 'win32' ? t('exit') : t('quit', { name }),
+  };
 
   const appMenu: MenuItemConstructorOptions[] = isMac
     ? [
@@ -112,19 +142,6 @@ function buildMenuTemplate(
       ]
     : [];
 
-  const windowItems: MenuItemConstructorOptions[] = isMac
-    ? [
-        { role: 'minimize', label: t('minimize') },
-        { role: 'zoom', label: t('zoom') },
-        { role: 'close', label: t('close') },
-        separator,
-        { role: 'front', label: t('bringAllToFront') },
-      ]
-    : [
-        { role: 'minimize', label: t('minimize') },
-        { role: 'close', label: t('close') },
-      ];
-
   return [
     ...appMenu,
     {
@@ -136,19 +153,21 @@ function buildMenuTemplate(
         separator,
         command('file.open'),
         openRecentMenu(),
+        command('gist.open'),
         separator,
         command('file.save'),
         command('file.saveAs'),
         command('file.saveAsForge'),
         separator,
         command('gist.publish'),
-        command('gist.open'),
         command('gist.history'),
         separator,
         showMeMenu(focused),
         separator,
+        // Elsewhere than macOS, Settings and Exit live here (there's no app menu).
+        ...(isMac ? [] : [command('app.preferences'), separator]),
         command('file.close'),
-        ...(isMac ? [] : [separator, command('app.preferences'), separator, quit]),
+        ...(isMac ? [] : [separator, quit]),
       ],
     },
     {
@@ -162,6 +181,12 @@ function buildMenuTemplate(
         { role: 'copy', label: t('copy') },
         { role: 'paste', label: t('paste') },
         command('edit.selectAll'),
+        separator,
+        command('editor.format'),
+        command('editor.formatSelection'),
+        command('editor.formatAll'),
+        separator,
+        command('console.clear'),
       ],
     },
     {
@@ -169,42 +194,57 @@ function buildMenuTemplate(
       submenu: [
         command('app.commandPalette'),
         separator,
-        command('view.reload'),
-        command('view.reloadAllWindows'),
-        command('view.toggleDevTools'),
-        separator,
-        command('view.toggleSidebar'),
-        command('view.toggleConsole'),
+        // Layout. Main knows the sidebar and console state, so these say Hide or Show.
+        command('view.toggleSidebar', (layout?.sidebar ?? true) ? 'hideSidebar' : 'showSidebar'),
+        command('view.toggleConsole', (layout?.consoleVisible ?? true) ? 'hideConsole' : 'showConsole'),
         command('view.toggleSplit'),
-        command('editor.moveTabLeft'),
-        command('editor.moveTabRight'),
+        separator,
+        // Editor presentation. Its state lives in the renderer, so plain toggles.
         command('editor.toggleSoftWrap'),
         command('editor.toggleMinimap'),
         command('editor.toggleTabFocus'),
-        command('editor.format'),
-        command('editor.formatAll'),
         separator,
         // §17.14. The app must stay usable at 200% (§10).
         { role: 'resetZoom', label: t('actualSize'), accelerator: 'CmdOrCtrl+0' },
         { role: 'zoomIn', label: t('zoomIn'), accelerator: 'CmdOrCtrl+Plus' },
         { role: 'zoomOut', label: t('zoomOut'), accelerator: 'CmdOrCtrl+-' },
         separator,
-        { role: 'togglefullscreen', label: t('toggleFullScreen') },
+        // The role brings the platform's key (Ctrl+Cmd+F, or F11; §17.14). On
+        // macOS 26, Electron 39.1–44 also shows AppKit's Globe+F copy of this
+        // item (electron/electron#52821); that second item isn't ours.
+        { role: 'togglefullscreen', label: t(state.fullScreen ? 'exitFullScreen' : 'enterFullScreen') },
+        // For developing Fiddle itself: unpackaged builds only. The commands stay
+        // registered everywhere, for Settings' "Reload all windows", the error
+        // view's Reload, the palette and their keys.
+        ...(state.dev ? [separator, command('view.reload'), command('view.reloadAllWindows')] : []),
       ],
     },
     // run.toggle's second default, F5, is dispatched by the renderer.
     {
       label: t('runMenu'),
       submenu: [
-        command('run.toggle'),
+        command('run.toggle', busy ? 'stop' : 'run'),
         separator,
-        command('bisect.toggle'),
+        command('bisect.toggle', bisecting ? 'stopBisect' : undefined),
         separator,
         command('run.package'),
         command('run.make'),
       ],
     },
-    { label: t('window'), submenu: windowItems },
+    {
+      // The Window menu proper (`role`), so macOS lists the open windows in it.
+      role: 'window',
+      label: t('window'),
+      submenu: [
+        { role: 'minimize', label: t('minimize') },
+        ...(isMac ? [{ role: 'zoom' as const, label: t('zoom') }] : []),
+        separator,
+        // The editor tabs, where macOS apps keep their tab commands.
+        command('editor.moveTabLeft'),
+        command('editor.moveTabRight'),
+        ...(isMac ? [separator, { role: 'front' as const, label: t('bringAllToFront') }] : []),
+      ],
+    },
     {
       role: 'help',
       label: t('help'),
@@ -217,6 +257,9 @@ function buildMenuTemplate(
         separator,
         command('help.openLogsFolder'),
         command('help.copyDiagnostics'),
+        separator,
+        // Last, as in VS Code: it's for looking under Fiddle's own hood.
+        command('view.toggleDevTools'),
         ...(isMac ? [] : [separator, command('help.about')]),
       ],
     },
@@ -224,6 +267,7 @@ function buildMenuTemplate(
 }
 
 export function installMenu({ registry, hub, platform }: Services): void {
+  const dev = !app.isPackaged;
   let scheduled = false;
   let shown: string | undefined;
   const refresh = () => {
@@ -232,20 +276,19 @@ export function installMenu({ registry, hub, platform }: Services): void {
     setImmediate(() => {
       scheduled = false;
       const focused = focusedWindowId();
-      const { keybindings } = hub.app.settings;
+      const template = buildMenuTemplate(registry, {
+        platform,
+        focused,
+        win: focused === undefined ? undefined : hub.getWindow(focused),
+        fullScreen: getWindow(focused)?.isFullScreen() ?? false,
+        keybindings: hub.app.settings.keybindings,
+        dev,
+      });
       // Store changes come up to 10 times a second during downloads; rebuild
       // only when something the menu shows has changed.
-      const key = JSON.stringify([
-        focused,
-        hub.app.locale,
-        keybindings,
-        recentFolders(),
-        focused && currentTemplateName(focused),
-        commandIds.filter((id) => registry.isEnabled(id, focused)),
-      ]);
+      const key = JSON.stringify([focused, describeMenu(template)]);
       if (key === shown) return;
       shown = key;
-      const template = buildMenuTemplate(registry, platform, focused, keybindings);
       dumpMenu('application menu', template);
       Menu.setApplicationMenu(Menu.buildFromTemplate(template));
     });
@@ -253,5 +296,9 @@ export function installMenu({ registry, hub, platform }: Services): void {
   hub.onChange(refresh);
   app.on('browser-window-focus', refresh);
   app.on('browser-window-blur', refresh);
+  app.on('browser-window-created', (_event, win) => {
+    win.on('enter-full-screen', refresh);
+    win.on('leave-full-screen', refresh);
+  });
   refresh();
 }

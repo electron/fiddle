@@ -459,11 +459,6 @@
     "translation": "03a781e9cbe3",
     "reviewed": false
   },
-  "main:close": {
-    "source": "8b9de9c0c0a0",
-    "translation": "286b5f7afa80",
-    "reviewed": false
-  },
   "main:closeWindow": {
     "source": "7d9eb7acb13e",
     "translation": "f6c244f98893",
@@ -722,11 +717,6 @@
   "main:toggleDevTools": {
     "source": "cf08ce6b4afe",
     "translation": "a6b7448cf7a1",
-    "reviewed": false
-  },
-  "main:toggleFullScreen": {
-    "source": "57789cb3e561",
-    "translation": "6c69b26b67b2",
     "reviewed": false
   },
   "main:toggleMinimap": {

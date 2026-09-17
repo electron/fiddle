@@ -105,7 +105,7 @@ export function attachContextMenu(windowId: string, contents: WebContents, { reg
   }
 }
 
-/** Labels, shortcuts, roles and state, one item per line, for the dev log. */
+/** Labels, shortcuts, roles and state, one item per line: the dev log, and the application menu's rebuild check. */
 export function describeMenu(template: readonly MenuItemConstructorOptions[], depth = 0): string[] {
   const indent = '  '.repeat(depth);
   return template.flatMap((item) => {
@@ -114,6 +114,7 @@ export function describeMenu(template: readonly MenuItemConstructorOptions[], de
     const notes = [
       item.accelerator && `[${String(item.accelerator)}]`,
       item.role && `(role ${item.role})`,
+      item.checked && '(checked)',
       item.enabled === false && '(disabled)',
     ].filter(Boolean);
     const line = [`${indent}${item.label ?? item.role ?? ''}`, ...notes].join(' ');

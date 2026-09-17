@@ -40,7 +40,7 @@
     "maxLength": 30
   },
   "closeWindow": {
-    "message": "Close",
+    "message": "Close window",
     "description": "File menu command that closes the window.",
     "maxLength": 30
   },
@@ -51,22 +51,42 @@
   },
   "moveTabLeft": {
     "message": "Move tab left",
-    "description": "View menu item and command that moves the current editor tab one place toward the start of the tab row.",
+    "description": "Window menu item and command that moves the current editor tab one place toward the start of the tab row.",
     "maxLength": 30
   },
   "moveTabRight": {
     "message": "Move tab right",
-    "description": "View menu item and command that moves the current editor tab one place toward the end of the tab row.",
+    "description": "Window menu item and command that moves the current editor tab one place toward the end of the tab row.",
     "maxLength": 30
   },
   "toggleSidebar": {
     "message": "Toggle sidebar",
-    "description": "View menu item and command that shows or hides the file sidebar.",
+    "description": "Command that shows or hides the file sidebar, as the command palette and the keyboard settings list it. The View menu says Hide sidebar or Show sidebar instead.",
     "maxLength": 30
   },
   "toggleConsole": {
     "message": "Toggle console",
-    "description": "View menu item and command that shows or hides the output console.",
+    "description": "Command that shows or hides the output console, as the command palette and the keyboard settings list it. The View menu says Hide console or Show console instead.",
+    "maxLength": 30
+  },
+  "showSidebar": {
+    "message": "Show sidebar",
+    "description": "View menu item, while the file sidebar is hidden, that shows it.",
+    "maxLength": 30
+  },
+  "hideSidebar": {
+    "message": "Hide sidebar",
+    "description": "View menu item, while the file sidebar is shown, that hides it.",
+    "maxLength": 30
+  },
+  "showConsole": {
+    "message": "Show console",
+    "description": "View menu item, while the output console is hidden, that shows it.",
+    "maxLength": 30
+  },
+  "hideConsole": {
+    "message": "Hide console",
+    "description": "View menu item, while the output console is shown, that hides it.",
     "maxLength": 30
   },
   "toggleSoftWrap": {
@@ -81,7 +101,7 @@
   },
   "formatDocument": {
     "message": "Format document",
-    "description": "Command that reformats the code in the current editor.",
+    "description": "Edit menu and editor context menu command that reformats the code in the current editor.",
     "maxLength": 30
   },
   "appMenu": {
@@ -116,8 +136,13 @@
   },
   "quit": {
     "message": "Quit {{name}}",
-    "description": "Menu item that quits the app. {{name}} is the product name.",
+    "description": "Menu item that quits the app: the macOS app menu, or the File menu on Linux. {{name}} is the product name.",
     "maxLength": 40
+  },
+  "exit": {
+    "message": "Exit",
+    "description": "File menu item on Windows that quits the app, as Windows apps call it.",
+    "maxLength": 20
   },
   "file": {
     "message": "File",
@@ -146,12 +171,12 @@
   },
   "reload": {
     "message": "Reload",
-    "description": "Command that reloads the current window's view. Unsaved text is kept.",
+    "description": "Command that reloads the current window's view: in the command palette, and in the View menu of development builds. Unsaved text is kept.",
     "maxLength": 30
   },
   "toggleDevTools": {
     "message": "Toggle developer tools",
-    "description": "Command that opens or closes Chromium's developer tools for the app window.",
+    "description": "Help menu command that opens or closes Chromium's developer tools for the app window.",
     "maxLength": 40
   },
   "undo": {
@@ -184,24 +209,24 @@
     "description": "Edit menu item.",
     "maxLength": 30
   },
-  "toggleFullScreen": {
-    "message": "Toggle full screen",
-    "description": "View menu item that enters or leaves full screen.",
+  "enterFullScreen": {
+    "message": "Enter full screen",
+    "description": "View menu item, while the window isn't full screen, that makes it full screen.",
+    "maxLength": 30
+  },
+  "exitFullScreen": {
+    "message": "Exit full screen",
+    "description": "View menu item, while the window is full screen, that leaves full screen.",
     "maxLength": 30
   },
   "minimize": {
     "message": "Minimize",
-    "description": "Window menu item.",
+    "description": "Window menu item that minimizes the focused window.",
     "maxLength": 30
   },
   "zoom": {
     "message": "Zoom",
     "description": "macOS Window menu item that zooms the window.",
-    "maxLength": 30
-  },
-  "close": {
-    "message": "Close window",
-    "description": "Window menu item that closes the focused window.",
     "maxLength": 30
   },
   "bringAllToFront": {
@@ -245,7 +270,17 @@
   },
   "runToggle": {
     "message": "Run or stop",
-    "description": "Command that runs the fiddle in Electron, or stops it when it is running.",
+    "description": "Command that runs the fiddle in Electron, or stops it when it is running, as the command palette and the keyboard settings list it. The Run menu says Run or Stop instead.",
+    "maxLength": 30
+  },
+  "run": {
+    "message": "Run",
+    "description": "Run menu item, while the fiddle isn't running, that runs it in Electron.",
+    "maxLength": 30
+  },
+  "stop": {
+    "message": "Stop",
+    "description": "Run menu item, while the fiddle runs (or its Electron version downloads or its modules install), that stops it.",
     "maxLength": 30
   },
   "packageFiddle": {
@@ -260,7 +295,12 @@
   },
   "toggleBisect": {
     "message": "Bisect…",
-    "description": "Command that starts a bisect to find which Electron release changed the fiddle's behavior, or stops the current one.",
+    "description": "Command that starts a bisect to find which Electron release changed the fiddle's behavior, or stops the current one. Opens a dialog. The Run menu says Stop bisect while one is running.",
+    "maxLength": 30
+  },
+  "stopBisect": {
+    "message": "Stop bisect",
+    "description": "Run menu item, while a bisect is in progress, that stops it.",
     "maxLength": 30
   },
   "preferences": {
@@ -330,17 +370,17 @@
   },
   "clearConsole": {
     "message": "Clear console",
-    "description": "Command that removes every line from the output console. In context menus and the command palette.",
+    "description": "Command that removes every line from the output console. In the Edit menu, context menus and the command palette.",
     "maxLength": 30
   },
   "formatAll": {
     "message": "Format all files",
-    "description": "Command that reformats the code in every file of the fiddle.",
+    "description": "Edit menu command that reformats the code in every file of the fiddle.",
     "maxLength": 30
   },
   "formatSelection": {
     "message": "Format selection",
-    "description": "Editor context menu command that reformats only the selected code.",
+    "description": "Edit menu and editor context menu command that reformats only the selected code.",
     "maxLength": 30
   },
   "goToDefinition": {
@@ -354,13 +394,13 @@
     "maxLength": 30
   },
   "toggleTabFocus": {
-    "message": "Toggle Tab key moves focus",
-    "description": "Accessibility command. While it's on, the Tab key moves keyboard focus out of the editor instead of inserting a tab. Tab is the key's name.",
+    "message": "Use Tab to move focus",
+    "description": "Accessibility command in the View menu that turns tab-focus mode on or off: while it's on, the Tab key moves keyboard focus out of the editor instead of inserting a tab. Tab is the key's name.",
     "maxLength": 40
   },
   "reloadAllWindows": {
     "message": "Reload all windows",
-    "description": "Command that reloads every open window's view, for example to apply a new editor font. Unsaved text is kept.",
+    "description": "Command that reloads every open window's view, for example to apply a new editor font: a button in Settings, the command palette, and the View menu of development builds. Unsaved text is kept.",
     "maxLength": 30
   },
   "inspectElement": {
