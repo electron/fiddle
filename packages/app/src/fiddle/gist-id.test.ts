@@ -27,13 +27,15 @@ describe('getGistId', () => {
 // @feature load.gist-open-clipboard
 describe('asGistReference', () => {
   it.each([
-    ID,
-    `  ${ID}\n`,
-    `https://gist.github.com/${ID}`,
-    `https://gist.github.com/ckerr/${ID}/0123456789abcdef0123456789abcdef01234567`,
-    `HTTPS://Gist.GitHub.com/ckerr/${ID}#file-main-js`,
-    `gist.github.com/ckerr/${ID}`,
-  ])('accepts %s whole', (input) => expect(asGistReference(input)).toBe(input.trim()));
+    [ID, ID],
+    [`  ${ID}\n`, ID],
+    [ID.toUpperCase(), ID],
+    [`https://gist.github.com/${ID}`, `https://gist.github.com/${ID}`],
+    [`https://gist.github.com/ckerr/${ID}/0123456789abcdef0123456789abcdef01234567`, `https://gist.github.com/ckerr/${ID}`],
+    [`HTTPS://Gist.GitHub.com/ckerr/${ID}#file-main-js`, `https://gist.github.com/ckerr/${ID}`],
+    [`https://gist.github.com/ckerr/${ID}?permalink_comment_id=1`, `https://gist.github.com/ckerr/${ID}`],
+    [`gist.github.com/ckerr/${ID}`, `https://gist.github.com/ckerr/${ID}`],
+  ])('turns %s into its canonical reference', (input, expected) => expect(asGistReference(input)).toBe(expected));
 
   it.each([
     '',
@@ -44,6 +46,11 @@ describe('asGistReference', () => {
     `https://example.com/${ID}`,
     `https://gist.github.com/?q=${ID}`,
     'https://gist.github.com/ckerr',
+    // Userinfo, a port or extra path segments never reach the renderer or getGistId().
+    `https://${'a'.repeat(32)}@gist.github.com/ckerr/${ID}`,
+    `https://user:secret@gist.github.com/${ID}`,
+    `https://gist.github.com:8443/${ID}`,
+    `https://gist.github.com/ckerr/${ID}/raw/main.js`,
     'a'.repeat(40),
   ])('refuses %s', (input) => expect(asGistReference(input)).toBeNull());
 });
