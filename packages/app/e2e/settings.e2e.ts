@@ -206,8 +206,8 @@ describe('settings', () => {
     const exported = path.join(dir, 'exported.json');
     await app().queueDialog('save', { filePath: exported });
     await app().click(role('button', 'Export…'));
-    await expect.poll(() => fs.existsSync(exported)).toBe(true);
-    expect(fs.readFileSync(exported, 'utf8')).toContain('E2E Author');
+    // The file exists before it's written (a plain writeFile), so wait for the content.
+    await expect.poll(() => (fs.existsSync(exported) ? fs.readFileSync(exported, 'utf8') : '')).toContain('E2E Author');
 
     const imported = path.join(dir, 'imported.json');
     fs.writeFileSync(imported, fs.readFileSync(exported, 'utf8').replace('E2E Author', 'Imported Author'));

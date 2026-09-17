@@ -430,6 +430,49 @@ export function electronArgs(electronPath: string): string[] {
   return args;
 }
 
+/**
+ * macOS: a module for `electron -r`, loaded into the main process of every
+ * fiddle the app runs, so the fiddle's windows stay in the background like the
+ * app's own (src/main/test-driver/index.ts): otherwise every `new BrowserWindow`
+ * of a run activates that Electron and puts its window over the desktop. It
+ * reaches runs through FIDDLE_DEV_ELECTRON_FLAGS (src/main/run/dev.ts), which
+ * only development and test builds read. Windows are created hidden and shown
+ * inactive one level below normal windows; nothing else about the run changes.
+ */
+const BACKGROUND_FIDDLE_PRELOAD = `// Written by packages/app/e2e/driver.ts for \`electron -r\`.
+const Module = require('node:module');
+const { app, BrowserWindow } = require('electron');
+try { app.setActivationPolicy('accessory'); } catch {}
+function BackgroundWindow(options) {
+  const wanted = Object.assign({}, options);
+  const show = wanted.show !== false;
+  wanted.show = false;
+  const win = new BrowserWindow(wanted);
+  try { win.setAlwaysOnTop(true, 'normal', -1); } catch {}
+  win.show = () => win.showInactive();
+  win.focus = () => {};
+  if (show) win.showInactive();
+  return win;
+}
+Object.setPrototypeOf(BackgroundWindow, BrowserWindow);
+BackgroundWindow.prototype = BrowserWindow.prototype;
+const load = Module._load;
+Module._load = function (request, ...rest) {
+  const exports = load.call(this, request, ...rest);
+  if (request !== 'electron' && request !== 'electron/main') return exports;
+  return new Proxy(exports, { get: (target, key) => (key === 'BrowserWindow' ? BackgroundWindow : Reflect.get(target, key)) });
+};
+`;
+
+/** The FIDDLE_DEV_ELECTRON_FLAGS that load BACKGROUND_FIDDLE_PRELOAD into runs, on macOS in the background. */
+function backgroundFiddleFlags(testDir: string): Record<string, string> {
+  // The app splits the variable on spaces, so a temp dir with one (never on macOS) opts out.
+  if (process.platform !== 'darwin' || process.env.FIDDLE_E2E_FOREGROUND === '1' || testDir.includes(' ')) return {};
+  const preload = path.join(testDir, 'background-windows.cjs');
+  fs.writeFileSync(preload, BACKGROUND_FIDDLE_PRELOAD);
+  return { FIDDLE_DEV_ELECTRON_FLAGS: [process.env.FIDDLE_DEV_ELECTRON_FLAGS, '-r', preload].filter(Boolean).join(' ') };
+}
+
 interface Display {
   env: Record<string, string>;
   stop(): void;
@@ -539,6 +582,7 @@ export async function launchApp(options: LaunchOptions = {}): Promise<FiddleApp>
     LANGUAGE: 'en_US',
     LC_ALL: 'en_US.UTF-8',
     ...(process.env.FIDDLE_E2E_FOREGROUND === '1' ? { FIDDLE_TEST_FOREGROUND: '1' } : {}),
+    ...backgroundFiddleFlags(testDir),
     ...options.env,
   });
 

@@ -25,10 +25,11 @@ in the key window whatever the OS does. That's what lets many apps run side by s
   icon or Cmd-Tab entry, it never becomes the active app, and its windows open one level below
   normal windows, so they never cover or take focus from what you're doing (you can see them on an
   empty desktop or in Mission Control). Window focus is emulated the way a window manager hands it
-  out: a shown or focused window becomes the focused one for the app and for `windows()`.
-  `FIDDLE_E2E_FOREGROUND=1` opens the windows in front instead (still without taking focus), to
-  watch a `yarn driver` session. Two things are shared with your session: the clipboard (a couple
-  of specs copy to it) and the CPU.
+  out: a shown or focused window becomes the focused one for the app and for `windows()`. The
+  fiddles that specs run get the same treatment, through a module the launcher hands to runs with
+  `electron -r` (`FIDDLE_DEV_ELECTRON_FLAGS`). `FIDDLE_E2E_FOREGROUND=1` opens the windows in front
+  instead (still without taking focus), to watch a `yarn driver` session. Two things are shared
+  with your session: the clipboard (a couple of specs copy to it) and the CPU.
 - **Workers:** `FIDDLE_E2E_WORKERS=<n>` sets how many spec files run at once. The default is one
   per core but one on Linux, and at most 4 on macOS and Windows.
 
@@ -49,6 +50,7 @@ describe('run', () => {
   // Tag each test with the Feature catalog ID it covers.
   it('runs the fiddle and shows its output @feature run.start', async () => {
     // Find controls by accessible role and name, the way a user or screen reader would.
+    // A click waits until the element is enabled, on top and no longer moving.
     await app().click(role('button', 'Run'));
 
     // Every query waits, with a 5 s default timeout. Never sleep.

@@ -264,8 +264,21 @@ export class Page {
     });
   }
 
-  /** Waits for exactly one enabled match (or `nth`) that has a size and is on top at its center. */
+  /**
+   * Waits for exactly one enabled match (or `nth`) that has a size, is on top
+   * at its center, and is stable: the same box on the next animation frame. A
+   * popover that's still being placed or a list that's still scrolling would
+   * otherwise take the press where the element was and the release where it is.
+   */
   actionable(query: Query): Promise<ElementInfo> {
+    const check = ({ info, box }: Found): string | undefined => {
+      if (info.states.includes('disabled')) return 'the element is disabled';
+      if (!box || box.width === 0 || box.height === 0) return 'the element has no size';
+      if (!box.hit) return `the element is covered by ${box.hitDescription}`;
+      return undefined;
+    };
+    const same = (a: ElementInfo, b: ElementInfo) =>
+      Math.abs(a.x - b.x) < 1 && Math.abs(a.y - b.y) < 1 && Math.abs(a.width - b.width) < 1 && Math.abs(a.height - b.height) < 1;
     return poll<ElementInfo>(`find ${describeQuery(query)}`, query.timeout ?? DEFAULT_TIMEOUT, async () => {
       const matches = matchNodes(await this.axNodes(), query);
       if (matches.length === 0) return { reason: 'no match' };
@@ -278,11 +291,14 @@ export class Page {
       }
       const node = matches[query.nth ?? 0];
       if (!node) return { reason: `only ${matches.length} match(es)` };
-      const { info, box } = await this.#describe(node);
-      if (info.states.includes('disabled')) return { reason: 'the element is disabled' };
-      if (!box || box.width === 0 || box.height === 0) return { reason: 'the element has no size' };
-      if (!box.hit) return { reason: `the element is covered by ${box.hitDescription}` };
-      return { value: info };
+      const first = await this.#describe(node);
+      const problem = check(first);
+      if (problem) return { reason: problem };
+      await this.#nextFrame();
+      const second = await this.#describe(node);
+      if (!same(first.info, second.info)) return { reason: 'the element is moving' };
+      const later = check(second);
+      return later ? { reason: later } : { value: second.info };
     });
   }
 
@@ -300,6 +316,11 @@ export class Page {
    * Types into whatever has focus, a key at a time: keydown, keypress and input,
    * then keyup, as from a US keyboard. Characters it has no key for (é, emoji)
    * are inserted as text, as an input method would. `\n` presses Enter.
+   *
+   * Then it waits for the next animation frame, as a person would see the text
+   * before doing anything else: work the page batches per frame (the editor
+   * sends its edits to main once per frame) is done before the spec's next
+   * step, which may be a Save keystroke a frame is too long for.
    */
   async type(text: string): Promise<void> {
     for (const char of text) {
@@ -315,6 +336,20 @@ export class Page {
       const key = { key: char, code: definition.code, windowsVirtualKeyCode: definition.keyCode };
       await this.#input('Input.dispatchKeyEvent', { type: 'keyDown', ...key, text: char, unmodifiedText: char });
       await this.#input('Input.dispatchKeyEvent', { type: 'keyUp', ...key });
+    }
+    await this.#nextFrame();
+  }
+
+  /** Resolves after the page's next animation frame callbacks have run (or soon, if it paints none). */
+  async #nextFrame(): Promise<void> {
+    if (this.contents.isDestroyed()) return;
+    try {
+      await this.evaluate(`new Promise((resolve) => {
+        const timer = setTimeout(resolve, 250);
+        requestAnimationFrame(() => { clearTimeout(timer); resolve(); });
+      })`);
+    } catch {
+      // The typing closed or reloaded the page: nothing to wait for.
     }
   }
 

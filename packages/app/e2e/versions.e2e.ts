@@ -163,7 +163,9 @@ describe('versions', () => {
       await app().click(role('button', 'Settings'));
       await app().click(role('button', 'Electron'));
     }
-    const dist = path.dirname(createRequire(path.join(APP_DIR, 'package.json'))('electron') as string);
+    // The build folder is electron's dist/; on macOS the executable is three levels down, in Electron.app/Contents/MacOS.
+    const exec = createRequire(path.join(APP_DIR, 'package.json'))('electron') as string;
+    const dist = process.platform === 'darwin' ? path.resolve(path.dirname(exec), '..', '..', '..') : path.dirname(exec);
     const builds = async () => (await appState(app())).versions?.localBuilds ?? [];
     await app().queueDialog('open', { filePaths: [dist] });
     await app().click(role('button', 'Add local build'));
@@ -171,8 +173,9 @@ describe('versions', () => {
     const [build] = await builds();
     expect(build).toMatchObject({ path: dist, available: true });
     // §5 names the file local-builds.json (§17.8's local-versions.json is the old app's, which §6 imports).
-    const stored = fs.readFileSync(path.join(app().testDir ?? '', 'userData', 'local-builds.json'), 'utf8');
-    expect(stored).toContain(build?.id ?? '?');
+    // The store writes it asynchronously, so wait for it.
+    const stored = path.join(app().testDir ?? '', 'userData', 'local-builds.json');
+    await expect.poll(() => (fs.existsSync(stored) ? fs.readFileSync(stored, 'utf8') : '')).toContain(build?.id ?? '?');
 
     // The same folder again: offer to switch to the registered build.
     await app().queueDialog('open', { filePaths: [dist] });
