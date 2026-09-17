@@ -90,6 +90,7 @@
 }
 
 .description {
+  user-select: text;
   padding: 6px 20px 0;
   color: var(--lu-ink-muted);
   text-wrap: pretty;

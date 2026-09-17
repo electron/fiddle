@@ -32,6 +32,9 @@
 }
 
 .rows {
+  /* Output is for reading and copying. */
+  user-select: text;
+  cursor: text;
   flex: 1;
   min-height: 0;
   overflow: auto;

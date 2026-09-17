@@ -31,6 +31,18 @@ body {
   font-synthesis-weight: none;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
+  /* App chrome is not selectable, like any desktop app. Text meant to be read
+     or copied opts back in: form fields and the editor here, console output,
+     dialog and toast messages in their own styles. */
+  user-select: none;
+  cursor: default;
+}
+
+input,
+textarea,
+[contenteditable="true"] {
+  user-select: text;
+  cursor: auto;
 }
 
 button,

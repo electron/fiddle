@@ -28,6 +28,8 @@
 .searchList {
   flex: 1 1 auto;
   min-height: 0;
+  /* About twelve rows; the popover's own viewport limit still wins in short windows. */
+  max-height: 340px;
   overflow: auto;
   outline: none;
 }

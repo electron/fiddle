@@ -73,11 +73,13 @@
 }
 
 .title {
+  user-select: text;
   font-weight: 600;
   letter-spacing: -0.005em;
 }
 
 .text {
+  user-select: text;
   color: var(--lu-ink-muted);
 }
 
