@@ -15,10 +15,10 @@ app.whenReady().then(() => {
   })
 
   powerMonitor.on('on-ac', () => {
-    console.log('We\'re on AC power')
+    console.log("We're on AC power")
   })
 
   powerMonitor.on('on-battery', () => {
-    console.log('We\'re on battery power')
+    console.log("We're on battery power")
   })
 })

@@ -5225,7 +5225,6 @@ __metadata:
     semver: "npm:^7.3.4"
     sfw: "npm:^2.0.4"
     shell-env: "npm:^4.0.3"
-    standard: "npm:^17.1.0"
     style-loader: "npm:^4.0.0"
     stylelint: "npm:^15.10.1"
     stylelint-config-standard: "npm:^34.0.0"
@@ -11727,7 +11726,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"standard@npm:^17.0.0, standard@npm:^17.1.0":
+"standard@npm:^17.0.0":
   version: 17.1.0
   resolution: "standard@npm:17.1.0"
   dependencies:

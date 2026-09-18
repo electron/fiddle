@@ -9,12 +9,11 @@
   "main": "./.webpack/main",
   "scripts": {
     "contributors": "tsx ./tools/contributors.ts",
-    "format": "prettier src --check --experimental-cli",
-    "format:write": "prettier src --write --experimental-cli",
+    "format": "prettier src \"static/**/*.js\" --check --experimental-cli",
+    "format:write": "prettier src \"static/**/*.js\" --write --experimental-cli",
     "lint:style": "stylelint \"./src/less/*.less\"",
     "lint:js": "oxlint",
     "lint:markdown": "markdownlint-cli2 \"*.md\"",
-    "lint:templates": "standard \"static/**/*.js\"",
     "lint:links": "lint-roller-markdown-links \"*.md\"",
     "lint:fix": "npm-run-all \"lint:!(fix|links) -- --fix\"",
     "lint": "npm-run-all \"lint:!(fix)\"",
@@ -119,7 +118,6 @@
     "postcss": "^8.5.23",
     "postcss-less": "^6.0.0",
     "resolve-url-loader": "^5.0.0",
-    "standard": "^17.1.0",
     "style-loader": "^4.0.0",
     "stylelint": "^15.10.1",
     "stylelint-config-standard": "^34.0.0",
@@ -134,9 +132,6 @@
     "./**/*.{js,ts,tsx}": [
       "npm run lint:js -- --fix",
       "prettier --write --experimental-cli"
-    ],
-    "./static/**/*.js": [
-      "npm run lint:templates -- --fix"
     ],
     "./src/less/*.less": [
       "npm run lint:style -- --fix",

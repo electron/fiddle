@@ -1,4 +1,4 @@
-function notifyMe () {
+function notifyMe() {
   const notification = new window.Notification('Hello World', {
     body: 'How is your day?'
   })

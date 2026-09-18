@@ -5,20 +5,22 @@ const { desktopCapturer, ipcRenderer } = require('electron/renderer')
 // just grab video from a single window.
 //
 
-function startCapture () {
-  desktopCapturer.getSources({
-    types: ['window', 'screen']
-  }).then(async sources => {
-    for (let i = 0; i < sources.length; ++i) {
-      console.log(sources[i])
-      if (sources[i].id.startsWith('screen')) {
-        showStream(sources[i].id)
+function startCapture() {
+  desktopCapturer
+    .getSources({
+      types: ['window', 'screen']
+    })
+    .then(async (sources) => {
+      for (let i = 0; i < sources.length; ++i) {
+        console.log(sources[i])
+        if (sources[i].id.startsWith('screen')) {
+          showStream(sources[i].id)
+        }
       }
-    }
-  })
+    })
 }
 
-async function showStream (sourceId) {
+async function showStream(sourceId) {
   try {
     const stream = await navigator.mediaDevices.getUserMedia({
       audio: false,
@@ -39,13 +41,13 @@ async function showStream (sourceId) {
   }
 }
 
-function handleStream (stream) {
+function handleStream(stream) {
   const video = document.querySelector('video')
   video.srcObject = stream
-  video.onloadedmetadata = (e) => video.play()
+  video.onloadedmetadata = () => video.play()
 }
 
-function handleError (e) {
+function handleError(e) {
   console.log(e)
 }
 

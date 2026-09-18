@@ -26,7 +26,9 @@ app.whenReady().then(() => {
   })
 
   autoUpdater.on('update-available', () => {
-    console.log('The autoUpdater has found an update and is now downloading it!')
+    console.log(
+      'The autoUpdater has found an update and is now downloading it!'
+    )
   })
 
   autoUpdater.on('update-not-available', () => {
