@@ -19,7 +19,7 @@ export default {
   "aboutVersion": "{{version}} (Electron {{electron}})",
   "aboutCopyright": "© Electron authors",
   "resetPrivacyMessage": "Reset all privacy permissions?",
-  "resetPrivacyDetail": "Electron Fiddle and the fiddles it runs lose access to the camera, microphone, contacts and other protected data. macOS asks again the next time they need it.",
+  "resetPrivacyDetail": "Electron Fiddle and the fiddles it runs lose access to the camera, microphone, contacts and other protected data. Fiddles run as the standard Electron app, so other apps running on a plain Electron download lose access too. macOS asks again the next time they need it.",
   "resetPrivacyButton": "Reset",
   "resetPrivacyFailed": "The privacy permissions couldn't be reset."
 } as const;

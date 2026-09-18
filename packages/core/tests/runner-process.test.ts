@@ -127,6 +127,32 @@ describe('Runner with a real child process', () => {
     expect(Number(match![1])).toBeGreaterThan(0);
   });
 
+  it.skipIf(process.platform === 'win32')(
+    'starts the launcher with Electron, the flags and the fiddle as its arguments',
+    async () => {
+      const argsFile = path.join(tmpdir, 'launcher-args');
+      const launcher = path.join(tmpdir, 'launcher.sh');
+      fs.writeFileSync(
+        launcher,
+        `#!/bin/sh\nprintf '%s\\n' "$@" > ${JSON.stringify(argsFile)}\nexec "$@"\n`,
+        { mode: 0o755 },
+      );
+
+      const result = await runner.run(electron, fiddle('process.exit(1);'), {
+        out: undefined,
+        showConfig: false,
+        args: ['--no-warnings'],
+        launcher,
+      });
+
+      // the exit code passes through the launcher's exec
+      expect(result.status).toBe('test_failed');
+      const [exec, flag, main] = fs.readFileSync(argsFile, 'utf8').trim().split('\n');
+      expect([exec, flag]).toEqual([electron, '--no-warnings']);
+      expect(path.basename(main!)).toBe('main.js');
+    },
+  );
+
   it('kills the child and rejects when aborted', async () => {
     const { main, started } = longRunning();
     const controller = new AbortController();

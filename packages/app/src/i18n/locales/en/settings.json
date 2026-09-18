@@ -101,11 +101,6 @@
     "description": "Settings section for crash reports.",
     "maxLength": 30
   },
-  "section.updates": {
-    "message": "Updates",
-    "description": "Settings section for app updates.",
-    "maxLength": 30
-  },
   "section.about": {
     "message": "About and credits",
     "description": "Settings section with the app version and its contributors.",
@@ -548,14 +543,6 @@
     "message": "Helps fix bugs. Fiddle contents, console output and environment variables are never sent.",
     "description": "Help for the crash reports setting."
   },
-  "betaUpdates.title": {
-    "message": "Beta updates",
-    "description": "Setting: get beta releases of the app."
-  },
-  "betaUpdates.description": {
-    "message": "Get new versions of Fiddle before they're stable.",
-    "description": "Help for the beta updates setting. Fiddle is the app's short name."
-  },
 
   "about.version": {
     "message": "Version {{version}}",
@@ -608,7 +595,7 @@
     "maxLength": 40
   },
   "privacyReset.description": {
-    "message": "Fiddles run as Electron Fiddle, so the camera, microphone and other permissions you gave a fiddle belong to the app. This forgets them all.",
+    "message": "Fiddles run as the standard Electron app, so the camera, microphone and other permissions you give a fiddle belong to it, and macOS asks again for each Electron version. This forgets them all, for Electron Fiddle too.",
     "description": "Help for the reset privacy permissions action."
   },
   "privacyReset.button": {

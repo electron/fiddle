@@ -21,7 +21,6 @@ export default {
   "section.keybindings": "キーボードショートカット",
   "section.accessibility": "アクセシビリティ",
   "section.privacy": "プライバシー",
-  "section.updates": "アップデート",
   "section.about": "バージョン情報とクレジット",
   "appearance.title": "外観",
   "appearance.description": "システムの設定に従うか、常にライトまたはダークを使用します。",
@@ -118,8 +117,6 @@ export default {
   "screenReader.inactive": "エディターは標準モードです。",
   "crashReports.title": "クラッシュレポートを送信",
   "crashReports.description": "バグの修正に役立ちます。Fiddle の内容、コンソール出力、環境変数が送信されることはありません。",
-  "betaUpdates.title": "ベータ版のアップデート",
-  "betaUpdates.description": "安定版になる前の Fiddle の新しいバージョンを入手します。",
   "about.version": "バージョン {{version}}",
   "about.electron": "Electron {{version}}",
   "about.contributors": "コントリビューター",
@@ -135,7 +132,7 @@ export default {
   "locale.relaunchDescription": "メニューとアプリにはすでに反映されています。エディターとシステムのテキストは再起動後に切り替わります。",
   "locale.relaunch": "再起動",
   "privacyReset.title": "プライバシー権限をリセット",
-  "privacyReset.description": "Fiddle は Electron Fiddle として実行されるため、Fiddle に許可したカメラやマイクなどの権限はアプリのものになります。これらをすべて取り消します。",
+  "privacyReset.description": "Fiddle は標準の Electron アプリとして実行されるため、Fiddle に許可したカメラやマイクなどの権限は Electron のものになり、macOS は Electron のバージョンごとに再度確認します。これらをすべて取り消します（Electron Fiddle の分も含みます）。",
   "privacyReset.button": "リセット…",
   "privacyReset.done": "プライバシー権限をリセットしました"
 } as const;

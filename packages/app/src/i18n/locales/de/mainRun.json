@@ -5,6 +5,7 @@
   "exitedCode": "Electron wurde mit Code {{code}} beendet",
   "exitedSignal": "Electron wurde durch {{signal}} gestoppt",
   "spawnFailed": "Electron konnte nicht gestartet werden: {{message}}",
+  "privacyHelperMissing": "Der Datenschutz-Helfer ({{path}}) fehlt oder lässt sich nicht ausführen, daher können keine Fiddles starten: Sie würden die Kamera-, Mikrofon- und anderen Berechtigungen von Electron Fiddle mitbenutzen. Installiere Electron Fiddle neu.",
   "downloading": "Electron {{version}} wird heruntergeladen …",
   "downloadFailed": "Electron {{version}} konnte nicht heruntergeladen werden: {{message}}",
   "installingModules": "Module werden mit {{pm}} installiert …",

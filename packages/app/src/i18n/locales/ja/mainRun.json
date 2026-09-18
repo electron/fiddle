@@ -5,6 +5,7 @@
   "exitedCode": "Electron がコード {{code}} で終了しました",
   "exitedSignal": "Electron は {{signal}} によって停止されました",
   "spawnFailed": "Electron を起動できませんでした：{{message}}",
+  "privacyHelperMissing": "プライバシーヘルパー（{{path}}）が見つからないか実行できないため、Fiddle を起動できません。起動すると Electron Fiddle のカメラやマイクなどの権限が共有されてしまいます。Electron Fiddle を再インストールしてください。",
   "downloading": "Electron {{version}} をダウンロードしています…",
   "downloadFailed": "Electron {{version}} をダウンロードできませんでした：{{message}}",
   "installingModules": "{{pm}} でモジュールをインストールしています…",

@@ -9,3 +9,4 @@ coverage/
 *.tsbuildinfo
 /test-results/
 .yarn/install-state.gz
+/packages/app/native/disclaim/build/

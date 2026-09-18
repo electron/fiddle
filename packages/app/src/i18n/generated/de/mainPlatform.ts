@@ -19,7 +19,7 @@ export default {
   "aboutVersion": "{{version}} (Electron {{electron}})",
   "aboutCopyright": "© Electron-Autoren",
   "resetPrivacyMessage": "Alle Datenschutzberechtigungen zurücksetzen?",
-  "resetPrivacyDetail": "Electron Fiddle und die Fiddles, die es ausführt, verlieren den Zugriff auf Kamera, Mikrofon, Kontakte und andere geschützte Daten. macOS fragt erneut, wenn sie ihn das nächste Mal brauchen.",
+  "resetPrivacyDetail": "Electron Fiddle und die Fiddles, die es ausführt, verlieren den Zugriff auf Kamera, Mikrofon, Kontakte und andere geschützte Daten. Fiddles laufen als Standard-Electron-App, daher verlieren auch andere Apps mit einer einfachen Electron-Version den Zugriff. macOS fragt erneut, wenn sie ihn brauchen.",
   "resetPrivacyButton": "Zurücksetzen",
   "resetPrivacyFailed": "Die Datenschutzberechtigungen konnten nicht zurückgesetzt werden."
 } as const;

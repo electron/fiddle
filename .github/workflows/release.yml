@@ -79,6 +79,12 @@ jobs:
           APPLE_API_KEY_ID: ${{ secrets.APPLE_API_KEY_ID }}
           APPLE_API_ISSUER: ${{ secrets.APPLE_API_ISSUER }}
         run: yarn workspace electron-fiddle run publish --arch=${{ matrix.arch }} --dry-run # zizmor: ignore[use-trusted-publishing]
+      - name: Check the privacy helper is signed (macOS)
+        if: runner.os == 'macOS'
+        run: |
+          for app in packages/app/out/*/"Electron Fiddle.app"; do
+            packages/app/native/disclaim/check-packaged.sh "$app" --release
+          done
       - name: Build (Linux)
         if: runner.os == 'Linux'
         run: yarn workspace electron-fiddle run publish --arch=${{ matrix.arch }} --dry-run # zizmor: ignore[use-trusted-publishing]

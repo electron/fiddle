@@ -2704,16 +2704,6 @@
     "translation": "997bdc9ac0e8",
     "reviewed": false
   },
-  "settings:betaUpdates.description": {
-    "source": "f0ca715233b7",
-    "translation": "a53d1cf696b6",
-    "reviewed": false
-  },
-  "settings:betaUpdates.title": {
-    "source": "d721d2ca69f0",
-    "translation": "a4439bcab520",
-    "reviewed": false
-  },
   "settings:changeFailed": {
     "source": "460f91c85b5b",
     "translation": "0f776c4ebfff",
@@ -3202,11 +3192,6 @@
   "settings:section.privacy": {
     "source": "54a57c3147c4",
     "translation": "fd55785d8031",
-    "reviewed": false
-  },
-  "settings:section.updates": {
-    "source": "22e2bada8f1c",
-    "translation": "3db34c3b08d5",
     "reviewed": false
   },
   "settings:sessionRestore.description": {

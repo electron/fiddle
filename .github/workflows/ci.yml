@@ -77,6 +77,14 @@ jobs:
         run: yarn typecheck
       - name: Unit tests
         run: yarn test
+      # Fiddles start through this helper on macOS, so the end-to-end tests
+      # below run them that way. The self-check proves it disclaims
+      # responsibility on this macOS version.
+      - name: Privacy helper self-check (macOS)
+        if: runner.os == 'macOS'
+        run: |
+          packages/app/native/disclaim/build.sh
+          packages/app/native/disclaim/build/selfcheck packages/app/native/disclaim/build/fiddle-disclaim
       - name: End-to-end tests (Linux)
         if: runner.os == 'Linux'
         run: xvfb-run --auto-servernum yarn test:e2e
@@ -88,6 +96,12 @@ jobs:
         run: yarn package
       - name: Check that the e2e driver is not packaged
         run: node tools/release-check-asar.mjs packages/app/out
+      - name: Check the privacy helper in the package (macOS)
+        if: runner.os == 'macOS'
+        run: |
+          for app in packages/app/out/*/"Electron Fiddle.app"; do
+            packages/app/native/disclaim/check-packaged.sh "$app"
+          done
 
   identity:
     name: App identity

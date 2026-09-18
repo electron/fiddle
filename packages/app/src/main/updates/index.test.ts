@@ -27,7 +27,7 @@ vi.mock('electron', () => ({
 vi.mock('update-electron-app', () => ({
   updateElectronApp: mocks.updateElectronApp,
   makeUserNotifier: () => undefined,
-  UpdateSourceType: { StaticStorage: 0, ElectronPublicUpdateService: 1 },
+  UpdateSourceType: { ElectronPublicUpdateService: 1 },
 }));
 vi.mock('../../ipc/main', () => ({
   AppPlatform: {
@@ -95,10 +95,10 @@ afterEach(() => {
 describe('startUpdates', () => {
   it('does nothing in dev or test mode', async () => {
     mocks.isPackaged = false;
-    startUpdates({ beta: false });
+    startUpdates();
     mocks.isPackaged = true;
     mocks.updatesFlag = false;
-    startUpdates({ beta: false });
+    startUpdates();
     await vi.advanceTimersByTimeAsync(60_000);
     expect(mocks.fetch).not.toHaveBeenCalled();
     expect(mocks.updateElectronApp).not.toHaveBeenCalled();
@@ -107,7 +107,7 @@ describe('startUpdates', () => {
   describe('the kill switch', () => {
     it('shows the notice for a blocked version and quits', async () => {
       serve({ policy: json({ blockedVersions: ['1.2.x'], message: 'Broken build' }) });
-      startUpdates({ beta: false });
+      startUpdates();
       await flush();
       expect(mocks.showMessageBox).toHaveBeenCalledWith(
         expect.objectContaining({ type: 'error', detail: 'Broken build' }),
@@ -119,7 +119,7 @@ describe('startUpdates', () => {
     it('quits after opening the download page too', async () => {
       mocks.showMessageBox.mockResolvedValue({ response: 0 });
       serve({ policy: json({ minVersion: '2.0.0' }) });
-      startUpdates({ beta: false });
+      startUpdates();
       await flush();
       expect(mocks.openExternal).toHaveBeenCalledOnce();
       expect(mocks.quit).toHaveBeenCalledOnce();
@@ -133,7 +133,7 @@ describe('startUpdates', () => {
         json({ blockedVersions: ['1.2.4'], minVersion: '1.0.0' }),
       ]) {
         serve({ policy });
-        startUpdates({ beta: false });
+        startUpdates();
         await flush();
       }
       expect(mocks.showMessageBox).not.toHaveBeenCalled();
@@ -151,7 +151,7 @@ describe('startUpdates', () => {
 
     it('announces a newer release once, however often it checks', async () => {
       serve({ releases: [release('v1.3.0')] });
-      startUpdates({ beta: false });
+      startUpdates();
       await vi.advanceTimersByTimeAsync(10_000);
       expect(mocks.dispatchUpdateAvailable).toHaveBeenCalledExactlyOnceWith('1.3.0');
 
@@ -167,7 +167,7 @@ describe('startUpdates', () => {
       mocks.fetch.mockImplementation(async (url: string) =>
         url.includes('update-policy') ? json({}) : json({}, 500),
       );
-      startUpdates({ beta: false });
+      startUpdates();
       await vi.advanceTimersByTimeAsync(10_000);
       expect(mocks.dispatchUpdateAvailable).not.toHaveBeenCalled();
     });

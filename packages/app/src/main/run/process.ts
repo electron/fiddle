@@ -20,6 +20,7 @@ import { PACKAGE_JSON, type FileMap } from '../../fiddle/files';
 import { writeFiddleFolder } from '../../fiddle/folder';
 import { loadLoginShellPath } from '../../fiddle/modules';
 import { generatePackageJson, type PackageJsonInput } from '../../fiddle/package-json';
+import { disclaimLauncher } from '../platform/disclaim';
 import { devElectronFlags } from './dev';
 import type { RunOutcome } from './logic';
 
@@ -81,10 +82,15 @@ interface SpawnElectronOptions {
   quiet?: boolean;
 }
 
-/** Spawns Electron on `appDir` with the filtered environment. stdout and stderr are pipes. */
+/**
+ * Spawns Electron on `appDir` with the filtered environment. stdout and stderr
+ * are pipes. On macOS it starts through the privacy helper (platform/disclaim.ts),
+ * and throws when a packaged build lacks it.
+ */
 export async function spawnElectron(
   options: SpawnElectronOptions,
 ): Promise<ChildProcess> {
+  const launcher = disclaimLauncher();
   const args = [...cleanFlags(options.flags), ...devElectronFlags()];
   if (!options.keepUserDataDirs)
     args.unshift(`--user-data-dir=${path.join(options.runDir, 'user-data')}`);
@@ -102,6 +108,7 @@ export async function spawnElectron(
       userEnv: options.env,
       advancedLogging: options.advancedLogging,
     }),
+    ...(launcher ? { launcher } : {}),
     ...(options.inspect ? { inspect: { host: '127.0.0.1', port: 0 } } : {}),
     ...(options.quiet ? { out: undefined } : {}),
   });

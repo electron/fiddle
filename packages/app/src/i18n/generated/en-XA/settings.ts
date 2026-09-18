@@ -21,7 +21,6 @@ export default {
   "section.keybindings": "[Ķéýƀöáŕð šĥöŕţçûţš one two]",
   "section.accessibility": "[Åççéššîƀîļîţý one two]",
   "section.privacy": "[Þŕîṽáçý one]",
-  "section.updates": "[Ûþðáţéš one]",
   "section.about": "[Åƀöûţ áñð çŕéðîţš one two]",
   "appearance.title": "[Åþþéáŕáñçé one]",
   "appearance.description": "[Ƒöļļöŵ ţĥé šýšţéɱ, öŕ áļŵáýš ûšé ļîĝĥţ öŕ ðáŕķ. one two three four]",
@@ -123,8 +122,6 @@ export default {
   "screenReader.inactive": "[Ţĥé éðîţöŕ îš îñ šţáñðáŕð ɱöðé. one two three]",
   "crashReports.title": "[Šéñð çŕášĥ ŕéþöŕţš one two]",
   "crashReports.description": "[Ĥéļþš ƒîẋ ƀûĝš. Ƒîððļé çöñţéñţš, çöñšöļé öûţþûţ áñð éñṽîŕöñɱéñţ ṽáŕîáƀļéš áŕé ñéṽéŕ šéñţ. one two three four five six seven eight]",
-  "betaUpdates.title": "[Ɓéţá ûþðáţéš one two]",
-  "betaUpdates.description": "[Ĝéţ ñéŵ ṽéŕšîöñš öƒ Ƒîððļé ƀéƒöŕé ţĥéý'ŕé šţáƀļé. one two three four five]",
   "about.version": "[Ṽéŕšîöñ {{version}} one two]",
   "about.electron": "[Éļéçţŕöñ {{version}} one two]",
   "about.contributors": "[Çöñţŕîƀûţöŕš one two]",
@@ -136,7 +133,7 @@ export default {
   "notice.newer.description": "[Çĥáñĝéš ŵöñ'ţ ƀé šáṽéð ţö îţ ûñţîļ ýöû ûþðáţé Ƒîððļé. one two three four five]",
   "notice.dismiss": "[Ðîšɱîšš one]",
   "privacyReset.title": "[Ŕéšéţ þŕîṽáçý þéŕɱîššîöñš one two three]",
-  "privacyReset.description": "[Ƒîððļéš ŕûñ áš Éļéçţŕöñ Ƒîððļé, šö ţĥé çáɱéŕá, ɱîçŕöþĥöñé áñð öţĥéŕ þéŕɱîššîöñš ýöû ĝáṽé á ƒîððļé ƀéļöñĝ ţö ţĥé áþþ. Ţĥîš ƒöŕĝéţš ţĥéɱ áļļ. one two three four five six seven eight nine ten one two]",
+  "privacyReset.description": "[Ƒîððļéš ŕûñ áš ţĥé šţáñðáŕð Éļéçţŕöñ áþþ, šö ţĥé çáɱéŕá, ɱîçŕöþĥöñé áñð öţĥéŕ þéŕɱîššîöñš ýöû ĝîṽé á ƒîððļé ƀéļöñĝ ţö îţ, áñð ɱáçÖŠ ášķš áĝáîñ ƒöŕ éáçĥ Éļéçţŕöñ ṽéŕšîöñ. Ţĥîš ƒöŕĝéţš ţĥéɱ áļļ, ƒöŕ Éļéçţŕöñ Ƒîððļé ţöö. one two three four five six seven eight nine ten one two three four five six seven eight]",
   "privacyReset.button": "[Ŕéšéţ… one]",
   "privacyReset.done": "[Þŕîṽáçý þéŕɱîššîöñš ŕéšéţ one two three]"
 } as const;

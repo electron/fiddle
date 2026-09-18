@@ -27,6 +27,6 @@ export async function startPlatform(hub: StateHub, firstLaunch: boolean): Promis
   registerProtocolClient();
   hub.onChange(() => applyCrashReportsSetting(hub.app.settings.crashReports));
   await offerMoveToApplications(firstLaunch);
-  startUpdates({ beta: hub.app.settings.betaUpdates });
+  startUpdates();
   if (firstLaunch) importElectronVersionsInBackground();
 }

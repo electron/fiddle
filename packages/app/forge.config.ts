@@ -32,6 +32,7 @@ const iconDir = path.join(appDir, 'assets', 'icons');
 const buildDir = path.join(appDir, 'build');
 const entitlements = path.join(buildDir, 'entitlements.plist');
 const requirements = path.join(buildDir, 'certs', 'requirements.txt');
+const disclaimDir = path.join(appDir, 'native', 'disclaim');
 
 // deb and rpm take a single icon: the 1024px PNG.
 const linuxOptions = {
@@ -212,6 +213,15 @@ function sfwEntry(): string[] {
   }
 }
 
+/**
+ * The macOS privacy helper (native/disclaim): fiddles start through it so they
+ * don't inherit the app's privacy grants. `prePackage` builds it, universal, and
+ * adds it to `extraResource` for darwin targets only, so it ships at
+ * `<resources>/fiddle-disclaim` (src/main/platform/disclaim.ts finds it). It is
+ * signed with the hardened runtime and no entitlements (`osxSign` below).
+ */
+const DISCLAIM_HELPER = 'fiddle-disclaim';
+
 const config: ForgeConfig = {
   hooks: {
     // `yarn generate`: offline and idempotent. The Electron release list and
@@ -220,6 +230,18 @@ const config: ForgeConfig = {
       execFileSync(process.execPath, [path.join(appDir, 'tools', 'generate.mjs')], {
         stdio: 'inherit',
       });
+    },
+    prePackage: async (forgeConfig, platform) => {
+      if (platform !== 'darwin') return;
+      if (process.platform !== 'darwin') {
+        throw new Error('The macOS privacy helper can only be built on macOS.');
+      }
+      execFileSync('sh', [path.join(disclaimDir, 'build.sh')], { stdio: 'inherit' });
+      const packagerConfig = (forgeConfig.packagerConfig ??= {});
+      packagerConfig.extraResource = [
+        ...[packagerConfig.extraResource ?? []].flat(),
+        path.join(disclaimDir, 'build', DISCLAIM_HELPER),
+      ];
     },
     // Nothing at runtime reads source maps, and they are about three quarters
     // of the asar. The release workflow uploads them from `.vite/`.
@@ -270,12 +292,17 @@ const config: ForgeConfig = {
     // builds), packager warns and leaves the app ad-hoc signed.
     osxSign: {
       identity: 'Developer ID Application: OpenJS Foundation, Inc. (UY52UFTVTM)',
-      optionsForFile: (filePath) =>
-        ['(Plugin).app', '(GPU).app', '(Renderer).app'].some((helper) =>
+      optionsForFile: (filePath) => {
+        // The privacy helper only execs Electron: it needs no entitlements.
+        if (path.basename(filePath) === DISCLAIM_HELPER) {
+          return { entitlements: [], requirements };
+        }
+        return ['(Plugin).app', '(GPU).app', '(Renderer).app'].some((helper) =>
           filePath.includes(helper),
         )
           ? { requirements }
-          : { entitlements, requirements },
+          : { entitlements, requirements };
+      },
     },
     osxNotarize: getNotarizeOptions(),
   },

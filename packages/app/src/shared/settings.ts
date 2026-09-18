@@ -143,7 +143,6 @@ export const settingsSchema = z.object({
 
   screenReader: z.enum(['auto', 'on', 'off']).default('auto'),
   crashReports: z.boolean().default(true),
-  betaUpdates: z.boolean().default(false),
 
   keybindings: z
     .record(z.string().min(1).max(100), acceleratorSchema.nullable())

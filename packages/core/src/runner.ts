@@ -55,6 +55,13 @@ export interface RunnerOptions {
   childEnv?: ChildEnvOptions;
   /** Start Electron with `--inspect=host:port`. */
   inspect?: InspectOptions;
+  /**
+   * An executable to spawn in place of Electron, which becomes its first
+   * argument: `launcher <electron> <args…>`. It must run the program it is
+   * given with the arguments and environment unchanged (the macOS privacy
+   * helper does, by exec). Unset, Electron is spawned directly.
+   */
+  launcher?: string;
 }
 
 const DefaultRunnerOpts: RunnerOptions = {
@@ -235,6 +242,7 @@ export class Runner {
     let args = [...(opts.args || []), fiddle.mainPath];
     if (opts.inspect) args.unshift(inspectArg(opts.inspect));
     if (opts.headless) ({ exec, args } = Runner.headless(exec, args));
+    if (opts.launcher) ({ exec, args } = { exec: opts.launcher, args: [exec, ...args] });
 
     if (opts.out && opts.showConfig) {
       opts.out.write(`${this.spawnInfo(version, electronExec, fiddle)}\n`);

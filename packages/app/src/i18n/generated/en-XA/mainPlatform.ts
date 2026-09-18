@@ -19,7 +19,7 @@ export default {
   "aboutVersion": "[{{version}} (Éļéçţŕöñ {{electron}}) one two]",
   "aboutCopyright": "[© Éļéçţŕöñ áûţĥöŕš one two]",
   "resetPrivacyMessage": "[Ŕéšéţ áļļ þŕîṽáçý þéŕɱîššîöñš? one two three]",
-  "resetPrivacyDetail": "[Éļéçţŕöñ Ƒîððļé áñð ţĥé ƒîððļéš îţ ŕûñš ļöšé áççéšš ţö ţĥé çáɱéŕá, ɱîçŕöþĥöñé, çöñţáçţš áñð öţĥéŕ þŕöţéçţéð ðáţá. ɱáçÖŠ ášķš áĝáîñ ţĥé ñéẋţ ţîɱé ţĥéý ñééð îţ. one two three four five six seven eight nine ten one two three four]",
+  "resetPrivacyDetail": "[Éļéçţŕöñ Ƒîððļé áñð ţĥé ƒîððļéš îţ ŕûñš ļöšé áççéšš ţö ţĥé çáɱéŕá, ɱîçŕöþĥöñé, çöñţáçţš áñð öţĥéŕ þŕöţéçţéð ðáţá. Ƒîððļéš ŕûñ áš ţĥé šţáñðáŕð Éļéçţŕöñ áþþ, šö öţĥéŕ áþþš ŕûññîñĝ öñ á þļáîñ Éļéçţŕöñ ðöŵñļöáð ļöšé áççéšš ţöö. ɱáçÖŠ ášķš áĝáîñ ţĥé ñéẋţ ţîɱé ţĥéý ñééð îţ. one two three four five six seven eight nine ten one two three four five six seven eight nine ten one two three]",
   "resetPrivacyButton": "[Ŕéšéţ one]",
   "resetPrivacyFailed": "[Ţĥé þŕîṽáçý þéŕɱîššîöñš çöûļðñ'ţ ƀé ŕéšéţ. one two three four]"
 } as const;

@@ -14,7 +14,6 @@ export type SectionId =
   | 'keybindings'
   | 'accessibility'
   | 'privacy'
-  | 'updates'
   | 'about';
 
 const requested = createStore<SectionId | undefined>(undefined);

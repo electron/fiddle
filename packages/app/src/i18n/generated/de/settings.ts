@@ -21,7 +21,6 @@ export default {
   "section.keybindings": "Tastenkürzel",
   "section.accessibility": "Barrierefreiheit",
   "section.privacy": "Datenschutz",
-  "section.updates": "Updates",
   "section.about": "Info und Mitwirkende",
   "appearance.title": "Erscheinungsbild",
   "appearance.description": "Dem System folgen oder immer hell bzw. dunkel verwenden.",
@@ -118,8 +117,6 @@ export default {
   "screenReader.inactive": "Der Editor ist im Standardmodus.",
   "crashReports.title": "Absturzberichte senden",
   "crashReports.description": "Hilft beim Beheben von Fehlern. Fiddle-Inhalte, Konsolenausgabe und Umgebungsvariablen werden nie gesendet.",
-  "betaUpdates.title": "Beta-Updates",
-  "betaUpdates.description": "Neue Versionen von Fiddle erhalten, bevor sie stabil sind.",
   "about.version": "Version {{version}}",
   "about.electron": "Electron {{version}}",
   "about.contributors": "Mitwirkende",
@@ -136,7 +133,7 @@ export default {
   "locale.relaunchDescription": "Menüs und die App verwenden sie bereits. Der Editor und die Systemtexte wechseln nach einem Neustart.",
   "locale.relaunch": "Neu starten",
   "privacyReset.title": "Datenschutzberechtigungen zurücksetzen",
-  "privacyReset.description": "Fiddles laufen als Electron Fiddle, daher gehören Kamera-, Mikrofon- und andere Berechtigungen, die du einem Fiddle gegeben hast, der App. Damit werden alle vergessen.",
+  "privacyReset.description": "Fiddles laufen als die Standard-Electron-App, daher gehören Kamera-, Mikrofon- und andere Berechtigungen, die du einem Fiddle gibst, dieser App, und macOS fragt für jede Electron-Version erneut. Damit werden alle vergessen, auch die von Electron Fiddle.",
   "privacyReset.button": "Zurücksetzen…",
   "privacyReset.done": "Datenschutzberechtigungen zurückgesetzt"
 } as const;

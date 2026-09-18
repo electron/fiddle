@@ -3,8 +3,7 @@
  *
  * - macOS and Windows (Squirrel): `update-electron-app` against
  *   update.electronjs.org for electron/fiddle, every hour, first 10 s after
- *   launch. The "Beta updates" setting switches to a StaticStorage feed once
- *   one exists. The setting applies at the next launch.
+ *   launch.
  * - Linux and MSIX: no auto-update. The GitHub releases API is checked once a
  *   day, and an "Update available" toast goes to the windows through the
  *   `AppPlatform.UpdateAvailable` event.
@@ -33,13 +32,6 @@ import {
 
 const UPDATE_REPO = 'electron/fiddle';
 const UPDATE_SERVICE = 'https://update.electronjs.org';
-/**
- * The "Beta updates" feed: a StaticStorage feed for `update-electron-app`, with
- * one `<platform>/<arch>/` folder per build below this URL. No such feed exists
- * yet, so until this is set, Beta updates keep checking the stable source
- * instead of failing every hour.
- */
-const BETA_UPDATE_FEED_URL: string | undefined = undefined;
 /** The kill switch, kept in the electron/fiddle repository. */
 const UPDATE_POLICY_URL =
   'https://raw.githubusercontent.com/electron/fiddle/main/update-policy.json';
@@ -51,7 +43,7 @@ const POLICY_TIMEOUT_MS = 10_000;
 
 let available: AvailableUpdate | undefined;
 
-export function startUpdates({ beta }: { beta: boolean }): void {
+export function startUpdates(): void {
   if (!app.isPackaged || !testFlags().updates) {
     log.info('updates are off (dev or test mode)');
     return;
@@ -59,28 +51,22 @@ export function startUpdates({ beta }: { beta: boolean }): void {
   void checkUpdatePolicy();
   if (process.platform === 'linux' || process.windowsStore) {
     setTimeout(() => {
-      void checkReleases(beta);
-      setInterval(() => void checkReleases(beta), RELEASE_CHECK_MS);
+      void checkReleases();
+      setInterval(() => void checkReleases(), RELEASE_CHECK_MS);
     }, FIRST_CHECK_MS);
   } else {
-    setTimeout(() => startAutoUpdates(beta), FIRST_CHECK_MS);
+    setTimeout(startAutoUpdates, FIRST_CHECK_MS);
   }
 }
 
-function startAutoUpdates(beta: boolean): void {
+function startAutoUpdates(): void {
   const tp = tm('mainPlatform');
   updateElectronApp({
-    updateSource:
-      beta && BETA_UPDATE_FEED_URL
-        ? {
-            type: UpdateSourceType.StaticStorage,
-            baseUrl: `${BETA_UPDATE_FEED_URL}/${process.platform}/${process.arch}`,
-          }
-        : {
-            type: UpdateSourceType.ElectronPublicUpdateService,
-            repo: UPDATE_REPO,
-            host: UPDATE_SERVICE,
-          },
+    updateSource: {
+      type: UpdateSourceType.ElectronPublicUpdateService,
+      repo: UPDATE_REPO,
+      host: UPDATE_SERVICE,
+    },
     updateInterval: '1 hour',
     logger: {
       log: (message) => log.info(message),
@@ -99,7 +85,7 @@ function startAutoUpdates(beta: boolean): void {
 }
 
 /** Linux and MSIX: tells every window about a newer GitHub release. */
-async function checkReleases(beta: boolean): Promise<void> {
+async function checkReleases(): Promise<void> {
   try {
     const response = await net.fetch(
       `${getEndpoints().githubApi}/repos/${UPDATE_REPO}/releases?per_page=20`,
@@ -110,7 +96,7 @@ async function checkReleases(beta: boolean): Promise<void> {
     if (!response.ok) throw new Error(`HTTP ${response.status}`);
     const releases: unknown = await response.json();
     const update = Array.isArray(releases)
-      ? pickUpdate(releases as GitHubRelease[], app.getVersion(), beta)
+      ? pickUpdate(releases as GitHubRelease[], app.getVersion())
       : undefined;
     if (!update || update.version === available?.version) return;
     available = update;

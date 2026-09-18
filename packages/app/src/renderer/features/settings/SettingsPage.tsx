@@ -596,7 +596,6 @@ function PrivacySection() {
     </>
   );
 }
-const BetaUpdates = () => <SwitchRow setting="betaUpdates" />;
 
 const SECTIONS: readonly SectionDef[] = [
   {
@@ -657,6 +656,5 @@ const SECTIONS: readonly SectionDef[] = [
     body: AccessibilitySection,
   },
   { id: 'privacy', icon: 'lock', keys: ['crashReports'], body: PrivacySection },
-  { id: 'updates', icon: 'refresh', keys: ['betaUpdates'], body: BetaUpdates },
   { id: 'about', icon: 'info', keys: [], body: AboutSection },
 ];

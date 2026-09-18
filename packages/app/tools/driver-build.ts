@@ -45,8 +45,8 @@ export async function buildTestApp(): Promise<string> {
     `${JSON.stringify({ name: pkg.name, productName: pkg.productName, version: pkg.version, main: 'build/main.js' }, null, 2)}\n`,
   );
   // Main reads app-root folders through app.getAppPath() (static/ templates and
-  // examples, assets/ icons), so the test build's app dir links to the real ones.
-  for (const dir of ['static', 'assets']) {
+  // examples, assets/ icons, native/ helpers), so the test build's app dir links to the real ones.
+  for (const dir of ['static', 'assets', 'native']) {
     const target = path.join(appDir, dir);
     const link = path.join(staging, dir);
     await fs

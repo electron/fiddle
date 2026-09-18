@@ -21,7 +21,6 @@ export default {
   "section.keybindings": "Keyboard shortcuts",
   "section.accessibility": "Accessibility",
   "section.privacy": "Privacy",
-  "section.updates": "Updates",
   "section.about": "About and credits",
   "appearance.title": "Appearance",
   "appearance.description": "Follow the system, or always use light or dark.",
@@ -123,8 +122,6 @@ export default {
   "screenReader.inactive": "The editor is in standard mode.",
   "crashReports.title": "Send crash reports",
   "crashReports.description": "Helps fix bugs. Fiddle contents, console output and environment variables are never sent.",
-  "betaUpdates.title": "Beta updates",
-  "betaUpdates.description": "Get new versions of Fiddle before they're stable.",
   "about.version": "Version {{version}}",
   "about.electron": "Electron {{version}}",
   "about.contributors": "Contributors",
@@ -136,7 +133,7 @@ export default {
   "notice.newer.description": "Changes won't be saved to it until you update Fiddle.",
   "notice.dismiss": "Dismiss",
   "privacyReset.title": "Reset privacy permissions",
-  "privacyReset.description": "Fiddles run as Electron Fiddle, so the camera, microphone and other permissions you gave a fiddle belong to the app. This forgets them all.",
+  "privacyReset.description": "Fiddles run as the standard Electron app, so the camera, microphone and other permissions you give a fiddle belong to it, and macOS asks again for each Electron version. This forgets them all, for Electron Fiddle too.",
   "privacyReset.button": "Reset…",
   "privacyReset.done": "Privacy permissions reset"
 } as const;
