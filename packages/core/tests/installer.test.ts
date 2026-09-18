@@ -68,8 +68,6 @@ describe('Installer', () => {
     fs.rmSync(tmpdir, { recursive: true, force: true });
   });
 
-  // test helpers
-
   async function listenWhile(installer: Installer, func: () => Promise<unknown>) {
     const events: InstallStateEvent[] = [];
     const listener = (ev: InstallStateEvent) => events.push(ev);
@@ -95,7 +93,7 @@ describe('Installer', () => {
       isDownloaded = true;
     };
 
-    // Version is already downloaded and present in local
+    // no progress callback fires when the version is already downloaded
     if (installer.state(version) !== missing) {
       isDownloaded = true;
     }
@@ -121,7 +119,7 @@ describe('Installer', () => {
       isDownloaded = true;
     };
 
-    // Version is already downloaded and present in local
+    // no progress callback fires when the version is already downloaded
     if (installer.state(version) !== missing) {
       isDownloaded = true;
     }
@@ -151,8 +149,6 @@ describe('Installer', () => {
     return extractDir;
   }
 
-  // tests
-
   describe('getExecPath()', () => {
     it.each([
       ['Linux', 'linux', 'electron'],
@@ -165,12 +161,9 @@ describe('Installer', () => {
   });
 
   describe('ensureDownloaded()', () => {
-    // @feature versions.download
     it('downloads the version if needed', async () => {
-      // setup: version is not installed
       expect(installer.state(version)).toBe(missing);
 
-      // test that the zipfile was downloaded
       const { events, binaryConfig } = await doDownload(installer, version);
       expect(events).toStrictEqual([
         { version, state: downloading },
@@ -180,12 +173,10 @@ describe('Installer', () => {
     });
 
     it('does nothing if the version is already downloaded', async () => {
-      // setup: version is already installed
       const { binaryConfig: config1 } = await doDownload(installer, version);
       const { path: zip1 } = config1;
       const { ctimeMs } = await fs.promises.stat(zip1);
 
-      // test that ensureDownloaded() did nothing:
       const { events, binaryConfig: config2 } = await doDownload(installer, version);
       const { path: zip2 } = config2;
 
@@ -203,7 +194,6 @@ describe('Installer', () => {
       const {
         binaryConfig: { path: zipFile },
       } = await doDownload(installer, version);
-      // Purposely remove the downloaded zip file
       fs.rmSync(zipFile, { force: true });
 
       const { binaryConfig } = await doDownload(installer, version);
@@ -219,11 +209,9 @@ describe('Installer', () => {
       const {
         binaryConfig: { path: zipFile },
       } = await doDownload(installer, version);
-      // Purposely remove the downloaded zip file
       fs.rmSync(zipFile, { force: true });
       expect(installer.state(version)).toBe(downloaded);
 
-      // test that the zipfile was downloaded
       const { events, binaryConfig } = await doDownload(installer, version);
       expect(events).toStrictEqual([
         { version, state: downloading },
@@ -240,7 +228,6 @@ describe('Installer', () => {
     });
 
     it('resets install state on error', async () => {
-      // setup: version is not installed
       expect(installer.state(version)).toBe(missing);
 
       nock.cleanAll();
@@ -254,9 +241,7 @@ describe('Installer', () => {
   });
 
   describe('remove()', () => {
-    // @feature versions.download
     it('removes a download', async () => {
-      // setup: version is already installed
       await doDownload(installer, version);
 
       const { events } = await doRemove(installer, version);
@@ -264,7 +249,6 @@ describe('Installer', () => {
     });
 
     it('does nothing if the version is missing', async () => {
-      // setup: version is not installed
       expect(installer.state(version)).toBe(missing);
 
       const { events } = await doRemove(installer, version);
@@ -272,7 +256,6 @@ describe('Installer', () => {
     });
 
     it('uninstalls the version if it is installed', async () => {
-      // setup: version is installed
       await doInstall(installer, version);
 
       const { events } = await doRemove(installer, version);
@@ -285,7 +268,6 @@ describe('Installer', () => {
       const {
         binaryConfig: { path: zipFile },
       } = await doDownload(installer, version);
-      // Purposely remove the downloaded zip file
       fs.rmSync(zipFile, { force: true });
       expect(installer.state(version)).toBe(downloaded);
 
@@ -307,7 +289,6 @@ describe('Installer', () => {
 
   describe('install()', () => {
     it('downloads a version if necessary', async () => {
-      // setup: version is not downloaded
       expect(installer.state(version)).toBe(missing);
       expect(installer.installedVersion).toBe(undefined);
 
@@ -321,7 +302,6 @@ describe('Installer', () => {
     });
 
     it('unzips a version if necessary', async () => {
-      // setup: version is downloaded but not installed
       await doDownload(installer, version);
       expect(installer.state(version)).toBe(downloaded);
 
@@ -359,7 +339,6 @@ describe('Installer', () => {
         binaryConfig: { path: zipFile },
       } = await doDownload(installer, version);
 
-      // Purposely remove the downloaded zip file
       fs.rmSync(zipFile, { force: true });
       expect(installer.state(version)).toBe(downloaded);
       const { events } = await doInstall(installer, version);
@@ -381,7 +360,6 @@ describe('Installer', () => {
     });
 
     it('leaves a valid state after an error', async () => {
-      // setup: version is not installed
       expect(installer.state(version)).toBe(missing);
 
       const spy = vi
@@ -401,7 +379,6 @@ describe('Installer', () => {
     });
 
     it('resets install state on error', async () => {
-      // setup: version is downloaded but not installed
       await doDownload(installer, version);
       expect(installer.state(version)).toBe(downloaded);
 
@@ -445,7 +422,6 @@ describe('Installer', () => {
       const {
         binaryConfig: { path: zipFile },
       } = await doDownload(installer, version);
-      // Purposely remove the downloaded zip file
       fs.rmSync(zipFile, { force: true });
       await doDownload(installer, version);
 

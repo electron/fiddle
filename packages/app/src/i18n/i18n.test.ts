@@ -39,25 +39,27 @@ describe('catalogs', () => {
   it('fall back to English key by key', async () => {
     const i18n = createInstance();
     await i18n.init({
-      ...i18nOptions('de', ['common']),
+      ...i18nOptions('de', ['shell']),
       resources: {
-        de: { common: { loading: 'Wird geladen …' } },
-        en: { common: { loading: 'Loading…', appName: 'Electron Fiddle' } },
+        de: { shell: { hideSidebar: 'Seitenleiste ausblenden' } },
+        en: { shell: { hideSidebar: 'Hide sidebar', showSidebar: 'Show sidebar' } },
       },
     });
-    expect(i18n.t('loading')).toBe('Wird geladen …');
-    expect(i18n.t('appName')).toBe('Electron Fiddle');
+    expect(i18n.t('hideSidebar')).toBe('Seitenleiste ausblenden');
+    expect(i18n.t('showSidebar')).toBe('Show sidebar');
   });
 
   it('load pseudo-locales, with every Arabic plural form for ar-XB', async () => {
     const xa = createInstance();
-    await xa.use(catalogBackend).init(i18nOptions('en-XA', ['common']));
-    expect(xa.t('loading')).toMatch(/^\[Ļöáðîñĝ/);
+    await xa.use(catalogBackend).init(i18nOptions('en-XA', ['shell']));
+    expect(xa.t('hideSidebar')).toMatch(/^\[Ĥîðé šîðéƀáŕ/);
 
     const xb = createInstance();
     await xb.use(catalogBackend).init(i18nOptions('ar-XB', ['shell']));
-    // Untyped: the key isn't in the default namespace's types.
-    const t = xb.getFixedT(null, 'shell') as unknown as (key: string, options: object) => string;
+    const t = xb.getFixedT(null, 'shell') as unknown as (
+      key: string,
+      options: object,
+    ) => string;
     for (const count of [0, 1, 2, 3, 11, 100]) {
       expect(t('errorCount', { count })).toContain(String(count));
     }
@@ -79,8 +81,12 @@ describe('format', () => {
   it('formats numbers and dates in the given locale', () => {
     expect(formatNumber('de', 1234.5)).toBe('1.234,5');
     expect(formatNumber('en', 0.25, { style: 'percent' })).toBe('25%');
-    expect(formatDate('ja', now, { dateStyle: 'long', timeZone: 'UTC' })).toBe('2026年9月13日');
-    expect(formatDate('en', now, { dateStyle: 'medium', timeZone: 'UTC' })).toBe('Sep 13, 2026');
+    expect(formatDate('ja', now, { dateStyle: 'long', timeZone: 'UTC' })).toBe(
+      '2026年9月13日',
+    );
+    expect(formatDate('en', now, { dateStyle: 'medium', timeZone: 'UTC' })).toBe(
+      'Sep 13, 2026',
+    );
   });
 
   it('formats relative times in their largest whole unit', () => {

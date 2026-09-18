@@ -5,23 +5,35 @@ import path from 'node:path';
 
 import { describe, expect, it } from 'vitest';
 
-import { appState, makeFolder, readJson, role, text, useApp, windowState, type AppState } from './harness.ts';
+import {
+  appState,
+  makeFolder,
+  readJson,
+  role,
+  text,
+  useApp,
+  windowState,
+  type AppState,
+} from './harness.ts';
 
 describe('settings', () => {
   const app = useApp();
   const settings = async () => (await appState(app())).settings;
   const setting = (key: string) => async () => (await settings())[key];
   const open = async (section: string) => {
-    if ((await windowState(app())).view !== 'settings') await app().click(role('button', 'Settings'));
+    if ((await windowState(app())).view !== 'settings')
+      await app().click(role('button', 'Settings'));
     await app().click(role('button', section));
     await app().query(role('region', section));
   };
   const states = async (query: Parameters<ReturnType<typeof app>['query']>[0]) =>
     (await app().query(query))[0]?.states ?? [];
   const openedPaths = async () =>
-    (await app().sideEffects()).filter((e) => e.kind === 'shell.openPath').map((e) => String(e.args[0]));
+    (await app().sideEffects())
+      .filter((e) => e.kind === 'shell.openPath')
+      .map((e) => String(e.args[0]));
 
-  it('starts with the documented defaults @feature settings.clear-console settings.keep-user-data settings.advanced-logging settings.package-manager settings.socket-firewall', async () => {
+  it('starts with the documented defaults', async () => {
     expect(await settings()).toMatchObject({
       appearance: 'system',
       theme: 'lucent',
@@ -42,14 +54,20 @@ describe('settings', () => {
       sessionRestore: true,
     });
     await open('Execution');
-    expect(await states(role('switch', 'Clear the console on every run'))).not.toContain('checked');
-    expect(await states(role('switch', 'Keep user data folders'))).not.toContain('checked');
-    expect(await states(role('switch', 'Advanced Electron logging'))).not.toContain('checked');
+    expect(await states(role('switch', 'Clear the console on every run'))).not.toContain(
+      'checked',
+    );
+    expect(await states(role('switch', 'Keep user data folders'))).not.toContain(
+      'checked',
+    );
+    expect(await states(role('switch', 'Advanced Electron logging'))).not.toContain(
+      'checked',
+    );
     expect(await states(role('switch', 'Use Socket Firewall'))).toContain('checked');
     expect(await states(role('radio', 'npm'))).toContain('checked');
   });
 
-  it('saves a change to settings.json and syncs it to every window @feature settings.persist-sync', async () => {
+  it('saves a change to settings.json and syncs it to every window', async () => {
     await open('Execution');
     await app().click(role('switch', 'Clear the console on every run'));
     await expect.poll(setting('clearConsoleOnRun')).toBe(true);
@@ -61,12 +79,14 @@ describe('settings', () => {
 
     await app().runCommand('app.newWindow');
     await app().waitForWindow(1);
-    expect(((await app().stores(1)).app as AppState).settings.clearConsoleOnRun).toBe(true);
+    expect(((await app().stores(1)).app as AppState).settings.clearConsoleOnRun).toBe(
+      true,
+    );
     await app().runCommand('file.close', 1);
     await expect.poll(async () => (await app().windows()).length).toBe(1);
   });
 
-  it('marks a changed value and resets it @feature new.settings-reset', async () => {
+  it('marks a changed value and resets it', async () => {
     await open('Execution');
     expect(await app().snapshot(0)).toContain('image "Changed from the default"');
     await app().click(role('button', 'Reset'));
@@ -74,7 +94,7 @@ describe('settings', () => {
     expect(await app().snapshot(0)).not.toContain('Changed from the default');
   });
 
-  it('searches every section @feature new.settings-search', async () => {
+  it('searches every section', async () => {
     await open('Execution');
     await app().type('socket', role('textbox', 'Search settings'));
     await app().query(role('switch', 'Use Socket Firewall'));
@@ -84,7 +104,7 @@ describe('settings', () => {
     await app().query(role('radiogroup', 'Package manager'));
   });
 
-  it('edits the execution settings @feature settings.package-manager settings.socket-firewall settings.keep-user-data settings.advanced-logging settings.electron-flags settings.env-vars', async () => {
+  it('edits the execution settings', async () => {
     await open('Execution');
     await app().click(role('radio', 'yarn'));
     await expect.poll(setting('packageManager')).toBe('yarn');
@@ -109,7 +129,7 @@ describe('settings', () => {
     await expect.poll(setting('environmentVariables')).toEqual(['FOO=bar']);
   });
 
-  it('edits the Electron settings @feature settings.channels settings.show-not-downloaded settings.show-obsolete settings.mirror', async () => {
+  it('edits the Electron settings', async () => {
     await open('Electron');
     // The current version's channel can't be turned off.
     expect(await states(role('checkbox', 'Stable'))).toContain('disabled');
@@ -141,7 +161,7 @@ describe('settings', () => {
     await expect.poll(setting('mirror')).toBe('auto');
   });
 
-  it('edits the GitHub settings @feature settings.publish-revision settings.gist-visibility settings.gist-history settings.package-author', async () => {
+  it('edits the GitHub settings', async () => {
     await open('GitHub');
     await app().click(role('switch', 'Publish as revision'));
     await expect.poll(setting('gistPublishAsRevision')).toBe(false);
@@ -154,7 +174,7 @@ describe('settings', () => {
     await expect.poll(setting('packageAuthor')).toBe('E2E Author');
   });
 
-  it('edits the editor font @feature settings.editor-font', async () => {
+  it('edits the editor font', async () => {
     await open('Editor');
     await app().type('monospace', role('textbox', 'Font family'));
     await app().press('Tab');
@@ -164,7 +184,7 @@ describe('settings', () => {
     await expect.poll(setting('editorFontSize')).toBe(16);
   });
 
-  it('switches between the light and dark themes and back to the system @feature themes.builtin themes.native-mode settings.follow-system', async () => {
+  it('switches between the light and dark themes and back to the system', async () => {
     await open('General');
     const theme = () =>
       app().evaluate(
@@ -180,13 +200,18 @@ describe('settings', () => {
     expect(await settings()).toMatchObject({ appearance: 'system' });
   });
 
-  it('creates and imports themes, and opens the themes folder @feature themes.create themes.import themes.open-folder settings.theme', async () => {
+  it('creates and imports themes, and opens the themes folder', async () => {
     await open('General');
     await app().click(role('button', 'Create from current'));
     await expect.poll(async () => (await appState(app())).themes.length).toBe(1);
 
     const source = makeFolder(app(), 'theme-source', {
-      'night.json': JSON.stringify({ base: 'vs-dark', inherit: true, rules: [], colors: { 'editor.background': '#101010' } }),
+      'night.json': JSON.stringify({
+        base: 'vs-dark',
+        inherit: true,
+        rules: [],
+        colors: { 'editor.background': '#101010' },
+      }),
     });
     await app().queueDialog('open', { filePaths: [path.join(source, 'night.json')] });
     await app().click(role('button', 'Import Monaco theme…'));
@@ -196,21 +221,28 @@ describe('settings', () => {
     await expect.poll(openedPaths).toContainEqual(expect.stringMatching(/themes$/));
   });
 
-  it('opens settings.json @feature new.settings-open-json', async () => {
+  it('opens settings.json', async () => {
     await app().click(role('button', 'Open settings.json'));
-    await expect.poll(openedPaths).toContainEqual(expect.stringMatching(/settings\.json$/));
+    await expect
+      .poll(openedPaths)
+      .toContainEqual(expect.stringMatching(/settings\.json$/));
   });
 
-  it('exports and imports settings @feature new.settings-import-export', async () => {
+  it('exports and imports settings', async () => {
     const dir = makeFolder(app(), 'settings-io');
     const exported = path.join(dir, 'exported.json');
     await app().queueDialog('save', { filePath: exported });
     await app().click(role('button', 'Export…'));
     // The file exists before it's written (a plain writeFile), so wait for the content.
-    await expect.poll(() => (fs.existsSync(exported) ? fs.readFileSync(exported, 'utf8') : '')).toContain('E2E Author');
+    await expect
+      .poll(() => (fs.existsSync(exported) ? fs.readFileSync(exported, 'utf8') : ''))
+      .toContain('E2E Author');
 
     const imported = path.join(dir, 'imported.json');
-    fs.writeFileSync(imported, fs.readFileSync(exported, 'utf8').replace('E2E Author', 'Imported Author'));
+    fs.writeFileSync(
+      imported,
+      fs.readFileSync(exported, 'utf8').replace('E2E Author', 'Imported Author'),
+    );
     await app().queueDialog('open', { filePaths: [imported] });
     // Flags and variables change how fiddles run, so importing them asks first.
     await app().queueDialog('messageBox', { button: 'Import' });
@@ -218,7 +250,7 @@ describe('settings', () => {
     await expect.poll(setting('packageAuthor')).toBe('Imported Author');
   });
 
-  it('lists the contributors @feature settings.credits', async () => {
+  it('lists the contributors', async () => {
     await open('About and credits');
     await app().query(role('heading', 'Contributors'));
     await app().query(text(/^\d+ contributions?$/, { nth: 0 }));

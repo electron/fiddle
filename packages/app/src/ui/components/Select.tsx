@@ -64,11 +64,20 @@ function isGroup(item: SelectOption | SelectGroup): item is SelectGroup {
 
 function Option({ option }: { option: SelectOption }) {
   return (
-    <ListBoxItem id={option.id} textValue={option.label} isDisabled={option.isDisabled} className={menu.item}>
+    <ListBoxItem
+      id={option.id}
+      textValue={option.label}
+      isDisabled={option.isDisabled}
+      className={menu.item}
+    >
       {({ isSelected }) => (
         <>
           <span className={menu.lead}>
-            {isSelected ? <Icon name="check" /> : option.icon ? <Icon name={option.icon} /> : null}
+            {isSelected ? (
+              <Icon name="check" />
+            ) : option.icon ? (
+              <Icon name={option.icon} />
+            ) : null}
           </span>
           <span className={menu.label}>{option.label}</span>
           {option.hint && <span className={menu.hint}>{option.hint}</span>}
@@ -78,7 +87,6 @@ function Option({ option }: { option: SelectOption }) {
   );
 }
 
-/** A field-styled trigger with a chevron, opening a menu 4px below (10px below a toolbar capsule). */
 export function Select({
   items,
   label,
@@ -114,7 +122,9 @@ export function Select({
         {icon && <Icon name={icon} className={styles.icon} />}
         <SelectValue className={styles.value}>
           {/* Never react-aria's own "Select an item": only the caller's catalog string. */}
-          {({ isPlaceholder, selectedText }) => (isPlaceholder ? placeholder : selectedText)}
+          {({ isPlaceholder, selectedText }) =>
+            isPlaceholder ? placeholder : selectedText
+          }
         </SelectValue>
         <Icon name="chevron-down" className={styles.chevron} />
       </AriaButton>

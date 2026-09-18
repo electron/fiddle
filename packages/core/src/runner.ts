@@ -144,25 +144,19 @@ export class Runner {
   }
 
   /**
-   * Figure out how to run the user-specified `electron` value.
-   *
-   * - if it's an existing directory, look for an execPath in it.
-   * - if it's an existing file, run it. It's a local build.
-   * - if it's a version number, delegate to the installer
-   *
-   * @param val - a version number, directory, or executable
-   * @returns a path to an Electron executable
+   * Resolves `electron` to an executable path:
+   * - an existing directory: the exec path inside it.
+   * - an existing file: that file, as a local build.
+   * - a version number: the installer's copy, installing it if needed.
    */
   private async getExec(electron: string, signal?: AbortSignal): Promise<string> {
     try {
+      // throws if `electron` isn't on disk
       const stat = fs.statSync(electron);
-      // if it's on the filesystem but not a directory, use it directly
       if (!stat.isDirectory()) return electron;
-      // if it's on the filesystem as a directory, look for execPath
       const name = Installer.getExecPath(electron);
       if (fs.existsSync(name)) return name;
     } catch {
-      // if it's a version, install it
       if (this.versions.isVersion(electron)) {
         return await (signal
           ? this.installer.install(electron, { signal })
@@ -219,7 +213,6 @@ export class Runner {
   ): Promise<ChildProcess> {
     const d = debug('fiddle-core:Runner.spawn');
 
-    // process the input parameters
     opts = { ...DefaultRunnerOpts, ...opts };
     const { signal } = opts;
     throwIfAborted(signal);
@@ -233,7 +226,6 @@ export class Runner {
         `Invalid fiddle: "${inspect(fiddleIn)}"`,
       );
 
-    // set up the electron binary and the fiddle
     const electronExec = await this.getExec(version, signal);
     throwIfAborted(signal);
     let exec =
@@ -260,8 +252,9 @@ export class Runner {
 
     const child = spawn(exec, args, spawnOpts);
     if (opts.out) {
-      child.stdout?.pipe(opts.out);
-      child.stderr?.pipe(opts.out);
+      // `out` outlives the child, and stdout and stderr share it
+      child.stdout?.pipe(opts.out, { end: false });
+      child.stderr?.pipe(opts.out, { end: false });
     }
     if (signal) {
       const onAbort = () => killTree(child);
@@ -299,7 +292,7 @@ export class Runner {
     }
   }
 
-  /** In `legacy` mode, an abort ends a run or bisect with `system_error`, as in 2.x. */
+  /** In `legacy` mode, an abort ends a run or bisect with `system_error`. */
   private settleAbort<T>(err: unknown, result: T): T {
     if (this.#errors !== 'typed' && isFiddleCoreError(err, 'aborted')) return result;
     throw err;
@@ -368,6 +361,12 @@ export class Runner {
 
     throwIfAborted(signal);
     const versions = this.versions.inRange(version_a, version_b);
+    if (versions.length < 2) {
+      throw new FiddleCoreError(
+        'invalid-version',
+        `A bisect needs two different versions, got "${version_a.toString()}" and "${version_b.toString()}"`,
+      );
+    }
     const fiddle = await this.fiddleFactory.create(fiddleIn);
     if (!fiddle)
       throw new FiddleCoreError(
@@ -389,7 +388,6 @@ export class Runner {
       ].join('\n'),
     );
 
-    // bisect through the releases
     const LEFT_POS = 0;
     const RIGHT_POS = versions.length - 1;
     let left = LEFT_POS;
@@ -418,9 +416,8 @@ export class Runner {
       }
     }
 
-    // validates the status of the boundary versions if we've reached the end
-    // of the bisect and one of our pointers is at a boundary.
-
+    // If a pointer ended on a boundary version that was never run, run it to
+    // validate that boundary.
     const boundaries: Array<number> = [];
     if (left === LEFT_POS && !results[LEFT_POS]) boundaries.push(LEFT_POS);
     if (right === RIGHT_POS && !results[RIGHT_POS]) boundaries.push(RIGHT_POS);

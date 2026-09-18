@@ -1,6 +1,12 @@
 import { describe, expect, it } from 'vitest';
 
-import { commandIds, commands, isCommandEnabled, isCommandListed, type CommandDefinition } from './commands';
+import {
+  commandIds,
+  commands,
+  isCommandEnabled,
+  isCommandListed,
+  type CommandDefinition,
+} from './commands';
 import { defaultSettings } from './settings';
 
 // The Develop menu's commands (`devOnly`): only development builds (`App.dev`) have them.
@@ -8,7 +14,6 @@ describe('dev-only commands', () => {
   const app = (dev: boolean | undefined) => ({ dev, settings: defaultSettings }) as never;
   const win = { fiddle: { source: {} } } as never;
 
-  // @feature workspace.menubar
   it('are enabled and listed only while App.dev is set', () => {
     expect(isCommandEnabled('dev.toggleMenuBar', app(true), win)).toBe(true);
     expect(isCommandEnabled('dev.toggleMenuBar', app(false), win)).toBe(false);
@@ -23,7 +28,9 @@ describe('dev-only commands', () => {
   });
 
   it('live under dev. and bring no default key', () => {
-    const devOnly = commandIds.filter((id) => (commands[id] as CommandDefinition).devOnly);
+    const devOnly = commandIds.filter(
+      (id) => (commands[id] as CommandDefinition).devOnly,
+    );
     expect(devOnly).toEqual(['dev.toggleMenuBar']);
     for (const id of devOnly) {
       expect(id.startsWith('dev.')).toBe(true);

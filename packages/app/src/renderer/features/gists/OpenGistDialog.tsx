@@ -11,7 +11,7 @@ import { useLoadedGist } from './state';
 /**
  * Loads a gist by URL or ID through Documents. Mount it only while it's open.
  * A gist URL or ID on the clipboard fills the empty field, selected so that
- * typing replaces it; main reads the clipboard (§4).
+ * typing replaces it; main reads the clipboard.
  */
 export function OpenGistDialog({ onClose }: { onClose: () => void }) {
   const { t } = useTranslation('gists');
@@ -75,7 +75,12 @@ export function OpenGistDialog({ onClose }: { onClose: () => void }) {
           <Button variant="ghost" onPress={onClose}>
             {t('cancel')}
           </Button>
-          <Button variant="primary" loading={busy} isDisabled={!value.trim()} onPress={() => void open()}>
+          <Button
+            variant="primary"
+            loading={busy}
+            isDisabled={!value.trim()}
+            onPress={() => void open()}
+          >
             {t('openSubmit')}
           </Button>
         </>

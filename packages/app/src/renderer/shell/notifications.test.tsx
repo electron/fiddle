@@ -45,7 +45,8 @@ describe('toast history', () => {
     expect(history.getSnapshot().entries.map((e) => e.content.title)).toEqual(['B', 'A']);
     expect(history.getSnapshot().unseen).toBe(2);
 
-    for (let i = 0; i < HISTORY_LIMIT + 5; i++) queue.close(queue.add({ title: `T${i}` }));
+    for (let i = 0; i < HISTORY_LIMIT + 5; i++)
+      queue.close(queue.add({ title: `T${i}` }));
     expect(history.getSnapshot().entries).toHaveLength(HISTORY_LIMIT);
   });
 

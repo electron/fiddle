@@ -1,4 +1,3 @@
-/* Gallery page: a stand-in desktop, a glass window, a sidebar on the glass and the sheet. */
 .stage {
   min-height: 100vh;
   padding: var(--lu-space-8);
@@ -127,7 +126,6 @@
   flex: 1;
 }
 
-/* Sections and specimens */
 .section {
   padding: var(--lu-space-6) 0;
 }

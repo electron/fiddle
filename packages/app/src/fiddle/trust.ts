@@ -1,5 +1,5 @@
 /**
- * Where a fiddle's code came from (§4 Trust model). Serialized as
+ * Where a fiddle's code came from. Serialized as
  * `local`, `example`, `gist:<owner>/<id>@<sha>` or `electron:<tag>/<path>`.
  */
 export type FiddleOrigin =
@@ -24,7 +24,12 @@ export function formatOrigin(origin: FiddleOrigin): string {
 }
 
 export function gistOrigin(id: string, sha: string, owner: string | null): FiddleOrigin {
-  return { kind: 'gist', owner: owner ?? ANONYMOUS_GIST_OWNER, id: id.toLowerCase(), sha: sha.toLowerCase() };
+  return {
+    kind: 'gist',
+    owner: owner ?? ANONYMOUS_GIST_OWNER,
+    id: id.toLowerCase(),
+    sha: sha.toLowerCase(),
+  };
 }
 
 /** Fiddles with a remote origin are untrusted until the user approves them. */
@@ -47,6 +52,12 @@ export function needsApproval(origin: FiddleOrigin, approvedOrigin?: string): bo
  * untrusted until the user approves it: the first untrusted `remembered`
  * origin wins over `loaded`.
  */
-export function restoredOrigin(loaded: FiddleOrigin, ...remembered: (FiddleOrigin | undefined)[]): FiddleOrigin {
-  return remembered.find((origin) => origin !== undefined && isUntrustedOrigin(origin)) ?? loaded;
+export function restoredOrigin(
+  loaded: FiddleOrigin,
+  ...remembered: (FiddleOrigin | undefined)[]
+): FiddleOrigin {
+  return (
+    remembered.find((origin) => origin !== undefined && isUntrustedOrigin(origin)) ??
+    loaded
+  );
 }

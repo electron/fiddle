@@ -1,11 +1,12 @@
 /**
- * Per-file diagnostics for the tab badges, sidebar pills and pane headers
- * (REQUIREMENTS §17.2): the running fiddle's runtime errors plus Monaco's own
- * markers (syntax errors and warnings). `models.ts` reports the markers; this
+ * Per-file diagnostics for the tab badges, sidebar pills and pane headers: the
+ * running fiddle's runtime errors plus Monaco's own markers (syntax errors and
+ * warnings). `models.ts` reports the markers; this
  * module has no Monaco import, so the merge runs anywhere.
  */
-import { useMemo, useSyncExternalStore } from 'react';
+import { useMemo } from 'react';
 
+import { createStore, useStore } from '../store';
 import { useRuntimeErrors } from './runtime-errors';
 
 export interface EditorMarker {
@@ -19,19 +20,12 @@ export interface FileDiagnostics {
 }
 
 const EMPTY: readonly EditorMarker[] = [];
-let markers: readonly EditorMarker[] = EMPTY;
-const listeners = new Set<() => void>();
-
-function subscribe(listener: () => void): () => void {
-  listeners.add(listener);
-  return () => listeners.delete(listener);
-}
+const markers = createStore(EMPTY);
 
 /** Replaces Monaco's error and warning markers, one entry per marker. */
 export function setEditorMarkers(next: readonly EditorMarker[]): void {
-  if (next.length === 0 && markers.length === 0) return;
-  markers = next.length ? [...next] : EMPTY;
-  for (const listener of listeners) listener();
+  if (next.length === 0 && markers.get().length === 0) return;
+  markers.set(next.length ? [...next] : EMPTY);
 }
 
 /** Runtime errors count as errors; Monaco's markers count by severity. Files without any are left out. */
@@ -55,12 +49,14 @@ export function mergeDiagnostics(
 
 export function useDiagnostics(): ReadonlyMap<string, FileDiagnostics> {
   const runtime = useRuntimeErrors();
-  const editor = useSyncExternalStore(subscribe, () => markers);
+  const editor = useStore(markers);
   return useMemo(() => mergeDiagnostics(runtime, editor), [runtime, editor]);
 }
 
 /** What a badge or pill shows: the error count, or the warning count when there are no errors. */
-export function badgeOf(diagnostics: FileDiagnostics | undefined): { count: number; tone: 'error' | 'warning' } | null {
+export function badgeOf(
+  diagnostics: FileDiagnostics | undefined,
+): { count: number; tone: 'error' | 'warning' } | null {
   if (diagnostics?.errors) return { count: diagnostics.errors, tone: 'error' };
   if (diagnostics?.warnings) return { count: diagnostics.warnings, tone: 'warning' };
   return null;

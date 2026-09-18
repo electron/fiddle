@@ -54,7 +54,8 @@ export function matchNodes(nodes: AXNode[], query: Query): AXNode[] {
     if (query.name !== undefined && !matchText(nameOf(node), query.name, false))
       return false;
     if (query.text !== undefined) {
-      if (role !== 'StaticText' || !matchText(nameOf(node), query.text, true)) return false;
+      if (role !== 'StaticText' || !matchText(nameOf(node), query.text, true))
+        return false;
     }
     return true;
   });
@@ -97,7 +98,10 @@ export function formatSnapshot(nodes: AXNode[]): string {
     if (!hidden) {
       const states = statesOf(node);
       const level = node.properties?.find((p) => p.name === 'level')?.value.value;
-      const extra = [...(level === undefined ? [] : [`level=${String(level)}`]), ...states];
+      const extra = [
+        ...(level === undefined ? [] : [`level=${String(level)}`]),
+        ...states,
+      ];
       lines.push(
         `${'  '.repeat(depth)}${role}${name ? ` ${JSON.stringify(name)}` : ''}${
           extra.length > 0 ? ` [${extra.join(', ')}]` : ''

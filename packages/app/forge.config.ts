@@ -16,9 +16,10 @@ import { PublisherGitHub } from '@electron-forge/publisher-github';
 import type { ForgeConfig } from '@electron-forge/shared-types';
 
 import packageJson from './package.json';
+import { extractsWithoutAddon, isTargetAddon } from './tools/native-addons';
 
-// Packaging, signing and release: REQUIREMENTS §12. The app identity here is
-// checked against build/identity.json in CI (tools/release-identity.mjs).
+// The app identity here is checked against build/identity.json in CI
+// (tools/release-identity.mjs).
 
 const appDir = import.meta.dirname;
 
@@ -40,6 +41,10 @@ const linuxOptions = {
   mimeType: ['x-scheme-handler/electron-fiddle'],
 };
 
+// Derived from Forge rather than imported from `@electron/windows-sign`, so the
+// type always matches the version Forge itself depends on.
+type WindowsSignOptions = NonNullable<MakerMSIX['config']['windowsSignOptions']>;
+
 /**
  * Windows code signing through Azure Trusted Signing.
  *
@@ -51,10 +56,6 @@ const linuxOptions = {
  * Returns `undefined` when none of the Azure variables are set, so local and
  * CI builds produce unsigned artifacts. Throws when only some are set.
  */
-// Derived from Forge rather than imported from `@electron/windows-sign`, so the
-// type always matches the version Forge itself depends on.
-type WindowsSignOptions = NonNullable<MakerMSIX['config']['windowsSignOptions']>;
-
 function getWindowsSignOptions(): WindowsSignOptions | undefined {
   const {
     AZURE_CODE_SIGNING_DLIB: dlib,
@@ -172,30 +173,30 @@ const windowsSignOptions = getWindowsSignOptions();
  * app's node_modules, with only the target's napi-rs addon
  * (`index.<platform>-<arch>[-<abi>].node` or `index.<platform>-universal.node`).
  * `asar.unpack` keeps the addons out of the asar. None has dependencies.
+ * Electron runs on glibc only, so musl addons are left out. A target with no
+ * addon fails the build, unless core unpacks without one there
+ * (`extractsWithoutAddon`, win32-ia32): otherwise the app can't unpack any
+ * download.
  */
 const NATIVE_MODULES = ['@electron-internal/extract-zip'];
 
 async function copyNativeModules(buildPath: string, platform: string, arch: string) {
-  const isTargetAddon = (file: string) => {
-    const tag = /^index\.(.+)\.node$/.exec(path.basename(file))?.[1];
-    return (
-      tag === `${platform}-universal` ||
-      tag === `${platform}-${arch}` ||
-      !!tag?.startsWith(`${platform}-${arch}-`)
-    );
-  };
   const require = createRequire(import.meta.url);
   for (const name of NATIVE_MODULES) {
-    await fs.promises.cp(
-      path.dirname(require.resolve(name)),
-      path.join(buildPath, 'node_modules', name),
-      { recursive: true, filter: (file) => !file.endsWith('.node') || isTargetAddon(file) },
-    );
+    const destination = path.join(buildPath, 'node_modules', name);
+    await fs.promises.cp(path.dirname(require.resolve(name)), destination, {
+      recursive: true,
+      filter: (file) => !file.endsWith('.node') || isTargetAddon(file, platform, arch),
+    });
+    const hasAddon = fs.readdirSync(destination).some((file) => file.endsWith('.node'));
+    if (!hasAddon && !extractsWithoutAddon(platform, arch)) {
+      throw new Error(`${name} has no addon for ${platform}-${arch}`);
+    }
   }
 }
 
 /**
- * Socket Firewall (§2): module installs spawn `node sfw.mjs npm …`, so the
+ * Socket Firewall: module installs spawn `node sfw.mjs npm …`, so the
  * `sfw` package's entry ships outside the asar, at `<resources>/sfw.mjs`
  * (`extraResource`; src/main/platform/sfw.ts finds it). Without the package,
  * installs run without it and the console says so.
@@ -204,7 +205,9 @@ function sfwEntry(): string[] {
   try {
     return [createRequire(import.meta.url).resolve('sfw/dist/sfw.mjs')];
   } catch {
-    console.warn('The sfw package is not installed, so this build ships without Socket Firewall.');
+    console.warn(
+      'The sfw package is not installed, so this build ships without Socket Firewall.',
+    );
     return [];
   }
 }
@@ -218,18 +221,25 @@ const config: ForgeConfig = {
         stdio: 'inherit',
       });
     },
+    // Nothing at runtime reads source maps, and they are about three quarters
+    // of the asar. The release workflow uploads them from `.vite/`.
     packageAfterCopy: async (_config, buildPath, _electronVersion, platform, arch) => {
       await copyNativeModules(buildPath, platform, arch);
+      const built = path.join(buildPath, '.vite');
+      for (const file of await fs.promises.readdir(built, { recursive: true })) {
+        if (file.endsWith('.map')) await fs.promises.rm(path.join(built, file));
+      }
     },
   },
   packagerConfig: {
     name: 'Electron Fiddle',
     executableName: 'electron-fiddle',
     asar: { unpack: '**/*.node' },
-    // Bundled content main reads at runtime: Show Me, the quick-start template,
-    // releases.json, contributors.json and import-local-storage.html. Packaged
-    // builds find it at `<resources>/static`, dev runs at `<app path>/static`
-    // (`staticDir()` in src/main/documents/service.ts).
+    // Bundled content main reads at runtime: Show Me, the quick-start template
+    // and import-local-storage.html. Packaged builds find it at
+    // `<resources>/static`, dev runs at `<app path>/static` (`staticDir()` in
+    // src/main/documents/service.ts). releases.json and contributors.json are
+    // compiled into the bundles, so their copies here are never read.
     extraResource: [path.join(appDir, 'static'), ...sfwEntry()],
     icon: path.join(iconDir, 'fiddle'),
     appBundleId: 'com.electron.fiddle',

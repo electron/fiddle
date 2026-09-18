@@ -13,5 +13,5 @@
     "noEmit": true,
     "tsBuildInfoFile": "../../../node_modules/.tmp/tsc/app-e2e.tsbuildinfo"
   },
-  "include": ["./**/*.ts", "../tools/driver*.ts"]
+  "include": ["./**/*.ts", "./*.mts", "../tools/driver*.ts"]
 }

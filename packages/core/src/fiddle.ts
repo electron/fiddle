@@ -7,7 +7,7 @@ import * as asar from '@electron/asar';
 import debug from 'debug';
 
 import { FiddleCoreError } from './errors.js';
-import { withNoAsar } from './fs-util.js';
+import { copyFolder, remove } from './fs-util.js';
 import { DefaultPaths } from './paths.js';
 
 function hashString(str: string): string {
@@ -29,10 +29,7 @@ export class Fiddle {
   ) {}
 
   public remove(): Promise<void> {
-    return fs.promises.rm(path.dirname(this.mainPath), {
-      recursive: true,
-      force: true,
-    });
+    return remove(path.dirname(this.mainPath));
   }
 }
 
@@ -58,30 +55,34 @@ export class FiddleFactory {
   public async fromFolder(source: string): Promise<Fiddle> {
     const d = debug('fiddle-core:FiddleFactory:fromFolder');
 
-    // make a tmp copy of this fiddle
     const folder = path.join(this.fiddles, hashString(source));
     d({ source, folder });
-    await fs.promises.rm(folder, { recursive: true, force: true });
+    await remove(folder);
 
-    // Disable asar in case any deps bundle Electron - ex. @electron/remote
-    await withNoAsar(() => fs.promises.cp(source, folder, { recursive: true }));
+    // asar files are copied as files, in case any deps bundle Electron, for
+    // example @electron/remote
+    await copyFolder(source, folder);
 
     return new Fiddle(path.join(folder, 'main.js'), source);
   }
 
-  public async fromRepo(url: string, checkout = 'master'): Promise<Fiddle> {
+  /** `checkout` is a branch. Default: the repository's default branch. */
+  public async fromRepo(url: string, checkout?: string): Promise<Fiddle> {
     const d = debug('fiddle-core:FiddleFactory:fromRepo');
     const folder = path.join(this.fiddles, hashString(url));
     d({ url, checkout, folder });
 
-    // get the repo
     if (!fs.existsSync(folder)) {
       d(`cloning "${url}" into "${folder}"`);
       await git(['clone', '--depth=1', '--', url, folder]);
     }
 
-    await git(['checkout', checkout], folder);
-    await git(['pull', 'origin', checkout], folder);
+    if (checkout) {
+      await git(['checkout', checkout], folder);
+      await git(['pull', 'origin', checkout], folder);
+    } else {
+      await git(['pull', '--ff-only'], folder);
+    }
 
     return new Fiddle(path.join(folder, 'main.js'), url);
   }
@@ -90,7 +91,6 @@ export class FiddleFactory {
     const d = debug('fiddle-core:FiddleFactory:fromEntries');
     const map = new Map<string, string>(src);
 
-    // make a name for the directory that will hold our temp copy of the fiddle
     const md5sum = createHash('md5');
     for (const content of map.values()) md5sum.update(content);
     const hash = md5sum.digest('hex');
@@ -98,7 +98,6 @@ export class FiddleFactory {
     await fs.promises.mkdir(folder, { recursive: true });
     d({ folder });
 
-    // save content to that temp directory
     await Promise.all(
       [...map.entries()].map(([filename, content]) => {
         const filePath = path.resolve(folder, filename);
@@ -137,22 +136,21 @@ export class FiddleFactory {
       fiddle = await this.fromEntries(src);
     }
 
-    const { packAsAsar } = options || {};
-    if (packAsAsar) {
-      fiddle = await this.packageFiddleAsAsar(fiddle);
+    if (options?.packAsAsar) {
+      // a folder the caller passed in as a `Fiddle` stays theirs
+      fiddle = await this.packageFiddleAsAsar(fiddle, !(src instanceof Fiddle));
     }
     return fiddle;
   }
 
-  private async packageFiddleAsAsar(fiddle: Fiddle): Promise<Fiddle> {
+  /** Packs the fiddle's folder into an asar. With `owned`, the folder is then deleted. */
+  private async packageFiddleAsAsar(fiddle: Fiddle, owned: boolean): Promise<Fiddle> {
     const sourceDir = path.dirname(fiddle.mainPath);
     const asarOutputDir = path.join(this.fiddles, hashString(sourceDir));
     const asarFilePath = path.join(asarOutputDir, 'app.asar');
 
-    await withNoAsar(() => asar.createPackage(sourceDir, asarFilePath));
-    const packagedFiddle = new Fiddle(asarFilePath, fiddle.source);
-
-    await fs.promises.rm(sourceDir, { recursive: true, force: true });
-    return packagedFiddle;
+    await asar.createPackage(sourceDir, asarFilePath);
+    if (owned) await remove(sourceDir);
+    return new Fiddle(asarFilePath, fiddle.source);
   }
 }

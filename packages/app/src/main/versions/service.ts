@@ -1,5 +1,5 @@
 /**
- * Electron versions (REQUIREMENTS §17.8, §5 "Cache"):
+ * Electron versions:
  *
  * - The release list starts from the bundled snapshot or the cached copy, and
  *   is refreshed with `net.fetch` at startup and on demand. Only `releasesRev`
@@ -22,14 +22,20 @@ import {
   type InstallStateEvent,
   type Mirrors,
 } from '@electron/fiddle-core';
-import { app } from 'electron';
+import { app, net } from 'electron';
 import { z } from 'zod';
 
 import { suggestLocalBuildName } from '../../fiddle/versions';
 import snapshotText from '../../../static/releases.json?raw';
 import { ErrorCode, FiddleError } from '../../shared/errors';
 import { isHttpsUrl, MIRRORS, type Settings } from '../../shared/settings';
-import type { LocalBuild, ReleaseRow, VersionsState } from '../../shared/stores';
+import type {
+  LocalBuild,
+  ReleaseRow,
+  VersionRefValue,
+  VersionsState,
+} from '../../shared/stores';
+import { fetchDownloader } from '../cli/downloader';
 import { confirm, messageBox, pickFolder, type DialogParent } from '../dialogs';
 import { tm } from '../i18n';
 import { log } from '../log';
@@ -41,6 +47,10 @@ import { getEndpoints } from '../test-mode';
 
 const PROGRESS_INTERVAL_MS = 100;
 
+/** `fetch` on Chromium's network stack, so the system proxy and certificates apply. */
+const netFetch: typeof fetch = (input, init) =>
+  net.fetch(input instanceof URL ? input.href : input, init as RequestInit);
+
 const storedBuildSchema = z.object({
   id: z.string(),
   name: z.string(),
@@ -49,19 +59,16 @@ const storedBuildSchema = z.object({
 });
 type StoredBuild = z.infer<typeof storedBuildSchema>;
 const localBuildsFileSchema = z.object({ builds: z.array(storedBuildSchema) });
-interface LocalBuildsFile {
-  builds: StoredBuild[];
-}
-
-// ---------------------------------------------------------------------------
-// Window-free pieces, shared with the headless CLI (main/cli).
+type LocalBuildsFile = z.infer<typeof localBuildsFileSchema>;
 
 /**
  * core's installer on the shared cache, in the `per-version` layout, which
- * always takes cross-process locks. The headless CLI passes a `net.fetch`
- * downloader (`options.downloader`).
+ * always takes cross-process locks. `options.downloader` is a `net.fetch` one.
  */
-export function createInstaller(cache: CachePaths, options: Pick<InstallerOptions, 'downloader'> = {}): Installer {
+export function createInstaller(
+  cache: CachePaths,
+  options: Pick<InstallerOptions, 'downloader'> = {},
+): Installer {
   return new Installer(
     {
       electronDownloads: cache.downloads,
@@ -73,15 +80,45 @@ export function createInstaller(cache: CachePaths, options: Pick<InstallerOption
   );
 }
 
-/** The cached release list, or else the bundled snapshot. */
-export async function readReleaseList(cache: CachePaths): Promise<unknown[]> {
+interface ReleaseListText {
+  text: string;
+  data: unknown[];
+}
+
+/** The cached release list, or else the bundled snapshot, with its text. */
+async function readReleaseListText(cache: CachePaths): Promise<ReleaseListText> {
   try {
-    const data: unknown = JSON.parse(await fsp.readFile(cache.releases, 'utf8'));
-    if (isReleaseList(data)) return data;
+    const text = await fsp.readFile(cache.releases, 'utf8');
+    const data: unknown = JSON.parse(text);
+    if (isReleaseList(data)) return { text, data };
   } catch {
     // No cached list yet.
   }
-  return JSON.parse(snapshotText) as unknown[];
+  return { text: snapshotText, data: JSON.parse(snapshotText) as unknown[] };
+}
+
+async function fetchReleaseListText(
+  url: string,
+  fetch: (url: string) => Promise<Response>,
+): Promise<ReleaseListText> {
+  const response = await fetch(url);
+  if (!response.ok) throw new Error(`HTTP ${response.status}`);
+  const text = await response.text();
+  const data: unknown = JSON.parse(text);
+  if (!isReleaseList(data)) throw new Error('Unexpected release list');
+  return { text, data };
+}
+
+/** Caches the list. A failed write is only logged: the fetched list is still good. */
+function cacheReleaseList(cache: CachePaths, text: string): Promise<void> {
+  return writeAtomic(cache.releases, text).catch((error: unknown) =>
+    log.warn('caching the release list failed', error),
+  );
+}
+
+/** The cached release list, or else the bundled snapshot. */
+export async function readReleaseList(cache: CachePaths): Promise<unknown[]> {
+  return (await readReleaseListText(cache)).data;
 }
 
 /** Fetches releases.json and caches it. Throws on failure. */
@@ -90,11 +127,8 @@ export async function fetchReleaseList(
   url: string,
   fetch: (url: string) => Promise<Response>,
 ): Promise<unknown[]> {
-  const response = await fetch(url);
-  if (!response.ok) throw new Error(`HTTP ${response.status}`);
-  const data: unknown = await response.json();
-  if (!isReleaseList(data)) throw new Error('Unexpected release list');
-  await writeAtomic(cache.releases, JSON.stringify(data));
+  const { text, data } = await fetchReleaseListText(url, fetch);
+  await cacheReleaseList(cache, text);
   return data;
 }
 
@@ -122,26 +156,37 @@ export async function loadReleases(
   return { versions, rows };
 }
 
+/** `@electron/get` appends the version folder to a mirror as is, so it needs its trailing slash. */
+const withSlash = (url: string) => (url.endsWith('/') ? url : `${url}/`);
+
 /** Download mirrors for the mirror settings. `auto` picks China's for a zh-CN system locale. */
 export function mirrorsFor(
   settings: Pick<Settings, 'mirror' | 'customMirrorElectron' | 'customMirrorNightly'>,
   systemLocale: string,
 ): Mirrors {
   const kind =
-    settings.mirror === 'auto' ? (systemLocale.toLowerCase() === 'zh-cn' ? 'china' : 'default') : settings.mirror;
+    settings.mirror === 'auto'
+      ? systemLocale.toLowerCase() === 'zh-cn'
+        ? 'china'
+        : 'default'
+      : settings.mirror;
   // The default mirror comes from the injected endpoints, so test mode uses the fixture server.
   const { electronMirror, electronNightlyMirror } = getEndpoints();
   if (kind === 'custom') {
     // A mirror serves the binaries every run executes, so only https. The
     // schema refuses others too; this also covers a hand-edited settings.json.
-    const httpsOr = (url: string, fallback: string) => (isHttpsUrl(url) ? url : fallback);
+    const httpsOr = (url: string, fallback: string) =>
+      isHttpsUrl(url) ? withSlash(url) : fallback;
     return {
       electronMirror: httpsOr(settings.customMirrorElectron, electronMirror),
       electronNightlyMirror: httpsOr(settings.customMirrorNightly, electronNightlyMirror),
     };
   }
   if (kind === 'china') {
-    return { electronMirror: MIRRORS.china.electron, electronNightlyMirror: MIRRORS.china.nightly };
+    return {
+      electronMirror: MIRRORS.china.electron,
+      electronNightlyMirror: MIRRORS.china.nightly,
+    };
   }
   return { electronMirror, electronNightlyMirror };
 }
@@ -151,7 +196,11 @@ export async function installRelease(
   installer: Installer,
   cache: CachePaths,
   version: string,
-  options: { mirror: Mirrors; onProgress?: (fraction: number) => void; signal?: AbortSignal },
+  options: {
+    mirror: Mirrors;
+    onProgress?: (fraction: number) => void;
+    signal?: AbortSignal;
+  },
 ): Promise<string> {
   const { onProgress, signal } = options;
   const exec = await installer.install(version, {
@@ -164,13 +213,17 @@ export async function installRelease(
   return exec;
 }
 
-/** The executable of an installed release. */
-export function installedExecPath(installer: Installer, cache: CachePaths, version: string): string | undefined {
+/** The executable of an installed release, or undefined if it isn't installed. */
+export function installedExecPath(
+  installer: Installer,
+  cache: CachePaths,
+  version: string,
+): string | undefined {
   const exec = Installer.getExecPath(path.join(cache.electron, version));
-  return installer.state(version) === InstallState.installed && fs.existsSync(exec) ? exec : undefined;
+  return installer.state(version) === InstallState.installed && fs.existsSync(exec)
+    ? exec
+    : undefined;
 }
-
-// ---------------------------------------------------------------------------
 
 interface VersionsServiceOptions {
   hub: StateHub;
@@ -191,14 +244,20 @@ export class VersionsService {
   #versions: ElectronVersions | undefined;
   #rows: ReleaseRow[] = [];
   #releasesRev = 0;
+  /** The text of the list `#rows` came from, to skip a refresh that changes nothing. */
+  #releasesText: string | undefined;
   #installs: VersionsState['installs'] = {};
   #downloadAll: AbortController | undefined;
   #progressTimer: ReturnType<typeof setTimeout> | undefined;
 
   constructor(options: VersionsServiceOptions) {
     this.#options = options;
-    this.installer = createInstaller(options.cache);
-    this.installer.on('state-changed', (event: InstallStateEvent) => this.#onState(event));
+    this.installer = createInstaller(options.cache, {
+      downloader: fetchDownloader(netFetch),
+    });
+    this.installer.on('state-changed', (event: InstallStateEvent) =>
+      this.#onState(event),
+    );
     this.#builds = createJsonStore<LocalBuildsFile>({
       file: path.join(options.userData, 'local-builds.json'),
       schema: localBuildsFileSchema,
@@ -209,12 +268,16 @@ export class VersionsService {
 
   /** Loads the cached or bundled list, publishes the store, then refreshes in the background. */
   async init(): Promise<void> {
-    await this.#setReleases(await readReleaseList(this.#options.cache));
-    void this.refresh();
+    const { text, data } = await readReleaseListText(this.#options.cache);
+    await this.#setReleases(data, text);
+    this.refresh().catch((error: unknown) =>
+      log.warn('refreshing the release list failed', error),
+    );
   }
 
   get electronVersions(): ElectronVersions {
-    if (!this.#versions) throw new FiddleError(ErrorCode.unavailable, 'The release list is not loaded yet');
+    if (!this.#versions)
+      throw new FiddleError(ErrorCode.unavailable, 'The release list is not loaded yet');
     return this.#versions;
   }
 
@@ -226,14 +289,19 @@ export class VersionsService {
     return this.#rows.find((row) => row.version === version);
   }
 
-  /** Fetches releases.json with Chromium's network stack and caches it. Failures are logged. */
+  /** Fetches releases.json with Chromium's network stack and caches it. Throws when the fetch fails. */
   async refresh(): Promise<void> {
-    try {
-      const { cache, releasesUrl, fetch } = this.#options;
-      await this.#setReleases(await fetchReleaseList(cache, releasesUrl, fetch));
-    } catch (error) {
-      log.warn('refreshing the release list failed', error);
-    }
+    const { cache, releasesUrl, fetch } = this.#options;
+    const { text, data } = await fetchReleaseListText(releasesUrl, fetch).catch(
+      (error: unknown) => {
+        throw new FiddleError(ErrorCode.network, tm('mainVersions')('refreshFailed'), {
+          cause: error instanceof Error ? error.message : String(error),
+        });
+      },
+    );
+    if (text === this.#releasesText) return;
+    await this.#setReleases(data, text);
+    await cacheReleaseList(cache, text);
   }
 
   state(version: string): InstallState {
@@ -256,10 +324,12 @@ export class VersionsService {
 
   async remove(version: string): Promise<void> {
     if (this.#options.activeVersions().releases.has(version)) {
-      throw new FiddleError(ErrorCode.conflict, tm('mainRun')('cannotRemoveActive', { version }));
+      throw new FiddleError(
+        ErrorCode.conflict,
+        tm('mainRun')('cannotRemoveActive', { version }),
+      );
     }
-    await this.installer.remove(version);
-    this.#options.onRemoved?.(version);
+    await this.#removeInstalled(version);
   }
 
   async downloadAll(versions: readonly string[]): Promise<void> {
@@ -270,7 +340,11 @@ export class VersionsService {
     try {
       for (const version of versions) {
         if (controller.signal.aborted) break;
-        if (!this.release(version)?.supported || this.state(version) === InstallState.installed) continue;
+        if (
+          !this.release(version)?.supported ||
+          this.state(version) === InstallState.installed
+        )
+          continue;
         try {
           await this.install(version, controller.signal);
         } catch (error) {
@@ -293,11 +367,19 @@ export class VersionsService {
     const active = this.#options.activeVersions();
     this.stopDownloadAll();
     for (const [version, { state }] of Object.entries(this.#installs)) {
-      if (active.releases.has(version) || state === 'downloading' || state === 'installing') continue;
-      await this.installer.remove(version).catch((error: unknown) => log.warn(`removing ${version} failed`, error));
-      this.#options.onRemoved?.(version);
+      if (
+        active.releases.has(version) ||
+        state === 'downloading' ||
+        state === 'installing'
+      )
+        continue;
+      await this.#removeInstalled(version).catch((error: unknown) =>
+        log.warn(`removing ${version} failed`, error),
+      );
     }
-    this.#builds.set((prev) => ({ builds: prev.builds.filter((b) => active.builds.has(b.id)) }));
+    this.#builds.set((prev) => ({
+      builds: prev.builds.filter((b) => active.builds.has(b.id)),
+    }));
     this.#publish();
   }
 
@@ -314,6 +396,13 @@ export class VersionsService {
     return this.localBuilds().find((b) => b.id === id);
   }
 
+  /** What a window's version is called: the release number, or the local build's name. */
+  label(ref: VersionRefValue): string {
+    return ref.kind === 'release'
+      ? ref.version
+      : (this.localBuild(ref.id)?.name ?? ref.id);
+  }
+
   isInstalled(version: string): boolean {
     return this.installer.state(version) === InstallState.installed;
   }
@@ -324,9 +413,14 @@ export class VersionsService {
    */
   async addLocalBuild(parent: DialogParent): Promise<string | undefined> {
     const t = tm('mainRun');
-    const folder = await pickFolder(parent, { title: t('addLocalBuildTitle'), buttonLabel: t('addLocalBuildButton') });
+    const folder = await pickFolder(parent, {
+      title: t('addLocalBuildTitle'),
+      buttonLabel: t('addLocalBuildButton'),
+    });
     if (!folder) return undefined;
-    const existing = this.#builds.get().builds.find((b) => path.resolve(b.path) === path.resolve(folder));
+    const existing = this.#builds
+      .get()
+      .builds.find((b) => path.resolve(b.path) === path.resolve(folder));
     if (existing) {
       const tv = tm('mainVersions');
       const ok = await confirm(parent, {
@@ -350,7 +444,9 @@ export class VersionsService {
   /** Registers a folder that holds an Electron build. A folder that's already registered keeps its ID. */
   registerLocalBuild(folder: string): string {
     const resolved = path.resolve(folder);
-    const existing = this.#builds.get().builds.find((b) => path.resolve(b.path) === resolved);
+    const existing = this.#builds
+      .get()
+      .builds.find((b) => path.resolve(b.path) === resolved);
     if (existing) return existing.id;
     const build: StoredBuild = {
       id: randomUUID(),
@@ -366,16 +462,36 @@ export class VersionsService {
   removeLocalBuild(id: string): void {
     if (this.#options.activeVersions().builds.has(id)) {
       const name = this.localBuild(id)?.name ?? id;
-      throw new FiddleError(ErrorCode.conflict, tm('mainRun')('cannotRemoveActive', { version: name }));
+      throw new FiddleError(
+        ErrorCode.conflict,
+        tm('mainRun')('cannotRemoveActive', { version: name }),
+      );
     }
     this.#builds.set((prev) => ({ builds: prev.builds.filter((b) => b.id !== id) }));
     this.#publish();
   }
 
-  async #setReleases(data: unknown[]): Promise<void> {
-    const { versions, rows } = await loadReleases(data, this.#options.cache, this.#options.releasesUrl);
+  /** Removes a version and drops its cached types. Throws if it's still there, for example a file was in use. */
+  async #removeInstalled(version: string): Promise<void> {
+    await this.installer.remove(version);
+    if (this.installer.state(version) !== InstallState.missing) {
+      throw new FiddleError(
+        ErrorCode.unavailable,
+        tm('mainVersions')('removeFailed', { version }),
+      );
+    }
+    this.#options.onRemoved?.(version);
+  }
+
+  async #setReleases(data: unknown[], text: string): Promise<void> {
+    const { versions, rows } = await loadReleases(
+      data,
+      this.#options.cache,
+      this.#options.releasesUrl,
+    );
     this.#versions = versions;
     this.#rows = rows;
+    this.#releasesText = text;
     for (const { version } of this.#rows) {
       const state = this.installer.state(version);
       if (state !== InstallState.missing) this.#installs[version] ??= { state };
@@ -395,7 +511,10 @@ export class VersionsService {
   }
 
   #progress(version: string, fraction: number): void {
-    this.#installs[version] = { state: 'downloading', percent: Math.min(100, Math.round(fraction * 100)) };
+    const percent = Math.min(100, Math.round(fraction * 100));
+    const known = this.#installs[version];
+    if (known?.state === 'downloading' && known.percent === percent) return;
+    this.#installs[version] = { state: 'downloading', percent };
     this.#progressTimer ??= setTimeout(() => this.#publish(), PROGRESS_INTERVAL_MS);
   }
 

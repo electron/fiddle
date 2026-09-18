@@ -1,22 +1,35 @@
 /**
  * The settings page, shown in the sheet when `Window.view` is `settings`
- * (REQUIREMENTS §17.13, §17.17). Lucent `Page` with a `SideNav`; search
- * filters every section by title, description and key; changed values are
- * marked and can be reset; settings.json can be opened, imported and exported.
+ * Search filters every section by title, description and key; changed values
+ * are marked and can be reset; settings.json can be opened, imported and
+ * exported.
  */
-import { useContext, useEffect, useEffectEvent, useState, type ComponentType } from 'react';
+import {
+  useContext,
+  useEffect,
+  useEffectEvent,
+  useState,
+  type ComponentType,
+} from 'react';
 import { useTranslation } from 'react-i18next';
 
 import contributors from '../../../../static/contributors.json';
+import { getReleaseChannel } from '../../../fiddle/versions';
 import { locales } from '../../../i18n';
-import { appApi, appPlatformApi, settingsApi, windowApi, type AppInfo } from '../../../ipc/renderer';
+import {
+  appApi,
+  appPlatformApi,
+  settingsApi,
+  windowApi,
+  type AppInfo,
+} from '../../../ipc/renderer';
 import { useWindowState } from '../../state';
 import {
   BUILTIN_THEME,
   HIGH_CONTRAST_THEMES,
   MIRRORS,
+  releaseChannelSchema,
   type Mirror,
-  type ReleaseChannel,
   type SettingKey,
   type Settings,
 } from '../../../shared/settings';
@@ -48,7 +61,7 @@ import {
   useSettingText,
 } from './controls';
 import { KeybindingsSection } from './KeybindingsSection';
-import { clearRequestedSection, requestedSection, type SectionId } from './sections';
+import { clearRequestedSection, useRequestedSection, type SectionId } from './sections';
 import styles from './SettingsPage.module.css';
 import { useSettings, useSettingsAction } from './use-settings';
 
@@ -66,13 +79,25 @@ interface SectionDef {
 export function SettingsPage() {
   const { t } = useTranslation('settings');
   const run = useSettingsAction();
-  const [current, setCurrent] = useState<SectionId>(() => requestedSection() ?? 'general');
+  const requested = useRequestedSection();
+  const [current, setCurrent] = useState<SectionId>(requested ?? 'general');
   const [query, setQuery] = useState('');
   const searching = query.trim() !== '';
 
-  useEffect(() => clearRequestedSection(), []);
+  // A section asked for while the page is open is shown, and the request is forgotten.
+  const [seen, setSeen] = useState(requested);
+  if (requested !== seen) {
+    setSeen(requested);
+    if (requested) {
+      setCurrent(requested);
+      setQuery('');
+    }
+  }
+  useEffect(() => {
+    if (requested) clearRequestedSection();
+  }, [requested]);
 
-  // Escape closes settings wherever focus is, not only inside the page (§17.14).
+  // Escape closes settings wherever focus is, not only inside the page.
   // An open menu, popover or dialog gets it first: React Aria stops Escape there,
   // and a press in one, or on a control whose popup is open, is left alone.
   const close = useEffectEvent(() => void setView('editor', t('actionFailed')));
@@ -80,10 +105,18 @@ export function SettingsPage() {
     let forOverlay = false;
     const onCapture = (event: KeyboardEvent) => {
       const target = event.target instanceof Element ? event.target : null;
-      forOverlay = !!target && (!!target.closest(OVERLAY) || target.getAttribute('aria-expanded') === 'true');
+      forOverlay =
+        !!target &&
+        (!!target.closest(OVERLAY) || target.getAttribute('aria-expanded') === 'true');
     };
     const onBubble = (event: KeyboardEvent) => {
-      if (event.key === 'Escape' && !event.defaultPrevented && !event.isComposing && !forOverlay) close();
+      if (
+        event.key === 'Escape' &&
+        !event.defaultPrevented &&
+        !event.isComposing &&
+        !forOverlay
+      )
+        close();
     };
     window.addEventListener('keydown', onCapture, true);
     window.addEventListener('keydown', onBubble);
@@ -102,7 +135,10 @@ export function SettingsPage() {
   const rowMatches = (key: SettingKey) =>
     matchesQuery(query, t(`${key}.title`), t(`${key}.description`), key);
   const shown = searching
-    ? SECTIONS.filter((section) => matchesQuery(query, title(section.id)) || section.keys.some(rowMatches))
+    ? SECTIONS.filter(
+        (section) =>
+          matchesQuery(query, title(section.id)) || section.keys.some(rowMatches),
+      )
     : SECTIONS.filter((section) => section.id === current);
 
   const nav = (
@@ -117,7 +153,11 @@ export function SettingsPage() {
       />
       <SideNav
         aria-label={t('navLabel')}
-        items={SECTIONS.map((section) => ({ id: section.id, label: title(section.id), icon: section.icon }))}
+        items={SECTIONS.map((section) => ({
+          id: section.id,
+          label: title(section.id),
+          icon: section.icon,
+        }))}
         value={searching ? '' : current}
         onChange={(id) => {
           setQuery('');
@@ -125,13 +165,28 @@ export function SettingsPage() {
         }}
       />
       <div className={styles.actions}>
-        <Button size="sm" variant="ghost" icon="file" onPress={() => run(() => settingsApi.OpenSettingsFile())}>
+        <Button
+          size="sm"
+          variant="ghost"
+          icon="file"
+          onPress={() => run(() => settingsApi.OpenSettingsFile())}
+        >
           {t('openFile')}
         </Button>
-        <Button size="sm" variant="ghost" icon="download" onPress={() => run(() => settingsApi.ImportSettings())}>
+        <Button
+          size="sm"
+          variant="ghost"
+          icon="download"
+          onPress={() => run(() => settingsApi.ImportSettings())}
+        >
           {t('import')}
         </Button>
-        <Button size="sm" variant="ghost" icon="upload" onPress={() => run(() => settingsApi.ExportSettings())}>
+        <Button
+          size="sm"
+          variant="ghost"
+          icon="upload"
+          onPress={() => run(() => settingsApi.ExportSettings())}
+        >
           {t('export')}
         </Button>
       </div>
@@ -150,7 +205,11 @@ export function SettingsPage() {
       {shown.map(({ id, body: Body }) => {
         const showAll = !searching || matchesQuery(query, title(id));
         return (
-          <section key={id} className={styles.section} aria-labelledby={`settings-section-${id}`}>
+          <section
+            key={id}
+            className={styles.section}
+            aria-labelledby={`settings-section-${id}`}
+          >
             <h2 id={`settings-section-${id}`} className={styles.sectionTitle}>
               {title(id)}
             </h2>
@@ -177,10 +236,9 @@ function GeneralSection() {
   // A custom or high-contrast theme sets light or dark itself.
   const fixedBy = custom?.name ?? highContrastNames[settings.theme];
 
-  const changeLocale = (id: string) => {
-    if (id === settings.locale) return;
-    set('locale', id);
-    // The editor's own strings and Chromium's follow after a relaunch (§9).
+  const changeLocale = async (id: string) => {
+    if (id === settings.locale || !(await set('locale', id))) return;
+    // The editor's own strings and Chromium's follow after a relaunch.
     showToast({
       title: t('locale.relaunchTitle'),
       description: t('locale.relaunchDescription'),
@@ -204,17 +262,28 @@ function GeneralSection() {
   }
 
   const names = new Intl.DisplayNames([app?.locale ?? 'en'], { type: 'language' });
+  // `of` throws for a tag that isn't well formed, which a hand-edited settings.json can hold.
+  const languageName = (code: string) => {
+    try {
+      return names.of(code) ?? code;
+    } catch {
+      return code;
+    }
+  };
   const localeItems: SelectOption[] = [
     { id: 'system', label: t('locale.system') },
-    ...locales.map((code) => ({ id: code, label: names.of(code) ?? code })),
+    ...locales.map((code) => ({ id: code, label: languageName(code) })),
   ];
   if (!localeItems.some((item) => item.id === settings.locale)) {
-    localeItems.push({ id: settings.locale, label: names.of(settings.locale) ?? settings.locale });
+    localeItems.push({ id: settings.locale, label: languageName(settings.locale) });
   }
 
   return (
     <>
-      <Row setting="appearance" note={fixedBy ? t('appearance.fromTheme', { theme: fixedBy }) : undefined}>
+      <Row
+        setting="appearance"
+        note={fixedBy ? t('appearance.fromTheme', { theme: fixedBy }) : undefined}
+      >
         <SegmentedControl
           label={t('appearance.title')}
           options={(['system', 'light', 'dark'] as const).map((value) => ({
@@ -239,10 +308,20 @@ function GeneralSection() {
             <Button size="sm" onPress={() => run(() => settingsApi.ImportTheme())}>
               {t('theme.importMonaco')}
             </Button>
-            <Button size="sm" onPress={() => run(() => settingsApi.CreateTheme(custom ? null : currentThemeSnapshot()))}>
+            <Button
+              size="sm"
+              onPress={() =>
+                run(() => settingsApi.CreateTheme(custom ? null : currentThemeSnapshot()))
+              }
+            >
               {t('theme.create')}
             </Button>
-            <Button size="sm" variant="ghost" icon="folder" onPress={() => run(() => settingsApi.OpenThemesFolder())}>
+            <Button
+              size="sm"
+              variant="ghost"
+              icon="folder"
+              onPress={() => run(() => settingsApi.OpenThemesFolder())}
+            >
               {t('theme.openFolder')}
             </Button>
           </div>
@@ -268,15 +347,21 @@ function EditorSection() {
   const run = useSettingsAction();
   return (
     <>
-      <TextRow setting="editorFontFamily" invalidMessage={t('editorFontFamily.invalid')} />
+      <TextRow
+        setting="editorFontFamily"
+        invalidMessage={t('editorFontFamily.invalid')}
+      />
       <TextRow setting="editorFontSize" invalidMessage={t('editorFontSize.invalid')} />
-      {/* Font changes apply after a reload (REQUIREMENTS §17.2). */}
+      {/* Font changes apply after a reload. */}
       <div className={styles.row} data-inline>
         <div className={styles.rowText}>
           <p className={styles.rowDescription}>{t('editorFont.reloadHint')}</p>
         </div>
         <div className={styles.rowControl}>
-          <Button size="sm" onPress={() => run(() => windowApi.RunCommand('view.reloadAllWindows'))}>
+          <Button
+            size="sm"
+            onPress={() => run(() => windowApi.RunCommand('view.reloadAllWindows'))}
+          >
             {t('editorFont.reload')}
           </Button>
         </div>
@@ -291,7 +376,10 @@ function ExecutionSection() {
   return (
     <>
       <ListRow setting="electronFlags" />
-      <ListRow setting="environmentVariables" invalidMessage={t('environmentVariables.invalid')} />
+      <ListRow
+        setting="environmentVariables"
+        invalidMessage={t('environmentVariables.invalid')}
+      />
       <Row setting="packageManager">
         <SegmentedControl
           label={t('packageManager.title')}
@@ -311,20 +399,16 @@ function ExecutionSection() {
   );
 }
 
-const CHANNELS: readonly ReleaseChannel[] = ['stable', 'beta', 'nightly'];
+const CHANNELS = releaseChannelSchema.options;
 const MIRROR_OPTIONS: readonly Mirror[] = ['auto', 'default', 'china', 'custom'];
-
-function channelOf(version: string): ReleaseChannel {
-  if (version.includes('-nightly')) return 'nightly';
-  return version.includes('-') ? 'beta' : 'stable';
-}
 
 function ElectronSection({ showAll }: { showAll: boolean }) {
   const { t } = useTranslation('settings');
   const { settings, set } = useSettings();
   const ref = useWindowState()?.fiddle.versionRef;
-  // The current version's channel can't be turned off (§17.13).
-  const currentChannel = ref?.kind === 'release' ? channelOf(ref.version) : undefined;
+  // The current version's channel can't be turned off.
+  const currentChannel =
+    ref?.kind === 'release' ? getReleaseChannel(ref.version) : undefined;
 
   return (
     <>
@@ -340,7 +424,9 @@ function ElectronSection({ showAll }: { showAll: boolean }) {
                 onChange={(on) =>
                   set(
                     'channels',
-                    CHANNELS.filter((c) => (c === channel ? on : settings.channels.includes(c))),
+                    CHANNELS.filter((c) =>
+                      c === channel ? on : settings.channels.includes(c),
+                    ),
                   )
                 }
               >
@@ -395,9 +481,13 @@ function GitHubSection({ showAll }: { showAll: boolean }) {
   const revision = useSettingText('gistPublishAsRevision');
   return (
     <>
-      {(showAll || matchesQuery(query, revision.title, revision.description, 'gistPublishAsRevision')) && (
-        <GitHubAccountSection />
-      )}
+      {(showAll ||
+        matchesQuery(
+          query,
+          revision.title,
+          revision.description,
+          'gistPublishAsRevision',
+        )) && <GitHubAccountSection />}
       <TextRow setting="packageAuthor" invalidMessage={t('packageAuthor.description')} />
       <SwitchRow setting="gistShowHistory" />
       <Row setting="gistVisibility">
@@ -419,7 +509,10 @@ function AccessibilitySection() {
   const { t } = useTranslation('settings');
   const { app, settings, set } = useSettings();
   return (
-    <Row setting="screenReader" note={t(app?.screenReaderActive ? 'screenReader.active' : 'screenReader.inactive')}>
+    <Row
+      setting="screenReader"
+      note={t(app?.screenReaderActive ? 'screenReader.active' : 'screenReader.inactive')}
+    >
       <SegmentedControl
         label={t('screenReader.title')}
         options={(['auto', 'on', 'off'] as const).map((value) => ({
@@ -446,7 +539,9 @@ function AboutSection() {
         <div className={styles.about}>
           <h3 className={styles.subTitle}>{info.name}</h3>
           <p className={styles.muted}>{t('about.version', { version: info.version })}</p>
-          <p className={styles.muted}>{t('about.electron', { version: info.electronVersion })}</p>
+          <p className={styles.muted}>
+            {t('about.electron', { version: info.electronVersion })}
+          </p>
         </div>
       )}
       <h3 className={styles.subTitle}>{t('about.contributors')}</h3>
@@ -456,7 +551,9 @@ function AboutSection() {
             <a href={person.url} target="_blank" rel="noreferrer">
               {person.login}
             </a>
-            <span className={styles.count}>{t('about.contributions', { count: person.contributions })}</span>
+            <span className={styles.count}>
+              {t('about.contributions', { count: person.contributions })}
+            </span>
           </li>
         ))}
       </ul>
@@ -464,7 +561,7 @@ function AboutSection() {
   );
 }
 
-/** Crash reports, and on macOS "Reset privacy permissions" (§4). */
+/** Crash reports, and on macOS "Reset privacy permissions". */
 function PrivacySection() {
   const { t } = useTranslation('settings');
   const { app } = useSettings();
@@ -472,9 +569,11 @@ function PrivacySection() {
   const { query, showAll } = useContext(SearchContext);
   const title = t('privacyReset.title');
   const description = t('privacyReset.description');
-  const showReset = app?.platform === 'darwin' && (showAll || matchesQuery(query, title, description));
+  const showReset =
+    app?.platform === 'darwin' && (showAll || matchesQuery(query, title, description));
   const reset = async () => {
-    if (await appPlatformApi.ResetPrivacyPermissions()) showToast({ tone: 'success', title: t('privacyReset.done') });
+    if (await appPlatformApi.ResetPrivacyPermissions())
+      showToast({ tone: 'success', title: t('privacyReset.done') });
   };
   return (
     <>
@@ -506,7 +605,12 @@ const SECTIONS: readonly SectionDef[] = [
     keys: ['appearance', 'theme', 'locale', 'sessionRestore', 'notifications'],
     body: GeneralSection,
   },
-  { id: 'editor', icon: 'code', keys: ['editorFontFamily', 'editorFontSize'], body: EditorSection },
+  {
+    id: 'editor',
+    icon: 'code',
+    keys: ['editorFontFamily', 'editorFontSize'],
+    body: EditorSection,
+  },
   {
     id: 'execution',
     icon: 'play',
@@ -524,7 +628,14 @@ const SECTIONS: readonly SectionDef[] = [
   {
     id: 'electron',
     icon: 'download',
-    keys: ['channels', 'showNotDownloaded', 'showObsolete', 'mirror', 'customMirrorElectron', 'customMirrorNightly'],
+    keys: [
+      'channels',
+      'showNotDownloaded',
+      'showObsolete',
+      'mirror',
+      'customMirrorElectron',
+      'customMirrorNightly',
+    ],
     body: ElectronSection,
   },
   {
@@ -533,8 +644,18 @@ const SECTIONS: readonly SectionDef[] = [
     keys: ['gistPublishAsRevision', 'packageAuthor', 'gistShowHistory', 'gistVisibility'],
     body: GitHubSection,
   },
-  { id: 'keybindings', icon: 'keyboard', keys: ['keybindings'], body: KeybindingsSection },
-  { id: 'accessibility', icon: 'eye', keys: ['screenReader'], body: AccessibilitySection },
+  {
+    id: 'keybindings',
+    icon: 'keyboard',
+    keys: ['keybindings'],
+    body: KeybindingsSection,
+  },
+  {
+    id: 'accessibility',
+    icon: 'eye',
+    keys: ['screenReader'],
+    body: AccessibilitySection,
+  },
   { id: 'privacy', icon: 'lock', keys: ['crashReports'], body: PrivacySection },
   { id: 'updates', icon: 'refresh', keys: ['betaUpdates'], body: BetaUpdates },
   { id: 'about', icon: 'info', keys: [], body: AboutSection },

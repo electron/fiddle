@@ -1,9 +1,6 @@
-// @vitest-environment jsdom
-import { act, cleanup, fireEvent, render, screen } from '@testing-library/react';
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { act, fireEvent, render, screen } from '@testing-library/react';
+import { describe, expect, it, vi } from 'vitest';
 import { Checkbox, Radio, RadioGroup, Switch } from './Choice';
-
-afterEach(cleanup);
 
 describe('Checkbox', () => {
   it('toggles and reports the new state', () => {
@@ -21,7 +18,9 @@ describe('Checkbox', () => {
   // simulating a click jsdom would wrongly deliver.
   it('is disabled and out of the tab order when disabled', () => {
     render(<Checkbox isDisabled>Signed builds only</Checkbox>);
-    const box = screen.getByRole('checkbox', { name: 'Signed builds only' }) as HTMLInputElement;
+    const box = screen.getByRole('checkbox', {
+      name: 'Signed builds only',
+    }) as HTMLInputElement;
     expect(box.disabled).toBe(true);
     expect(box.closest('label')?.hasAttribute('data-disabled')).toBe(true);
   });
@@ -68,7 +67,9 @@ describe('RadioGroup', () => {
     expect(screen.getByRole('radiogroup', { name: 'Theme' })).toBeTruthy();
     fireEvent.click(screen.getByRole('radio', { name: 'Dark' }));
     expect(onChange).toHaveBeenLastCalledWith('dark');
-    expect((screen.getByRole('radio', { name: 'Light' }) as HTMLInputElement).disabled).toBe(true);
+    expect(
+      (screen.getByRole('radio', { name: 'Light' }) as HTMLInputElement).disabled,
+    ).toBe(true);
   });
 
   it('moves the selection with arrow keys, skipping disabled options', () => {

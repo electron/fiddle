@@ -1,5 +1,5 @@
 /**
- * Applies the appearance (REQUIREMENTS §17.12, §10): following the system (the
+ * Applies the appearance: following the system (the
  * default) leaves `data-theme` off so the tokens' media queries decide;
  * otherwise `data-theme` is `light` or `dark`. A custom theme sets its own
  * light/dark mode and its `common` tokens as CSS variables. High contrast (a
@@ -8,7 +8,12 @@
  */
 import { useEffect, useLayoutEffect } from 'react';
 
-import { BUILTIN_THEME, HIGH_CONTRAST_THEMES, type Settings, type ThemeData } from '../../shared/settings';
+import {
+  BUILTIN_THEME,
+  HIGH_CONTRAST_THEMES,
+  type Settings,
+  type ThemeData,
+} from '../../shared/settings';
 import { applyEditorTheme } from '../editor/monaco';
 import { useAppState } from '../state';
 import { currentThemeSnapshot } from './theme-snapshot';
@@ -21,7 +26,10 @@ export interface HighContrast {
 }
 
 /** Whether to draw high contrast. OS high contrast applies to Lucent, never to a custom theme. */
-export function highContrastFor(themeId: string, osHighContrast: boolean): HighContrast | undefined {
+export function highContrastFor(
+  themeId: string,
+  osHighContrast: boolean,
+): HighContrast | undefined {
   if (themeId === HIGH_CONTRAST_THEMES.dark) return { mode: 'dark' };
   if (themeId === HIGH_CONTRAST_THEMES.light) return { mode: 'light' };
   return osHighContrast && themeId === BUILTIN_THEME ? {} : undefined;
@@ -55,7 +63,8 @@ export function applyAppearance(
 
 function applyEditor(custom?: Pick<ThemeData, 'editor'> | null): void {
   if (custom) applyEditorTheme(custom.editor);
-  else if (document.documentElement.dataset.contrast === 'high') applyEditorTheme(currentThemeSnapshot().editor);
+  else if (document.documentElement.dataset.contrast === 'high')
+    applyEditorTheme(currentThemeSnapshot().editor);
   else applyEditorTheme();
 }
 
@@ -65,7 +74,10 @@ export function useAppearance(
   custom?: Pick<ThemeData, 'isDark' | 'common' | 'editor'> | null,
 ): void {
   const app = useAppState();
-  const contrast = highContrastFor(app?.settings.theme ?? BUILTIN_THEME, app?.highContrast ?? false);
+  const contrast = highContrastFor(
+    app?.settings.theme ?? BUILTIN_THEME,
+    app?.highContrast ?? false,
+  );
   const contrastKey = contrast ? (contrast.mode ?? 'os') : undefined;
 
   useLayoutEffect(() => {
@@ -73,7 +85,11 @@ export function useAppearance(
       document.documentElement,
       appearance,
       custom,
-      contrastKey === undefined ? undefined : contrastKey === 'os' ? {} : { mode: contrastKey },
+      contrastKey === undefined
+        ? undefined
+        : contrastKey === 'os'
+          ? {}
+          : { mode: contrastKey },
     );
     applyEditor(custom);
   }, [appearance, custom, contrastKey]);

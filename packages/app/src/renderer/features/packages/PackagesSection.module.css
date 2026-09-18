@@ -1,5 +1,3 @@
-/* Sidebar Packages section, on the material (Lucent window anatomy: sidebar heads in
-   caption style, ink-muted, padding 14 8 5; the package field is 24 tall on-glass). */
 .section {
   display: flex;
   flex-direction: column;
@@ -24,8 +22,7 @@
   list-style: none;
 }
 
-/* Rows match tree rows: 28 tall, padding 0 8 (4 on the right for the remove button),
-   16px icon with a 6px gap, ink label. */
+/* Rows match tree rows; the right padding is smaller for the remove button. */
 .row {
   display: flex;
   align-items: center;

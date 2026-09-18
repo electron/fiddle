@@ -1,6 +1,6 @@
 /**
- * The GitHub token on disk (REQUIREMENTS §4 "Credentials and GitHub"):
- * `<userData>/credentials/github`, encrypted with async `safeStorage`.
+ * The GitHub token on disk: `<userData>/credentials/github`, encrypted with
+ * async `safeStorage`.
  *
  * - On Linux with a `basic_text` or `unknown` backend, encryption is only
  *   obfuscation, so the token is kept for the session unless the user
@@ -19,7 +19,9 @@ import { writeAtomic } from '../persistence/json-store';
 export interface SafeStorageLike {
   isAsyncEncryptionAvailable(): Promise<boolean>;
   encryptStringAsync(plainText: string): Promise<Buffer>;
-  decryptStringAsync(encrypted: Buffer): Promise<{ result: string; shouldReEncrypt: boolean }>;
+  decryptStringAsync(
+    encrypted: Buffer,
+  ): Promise<{ result: string; shouldReEncrypt: boolean }>;
   getSelectedStorageBackend(): string;
 }
 
@@ -59,7 +61,10 @@ export class CredentialStore {
 
   async kind(): Promise<CredentialStorageKind> {
     if (!(await this.#safeStorage.isAsyncEncryptionAvailable())) return 'unavailable';
-    if (this.#platform === 'linux' && WEAK_LINUX_BACKENDS.has(this.#safeStorage.getSelectedStorageBackend())) {
+    if (
+      this.#platform === 'linux' &&
+      WEAK_LINUX_BACKENDS.has(this.#safeStorage.getSelectedStorageBackend())
+    ) {
       return 'weak';
     }
     return 'encrypted';
@@ -93,7 +98,10 @@ export class CredentialStore {
    * Saves the credentials when storage allows it. Returns false when the token
    * must stay in memory for this session only; any older file is removed then.
    */
-  async save(credentials: StoredCredentials, options: { allowPlaintext: boolean }): Promise<boolean> {
+  async save(
+    credentials: StoredCredentials,
+    options: { allowPlaintext: boolean },
+  ): Promise<boolean> {
     const kind = await this.kind();
     if (kind === 'unavailable' || (kind === 'weak' && !options.allowPlaintext)) {
       await this.delete();
@@ -108,7 +116,9 @@ export class CredentialStore {
   }
 
   async #write(credentials: StoredCredentials): Promise<void> {
-    const encrypted = await this.#safeStorage.encryptStringAsync(JSON.stringify(credentials));
+    const encrypted = await this.#safeStorage.encryptStringAsync(
+      JSON.stringify(credentials),
+    );
     await mkdir(path.dirname(this.#file), { recursive: true, mode: 0o700 });
     await writeAtomic(this.#file, encrypted, { mode: 0o600 });
   }
@@ -122,7 +132,10 @@ function parseCredentials(text: string): StoredCredentials {
     typeof (data as StoredCredentials).token === 'string' &&
     typeof (data as StoredCredentials).login === 'string'
   ) {
-    return { token: (data as StoredCredentials).token, login: (data as StoredCredentials).login };
+    return {
+      token: (data as StoredCredentials).token,
+      login: (data as StoredCredentials).login,
+    };
   }
   throw new Error('Unexpected credentials format');
 }

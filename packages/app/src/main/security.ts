@@ -1,6 +1,6 @@
 /**
- * The Electron security checklist (REQUIREMENTS.md §4) for sessions and
- * webContents. Web preferences are set where windows are created (window.ts).
+ * Hardening for sessions and webContents. Web preferences are set where windows
+ * are created (window.ts).
  *
  * `file://` is never loaded, with one exception: the one-time import
  * (src/main/migration/local-storage.ts) loads `static/import-local-storage.html`
@@ -11,7 +11,7 @@
  */
 import { app, BrowserWindow, session, shell, type WebContents } from 'electron';
 
-import { messageBox } from './dialogs';
+import { confirm } from './dialogs';
 import { t } from './i18n';
 import { log } from './log';
 
@@ -38,14 +38,17 @@ export function applySessionSecurity(ses = session.defaultSession): void {
     callback();
   });
   // Windows and Linux only; macOS pairs through the OS.
-  if (process.platform !== 'darwin') ses.setBluetoothPairingHandler((_details, callback) => callback({ confirmed: false }));
+  if (process.platform !== 'darwin')
+    ses.setBluetoothPairingHandler((_details, callback) =>
+      callback({ confirmed: false }),
+    );
 }
 
 /** Every webContents: no new windows (http(s) links open in the browser) and no webviews. */
 export function hardenAllWebContents(): void {
   app.on('web-contents-created', (_event, contents) => {
     contents.setWindowOpenHandler(({ url }) => {
-      void openExternalLink(url, BrowserWindow.fromWebContents(contents) ?? undefined);
+      offerExternalLink(url, contents);
       return { action: 'deny' };
     });
     contents.on('will-attach-webview', (event) => event.preventDefault());
@@ -64,15 +67,19 @@ export function blockNavigation(contents: WebContents): void {
     // (`yarn start`), and the error boundary's fallback. That's a reload.
     if (event.url === contents.getURL()) return;
     event.preventDefault();
-    void openExternalLink(
-      event.url,
-      BrowserWindow.fromWebContents(contents) ?? undefined,
-    );
+    offerExternalLink(event.url, contents);
   });
   contents.on('will-redirect', (event) => event.preventDefault());
   contents.on('will-frame-navigate', (event) => {
     if (!event.isMainFrame || event.url !== contents.getURL()) event.preventDefault();
   });
+}
+
+/** A link the page tried to open: nobody awaits it, so a failure is logged here. */
+function offerExternalLink(url: string, contents: WebContents): void {
+  openExternalLink(url, BrowserWindow.fromWebContents(contents) ?? undefined).catch(
+    (error: unknown) => log.warn('opening a link failed', error),
+  );
 }
 
 /** Opens only parsed http(s) URLs, and only after the user confirms. */
@@ -87,13 +94,10 @@ export async function openExternalLink(
     return;
   }
   if (parsed.protocol !== 'https:' && parsed.protocol !== 'http:') return;
-  const { response } = await messageBox(parent, {
-    type: 'question',
+  const open = await confirm(parent, {
     message: t('openLinkMessage'),
     detail: parsed.href,
-    buttons: [t('openLink'), t('cancel')],
-    defaultId: 0,
-    cancelId: 1,
+    ok: t('openLink'),
   });
-  if (response === 0) await shell.openExternal(parsed.href);
+  if (open) await shell.openExternal(parsed.href);
 }

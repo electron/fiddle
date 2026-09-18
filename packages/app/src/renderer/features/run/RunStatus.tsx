@@ -7,22 +7,13 @@
 import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import type { RunState, RuntimeErrorValue } from '../../../shared/stores';
+import type { RuntimeErrorValue } from '../../../shared/stores';
 import { srOnly, StatusPill } from '../../../ui';
 import { setRuntimeErrors, type RuntimeError } from '../../editor/runtime-errors';
 import { useAppState, useWindowState } from '../../state';
 import { BisectControls, BisectDialogs } from '../bisect/Bisect';
 import styles from './Run.module.css';
-import { IDLE_RUN, versionLabel } from './use-run';
-
-/** Status bar text for every state except downloading (with its percent) and running (the pill). */
-const STATUS_LABEL = {
-  ready: 'ready',
-  checking: 'checking',
-  unzipping: 'unzipping',
-  installing: 'installingModules',
-  starting: 'starting',
-} as const satisfies Partial<Record<RunState['status'], string>>;
+import { IDLE_RUN, STATUS_LABEL, versionLabel } from './use-run';
 
 /** Main's runtime errors in the shape the editor markers use. */
 export function toEditorErrors(errors: readonly RuntimeErrorValue[]): RuntimeError[] {
@@ -52,7 +43,9 @@ export function RunStatus() {
     if (errors.length < announced.current) announced.current = 0;
     const latest = errors[errors.length - 1];
     if (latest && errors.length > announced.current) {
-      setAnnouncement(t('newError', { name: latest.name, file: latest.file, message: latest.message }));
+      setAnnouncement(
+        t('newError', { name: latest.name, file: latest.file, message: latest.message }),
+      );
     }
     announced.current = errors.length;
   }, [errors, t]);

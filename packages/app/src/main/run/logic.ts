@@ -1,6 +1,6 @@
 /**
- * Small pure rules for runs: result classification (§17.6 "Results"), the
- * pre-run ESM check and the generated package name. No Electron imports.
+ * Small pure rules for runs: result classification, the pre-run ESM check and
+ * the generated package name. No Electron imports.
  */
 import * as semver from 'semver';
 
@@ -15,6 +15,8 @@ export interface RunOutcome {
   spawnFailed?: boolean;
   /** The module install failed. */
   installFailed?: boolean;
+  /** The user stopped the run. Electron may still exit with code 0 on SIGTERM. */
+  stopped?: boolean;
   code?: number | null;
   signal?: string | null;
 }
@@ -28,28 +30,36 @@ export function classifyRun(outcome: RunOutcome): RunResult {
 }
 
 /**
+ * What an auto bisect step learns from a run: true for good (exit code 0),
+ * false for bad, undefined when the run says nothing about the version (it was
+ * refused or stopped, or the module install or the spawn failed).
+ */
+export function bisectVerdict(outcome: RunOutcome): boolean | undefined {
+  if (outcome.invalid || outcome.stopped || outcome.installFailed || outcome.spawnFailed)
+    return undefined;
+  return classifyRun(outcome) === 'success';
+}
+
+/**
  * The Run control's status while the chosen version installs, from core's
  * install state: downloading, then unzipping. Other states don't change it.
  */
-export function installRunStatus(state: InstallStateValue): 'downloading' | 'unzipping' | undefined {
+export function installRunStatus(
+  state: InstallStateValue,
+): 'downloading' | 'unzipping' | undefined {
   if (state === 'downloading') return 'downloading';
   if (state === 'downloaded' || state === 'installing') return 'unzipping';
   return undefined;
 }
 
 /** ES module entry points (`main.mjs`) need Electron 28 or later. Local builds pass. */
-export function esmNeedsNewerElectron(mainEntry: string, version: string | undefined): boolean {
-  if (!mainEntry.endsWith('.mjs') || version === undefined) return false;
+export function esmNeedsNewerElectron(
+  mainEntry: string,
+  version: string | undefined,
+): boolean {
+  if (!mainEntry.toLowerCase().endsWith('.mjs') || version === undefined) return false;
   const parsed = semver.parse(version);
   return parsed !== null && parsed.major < 28;
 }
 
-/** A valid npm package name from a fiddle's display name, e.g. "Sparkling Pony" → "sparkling-pony". */
-export function toPackageName(name: string): string {
-  const cleaned = name
-    .toLowerCase()
-    .replace(/[^a-z0-9._-]+/g, '-')
-    .replace(/^[._-]+|[-]+$/g, '')
-    .slice(0, 214);
-  return cleaned || 'fiddle';
-}
+export { toPackageName } from '../../fiddle/package-json';

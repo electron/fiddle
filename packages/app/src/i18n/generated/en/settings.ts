@@ -93,7 +93,7 @@ export default {
   "customMirrorElectron.description": "Used for stable and beta releases.",
   "customMirrorNightly.title": "Nightly mirror URL",
   "customMirrorNightly.description": "Used for nightly releases.",
-  "mirror.invalidUrl": "Enter an http or https URL.",
+  "mirror.invalidUrl": "Enter an https URL.",
   "packageAuthor.title": "package.json author",
   "packageAuthor.description": "Used when a fiddle is saved or packaged. Leave it empty to use your user name.",
   "gistShowHistory.title": "Show gist revision history",

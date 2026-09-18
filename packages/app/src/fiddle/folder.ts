@@ -1,6 +1,7 @@
 import { randomBytes } from 'node:crypto';
 import { mkdir, readdir, readFile, rename, rm, writeFile } from 'node:fs/promises';
 import * as path from 'node:path';
+import { setTimeout as sleep } from 'node:timers/promises';
 import { fileURLToPath } from 'node:url';
 
 import { ErrorCode, FiddleError } from '../shared/errors';
@@ -27,7 +28,9 @@ async function listDir(dir: string) {
   } catch (error) {
     const code = (error as NodeJS.ErrnoException).code;
     if (code === 'ENOENT' || code === 'ENOTDIR') {
-      throw new FiddleError(ErrorCode.notFound, `Folder not found: ${dir}`, { path: dir });
+      throw new FiddleError(ErrorCode.notFound, `Folder not found: ${dir}`, {
+        path: dir,
+      });
     }
     throw error;
   }
@@ -37,16 +40,25 @@ async function listDir(dir: string) {
  * Reads a fiddle folder's top-level regular files (never symlinks or
  * folders) through `pickFiddleFiles`. Unsupported files aren't read.
  */
-export async function readFiddleFolder(dir: string, options: PickOptions = {}): Promise<FolderReadResult> {
+export async function readFiddleFolder(
+  dir: string,
+  options: PickOptions = {},
+): Promise<FolderReadResult> {
   const names: string[] = [];
   const skipped: string[] = [];
   for (const entry of await listDir(dir)) {
     if (!entry.isFile()) continue;
-    if (isSupportedFileName(entry.name) || entry.name === PACKAGE_JSON) names.push(entry.name);
+    if (isSupportedFileName(entry.name) || entry.name === PACKAGE_JSON)
+      names.push(entry.name);
     else skipped.push(entry.name);
   }
-  const contents = await Promise.all(names.map((name) => readFile(path.join(dir, name), 'utf8')));
-  const picked = pickFiddleFiles(Object.fromEntries(names.map((name, i) => [name, contents[i]!])), options);
+  const contents = await Promise.all(
+    names.map((name) => readFile(path.join(dir, name), 'utf8')),
+  );
+  const picked = pickFiddleFiles(
+    Object.fromEntries(names.map((name, i) => [name, contents[i]!])),
+    options,
+  );
   return { ...picked, skipped: [...skipped, ...picked.skipped] };
 }
 
@@ -66,6 +78,28 @@ function assertWritableNames(names: readonly string[]): void {
   }
 }
 
+const RENAME_RETRIES = 5;
+const RENAME_RETRY_CODES = new Set(['EPERM', 'EBUSY', 'EACCES']);
+
+/** On Windows, a file another process has open (an editor, an indexer, a virus scanner) refuses to be replaced for a moment. */
+async function renameWithRetry(from: string, to: string): Promise<void> {
+  for (let attempt = 1; ; attempt++) {
+    try {
+      await rename(from, to);
+      return;
+    } catch (error) {
+      const code = (error as NodeJS.ErrnoException).code ?? '';
+      if (
+        process.platform !== 'win32' ||
+        !RENAME_RETRY_CODES.has(code) ||
+        attempt >= RENAME_RETRIES
+      )
+        throw error;
+      await sleep(25 * 2 ** attempt);
+    }
+  }
+}
+
 /**
  * Writes `target` as a regular file: the content goes to a new temp file in
  * the same folder, created exclusively (`wx` never opens through an existing
@@ -74,23 +108,15 @@ function assertWritableNames(names: readonly string[]): void {
  * never written through.
  */
 async function writeRegularFile(target: string, content: string): Promise<void> {
-  const temp = path.join(path.dirname(target), `.${path.basename(target)}.${randomBytes(6).toString('hex')}.tmp`);
+  const temp = path.join(
+    path.dirname(target),
+    `.${path.basename(target)}.${randomBytes(6).toString('hex')}.tmp`,
+  );
   await writeFile(temp, content, { encoding: 'utf8', flag: 'wx' });
   try {
-    await rename(temp, target);
+    await renameWithRetry(temp, target);
   } catch (error) {
     await rm(temp, { force: true });
-    throw error;
-  }
-}
-
-/** Supported files already in `dir`. Empty if `dir` doesn't exist. */
-export async function findExistingSupportedFiles(dir: string): Promise<string[]> {
-  try {
-    const entries = await readdir(dir, { withFileTypes: true });
-    return entries.filter((e) => e.isFile() && isSupportedFileName(e.name)).map((e) => e.name);
-  } catch (error) {
-    if ((error as NodeJS.ErrnoException).code === 'ENOENT') return [];
     throw error;
   }
 }
@@ -113,12 +139,21 @@ export async function findFilesToReplace(dir: string, files: FileMap): Promise<s
 
 /**
  * Writes a fiddle to `dir`: files with empty content are deleted from disk,
- * and `.gitignore` is written on every save. All names are checked first.
+ * and `.gitignore` is written on every save. `remove` names files the fiddle
+ * no longer has (removed or renamed), which are deleted before anything is
+ * written, so a rename that only changes case ends with the new name. All
+ * names are checked first.
  */
-export async function writeFiddleFolder(dir: string, files: FileMap): Promise<void> {
+export async function writeFiddleFolder(
+  dir: string,
+  files: FileMap,
+  remove: readonly string[] = [],
+): Promise<void> {
   const entries = Object.entries(files);
   assertWritableNames(entries.map(([name]) => name));
+  assertWritableNames(remove);
   await mkdir(dir, { recursive: true });
+  for (const name of remove) await rm(path.join(dir, name), { force: true });
   for (const [name, content] of entries) {
     const target = path.join(dir, name);
     // rm removes a symlink itself, not what it points to.
@@ -134,7 +169,10 @@ export async function writeFiddleFolder(dir: string, files: FileMap): Promise<vo
  * turns `localhost` into none), or a UNC path such as `\\server\share` or
  * `//server/share`.
  */
-export function localPathFromFileUrl(url: string, platform: NodeJS.Platform = process.platform): string | undefined {
+export function localPathFromFileUrl(
+  url: string,
+  platform: NodeJS.Platform = process.platform,
+): string | undefined {
   let parsed: URL;
   try {
     parsed = new URL(url);

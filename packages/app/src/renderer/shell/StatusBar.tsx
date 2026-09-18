@@ -14,7 +14,6 @@ const languageKey = {
   json: 'languageJson',
 } as const satisfies Record<EditorLanguage, string>;
 
-/** 32px, on the material: run status on the left; the cursor, language and notifications on the right. */
 export function StatusBar({ files }: { files: readonly string[] }) {
   const { t } = useTranslation('shell');
   const { cursor } = useEditorViewState();
@@ -24,11 +23,13 @@ export function StatusBar({ files }: { files: readonly string[] }) {
     <footer className={styles.statusbar} aria-label={t('status')}>
       <RunStatus />
       <div className={styles.statusEnd}>
-        {/* Tab-focus mode (REQUIREMENTS §10): a live region, so turning it on is announced. */}
+        {/* Tab-focus mode: a live region, so turning it on is announced. */}
         <span role="status">{tabFocus ? t('tabFocusMode') : ''}</span>
         {current && (
           <>
-            <span>{t('cursorPosition', { line: current.line, column: current.column })}</span>
+            <span>
+              {t('cursorPosition', { line: current.line, column: current.column })}
+            </span>
             <span>{t(languageKey[getEditorLanguage(current.file)])}</span>
           </>
         )}

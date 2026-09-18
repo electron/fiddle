@@ -15,5 +15,7 @@ export default {
   "showChannelOk": "Show them",
   "switchToBuild": "Switch to {{name}}?",
   "switchToBuildDetail": "This folder is already added as a local build.",
-  "switchButton": "Switch"
+  "switchButton": "Switch",
+  "refreshFailed": "Couldn't refresh the list of Electron releases. Check your connection and try again.",
+  "removeFailed": "Couldn't remove Electron {{version}}. A file may be in use."
 } as const;

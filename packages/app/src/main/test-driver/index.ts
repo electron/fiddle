@@ -1,17 +1,6 @@
 /**
  * The test harness, compiled only into test builds (see ../test-mode.ts). main
- * calls `installTestHarness()` before `ready` when `isTestMode()`. It:
- *
- * - puts userData, sessionData, logs, crash dumps and the cache in a temp dir;
- * - turns off background throttling and animations, fixes locale, time zone
- *   and randomness, and uses the basic password store on Linux;
- * - fails any request to a non-loopback host (Chromium, `net.fetch`, Node);
- * - records and stubs OS side effects (including native context menus), and
- *   answers native dialogs from a queue;
- * - on macOS, where the app shares a desktop with whoever runs the tests,
- *   keeps it in the background and emulates window focus (`stayInBackground`);
- * - captures main and renderer logs;
- * - serves the e2e driver on `ELECTRON_FIDDLE_DRIVER_SOCKET` once attached.
+ * calls `installTestHarness()` before `ready` when `isTestMode()`.
  *
  * Keep this module free of top-level side effects so release builds drop it.
  */
@@ -84,7 +73,7 @@ export function installTestHarness(): TestHarness {
   for (const dir of ['appData', 'userData', 'cache', 'logs', 'artifacts', 'crashDumps']) {
     fs.mkdirSync(path.join(testDir, dir), { recursive: true });
   }
-  // appData too, so nothing (the old-app import, for one) reads this machine's real data.
+  // appData too, so nothing (the legacy data import, for one) reads this machine's real data.
   app.setPath('appData', path.join(testDir, 'appData'));
   app.setPath('userData', path.join(testDir, 'userData'));
   app.setPath('sessionData', path.join(testDir, 'userData'));
@@ -106,19 +95,28 @@ export function installTestHarness(): TestHarness {
   configurePages({ locale, timezone: 'UTC', initScript: seededRandomScript(seed) });
 
   app.on('session-created', (ses) => guardSession(ses, state));
-  app.on('web-contents-created', (_event, contents) => prepareWebContents(contents, state));
+  app.on('web-contents-created', (_event, contents) =>
+    prepareWebContents(contents, state),
+  );
   void app.whenReady().then(() => guardSession(session.defaultSession, state));
 
   // The harness's own hooks, so specs can check the network guard from main.
-  const tryFetch = (doFetch: (url: string) => Promise<Response>) => async (url: unknown) => {
-    try {
-      return { status: (await doFetch(String(url))).status };
-    } catch (error) {
-      return { error: String(error) };
-    }
-  };
-  registerMainTestHook('harness.fetch', tryFetch((url) => fetch(url)));
-  registerMainTestHook('harness.netFetch', tryFetch((url) => net.fetch(url)));
+  const tryFetch =
+    (doFetch: (url: string) => Promise<Response>) => async (url: unknown) => {
+      try {
+        return { status: (await doFetch(String(url))).status };
+      } catch (error) {
+        return { error: String(error) };
+      }
+    };
+  registerMainTestHook(
+    'harness.fetch',
+    tryFetch((url) => fetch(url)),
+  );
+  registerMainTestHook(
+    'harness.netFetch',
+    tryFetch((url) => net.fetch(url)),
+  );
 
   return {
     attach({ hub, registry }) {
@@ -137,7 +135,12 @@ function captureMainLog(state: TestState): void {
     };
   }
   // An unexpected quit is hard to trace from a test, so log who asked for it.
-  const caller = () => new Error().stack?.split('\n').slice(3, 7).map((line) => line.trim()).join(' <- ');
+  const caller = () =>
+    new Error().stack
+      ?.split('\n')
+      .slice(3, 7)
+      .map((line) => line.trim())
+      .join(' <- ');
   const quit = app.quit.bind(app);
   const exit = app.exit.bind(app);
   app.quit = () => {
@@ -204,7 +207,9 @@ function seededRandomScript(seed: number): string {
 function guardSession(ses: Session, state: TestState): void {
   ses.webRequest.onBeforeRequest((details, callback) => {
     if (isBlocked(details.url)) {
-      state.violation(`non-loopback request (Chromium): ${details.method} ${details.url}`);
+      state.violation(
+        `non-loopback request (Chromium): ${details.method} ${details.url}`,
+      );
       callback({ cancel: true });
       return;
     }
@@ -225,7 +230,8 @@ function requestUrl(input: unknown): string {
 function guardNodeNetwork(state: TestState): void {
   let seq = 0;
   type AnyFetch = (input: never, init?: never) => Promise<Response>;
-  const guardFetch = (source: string, original: AnyFetch) =>
+  const guardFetch =
+    (source: string, original: AnyFetch) =>
     async (input: never, init?: never): Promise<Response> => {
       const url = requestUrl(input);
       if (isBlocked(url)) {
@@ -241,7 +247,10 @@ function guardNodeNetwork(state: TestState): void {
       }
     };
 
-  globalThis.fetch = guardFetch('fetch', globalThis.fetch.bind(globalThis)) as typeof fetch;
+  globalThis.fetch = guardFetch(
+    'fetch',
+    globalThis.fetch.bind(globalThis),
+  ) as typeof fetch;
   net.fetch = guardFetch('net.fetch', net.fetch.bind(net)) as typeof net.fetch;
 
   for (const [protocol, mod] of [
@@ -314,24 +323,24 @@ function stubOsSideEffects(state: TestState): void {
   // A native context menu can't be driven, and on macOS it tracks the mouse in
   // a modal loop over someone's desktop until dismissed. Record its items instead.
   Menu.prototype.popup = function (this: Menu) {
-    record('menu.popup', this.items.map((item) => (item.type === 'separator' ? '-' : item.label)));
+    record(
+      'menu.popup',
+      this.items.map((item) => (item.type === 'separator' ? '-' : item.label)),
+    );
   };
 }
 
 /**
  * macOS has no Xvfb: the app under test shares the desktop with whoever runs
  * the tests, usually several apps at once. So there it stays out of the way:
- * - no Dock icon or Cmd-Tab entry, and never the active app (accessory);
- * - windows are shown without activating, one level below normal windows:
- *   in front of the desktop, behind everyone's work. FIDDLE_TEST_FOREGROUND=1
- *   (the launcher's FIDDLE_E2E_FOREGROUND) keeps them at the normal level, to
- *   watch a `yarn driver` session;
+ * - accessory activation policy: no Dock icon, never the active app;
+ * - windows are shown without activating, one level below normal windows.
+ *   FIDDLE_TEST_FOREGROUND=1 (the launcher's FIDDLE_E2E_FOREGROUND) keeps the
+ *   normal level, to watch a `yarn driver` session;
  * - a power assertion keeps App Nap from throttling an app nobody can see;
- * - window focus is emulated, the way a window manager hands it out: showing
- *   or focusing a window makes it the focused one (`isFocused`,
- *   `getFocusedWindow`, the `focus` and `blur` events), and a closed window
- *   passes focus back to the one focused before it. The app and the specs see
- *   what they'd see on a display of their own; the OS never makes a window key.
+ * - window focus is emulated: showing or focusing a window makes it the
+ *   focused one, and a closed window passes focus back to the previous one.
+ *   The OS never makes a window key.
  * The driver needs none of this: input goes through CDP and pages emulate
  * focus (./page.ts).
  */
@@ -372,7 +381,10 @@ function stayInBackground(state: TestState): void {
     if (previous && !previous.isDestroyed()) previous.emit('blur', event);
     if (announce && win && !win.isDestroyed()) win.emit('focus', event);
   };
-  const refocus = () => setFocused([...history].reverse().find((win) => !win.isDestroyed() && win.isVisible()));
+  const refocus = () =>
+    setFocused(
+      [...history].reverse().find((win) => !win.isDestroyed() && win.isVisible()),
+    );
 
   app.on('browser-window-created', (_event, win) => {
     if (!foreground) win.setAlwaysOnTop(true, 'normal', -1);
@@ -403,8 +415,22 @@ function stayInBackground(state: TestState): void {
 
 /** Only what's useful in assertions; options can hold windows and functions. */
 function summarize(options: Record<string, unknown>): Record<string, unknown> {
-  const keys = ['type', 'title', 'message', 'detail', 'buttons', 'checkboxLabel', 'defaultPath', 'filters', 'properties', 'cancelId', 'defaultId'];
-  return Object.fromEntries(keys.filter((key) => key in options).map((key) => [key, options[key]]));
+  const keys = [
+    'type',
+    'title',
+    'message',
+    'detail',
+    'buttons',
+    'checkboxLabel',
+    'defaultPath',
+    'filters',
+    'properties',
+    'cancelId',
+    'defaultId',
+  ];
+  return Object.fromEntries(
+    keys.filter((key) => key in options).map((key) => [key, options[key]]),
+  );
 }
 
 function scriptDialogs(state: TestState): void {
@@ -419,7 +445,12 @@ function scriptDialogs(state: TestState): void {
       state.violation(`unexpected ${kind} dialog: ${JSON.stringify(summary)}`);
     }
     const response = resolveDialog(kind, queued, options, state);
-    state.dialogs.push({ kind, options: summary, response, scripted: queued !== undefined });
+    state.dialogs.push({
+      kind,
+      options: summary,
+      response,
+      scripted: queued !== undefined,
+    });
     return response;
   };
 
@@ -431,18 +462,25 @@ function scriptDialogs(state: TestState): void {
       respond('messageBox', optionsOf(args)) as MessageBox,
     showMessageBoxSync: (...args: unknown[]) =>
       (respond('messageBox', optionsOf(args)) as MessageBox).response,
-    showOpenDialog: async (...args: unknown[]) => respond('open', optionsOf(args)) as Open,
+    showOpenDialog: async (...args: unknown[]) =>
+      respond('open', optionsOf(args)) as Open,
     showOpenDialogSync: (...args: unknown[]) => {
       const result = respond('open', optionsOf(args)) as Open;
       return result.canceled ? undefined : result.filePaths;
     },
-    showSaveDialog: async (...args: unknown[]) => respond('save', optionsOf(args)) as Save,
+    showSaveDialog: async (...args: unknown[]) =>
+      respond('save', optionsOf(args)) as Save,
     showSaveDialogSync: (...args: unknown[]) => {
       const result = respond('save', optionsOf(args)) as Save;
       return result.canceled ? '' : result.filePath;
     },
     showErrorBox: (title: string, content: string) => {
-      state.dialogs.push({ kind: 'errorBox', options: { title, content }, response: null, scripted: false });
+      state.dialogs.push({
+        kind: 'errorBox',
+        options: { title, content },
+        response: null,
+        scripted: false,
+      });
       state.mainLog.push(`[test] error box: ${title}: ${content}`);
     },
   });
@@ -507,7 +545,9 @@ function prepareWebContents(contents: WebContents, state: TestState): void {
     const source = `${event.sourceId}:${event.lineNumber}`;
     lines.push({ level: event.level, message: event.message, source });
     if (lines.length > 1000) lines.shift();
-    state.rendererLog.push(`[${contents.id}:${event.level}] ${event.message} (${source})`);
+    state.rendererLog.push(
+      `[${contents.id}:${event.level}] ${event.message} (${source})`,
+    );
   });
   contents.on('render-process-gone', (_event, details) => {
     state.violation(`renderer ${contents.id} gone: ${details.reason}`);

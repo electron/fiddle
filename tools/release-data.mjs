@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// Refreshes the bundled data snapshots (REQUIREMENTS §2):
+// Refreshes the bundled data snapshots:
 //
 //   packages/app/static/releases.json      from releases.electronjs.org
 //   packages/app/static/contributors.json  from the GitHub API

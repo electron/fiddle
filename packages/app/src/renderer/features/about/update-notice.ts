@@ -1,5 +1,5 @@
 /**
- * The non-modal "Update available" toast (REQUIREMENTS §13) for Linux and
+ * The non-modal "Update available" toast for Linux and
  * MSIX, which have no auto-update. Main sends `AppPlatform.UpdateAvailable`
  * after its daily GitHub releases check.
  */

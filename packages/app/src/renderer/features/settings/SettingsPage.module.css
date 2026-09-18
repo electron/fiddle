@@ -1,5 +1,3 @@
-/* Settings page (Lucent Page + SideNav): title type 22/28, 32px margins, sentence case. */
-
 .aside {
   display: flex;
   flex: 1;
@@ -44,7 +42,6 @@
   color: var(--lu-ink-muted);
 }
 
-/* Rows */
 .row {
   display: flex;
   flex-direction: column;
@@ -127,7 +124,6 @@
   gap: var(--lu-space-4);
 }
 
-/* List settings (flags, environment variables) */
 .list {
   display: flex;
   flex-direction: column;
@@ -148,7 +144,6 @@
   flex: 1;
 }
 
-/* Keyboard shortcuts */
 .shortcuts {
   display: flex;
   flex-direction: column;
@@ -228,7 +223,6 @@
   color: var(--lu-ink-muted);
 }
 
-/* About */
 .about {
   display: flex;
   flex-direction: column;

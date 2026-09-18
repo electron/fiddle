@@ -1,5 +1,5 @@
 /**
- * The keybinding dispatcher (REQUIREMENTS §3, §17.14). For the focused window
+ * The keybinding dispatcher. For the focused window
  * it runs commands by ID for every keybinding after the overrides in
  * `App.settings.keybindings`, so that:
  * - second defaults (F5 for Run, F1 for the palette), commands without a menu
@@ -16,13 +16,26 @@
 import { useEffect, useRef } from 'react';
 
 import { windowApi } from '../../../ipc/renderer';
-import { isCommandEnabled, type CommandId, type KeyContext } from '../../../shared/commands';
-import { acceleratorFromKey, matchKeybinding, resolveKeybindings, type FocusContext } from '../../../shared/settings';
+import {
+  isCommandEnabled,
+  type CommandId,
+  type KeyContext,
+} from '../../../shared/commands';
+import {
+  acceleratorFromKey,
+  matchKeybinding,
+  resolveKeybindings,
+  type FocusContext,
+} from '../../../shared/settings';
 import type { AppState, WindowState } from '../../../shared/stores';
 import { useAppState, useWindowState } from '../../state';
 
 /** Undo, redo and select all keep their native keys: Monaco's, a text field's, or the Edit menu's. */
-const NATIVE: ReadonlySet<CommandId> = new Set<CommandId>(['edit.undo', 'edit.redo', 'edit.selectAll']);
+const NATIVE: ReadonlySet<CommandId> = new Set<CommandId>([
+  'edit.undo',
+  'edit.redo',
+  'edit.selectAll',
+]);
 
 /** Where an element is: a Monaco editor, the console (its tour anchor), or elsewhere. */
 export function focusContextOf(target: EventTarget | null): FocusContext {
@@ -34,7 +47,14 @@ export function focusContextOf(target: EventTarget | null): FocusContext {
 
 type KeyEventLike = Pick<
   KeyboardEvent,
-  'key' | 'code' | 'metaKey' | 'ctrlKey' | 'altKey' | 'shiftKey' | 'isComposing' | 'target'
+  | 'key'
+  | 'code'
+  | 'metaKey'
+  | 'ctrlKey'
+  | 'altKey'
+  | 'shiftKey'
+  | 'isComposing'
+  | 'target'
 >;
 
 /** The command a key press runs in this window, or undefined when the app leaves the key alone. */
@@ -44,7 +64,11 @@ export function commandForKey(
   win: WindowState | undefined,
 ): CommandId | undefined {
   if (event.isComposing) return undefined;
-  if (event.target instanceof Element && event.target.closest('[data-keybinding-recorder]')) return undefined;
+  if (
+    event.target instanceof Element &&
+    event.target.closest('[data-keybinding-recorder]')
+  )
+    return undefined;
   const accelerator = acceleratorFromKey(event, app.platform);
   if (!accelerator) return undefined;
   const active = new Set<KeyContext>();
@@ -53,11 +77,11 @@ export function commandForKey(
   if (win?.run?.status === 'running') active.add('running');
   const bindings = resolveKeybindings(app.platform, app.settings.keybindings);
   const binding = matchKeybinding(bindings, accelerator, active, app.platform);
-  if (!binding || NATIVE.has(binding.id) || !isCommandEnabled(binding.id, app, win)) return undefined;
+  if (!binding || NATIVE.has(binding.id) || !isCommandEnabled(binding.id, app, win))
+    return undefined;
   return binding.id;
 }
 
-/** Installs the dispatcher for this window. */
 export function useKeybindings(): void {
   const app = useAppState();
   const win = useWindowState();
@@ -75,12 +99,16 @@ export function useKeybindings(): void {
       event.preventDefault();
       event.stopPropagation();
       if (event.repeat) return;
-      windowApi.RunCommand(id).catch((error: unknown) => console.error(`[fiddle] command ${id} failed`, error));
+      windowApi
+        .RunCommand(id)
+        .catch((error: unknown) => console.error(`[fiddle] command ${id} failed`, error));
     };
     const onContextMenu = (event: MouseEvent) => {
       windowApi
         .ReportContextMenu(focusContextOf(event.target))
-        .catch((error: unknown) => console.error('[fiddle] reporting the context menu failed', error));
+        .catch((error: unknown) =>
+          console.error('[fiddle] reporting the context menu failed', error),
+        );
     };
     window.addEventListener('keydown', onKeyDown, true);
     window.addEventListener('contextmenu', onContextMenu, true);

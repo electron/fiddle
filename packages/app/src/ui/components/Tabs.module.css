@@ -11,8 +11,6 @@
   min-width: 0;
 }
 
-/* Tab: 28 tall, padding 0 11, radius-item squircle, 12.5/16 at 500.
-   Others ink-muted; hover at 55% of hover. Selected: hover fill, ink. */
 .tab {
   position: relative;
   display: inline-flex;
@@ -49,7 +47,6 @@
   opacity: var(--lu-disabled-opacity);
 }
 
-/* Inside a tab row the ring is drawn 3px inset. */
 .tab[data-focus-visible] {
   outline: var(--lu-focus-outline);
   outline-offset: -3px;
@@ -65,7 +62,6 @@
   text-overflow: ellipsis;
 }
 
-/* Error count: 10px semibold, spark on spark-soft, 16px tall capsule, min-width 17. */
 .errors {
   flex: none;
   min-width: 17px;
@@ -78,7 +74,7 @@
   text-align: center;
   font-variant-numeric: tabular-nums;
 }
-.errors[data-tone="warning"] {
+.errors[data-tone='warning'] {
   background: color-mix(in srgb, var(--lu-warning) 16%, transparent);
   color: var(--lu-warning);
 }
@@ -126,7 +122,7 @@
 /* Reordering: a 2px accent bar on the edge of the tab the dragged one would
    land next to (inside the tab, so a scrolling tab row never clips it). */
 .tab[data-drop-indicator]::before {
-  content: "";
+  content: '';
   position: absolute;
   top: 4px;
   bottom: 4px;
@@ -137,7 +133,7 @@
   pointer-events: none;
 }
 
-.tab[data-drop-indicator="after"]::before {
+.tab[data-drop-indicator='after']::before {
   inset-inline-start: auto;
   inset-inline-end: 0;
 }

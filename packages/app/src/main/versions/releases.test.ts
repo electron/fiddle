@@ -10,52 +10,88 @@ const data = [
 ];
 
 describe('toReleaseRows', () => {
-  const options = { stableMajors: [10, 40, 43], supportedMajors: [40, 43], platform: 'linux', arch: 'x64' };
+  const options = {
+    stableMajors: [10, 40, 43],
+    supportedMajors: [40, 43],
+    platform: 'linux',
+    arch: 'x64',
+  };
 
-  // @feature versions.obsolete
   it('sorts newest first and flags obsolete majors', () => {
     const rows = toReleaseRows(data, options);
-    expect(rows.map((r) => r.version)).toEqual(['44.0.0-beta.3', '43.0.0', '40.1.0', '10.0.0']);
+    expect(rows.map((r) => r.version)).toEqual([
+      '44.0.0-beta.3',
+      '43.0.0',
+      '40.1.0',
+      '10.0.0',
+    ]);
     expect(rows.find((r) => r.version === '10.0.0')?.obsolete).toBe(true);
     expect(rows.find((r) => r.version === '40.1.0')?.obsolete).toBe(false);
   });
 
-  // @feature versions.obsolete
   it('honours NUM_STABLE_BRANCHES', () => {
     const rows = toReleaseRows(data, { ...options, numStableBranches: '1' });
     expect(rows.find((r) => r.version === '40.1.0')?.obsolete).toBe(true);
   });
 
-  // @feature versions.platform-limits
+  it('leaves out the 0.2x releases, which cannot be downloaded', () => {
+    const rows = toReleaseRows(
+      [{ version: '0.20.8' }, { version: '0.37.8' }, { version: 'v0.30.0' }, ...data],
+      options,
+    );
+    expect(rows.map((r) => r.version).filter((v) => v.startsWith('0.'))).toEqual([
+      '0.37.8',
+      '0.30.0',
+    ]);
+  });
+
   it('marks versions the platform cannot run', () => {
-    const rows = toReleaseRows([{ version: '10.0.0' }], { ...options, platform: 'darwin', arch: 'arm64' });
+    const rows = toReleaseRows([{ version: '10.0.0' }], {
+      ...options,
+      platform: 'darwin',
+      arch: 'arm64',
+    });
     expect(rows[0]).toMatchObject({ supported: false, date: '', node: '' });
   });
 });
 
 describe('visibleVersions', () => {
   const rows = [
-    { version: '46.0.0-nightly.20260911', date: '', node: '', obsolete: false, supported: true },
+    {
+      version: '46.0.0-nightly.20260911',
+      date: '',
+      node: '',
+      obsolete: false,
+      supported: true,
+    },
     { version: '44.0.0-beta.3', date: '', node: '', obsolete: false, supported: true },
     { version: '43.0.0', date: '', node: '', obsolete: false, supported: true },
     { version: '42.0.0', date: '', node: '', obsolete: false, supported: false },
     { version: '10.0.0', date: '', node: '', obsolete: true, supported: true },
   ];
-  const base = { channels: ['stable', 'beta'] as ('stable' | 'beta' | 'nightly')[], showObsolete: false, showNotDownloaded: true };
+  const base = {
+    channels: ['stable', 'beta'] as ('stable' | 'beta' | 'nightly')[],
+    showObsolete: false,
+    showNotDownloaded: true,
+  };
   const none = () => false;
 
-  // @feature versions.channels settings.channels settings.show-obsolete
   it('filters by channel, obsolete and platform support', () => {
     expect(visibleVersions(rows, base, none)).toEqual(['44.0.0-beta.3', '43.0.0']);
-    expect(visibleVersions(rows, { ...base, channels: ['nightly'] }, none)).toEqual(['46.0.0-nightly.20260911']);
-    expect(visibleVersions(rows, { ...base, showObsolete: true }, none)).toContain('10.0.0');
+    expect(visibleVersions(rows, { ...base, channels: ['nightly'] }, none)).toEqual([
+      '46.0.0-nightly.20260911',
+    ]);
+    expect(visibleVersions(rows, { ...base, showObsolete: true }, none)).toContain(
+      '10.0.0',
+    );
   });
 
-  // @feature settings.show-not-downloaded
   it('can hide versions that are not downloaded, but keeps the current one', () => {
     const hidden = { ...base, showNotDownloaded: false };
     expect(visibleVersions(rows, hidden, (v) => v === '43.0.0')).toEqual(['43.0.0']);
-    expect(visibleVersions(rows, hidden, none, ['44.0.0-beta.3'])).toEqual(['44.0.0-beta.3']);
+    expect(visibleVersions(rows, hidden, none, ['44.0.0-beta.3'])).toEqual([
+      '44.0.0-beta.3',
+    ]);
   });
 });
 

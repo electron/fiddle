@@ -8,9 +8,19 @@ import { createFiddle } from '../../fiddle/fiddle';
 import type { GistLoadResult } from '../../fiddle/github';
 import type { TemplateLoader } from '../../fiddle/templates';
 import { gistOrigin } from '../../fiddle/trust';
-import { fiddleFromGist, filesForSave, loadFolder, newFiddle, saveToFolder } from './load';
+import {
+  fiddleFromGist,
+  filesForSave,
+  gistDependencies,
+  loadFolder,
+  newFiddle,
+  saveToFolder,
+} from './load';
 
-const current = { version: { kind: 'release', version: '30.0.0' } as const, modules: { lodash: '^4.0.0' } };
+const current = {
+  version: { kind: 'release', version: '30.0.0' } as const,
+  modules: { lodash: '^4.0.0' },
+};
 
 function gist(files: Record<string, string>): GistLoadResult {
   return {
@@ -26,36 +36,58 @@ function gist(files: Record<string, string>): GistLoadResult {
 }
 
 describe('fiddleFromGist', () => {
-  // @feature load.gist-files
   it('skips unsupported files and asks before adding unknown ones', async () => {
     const confirmAddFile = vi.fn(async (name: string) => name === 'keep.js');
     const loaded = await fiddleFromGist(
-      gist({ 'main.js': 'm', 'README.md': '#', 'keep.js': 'k', 'drop.css': 'd', 'package-lock.json': '{}' }),
+      gist({
+        'main.js': 'm',
+        'README.md': '#',
+        'keep.js': 'k',
+        'drop.css': 'd',
+        'package-lock.json': '{}',
+      }),
       { context: current, confirmAddFile },
     );
     expect(Object.keys(loaded.fiddle.files).sort()).toEqual(['keep.js', 'main.js']);
-    expect(confirmAddFile.mock.calls.map(([name]) => name).sort()).toEqual(['drop.css', 'keep.js']);
-    expect(loaded.fiddle.origin).toEqual({ kind: 'gist', owner: 'octocat', id: 'a'.repeat(32), sha: 'b'.repeat(40) });
-    expect(loaded.fiddle.source).toEqual({ gistId: 'a'.repeat(32), gistRevision: 'b'.repeat(40) });
+    expect(confirmAddFile.mock.calls.map(([name]) => name).sort()).toEqual([
+      'drop.css',
+      'keep.js',
+    ]);
+    expect(loaded.fiddle.origin).toEqual({
+      kind: 'gist',
+      owner: 'octocat',
+      id: 'a'.repeat(32),
+      sha: 'b'.repeat(40),
+    });
+    expect(loaded.fiddle.source).toEqual({
+      gistId: 'a'.repeat(32),
+      gistRevision: 'b'.repeat(40),
+    });
     expect(loaded.gistOwner).toBe('octocat');
   });
 
-  // @feature load.gist-files
   it('errors when the gist has no supported files', async () => {
     await expect(
-      fiddleFromGist(gist({ 'README.md': '#', 'package.json': '{}' }), { context: current, confirmAddFile: async () => true }),
+      fiddleFromGist(gist({ 'README.md': '#', 'package.json': '{}' }), {
+        context: current,
+        confirmAddFile: async () => true,
+      }),
     ).rejects.toMatchObject({ details: { reason: 'no-supported-files' } });
   });
 
-  // @feature files.add-main
   it('adds a main entry when the gist has none', async () => {
-    const loaded = await fiddleFromGist(gist({ 'index.html': '<p>' }), { context: current, confirmAddFile: async () => true });
+    const loaded = await fiddleFromGist(gist({ 'index.html': '<p>' }), {
+      context: current,
+      confirmAddFile: async () => true,
+    });
     expect(Object.keys(loaded.fiddle.files)).toContain('main.js');
   });
 
-  // @feature load.gist-modules load.gist-version
   it('takes modules and the Electron version from package.json', async () => {
-    const pkg = JSON.stringify({ dependencies: { react: '^19.0.0' }, devDependencies: { electron: '^31.1.0' } });
+    const pkg = JSON.stringify({
+      dependencies: { react: '^19.0.0' },
+      devDependencies: { electron: '^31.1.0' },
+    });
     const loaded = await fiddleFromGist(gist({ 'main.js': '', 'package.json': pkg }), {
       context: current,
       confirmAddFile: async () => true,
@@ -65,14 +97,15 @@ describe('fiddleFromGist', () => {
     expect(loaded.warnings).toEqual([]);
   });
 
-  // @feature load.gist-modules
   it('keeps the previous modules and version without a package.json', async () => {
-    const loaded = await fiddleFromGist(gist({ 'main.js': '' }), { context: current, confirmAddFile: async () => true });
+    const loaded = await fiddleFromGist(gist({ 'main.js': '' }), {
+      context: current,
+      confirmAddFile: async () => true,
+    });
     expect(loaded.fiddle.modules).toEqual(current.modules);
     expect(loaded.fiddle.version).toEqual(current.version);
   });
 
-  // @feature load.gist-version
   it('keeps the current version with a warning when package.json asks for an unusable one', async () => {
     const pkg = JSON.stringify({ devDependencies: { electron: '99.0.0' } });
     const loaded = await fiddleFromGist(gist({ 'main.js': '', 'package.json': pkg }), {
@@ -84,14 +117,30 @@ describe('fiddleFromGist', () => {
     expect(loaded.warnings).toEqual([{ kind: 'unusable-version', version: '99.0.0' }]);
   });
 
-  // @feature load.gist-modules
   it('warns about an invalid package.json and keeps the previous modules', async () => {
-    const loaded = await fiddleFromGist(gist({ 'main.js': '', 'package.json': '{nope' }), {
-      context: current,
-      confirmAddFile: async () => true,
-    });
+    const loaded = await fiddleFromGist(
+      gist({ 'main.js': '', 'package.json': '{nope' }),
+      {
+        context: current,
+        confirmAddFile: async () => true,
+      },
+    );
     expect(loaded.warnings).toEqual([{ kind: 'invalid-package-json' }]);
     expect(loaded.fiddle.modules).toEqual(current.modules);
+  });
+});
+
+describe('gistDependencies', () => {
+  it('lists the modules of the gist’s package.json, and none when it is missing or invalid', () => {
+    expect(
+      gistDependencies(
+        gist({ 'package.json': JSON.stringify({ dependencies: { lodash: '4.17.21' } }) }),
+      ),
+    ).toEqual({
+      lodash: '4.17.21',
+    });
+    expect(gistDependencies(gist({ 'main.js': '' }))).toEqual({});
+    expect(gistDependencies(gist({ 'package.json': '{nope' }))).toEqual({});
   });
 });
 
@@ -104,7 +153,6 @@ describe('folders', () => {
     await rm(dir, { recursive: true, force: true });
   });
 
-  // @feature load.folder load.folder-invalid-json files.project-name
   it('loads a folder and names the project after it', async () => {
     await writeFile(path.join(dir, 'main.js'), 'm');
     await writeFile(path.join(dir, 'package.json'), '{bad');
@@ -115,20 +163,47 @@ describe('folders', () => {
     expect(loaded.warnings).toEqual([{ kind: 'invalid-package-json' }]);
   });
 
-  // @feature files.pkg-fields save.gitignore
   it('saves the files with a generated package.json and .gitignore', async () => {
-    const fiddle = createFiddle({ files: { 'main.js': 'm', 'styles.css': '' }, version: current.version, modules: { a: '1.0.0' } });
+    const fiddle = createFiddle({
+      files: { 'main.js': 'm', 'styles.css': '' },
+      version: current.version,
+      modules: { a: '1.0.0' },
+    });
     await saveToFolder(dir, fiddle, { name: 'demo', author: 'me' });
     const pkg = JSON.parse(await readFile(path.join(dir, 'package.json'), 'utf8'));
-    expect(pkg).toMatchObject({ name: 'demo', main: './main.js', author: 'me', dependencies: { a: '1.0.0' } });
+    expect(pkg).toMatchObject({
+      name: 'demo',
+      main: './main.js',
+      author: 'me',
+      dependencies: { a: '1.0.0' },
+    });
     expect(pkg.devDependencies).toEqual({ electron: '30.0.0' });
-    expect(await readFile(path.join(dir, '.gitignore'), 'utf8')).toContain('node_modules');
+    expect(await readFile(path.join(dir, '.gitignore'), 'utf8')).toContain(
+      'node_modules',
+    );
   });
 
-  // @feature save.forge-scripts save.forge-makers
+  it('writes a valid package name whatever the folder is called, and deletes the files it is told to', async () => {
+    await writeFile(path.join(dir, 'old.js'), 'old');
+    const fiddle = createFiddle({ files: { 'main.js': 'm' }, version: current.version });
+    await saveToFolder(dir, fiddle, {
+      name: 'My Fiddle',
+      remove: ['old.js', 'never-existed.js'],
+    });
+    expect(
+      JSON.parse(await readFile(path.join(dir, 'package.json'), 'utf8')),
+    ).toMatchObject({ name: 'my-fiddle' });
+    await expect(readFile(path.join(dir, 'old.js'), 'utf8')).rejects.toMatchObject({
+      code: 'ENOENT',
+    });
+  });
+
   it('adds Forge config for "Save as Forge project"', () => {
     const fiddle = createFiddle({ files: { 'main.js': 'm' }, version: current.version });
-    const files = filesForSave(fiddle, { name: 'demo', forge: { forgeVersion: '^7.8.0' } });
+    const files = filesForSave(fiddle, {
+      name: 'demo',
+      forge: { forgeVersion: '^7.8.0' },
+    });
     const pkg = JSON.parse(files['package.json']!);
     expect(pkg.scripts.make).toBe('electron-forge make');
     expect(pkg.devDependencies['@electron-forge/cli']).toBe('^7.8.0');
@@ -136,7 +211,6 @@ describe('folders', () => {
 });
 
 describe('newFiddle', () => {
-  // @feature load.new-fiddle
   it('uses the template for the version', async () => {
     const templates: TemplateLoader = {
       getTemplate: vi.fn(async () => ({ 'main.js': 'tpl' })),

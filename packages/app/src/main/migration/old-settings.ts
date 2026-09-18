@@ -1,7 +1,7 @@
 /**
  * Maps the previous Electron Fiddle's localStorage (every `GlobalSetting` in
  * its src/interfaces.ts, plus the window setting `gitHubPublishAsPublic`) to
- * the new sparse settings (REQUIREMENTS §6). Pure.
+ * the new sparse settings. Pure.
  *
  * The old app stored strings as they are (`theme`, `packageManager`,
  * `fontFamily`, …), booleans and numbers with `toString()`, and arrays and
@@ -45,40 +45,6 @@ interface MapOldSettingsOptions {
   osUser: string;
 }
 
-/** Old keys that are read below. */
-const MAPPED_KEYS = new Set([
-  'acceleratorsToBlock',
-  'channelsToShow',
-  'electronMirror',
-  'environmentVariables',
-  'executionFlags',
-  'fontFamily',
-  'fontSize',
-  'gitHubLogin',
-  'gitHubPublishAsPublic',
-  'hasShownTour',
-  'isClearingConsoleOnRun',
-  'isEnablingElectronLogging',
-  'isKeepingUserDataDirs',
-  'isPublishingGistAsRevision',
-  'isShowingGistHistory',
-  'isUsingSocketFirewall',
-  'isUsingSystemTheme',
-  'local-electron-versions',
-  'packageAuthor',
-  'packageManager',
-  'showObsoleteVersions',
-  'showUndownloadedVersions',
-  'theme',
-]);
-
-/**
- * Old keys the new app doesn't use: the plaintext token of very old versions
- * (the token is imported from `.github-credentials` instead), the cached
- * release list and the last selected version.
- */
-const IGNORED_KEYS = new Set(['gitHubToken', 'known-electron-versions', 'version']);
-
 /** Old `BlockableAccelerator` values → the commands they blocked. */
 const BLOCKABLE: Record<string, string> = { save: 'file.save', saveAs: 'file.saveAs' };
 
@@ -100,7 +66,9 @@ function parseBool(raw: string | undefined): boolean | undefined {
 }
 
 function strings(value: unknown): string[] | undefined {
-  return Array.isArray(value) ? value.filter((item): item is string => typeof item === 'string') : undefined;
+  return Array.isArray(value)
+    ? value.filter((item): item is string => typeof item === 'string')
+    : undefined;
 }
 
 /** Old theme file name, with or without `.json`. */
@@ -122,7 +90,11 @@ export function mapOldSettings(
     invalid: [],
   };
 
-  const set = <K extends SettingKey>(oldKey: string, key: K, value: Settings[K] | undefined): void => {
+  const set = <K extends SettingKey>(
+    oldKey: string,
+    key: K,
+    value: Settings[K] | undefined,
+  ): void => {
     const parsed = value === undefined ? undefined : parseSetting(key, value);
     if (!parsed) {
       result.invalid.push(oldKey);
@@ -132,14 +104,6 @@ export function mapOldSettings(
   };
 
   for (const [key, raw] of Object.entries(values)) {
-    if (IGNORED_KEYS.has(key)) {
-      result.ignored.push(key);
-      continue;
-    }
-    if (!MAPPED_KEYS.has(key)) {
-      result.unknown.push(key);
-      continue;
-    }
     switch (key) {
       case 'fontFamily':
         set(key, 'editorFontFamily', raw);
@@ -160,7 +124,11 @@ export function mapOldSettings(
         break;
       case 'gitHubPublishAsPublic': {
         const isPublic = parseBool(raw);
-        set(key, 'gistVisibility', isPublic === undefined ? undefined : isPublic ? 'public' : 'secret');
+        set(
+          key,
+          'gistVisibility',
+          isPublic === undefined ? undefined : isPublic ? 'public' : 'secret',
+        );
         break;
       }
       case 'packageAuthor':
@@ -179,7 +147,9 @@ export function mapOldSettings(
       case 'electronMirror': {
         const mirror = parseJson(raw) as {
           sourceType?: unknown;
-          sources?: { CUSTOM?: { electronMirror?: unknown; electronNightlyMirror?: unknown } };
+          sources?: {
+            CUSTOM?: { electronMirror?: unknown; electronNightlyMirror?: unknown };
+          };
         } | null;
         // The old default was a fixed "DEFAULT"; the new default picks by locale.
         if (mirror?.sourceType === 'CHINA') set(key, 'mirror', 'china');
@@ -199,7 +169,9 @@ export function mapOldSettings(
         set(
           key,
           'channels',
-          strings(parseJson(raw))?.map((channel) => channel.toLowerCase()) as Settings['channels'],
+          strings(parseJson(raw))?.map((channel) =>
+            channel.toLowerCase(),
+          ) as Settings['channels'],
         );
         break;
       case 'showUndownloadedVersions':
@@ -215,13 +187,19 @@ export function mapOldSettings(
         set(key, 'electronLogging', parseBool(raw));
         break;
       case 'executionFlags':
-        set(key, 'electronFlags', strings(parseJson(raw))?.filter((flag) => flag.trim() !== ''));
+        set(
+          key,
+          'electronFlags',
+          strings(parseJson(raw))?.filter((flag) => flag.trim() !== ''),
+        );
         break;
       case 'environmentVariables':
         set(
           key,
           'environmentVariables',
-          strings(parseJson(raw))?.filter((entry) => /^[A-Za-z_][A-Za-z0-9_]*=/.test(entry)),
+          strings(parseJson(raw))?.filter((entry) =>
+            /^[A-Za-z_][A-Za-z0-9_]*=/.test(entry),
+          ),
         );
         break;
       case 'packageManager':
@@ -241,12 +219,29 @@ export function mapOldSettings(
         for (const entry of Array.isArray(list) ? list : []) {
           const { version, localPath, name } = (entry ?? {}) as Record<string, unknown>;
           if (typeof version === 'string' && typeof localPath === 'string') {
-            result.localVersions.push({ version, localPath, ...(typeof name === 'string' ? { name } : {}) });
+            result.localVersions.push({
+              version,
+              localPath,
+              ...(typeof name === 'string' ? { name } : {}),
+            });
           }
         }
         break;
       }
-      // `theme` and `isUsingSystemTheme` are read together below.
+      // The plaintext token of very old versions (the token is imported from
+      // `.github-credentials` instead), the cached release list and the last
+      // selected version.
+      case 'gitHubToken':
+      case 'known-electron-versions':
+      case 'version':
+        result.ignored.push(key);
+        break;
+      // Read together below.
+      case 'theme':
+      case 'isUsingSystemTheme':
+        break;
+      default:
+        result.unknown.push(key);
     }
   }
 
@@ -254,7 +249,8 @@ export function mapOldSettings(
   const followSystem = parseBool(values.isUsingSystemTheme) ?? true;
   if (!followSystem) {
     const theme = values.theme;
-    if (theme === undefined || theme === '' || theme === BUILTIN_DARK) set('theme', 'appearance', 'dark');
+    if (theme === undefined || theme === '' || theme === BUILTIN_DARK)
+      set('theme', 'appearance', 'dark');
     else if (theme === BUILTIN_LIGHT) set('theme', 'appearance', 'light');
     else {
       const id = themeIds.get(oldThemeKey(theme));

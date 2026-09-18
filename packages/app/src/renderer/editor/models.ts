@@ -1,6 +1,6 @@
 /**
  * One Monaco model per fiddle file, as `inmemory://fiddle/<name>`, kept in
- * step with `Window.fiddle.files` (REQUIREMENTS §3, "Editor text"):
+ * step with `Window.fiddle.files`:
  *
  * - New names and every new `fiddleRev` fetch text with `Documents.GetFiles`.
  * - Models whose names are gone are disposed.
@@ -11,10 +11,9 @@
  * every editor showing a file shows its errors. Monaco's own errors and
  * warnings are reported to `diagnostics.ts` for the badges.
  */
-import { useSyncExternalStore } from 'react';
-
 import { getEditorLanguage } from '../../fiddle/files';
 import { documentsApi } from '../../ipc/renderer';
+import { createStore, useStore } from '../store';
 import { setEditorMarkers, type EditorMarker } from './diagnostics';
 import { monaco } from './monaco';
 import { getRuntimeErrors, type RuntimeError } from './runtime-errors';
@@ -25,22 +24,18 @@ type Model = monaco.editor.ITextModel;
 const RUNTIME_OWNER = 'fiddle-runtime';
 
 const models = new Map<string, Model>();
+/** The `fiddleRev` whose text the models hold. Edits carry it, so main drops the ones made against another. */
 let fiddleRev = -1;
 let fetchSeq = 0;
 /** True while we apply text from main, so it isn't echoed back. */
 let applying = false;
 const pendingEdits = new Set<string>();
 let frame = 0;
-let version = 0;
-const listeners = new Set<() => void>();
-/** Decoration IDs of the error lines, per file. */
+/** Counts model creations and disposals. */
+const modelVersion = createStore(0);
+const synced = createStore(false);
 const errorDecorations = new Map<string, string[]>();
 let markerListener: monaco.IDisposable | undefined;
-
-function emit() {
-  version += 1;
-  for (const listener of listeners) listener();
-}
 
 export function modelUri(name: string): monaco.Uri {
   return monaco.Uri.from({ scheme: 'inmemory', authority: 'fiddle', path: `/${name}` });
@@ -50,36 +45,21 @@ export function getModel(name: string | null | undefined): Model | undefined {
   return name ? models.get(name) : undefined;
 }
 
-let synced = false;
-
 /** Called after the first sync, successful or not, so the window can be shown. */
 export function markModelsSynced(): void {
-  if (synced) return;
-  synced = true;
-  emit();
+  synced.set(true);
 }
 
-/** True once the first `syncModels` has finished: the editors have text to show. */
-export function useModelsSynced(): boolean {
-  return useSyncExternalStore(
-    (listener) => {
-      listeners.add(listener);
-      return () => listeners.delete(listener);
-    },
-    () => synced,
-  );
-}
+export const useModelsSynced = (): boolean => useStore(synced);
 
 /** Re-renders when models are created or disposed; returns the file's model. */
 export function useModel(name: string | null | undefined): Model | undefined {
-  useSyncExternalStore(
-    (listener) => {
-      listeners.add(listener);
-      return () => listeners.delete(listener);
-    },
-    () => version,
-  );
+  useStore(modelVersion);
   return getModel(name);
+}
+
+function emitModelsChanged() {
+  modelVersion.set(modelVersion.get() + 1);
 }
 
 function flushEdits() {
@@ -123,8 +103,10 @@ function publishMarkers(): void {
   for (const [name, model] of models) {
     for (const marker of monaco.editor.getModelMarkers({ resource: model.uri })) {
       if (marker.owner === RUNTIME_OWNER) continue;
-      if (marker.severity === monaco.MarkerSeverity.Error) list.push({ file: name, severity: 'error' });
-      else if (marker.severity === monaco.MarkerSeverity.Warning) list.push({ file: name, severity: 'warning' });
+      if (marker.severity === monaco.MarkerSeverity.Error)
+        list.push({ file: name, severity: 'error' });
+      else if (marker.severity === monaco.MarkerSeverity.Warning)
+        list.push({ file: name, severity: 'warning' });
     }
   }
   setEditorMarkers(list);
@@ -137,7 +119,6 @@ function publishMarkers(): void {
 export async function syncModels(names: readonly string[], rev: number): Promise<void> {
   markerListener ??= monaco.editor.onDidChangeMarkers(publishMarkers);
   const revChanged = rev !== fiddleRev;
-  fiddleRev = rev;
   let changed = false;
   for (const [name, model] of models) {
     if (names.includes(name)) continue;
@@ -149,14 +130,17 @@ export async function syncModels(names: readonly string[], rev: number): Promise
   }
   if (changed) publishMarkers();
   const missing = names.filter((name) => !models.has(name));
-  if (revChanged) pendingEdits.clear();
   if (!revChanged && missing.length === 0) {
-    if (changed) emit();
+    if (changed) emitModelsChanged();
     return;
   }
   const seq = ++fetchSeq;
   const texts = await documentsApi.GetFiles();
   if (seq !== fetchSeq) return;
+  // Only now do edits carry the new rev: one typed while the text was on its way was made against the old
+  // text, which the new text replaces, and main must not keep it.
+  fiddleRev = rev;
+  if (revChanged) pendingEdits.clear();
   for (const name of names) {
     const text = Object.hasOwn(texts, name) ? (texts[name] ?? '') : '';
     const model = models.get(name);
@@ -165,18 +149,22 @@ export async function syncModels(names: readonly string[], rev: number): Promise
     else if (revChanged) setText(model, text);
   }
   applyRuntimeErrors(getRuntimeErrors());
-  emit();
+  emitModelsChanged();
 }
 
-/** Draws runtime errors: the spark-soft line, the spark line number and a squiggle. */
 export function applyRuntimeErrors(errors: readonly RuntimeError[]): void {
   for (const [name, model] of models) {
-    const mine = errors.filter((error) => error.file === name && error.line <= model.getLineCount());
+    const mine = errors.filter(
+      (error) => error.file === name && error.line <= model.getLineCount(),
+    );
     monaco.editor.setModelMarkers(
       model,
       RUNTIME_OWNER,
       mine.map((error) => {
-        const word = model.getWordAtPosition({ lineNumber: error.line, column: error.column });
+        const word = model.getWordAtPosition({
+          lineNumber: error.line,
+          column: error.column,
+        });
         return {
           severity: monaco.MarkerSeverity.Error,
           message: error.message,

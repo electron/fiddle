@@ -1,4 +1,3 @@
-/* Segmented control: 30 tall, 2px inset, radius-control squircle, Inter 13/18. */
 .track {
   display: inline-flex;
   flex: none;
@@ -9,7 +8,7 @@
   background: var(--lu-fill);
 }
 
-.track[data-size="sm"] {
+.track[data-size='sm'] {
   height: var(--lu-size-control-sm);
 }
 
@@ -41,7 +40,7 @@
     box-shadow var(--lu-dur-base) var(--lu-ease);
 }
 
-.track[data-size="sm"] .segment {
+.track[data-size='sm'] .segment {
   padding: 0 9px;
 }
 

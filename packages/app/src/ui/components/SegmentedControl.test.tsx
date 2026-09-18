@@ -1,9 +1,6 @@
-// @vitest-environment jsdom
-import { act, cleanup, fireEvent, render, screen } from '@testing-library/react';
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { act, fireEvent, render, screen } from '@testing-library/react';
+import { describe, expect, it, vi } from 'vitest';
 import { SegmentedControl } from './SegmentedControl';
-
-afterEach(cleanup);
 
 const OPTIONS = [
   { value: 'main', label: 'Main' },
@@ -35,7 +32,14 @@ describe('SegmentedControl', () => {
 
   it('ignores presses when disabled', () => {
     const onChange = vi.fn();
-    render(<SegmentedControl label="Process" options={OPTIONS} onChange={onChange} isDisabled />);
+    render(
+      <SegmentedControl
+        label="Process"
+        options={OPTIONS}
+        onChange={onChange}
+        isDisabled
+      />,
+    );
     fireEvent.click(segment('Renderer'));
     expect(onChange).not.toHaveBeenCalled();
   });

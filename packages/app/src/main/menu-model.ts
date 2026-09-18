@@ -1,10 +1,16 @@
 /**
  * The application menu as data, for the title bar's menu bar on Windows and
- * Linux (REQUIREMENTS §17.14, `Window.menuBar`): the native template of
- * src/main/menu.ts serialized to `MenuNode`s, and the lookup and role table
- * `Window.ActivateMenuItem` uses to do what the native item does.
+ * Linux (`Window.menuBar`): the native template of src/main/menu.ts serialized
+ * to `MenuNode`s, and the lookup and role table `Window.ActivateMenuItem` uses
+ * to do what the native item does.
  */
-import { app, Menu, type BaseWindow, type BrowserWindow, type MenuItemConstructorOptions } from 'electron';
+import {
+  app,
+  Menu,
+  type BaseWindow,
+  type BrowserWindow,
+  type MenuItemConstructorOptions,
+} from 'electron';
 
 import { formatAccelerator } from '../shared/accelerators';
 import { ErrorCode, FiddleError } from '../shared/errors';
@@ -24,7 +30,11 @@ type Role = NonNullable<Item['role']>;
  */
 export function hasWindowMenuBar(platform: Platform): boolean {
   if (platform !== 'darwin' || testMenuBar()) return true;
-  return import.meta.env.MODE !== 'production' && !app.isPackaged && process.env.FIDDLE_DEV_MENUBAR === '1';
+  return (
+    import.meta.env.MODE !== 'production' &&
+    !app.isPackaged &&
+    process.env.FIDDLE_DEV_MENUBAR === '1'
+  );
 }
 
 /**
@@ -33,46 +43,19 @@ export function hasWindowMenuBar(platform: Platform): boolean {
  * menu shows.
  */
 export function roleAccelerator(role: Role, platform: Platform): string | undefined {
-  const mac = platform === 'darwin';
   switch (role) {
-    case 'undo':
-      return 'CommandOrControl+Z';
-    case 'redo':
-      return mac ? 'Shift+CommandOrControl+Z' : 'Control+Y';
     case 'cut':
       return 'CommandOrControl+X';
     case 'copy':
       return 'CommandOrControl+C';
     case 'paste':
       return 'CommandOrControl+V';
-    case 'pasteAndMatchStyle':
-      return mac ? 'Cmd+Option+Shift+V' : 'Shift+CommandOrControl+V';
-    case 'selectAll':
-      return 'CommandOrControl+A';
     case 'minimize':
       return 'CommandOrControl+M';
-    case 'close':
-      return 'CommandOrControl+W';
     case 'quit':
       return platform === 'win32' ? undefined : 'CommandOrControl+Q';
-    case 'reload':
-      return 'CmdOrCtrl+R';
-    case 'forceReload':
-      return 'Shift+CmdOrCtrl+R';
-    case 'toggleDevTools':
-      return mac ? 'Alt+Command+I' : 'Ctrl+Shift+I';
-    case 'resetZoom':
-      return 'CommandOrControl+0';
-    case 'zoomIn':
-      return 'CommandOrControl+Plus';
-    case 'zoomOut':
-      return 'CommandOrControl+-';
     case 'togglefullscreen':
-      return mac ? 'Control+Command+F' : 'F11';
-    case 'hide':
-      return 'Command+H';
-    case 'hideOthers':
-      return 'Command+Alt+H';
+      return platform === 'darwin' ? 'Control+Command+F' : 'F11';
     default:
       return undefined;
   }
@@ -88,15 +71,30 @@ export function toMenuModel(template: readonly Item[], platform: Platform): Menu
     if (item.type === 'separator') return [{ kind: 'separator' }];
     if (item.visible === false) return [];
     const id = item.id;
-    if (!id) throw new FiddleError(ErrorCode.internal, `Menu item "${item.label ?? item.role ?? '?'}" has no id`);
+    if (!id)
+      throw new FiddleError(
+        ErrorCode.internal,
+        `Menu item "${item.label ?? item.role ?? '?'}" has no id`,
+      );
     const label = item.label ?? '';
     const enabled = item.enabled !== false;
     if (Array.isArray(item.submenu)) {
-      return [{ kind: 'submenu', id, label, enabled, children: toMenuModel(item.submenu, platform) }];
+      return [
+        {
+          kind: 'submenu',
+          id,
+          label,
+          enabled,
+          children: toMenuModel(item.submenu, platform),
+        },
+      ];
     }
-    const accelerator = item.accelerator ?? (item.role ? roleAccelerator(item.role, platform) : undefined);
+    const accelerator =
+      item.accelerator ?? (item.role ? roleAccelerator(item.role, platform) : undefined);
     const node: MenuNode = { kind: 'item', id, label, enabled };
-    if (item.type === 'checkbox' || item.type === 'radio') node.checked = item.checked === true;
+    if (item.type === 'checkbox' || item.type === 'radio')
+      node.checked = item.checked === true;
+    if (item.type === 'radio') node.radio = true;
     const text = formatAccelerator(accelerator, platform);
     if (text) node.accelerator = text;
     return [node];
@@ -125,16 +123,10 @@ export function findMenuItem(template: readonly Item[], id: string): Item | unde
  * the time the renderer calls `ActivateMenuItem`.
  */
 const ROLE_ACTIONS: Partial<Record<Role, (win: BrowserWindow) => void>> = {
-  undo: (win) => win.webContents.undo(),
-  redo: (win) => win.webContents.redo(),
   cut: (win) => win.webContents.cut(),
   copy: (win) => win.webContents.copy(),
   paste: (win) => win.webContents.paste(),
-  pasteAndMatchStyle: (win) => win.webContents.pasteAndMatchStyle(),
-  delete: (win) => win.webContents.delete(),
-  selectAll: (win) => win.webContents.selectAll(),
   minimize: (win) => win.minimize(),
-  close: (win) => win.close(),
   quit: () => app.quit(),
   togglefullscreen: (win) => win.setFullScreen(!win.isFullScreen()),
   resetZoom: (win) => {
@@ -146,9 +138,6 @@ const ROLE_ACTIONS: Partial<Record<Role, (win: BrowserWindow) => void>> = {
   zoomOut: (win) => {
     win.webContents.zoomLevel -= 0.5;
   },
-  reload: (win) => win.webContents.reload(),
-  forceReload: (win) => win.webContents.reloadIgnoringCache(),
-  toggleDevTools: (win) => win.webContents.toggleDevTools(),
 };
 
 /** Runs a role item for `win`: the table above, or else the native item's own `click`. */
@@ -159,12 +148,15 @@ export function runRole(role: Role, id: string, win: BrowserWindow): void {
     return;
   }
   const native = Menu.getApplicationMenu()?.getMenuItemById(id);
-  if (!native) throw new FiddleError(ErrorCode.unavailable, `Menu role ${role} can't run here`);
-  (native.click as (event: unknown, focusedWindow: BaseWindow, focusedWebContents: Electron.WebContents) => void)(
-    undefined,
-    win,
-    win.webContents,
-  );
+  if (!native)
+    throw new FiddleError(ErrorCode.unavailable, `Menu role ${role} can't run here`);
+  (
+    native.click as (
+      event: unknown,
+      focusedWindow: BaseWindow,
+      focusedWebContents: Electron.WebContents,
+    ) => void
+  )(undefined, win, win.webContents);
 }
 
 /**
@@ -172,7 +164,11 @@ export function runRole(role: Role, id: string, win: BrowserWindow): void {
  * native menu. Unknown IDs are `not-found`, disabled items and submenus
  * `forbidden`.
  */
-export function activateMenuItem(template: readonly Item[], id: string, win: BrowserWindow): void {
+export function activateMenuItem(
+  template: readonly Item[],
+  id: string,
+  win: BrowserWindow,
+): void {
   const item = findMenuItem(template, id);
   if (!item) throw new FiddleError(ErrorCode.notFound, `No menu item ${id}`);
   if (item.enabled === false || Array.isArray(item.submenu)) {
@@ -182,7 +178,8 @@ export function activateMenuItem(template: readonly Item[], id: string, win: Bro
     runRole(item.role, id, win);
     return;
   }
-  if (typeof item.click !== 'function') throw new FiddleError(ErrorCode.unavailable, `Menu item ${id} does nothing`);
+  if (typeof item.click !== 'function')
+    throw new FiddleError(ErrorCode.unavailable, `Menu item ${id} does nothing`);
   // Our click handlers only read the window (menu.ts); the item and event are the native menu's.
   item.click({} as Electron.MenuItem, win, {} as Electron.KeyboardEvent);
 }

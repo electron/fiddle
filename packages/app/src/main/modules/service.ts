@@ -6,7 +6,11 @@
  */
 import * as semver from 'semver';
 
-import { assertModuleSpec, isValidPackageName, normalizeModuleVersion } from '../../fiddle/modules';
+import {
+  assertModuleSpec,
+  isValidPackageName,
+  normalizeModuleVersion,
+} from '../../fiddle/modules';
 import { ErrorCode, FiddleError } from '../../shared/errors';
 import type { FiddleState } from '../../shared/stores';
 import type { ChangeListener } from '../state-hub';
@@ -19,7 +23,11 @@ export interface ModulesHub {
    * Documents' `setFiddleModules`, so a change marks the fiddle dirty.
    * `normalized` (`*` resolved to the latest) doesn't. Returns the Window rev.
    */
-  setModules(windowId: string, modules: Record<string, string>, normalized: boolean): number;
+  setModules(
+    windowId: string,
+    modules: Record<string, string>,
+    normalized: boolean,
+  ): number;
 }
 
 interface LatestVersionSource {
@@ -33,7 +41,11 @@ export class ModulesService {
   /** `windowId name spec` keys being normalized, or that failed to (not retried). */
   readonly #seen = new Set<string>();
 
-  constructor(hub: ModulesHub, npm: LatestVersionSource, log: (message: string, error: unknown) => void) {
+  constructor(
+    hub: ModulesHub,
+    npm: LatestVersionSource,
+    log: (message: string, error: unknown) => void,
+  ) {
     this.#hub = hub;
     this.#npm = npm;
     this.#log = log;
@@ -47,7 +59,9 @@ export class ModulesService {
 
   async setVersion(windowId: string, name: string, version: string): Promise<number> {
     if (!Object.hasOwn(this.#modules(windowId), name)) {
-      throw new FiddleError(ErrorCode.notFound, `${name} is not in this fiddle`, { name });
+      throw new FiddleError(ErrorCode.notFound, `${name} is not in this fiddle`, {
+        name,
+      });
     }
     const resolved = await this.#resolve(name, version);
     return this.#write(windowId, { ...this.#modules(windowId), [name]: resolved });
@@ -81,7 +95,11 @@ export class ModulesService {
           const current = this.#hub.getWindow(windowId)?.fiddle.modules;
           // Only if nobody changed it meanwhile.
           if (current?.[name] !== spec) return;
-          this.#write(windowId, { ...current, [name]: normalizeModuleVersion(spec, latest) }, true);
+          this.#write(
+            windowId,
+            { ...current, [name]: normalizeModuleVersion(spec, latest) },
+            true,
+          );
           this.#seen.delete(`${windowId} ${name} ${spec}`);
         } catch (error) {
           this.#log(`could not normalize ${name}@${spec}`, error);
@@ -92,7 +110,9 @@ export class ModulesService {
 
   async #resolve(name: string, version: string | undefined): Promise<string> {
     if (!isValidPackageName(name)) {
-      throw new FiddleError(ErrorCode.invalidArgument, `Invalid package name: ${name}`, { name });
+      throw new FiddleError(ErrorCode.invalidArgument, `Invalid package name: ${name}`, {
+        name,
+      });
     }
     if (version !== undefined) assertModuleSpec(name, version);
     if (version !== undefined && semver.valid(version)) return version;
@@ -101,12 +121,14 @@ export class ModulesService {
 
   #modules(windowId: string): Record<string, string> {
     const win = this.#hub.getWindow(windowId);
-    if (!win) throw new FiddleError(ErrorCode.notFound, `Window ${windowId} is not registered`);
+    if (!win)
+      throw new FiddleError(ErrorCode.notFound, `Window ${windowId} is not registered`);
     return win.fiddle.modules;
   }
 
   #write(windowId: string, modules: Record<string, string>, normalized = false): number {
-    if (!this.#hub.getWindow(windowId)) throw new FiddleError(ErrorCode.notFound, `Window ${windowId} is not registered`);
+    if (!this.#hub.getWindow(windowId))
+      throw new FiddleError(ErrorCode.notFound, `Window ${windowId} is not registered`);
     return this.#hub.setModules(windowId, modules, normalized);
   }
 }

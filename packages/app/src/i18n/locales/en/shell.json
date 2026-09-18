@@ -142,10 +142,6 @@
     "message": "Unsaved changes",
     "description": "Spoken by screen readers for the dot on a file with unsaved changes."
   },
-  "hiddenFile": {
-    "message": "Hidden",
-    "description": "Spoken by screen readers for a file whose editor is hidden."
-  },
   "filterFiles": {
     "message": "Filter files",
     "description": "Placeholder of the search field that filters the sidebar's file list.",
@@ -246,11 +242,6 @@
     "description": "Tooltip and accessible name of the tab row button while the editor is split; it closes every pane but the focused one.",
     "maxLength": 30
   },
-  "popOut": {
-    "message": "Open in a new window",
-    "description": "Editor pane header button that opens the file in its own window.",
-    "maxLength": 40
-  },
   "maximize": {
     "message": "Maximize",
     "description": "Editor pane header button that closes the other panes and keeps only this one.",
@@ -348,51 +339,6 @@
   "dismiss": {
     "message": "Dismiss",
     "description": "Accessible name of the button that closes a notification."
-  },
-  "stubRun": {
-    "message": "Run",
-    "description": "Placeholder Run button until the run feature lands.",
-    "maxLength": 16
-  },
-  "stubPublish": {
-    "message": "Publish",
-    "description": "Placeholder Publish button until the gists feature lands.",
-    "maxLength": 20
-  },
-  "stubConsole": {
-    "message": "Console",
-    "description": "Placeholder console title until the run feature lands.",
-    "maxLength": 20
-  },
-  "stubReady": {
-    "message": "Ready",
-    "description": "Placeholder status bar text until the run feature lands.",
-    "maxLength": 20
-  },
-  "stubPackages": {
-    "message": "Packages",
-    "description": "Placeholder sidebar section head until the packages feature lands.",
-    "maxLength": 24
-  },
-  "stubAddPackage": {
-    "message": "Add a package",
-    "description": "Placeholder package field until the packages feature lands.",
-    "maxLength": 30
-  },
-  "stubVersion": {
-    "message": "Electron",
-    "description": "Placeholder version picker until the versions feature lands.",
-    "maxLength": 24
-  },
-  "stubSettingsTitle": {
-    "message": "Settings",
-    "description": "Placeholder settings page title until the settings feature lands.",
-    "maxLength": 30
-  },
-  "stubCloseSettings": {
-    "message": "Done",
-    "description": "Placeholder button that closes the settings page.",
-    "maxLength": 20
   },
   "tabFocusMode": {
     "message": "Tab moves focus",

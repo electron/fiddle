@@ -1,16 +1,19 @@
-// @vitest-environment jsdom
-import { act, cleanup, fireEvent, render, screen } from '@testing-library/react';
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { act, fireEvent, render, screen } from '@testing-library/react';
+import { describe, expect, it, vi } from 'vitest';
 import { Tab, TabList, TabPanel, Tabs } from './Tabs';
-
-afterEach(cleanup);
 
 function Example({ onChange }: { onChange?: (id: string) => void }) {
   return (
     <Tabs defaultValue="main" onChange={onChange}>
       <TabList aria-label="Open files">
         <Tab id="main">main.js</Tab>
-        <Tab id="renderer" errorCount={2} errorLabel="2 errors" unsaved unsavedLabel="Unsaved changes">
+        <Tab
+          id="renderer"
+          errorCount={2}
+          errorLabel="2 errors"
+          unsaved
+          unsavedLabel="Unsaved changes"
+        >
           renderer.js
         </Tab>
         <Tab id="html" isDisabled>
@@ -48,7 +51,9 @@ describe('Tabs', () => {
 
   it('speaks the error count and unsaved state', () => {
     render(<Example />);
-    const tab = screen.getByRole('tab', { name: /renderer\.js.*2 errors.*Unsaved changes/ });
+    const tab = screen.getByRole('tab', {
+      name: /renderer\.js.*2 errors.*Unsaved changes/,
+    });
     expect(tab).toBeTruthy();
   });
 
@@ -77,7 +82,9 @@ describe('Tabs', () => {
 
     fireEvent.keyDown(tab, { key: 'Delete' });
     expect(onClose).toHaveBeenCalledTimes(3);
-    expect(screen.getByRole('tab', { name: 'main.js' }).querySelector('[data-tab-close]')).toBeNull();
+    expect(
+      screen.getByRole('tab', { name: 'main.js' }).querySelector('[data-tab-close]'),
+    ).toBeNull();
   });
 
   it('carries its drag data', () => {
@@ -94,12 +101,13 @@ describe('Tabs', () => {
     expect(tab.draggable).toBe(true);
     const setData = vi.fn();
     const event = new Event('dragstart', { bubbles: true });
-    Object.defineProperty(event, 'dataTransfer', { value: { setData, effectAllowed: 'all' } });
+    Object.defineProperty(event, 'dataTransfer', {
+      value: { setData, effectAllowed: 'all' },
+    });
     fireEvent(tab, event);
     expect(setData).toHaveBeenCalledWith('application/x-test', 'main.js');
   });
 
-  // @feature editor.tab-reorder
   it('marks where a dragged tab would land', () => {
     const { rerender } = render(
       <Tabs defaultValue="main">
@@ -110,7 +118,9 @@ describe('Tabs', () => {
         </TabList>
       </Tabs>,
     );
-    expect(screen.getByRole('tab', { name: 'main.js' }).getAttribute('data-drop-indicator')).toBe('before');
+    expect(
+      screen.getByRole('tab', { name: 'main.js' }).getAttribute('data-drop-indicator'),
+    ).toBe('before');
     rerender(
       <Tabs defaultValue="main">
         <TabList aria-label="Open files">
@@ -118,7 +128,20 @@ describe('Tabs', () => {
         </TabList>
       </Tabs>,
     );
-    expect(screen.getByRole('tab', { name: 'main.js' }).hasAttribute('data-drop-indicator')).toBe(false);
+    expect(
+      screen.getByRole('tab', { name: 'main.js' }).hasAttribute('data-drop-indicator'),
+    ).toBe(false);
+  });
+
+  it('jumps to the first and last enabled tab with Home and End', () => {
+    const onChange = vi.fn();
+    render(<Example onChange={onChange} />);
+    const first = screen.getByRole('tab', { name: 'main.js' });
+    act(() => first.focus());
+    fireEvent.keyDown(first, { key: 'End' });
+    expect(onChange).toHaveBeenLastCalledWith('css');
+    fireEvent.keyDown(document.activeElement!, { key: 'Home' });
+    expect(onChange).toHaveBeenLastCalledWith('main');
   });
 
   it('does not select a disabled tab', () => {

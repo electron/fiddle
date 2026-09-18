@@ -1,6 +1,6 @@
 /**
- * How the title bar degrades in narrow windows (REQUIREMENTS §14: usable at
- * 600×600). Its layout already can't overlap: the sides are flex groups that
+ * How the title bar degrades in narrow windows (the minimum size is 600×600).
+ * Its layout already can't overlap: the sides are flex groups that
  * push the capsule instead of running under it, and the capsule's version
  * picker narrows last. This decides, from widths the CSS fixes, what gives way
  * before that: the Publish label, then (Windows at its narrowest, where the
@@ -50,34 +50,57 @@ const P = TITLE_BAR_PARTS;
 
 /** The least the left group takes: the name hidden and the menus folded into the Menu button. */
 export function leftGroupMin(platform: Platform, menuBar: boolean): number {
-  return P.padding + P.startInset[platform] + P.sidebarButton + P.gap + (menuBar ? P.menuButton + P.gap : 0) + P.gap;
+  return (
+    P.padding +
+    P.startInset[platform] +
+    P.sidebarButton +
+    P.gap +
+    (menuBar ? P.menuButton + P.gap : 0) +
+    P.gap
+  );
 }
 
 /** The least the right group takes with Publish `publish` px wide, with or without the Open gist button. */
-export function rightGroupMin(platform: Platform, publish: number, openGist: boolean): number {
-  return P.gap + (openGist ? P.iconButton + P.buttonGap : 0) + publish + P.buttonGap + P.iconButton + P.endInset[platform] + P.padding;
+export function rightGroupMin(
+  platform: Platform,
+  publish: number,
+  openGist: boolean,
+): number {
+  return (
+    P.gap +
+    (openGist ? P.iconButton + P.buttonGap : 0) +
+    publish +
+    P.buttonGap +
+    P.iconButton +
+    P.endInset[platform] +
+    P.padding
+  );
 }
 
 /** The capsule with the picker `picker` px wide and Run `run` px wide. */
-export const capsuleWidth = (picker: number, run: number): number => P.capsuleChrome + picker + run;
+export const capsuleWidth = (picker: number, run: number): number =>
+  P.capsuleChrome + picker + run;
 
 /**
  * What the title bar shows at `width` px. Publish keeps its label while the
  * capsule can stay whole beside both groups at their least; Open gist and the
  * Run hint stay while everything fits with the picker at its narrowest.
  */
-export function titleBarFit(platform: Platform, width: number, menuBar: boolean): TitleBarFit {
+export function titleBarFit(
+  platform: Platform,
+  width: number,
+  menuBar: boolean,
+): TitleBarFit {
   const left = leftGroupMin(platform, menuBar);
-  const publishLabel = left + capsuleWidth(P.picker, P.run[platform]) + rightGroupMin(platform, P.publishLabelled, true) <= width;
-  const roomy = left + capsuleWidth(P.pickerMin, P.run[platform]) + rightGroupMin(platform, P.iconButton, true) <= width;
+  const publishLabel =
+    left +
+      capsuleWidth(P.picker, P.run[platform]) +
+      rightGroupMin(platform, P.publishLabelled, true) <=
+    width;
+  const roomy =
+    left +
+      capsuleWidth(P.pickerMin, P.run[platform]) +
+      rightGroupMin(platform, P.iconButton, true) <=
+    width;
   return { publishLabel, openGistButton: roomy, runHint: roomy };
-}
-
-/** The least width the title bar needs with what `fit` shows: never more than the window's minimum. */
-export function titleBarMinWidth(platform: Platform, menuBar: boolean, fit: TitleBarFit): number {
-  return (
-    leftGroupMin(platform, menuBar) +
-    capsuleWidth(P.pickerMin, fit.runHint ? P.run[platform] : P.runBare) +
-    rightGroupMin(platform, fit.publishLabel ? P.publishLabelled : P.iconButton, fit.openGistButton)
-  );
 }

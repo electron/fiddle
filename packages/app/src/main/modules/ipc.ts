@@ -1,8 +1,11 @@
-/** Binds the `Modules` interface (npm search and the fiddle's modules) for one window. */
 import { implement, Modules } from '../../ipc/main';
 import type { IpcContext } from '../ipc';
 
-export function bindModulesIpc({ contents, windowId, services: { npm, modules } }: IpcContext): void {
+export function bindModulesIpc({
+  contents,
+  windowId,
+  services: { npm, modules },
+}: IpcContext): void {
   implement(Modules, contents, {
     SearchPackages: (query) => npm.search(query),
     GetPackageVersions: (name) => npm.versions(name),

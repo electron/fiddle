@@ -18,7 +18,7 @@ export default defineConfig(({ mode }) => ({
     outDir: '.vite/build',
     emptyOutDir: false,
     copyPublicDir: false,
-    sourcemap: true,
+    sourcemap: mode !== 'test',
     minify: mode === 'production',
     target: 'node24',
     lib: {
@@ -36,7 +36,8 @@ export default defineConfig(({ mode }) => ({
         ...builtinModules.flatMap((name) => [name, `node:${name}`]),
       ],
       output: {
-        banner: 'var __fiddleImportMetaUrl = require("node:url").pathToFileURL(__filename).href;',
+        banner:
+          'var __fiddleImportMetaUrl = require("node:url").pathToFileURL(__filename).href;',
       },
     },
   },

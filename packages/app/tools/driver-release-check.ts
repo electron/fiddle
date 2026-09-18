@@ -1,10 +1,11 @@
 #!/usr/bin/env node
 // `yarn workspace electron-fiddle driver:release-check [paths...]`
 //
-// Fails if test-only code is in a release build (REQUIREMENTS §11). With no
-// arguments it builds main and preload in production mode into a temp dir and
-// scans them. With paths (files or directories, e.g. a packaged app.asar or
-// .vite/), it scans those instead. CI runs it on the packaged app.
+// Fails if test-only code is in a release build. With no arguments it builds
+// main and preload in production mode into a temp dir and scans them. With
+// paths (files or directories, e.g. a packaged app.asar or .vite/), it scans
+// those instead. CI scans the packaged app with tools/release-check-asar.mjs,
+// which keeps its own copy of MARKERS.
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
@@ -12,7 +13,7 @@ import { fileURLToPath } from 'node:url';
 
 import { build } from 'vite';
 
-/** Strings that exist only in src/main/test-driver (and renderer test hooks). */
+/** Strings that exist only in src/main/test-driver (and renderer test hooks). Keep in sync with tools/release-check-asar.mjs. */
 const MARKERS = [
   'ELECTRON_FIDDLE_DRIVER_SOCKET',
   'Accessibility.getFullAXTree',
@@ -54,7 +55,8 @@ for (const target of targets) {
     if (file.endsWith('.map')) continue;
     scanned++;
     const content = fs.readFileSync(file, 'latin1');
-    for (const marker of MARKERS) if (content.includes(marker)) hits.push(`${file}: ${marker}`);
+    for (const marker of MARKERS)
+      if (content.includes(marker)) hits.push(`${file}: ${marker}`);
   }
 }
 if (temp) fs.rmSync(temp, { recursive: true, force: true });

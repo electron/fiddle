@@ -26,11 +26,20 @@ export function asGistReference(input: string): string | null {
   if (isGistId(value)) return value.toLowerCase();
   try {
     const url = new URL(/^https?:\/\//i.test(value) ? value : `https://${value}`);
-    if (url.hostname.toLowerCase() !== 'gist.github.com' || url.username || url.password || url.port) return null;
+    if (
+      url.hostname.toLowerCase() !== 'gist.github.com' ||
+      url.username ||
+      url.password ||
+      url.port
+    )
+      return null;
     // `/<id>` or `/<user>/<id>`, optionally followed by a revision SHA and a slash.
     // Only the canonical URL comes back: no userinfo, query, fragment or revision,
     // so what the field shows is exactly what getGistId() will load.
-    const match = /^\/(?:([a-z\d](?:[a-z\d-]{0,38})?)\/)?([\da-f]{32})(?:\/[\da-f]{40})?\/?$/i.exec(url.pathname);
+    const match =
+      /^\/(?:([a-z\d](?:[a-z\d-]{0,38})?)\/)?([\da-f]{32})(?:\/[\da-f]{40})?\/?$/i.exec(
+        url.pathname,
+      );
     if (!match) return null;
     const [, user, id] = match;
     return gistUrl(user ? `${user}/${id!.toLowerCase()}` : id!.toLowerCase());

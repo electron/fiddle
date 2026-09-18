@@ -41,7 +41,8 @@ export class FiddleError extends Error {
 
   static from(error: unknown): FiddleError {
     if (error instanceof FiddleError) return error;
-    if (isSerializedFiddleError(error)) {
+    // Node's system errors (`EACCES`, `ABORT_ERR`) carry a `code` too, but only a plain object is a serialized FiddleError.
+    if (!(error instanceof Error) && isSerializedFiddleError(error)) {
       return new FiddleError(error.code, error.message, error.details);
     }
     const message = error instanceof Error ? error.message : String(error);

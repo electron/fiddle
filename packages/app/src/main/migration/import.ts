@@ -1,5 +1,5 @@
 /**
- * The one-time import from the previous Electron Fiddle (REQUIREMENTS §6).
+ * The one-time import from the previous Electron Fiddle.
  *
  * - Runs on the first launch, before any store is created, so it finishes
  *   before any new settings are written. `importedFrom: { version, at }` in
@@ -13,8 +13,8 @@
  *   and `tourDone` in state.json. Unknown keys are logged and ignored.
  * - `local-versions.json` (and the older `local-electron-versions` key) →
  *   local-builds.json `{ schemaVersion, builds: [{ id, name, path, addedAt }] }`.
- * - `.github-credentials` → `credentials/github`, re-encrypted with the Gists
- *   slice's CredentialStore.
+ * - `.github-credentials` → `credentials/github`, re-encrypted with the
+ *   CredentialStore.
  * - `~/.electron-fiddle/themes/*.json` → `<userData>/themes/`, keeping the
  *   Monaco editor colours; UI tokens come from Lucent.
  * - `electron-bin/` → the core cache (`importElectronVersions`), which the
@@ -27,7 +27,12 @@ import fs from 'node:fs';
 import fsp from 'node:fs/promises';
 import path from 'node:path';
 
-import { Installer } from '@electron/fiddle-core';
+import {
+  copyFolder,
+  Installer,
+  removeBestEffort,
+  renameWithRetry,
+} from '@electron/fiddle-core';
 import semver from 'semver';
 
 import { GITHUB_TOKEN_PATTERN } from '../../fiddle/github';
@@ -88,6 +93,21 @@ function readJsonObject(file: string): Record<string, unknown> | undefined {
   }
 }
 
+/** state.json's object; undefined when there is no file. Throws when it exists but can't be read as an object. */
+function readStateFile(file: string): Record<string, unknown> | undefined {
+  let text: string;
+  try {
+    text = fs.readFileSync(file, 'utf8');
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code === 'ENOENT') return undefined;
+    throw error;
+  }
+  const data: unknown = JSON.parse(text);
+  if (typeof data !== 'object' || data === null || Array.isArray(data))
+    throw new Error(`${file} is not an object`);
+  return data as Record<string, unknown>;
+}
+
 /** Creates `file` with `data`, never overwriting. Returns false when it already exists. */
 async function createJsonFile(file: string, data: unknown): Promise<boolean> {
   await fsp.mkdir(path.dirname(file), { recursive: true });
@@ -101,7 +121,10 @@ async function createJsonFile(file: string, data: unknown): Promise<boolean> {
 }
 
 /** Old themes → `<userData>/themes/<id>.json`. Returns old file name (no `.json`) → new ID. */
-async function importThemes(oldDir: string, newDir: string): Promise<Map<string, string>> {
+async function importThemes(
+  oldDir: string,
+  newDir: string,
+): Promise<Map<string, string>> {
   const ids = new Map<string, string>();
   let names: string[];
   try {
@@ -118,8 +141,9 @@ async function importThemes(oldDir: string, newDir: string): Promise<Map<string,
         isDark?: unknown;
         editor?: unknown;
       };
-      const title = typeof data.name === 'string' && data.name.trim() ? data.name.trim() : key;
-      // Keeps only the Monaco editor data; `common` UI tokens now come from Lucent.
+      const title =
+        typeof data.name === 'string' && data.name.trim() ? data.name.trim() : key;
+      // Keeps only the Monaco editor data; `common` UI tokens come from Lucent.
       const theme = themeFromMonaco(title, data.editor);
       if (typeof data.isDark === 'boolean') theme.isDark = data.isDark;
       // The ID comes from the old file name, so a second run finds the same file.
@@ -167,7 +191,10 @@ function toLocalBuilds(versions: readonly OldLocalVersion[], now: Date): LocalBu
 }
 
 /** `.github-credentials` → `credentials/github`. The old file stays where it is. */
-async function importGitHubToken(deps: ImportDeps, login: string | undefined): Promise<string> {
+async function importGitHubToken(
+  deps: ImportDeps,
+  login: string | undefined,
+): Promise<string> {
   const oldFile = path.join(deps.userData, '.github-credentials');
   const newFile = path.join(deps.userData, 'credentials', 'github');
   if (!fs.existsSync(oldFile)) return 'none';
@@ -180,9 +207,16 @@ async function importGitHubToken(deps: ImportDeps, login: string | undefined): P
     return 'undecryptable';
   }
   if (!GITHUB_TOKEN_PATTERN.test(token)) return 'invalid';
-  const store = new CredentialStore({ file: newFile, safeStorage: deps.safeStorage, platform: deps.platform });
-  // `login` may be empty: the Gists slice replaces it after its startup check.
-  const saved = await store.save({ token, login: login ?? '' }, { allowPlaintext: false });
+  const store = new CredentialStore({
+    file: newFile,
+    safeStorage: deps.safeStorage,
+    platform: deps.platform,
+  });
+  // `login` may be empty: the GitHub service replaces it after its startup check.
+  const saved = await store.save(
+    { token, login: login ?? '' },
+    { allowPlaintext: false },
+  );
   return saved ? 'imported' : 'session-only';
 }
 
@@ -191,17 +225,14 @@ export async function importOldApp(deps: ImportDeps): Promise<ImportResult> {
   const { userData, home } = deps;
   const now = deps.now?.() ?? new Date();
   const stateFile = path.join(userData, 'state.json');
-  const state = readJsonObject(stateFile);
+  // An unreadable state.json throws: nothing is written over it, and the JSON store deals with the file.
+  const state = readStateFile(stateFile);
   if (state?.importedFrom) return { firstLaunch: false, summary: {} };
 
   const summary: Record<string, unknown> = {};
 
-  let values: Record<string, string> = {};
-  try {
-    values = (await deps.readLocalStorage()) ?? {};
-  } catch (error) {
-    log.warn('import: could not read the old localStorage', error);
-  }
+  // A failed read throws too: nothing is recorded, so the next launch tries again.
+  const values = (await deps.readLocalStorage()) ?? {};
 
   const themeIds = await importThemes(
     path.join(home, '.electron-fiddle', 'themes'),
@@ -210,8 +241,10 @@ export async function importOldApp(deps: ImportDeps): Promise<ImportResult> {
   summary.themes = themeIds.size;
 
   const mapped = mapOldSettings(values, { themeIds, osUser: deps.osUser });
-  if (mapped.unknown.length) log.warn('import: ignoring unknown localStorage keys', mapped.unknown);
-  if (mapped.invalid.length) log.warn('import: ignoring invalid old values', mapped.invalid);
+  if (mapped.unknown.length)
+    log.warn('import: ignoring unknown localStorage keys', mapped.unknown);
+  if (mapped.invalid.length)
+    log.warn('import: ignoring invalid old values', mapped.invalid);
 
   const settingKeys = Object.keys(mapped.settings);
   if (settingKeys.length) {
@@ -223,7 +256,10 @@ export async function importOldApp(deps: ImportDeps): Promise<ImportResult> {
   }
 
   const builds = toLocalBuilds(
-    [...readOldLocalVersions(path.join(userData, 'local-versions.json')), ...mapped.localVersions],
+    [
+      ...readOldLocalVersions(path.join(userData, 'local-versions.json')),
+      ...mapped.localVersions,
+    ],
     now,
   );
   if (builds.length) {
@@ -245,27 +281,17 @@ export async function importOldApp(deps: ImportDeps): Promise<ImportResult> {
   return { firstLaunch: true, summary };
 }
 
-/** Electron's `fs` treats .asar files as folders; copying an Electron build must not. */
-async function withNoAsar<T>(fn: () => Promise<T>): Promise<T> {
-  const proc = process as { noAsar?: boolean };
-  const previous = proc.noAsar;
-  proc.noAsar = true;
-  try {
-    return await fn();
-  } finally {
-    proc.noAsar = previous;
-  }
-}
-
 /** Copies a folder into place through a temp folder, so the target is complete or absent. */
 async function copyIntoPlace(source: string, target: string): Promise<void> {
   await fsp.mkdir(path.dirname(target), { recursive: true });
-  const tmp = await fsp.mkdtemp(path.join(path.dirname(target), `.tmp-${path.basename(target)}-`));
+  const tmp = await fsp.mkdtemp(
+    path.join(path.dirname(target), `.tmp-${path.basename(target)}-`),
+  );
   try {
-    await withNoAsar(() => fsp.cp(source, tmp, { recursive: true, verbatimSymlinks: true }));
-    await fsp.rename(tmp, target);
+    await copyFolder(source, tmp, { verbatimSymlinks: true });
+    await renameWithRetry(tmp, target);
   } catch (error) {
-    await withNoAsar(() => fsp.rm(tmp, { recursive: true, force: true }));
+    await removeBestEffort(tmp);
     throw error;
   }
 }
@@ -297,7 +323,9 @@ export async function importElectronVersions(
       continue;
     }
     const dir = path.join(oldBin, name);
-    const version = (await fsp.readFile(path.join(dir, 'version'), 'utf8').catch(() => ''))
+    const version = (
+      await fsp.readFile(path.join(dir, 'version'), 'utf8').catch(() => '')
+    )
       .trim()
       .replace(/^v/, '');
     if (semver.valid(version) && !folders.has(version)) folders.set(version, dir);
@@ -309,7 +337,7 @@ export async function importElectronVersions(
       electronInstall: path.join(oldBin, 'current'),
       electronVersions: versionsDir,
     },
-    { layout: 'per-version', locks: true },
+    { layout: 'per-version' },
   );
   const imported: string[] = [];
   for (const version of new Set([...folders.keys(), ...zips])) {

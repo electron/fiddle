@@ -1,12 +1,13 @@
 /**
- * Bisect (REQUIREMENTS §17.9) over the visible releases between a known-good
- * and a known-bad version.
+ * Bisect over the visible releases between a known-good and a known-bad
+ * version.
  *
  * - Manual: each step stops the fiddle and switches the window to the version
  *   under test; the user marks it Good, Bad or Skip.
  * - Auto: runs the fiddle on each version through the normal run path (the
  *   same trust check and spawn); exit code 0 is good. Both ends are verified
- *   first, and an invalid run stops the bisect.
+ *   first. A run that says nothing about the version (refused, stopped, or one
+ *   that never started Electron) stops the bisect.
  */
 import { Bisector, bisectCompareUrl, type BisectStep } from '../../fiddle/bisect';
 import { compareVersions, getVersionRange } from '../../fiddle/versions';
@@ -17,6 +18,7 @@ import { tm } from '../i18n';
 import { log } from '../log';
 import type { StateHub } from '../state-hub';
 import type { RunService } from '../run/service';
+import { bisectVerdict } from '../run/logic';
 import { visibleVersions } from '../versions/releases';
 import type { VersionsService } from '../versions/service';
 import { autoBisect } from './auto';
@@ -31,27 +33,45 @@ export class BisectService {
   readonly #hub: StateHub;
   readonly #runs: RunService;
   readonly #versions: VersionsService;
+  readonly #typesChanged: (windowId: string) => void;
   readonly #sessions = new Map<string, Session>();
 
-  constructor(hub: StateHub, runs: RunService, versions: VersionsService) {
+  constructor(
+    hub: StateHub,
+    runs: RunService,
+    versions: VersionsService,
+    typesChanged: (windowId: string) => void,
+  ) {
     this.#hub = hub;
     this.#runs = runs;
     this.#versions = versions;
+    this.#typesChanged = typesChanged;
   }
 
   isActive(windowId: string): boolean {
-    return this.#runs.state(windowId).bisect !== null && this.#runs.state(windowId).bisect?.result === null;
+    return (
+      this.#runs.state(windowId).bisect !== null &&
+      this.#runs.state(windowId).bisect?.result === null
+    );
   }
 
   async start(windowId: string, good: string, bad: string, auto: boolean): Promise<void> {
     const t = tm('mainRun');
     if (compareVersions(good, bad) >= 0) {
-      throw new FiddleError(ErrorCode.invalidArgument, 'The good version must be older than the bad one');
+      throw new FiddleError(
+        ErrorCode.invalidArgument,
+        'The good version must be older than the bad one',
+      );
     }
     const settings = this.#hub.app.settings;
-    const visible = visibleVersions(this.#versions.releases(), settings, (v) => this.#versions.state(v) === 'installed');
+    const visible = visibleVersions(
+      this.#versions.releases(),
+      settings,
+      (v) => this.#versions.state(v) === 'installed',
+    );
     const range = getVersionRange(good, bad, visible);
-    if (range.length < 2) throw new FiddleError(ErrorCode.invalidArgument, t('bisectTooFew'));
+    if (range.length < 2)
+      throw new FiddleError(ErrorCode.invalidArgument, t('bisectTooFew'));
     this.stop(windowId);
 
     if (auto) {
@@ -60,27 +80,35 @@ export class BisectService {
         this.#runs.log(windowId, t('untrusted'), 'error');
         return;
       }
+      await this.#runs.stopAndWait(windowId);
       const session: Session = { auto: true, stopped: false };
       this.#sessions.set(windowId, session);
       this.#setBisect(windowId, { good, bad, auto: true, current: null, result: null });
       void this.#auto(windowId, session, range).catch((error: unknown) => {
         log.error('auto bisect failed', error);
-        this.stop(windowId);
+        if (this.#sessions.get(windowId) === session) this.stop(windowId);
       });
       return;
     }
 
     const bisector = new Bisector(range);
-    this.#sessions.set(windowId, { auto: false, bisector, stopped: false });
+    const session: Session = { auto: false, bisector, stopped: false };
+    this.#sessions.set(windowId, session);
     this.#setBisect(windowId, { good, bad, auto: false, current: null, result: null });
-    await this.#show(windowId, bisector.current());
+    await this.#show(windowId, session, bisector.current());
   }
 
   async mark(windowId: string, verdict: 'good' | 'bad' | 'skip'): Promise<void> {
-    const bisector = this.#sessions.get(windowId)?.bisector;
-    if (!bisector) return;
-    const step = verdict === 'good' ? bisector.good() : verdict === 'bad' ? bisector.bad() : bisector.skip();
-    await this.#show(windowId, step);
+    const session = this.#sessions.get(windowId);
+    const bisector = session?.bisector;
+    if (!session || !bisector) return;
+    const step =
+      verdict === 'good'
+        ? bisector.good()
+        : verdict === 'bad'
+          ? bisector.bad()
+          : bisector.skip();
+    await this.#show(windowId, session, step);
   }
 
   stop(windowId: string): void {
@@ -90,7 +118,8 @@ export class BisectService {
       if (session.auto) this.#runs.stop(windowId);
     }
     this.#sessions.delete(windowId);
-    if (this.#runs.state(windowId).bisect) this.#runs.setState(windowId, { bisect: null });
+    if (this.#runs.state(windowId).bisect)
+      this.#runs.setState(windowId, { bisect: null });
   }
 
   /** The result's compare URL, if the bisect finished. */
@@ -99,21 +128,28 @@ export class BisectService {
     return result ? bisectCompareUrl(result.good, result.bad) : undefined;
   }
 
-  async #show(windowId: string, step: BisectStep): Promise<void> {
+  async #show(windowId: string, session: Session, step: BisectStep): Promise<void> {
     const t = tm('mainRun');
     const current = this.#runs.state(windowId).bisect;
     if (!current) return;
     if (step.done) {
-      this.#finish(windowId, step.good, step.bad);
+      this.#finish(windowId, session, step.good, step.bad);
       return;
     }
     // Each step stops the running fiddle and switches to the version under test.
     this.#runs.stop(windowId);
-    await documents.setFiddleVersion(windowId, { kind: 'release', version: step.version });
+    await documents.setFiddleVersion(windowId, {
+      kind: 'release',
+      version: step.version,
+    });
+    if (this.#sessions.get(windowId) !== session) return;
+    this.#typesChanged(windowId);
     this.#setBisect(windowId, { ...current, current: step.version });
     this.#runs.log(windowId, t('bisectStep', { version: step.version }));
     if (this.#versions.state(step.version) !== 'installed') {
-      void this.#versions.install(step.version).catch((error: unknown) => log.warn('bisect download failed', error));
+      void this.#versions
+        .install(step.version)
+        .catch((error: unknown) => log.warn('bisect download failed', error));
     }
   }
 
@@ -123,39 +159,55 @@ export class BisectService {
       if (session.stopped) return undefined;
       const current = this.#runs.state(windowId).bisect;
       if (current) this.#setBisect(windowId, { ...current, current: version });
-      this.#runs.log(windowId, t('bisectStep', { version }));
       // Each step checks trust again, so a fiddle loaded mid-bisect never runs unapproved.
-      const result = await this.#runs.run(windowId, {
+      const outcome = await this.#runs.run(windowId, {
         versionRef: { kind: 'release', version },
         trustOperation: 'auto-bisect',
+        banner: t('bisectStep', { version }),
       });
       if (session.stopped) return undefined;
-      if (result === 'invalid') {
-        this.#runs.log(windowId, t('bisectInvalid'), 'error');
+      const good = bisectVerdict(outcome);
+      if (good === undefined) {
+        // A stop from the Run control ends the bisect quietly, as its own Stop does.
+        if (!outcome.stopped) this.#runs.log(windowId, t('bisectInvalid'), 'error');
         return undefined;
       }
-      const good = result === 'success';
-      this.#runs.log(windowId, good ? t('bisectVerdictGood', { version }) : t('bisectVerdictBad', { version }));
+      this.#runs.log(
+        windowId,
+        good ? t('bisectVerdictGood', { version }) : t('bisectVerdictBad', { version }),
+      );
       return good;
     };
 
     const result = await autoBisect(range, check);
-    if ('stopped' in result) return this.#abort(windowId, result.unexpected);
-    this.#finish(windowId, result.good, result.bad);
+    if ('stopped' in result) return this.#abort(windowId, session, result.unexpected);
+    this.#finish(windowId, session, result.good, result.bad);
   }
 
-  #abort(windowId: string, unexpected: string | undefined): void {
-    if (unexpected) this.#runs.log(windowId, tm('mainRun')('bisectVerifyFailed', { version: unexpected }), 'error');
+  /** Ends `session` without a result. A session that was stopped and replaced leaves the new one alone. */
+  #abort(windowId: string, session: Session, unexpected: string | undefined): void {
+    if (this.#sessions.get(windowId) !== session) return;
+    if (unexpected)
+      this.#runs.log(
+        windowId,
+        tm('mainRun')('bisectVerifyFailed', { version: unexpected }),
+        'error',
+      );
     this.#sessions.delete(windowId);
-    if (this.#runs.state(windowId).bisect) this.#runs.setState(windowId, { bisect: null });
+    if (this.#runs.state(windowId).bisect)
+      this.#runs.setState(windowId, { bisect: null });
   }
 
-  #finish(windowId: string, good: string, bad: string): void {
+  #finish(windowId: string, session: Session, good: string, bad: string): void {
+    if (this.#sessions.get(windowId) !== session) return;
     const current = this.#runs.state(windowId).bisect;
     this.#sessions.delete(windowId);
     if (!current) return;
     this.#setBisect(windowId, { ...current, current: null, result: { good, bad } });
-    this.#runs.log(windowId, tm('mainRun')('bisectDone', { good, bad, url: bisectCompareUrl(good, bad) }));
+    this.#runs.log(
+      windowId,
+      tm('mainRun')('bisectDone', { good, bad, url: bisectCompareUrl(good, bad) }),
+    );
   }
 
   #setBisect(windowId: string, bisect: BisectState): void {

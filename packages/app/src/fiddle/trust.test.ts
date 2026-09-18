@@ -17,7 +17,10 @@ const origins: [FiddleOrigin, string][] = [
   [{ kind: 'local' }, 'local'],
   [{ kind: 'example' }, 'example'],
   [{ kind: 'gist', owner: 'octocat', id, sha }, `gist:octocat/${id}@${sha}`],
-  [{ kind: 'electron', tag: 'v30.0.0', path: 'docs/fiddles/quick-start' }, 'electron:v30.0.0/docs/fiddles/quick-start'],
+  [
+    { kind: 'electron', tag: 'v30.0.0', path: 'docs/fiddles/quick-start' },
+    'electron:v30.0.0/docs/fiddles/quick-start',
+  ],
 ];
 
 describe('origins', () => {
@@ -26,24 +29,41 @@ describe('origins', () => {
   });
 
   it('marks remote origins untrusted', () => {
-    expect(origins.map(([o]) => isUntrustedOrigin(o))).toEqual([false, false, true, true]);
+    expect(origins.map(([o]) => isUntrustedOrigin(o))).toEqual([
+      false,
+      false,
+      true,
+      true,
+    ]);
   });
 
   it('builds gist origins, with a placeholder owner for anonymous gists', () => {
-    expect(gistOrigin(id.toUpperCase(), sha.toUpperCase(), 'octocat')).toEqual({ kind: 'gist', owner: 'octocat', id, sha });
-    expect(formatOrigin(gistOrigin(id, sha, null))).toBe(`gist:${ANONYMOUS_GIST_OWNER}/${id}@${sha}`);
+    expect(gistOrigin(id.toUpperCase(), sha.toUpperCase(), 'octocat')).toEqual({
+      kind: 'gist',
+      owner: 'octocat',
+      id,
+      sha,
+    });
+    expect(formatOrigin(gistOrigin(id, sha, null))).toBe(
+      `gist:${ANONYMOUS_GIST_OWNER}/${id}@${sha}`,
+    );
   });
 });
 
 describe('needsApproval', () => {
-  // @feature load.deep-link-confirm
   it('asks for remote fiddles until that exact origin is approved', () => {
     const gist = gistOrigin(id, sha, 'octocat');
     expect(needsApproval(gist)).toBe(true);
     expect(needsApproval(gist, formatOrigin(gist))).toBe(false);
     // Another revision of the same gist needs approval again.
-    expect(needsApproval(gistOrigin(id, 'b'.repeat(40), 'octocat'), formatOrigin(gist))).toBe(true);
-    const docs: FiddleOrigin = { kind: 'electron', tag: 'v30.0.0', path: 'docs/fiddles/x' };
+    expect(
+      needsApproval(gistOrigin(id, 'b'.repeat(40), 'octocat'), formatOrigin(gist)),
+    ).toBe(true);
+    const docs: FiddleOrigin = {
+      kind: 'electron',
+      tag: 'v30.0.0',
+      path: 'docs/fiddles/x',
+    };
     expect(needsApproval(docs, formatOrigin(gist))).toBe(true);
     expect(needsApproval(docs, formatOrigin(docs))).toBe(false);
   });
@@ -71,6 +91,8 @@ describe('restoredOrigin', () => {
 
   it('keeps the loaded origin when nothing untrusted is remembered', () => {
     expect(restoredOrigin({ kind: 'local' })).toEqual({ kind: 'local' });
-    expect(restoredOrigin({ kind: 'local' }, undefined, { kind: 'example' })).toEqual({ kind: 'local' });
+    expect(restoredOrigin({ kind: 'local' }, undefined, { kind: 'example' })).toEqual({
+      kind: 'local',
+    });
   });
 });

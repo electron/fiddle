@@ -1,4 +1,3 @@
-/* Sidebar on the material: padding 0 10 12 12, rows 2px apart. */
 .sidebar {
   display: flex;
   flex-direction: column;
@@ -13,21 +12,20 @@
   margin: 4px 0 2px;
 }
 
-/* Group header: the head, then the group's add button, a 24px icon button (the
-   design's minimum target) centred on the head's text. The text keeps its
-   place: 14 above (9 on the header plus 5 on the head), 5 below. */
+/* The add button is a 24px icon button (the minimum target) centred on the
+   head's text. The text keeps its place: 14 above (9 on the header plus 5 on
+   the head), 5 below. */
 .header {
   display: flex;
   align-items: center;
   padding-top: 9px;
 }
 
-/* The first head sits 5px from the top (the design's 4, plus 1 so the button fits). */
+/* The first head sits 5px from the top, so the add button fits. */
 .section:first-of-type .header {
   padding-top: 0;
 }
 
-/* Heads: caption 11/14 600 ink-muted, padding 0 8. */
 .head {
   flex: 1;
   min-width: 0;
@@ -45,7 +43,7 @@
    stays in the tab order, so Tab reaches it and focus reveals it. It sits 2px
    in, level with the package rows' remove buttons. Button fades opacity itself. */
 .groupAdd {
-  margin-right: 2px;
+  margin-inline-end: 2px;
   opacity: 0;
 }
 

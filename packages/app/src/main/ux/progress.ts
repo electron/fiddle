@@ -1,14 +1,11 @@
 /**
  * What the OS integration shows, derived from the stores: taskbar and dock
  * progress, and which long operations just finished. Pure functions.
- * `Window.run` and `App.versions` are owned by the Versions and run slice.
  */
 import type { RunState, VersionsState } from '../../shared/stores';
 
 type TaskbarProgress =
-  | { mode: 'none' }
-  | { mode: 'indeterminate' }
-  | { mode: 'normal'; progress: number };
+  { mode: 'none' } | { mode: 'indeterminate' } | { mode: 'normal'; progress: number };
 
 export type OperationKind = 'bisect' | 'package' | 'downloads' | 'run';
 
@@ -47,7 +44,10 @@ export function taskbarProgress(
     const total = downloading.reduce((sum, install) => sum + (install.percent ?? 0), 0);
     return { mode: 'normal', progress: total / downloading.length / 100 };
   }
-  if (installs.some((install) => install.state === 'installing') || versions?.downloadingAll) {
+  if (
+    installs.some((install) => install.state === 'installing') ||
+    versions?.downloadingAll
+  ) {
     return { mode: 'indeterminate' };
   }
   return { mode: 'none' };
@@ -85,7 +85,10 @@ export function finishedWindowOperations(
 }
 
 /** True when the fiddle itself has just started running. */
-export function runStarted(prev: RunState | undefined, next: RunState | undefined): boolean {
+export function runStarted(
+  prev: RunState | undefined,
+  next: RunState | undefined,
+): boolean {
   return next?.task === 'run' && next.status === 'running' && prev?.status !== 'running';
 }
 
@@ -95,6 +98,8 @@ export function downloadsFinished(
   next: VersionsState | undefined,
 ): FinishedOperation | undefined {
   if (!prev?.downloadingAll || next?.downloadingAll) return undefined;
-  const failed = Object.values(next?.installs ?? {}).some((install) => install.state === 'missing');
+  const failed = Object.values(next?.installs ?? {}).some(
+    (install) => install.state === 'missing',
+  );
   return { kind: 'downloads', ok: !failed };
 }

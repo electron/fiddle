@@ -1,6 +1,6 @@
-// The title bar's menu bar on Windows and Linux (§17.14). FIDDLE_TEST_MENUBAR
-// forces it on every platform, so this runs on a macOS desktop too, where it
-// shows the Linux menus. Test builds are unpackaged, so they also have the
+// The title bar's menu bar on Windows and Linux. FIDDLE_TEST_MENUBAR forces it
+// on every platform, so this runs on a macOS desktop too, where it shows the
+// Linux menus. Test builds are unpackaged, so they also have the
 // development-only Develop menu before Help. At the default width the last
 // titles may be folded into the More button (on macOS the traffic lights take
 // room too), so tests drive File, Edit and View, which always fit, and read
@@ -18,7 +18,8 @@ interface MenuNode {
 
 describe('menu bar', () => {
   const app = useApp({ env: { FIDDLE_TEST_MENUBAR: '1' } });
-  const states = async (roleName: string, name: string) => (await app().query(role(roleName, name)))[0]?.states ?? [];
+  const states = async (roleName: string, name: string) =>
+    (await app().query(role(roleName, name)))[0]?.states ?? [];
   /** What has focus: its role, its accessible label or text, and whether it's in a code editor. */
   const focused = () =>
     app().evaluate(`(() => {
@@ -33,11 +34,13 @@ describe('menu bar', () => {
     })()`) as Promise<{ role: string | null; name: string; inEditor: boolean } | null>;
 
   /** The menus main built for the window, from its store. */
-  const menuModel = async () => ((await windowState(app())) as unknown as { menuBar: MenuNode[] }).menuBar;
+  const menuModel = async () =>
+    ((await windowState(app())) as unknown as { menuBar: MenuNode[] }).menuBar;
   /** The bar's titles while no menu is open: every menu, or the ones that fit and More. */
-  const barTitles = async () => (await app().query(role('menuitem'))).map((item) => item.name);
+  const barTitles = async () =>
+    (await app().query(role('menuitem'))).map((item) => item.name);
 
-  it('shows File, Edit, View, Run, Window and Help in the title bar @feature workspace.menubar', async () => {
+  it('shows File, Edit, View, Run, Window and Help in the title bar', async () => {
     await app().query(role('menubar', 'Application menu'));
     // Main builds it per window and pushes it in the Window store.
     const menuBar = await menuModel();
@@ -62,10 +65,15 @@ describe('menu bar', () => {
     expect(titles.slice(0, 3)).toEqual(['File', 'Edit', 'View']);
   });
 
-  it('opens a folded menu from the More button, when the window is too narrow for every title @feature workspace.menubar', async ({ skip }) => {
+  it('opens a folded menu from the More button, when the window is too narrow for every title', async ({
+    skip,
+  }) => {
     const titles = await barTitles();
-    if (titles.at(-1) !== 'More') skip('every title fits at this width, so nothing is folded');
-    const folded = (await menuModel()).map((menu) => menu.label ?? '').slice(titles.length - 1);
+    if (titles.at(-1) !== 'More')
+      skip('every title fits at this width, so nothing is folded');
+    const folded = (await menuModel())
+      .map((menu) => menu.label ?? '')
+      .slice(titles.length - 1);
     expect(folded.length).toBeGreaterThan(0);
     await app().click(role('menuitem', 'More'));
     await app().query(role('menu', 'More'));
@@ -84,7 +92,7 @@ describe('menu bar', () => {
     expect(await states('menuitem', 'More')).not.toContain('focused');
   });
 
-  it('opens File with its items, keys and disabled entries, and closes it on Escape @feature workspace.menubar', async () => {
+  it('opens File with its items, keys and disabled entries, and closes it on Escape', async () => {
     await app().click(role('menuitem', 'File'));
     await app().query(role('menu', 'File'));
     expect(await states('menuitem', 'File')).toContain('expanded');
@@ -103,7 +111,7 @@ describe('menu bar', () => {
     expect(await states('menuitem', 'File')).not.toContain('focused');
   });
 
-  it('runs what is chosen, with labels that follow the window @feature workspace.menubar workspace.panels', async () => {
+  it('runs what is chosen, with labels that follow the window', async () => {
     await app().click(role('menuitem', 'View'));
     await app().click(role('menuitem', 'Hide sidebar'));
     await app().waitForAbsent(role('menu', 'View'));
@@ -115,7 +123,7 @@ describe('menu bar', () => {
     await app().query(role('navigation', 'Files'));
   });
 
-  it('runs role items itself: Zoom in and Actual size @feature workspace.menubar keys.zoom', async () => {
+  it('runs role items itself: Zoom in and Actual size', async () => {
     const ratio = async () => Number(await app().evaluate('window.devicePixelRatio'));
     const initial = await ratio();
     await app().click(role('menuitem', 'View'));
@@ -126,7 +134,7 @@ describe('menu bar', () => {
     await expect.poll(ratio).toBe(initial);
   });
 
-  it('gives editing items back the focus they act on: Select all, then Copy @feature workspace.menubar keys.clipboard', async () => {
+  it('gives editing items back the focus they act on: Select all, then Copy', async () => {
     await app().click(role('code'));
     await app().click(role('menuitem', 'Edit'));
     await app().click(role('menuitem', 'Select all'));
@@ -136,7 +144,7 @@ describe('menu bar', () => {
     await expect.poll(() => app().clipboard()).toContain('electron');
   });
 
-  it('takes the keyboard on Alt or Alt and a mnemonic, and gives it back on Escape @feature keys.menubar-alt', async () => {
+  it('takes the keyboard on Alt or Alt and a mnemonic, and gives it back on Escape', async () => {
     await app().click(role('code'));
     await expect.poll(async () => (await focused())?.inEditor).toBe(true);
     await app().press('Alt');
@@ -152,9 +160,12 @@ describe('menu bar', () => {
     // Alt+H opens Help on its first item: in place, or inside More when it's folded there.
     await app().press('Alt+h');
     await app().query(role('menu', 'Help'));
-    await expect.poll(focused).toMatchObject({ role: 'menuitem', name: 'Show welcome tour' });
+    await expect
+      .poll(focused)
+      .toMatchObject({ role: 'menuitem', name: 'Show welcome tour' });
     // Escape backs out a level at a time (submenu, menu, bar), then gives the editor its focus back.
-    for (let level = 0; level < 3 && !(await focused())?.inEditor; level++) await app().press('Escape');
+    for (let level = 0; level < 3 && !(await focused())?.inEditor; level++)
+      await app().press('Escape');
     await app().waitForAbsent(role('menu', 'Help'));
     await expect.poll(async () => (await focused())?.inEditor).toBe(true);
   });

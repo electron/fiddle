@@ -1,7 +1,7 @@
 /**
- * The one-time import from the previous Electron Fiddle (REQUIREMENTS §6).
- * main/index.ts awaits `runMigration()` right after `ready`, before any store
- * (settings.json, state.json, …) is created. See ./import.ts.
+ * The one-time import from the previous Electron Fiddle. main/index.ts awaits
+ * `runMigration()` right after `ready`, before any store (settings.json,
+ * state.json, …) is created. See ./import.ts.
  */
 import os from 'node:os';
 import path from 'node:path';
@@ -35,7 +35,8 @@ export async function runMigration(): Promise<ImportResult> {
       readLocalStorage: () => readOldLocalStorage(userData),
       safeStorage,
     });
-    if (result.firstLaunch) log.info('first launch: import from the previous Electron Fiddle', result.summary);
+    if (result.firstLaunch)
+      log.info('first launch: import from the previous Electron Fiddle', result.summary);
     return result;
   } catch (error) {
     // Nothing was recorded, so the next launch tries again.
@@ -55,7 +56,10 @@ export function importElectronVersionsInBackground(): void {
   }
   importElectronVersions(path.join(app.getPath('userData'), 'electron-bin'), versionsDir)
     .then((versions) => {
-      if (versions.length) log.info('import: Electron versions copied into the cache', versions);
+      if (versions.length)
+        log.info('import: Electron versions copied into the cache', versions);
     })
-    .catch((error: unknown) => log.warn('import: copying Electron versions failed', error));
+    .catch((error: unknown) =>
+      log.warn('import: copying Electron versions failed', error),
+    );
 }

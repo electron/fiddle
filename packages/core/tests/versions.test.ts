@@ -4,8 +4,18 @@ import path from 'node:path';
 import fs from 'node:fs';
 import nock, { type Scope } from 'nock';
 import * as semver from 'semver';
-import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from 'vitest';
+import {
+  afterAll,
+  afterEach,
+  beforeAll,
+  beforeEach,
+  describe,
+  expect,
+  it,
+  vi,
+} from 'vitest';
 
+import { isFiddleCoreError } from '../src/errors.js';
 import { BaseVersions, ElectronVersions } from '../src/versions.js';
 
 describe('BaseVersions', () => {
@@ -26,8 +36,8 @@ describe('BaseVersions', () => {
     });
 
     it('filters out unsupported 0.2x (atom-shell era) versions', () => {
-      // Mirrors Electron Fiddle: drop everything in the 0.2x series, but keep
-      // 0.30.0 and newer. Accepts both version-object and string input shapes.
+      // Drops the 0.2x series but keeps 0.30.0 and newer, for both the
+      // version-object and the string input shapes.
       const objVersions = new BaseVersions([
         { version: '0.20.0' },
         { version: '0.24.0' },
@@ -124,6 +134,26 @@ describe('BaseVersions', () => {
       expect(range.length).toBe(16);
       expect(range.shift()!.version).toBe('12.0.0');
       expect(range.pop()!.version).toBe('12.0.15');
+    });
+
+    it('accepts a `v` prefix and either order', () => {
+      const range = testVersions.inRange('v12.0.15', 'v12.0.0');
+      expect(range.length).toBe(16);
+      expect(range[0]!.version).toBe('12.0.0');
+    });
+
+    it.each([
+      ['9.9.9', '12.0.15'],
+      ['12.0.0', '9.9.9'],
+      ['not a version', '12.0.15'],
+    ])('rejects a range from "%s" to "%s", which has an unknown end', (a, b) => {
+      let err: unknown;
+      try {
+        testVersions.inRange(a, b);
+      } catch (e) {
+        err = e;
+      }
+      expect(isFiddleCoreError(err, 'invalid-version')).toBe(true);
     });
   });
 
@@ -304,7 +334,6 @@ describe('ElectronVersions', () => {
   });
 
   beforeEach(async () => {
-    // Copy the releases.json fixture over to populate the versions cache
     versionsCache = path.join(tmpdir, 'versions.json');
     await fs.promises.copyFile(releasesFixturePath, versionsCache);
 
@@ -384,7 +413,6 @@ describe('ElectronVersions', () => {
       expect(scope.isDone());
     });
 
-    // @feature versions.refresh
     it('fetches with a stale cache', async () => {
       const scope = nockScope.get('/releases.json').reply(
         200,
@@ -412,7 +440,6 @@ describe('ElectronVersions', () => {
       expect(versions.length).toBe(3);
     });
 
-    // @feature versions.bundled-list
     it('uses stale cache when fetch fails', async () => {
       const scope = nockScope.get('/releases.json').replyWithError('Error');
       const staleCacheMtime = Date.now() / 1000 - 5 * 60 * 60;
@@ -424,7 +451,60 @@ describe('ElectronVersions', () => {
       expect(versions.length).toBe(1027);
     });
 
-    // @feature versions.bundled-list
+    it('keeps the age of a stale cache that could not be refreshed, and tries again', async () => {
+      nockScope.get('/releases.json').replyWithError('Error');
+      const staleCacheMtime = Date.now() / 1000 - 5 * 60 * 60;
+      await fs.promises.utimes(versionsCache, staleCacheMtime, staleCacheMtime);
+      const electronVersions = await ElectronVersions.create({
+        paths: { versionsCache },
+      });
+      expect(electronVersions.versions.length).toBe(1027);
+
+      const retry = nockScope
+        .get('/releases.json')
+        .reply(200, JSON.stringify([{ version: '0.30.0' }]), {
+          'Content-Type': 'application/json',
+        });
+      void electronVersions.versions;
+      await vi.waitFor(() => expect(retry.isDone()).toBe(true));
+    });
+
+    it('counts the age of the cache it used, so a refresh is not put off for hours', async () => {
+      const almostStale = Date.now() / 1000 - (4 * 60 * 60 - 60);
+      await fs.promises.utimes(versionsCache, almostStale, almostStale);
+      const electronVersions = await ElectronVersions.create({
+        paths: { versionsCache },
+      });
+
+      const refresh = nockScope
+        .get('/releases.json')
+        .reply(200, JSON.stringify([{ version: '0.30.0' }]), {
+          'Content-Type': 'application/json',
+        });
+      vi.useFakeTimers({ toFake: ['Date'] });
+      try {
+        vi.setSystemTime(Date.now() + 5 * 60 * 1000);
+        void electronVersions.versions;
+        await vi.waitFor(() => expect(refresh.isDone()).toBe(true));
+      } finally {
+        vi.useRealTimers();
+      }
+    });
+
+    it.each([
+      ['a list that is not an array', '{}'],
+      ['a response that is not JSON', '<html>'],
+    ])('fails with `download-failed` on %s, without caching it', async (_title, body) => {
+      nockScope.get('/releases.json').reply(200, body);
+      await fs.promises.rm(versionsCache, { force: true });
+      const err: unknown = await ElectronVersions.create({
+        paths: { versionsCache },
+        errors: 'typed',
+      }).catch((e) => e);
+      expect(isFiddleCoreError(err, 'download-failed')).toBe(true);
+      expect(fs.existsSync(versionsCache)).toBe(false);
+    });
+
     it('uses options.initialVersions if missing cache', async () => {
       await fs.promises.rm(versionsCache, { force: true });
       expect(nockScope.isDone()); // No mocks

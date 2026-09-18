@@ -33,7 +33,9 @@ export async function buildTestApp(): Promise<string> {
       build: { outDir: path.join(staging, outDir) },
     });
   }
-  const pkg = JSON.parse(await fs.readFile(path.join(appDir, 'package.json'), 'utf8')) as {
+  const pkg = JSON.parse(
+    await fs.readFile(path.join(appDir, 'package.json'), 'utf8'),
+  ) as {
     name: string;
     productName: string;
     version: string;
@@ -47,13 +49,17 @@ export async function buildTestApp(): Promise<string> {
   for (const dir of ['static', 'assets']) {
     const target = path.join(appDir, dir);
     const link = path.join(staging, dir);
-    await fs.symlink(target, link, 'junction').catch(() => fs.cp(target, link, { recursive: true }));
+    await fs
+      .symlink(target, link, 'junction')
+      .catch(() => fs.cp(target, link, { recursive: true }));
   }
   const old = `${testBuildDir}.old-${process.pid}`;
   await fs.rename(testBuildDir, old).catch(() => undefined);
   await fs.rename(staging, testBuildDir);
   await fs.rm(old, { recursive: true, force: true });
-  console.error(`[driver] test build ready in ${Date.now() - started} ms: ${testBuildDir}`);
+  console.error(
+    `[driver] test build ready in ${Date.now() - started} ms: ${testBuildDir}`,
+  );
   return testBuildDir;
 }
 

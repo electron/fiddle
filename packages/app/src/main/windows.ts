@@ -31,7 +31,10 @@ export function focusedWindowId(): string | undefined {
 }
 
 /** Sends `Window.Command` to a window, for handlers that act on Monaco, view state or a dialog there. */
-export function sendWindowCommand(windowId: string | undefined, id: WindowCommandId): void {
+export function sendWindowCommand(
+  windowId: string | undefined,
+  id: WindowCommandId,
+): void {
   const contents = getWindow(windowId)?.webContents;
   if (contents) Window.getDispatcher(contents)?.dispatchCommand(id);
 }

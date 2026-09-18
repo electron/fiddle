@@ -21,7 +21,10 @@ export class Bisector {
     private readonly random: () => number = Math.random,
   ) {
     if (versions.length < 2) {
-      throw new FiddleError(ErrorCode.invalidArgument, 'Bisect needs at least two versions');
+      throw new FiddleError(
+        ErrorCode.invalidArgument,
+        'Bisect needs at least two versions',
+      );
     }
     this.hi = versions.length - 1;
     this.step = this.next();
@@ -49,7 +52,13 @@ export class Bisector {
     this.skipped.add(this.pivot);
     const candidates = this.candidates();
     if (candidates.length === 0) return (this.step = this.finish());
-    this.pivot = candidates[Math.min(candidates.length - 1, Math.floor(this.random() ** 1.5 * candidates.length))]!;
+    this.pivot =
+      candidates[
+        Math.min(
+          candidates.length - 1,
+          Math.floor(this.random() ** 1.5 * candidates.length),
+        )
+      ]!;
     return (this.step = { done: false, version: this.versions[this.pivot]! });
   }
 
@@ -63,7 +72,9 @@ export class Bisector {
     const candidates = this.candidates();
     if (candidates.length === 0) return this.finish();
     const mid = (this.lo + this.hi) / 2;
-    this.pivot = candidates.reduce((best, i) => (Math.abs(i - mid) < Math.abs(best - mid) ? i : best));
+    this.pivot = candidates.reduce((best, i) =>
+      Math.abs(i - mid) < Math.abs(best - mid) ? i : best,
+    );
     return { done: false, version: this.versions[this.pivot]! };
   }
 

@@ -1,4 +1,3 @@
-/* A region that failed to render: its error state, centred in the region. */
 .error {
   display: grid;
   place-items: center;
@@ -7,7 +6,6 @@
   padding: 16px;
 }
 
-/* The whole window failed: cover it, on the window material. */
 .error[data-fill] {
   position: fixed;
   inset: 0;

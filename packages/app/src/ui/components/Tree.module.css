@@ -8,7 +8,6 @@
   outline: none;
 }
 
-/* Row: 28 tall, padding 0 8, radius-item squircle. Hover: hover at 60%. Selected: weight 500. */
 .row {
   display: flex;
   align-items: center;
@@ -47,17 +46,16 @@
   outline-offset: -3px;
 }
 
-/* On the glass: hover is the capsule tint; selected is a chip lifted with shadow-lift. */
-.tree[data-variant="sidebar"] .row[data-hovered] {
+.tree[data-variant='sidebar'] .row[data-hovered] {
   background: var(--lu-capsule);
 }
 
-.tree[data-variant="sidebar"] .row[data-selected] {
+.tree[data-variant='sidebar'] .row[data-selected] {
   background: var(--lu-chip);
   box-shadow: var(--lu-shadow-lift);
 }
 
-.tree[data-variant="sidebar"] .dot {
+.tree[data-variant='sidebar'] .dot {
   background: var(--lu-ink-muted);
 }
 
@@ -86,7 +84,6 @@
   white-space: nowrap;
 }
 
-/* The "1 error" pill: spark on spark-soft, right-aligned. */
 .pill {
   flex: none;
   padding: 0 6px;
@@ -95,7 +92,7 @@
   color: var(--lu-spark);
   font: var(--lu-type-pill);
 }
-.pill[data-tone="warning"] {
+.pill[data-tone='warning'] {
   background: color-mix(in srgb, var(--lu-warning) 16%, transparent);
   color: var(--lu-warning);
 }

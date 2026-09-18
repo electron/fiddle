@@ -56,7 +56,12 @@ export interface FixtureServer {
 export const FIXTURE_GIST_ID = 'c0ffee00c0ffee00c0ffee00c0ffee00';
 
 type Reply =
-  | { status: number; type: string; body: Buffer | string; headers?: Record<string, string> }
+  | {
+      status: number;
+      type: string;
+      body: Buffer | string;
+      headers?: Record<string, string>;
+    }
   | { file: string };
 
 const json = (value: unknown, status = 200): Reply => ({
@@ -64,14 +69,17 @@ const json = (value: unknown, status = 200): Reply => ({
   type: 'application/json',
   body: JSON.stringify(value),
 });
-const text = (body: string, status = 200, type = 'text/plain'): Reply => ({ status, type, body });
-const notFound = (what: string): Reply => text(`fixture server: no fixture for ${what}\n`, 404);
+const text = (body: string, status = 200, type = 'text/plain'): Reply => ({
+  status,
+  type,
+  body,
+});
+const notFound = (what: string): Reply =>
+  text(`fixture server: no fixture for ${what}\n`, 404);
 
 function readData(file: string): string {
   return fs.readFileSync(path.join(DATA, file), 'utf8');
 }
-
-// ---- Electron zips -------------------------------------------------------
 
 function electronCacheDirs(): string[] {
   const home = os.homedir();
@@ -81,7 +89,11 @@ function electronCacheDirs(): string[] {
     process.platform === 'darwin'
       ? path.join(home, 'Library', 'Caches', 'electron')
       : process.platform === 'win32'
-        ? path.join(process.env.LOCALAPPDATA ?? path.join(home, 'AppData', 'Local'), 'electron', 'Cache')
+        ? path.join(
+            process.env.LOCALAPPDATA ?? path.join(home, 'AppData', 'Local'),
+            'electron',
+            'Cache',
+          )
         : path.join(process.env.XDG_CACHE_HOME ?? path.join(home, '.cache'), 'electron'),
     path.join(APP_DIR, 'node_modules', '.cache', 'fiddle-e2e'),
   ];
@@ -105,7 +117,9 @@ function installedElectron(): { version: string; dist: string } | undefined {
   try {
     const require = createRequire(path.join(APP_DIR, 'package.json'));
     const pkgFile = require.resolve('electron/package.json');
-    const { version } = JSON.parse(fs.readFileSync(pkgFile, 'utf8')) as { version: string };
+    const { version } = JSON.parse(fs.readFileSync(pkgFile, 'utf8')) as {
+      version: string;
+    };
     return { version, dist: path.join(path.dirname(pkgFile), 'dist') };
   } catch {
     return undefined;
@@ -116,7 +130,8 @@ function findElectronZip(file: string): string | undefined {
   const cached = findInCache(file);
   if (cached) return cached;
   const installed = installedElectron();
-  const wanted = installed && `electron-v${installed.version}-${process.platform}-${process.arch}.zip`;
+  const wanted =
+    installed && `electron-v${installed.version}-${process.platform}-${process.arch}.zip`;
   if (!installed || file !== wanted || !fs.existsSync(installed.dist)) return undefined;
   const out = path.join(APP_DIR, 'node_modules', '.cache', 'fiddle-e2e', file);
   try {
@@ -149,7 +164,8 @@ function zipFor(file: string): string | undefined {
   if (zip) return zip;
   const installed = installedElectron();
   const suffix = `-${process.platform}-${process.arch}.zip`;
-  if (!installed || !file.startsWith('electron-v') || !file.endsWith(suffix)) return undefined;
+  if (!installed || !file.startsWith('electron-v') || !file.endsWith(suffix))
+    return undefined;
   return findElectronZip(`electron-v${installed.version}${suffix}`);
 }
 
@@ -160,13 +176,13 @@ function electronMirror(dir: string, file: string): Reply {
       const zip = zipFor(name);
       if (zip) lines.push(`${sha256(zip)} *${name}`);
     }
-    return lines.length > 0 ? text(`${lines.join('\n')}\n`) : notFound(`SHASUMS256.txt for ${dir}`);
+    return lines.length > 0
+      ? text(`${lines.join('\n')}\n`)
+      : notFound(`SHASUMS256.txt for ${dir}`);
   }
   const zip = file.endsWith('.zip') ? zipFor(file) : undefined;
   return zip ? { file: zip } : notFound(`${dir}/${file} (no cached Electron zip)`);
 }
-
-// ---- GitHub --------------------------------------------------------------
 
 interface GistFile {
   filename?: string;
@@ -210,7 +226,13 @@ function applyFiles(
 ): Record<string, unknown> {
   const files = { ...current };
   for (const [name, change] of Object.entries(changes)) {
-    if (change) files[name] = { filename: name, type: 'text/plain', size: change.content.length, content: change.content };
+    if (change)
+      files[name] = {
+        filename: name,
+        type: 'text/plain',
+        size: change.content.length,
+        content: change.content,
+      };
     else delete files[name];
   }
   return files;
@@ -265,12 +287,18 @@ function github(method: string, parts: string[], body: string, base: string): Re
     return { status: 204, type: 'text/plain', body: '' };
   }
   if (method === 'PATCH') {
-    const input = JSON.parse(body || '{}') as { description?: string; files?: Record<string, GistFile | null> };
+    const input = JSON.parse(body || '{}') as {
+      description?: string;
+      files?: Record<string, GistFile | null>;
+    };
     const updated = {
       ...gist,
       ...(input.description === undefined ? {} : { description: input.description }),
       files: applyFiles(gist.files as Record<string, unknown>, input.files),
-      history: [revision(`${id}${body}`, Object.keys(input.files ?? {}).length), ...((gist.history as unknown[]) ?? [])],
+      history: [
+        revision(`${id}${body}`, Object.keys(input.files ?? {}).length),
+        ...((gist.history as unknown[]) ?? []),
+      ],
     };
     written.set(id, updated);
     return json(updated);
@@ -289,11 +317,13 @@ function gistRaw(parts: string[], base: string): Reply {
   return entry ? text(entry.content) : notFound(`raw gist file ${parts.join('/')}`);
 }
 
-// ---- Everything else ----------------------------------------------------
-
 function unpkg(pathname: string, search: string): Reply {
   if (search === '?meta') {
-    return json({ path: '/', type: 'directory', files: [{ path: '/index.d.ts', type: 'file' }] });
+    return json({
+      path: '/',
+      type: 'directory',
+      files: [{ path: '/index.d.ts', type: 'file' }],
+    });
   }
   if (!pathname.endsWith('.d.ts')) return notFound(`unpkg ${pathname}`);
   return text(readData(pathname.includes('/electron') ? 'electron.d.ts' : 'node.d.ts'));
@@ -312,13 +342,16 @@ function npm(parts: string[]): Reply {
 
 function minimalRepro(parts: string[]): Reply {
   const branch = parts[1]?.replace(/\.zip$/, '');
-  if (parts[0] !== 'archive' || !branch) return notFound(`minimal-repro ${parts.join('/')}`);
+  if (parts[0] !== 'archive' || !branch)
+    return notFound(`minimal-repro ${parts.join('/')}`);
   const dir = path.join(DATA, 'minimal-repro');
   const files = Object.fromEntries(
-    fs.readdirSync(dir).map((name) => [
-      `minimal-repro-${branch}/${name}`,
-      fs.readFileSync(path.join(dir, name)),
-    ]),
+    fs
+      .readdirSync(dir)
+      .map((name) => [
+        `minimal-repro-${branch}/${name}`,
+        fs.readFileSync(path.join(dir, name)),
+      ]),
   );
   return { status: 200, type: 'application/zip', body: makeZip(files) };
 }
@@ -367,7 +400,12 @@ export async function startFixtureServer(): Promise<FixtureServer> {
         reply = text(`fixture server error: ${String(error)}\n`, 500);
       }
       const status = 'file' in reply ? 200 : reply.status;
-      requests.push({ method, path: url.pathname + url.search, status, ...(body ? { body } : {}) });
+      requests.push({
+        method,
+        path: url.pathname + url.search,
+        status,
+        ...(body ? { body } : {}),
+      });
       response.setHeader('Access-Control-Allow-Origin', '*');
       if ('file' in reply) {
         response.writeHead(200, {
@@ -383,7 +421,8 @@ export async function startFixtureServer(): Promise<FixtureServer> {
   });
   await new Promise<void>((resolve) => server.listen(0, '127.0.0.1', resolve));
   const address = server.address();
-  if (!address || typeof address === 'string') throw new Error('fixture server has no port');
+  if (!address || typeof address === 'string')
+    throw new Error('fixture server has no port');
   base = `http://127.0.0.1:${address.port}`;
   return {
     url: base,

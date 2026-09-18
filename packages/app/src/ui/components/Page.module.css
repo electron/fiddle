@@ -51,7 +51,6 @@
   padding: var(--lu-space-8) 64px var(--lu-space-8) var(--lu-space-8);
 }
 
-/* Side nav */
 .nav {
   display: flex;
   flex-direction: column;
@@ -87,12 +86,12 @@
 }
 
 .item[data-hovered],
-.item[aria-current="page"] {
+.item[aria-current='page'] {
   background: var(--lu-hover);
   color: var(--lu-ink);
 }
 
-.item[aria-current="page"] .itemIcon {
+.item[aria-current='page'] .itemIcon {
   color: var(--lu-accent);
 }
 

@@ -1,4 +1,3 @@
-/* Toolbar capsule: capsule fill, shadow-capsule, 3px inset, 2px gap. */
 .capsule {
   display: inline-flex;
   align-items: center;
@@ -12,7 +11,6 @@
   -webkit-app-region: no-drag;
 }
 
-/* Toolbar buttons: 36 tall capsules. Publish: padding 0 16 0 14. Settings: 36 × 36. */
 .button {
   appearance: none;
   display: inline-flex;
@@ -44,7 +42,7 @@
 }
 
 .button[data-hovered],
-.button[aria-pressed="true"] {
+.button[aria-pressed='true'] {
   background: var(--lu-capsule-hover);
 }
 

@@ -1,11 +1,20 @@
 import { describe, expect, it } from 'vitest';
 
-import { exitCodeForError, exitCodeForRun, localeFromEnv, Reporter, SCHEMA_VERSION } from './output';
+import {
+  exitCodeForError,
+  exitCodeForRun,
+  localeFromEnv,
+  Reporter,
+  SCHEMA_VERSION,
+} from './output';
 
 function capture(json: boolean) {
   const out: string[] = [];
   const err: string[] = [];
-  const reporter = new Reporter(json, 'run', { stdout: (text) => out.push(text), stderr: (text) => err.push(text) });
+  const reporter = new Reporter(json, 'run', {
+    stdout: (text) => out.push(text),
+    stderr: (text) => err.push(text),
+  });
   const events = () =>
     out
       .join('')
@@ -29,7 +38,13 @@ describe('Reporter with --json', () => {
       { schemaVersion: 1, type: 'output', stream: 'stdout', text: 'a' },
       { schemaVersion: 1, type: 'output', stream: 'stdout', text: 'bc' },
       { schemaVersion: 1, type: 'output', stream: 'stderr', text: 'oops' },
-      { schemaVersion: 1, type: 'result', command: 'run', ok: true, data: { exitCode: 3 } },
+      {
+        schemaVersion: 1,
+        type: 'result',
+        command: 'run',
+        ok: true,
+        data: { exitCode: 3 },
+      },
     ]);
     expect(err).toEqual([]);
   });
@@ -37,9 +52,18 @@ describe('Reporter with --json', () => {
   it('writes a failure as a result with the error code', () => {
     const { reporter, events } = capture(true);
     reporter.error({ code: 'untrusted', message: 'Add --trust' }, 'Error: Add --trust');
-    reporter.error({ code: 'task-failed', message: 'npm failed', details: { code: 1 } }, '');
+    reporter.error(
+      { code: 'task-failed', message: 'npm failed', details: { code: 1 } },
+      '',
+    );
     expect(events()).toEqual([
-      { schemaVersion: 1, type: 'result', command: 'run', ok: false, error: { code: 'untrusted', message: 'Add --trust' } },
+      {
+        schemaVersion: 1,
+        type: 'result',
+        command: 'run',
+        ok: false,
+        error: { code: 'untrusted', message: 'Add --trust' },
+      },
       {
         schemaVersion: 1,
         type: 'result',
@@ -55,7 +79,15 @@ describe('Reporter with --json', () => {
     const details: Record<string, unknown> = {};
     details.self = details;
     reporter.error({ code: 'internal', message: 'boom', details }, '');
-    expect(events()).toEqual([{ schemaVersion: 1, type: 'result', command: 'run', ok: false, error: { code: 'internal', message: 'boom' } }]);
+    expect(events()).toEqual([
+      {
+        schemaVersion: 1,
+        type: 'result',
+        command: 'run',
+        ok: false,
+        error: { code: 'internal', message: 'boom' },
+      },
+    ]);
   });
 });
 
@@ -99,8 +131,12 @@ describe('exit codes', () => {
 
 describe('localeFromEnv', () => {
   it('reads LC_ALL, then LC_MESSAGES, then LANG', () => {
-    expect(localeFromEnv({ LC_ALL: 'de_DE.UTF-8', LC_MESSAGES: 'fr_FR', LANG: 'es_ES' })).toEqual(['de-DE']);
-    expect(localeFromEnv({ LC_ALL: '', LC_MESSAGES: 'fr_FR@euro', LANG: 'es_ES' })).toEqual(['fr-FR']);
+    expect(
+      localeFromEnv({ LC_ALL: 'de_DE.UTF-8', LC_MESSAGES: 'fr_FR', LANG: 'es_ES' }),
+    ).toEqual(['de-DE']);
+    expect(
+      localeFromEnv({ LC_ALL: '', LC_MESSAGES: 'fr_FR@euro', LANG: 'es_ES' }),
+    ).toEqual(['fr-FR']);
     expect(localeFromEnv({ LANG: 'pt_BR.UTF-8' })).toEqual(['pt-BR']);
   });
 

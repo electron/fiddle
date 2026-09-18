@@ -3,5 +3,6 @@ export default {
   "searchVersions": "[Šéáŕçĥ ṽéŕšîöñš one two]",
   "noMatches": "[Ñö ṽéŕšîöñš ɱáţçĥ one two]",
   "copyVersion": "[Çöþý ṽéŕšîöñ ñûɱƀéŕ one two]",
-  "copied": "[Çöþîéð {{version}} one]"
+  "copied": "[Çöþîéð {{version}} one]",
+  "versionChangeFailed": "[Çöûļðñ'ţ çĥáñĝé ţĥé Éļéçţŕöñ ṽéŕšîöñ one two three four]"
 } as const;

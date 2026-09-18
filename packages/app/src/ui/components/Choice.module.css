@@ -1,4 +1,3 @@
-/* Checkbox, radio and switch share a row: control, 8px, label in body type. */
 .choice {
   display: inline-flex;
   align-items: center;
@@ -23,7 +22,6 @@
   min-width: 0;
 }
 
-/* Box: 16 × 16, radius-check squircle. */
 .box {
   display: grid;
   place-items: center;
@@ -61,33 +59,27 @@
   outline-offset: 1px;
 }
 
-/* Radio: round, with an on-action dot when chosen. */
 .radio .box {
   border-radius: var(--lu-radius-round);
   corner-shape: round;
 }
 
 .radio[data-selected] .box::after {
-  content: "";
+  content: '';
   width: 6px;
   height: 6px;
   border-radius: var(--lu-radius-round);
   background: var(--lu-on-action);
 }
 
-.group {
-  display: flex;
-  flex-direction: column;
-  gap: var(--lu-space-2);
-}
-
+.group,
 .options {
   display: flex;
   flex-direction: column;
   gap: var(--lu-space-2);
 }
 
-.group[data-orientation="horizontal"] .options {
+.group[data-orientation='horizontal'] .options {
   flex-direction: row;
   flex-wrap: wrap;
   gap: var(--lu-space-2) var(--lu-space-4);
@@ -100,7 +92,6 @@
   opacity: 1;
 }
 
-/* Switch */
 .track {
   position: relative;
   flex: none;

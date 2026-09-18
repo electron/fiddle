@@ -1,5 +1,5 @@
 /**
- * Choosing a window's Electron version (§17.8, §17.4):
+ * Choosing a window's Electron version:
  *
  * - `select` is `Versions.SetVersion`: it checks the version, sets it,
  *   remembers it for new windows when the user picked it, and downloads it
@@ -22,7 +22,13 @@ import type { ReleaseChannel } from '../../fiddle/versions';
 import { ErrorCode, FiddleError } from '../../shared/errors';
 import type { LocalBuild, ReleaseRow } from '../../shared/stores';
 import type { VersionFilterSettings } from './releases';
-import { firstUsableVersion, hiddenChannel, sameVersion, versionProblem, type VersionProblem } from './selection';
+import {
+  firstUsableVersion,
+  hiddenChannel,
+  sameVersion,
+  versionProblem,
+  type VersionProblem,
+} from './selection';
 
 /** Keys in the `mainVersions` namespace. */
 export type SelectorText =
@@ -64,7 +70,10 @@ export interface VersionSelectorDeps {
   notify: (windowId: string, message: string) => void;
   /** The window's version changed: its editor types did too. */
   typesChanged: (windowId: string) => void;
-  confirm: (windowId: string, options: { message: string; detail: string; ok: string }) => Promise<boolean>;
+  confirm: (
+    windowId: string,
+    options: { message: string; detail: string; ok: string },
+  ) => Promise<boolean>;
   text: (key: SelectorText, values?: Record<string, string>) => string;
   warn: (message: string, error?: unknown) => void;
 }
@@ -86,12 +95,18 @@ export class VersionSelector {
   }
 
   /** `SetVersion`. Resolves with the Window rev if the version changed. */
-  async select(windowId: string, ref: VersionRef, options: { remember?: boolean } = {}): Promise<number | undefined> {
+  async select(
+    windowId: string,
+    ref: VersionRef,
+    options: { remember?: boolean } = {},
+  ): Promise<number | undefined> {
     const deps = this.#deps;
-    if (deps.isBusy(windowId)) throw new FiddleError(ErrorCode.conflict, deps.text('cannotChange'));
+    if (deps.isBusy(windowId))
+      throw new FiddleError(ErrorCode.conflict, deps.text('cannotChange'));
     const problem = versionProblem(ref, deps.versions);
     if (problem) {
-      const code = problem === 'unsupported' ? ErrorCode.invalidArgument : ErrorCode.notFound;
+      const code =
+        problem === 'unsupported' ? ErrorCode.invalidArgument : ErrorCode.notFound;
       throw new FiddleError(code, this.#problemText(ref, problem));
     }
     let rev: number | undefined;
@@ -109,7 +124,12 @@ export class VersionSelector {
   async validate(windowId: string): Promise<void> {
     const deps = this.#deps;
     const ref = deps.getVersion(windowId);
-    if (!ref || this.#validating.has(windowId) || deps.isBusy(windowId) || deps.versions.releases().length === 0) {
+    if (
+      !ref ||
+      this.#validating.has(windowId) ||
+      deps.isBusy(windowId) ||
+      deps.versions.releases().length === 0
+    ) {
       return;
     }
     const problem = versionProblem(ref, deps.versions);
@@ -153,7 +173,12 @@ export class VersionSelector {
     }
   }
 
-  async #fallBack(windowId: string, from: VersionRef, problem: string, installedOnly: boolean): Promise<void> {
+  async #fallBack(
+    windowId: string,
+    from: VersionRef,
+    problem: string,
+    installedOnly: boolean,
+  ): Promise<void> {
     const deps = this.#deps;
     const fallback = firstUsableVersion(
       {
@@ -170,7 +195,10 @@ export class VersionSelector {
     }
     await deps.setVersion(windowId, fallback);
     deps.typesChanged(windowId);
-    deps.notify(windowId, deps.text('fallback', { problem, fallback: this.#label(fallback) }));
+    deps.notify(
+      windowId,
+      deps.text('fallback', { problem, fallback: this.#label(fallback) }),
+    );
     this.#download(windowId, fallback);
   }
 
@@ -202,13 +230,25 @@ export class VersionSelector {
     );
   }
 
-  async #downloadFailed(windowId: string, version: string, error: unknown): Promise<void> {
+  async #downloadFailed(
+    windowId: string,
+    version: string,
+    error: unknown,
+  ): Promise<void> {
     const deps = this.#deps;
     const current = deps.getVersion(windowId);
     // The window moved on to another version or closed. A busy window keeps
     // its version, and a run reports its own download errors.
-    if (current?.kind !== 'release' || current.version !== version || deps.isBusy(windowId)) return;
-    const problem = deps.text('downloadFailed', { version, message: FiddleError.from(error).message });
+    if (
+      current?.kind !== 'release' ||
+      current.version !== version ||
+      deps.isBusy(windowId)
+    )
+      return;
+    const problem = deps.text('downloadFailed', {
+      version,
+      message: FiddleError.from(error).message,
+    });
     await this.#fallBack(windowId, current, problem, true);
   }
 
@@ -216,9 +256,14 @@ export class VersionSelector {
     const deps = this.#deps;
     if (ref.kind === 'local') {
       const name = deps.versions.localBuild(ref.id)?.name;
-      return problem === 'localMissing' && name ? deps.text('localBuildMissing', { name }) : deps.text('localBuildUnknown');
+      return problem === 'localMissing' && name
+        ? deps.text('localBuildMissing', { name })
+        : deps.text('localBuildUnknown');
     }
-    return deps.text(problem === 'unsupported' ? 'versionUnsupported' : 'versionUnknown', { version: ref.version });
+    return deps.text(
+      problem === 'unsupported' ? 'versionUnsupported' : 'versionUnknown',
+      { version: ref.version },
+    );
   }
 
   #label(ref: VersionRef): string {

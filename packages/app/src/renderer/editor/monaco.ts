@@ -38,24 +38,29 @@ function workerUrl(label: string): string {
 /** Only same-origin bundle URLs may become worker scripts. */
 function sameOriginUrl(url: string): string {
   const resolved = new URL(url, location.href);
-  if (resolved.origin !== location.origin) throw new Error(`Refusing worker URL ${resolved.href}`);
+  if (resolved.origin !== location.origin)
+    throw new Error(`Refusing worker URL ${resolved.href}`);
   return resolved.href;
 }
 
 interface TrustedTypePolicyFactory {
-  createPolicy(name: string, rules: { createScriptURL(url: string): string }): {
+  createPolicy(
+    name: string,
+    rules: { createScriptURL(url: string): string },
+  ): {
     createScriptURL(url: string): unknown;
   };
 }
 
-const workerPolicy = (window as { trustedTypes?: TrustedTypePolicyFactory }).trustedTypes?.createPolicy(
-  'fiddleMonacoWorker',
-  { createScriptURL: sameOriginUrl },
-);
+const workerPolicy = (
+  window as { trustedTypes?: TrustedTypePolicyFactory }
+).trustedTypes?.createPolicy('fiddleMonacoWorker', { createScriptURL: sameOriginUrl });
 
 self.MonacoEnvironment = {
   getWorker(_workerId, label) {
-    const url = workerPolicy ? workerPolicy.createScriptURL(workerUrl(label)) : sameOriginUrl(workerUrl(label));
+    const url = workerPolicy
+      ? workerPolicy.createScriptURL(workerUrl(label))
+      : sameOriginUrl(workerUrl(label));
     // The DOM typings only admit string | URL; Chromium takes a TrustedScriptURL.
     return new Worker(url as unknown as string, { type: 'module', name: label });
   },
@@ -72,7 +77,9 @@ monaco.typescript.javascriptDefaults.setCompilerOptions({
   moduleResolution: monaco.typescript.ModuleResolutionKind.NodeJs,
 });
 // Fiddles are CommonJS on purpose; skip "convert to ES module" style hints.
-monaco.typescript.javascriptDefaults.setDiagnosticsOptions({ noSuggestionDiagnostics: true });
+monaco.typescript.javascriptDefaults.setDiagnosticsOptions({
+  noSuggestionDiagnostics: true,
+});
 
 // Formatting is Prettier's (./format.ts). Monaco uses the first formatter it
 // finds, so the built-in JavaScript, HTML and CSS ones are turned off.
@@ -80,9 +87,17 @@ monaco.typescript.javascriptDefaults.setDiagnosticsOptions({ noSuggestionDiagnos
 const js = monaco.typescript.javascriptDefaults;
 js.setModeConfiguration({ ...js.modeConfiguration, documentRangeFormattingEdits: false });
 const html = monaco.html.htmlDefaults;
-html.setModeConfiguration({ ...html.modeConfiguration, documentFormattingEdits: false, documentRangeFormattingEdits: false });
+html.setModeConfiguration({
+  ...html.modeConfiguration,
+  documentFormattingEdits: false,
+  documentRangeFormattingEdits: false,
+});
 const css = monaco.css.cssDefaults;
-css.setModeConfiguration({ ...css.modeConfiguration, documentFormattingEdits: false, documentRangeFormattingEdits: false });
+css.setModeConfiguration({
+  ...css.modeConfiguration,
+  documentFormattingEdits: false,
+  documentRangeFormattingEdits: false,
+});
 registerPrettierFormatter(monaco.languages);
 
 /**
@@ -91,7 +106,9 @@ registerPrettierFormatter(monaco.languages);
  */
 export function applyEditorTheme(custom?: MonacoTheme): void {
   const { theme } = document.documentElement.dataset;
-  const isDark = theme ? theme === 'dark' : window.matchMedia('(prefers-color-scheme: dark)').matches;
+  const isDark = theme
+    ? theme === 'dark'
+    : window.matchMedia('(prefers-color-scheme: dark)').matches;
   const data: monaco.editor.IStandaloneThemeData = custom
     ? {
         base: custom.base ?? (isDark ? 'vs-dark' : 'vs'),
@@ -106,10 +123,15 @@ export function applyEditorTheme(custom?: MonacoTheme): void {
 
 /** The mono font from the tokens, resolved to a plain font-family list for Monaco. */
 export function monoFontFamily(): string {
-  return getComputedStyle(document.documentElement).getPropertyValue('--lu-font-mono').trim() || 'monospace';
+  return (
+    getComputedStyle(document.documentElement)
+      .getPropertyValue('--lu-font-mono')
+      .trim() || 'monospace'
+  );
 }
 
-// Monaco measures glyphs on creation; measure again once Commit Mono is in.
-void document.fonts.ready.then(() => monaco.editor.remeasureFonts());
+// Monaco measures glyphs on creation; measure again whenever a font finishes loading. The fonts are
+// requested when the first text uses them, after this module has run, so `fonts.ready` would be too early.
+document.fonts.addEventListener('loadingdone', () => monaco.editor.remeasureFonts());
 
 export { monaco };

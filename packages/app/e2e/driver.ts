@@ -2,14 +2,12 @@
  * The e2e client. `launchApp()` starts the test build (out/test-build) with test
  * mode on, a fresh temp dir, its own fixture server and, on Linux, its own
  * headless X display (Xvfb, plus openbox when installed). On macOS the app runs
- * on the real desktop but in the background: no Dock icon, windows behind
- * everyone else's and never focused (src/main/test-driver/index.ts);
- * FIDDLE_E2E_FOREGROUND=1 shows them in front. The returned `FiddleApp` drives
+ * in the background of the real desktop (src/main/test-driver/index.ts);
+ * FIDDLE_E2E_FOREGROUND=1 shows it in front. The returned `FiddleApp` drives
  * it over the driver socket.
  *
- * Specs use it through ./harness.ts; `yarn driver` (tools/driver.ts) uses it
- * too. Plain Node with type stripping: import with `.ts` extensions, and no
- * Vitest imports here.
+ * Plain Node with type stripping: import with `.ts` extensions, and no Vitest
+ * imports here, since `yarn driver` (tools/driver.ts) uses this too.
  */
 import { spawn } from 'node:child_process';
 import fs from 'node:fs';
@@ -34,13 +32,15 @@ import type {
 } from '../src/main/test-driver/protocol.ts';
 import { startFixtureServer, type FixtureServer } from './fixtures/server.ts';
 
-export type { ElementInfo, FailureReport, WindowInfo } from '../src/main/test-driver/protocol.ts';
+export type {
+  ElementInfo,
+  FailureReport,
+  WindowInfo,
+} from '../src/main/test-driver/protocol.ts';
 export { FIXTURE_GIST_ID, type FixtureServer } from './fixtures/server.ts';
 
 export const APP_DIR = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 export const TEST_BUILD_DIR = path.join(APP_DIR, 'out', 'test-build');
-
-// ---- Queries -------------------------------------------------------------
 
 /** A query as specs write it: names and text may be RegExps. */
 export interface AppQuery extends Omit<Query, 'name' | 'text'> {
@@ -58,7 +58,10 @@ export function role(
 }
 
 /** Visible text containing `value` (or matching a RegExp). */
-export function text(value: string | RegExp, extra: Omit<AppQuery, 'text'> = {}): AppQuery {
+export function text(
+  value: string | RegExp,
+  extra: Omit<AppQuery, 'text'> = {},
+): AppQuery {
   return { text: value, ...extra };
 }
 
@@ -74,8 +77,6 @@ export function toQuery(query: AppQuery): Query {
   };
 }
 
-// ---- Errors --------------------------------------------------------------
-
 const indent = (value: string) =>
   value
     .split('\n')
@@ -87,7 +88,9 @@ export function formatFailure(report: FailureReport): string {
     `${report.step} failed: ${report.message}`,
     report.query === undefined ? '' : `  query: ${JSON.stringify(report.query)}`,
     report.screenshot ? `  screenshot: ${report.screenshot}` : '',
-    report.a11ySnapshot ? `  accessibility snapshot:\n${indent(report.a11ySnapshot)}` : '',
+    report.a11ySnapshot
+      ? `  accessibility snapshot:\n${indent(report.a11ySnapshot)}`
+      : '',
     `  main log (last ${report.mainLog.length}):\n${indent(report.mainLog.join('\n'))}`,
     `  renderer log (last ${report.rendererLog.length}):\n${indent(report.rendererLog.join('\n'))}`,
   ]
@@ -105,8 +108,6 @@ export class DriverError extends Error {
     this.report = report;
   }
 }
-
-// ---- Socket client -------------------------------------------------------
 
 interface Pending {
   resolve(value: unknown): void;
@@ -126,7 +127,11 @@ export class DriverClient {
     socket.setEncoding('utf8');
     socket.on('data', (chunk: string) => {
       this.#buffer += chunk;
-      for (let end = this.#buffer.indexOf('\n'); end !== -1; end = this.#buffer.indexOf('\n')) {
+      for (
+        let end = this.#buffer.indexOf('\n');
+        end !== -1;
+        end = this.#buffer.indexOf('\n')
+      ) {
         const line = this.#buffer.slice(0, end);
         this.#buffer = this.#buffer.slice(end + 1);
         if (line.trim()) this.#receive(JSON.parse(line) as DriverResponse);
@@ -135,7 +140,9 @@ export class DriverClient {
     const fail = () => {
       for (const pending of this.#pending.values()) {
         clearTimeout(pending.timer);
-        pending.reject(new Error('The driver connection closed (did the app quit or crash?)'));
+        pending.reject(
+          new Error('The driver connection closed (did the app quit or crash?)'),
+        );
       }
       this.#pending.clear();
     };
@@ -189,8 +196,6 @@ export class DriverClient {
     this.#socket.end();
   }
 }
-
-// ---- The app -------------------------------------------------------------
 
 interface AppParts {
   client: DriverClient;
@@ -337,15 +342,23 @@ export class FiddleApp {
 
   /** A screenshot, the accessibility snapshot and log tails, as text. Never throws. */
   async diagnostics(title = 'failure'): Promise<string> {
-    const parts = [`--- e2e diagnostics: ${title} ---`, `test dir: ${this.testDir ?? '(unknown)'}`];
+    const parts = [
+      `--- e2e diagnostics: ${title} ---`,
+      `test dir: ${this.testDir ?? '(unknown)'}`,
+    ];
     const attempt = async (label: string, get: () => Promise<string>) => {
       try {
         parts.push(`${label}${await get()}`);
       } catch (error) {
-        parts.push(`${label}(unavailable: ${error instanceof Error ? error.message.split('\n')[0] : String(error)})`);
+        parts.push(
+          `${label}(unavailable: ${error instanceof Error ? error.message.split('\n')[0] : String(error)})`,
+        );
       }
     };
-    await attempt('screenshot: ', async () => (await this.client.call('screenshot', {})).path);
+    await attempt(
+      'screenshot: ',
+      async () => (await this.client.call('screenshot', {})).path,
+    );
     await attempt('accessibility snapshot:\n', async () =>
       indent(await this.client.call('snapshot', {})),
     );
@@ -369,17 +382,20 @@ export class FiddleApp {
       } catch {
         // Already gone.
       }
-      await Promise.race([this.exited, new Promise((resolve) => setTimeout(resolve, 10_000))]);
+      await Promise.race([
+        this.exited,
+        new Promise((resolve) => setTimeout(resolve, 10_000)),
+      ]);
       await this.#cleanup(this.#keep || this.#failed);
       if (this.#failed && this.testDir) {
-        console.error(`[e2e] kept ${this.testDir} (screenshots in artifacts/, app-output.log)`);
+        console.error(
+          `[e2e] kept ${this.testDir} (screenshots in artifacts/, app-output.log)`,
+        );
       }
     }
     this.client.close();
   }
 }
-
-// ---- Launching ------------------------------------------------------------
 
 export interface LaunchOptions {
   /** Default: out/test-build (`yarn workspace electron-fiddle driver:build`). */
@@ -436,8 +452,7 @@ export function electronArgs(electronPath: string): string[] {
  * app's own (src/main/test-driver/index.ts): otherwise every `new BrowserWindow`
  * of a run activates that Electron and puts its window over the desktop. It
  * reaches runs through FIDDLE_DEV_ELECTRON_FLAGS (src/main/run/dev.ts), which
- * only development and test builds read. Windows are created hidden and shown
- * inactive one level below normal windows; nothing else about the run changes.
+ * only development and test builds read.
  */
 const BACKGROUND_FIDDLE_PRELOAD = `// Written by packages/app/e2e/driver.ts for \`electron -r\`.
 const Module = require('node:module');
@@ -467,10 +482,19 @@ Module._load = function (request, ...rest) {
 /** The FIDDLE_DEV_ELECTRON_FLAGS that load BACKGROUND_FIDDLE_PRELOAD into runs, on macOS in the background. */
 function backgroundFiddleFlags(testDir: string): Record<string, string> {
   // The app splits the variable on spaces, so a temp dir with one (never on macOS) opts out.
-  if (process.platform !== 'darwin' || process.env.FIDDLE_E2E_FOREGROUND === '1' || testDir.includes(' ')) return {};
+  if (
+    process.platform !== 'darwin' ||
+    process.env.FIDDLE_E2E_FOREGROUND === '1' ||
+    testDir.includes(' ')
+  )
+    return {};
   const preload = path.join(testDir, 'background-windows.cjs');
   fs.writeFileSync(preload, BACKGROUND_FIDDLE_PRELOAD);
-  return { FIDDLE_DEV_ELECTRON_FLAGS: [process.env.FIDDLE_DEV_ELECTRON_FLAGS, '-r', preload].filter(Boolean).join(' ') };
+  return {
+    FIDDLE_DEV_ELECTRON_FLAGS: [process.env.FIDDLE_DEV_ELECTRON_FLAGS, '-r', preload]
+      .filter(Boolean)
+      .join(' '),
+  };
 }
 
 interface Display {
@@ -506,7 +530,9 @@ async function startDisplay(): Promise<Display> {
       if (out.includes('\n')) resolve(`:${out.trim()}`);
     });
     xvfb.once('error', reject);
-    xvfb.once('exit', (code) => reject(new Error(`Xvfb exited (${code}): ${err.trim()}`)));
+    xvfb.once('exit', (code) =>
+      reject(new Error(`Xvfb exited (${code}): ${err.trim()}`)),
+    );
   });
   const wm = hasCommand('openbox')
     ? spawn('openbox', ['--sm-disable'], {
@@ -544,7 +570,8 @@ async function connectWhenReady(
     } catch {
       // Not listening yet.
     }
-    if (Date.now() > deadline) throw new Error(`the driver socket didn't open within ${timeout} ms`);
+    if (Date.now() > deadline)
+      throw new Error(`the driver socket didn't open within ${timeout} ms`);
     await new Promise((resolve) => setTimeout(resolve, 50));
   }
 }

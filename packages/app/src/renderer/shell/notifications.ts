@@ -1,5 +1,5 @@
 /**
- * The notification list (REQUIREMENTS §10 "Toasts"): every toast shown in
+ * The notification list: every toast shown in
  * this window, newest first, with its action. The status bar's bell counts
  * the ones that appeared since the list was last opened.
  */
@@ -43,9 +43,16 @@ export function createToastHistory(queue: Queue, now: () => number = Date.now) {
   const dispose = queue.subscribe(() => {
     const fresh = queue.visibleToasts.filter((toast) => !known.has(toast.key));
     if (fresh.length === 0) return;
-    const added = fresh.map((toast) => ({ key: toast.key, time: now(), content: toast.content }));
+    const added = fresh.map((toast) => ({
+      key: toast.key,
+      time: now(),
+      content: toast.content,
+    }));
     const entries = [...added, ...snapshot.entries].slice(0, HISTORY_LIMIT);
-    known = new Set([...entries.map((entry) => entry.key), ...queue.visibleToasts.map((toast) => toast.key)]);
+    known = new Set([
+      ...entries.map((entry) => entry.key),
+      ...queue.visibleToasts.map((toast) => toast.key),
+    ]);
     set({ entries, unseen: snapshot.unseen + fresh.length });
   });
 
@@ -55,7 +62,6 @@ export function createToastHistory(queue: Queue, now: () => number = Date.now) {
       listeners.add(listener);
       return () => listeners.delete(listener);
     },
-    /** The list was opened. */
     markSeen(): void {
       if (snapshot.unseen) set({ ...snapshot, unseen: 0 });
     },
@@ -71,6 +77,8 @@ export type ToastHistory = ReturnType<typeof createToastHistory>;
 /** The window's history, recording from the first toast on. */
 export const toastHistory = createToastHistory(toastQueue);
 
-export function useToastHistory(history: ToastHistory = toastHistory): NotificationsSnapshot {
+export function useToastHistory(
+  history: ToastHistory = toastHistory,
+): NotificationsSnapshot {
   return useSyncExternalStore(history.subscribe, history.getSnapshot);
 }

@@ -4,7 +4,6 @@
  */
 import type { editor } from 'monaco-editor';
 
-/** Tokens the editor theme reads. */
 export const EDITOR_TOKENS = [
   'surface',
   'surface-raised',
@@ -58,14 +57,12 @@ export function buildLucentTheme(
       rule('type.identifier', tokens['syntax-function']),
       rule('identifier', tokens.ink),
       rule('delimiter', tokens.ink),
-      // HTML and CSS
       rule('tag', tokens['syntax-keyword']),
       rule('metatag', tokens['syntax-keyword']),
       rule('attribute.name', tokens['syntax-function']),
       rule('attribute.value', tokens['syntax-string']),
       rule('attribute.value.number', tokens['syntax-number']),
       rule('attribute.value.unit', tokens['syntax-number']),
-      // JSON
       rule('string.key.json', tokens['syntax-function']),
       rule('string.value.json', tokens['syntax-string']),
     ],
@@ -93,7 +90,7 @@ export function buildLucentTheme(
       'scrollbarSlider.background': tokens.fill,
       'scrollbarSlider.hoverBackground': tokens['fill-strong'],
       'scrollbarSlider.activeBackground': tokens['fill-strong'],
-      'focusBorder': '#00000000',
+      focusBorder: '#00000000',
     },
   };
 }
@@ -117,22 +114,35 @@ export function cssColorToHex(value: string): string | undefined {
   const rgb = /^rgba?\(([^)]+)\)$/i.exec(text);
   const srgb = /^color\(srgb\s+([^)]+)\)$/i.exec(text);
   if (rgb?.[1]) {
-    const parts = rgb[1].split(/[\s,/]+/).filter(Boolean).map(Number);
+    const parts = rgb[1]
+      .split(/[\s,/]+/)
+      .filter(Boolean)
+      .map(Number);
     channels = parts.slice(0, 3);
     if (parts[3] !== undefined) alpha = parts[3];
   } else if (srgb?.[1]) {
-    const parts = srgb[1].split(/[\s/]+/).filter(Boolean).map(Number);
+    const parts = srgb[1]
+      .split(/[\s/]+/)
+      .filter(Boolean)
+      .map(Number);
     channels = parts.slice(0, 3).map((c) => c * 255);
     if (parts[3] !== undefined) alpha = parts[3];
   }
-  if (!channels || channels.length !== 3 || channels.some(Number.isNaN) || Number.isNaN(alpha))
+  if (
+    !channels ||
+    channels.length !== 3 ||
+    channels.some(Number.isNaN) ||
+    Number.isNaN(alpha)
+  )
     return undefined;
   const base = `#${channels.map(hex2).join('')}`;
   return alpha >= 1 ? base : `${base}${hex2(alpha * 255)}`;
 }
 
 /** Resolves each token through a probe element, so `color-mix()` and `var()` are computed. */
-export function readEditorTokens(root: HTMLElement = document.documentElement): EditorTokens {
+export function readEditorTokens(
+  root: HTMLElement = document.documentElement,
+): EditorTokens {
   const probe = document.createElement('span');
   probe.style.display = 'none';
   root.appendChild(probe);

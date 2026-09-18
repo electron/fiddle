@@ -15,7 +15,9 @@ describe('deep links', () => {
   /** Launches a second instance; resolves with its exit code. */
   const secondInstance = (...args: string[]) =>
     new Promise<number | null>((resolve, reject) => {
-      const electron = createRequire(path.join(APP_DIR, 'package.json'))('electron') as string;
+      const electron = createRequire(path.join(APP_DIR, 'package.json'))(
+        'electron',
+      ) as string;
       const testDir = app().testDir ?? '';
       const env: NodeJS.ProcessEnv = {
         ...process.env,
@@ -42,14 +44,20 @@ describe('deep links', () => {
       });
     });
 
-  it('forwards a link from a second launch and asks before loading it @feature platform.single-instance load.deep-link load.deep-link-confirm', async () => {
+  it('forwards a link from a second launch and asks before loading it', async () => {
     await app().queueDialog('messageBox', { button: 'Load' });
-    expect(await secondInstance(`electron-fiddle://gist/fiddle-e2e/${FIXTURE_GIST_ID}`)).toBe(0);
+    expect(
+      await secondInstance(`electron-fiddle://gist/fiddle-e2e/${FIXTURE_GIST_ID}`),
+    ).toBe(0);
     await expect
-      .poll(async () => (await windowState(app())).fiddle.source.gistId, { timeout: 15_000 })
+      .poll(async () => (await windowState(app())).fiddle.source.gistId, {
+        timeout: 15_000,
+      })
       .toBe(FIXTURE_GIST_ID);
 
-    const prompt = (await app().dialogs()).find((dialog) => dialog.options.message === 'Load this gist?');
+    const prompt = (await app().dialogs()).find(
+      (dialog) => dialog.options.message === 'Load this gist?',
+    );
     expect(prompt).toMatchObject({ kind: 'messageBox', scripted: true });
     expect(String(prompt?.options.detail)).toContain('Owner: fiddle-e2e');
   });

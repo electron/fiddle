@@ -6,7 +6,7 @@ export type Locale = (typeof locales)[number];
 /** Generated from English for testing (accented and longer; right-to-left). Not real languages. */
 export const pseudoLocales = ["en-XA","ar-XB"] as const;
 
-export const namespaces = ["about","common","gists","main","mainCli","mainDocuments","mainPlatform","mainRun","mainSettings","mainUx","mainVersions","onboarding","packages","palette","run","settings","shell","versions"] as const;
+export const namespaces = ["about","gists","main","mainCli","mainDocuments","mainPlatform","mainRun","mainSettings","mainUx","mainVersions","onboarding","packages","palette","run","settings","shell","versions"] as const;
 export type Namespace = (typeof namespaces)[number];
 
 export type Messages = Readonly<Record<string, string>>;
@@ -16,7 +16,6 @@ export type Loader = () => Promise<{ default: Messages }>;
 export const loaders: Record<Locale, Partial<Record<Namespace, Loader>>> = {
   "en": {
     "about": () => import('./en/about.js'),
-    "common": () => import('./en/common.js'),
     "gists": () => import('./en/gists.js'),
     "main": () => import('./en/main.js'),
     "mainCli": () => import('./en/mainCli.js'),
@@ -36,7 +35,6 @@ export const loaders: Record<Locale, Partial<Record<Namespace, Loader>>> = {
   },
   "de": {
     "about": () => import('./de/about.js'),
-    "common": () => import('./de/common.js'),
     "gists": () => import('./de/gists.js'),
     "main": () => import('./de/main.js'),
     "mainCli": () => import('./de/mainCli.js'),
@@ -56,7 +54,6 @@ export const loaders: Record<Locale, Partial<Record<Namespace, Loader>>> = {
   },
   "ja": {
     "about": () => import('./ja/about.js'),
-    "common": () => import('./ja/common.js'),
     "gists": () => import('./ja/gists.js'),
     "main": () => import('./ja/main.js'),
     "mainCli": () => import('./ja/mainCli.js'),
@@ -76,7 +73,6 @@ export const loaders: Record<Locale, Partial<Record<Namespace, Loader>>> = {
   },
   "en-XA": {
     "about": () => import('./en-XA/about.js'),
-    "common": () => import('./en-XA/common.js'),
     "gists": () => import('./en-XA/gists.js'),
     "main": () => import('./en-XA/main.js'),
     "mainCli": () => import('./en-XA/mainCli.js'),
@@ -96,7 +92,6 @@ export const loaders: Record<Locale, Partial<Record<Namespace, Loader>>> = {
   },
   "ar-XB": {
     "about": () => import('./ar-XB/about.js'),
-    "common": () => import('./ar-XB/common.js'),
     "gists": () => import('./ar-XB/gists.js'),
     "main": () => import('./ar-XB/main.js'),
     "mainCli": () => import('./ar-XB/mainCli.js'),

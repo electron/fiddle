@@ -94,12 +94,17 @@ export function createDoc(
 }
 
 export function isDirty(doc: Doc): boolean {
-  return !sameFiles(doc.fiddle.files, doc.baseline) || !sameFiles(doc.fiddle.modules, doc.baselineModules);
+  return (
+    !sameFiles(doc.fiddle.files, doc.baseline) ||
+    !sameFiles(doc.fiddle.modules, doc.baselineModules)
+  );
 }
 
 /** The files whose text differs from the baseline (new files included), in display order. */
 export function dirtyFileNames(doc: Doc): string[] {
-  return fileNames(doc.fiddle).filter((name) => doc.fiddle.files[name] !== doc.baseline[name]);
+  return fileNames(doc.fiddle).filter(
+    (name) => doc.fiddle.files[name] !== doc.baseline[name],
+  );
 }
 
 /**
@@ -107,12 +112,17 @@ export function dirtyFileNames(doc: Doc): string[] {
  * latest version) moves the baseline along for modules the user hadn't
  * changed, so it doesn't mark the fiddle dirty.
  */
-export function docSetModules(doc: Doc, modules: Readonly<Record<string, string>>, normalized = false): Doc {
+export function docSetModules(
+  doc: Doc,
+  modules: Readonly<Record<string, string>>,
+  normalized = false,
+): Doc {
   let baselineModules = doc.baselineModules;
   if (normalized) {
     const next = { ...baselineModules };
     for (const [name, spec] of Object.entries(modules)) {
-      if (Object.hasOwn(next, name) && next[name] === doc.fiddle.modules[name]) next[name] = spec;
+      if (Object.hasOwn(next, name) && next[name] === doc.fiddle.modules[name])
+        next[name] = spec;
     }
     baselineModules = next;
   }
@@ -129,7 +139,12 @@ export function isTrusted(doc: Doc): boolean {
 }
 
 /** Applies the renderer's text for one file, or returns undefined if `fiddleRev` is stale. */
-export function applyEdit(doc: Doc, name: string, text: string, fiddleRev: number): Doc | undefined {
+export function applyEdit(
+  doc: Doc,
+  name: string,
+  text: string,
+  fiddleRev: number,
+): Doc | undefined {
   if (fiddleRev !== doc.fiddleRev) return undefined;
   if (doc.fiddle.files[name] === text) return doc;
   return { ...doc, fiddle: setFileContent(doc.fiddle, name, text) };
@@ -151,7 +166,11 @@ export function docRenameFile(doc: Doc, from: string, to: string): Doc {
 
 export function docRemoveFile(doc: Doc, name: string): Doc {
   const fiddle = removeFile(doc.fiddle, name);
-  return withNames(doc, fiddle, doc.activeFile === name ? firstVisible(fiddle) : doc.activeFile);
+  return withNames(
+    doc,
+    fiddle,
+    doc.activeFile === name ? firstVisible(fiddle) : doc.activeFile,
+  );
 }
 
 export function docSetFileVisible(doc: Doc, name: string, visible: boolean): Doc {
@@ -162,26 +181,30 @@ export function docSetFileVisible(doc: Doc, name: string, visible: boolean): Doc
   return { ...doc, fiddle, activeFile };
 }
 
-/** Moves a file's tab and sidebar row (§17.2). The set of names is unchanged, so `fiddleRev` stays. */
+/** Moves a file's tab and sidebar row. The set of names is unchanged, so `fiddleRev` stays. */
 export function docMoveFile(doc: Doc, name: string, before: string | null): Doc {
   const fiddle = moveFile(doc.fiddle, name, before);
   return fiddle === doc.fiddle ? doc : { ...doc, fiddle };
 }
 
-/** Focusing a hidden file shows it (§17.3). */
+/** Focusing a hidden file shows it. */
 export function docSetActiveFile(doc: Doc, name: string): Doc {
   if (!Object.hasOwn(doc.fiddle.files, name)) {
-    throw new FiddleError(ErrorCode.notFound, `No file named "${name}"`, { reason: 'file-not-found', name });
+    throw new FiddleError(ErrorCode.notFound, `No file named "${name}"`, {
+      reason: 'file-not-found',
+      name,
+    });
   }
   return { ...doc, fiddle: showFile(doc.fiddle, name), activeFile: name };
 }
 
-/** After a save or publish: the mirror becomes the baseline. */
-export function markSaved(doc: Doc, source: Fiddle['source']): Doc {
-  return { ...doc, fiddle: { ...doc.fiddle, source }, baseline: doc.fiddle.files, baselineModules: doc.fiddle.modules };
+/** The files that were saved, loaded or published before and that the fiddle has since lost (removed or renamed). */
+export function removedFileNames(doc: Doc): string[] {
+  return Object.keys(doc.baseline).filter(
+    (name) => !Object.hasOwn(doc.fiddle.files, name),
+  );
 }
 
-/** The fiddle part of the `Window` store. */
 export function toFiddleState(doc: Doc): FiddleState {
   const { fiddle } = doc;
   const source: FiddleState['source'] = {
@@ -190,7 +213,8 @@ export function toFiddleState(doc: Doc): FiddleState {
   };
   if (fiddle.source.localPath !== undefined) source.localPath = fiddle.source.localPath;
   if (fiddle.source.gistId !== undefined) source.gistId = fiddle.source.gistId;
-  if (fiddle.source.gistRevision !== undefined) source.gistRevision = fiddle.source.gistRevision;
+  if (fiddle.source.gistRevision !== undefined)
+    source.gistRevision = fiddle.source.gistRevision;
   if (doc.gistOwner !== undefined) source.gistOwner = doc.gistOwner;
   if (fiddle.templateName !== undefined) source.templateName = fiddle.templateName;
   return {
@@ -198,7 +222,10 @@ export function toFiddleState(doc: Doc): FiddleState {
     name: doc.name,
     versionRef: fiddle.version,
     modules: { ...fiddle.modules },
-    files: fileNames(fiddle).map((name) => ({ name, visible: !fiddle.hidden.includes(name) })),
+    files: fileNames(fiddle).map((name) => ({
+      name,
+      visible: !fiddle.hidden.includes(name),
+    })),
     activeFile: doc.activeFile,
     fiddleRev: doc.fiddleRev,
     dirty: isDirty(doc),

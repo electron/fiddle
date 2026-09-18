@@ -23,8 +23,7 @@ export interface SegmentedControlProps {
   className?: string;
 }
 
-/** Two to four exclusive options. Track: fill, 2px inset. Selected: thumb with shadow-lift.
- *  Arrow keys move between segments; one Tab stop. */
+/** Two to four exclusive options. Arrow keys move between segments; one Tab stop. */
 export function SegmentedControl({
   options,
   label,
@@ -35,7 +34,8 @@ export function SegmentedControl({
   isDisabled,
   className,
 }: SegmentedControlProps) {
-  const fallback = value === undefined && defaultValue === undefined ? options[0]?.value : defaultValue;
+  const fallback =
+    value === undefined && defaultValue === undefined ? options[0]?.value : defaultValue;
   return (
     <ToggleButtonGroup
       aria-label={label}

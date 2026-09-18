@@ -1,7 +1,7 @@
 /**
  * Update decisions that don't need Electron, so they are unit-tested:
  *
- * - The kill switch (REQUIREMENTS §13): `update-policy.json` holds
+ * - The kill switch: `update-policy.json` holds
  *   `{ blockedVersions, minVersion, message }`. `blockedVersions` entries are
  *   exact versions or semver ranges. A version below `minVersion` is blocked too.
  * - Linux and MSIX have no auto-update, so they compare the app version with
@@ -35,12 +35,18 @@ export function evaluatePolicy(policy: UpdatePolicy, version: string): PolicyVer
   if (!current) return { blocked: false };
   const options = { includePrerelease: true };
   const listed = policy.blockedVersions.some((entry) => {
-    const range = semver.validRange(entry.replace(/^v/, ''), options);
+    // An empty entry is a valid range that every version satisfies.
+    const text = entry.trim().replace(/^v/, '');
+    const range = text ? semver.validRange(text, options) : null;
     return range !== null && semver.satisfies(current, range, options);
   });
-  const min = policy.minVersion ? semver.valid(policy.minVersion.replace(/^v/, '')) : null;
+  const min = policy.minVersion
+    ? semver.valid(policy.minVersion.replace(/^v/, ''))
+    : null;
   const tooOld = min !== null && semver.lt(current, min);
-  return listed || tooOld ? { blocked: true, message: policy.message } : { blocked: false };
+  return listed || tooOld
+    ? { blocked: true, message: policy.message }
+    : { blocked: false };
 }
 
 /** The fields of a GitHub release this app reads. */
@@ -75,7 +81,8 @@ export function pickUpdate(
     if (!version || !RELEASE_PAGE.test(String(release.html_url))) continue;
     if (!includePrerelease && semver.prerelease(version)) continue;
     if (!semver.gt(version, current)) continue;
-    if (!best || semver.gt(version, best.version)) best = { version, url: release.html_url };
+    if (!best || semver.gt(version, best.version))
+      best = { version, url: release.html_url };
   }
   return best;
 }

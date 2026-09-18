@@ -13,6 +13,12 @@ const parent = {
   OPENAI_API_KEY: 'key',
   CLIENT_SECRET: 'secret',
   DB_PASSWORD: 'password',
+  DJANGO_SECRET_KEY: 'django',
+  TLS_PRIVATE_KEY: 'pem',
+  MINIO_ACCESS_KEY: 'minio',
+  GOOGLE_CREDENTIALS: '{}',
+  GPG_PASSPHRASE: 'phrase',
+  DATABASE_URL: 'postgres://user:pass@host/db',
   CSC_KEY_PASSWORD: 'signing',
   AWS_SECRET_ACCESS_KEY: 'aws',
   AWS_ACCESS_KEY_ID: 'aws-id',
@@ -28,7 +34,6 @@ const parent = {
 };
 
 describe('buildChildEnv()', () => {
-  // @feature run.env-blocked
   it('removes the default denylist and blocked variables from the parent', () => {
     expect(buildChildEnv({}, parent)).toStrictEqual({
       PATH: '/usr/bin',
@@ -85,7 +90,6 @@ describe('buildChildEnv()', () => {
     expect(buildChildEnv({ vars }, parent)).toMatchObject(vars);
   });
 
-  // @feature run.env-blocked
   it('never passes LD_* or DYLD_* from user variables', () => {
     const vars = {
       LD_PRELOAD: '/x.so',

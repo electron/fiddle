@@ -1,7 +1,6 @@
-/** Binds `interface GitHub` for one window. The token stays in this process. */
 import { BrowserWindow, clipboard } from 'electron';
 
-import { asGistReference, isGistId } from '../../fiddle/gist-id';
+import { asGistReference, gistUrl, isGistId } from '../../fiddle/gist-id';
 import { isValidTokenFormat } from '../../fiddle/github';
 import { GitHubCredentialStorage } from '../../ipc/generated/common/fiddle';
 import { GitHub, implement } from '../../ipc/main';
@@ -10,7 +9,8 @@ import type { IpcContext } from '../ipc';
 import { openExternalLink } from '../security';
 
 /** GitHub's new-token page with the `gist` scope prefilled. */
-const NEW_TOKEN_URL = 'https://github.com/settings/tokens/new?scopes=gist&description=Electron%20Fiddle';
+const NEW_TOKEN_URL =
+  'https://github.com/settings/tokens/new?scopes=gist&description=Electron%20Fiddle';
 
 const storageKinds = {
   encrypted: GitHubCredentialStorage.Encrypted,
@@ -18,25 +18,39 @@ const storageKinds = {
   unavailable: GitHubCredentialStorage.Unavailable,
 } as const;
 
-export function bindGitHubIpc({ contents, windowId, services: { github } }: IpcContext): void {
+export function bindGitHubIpc({
+  contents,
+  windowId,
+  services: { github },
+}: IpcContext): void {
   implement(GitHub, contents, {
     GetCredentialStorage: async () => storageKinds[await github.credentialStorage()],
     SignIn: (token, allowPlaintext) => github.signIn(token, allowPlaintext),
     SignOut: () => github.signOut(),
-    // Main reads the clipboard itself, so a token there never reaches the renderer (§4).
+    // Main reads the clipboard itself, so a token there never reaches the renderer.
     SignInFromClipboard: async (allowPlaintext) => {
       const token = (await clipboard.readText()).trim();
       if (!isValidTokenFormat(token)) {
-        throw new FiddleError(ErrorCode.invalidArgument, 'There is no token on the clipboard', { reason: 'bad-format' });
+        throw new FiddleError(
+          ErrorCode.invalidArgument,
+          'There is no token on the clipboard',
+          { reason: 'bad-format' },
+        );
       }
       return github.signIn(token, allowPlaintext);
     },
-    HasClipboardToken: async () => isValidTokenFormat((await clipboard.readText()).trim()),
+    HasClipboardToken: async () =>
+      isValidTokenFormat((await clipboard.readText()).trim()),
     // Only a gist URL or ID comes back, so the renderer can't read anything else off the clipboard.
     ReadClipboardGist: async () => asGistReference(await clipboard.readText()),
-    OpenNewTokenPage: () => openExternalLink(NEW_TOKEN_URL, BrowserWindow.fromWebContents(contents) ?? undefined),
+    OpenNewTokenPage: () =>
+      openExternalLink(
+        NEW_TOKEN_URL,
+        BrowserWindow.fromWebContents(contents) ?? undefined,
+      ),
     TakeNotice: () => github.takeNotice() ?? null,
-    Publish: (description, isPublic) => github.publish(windowId, { description, isPublic }),
+    Publish: (description, isPublic) =>
+      github.publish(windowId, { description, isPublic }),
     Update: () => github.update(windowId),
     Delete: () => github.delete(windowId),
     GetHistory: async () => {
@@ -54,8 +68,9 @@ export function bindGitHubIpc({ contents, windowId, services: { github } }: IpcC
       };
     },
     CopyShareLink: (id) => {
-      if (!isGistId(id)) throw new FiddleError(ErrorCode.invalidArgument, 'Invalid gist ID');
-      clipboard.writeText(github.shareLink(id));
+      if (!isGistId(id))
+        throw new FiddleError(ErrorCode.invalidArgument, 'Invalid gist ID');
+      clipboard.writeText(gistUrl(id));
     },
   });
 }

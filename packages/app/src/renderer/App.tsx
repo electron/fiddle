@@ -11,27 +11,35 @@ import { useKeybindings } from './features/commands/keybindings';
 import { useWindowCommands } from './features/commands/window-commands';
 import { CommandPalette } from './features/palette/CommandPalette';
 import { StorageNotices } from './features/settings/StorageNotices';
-import { ErrorBoundary } from './shell/ErrorBoundary';
+import { ErrorBoundary, RegionError } from './shell/ErrorBoundary';
 import { Shell } from './shell/Shell';
 import { useAppearance } from './shell/theme';
-import { useAppState, useWindowState } from './state';
+import { useAppState, useStoreError, useWindowState } from './state';
 
 /** The window: the shell, plus the app-wide mounts (dialogs, toasts, palette). */
 export function App() {
   const { t, i18n } = useTranslation('shell');
   const appState = useAppState() ?? null;
   const win = useWindowState();
-  // Keybindings for every command, and the window's side of the editor and console commands.
   useKeybindings();
   useWindowCommands();
   const modelsSynced = useModelsSynced();
-  const ready = appState !== null && win !== null && modelsSynced;
+  // A store that failed to load never becomes ready: report anyway, so the window shows its error.
+  const storeError = useStoreError();
+  const ready =
+    storeError !== undefined || (appState !== null && win !== null && modelsSynced);
+  useEffect(() => {
+    if (storeError) console.error('[fiddle] a store failed to load', storeError);
+  }, [storeError]);
   const material = appState?.material;
   const locale = appState?.locale;
 
   // A custom theme's data comes from Settings.GetTheme; the built-in one is Lucent.
   const themeId = appState?.settings.theme ?? BUILTIN_THEME;
-  const [customTheme, setCustomTheme] = useState<{ id: string; data: ThemeData | null } | null>(null);
+  const [customTheme, setCustomTheme] = useState<{
+    id: string;
+    data: ThemeData | null;
+  } | null>(null);
   useEffect(() => {
     if (themeId === BUILTIN_THEME) return;
     let current = true;
@@ -39,7 +47,8 @@ export function App() {
       (data: ThemeData | null | undefined) => {
         if (current) setCustomTheme({ id: themeId, data: data ?? null });
       },
-      (error: unknown) => console.error('[fiddle] loading the theme failed', themeId, error),
+      (error: unknown) =>
+        console.error('[fiddle] loading the theme failed', themeId, error),
     );
     return () => {
       current = false;
@@ -57,7 +66,6 @@ export function App() {
     document.documentElement.dataset.material = material;
   }, [material]);
 
-  // The language switches live when the setting changes; `<html lang dir>` follows it.
   useSyncLocale(locale);
 
   // Main shows the window once we report ready: after the first commit with
@@ -80,7 +88,7 @@ export function App() {
   return (
     <I18nProvider locale={i18n.language}>
       <ErrorBoundary region="shell" fill>
-        <Shell />
+        {storeError ? <RegionError fill /> : <Shell />}
       </ErrorBoundary>
       <ErrorBoundary region="palette">
         <CommandPalette />

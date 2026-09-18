@@ -22,7 +22,6 @@ function withPlatform<T>(platform: NodeJS.Platform, fn: () => T): T {
 }
 
 describe('parseEnvEntries', () => {
-  // @feature run.env-parse run.env-blocked
   it('parses, drops empties, and reports bad and blocked entries', () => {
     const result = parseEnvEntries(
       [
@@ -43,14 +42,27 @@ describe('parseEnvEntries', () => {
       ],
       'linux',
     );
-    expect(result.env).toEqual({ A: 'override', B: 'two', C: 'quoted value', D: 'x', E: '', F: 'a=b' });
+    expect(result.env).toEqual({
+      A: 'override',
+      B: 'two',
+      C: 'quoted value',
+      D: 'x',
+      E: '',
+      F: 'a=b',
+    });
     expect(result.invalid).toEqual(['bad', '=x', '1A=2']);
     expect(result.blocked).toEqual(['LD_PRELOAD', 'DYLD_INSERT_LIBRARIES']);
   });
 
   it('treats names that differ only in case as one variable on Windows', () => {
-    expect(parseEnvEntries(['Path=a', 'x=1', 'PATH=b'], 'win32').env).toEqual({ x: '1', PATH: 'b' });
-    expect(parseEnvEntries(['Path=a', 'PATH=b'], 'linux').env).toEqual({ Path: 'a', PATH: 'b' });
+    expect(parseEnvEntries(['Path=a', 'x=1', 'PATH=b'], 'win32').env).toEqual({
+      x: '1',
+      PATH: 'b',
+    });
+    expect(parseEnvEntries(['Path=a', 'PATH=b'], 'linux').env).toEqual({
+      Path: 'a',
+      PATH: 'b',
+    });
   });
 
   it('parses single entries', () => {
@@ -63,22 +75,43 @@ describe('parseEnvEntries', () => {
 });
 
 describe('blocked user keys', () => {
-  // @feature run.env-blocked
   it('blocks every LD_ and DYLD_ variable, as core does', () => {
-    const keys = ['LD_PRELOAD', 'LD_LIBRARY_PATH', 'ld_audit', 'DYLD_INSERT_LIBRARIES', 'DYLD_LIBRARY_PATH', 'dyld_anything'];
+    const keys = [
+      'LD_PRELOAD',
+      'LD_LIBRARY_PATH',
+      'ld_audit',
+      'DYLD_INSERT_LIBRARIES',
+      'DYLD_LIBRARY_PATH',
+      'dyld_anything',
+    ];
     for (const key of keys) expect(isBlockedUserEnvKey(key)).toBe(true);
     expect(isBlockedUserEnvKey('NODE_ENV')).toBe(false);
     expect(isBlockedUserEnvKey('OLD_PATH')).toBe(false);
-    expect(parseEnvEntries(keys.map((key) => `${key}=x`), 'linux')).toEqual({ env: {}, invalid: [], blocked: keys });
+    expect(
+      parseEnvEntries(
+        keys.map((key) => `${key}=x`),
+        'linux',
+      ),
+    ).toEqual({ env: {}, invalid: [], blocked: keys });
   });
 
   it('blocks NODE_OPTIONS and ELECTRON_RUN_AS_NODE, which change what Electron runs', () => {
-    for (const key of ['NODE_OPTIONS', 'node_options', 'ELECTRON_RUN_AS_NODE', 'Electron_Run_As_Node']) {
+    for (const key of [
+      'NODE_OPTIONS',
+      'node_options',
+      'ELECTRON_RUN_AS_NODE',
+      'Electron_Run_As_Node',
+    ]) {
       expect(isBlockedUserEnvKey(key)).toBe(true);
     }
     expect(isBlockedUserEnvKey('NODE_OPTIONS_X')).toBe(false);
     expect(isBlockedUserEnvKey('ELECTRON_ENABLE_LOGGING')).toBe(false);
-    expect(parseEnvEntries(['NODE_OPTIONS=--require /tmp/x.js', 'ELECTRON_RUN_AS_NODE=1', 'A=1'], 'linux')).toEqual({
+    expect(
+      parseEnvEntries(
+        ['NODE_OPTIONS=--require /tmp/x.js', 'ELECTRON_RUN_AS_NODE=1', 'A=1'],
+        'linux',
+      ),
+    ).toEqual({
       env: { A: '1' },
       invalid: [],
       blocked: ['NODE_OPTIONS', 'ELECTRON_RUN_AS_NODE'],
@@ -88,11 +121,26 @@ describe('blocked user keys', () => {
 
 describe('envFromEntries', () => {
   it('lets later entries win and skips undefined values', () => {
-    expect(envFromEntries([['A', '1'], ['B', undefined], ['A', '2']], 'linux')).toEqual({ A: '2' });
+    expect(
+      envFromEntries(
+        [
+          ['A', '1'],
+          ['B', undefined],
+          ['A', '2'],
+        ],
+        'linux',
+      ),
+    ).toEqual({ A: '2' });
   });
 
   it('keeps names like __proto__ and toString as plain variables', () => {
-    const env = envFromEntries([['__proto__', 'x'], ['toString', 'y']], 'linux');
+    const env = envFromEntries(
+      [
+        ['__proto__', 'x'],
+        ['toString', 'y'],
+      ],
+      'linux',
+    );
     expect(Object.keys(env)).toEqual(['__proto__', 'toString']);
     expect(Object.getPrototypeOf(env)).toBe(Object.prototype);
   });
@@ -119,13 +167,18 @@ describe('fiddleProcessEnv', () => {
     });
   });
 
-  // @feature run.advanced-logging run.env-blocked
   it('adds advanced logging, then the user variables, except blocked ones', () => {
     const env = withPlatform('linux', () =>
       fiddleProcessEnv(
         {
           advancedLogging: true,
-          userEnv: { PATH: '/custom', MY_TOKEN: 'user-set', ELECTRON_ENABLE_LOGGING: 'false', LD_PRELOAD: 'x', DYLD_LIBRARY_PATH: 'y' },
+          userEnv: {
+            PATH: '/custom',
+            MY_TOKEN: 'user-set',
+            ELECTRON_ENABLE_LOGGING: 'false',
+            LD_PRELOAD: 'x',
+            DYLD_LIBRARY_PATH: 'y',
+          },
         },
         parent,
       ),
@@ -143,7 +196,10 @@ describe('fiddleProcessEnv', () => {
   it('replaces differently-cased copies on Windows', () => {
     const env = withPlatform('win32', () =>
       fiddleProcessEnv(
-        { advancedLogging: true, userEnv: { electron_enable_logging: 'false', PATH: 'C:\\bin' } },
+        {
+          advancedLogging: true,
+          userEnv: { electron_enable_logging: 'false', PATH: 'C:\\bin' },
+        },
         { Path: 'C:\\old', SystemRoot: 'C:\\Windows' },
       ),
     );
@@ -158,7 +214,6 @@ describe('fiddleProcessEnv', () => {
 });
 
 describe('cleanFlags', () => {
-  // @feature run.env-parse
   it('drops empty flags', () => {
     expect(cleanFlags(['--a', '', '  ', ' --b ', 'x\0y'])).toEqual(['--a', '--b']);
   });

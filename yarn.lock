@@ -2494,6 +2494,7 @@ __metadata:
     eslint: "npm:^10.10.0"
     eslint-plugin-i18next: "npm:^6.1.5"
     eslint-plugin-react-hooks: "npm:^7.1.1"
+    jiti: "npm:^2.4.2"
     jsdom: "npm:^30.0.1"
     prettier: "npm:^3.9.6"
     typescript: "npm:~6.0.3"

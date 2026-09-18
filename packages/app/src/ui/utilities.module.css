@@ -1,6 +1,3 @@
-/* Shared utilities, exported from the ui index. */
-
-/* Read by screen readers, not shown: live regions and spoken-only text. */
 .srOnly {
   position: absolute;
   width: 1px;

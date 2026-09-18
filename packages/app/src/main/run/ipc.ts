@@ -6,7 +6,6 @@ import { messageBox } from '../dialogs';
 import { tm } from '../i18n';
 import type { IpcContext } from '../ipc';
 import { bindVersionsIpc } from '../versions/ipc';
-import { installRunDevHooks } from './dev';
 
 const t = tm('mainRun');
 
@@ -45,6 +44,4 @@ export function bindRunIpc(ctx: IpcContext): void {
     bisect.stop(windowId);
     runs.disposeWindow(windowId);
   });
-
-  installRunDevHooks(services, windowId);
 }

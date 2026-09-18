@@ -21,7 +21,6 @@ import { titleBarDoubleClick } from './title-bar';
 import { bindOnboardingIpc } from './ux/ipc';
 import { getWindow } from './windows';
 
-/** What every `bind*Ipc` gets. */
 export interface IpcContext {
   contents: WebContents;
   windowId: string;
@@ -29,7 +28,11 @@ export interface IpcContext {
 }
 
 /** `onReady`: the renderer has read both stores and painted. */
-export function bindWindowIpc(ctx: IpcContext, init: WindowInit, onReady: () => void): void {
+export function bindWindowIpc(
+  ctx: IpcContext,
+  init: WindowInit,
+  onReady: () => void,
+): void {
   const { contents, windowId, services } = ctx;
   const { hub, registry } = services;
   const appDispatcher = implement(App, contents, {
@@ -61,7 +64,6 @@ export function bindWindowIpc(ctx: IpcContext, init: WindowInit, onReady: () => 
   bindAppPlatformIpc(ctx);
   bindRunIpc(ctx);
 
-  // The StateHub is the only caller of update*Store.
   hub.registerWindow(windowId, init, {
     pushApp: (state) => appDispatcher.updateAppStore(state),
     pushWindow: (state) => windowDispatcher.updateWindowStore(state),

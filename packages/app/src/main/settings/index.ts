@@ -1,6 +1,4 @@
 /**
- * Settings wiring in main.
- *
  * - `loadSettings()` reads `<userData>/settings.json` before the StateHub
  *   exists and returns the `App` store fields settings owns.
  * - `startSettings()` creates the service, loads custom themes, applies side
@@ -23,7 +21,11 @@ import {
 import type { AppState } from '../../shared/stores';
 import { setMainLocale } from '../i18n';
 import { log } from '../log';
-import { createJsonStore, onJsonStoreNotice, type JsonStore } from '../persistence/json-store';
+import {
+  createJsonStore,
+  onJsonStoreNotice,
+  type JsonStore,
+} from '../persistence/json-store';
 import type { StateHub } from '../state-hub';
 import { loadThemes, summarize, themeSource } from '../themes/themes';
 import { SETTINGS_VERSION, SettingsService } from './service';
@@ -38,7 +40,10 @@ export interface SettingsContext {
   refreshThemes(): Promise<number>;
 }
 
-type SettingsAppFields = Pick<AppState, 'settings' | 'themes' | 'screenReaderActive' | 'storageNotices' | 'highContrast'>;
+type SettingsAppFields = Pick<
+  AppState,
+  'settings' | 'themes' | 'screenReaderActive' | 'storageNotices' | 'highContrast'
+>;
 
 export function loadSettings(userData = app.getPath('userData')): {
   store: JsonStore<SparseSettings>;
@@ -68,7 +73,10 @@ export function loadSettings(userData = app.getPath('userData')): {
 
 /** The locale list main's i18n should start with, honouring the setting. */
 export function preferredLocales(store: JsonStore<SparseSettings>): string[] {
-  return localePreference(fromSparse(store.get()).locale, app.getPreferredSystemLanguages());
+  return localePreference(
+    fromSparse(store.get()).locale,
+    app.getPreferredSystemLanguages(),
+  );
 }
 
 export async function startSettings(
@@ -103,9 +111,10 @@ export async function startSettings(
       settings.screenReader,
       app.isAccessibilitySupportEnabled(),
     );
-    if (screenReaderActive !== hub.app.screenReaderActive) hub.updateApp({ screenReaderActive });
+    if (screenReaderActive !== hub.app.screenReaderActive)
+      hub.updateApp({ screenReaderActive });
 
-    // OS high contrast shows Lucent's high-contrast variant (§10).
+    // OS high contrast shows Lucent's high-contrast variant.
     const highContrast = nativeTheme.shouldUseHighContrastColors;
     if (highContrast !== hub.app.highContrast) hub.updateApp({ highContrast });
 
@@ -130,7 +139,10 @@ export async function startSettings(
 }
 
 /** Applies outside edits to settings.json (from "Open settings.json") live. */
-function watchSettingsFile(store: JsonStore<SparseSettings>, service: SettingsService): void {
+function watchSettingsFile(
+  store: JsonStore<SparseSettings>,
+  service: SettingsService,
+): void {
   const name = path.basename(store.file);
   let timer: NodeJS.Timeout | undefined;
   try {

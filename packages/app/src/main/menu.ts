@@ -1,16 +1,9 @@
 /**
- * The native application menu (REQUIREMENTS §17.14), built from the shared
- * command definitions:
- * - macOS: Electron Fiddle, File, Edit, View, Run, Window and Help;
- * - Windows and Linux: the same without the app menu; Settings and Exit are in
- *   File, and About is in Help;
- * - unpackaged (development and test) builds add Develop before Help, for
- *   working on Fiddle itself: the title bar menu bar toggle and the reloads.
- *
- * Role items get explicit, translated labels. Items whose state main knows
- * (the sidebar, the console, the run, a bisect, full screen) say what they
- * will do, as macOS menus do; the palette keeps the command's own label. The
- * menu is rebuilt whenever anything it shows changes (a label, enablement, a
+ * The native application menu, built from the shared command definitions. Role
+ * items get explicit, translated labels. Items whose state main knows (the
+ * sidebar, the console, the run, a bisect, full screen) say what they will do,
+ * as macOS menus do; the palette keeps the command's own label. The menu is
+ * rebuilt whenever anything it shows changes (a label, enablement, a
  * keybinding, recent folders, the locale, the focused window), so it follows
  * the focused window.
  *
@@ -48,7 +41,11 @@ type Role = NonNullable<MenuItemConstructorOptions['role']>;
 const separator: MenuItemConstructorOptions = { type: 'separator' };
 
 /** A role item with our label. Its `id` is `role:<role>`. */
-const role = (name: Role, label: string, extra: Partial<MenuItemConstructorOptions> = {}): MenuItemConstructorOptions => ({
+const role = (
+  name: Role,
+  label: string,
+  extra: Partial<MenuItemConstructorOptions> = {},
+): MenuItemConstructorOptions => ({
   id: `role:${name}`,
   role: name,
   label,
@@ -61,7 +58,6 @@ export interface MenuState {
   /** The focused app window; undefined when none has focus (macOS). */
   focused: string | undefined;
   win: WindowState | undefined;
-  /** Whether that window is full screen. */
   fullScreen: boolean;
   /** The user's overrides; `null` unbinds. */
   keybindings: Keybindings;
@@ -71,11 +67,12 @@ export interface MenuState {
   menuBar: boolean;
 }
 
-/** File → Open recent, from state.json's recent folders. A folder opens in the window the click came from. */
+/** A recent folder opens in the window the click came from. */
 function openRecentMenu(focused: string | undefined): MenuItemConstructorOptions {
   const td = tm('mainDocuments');
   const recent = recentFolders();
-  const target = (window: Electron.BaseWindow | undefined) => windowIdOf(window) ?? focused;
+  const target = (window: Electron.BaseWindow | undefined) =>
+    windowIdOf(window) ?? focused;
   return {
     id: 'menu:openRecent',
     label: t('openRecent'),
@@ -83,42 +80,42 @@ function openRecentMenu(focused: string | undefined): MenuItemConstructorOptions
       recent.length === 0
         ? [{ id: 'recent:none', label: td('noRecent'), enabled: false }]
         : [
-            ...recent.map(
-              (dir, index): MenuItemConstructorOptions => ({
-                id: `recent:${index}`,
-                label: dir,
-                click: (_item, window) => void withErrorDialog(target(window), () => openFolderIn(target(window), dir)),
-              }),
-            ),
+            ...recent.map((dir, index): MenuItemConstructorOptions => ({
+              id: `recent:${index}`,
+              label: dir,
+              click: (_item, window) =>
+                void withErrorDialog(target(window), () =>
+                  openFolderIn(target(window), dir),
+                ),
+            })),
             separator,
-            { id: 'recent:clear', label: td('clearRecent'), click: () => clearRecentFolders() },
+            {
+              id: 'recent:clear',
+              label: td('clearRecent'),
+              click: () => clearRecentFolders(),
+            },
           ],
   };
 }
 
-/** File → Show me, with the focused window's example checked. */
 function showMeMenu(focused: string | undefined): MenuItemConstructorOptions {
   const current = focused ? currentTemplateName(focused) : undefined;
-  const target = (window: Electron.BaseWindow | undefined) => windowIdOf(window) ?? focused;
+  const target = (window: Electron.BaseWindow | undefined) =>
+    windowIdOf(window) ?? focused;
   return {
     id: 'menu:showMe',
     label: t('showMe'),
-    submenu: SHOW_ME_EXAMPLES.map(
-      (name): MenuItemConstructorOptions => ({
-        id: `example:${name}`,
-        label: name,
-        type: 'radio',
-        checked: current === name,
-        click: (_item, window) => void withErrorDialog(target(window), () => showMeIn(target(window), name)),
-      }),
-    ),
+    submenu: SHOW_ME_EXAMPLES.map((name): MenuItemConstructorOptions => ({
+      id: `example:${name}`,
+      label: name,
+      type: 'radio',
+      checked: current === name,
+      click: (_item, window) =>
+        void withErrorDialog(target(window), () => showMeIn(target(window), name)),
+    })),
   };
 }
 
-/**
- * Develop: the title bar menu bar toggle, checked while the bar is drawn, then
- * Reload and Reload all windows.
- */
 function developMenu(
   command: (id: CommandId, label?: LabelKey) => MenuItemConstructorOptions,
   menuBar: boolean,
@@ -135,7 +132,10 @@ function developMenu(
   };
 }
 
-export function buildMenuTemplate(registry: CommandRegistry, state: MenuState): MenuItemConstructorOptions[] {
+export function buildMenuTemplate(
+  registry: CommandRegistry,
+  state: MenuState,
+): MenuItemConstructorOptions[] {
   const { platform, focused, win, keybindings } = state;
   const isMac = platform === 'darwin';
   const name = t('appMenu');
@@ -146,7 +146,9 @@ export function buildMenuTemplate(registry: CommandRegistry, state: MenuState): 
     label: t(label ?? commands[id].label),
     // A keybinding scoped to a context (Clear console's, to the console) is the
     // renderer's to dispatch: registered here, it would fire everywhere.
-    accelerator: getCommand(id).context ? undefined : effectiveAccelerator(id, platform, keybindings),
+    accelerator: getCommand(id).context
+      ? undefined
+      : effectiveAccelerator(id, platform, keybindings),
     enabled: registry.isEnabled(id, focused),
     click: (_item, window) => {
       registry
@@ -157,13 +159,11 @@ export function buildMenuTemplate(registry: CommandRegistry, state: MenuState): 
     },
   });
 
-  // What the stateful items will do, from the focused window's store.
   const layout = win?.layout;
   const busy = (win?.run?.status ?? 'ready') !== 'ready';
   const bisect = win?.run?.bisect;
   const bisecting = bisect != null && bisect.result === null;
 
-  // "Quit Electron Fiddle" (Cmd+Q, Ctrl+Q); Windows says Exit.
   const quit = role('quit', platform === 'win32' ? t('exit') : t('quit', { name }));
 
   const appMenu: MenuItemConstructorOptions[] = isMac
@@ -221,7 +221,7 @@ export function buildMenuTemplate(registry: CommandRegistry, state: MenuState): 
       id: 'menu:edit',
       label: t('edit'),
       submenu: [
-        // Commands, not roles, so they reach the focused Monaco editor (src/main/app-commands.ts).
+        // Commands, not roles, so they reach the focused Monaco editor.
         command('edit.undo'),
         command('edit.redo'),
         separator,
@@ -244,8 +244,14 @@ export function buildMenuTemplate(registry: CommandRegistry, state: MenuState): 
         command('app.commandPalette'),
         separator,
         // Layout. Main knows the sidebar and console state, so these say Hide or Show.
-        command('view.toggleSidebar', (layout?.sidebar ?? true) ? 'hideSidebar' : 'showSidebar'),
-        command('view.toggleConsole', (layout?.consoleVisible ?? true) ? 'hideConsole' : 'showConsole'),
+        command(
+          'view.toggleSidebar',
+          (layout?.sidebar ?? true) ? 'hideSidebar' : 'showSidebar',
+        ),
+        command(
+          'view.toggleConsole',
+          (layout?.consoleVisible ?? true) ? 'hideConsole' : 'showConsole',
+        ),
         command('view.toggleSplit'),
         separator,
         // Editor presentation. Its state lives in the renderer, so plain toggles.
@@ -253,15 +259,18 @@ export function buildMenuTemplate(registry: CommandRegistry, state: MenuState): 
         command('editor.toggleMinimap'),
         command('editor.toggleTabFocus'),
         separator,
-        // §17.14. The app must stay usable at 200% (§10).
+        // The app stays usable at 200% zoom.
         role('resetZoom', t('actualSize'), { accelerator: 'CmdOrCtrl+0' }),
         role('zoomIn', t('zoomIn'), { accelerator: 'CmdOrCtrl+Plus' }),
         role('zoomOut', t('zoomOut'), { accelerator: 'CmdOrCtrl+-' }),
         separator,
-        // The role brings the platform's key (Ctrl+Cmd+F, or F11; §17.14). On
+        // The role brings the platform's key (Ctrl+Cmd+F, or F11). On
         // macOS 26, Electron 39.1–44 also shows AppKit's Globe+F copy of this
         // item (electron/electron#52821); that second item isn't ours.
-        role('togglefullscreen', t(state.fullScreen ? 'exitFullScreen' : 'enterFullScreen')),
+        role(
+          'togglefullscreen',
+          t(state.fullScreen ? 'exitFullScreen' : 'enterFullScreen'),
+        ),
       ],
     },
     // run.toggle's second default, F5, is dispatched by the renderer.
@@ -292,10 +301,10 @@ export function buildMenuTemplate(registry: CommandRegistry, state: MenuState): 
         ...(isMac ? [separator, role('front', t('bringAllToFront'))] : []),
       ],
     },
-    // For developing Fiddle itself: unpackaged builds only, late in the bar as
-    // Safari and VS Code place theirs. The reload commands stay defined in every
-    // build, for Settings' "Reload all windows", the error view's Reload, the
-    // palette and their keys; the toggle is `devOnly`.
+    // Unpackaged builds only, late in the bar as Safari and VS Code place
+    // theirs. The reload commands are defined in every build (Settings' "Reload
+    // all windows", the error view's Reload, the palette and their keys); only
+    // the toggle is `devOnly`.
     ...(state.dev ? [developMenu(command, state.menuBar)] : []),
     {
       id: 'menu:help',
@@ -337,7 +346,10 @@ export function installMenu({ registry, hub, platform }: Services): void {
   let shown: string | undefined;
   /** What each window's menu bar shows now, to push only real changes. */
   const pushed = new Map<string, string>();
-  const stateFor = (focused: string | undefined, statePlatform = platform): MenuState => ({
+  const stateFor = (
+    focused: string | undefined,
+    statePlatform = platform,
+  ): MenuState => ({
     platform: statePlatform,
     focused,
     win: focused === undefined ? undefined : hub.getWindow(focused),
@@ -417,7 +429,8 @@ export function installMenu({ registry, hub, platform }: Services): void {
  * either way. Returns whether the bar is now drawn.
  */
 export function toggleWindowMenuBar(): boolean {
-  if (!toggleMenuBar) throw new FiddleError(ErrorCode.unavailable, 'The menu is not installed yet');
+  if (!toggleMenuBar)
+    throw new FiddleError(ErrorCode.unavailable, 'The menu is not installed yet');
   return toggleMenuBar();
 }
 
@@ -425,6 +438,7 @@ export function toggleWindowMenuBar(): boolean {
 export function activateWindowMenuItem(windowId: string, id: string): void {
   const template = windowTemplates.get(windowId);
   const win = getWindow(windowId);
-  if (!template || !win) throw new FiddleError(ErrorCode.unavailable, `Window ${windowId} has no menu bar`);
+  if (!template || !win)
+    throw new FiddleError(ErrorCode.unavailable, `Window ${windowId} has no menu bar`);
   activateMenuItem(template, id, win);
 }

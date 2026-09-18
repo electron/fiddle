@@ -1,24 +1,50 @@
-/** Run state, console lines and the release list, from main's stores and methods. */
 import { useEffect, useMemo, useState } from 'react';
 
 import { runApi, versionsApi } from '../../../ipc/renderer';
-import type { AppState, OutputLine, ReleaseRow, RunState, VersionRefValue } from '../../../shared/stores';
+import type {
+  AppState,
+  OutputLine,
+  ReleaseRow,
+  RunState,
+  VersionRefValue,
+} from '../../../shared/stores';
 import { useAppState, useWindowState } from '../../state';
 
-export const IDLE_RUN: RunState = { status: 'ready', task: 'run', errors: [], clearedSeq: 0, bisect: null };
+/** The label key of each state that shows plain text: the status bar's, and the Run button's while it is busy. */
+export const STATUS_LABEL = {
+  ready: 'ready',
+  checking: 'checking',
+  unzipping: 'unzipping',
+  installing: 'installingModules',
+  starting: 'starting',
+} as const satisfies Partial<Record<RunState['status'], string>>;
+
+export const IDLE_RUN: RunState = {
+  status: 'ready',
+  task: 'run',
+  errors: [],
+  clearedSeq: 0,
+  bisect: null,
+};
 const CONSOLE_LIMIT = 1000;
+// A fiddle that colours its output (FORCE_COLOR, or a library that decides so) writes terminal escape sequences the console doesn't interpret.
+// eslint-disable-next-line no-control-regex
+const ESCAPE_SEQUENCE = /\u001b\[[0-?]*[ -/]*[@-~]/g;
+
+const withoutEscapes = (line: OutputLine): OutputLine => {
+  const text = line.text.replace(ESCAPE_SEQUENCE, '');
+  return text === line.text ? line : { ...line, text };
+};
 
 export function useRunState(): RunState {
   return useWindowState()?.run ?? IDLE_RUN;
 }
 
-/** ⌘R on macOS, Ctrl+R elsewhere. */
-export function useRunKbd(): string {
-  return useAppState()?.platform === 'darwin' ? '⌘R' : 'Ctrl+R';
-}
-
 /** A version reference as shown to people: the release number or the local build's name. */
-export function versionLabel(ref: VersionRefValue | undefined, app: AppState | undefined): string | undefined {
+export function versionLabel(
+  ref: VersionRefValue | undefined,
+  app: AppState | undefined,
+): string | undefined {
   if (!ref) return undefined;
   if (ref.kind === 'release') return ref.version;
   return app?.versions?.localBuilds.find((b) => b.id === ref.id)?.name;
@@ -37,18 +63,22 @@ export function useConsoleLines(): OutputLine[] {
     let live = true;
     let pending: OutputLine[] | null = [];
     const add = (batch: readonly OutputLine[]) => {
-      const fresh = batch.filter((line) => line.seq > last);
+      const fresh = batch.filter((line) => line.seq > last).map(withoutEscapes);
       if (!live || fresh.length === 0) return;
       last = fresh[fresh.length - 1]!.seq;
       setLines((prev) => {
         const next = prev.concat(fresh);
-        return next.length > CONSOLE_LIMIT ? next.slice(next.length - CONSOLE_LIMIT) : next;
+        return next.length > CONSOLE_LIMIT
+          ? next.slice(next.length - CONSOLE_LIMIT)
+          : next;
       });
     };
     let unsubscribe: (() => void) | undefined;
     try {
       // Batches that arrive before the backlog wait for it, so nothing is lost.
-      unsubscribe = runApi.onOutput((batch) => (pending ? pending.push(...batch) : add(batch)));
+      unsubscribe = runApi.onOutput((batch) =>
+        pending ? pending.push(...batch) : add(batch),
+      );
       runApi.GetOutput().then(
         (backlog) => {
           add(backlog);
@@ -56,7 +86,8 @@ export function useConsoleLines(): OutputLine[] {
           pending = null;
           add(early);
         },
-        (error: unknown) => console.error('[fiddle] loading console output failed', error),
+        (error: unknown) =>
+          console.error('[fiddle] loading console output failed', error),
       );
     } catch (error) {
       console.error('[fiddle] console unavailable', error);
@@ -67,7 +98,10 @@ export function useConsoleLines(): OutputLine[] {
     };
   }, []);
 
-  return useMemo(() => lines.filter((line) => line.seq > clearedSeq), [lines, clearedSeq]);
+  return useMemo(
+    () => lines.filter((line) => line.seq > clearedSeq),
+    [lines, clearedSeq],
+  );
 }
 
 let releasesCache: { rev: number; rows: Promise<ReleaseRow[]> } | undefined;

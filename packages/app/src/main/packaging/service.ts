@@ -1,6 +1,6 @@
 /**
- * Package and make with Electron Forge (REQUIREMENTS §17.6): the Forge
- * transform, `<pm> install`, `<pm> run package|make`, then reveal `out/`.
+ * Package and make with Electron Forge: the Forge transform, `<pm> install`,
+ * `<pm> run package|make`, then reveal `out/`.
  *
  * Both run the fiddle's dependencies' install scripts and Forge itself, so they
  * need the same trust approval as a run. An unapproved fiddle is refused; there
@@ -25,14 +25,13 @@ import {
   type CommandLine,
   type PackageManager,
 } from '../../fiddle/modules';
-import { generatePackageJson } from '../../fiddle/package-json';
+import { generatePackageJson, osUserName } from '../../fiddle/package-json';
 import { FiddleError } from '../../shared/errors';
 import type { ReleaseRow } from '../../shared/stores';
 import * as documents from '../documents/service';
 import { tm } from '../i18n';
 import { log } from '../log';
 import type { StateHub } from '../state-hub';
-import { toPackageName } from '../run/logic';
 import { PM_INSTALL_URLS, type RunService } from '../run/service';
 import type { VersionsService } from '../versions/service';
 
@@ -70,7 +69,9 @@ export function forgeElectronFor(
   versions: Pick<VersionsService, 'localBuild' | 'releases' | 'electronVersions'>,
 ): ForgeElectron {
   return {
-    ...(ref.kind === 'release' ? { release: ref.version } : { localPath: versions.localBuild(ref.id)?.path }),
+    ...(ref.kind === 'release'
+      ? { release: ref.version }
+      : { localPath: versions.localBuild(ref.id)?.path }),
     releases: versions.releases(),
     electronVersions: versions.electronVersions,
   };
@@ -78,13 +79,18 @@ export function forgeElectronFor(
 
 /** A fiddle as an Electron Forge project: its files, a generated `package.json`, then the Forge transform. */
 export function forgeProject(
-  fiddle: { files: FileMap; modules: Readonly<Record<string, string>>; name: string; author: string },
+  fiddle: {
+    files: FileMap;
+    modules: Readonly<Record<string, string>>;
+    name: string;
+    author: string;
+  },
   electron: ForgeElectron,
 ): FileMap {
   const options = forgeOptionsFor(electron);
   const electronVersion = electron.release ?? options.latestStableVersion;
   const packageJson = generatePackageJson({
-    name: toPackageName(fiddle.name),
+    name: fiddle.name,
     main: findMainEntry(Object.keys(fiddle.files)) ?? 'main.js',
     author: fiddle.author,
     modules: fiddle.modules,
@@ -95,13 +101,20 @@ export function forgeProject(
 
 interface ForgeInstallOptions {
   ignoreScripts?: boolean;
-  /** `sfw.mjs`: the install runs through Socket Firewall, like a run's module install (§4). */
+  /** `sfw.mjs`: the install runs through Socket Firewall, like a run's module install. */
   sfwPath?: string;
 }
 
 /** The commands of a Forge task: `<pm> install` (`node <sfw.mjs> <pm> install` with Socket Firewall), then `<pm> run package|make`. */
-export function forgeTaskCommands(pm: PackageManager, task: 'package' | 'make', options: ForgeInstallOptions = {}): CommandLine[] {
-  return [buildInstallCommand({ packageManager: pm, ...options }), buildRunScriptCommand(pm, task)];
+export function forgeTaskCommands(
+  pm: PackageManager,
+  task: 'package' | 'make',
+  options: ForgeInstallOptions = {},
+): CommandLine[] {
+  return [
+    buildInstallCommand({ packageManager: pm, ...options }),
+    buildRunScriptCommand(pm, task),
+  ];
 }
 
 /** `<pm> install`, then `<pm> run package|make` in `dir`. Resolves with the command that failed, if any. */
@@ -109,12 +122,24 @@ export async function runForgeTask(
   dir: string,
   pm: PackageManager,
   task: 'package' | 'make',
-  options: ForgeInstallOptions & { env: NodeJS.ProcessEnv; signal?: AbortSignal; onOutput: (text: string) => void },
+  options: ForgeInstallOptions & {
+    env: NodeJS.ProcessEnv;
+    signal?: AbortSignal;
+    onOutput: (text: string) => void;
+  },
 ): Promise<{ command: string; code: number | string } | undefined> {
   const { ignoreScripts, sfwPath, ...commandOptions } = options;
   for (const line of forgeTaskCommands(pm, task, { ignoreScripts, sfwPath })) {
-    const result = await runCommand(line, { cwd: dir, ...commandOptions, env: { ...commandOptions.env, ...line.env } });
-    if (result.code !== 0) return { command: [line.command, ...line.args].join(' '), code: result.code ?? result.signal ?? '' };
+    const result = await runCommand(line, {
+      cwd: dir,
+      ...commandOptions,
+      env: { ...commandOptions.env, ...line.env },
+    });
+    if (result.code !== 0)
+      return {
+        command: [line.command, ...line.args].join(' '),
+        code: result.code ?? result.signal ?? '',
+      };
   }
   return undefined;
 }
@@ -128,49 +153,58 @@ export async function packageFiddle(
   const t = tm('mainRun');
   if (runs.isBusy(windowId)) return;
   runs.openConsole(windowId);
-
-  // The approval lists the packages with install scripts. The build needs
-  // them, so an approval that left scripts off is asked again.
-  const scripted = await documents.installScriptPackages(windowId);
-  const trust = await documents.ensureTrusted(windowId, task, {
-    packagesWithInstallScripts: scripted,
-    requireScripts: scripted.length > 0,
-  });
-  if (!trust.approved) {
-    runs.log(windowId, t('untrusted'), 'error');
-    return;
-  }
-  if (scripted.length > 0 && !trust.allowScripts) {
-    runs.log(windowId, t('scriptsRequired', { packages: scripted.join(', ') }), 'error');
-    return;
-  }
-  // Exactly the approved fiddle is built, whatever the window loads during the awaits below.
-  const fiddle = trust.fiddle;
-  const name = hub.getWindow(windowId)?.fiddle.name ?? 'fiddle';
-
-  const settings = hub.app.settings;
-  const pm = settings.packageManager;
-  const env = await runs.toolEnv();
-  if (!(await findPackageManager(pm, { env }))) {
-    runs.log(windowId, t('pmMissing', { pm, url: PM_INSTALL_URLS[pm] }), 'error');
-    return;
-  }
-
+  // Busy from the start: the approval and the lookups below take a while, and another run must not begin meanwhile.
   const controller = runs.claim(windowId);
-  runs.setState(windowId, { status: 'running', task, errors: [], result: undefined });
+  runs.setState(windowId, { status: 'checking', task, errors: [], result: undefined });
+  let dir: string | undefined;
   try {
+    // The approval lists the packages with install scripts. The build needs
+    // them, so an approval that left scripts off is asked again.
+    const scripted = await documents.installScriptPackages(windowId);
+    const trust = await documents.ensureTrusted(windowId, task, {
+      packagesWithInstallScripts: scripted,
+      requireScripts: scripted.length > 0,
+    });
+    if (!trust.approved) {
+      runs.log(windowId, t('untrusted'), 'error');
+      return;
+    }
+    if (scripted.length > 0 && !trust.allowScripts) {
+      runs.log(
+        windowId,
+        t('scriptsRequired', { packages: scripted.join(', ') }),
+        'error',
+      );
+      return;
+    }
+    // Exactly the approved fiddle is built, whatever the window loads during the awaits below.
+    const fiddle = trust.fiddle;
+    const name = hub.getWindow(windowId)?.fiddle.name ?? 'fiddle';
+
+    const settings = hub.app.settings;
+    const pm = settings.packageManager;
+    const env = await runs.toolEnv();
+    if (!(await findPackageManager(pm, { env }))) {
+      runs.log(windowId, t('pmMissing', { pm, url: PM_INSTALL_URLS[pm] }), 'error');
+      return;
+    }
+
+    runs.setState(windowId, { status: 'running' });
     const project = forgeProject(
       {
         files: { ...fiddle.files },
         modules: fiddle.modules,
         name,
-        author: settings.packageAuthor || os.userInfo().username,
+        author: settings.packageAuthor || osUserName(),
       },
       forgeElectronFor(fiddle.version, versions),
     );
-    const dir = await fsp.mkdtemp(path.join(os.tmpdir(), `electron-fiddle-${task}-`));
+    dir = await fsp.mkdtemp(path.join(os.tmpdir(), `electron-fiddle-${task}-`));
     await writeFiddleFolder(dir, project);
-    runs.log(windowId, task === 'package' ? t('packaging', { path: dir }) : t('making', { path: dir }));
+    runs.log(
+      windowId,
+      task === 'package' ? t('packaging', { path: dir }) : t('making', { path: dir }),
+    );
 
     const failedCommand = await runForgeTask(dir, pm, task, {
       env,
@@ -182,6 +216,7 @@ export async function packageFiddle(
     if (failedCommand) {
       runs.log(windowId, t('commandFailed', failedCommand), 'error');
       runs.setState(windowId, { result: 'failure' });
+      await removeProject(dir);
       return;
     }
     const out = path.join(dir, 'out');
@@ -195,8 +230,17 @@ export async function packageFiddle(
       runs.log(windowId, FiddleError.from(error).message, 'error');
     }
     runs.setState(windowId, { result: 'failure' });
+    await removeProject(dir);
   } finally {
     runs.release(windowId);
     runs.setState(windowId, { status: 'ready', task: 'run' });
   }
+}
+
+/** A project that failed to build is no use: don't leave its `node_modules` in the temp folder. */
+async function removeProject(dir: string | undefined): Promise<void> {
+  if (dir === undefined) return;
+  await fsp
+    .rm(dir, { recursive: true, force: true })
+    .catch((error: unknown) => log.warn('removing the project failed', dir, error));
 }

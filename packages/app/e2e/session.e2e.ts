@@ -9,7 +9,7 @@ import { startFixtureServer } from './fixtures/server.ts';
 import { windowState } from './harness.ts';
 
 describe('session', () => {
-  it('reopens every window with its fiddle, version and layout @feature new.session-restore', async () => {
+  it('reopens every window with its fiddle, version and layout', async () => {
     const fixtures = await startFixtureServer();
     let first: FiddleApp | undefined;
     let second: FiddleApp | undefined;
@@ -21,7 +21,9 @@ describe('session', () => {
         .poll(async () => (await windowState(first!, 0)).fiddle.versionRef)
         .toEqual({ kind: 'release', version: '43.7.0' });
       await first.click(role('button', 'Split editor'));
-      await expect.poll(async () => (await windowState(first!, 0)).layout.panes).toHaveLength(2);
+      await expect
+        .poll(async () => (await windowState(first!, 0)).layout.panes)
+        .toHaveLength(2);
       await first.runCommand('app.newWindow');
       await first.waitForWindow(1);
       const before = [await windowState(first, 0), await windowState(first, 1)];
@@ -29,12 +31,19 @@ describe('session', () => {
       await first.assertClean();
       await first.close();
 
-      second = await launchApp({ fixtures, env: { FIDDLE_TEST_DIR: first.testDir ?? '' } });
+      second = await launchApp({
+        fixtures,
+        env: { FIDDLE_TEST_DIR: first.testDir ?? '' },
+      });
       await second.waitForWindow(1);
       const after = [await windowState(second, 0), await windowState(second, 1)];
       const summary = (states: typeof before) =>
         states
-          .map((s) => ({ name: s.fiddle.name, version: s.fiddle.versionRef, panes: s.layout.panes }))
+          .map((s) => ({
+            name: s.fiddle.name,
+            version: s.fiddle.versionRef,
+            panes: s.layout.panes,
+          }))
           .sort((a, b) => a.name.localeCompare(b.name));
       expect(summary(after)).toEqual(summary(before));
       await second.assertClean();

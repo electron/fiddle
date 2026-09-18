@@ -1,4 +1,3 @@
-import * as semver from 'semver';
 import { z } from 'zod';
 
 import { ErrorCode, FiddleError } from '../shared/errors';
@@ -8,8 +7,6 @@ import {
   assertCanRenameFile,
   ensureMainEntry,
   type FileMap,
-  findMainEntry,
-  getExtension,
   getPlaceholder,
   isEmptyOrPlaceholder,
   moveName,
@@ -74,7 +71,10 @@ export function createFiddle(input: CreateFiddleInput): Fiddle {
 
 function assertHasFile(fiddle: Fiddle, name: string): void {
   if (!Object.hasOwn(fiddle.files, name)) {
-    throw new FiddleError(ErrorCode.notFound, `No file named "${name}"`, { reason: 'file-not-found', name });
+    throw new FiddleError(ErrorCode.notFound, `No file named "${name}"`, {
+      reason: 'file-not-found',
+      name,
+    });
   }
 }
 
@@ -88,7 +88,11 @@ export function visibleFileNames(fiddle: Fiddle): string[] {
 }
 
 /** Adds a visible file. New files get their language's placeholder. */
-export function addFile(fiddle: Fiddle, name: string, content: string = getPlaceholder(name)): Fiddle {
+export function addFile(
+  fiddle: Fiddle,
+  name: string,
+  content: string = getPlaceholder(name),
+): Fiddle {
   assertCanAddFile(Object.keys(fiddle.files), name);
   return { ...fiddle, files: { ...fiddle.files, [name]: content } };
 }
@@ -97,7 +101,9 @@ export function renameFile(fiddle: Fiddle, from: string, to: string): Fiddle {
   assertCanRenameFile(Object.keys(fiddle.files), from, to);
   return {
     ...fiddle,
-    files: Object.fromEntries(Object.entries(fiddle.files).map(([n, c]) => [n === from ? to : n, c])),
+    files: Object.fromEntries(
+      Object.entries(fiddle.files).map(([n, c]) => [n === from ? to : n, c]),
+    ),
     hidden: fiddle.hidden.map((n) => (n === from ? to : n)),
   };
 }
@@ -113,7 +119,9 @@ export function removeFile(fiddle: Fiddle, name: string): Fiddle {
 
 export function hideFile(fiddle: Fiddle, name: string): Fiddle {
   assertHasFile(fiddle, name);
-  return fiddle.hidden.includes(name) ? fiddle : { ...fiddle, hidden: [...fiddle.hidden, name] };
+  return fiddle.hidden.includes(name)
+    ? fiddle
+    : { ...fiddle, hidden: [...fiddle.hidden, name] };
 }
 
 export function showFile(fiddle: Fiddle, name: string): Fiddle {
@@ -136,27 +144,11 @@ export function setFileContent(fiddle: Fiddle, name: string, content: string): F
   return { ...fiddle, files: { ...fiddle.files, [name]: content } };
 }
 
-export const ESM_MIN_MAJOR = 28;
-
-/**
- * Pre-run check: a `main.mjs` entry needs Electron 28 or later. Local builds
- * and non-semver versions pass. Returns the error that refuses the run, or null.
- */
-export function checkEsmSupport(files: FileMap, version: VersionRef): FiddleError | null {
-  if (version.kind === 'local') return null;
-  const main = findMainEntry(Object.keys(files));
-  if (!main || getExtension(main) !== '.mjs') return null;
-  const parsed = semver.parse(version.version);
-  if (!parsed || parsed.major >= ESM_MIN_MAJOR) return null;
-  return new FiddleError(ErrorCode.invalidArgument, `${main} needs Electron ${ESM_MIN_MAJOR} or later`, {
-    reason: 'esm-unsupported',
-    file: main,
-    version: version.version,
-  });
-}
-
 /** True if both maps hold the same names with the same content (hidden files included). */
 export function sameFiles(a: FileMap, b: FileMap): boolean {
   const keys = Object.keys(a);
-  return keys.length === Object.keys(b).length && keys.every((k) => Object.hasOwn(b, k) && a[k] === b[k]);
+  return (
+    keys.length === Object.keys(b).length &&
+    keys.every((k) => Object.hasOwn(b, k) && a[k] === b[k])
+  );
 }

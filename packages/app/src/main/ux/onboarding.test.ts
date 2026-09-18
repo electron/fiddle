@@ -21,8 +21,9 @@ beforeEach(() => {
   dir = fs.mkdtempSync(path.join(os.tmpdir(), 'fiddle-onboarding-'));
 });
 
-afterEach(() => {
+afterEach(async () => {
   flags.tour = true;
+  await flushAll();
   fs.rmSync(dir, { recursive: true, force: true });
 });
 
@@ -30,7 +31,10 @@ afterEach(() => {
 function load() {
   const store = createJsonStore<AppStateFile>({
     file: path.join(dir, 'state.json'),
-    schema: z.looseObject({ tourDone: z.boolean().optional(), crashNoticeShown: z.boolean().optional() }),
+    schema: z.looseObject({
+      tourDone: z.boolean().optional(),
+      crashNoticeShown: z.boolean().optional(),
+    }),
     defaults: { sessions: [], recentFolders: [] },
     version: 1,
   });
@@ -38,7 +42,6 @@ function load() {
 }
 
 describe('onboarding', () => {
-  // @feature onboarding.tour onboarding.offer-repeat
   it('offers the tour once per launch until it is done', () => {
     const first = load();
     expect(first.shouldOfferTour()).toBe(true);
@@ -61,7 +64,9 @@ describe('onboarding', () => {
     const next = load();
     expect(next.takeCrashReportsNotice(true)).toBe(false);
     expect(next.shouldOfferTour()).toBe(false);
-    expect(JSON.parse(fs.readFileSync(path.join(dir, 'state.json'), 'utf8'))).toMatchObject({
+    expect(
+      JSON.parse(fs.readFileSync(path.join(dir, 'state.json'), 'utf8')),
+    ).toMatchObject({
       tourDone: true,
       crashNoticeShown: true,
     });

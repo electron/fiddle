@@ -23,7 +23,9 @@ export interface PaletteItem {
 const IDLE_KINDS: ReadonlySet<PaletteKind> = new Set(['command', 'editor']);
 
 const isWordStart = (text: string, index: number) =>
-  index === 0 || /[\s._\-/:@()]/.test(text[index - 1] ?? '') || /[a-z][A-Z]/.test(text.slice(index - 1, index + 1));
+  index === 0 ||
+  /[\s._\-/:@()]/.test(text[index - 1] ?? '') ||
+  /[a-z][A-Z]/.test(text.slice(index - 1, index + 1));
 
 /**
  * How well `query` matches `text`, or null if it doesn't. Substrings beat
@@ -87,7 +89,9 @@ export function rankItems<T extends PaletteItem>(
   if (query.trim() === '') {
     const byId = new Map(items.map((item) => [item.id, item]));
     const first = recent.map((id) => byId.get(id)).filter((item) => item !== undefined);
-    const rest = items.filter((item) => IDLE_KINDS.has(item.kind) && !recency.has(item.id));
+    const rest = items.filter(
+      (item) => IDLE_KINDS.has(item.kind) && !recency.has(item.id),
+    );
     return [...first, ...rest].slice(0, limit);
   }
 

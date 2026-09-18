@@ -49,7 +49,6 @@ let versionsCache: string;
 beforeAll(async () => {
   tmpdir = await fs.promises.mkdtemp(path.join(os.tmpdir(), 'fiddle-core-'));
 
-  // Copy the releases.json fixture over to populate the versions cache
   versionsCache = path.join(tmpdir, 'versions.json');
   const filename = path.join(import.meta.dirname, 'fixtures', 'releases.json');
   await fs.promises.copyFile(filename, versionsCache);
@@ -143,12 +142,15 @@ describe('Runner', () => {
         },
       );
 
-      expect(mockSubprocess.stderr.pipe).toHaveBeenCalledWith({
-        write: mockStdout,
-      });
-      expect(mockSubprocess.stdout.pipe).toHaveBeenCalledWith({
-        write: mockStdout,
-      });
+      // `out` is shared by both streams and by later runs, so it isn't ended
+      expect(mockSubprocess.stderr.pipe).toHaveBeenCalledWith(
+        { write: mockStdout },
+        { end: false },
+      );
+      expect(mockSubprocess.stdout.pipe).toHaveBeenCalledWith(
+        { write: mockStdout },
+        { end: false },
+      );
       expect(mockStdout).toHaveBeenCalledTimes(1);
     });
 
@@ -397,6 +399,19 @@ describe('Runner', () => {
         range: ['12.0.0', '12.0.1'],
         status: 'bisect_succeeded',
       });
+    });
+
+    it.each([
+      ['12.0.0', '12.0.0'],
+      ['12.0.0', '9.9.9'],
+    ])('rejects a range of %s to %s, which has fewer than two versions', async (a, b) => {
+      const runner = await createFakeRunner({});
+      runner.run = vi.fn();
+
+      await expect(
+        runner.bisect(a, b, '642fa8daaebea6044c9079e3f8a46390'),
+      ).rejects.toHaveProperty('code', 'invalid-version');
+      expect(runner.run).not.toHaveBeenCalled();
     });
 
     it('throws on invalid fiddle', async () => {

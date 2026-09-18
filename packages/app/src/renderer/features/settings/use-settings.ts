@@ -1,91 +1,59 @@
 /**
  * Settings in the renderer: the `App` store's settings with this window's
- * pending changes on top (see ./optimistic.ts). `set` and `reset` show the
+ * pending changes on top (see ../../optimistic.ts). `set` and `reset` show the
  * change at once, call main, and reconcile on the returned rev. A rejected
  * change is dropped and shown as a toast.
  */
-import { useCallback, useEffect, useMemo, useSyncExternalStore } from 'react';
+import { useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { settingsApi } from '../../../ipc/renderer';
-import { FiddleError } from '../../../shared/errors';
-import { defaultSettings, type SettingKey, type Settings } from '../../../shared/settings';
+import {
+  defaultSettings,
+  type SettingKey,
+  type Settings,
+} from '../../../shared/settings';
 import type { AppState } from '../../../shared/stores';
-import { showToast } from '../../../ui';
+import { createOptimistic } from '../../optimistic';
 import { useAppState } from '../../state';
-import { outstanding, withPending, type PendingChange } from './optimistic';
+import { toastError } from '../../toast-error';
 
-// One pending list per window, shared by every component that shows settings.
-let pending: PendingChange[] = [];
-let nextId = 1;
-const listeners = new Set<() => void>();
-
-function subscribe(listener: () => void): () => void {
-  listeners.add(listener);
-  return () => listeners.delete(listener);
-}
-
-function replace(next: PendingChange[]): void {
-  pending = next;
-  for (const listener of listeners) listener();
-}
-
-async function commit(
-  key: SettingKey,
-  value: unknown,
-  send: () => Promise<number>,
-  onError: (error: FiddleError) => void,
-): Promise<void> {
-  const id = nextId++;
-  replace([...pending, { id, key, value }]);
-  try {
-    const rev = await send();
-    replace(pending.map((change) => (change.id === id ? { ...change, rev } : change)));
-  } catch (error) {
-    replace(pending.filter((change) => change.id !== id));
-    onError(FiddleError.from(error));
-  }
-}
+// One per window, shared by every component that shows settings.
+const settingsChanges = createOptimistic<Settings>();
 
 export interface UseSettings {
   /** The App store, once it has loaded. */
   app: AppState | undefined;
   settings: Settings;
-  set<K extends SettingKey>(key: K, value: Settings[K]): void;
+  /** Resolves to whether main accepted the change; a rejection has already been shown as a toast. */
+  set<K extends SettingKey>(key: K, value: Settings[K]): Promise<boolean>;
   reset(key: SettingKey): void;
 }
 
 export function useSettings(): UseSettings {
   const { t } = useTranslation('settings');
   const app = useAppState();
-  const rev = app?.rev ?? 0;
-  const list = useSyncExternalStore(subscribe, () => pending);
+  const settings = settingsChanges.use(app?.settings ?? defaultSettings, app?.rev ?? 0);
+  const failedTitle = t('changeFailed');
 
-  useEffect(() => {
-    const left = outstanding(pending, rev);
-    if (left.length !== pending.length) replace(left);
-  }, [rev, list]);
-
-  const settings = useMemo(
-    () => withPending(app?.settings ?? defaultSettings, list, rev),
-    [app?.settings, list, rev],
-  );
-
-  const onError = useCallback(
-    (error: FiddleError) => showToast({ tone: 'error', title: t('changeFailed'), description: error.message }),
-    [t],
-  );
   const set = useCallback(
-    <K extends SettingKey>(key: K, value: Settings[K]) => {
-      void commit(key, value, () => settingsApi.SetSetting(key, value), onError);
-    },
-    [onError],
+    <K extends SettingKey>(key: K, value: Settings[K]) =>
+      settingsChanges.change(
+        (current) => ({ ...current, [key]: value }),
+        () => settingsApi.SetSetting(key, value),
+        failedTitle,
+      ),
+    [failedTitle],
   );
   const reset = useCallback(
     (key: SettingKey) => {
-      void commit(key, defaultSettings[key], () => settingsApi.ResetSetting(key), onError);
+      void settingsChanges.change(
+        (current) => ({ ...current, [key]: defaultSettings[key] }),
+        () => settingsApi.ResetSetting(key),
+        failedTitle,
+      );
     },
-    [onError],
+    [failedTitle],
   );
 
   return { app, settings, set, reset };
@@ -96,9 +64,7 @@ export function useSettingsAction(): (action: () => Promise<unknown>) => void {
   const { t } = useTranslation('settings');
   return useCallback(
     (action) => {
-      action().catch((error: unknown) =>
-        showToast({ tone: 'error', title: t('actionFailed'), description: FiddleError.from(error).message }),
-      );
+      action().catch((error: unknown) => toastError(error, t('actionFailed')));
     },
     [t],
   );

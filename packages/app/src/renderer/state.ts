@@ -2,20 +2,38 @@
  * The App and Window stores, subscribed once per window. EIPC adds an IPC
  * listener for every `useAppStore()` and `useWindowStore()` call, so only
  * `StoreProvider` calls them; everything else reads the stores from here.
+ *
+ * Main sends every push as new objects, so `StoreProvider` hands out the
+ * previous objects for the parts that didn't change (`shareEqual`), which is
+ * what lets `memo` and `useMemo` on a slice of a store skip work.
  */
-import { createContext, createElement, use, type ReactNode } from 'react';
+import { createContext, createElement, use, useState, type ReactNode } from 'react';
 
-import { useAppStore, useWindowStore, type AppStoreState, type WindowStoreState } from '../ipc/renderer';
+import {
+  useAppStore,
+  useWindowStore,
+  type AppStoreState,
+  type WindowStoreState,
+} from '../ipc/renderer';
 import type { AppState, WindowState } from '../shared/stores';
+import { shareEqual } from './share-equal';
 import { useWithPending } from './shell/window-state';
 
 const AppStoreContext = createContext<AppStoreState>({ state: 'loading' });
 const WindowStoreContext = createContext<WindowStoreState>({ state: 'loading' });
 
+/** `store` with the parts of its state that equal the last render's kept as they were. */
+function useShared<S extends AppStoreState | WindowStoreState>(store: S): S {
+  const [last, setLast] = useState(store);
+  const shared = store === last ? last : shareEqual(last, store);
+  if (shared !== last) setLast(shared);
+  return shared;
+}
+
 /** Subscribes to both stores. Wrap the window's root in it once. */
 export function StoreProvider({ children }: { children: ReactNode }) {
-  const app = useAppStore();
-  const win = useWindowStore();
+  const app = useShared(useAppStore());
+  const win = useShared(useWindowStore());
   return createElement(
     AppStoreContext.Provider,
     { value: app },
@@ -23,7 +41,6 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   );
 }
 
-/** The App store, or undefined before it has loaded. */
 export function useAppState(): AppState | undefined {
   const app = use(AppStoreContext);
   return app.state === 'ready' ? app.result : undefined;
@@ -33,4 +50,15 @@ export function useAppState(): AppState | undefined {
 export function useWindowState(): WindowState | null {
   const win = use(WindowStoreContext);
   return useWithPending(win.state === 'ready' ? win.result : null);
+}
+
+/** The error a store failed to load with, if one did. */
+export function useStoreError(): Error | undefined {
+  const app = use(AppStoreContext);
+  const win = use(WindowStoreContext);
+  return app.state === 'error'
+    ? app.error
+    : win.state === 'error'
+      ? win.error
+      : undefined;
 }

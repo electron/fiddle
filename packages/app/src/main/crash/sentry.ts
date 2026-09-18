@@ -1,6 +1,5 @@
 /**
- * Sentry in the main process (REQUIREMENTS §14): org `electronjs`, project
- * `electron-fiddle`.
+ * Sentry in the main process: org `electronjs`, project `electron-fiddle`.
  *
  * - Off in dev (unpackaged), in test mode, in headless mode, and when the
  *   "Send crash reports" setting is off. The setting is read from
@@ -9,7 +8,7 @@
  * - An explicit integration allowlist: no console, network or local-variable
  *   integrations. `sendDefaultPii` is off.
  * - `IPCMode.Classic`: renderers reach Sentry through the app's own preload
- *   (src/preload/index.ts), the one documented exception to EIPC (§3).
+ *   (src/preload/index.ts), the one exception to EIPC-only IPC.
  * - `beforeSend` / `beforeBreadcrumb` scrub everything (./scrub.ts). Native
  *   dumps from main are never sent; renderer dumps only after the user agrees,
  *   crash by crash.
@@ -38,14 +37,13 @@ export function isCrashReportingEnabled(): boolean {
 
 /**
  * The Sentry release, `Electron-Fiddle@<package.json version>` with no `v`:
- * `@sentry/electron`'s default format, which the release workflow uses too
- * (PROGRESS.md, "Sentry release name").
+ * `@sentry/electron`'s default format, which the release workflow uses too.
  */
 function releaseName(appName: string, version: string): string {
   return `${appName.replace(/\W/g, '-')}@${version.replace(/^v/, '')}`;
 }
 
-/** Headless CLI mode (REQUIREMENTS §7) never sends crash reports. */
+/** Headless CLI mode never sends crash reports. */
 function isHeadless(argv: readonly string[] = process.argv): boolean {
   return argv.includes('--headless');
 }
@@ -53,7 +51,9 @@ function isHeadless(argv: readonly string[] = process.argv): boolean {
 /** Reads `crashReports` straight from settings.json: Sentry starts before the settings store. */
 function readCrashReportsSetting(userData: string): boolean {
   try {
-    const data: unknown = JSON.parse(fs.readFileSync(path.join(userData, 'settings.json'), 'utf8'));
+    const data: unknown = JSON.parse(
+      fs.readFileSync(path.join(userData, 'settings.json'), 'utf8'),
+    );
     const value = (data as { crashReports?: unknown } | null)?.crashReports;
     return parseSetting('crashReports', value)?.value ?? defaultSettings.crashReports;
   } catch {
@@ -128,7 +128,7 @@ export function initCrashReporting(): void {
       Sentry.childProcessIntegration(),
       Sentry.onUncaughtExceptionIntegration(),
       Sentry.onUnhandledRejectionIntegration(),
-      // Release health: crash-free sessions gate stable releases (§13).
+      // Release health: crash-free sessions gate stable releases.
       Sentry.mainProcessSessionIntegration(),
       Sentry.eventFiltersIntegration(),
       Sentry.functionToStringIntegration(),

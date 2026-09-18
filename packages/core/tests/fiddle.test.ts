@@ -68,22 +68,15 @@ describe('FiddleFactory', () => {
       const fiddle = await fiddleFactory.create(sourceDir);
       expect(fiddle).toBeTruthy();
 
-      // test that the fiddle is a copy of the original
       const dirname = path.dirname(fiddle!.mainPath);
       expect(dirname).not.toEqual(sourceDir);
-
-      // test that main.js file is created (not app.asar)
       expect(path.basename(fiddle!.mainPath)).toBe('main.js');
-
-      // test that the fiddle is kept in the fiddle cache
       expect(path.dirname(dirname)).toBe(fiddleDir);
 
-      // test that the file list is identical
       const sourceFiles = fs.readdirSync(sourceDir);
       const fiddleFiles = fs.readdirSync(dirname);
       expect(fiddleFiles).toStrictEqual(sourceFiles);
 
-      // test that the files' contents are identical
       for (const file of fiddleFiles) {
         const sourceFile = path.join(sourceDir, file);
         const fiddleFile = path.join(dirname, file);
@@ -98,16 +91,13 @@ describe('FiddleFactory', () => {
       const fiddle = await fiddleFactory.create(files.entries());
       expect(fiddle).toBeTruthy();
 
-      // test that the fiddle is kept in the fiddle cache
       const dirname = path.dirname(fiddle!.mainPath);
       expect(path.dirname(dirname)).toBe(fiddleDir);
 
-      // test that the file list is identical
       const sourceFiles = [...files.keys()];
       const fiddleFiles = fs.readdirSync(dirname);
       expect(fiddleFiles).toEqual(sourceFiles);
 
-      // test that the files' contents are identical
       for (const file of fiddleFiles) {
         const source = files.get(file);
         const fiddleFile = path.join(dirname, file);
@@ -135,6 +125,46 @@ describe('FiddleFactory', () => {
       expect(path.dirname(path.dirname(fiddle!.mainPath))).toBe(fiddleDir);
     });
 
+    describe('fromRepo()', () => {
+      // A repository whose default branch is `main`.
+      function makeRepo(): { url: string; commit: (file: string) => void } {
+        const repo = path.join(tmpdir, 'repo');
+        fs.mkdirSync(repo);
+        const git = (...args: string[]) =>
+          execFileSync(
+            'git',
+            ['-c', 'user.name=test', '-c', 'user.email=test@example.com', ...args],
+            { cwd: repo, stdio: 'ignore' },
+          );
+        git('init', '-q', '-b', 'main');
+        const commit = (file: string) => {
+          fs.writeFileSync(path.join(repo, file), file);
+          git('add', '.');
+          git('-c', 'commit.gpgsign=false', 'commit', '-q', '-m', file);
+        };
+        commit('main.js');
+        return { url: pathToFileURL(repo).href, commit };
+      }
+
+      it("clones the repository's default branch, and updates it on the next call", async () => {
+        const { url, commit } = makeRepo();
+        const fiddle = await fiddleFactory.fromRepo(url);
+        expect(fs.existsSync(fiddle.mainPath)).toBe(true);
+
+        commit('second.js');
+        await fiddleFactory.fromRepo(url);
+        expect(fs.existsSync(path.join(path.dirname(fiddle.mainPath), 'second.js'))).toBe(
+          true,
+        );
+      });
+
+      it('checks out the branch it is given', async () => {
+        const { url } = makeRepo();
+        const fiddle = await fiddleFactory.fromRepo(url, 'main');
+        expect(fs.existsSync(fiddle.mainPath)).toBe(true);
+      });
+    });
+
     it('acts as a pass-through when given a fiddle', async () => {
       const fiddleIn = new Fiddle('/main/path', 'source');
       const fiddle = await fiddleFactory.create(fiddleIn);
@@ -153,17 +183,14 @@ describe('FiddleFactory', () => {
         );
       }
 
-      // test that app.asar file is created
       expect(fiddle).toBeTruthy();
       expect(path.basename(fiddle!.mainPath)).toBe('app.asar');
 
-      // test that the file list is identical
       const dirname: string = fiddle!.mainPath;
       const sourceFiles = fs.readdirSync(sourceDir);
       const asarFiles = normalizeAsarFiles(asar.listPackage(dirname, { isPack: false }));
       expect(asarFiles).toStrictEqual(sourceFiles);
 
-      // test that the files' contents are identical
       for (const file of sourceFiles) {
         const sourceFileContent = fs.readFileSync(path.join(sourceDir, file), 'utf-8');
         const asarFileContent = asar.extractFile(dirname, file).toString();
@@ -171,18 +198,22 @@ describe('FiddleFactory', () => {
       }
     });
 
-    it.todo('reads fiddles from git repositories');
-    it.todo('refreshes the cache if given a previously-cached git repository');
+    it('packs a fiddle it was given as many times as needed, and leaves its folder', async () => {
+      const fiddle = (await fiddleFactory.create(
+        fiddleFixture('642fa8daaebea6044c9079e3f8a46390'),
+      ))!;
+      for (let i = 0; i < 2; i++) {
+        const packed = await fiddleFactory.create(fiddle, { packAsAsar: true });
+        expect(asar.listPackage(packed!.mainPath, { isPack: false })).toContain(
+          path.sep + 'main.js',
+        );
+      }
+      expect(fs.existsSync(fiddle.mainPath)).toBe(true);
+    });
 
     it('returns undefined for unknown input', async () => {
       const fiddle = await fiddleFactory.create('fnord');
       expect(fiddle).toBeUndefined();
     });
-  });
-});
-
-describe('Fiddle', () => {
-  describe('remove()', () => {
-    it.todo('removes the fiddle');
   });
 });

@@ -26,8 +26,12 @@ describe('isolation', () => {
       expect.objectContaining({ method: 'GET', path: '/releases.json', status: 200 }),
     );
 
-    expect(await app.mainHook('harness.fetch', 'https://example.com/')).toHaveProperty('error');
-    expect(await app.mainHook('harness.netFetch', 'https://example.org/')).toHaveProperty('error');
+    expect(await app.mainHook('harness.fetch', 'https://example.com/')).toHaveProperty(
+      'error',
+    );
+    expect(await app.mainHook('harness.netFetch', 'https://example.org/')).toHaveProperty(
+      'error',
+    );
     const violations = await app.violations();
     expect(violations).toEqual(
       expect.arrayContaining([
@@ -39,7 +43,9 @@ describe('isolation', () => {
 
   it('fixes the locale and time zone in the renderer', async () => {
     expect(
-      await app.evaluate('[navigator.language, Intl.DateTimeFormat().resolvedOptions().timeZone]'),
+      await app.evaluate(
+        '[navigator.language, Intl.DateTimeFormat().resolvedOptions().timeZone]',
+      ),
     ).toEqual(['en-US', 'UTC']);
   });
 

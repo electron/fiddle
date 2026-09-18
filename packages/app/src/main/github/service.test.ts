@@ -15,11 +15,24 @@ const SHA2 = '2222222222222222222222222222222222222222';
 interface Call {
   method: string;
   path: string;
-  body: { files?: Record<string, { content: string } | null>; description?: string; public?: boolean } | undefined;
+  body:
+    | {
+        files?: Record<string, { content: string } | null>;
+        description?: string;
+        public?: boolean;
+      }
+    | undefined;
 }
 
-function json(body: unknown, status = 200, headers: Record<string, string> = {}): Response {
-  return new Response(JSON.stringify(body), { status, headers: { 'content-type': 'application/json', ...headers } });
+function json(
+  body: unknown,
+  status = 200,
+  headers: Record<string, string> = {},
+): Response {
+  return new Response(JSON.stringify(body), {
+    status,
+    headers: { 'content-type': 'application/json', ...headers },
+  });
 }
 
 function gistBody(files: Record<string, string>, sha: string) {
@@ -28,12 +41,16 @@ function gistBody(files: Record<string, string>, sha: string) {
     html_url: `https://gist.github.com/${ID}`,
     owner: { login: 'octocat' },
     history: [{ version: sha }],
-    files: Object.fromEntries(Object.entries(files).map(([name, content]) => [name, { filename: name, content }])),
+    files: Object.fromEntries(
+      Object.entries(files).map(([name, content]) => [name, { filename: name, content }]),
+    ),
   };
 }
 
 /** A tiny in-memory GitHub: one gist, created by POST and replaced by PATCH (null deletes). */
-function fakeGitHub(options: { remote?: Record<string, string>; user?: () => Response } = {}) {
+function fakeGitHub(
+  options: { remote?: Record<string, string>; user?: () => Response } = {},
+) {
   const calls: Call[] = [];
   let remote: Record<string, string> | undefined = options.remote;
   const fetchFn = (async (input: string | URL | Request, init?: RequestInit) => {
@@ -45,10 +62,15 @@ function fakeGitHub(options: { remote?: Record<string, string>; user?: () => Res
     };
     calls.push(call);
     if (call.path === '/user') {
-      return options.user?.() ?? json({ login: 'octocat' }, 200, { 'x-oauth-scopes': 'gist, repo' });
+      return (
+        options.user?.() ??
+        json({ login: 'octocat' }, 200, { 'x-oauth-scopes': 'gist, repo' })
+      );
     }
     if (call.method === 'POST' && call.path === '/gists') {
-      remote = Object.fromEntries(Object.entries(call.body!.files!).map(([n, f]) => [n, f!.content]));
+      remote = Object.fromEntries(
+        Object.entries(call.body!.files!).map(([n, f]) => [n, f!.content]),
+      );
       return json(gistBody(remote, SHA1), 201);
     }
     if (call.path === `/gists/${ID}`) {
@@ -78,9 +100,12 @@ function fakeStore(initial: LoadResult = { kind: 'none' }) {
   };
 }
 
-function fakeDocuments(fiddle: Partial<GistFiddle> = {}): GistDocuments & { saved: unknown[]; deleted: number } {
+function fakeDocuments(
+  fiddle: Partial<GistFiddle> = {},
+): GistDocuments & { saved: unknown[]; sent: unknown[]; deleted: number } {
   const docs = {
     saved: [] as unknown[],
+    sent: [] as unknown[],
     deleted: 0,
     getFiddle: async (): Promise<GistFiddle> => ({
       files: { 'main.js': 'console.log(1)', 'index.html': '<p>hi</p>' },
@@ -88,11 +113,18 @@ function fakeDocuments(fiddle: Partial<GistFiddle> = {}): GistDocuments & { save
       versionRef: { kind: 'release', version: '43.0.0' },
       modules: { lodash: '^4.17.21' },
       source: {},
+      savedNames: ['main.js', 'index.html', 'removed.css'],
+      fiddleRev: 3,
       ...fiddle,
     }),
-    getTemplate: async () => ({ 'main.js': '// template', 'preload.js': '// template', 'styles.css': 'body {}' }),
-    markGistSaved: (_windowId: string, gist: unknown) => {
+    getTemplate: async () => ({
+      'main.js': '// template',
+      'preload.js': '// template',
+      'styles.css': 'body {}',
+    }),
+    markGistSaved: (_windowId: string, gist: unknown, sent: unknown) => {
       docs.saved.push(gist);
+      docs.sent.push(sent);
     },
     markGistDeleted: () => {
       docs.deleted++;
@@ -113,7 +145,7 @@ function setup(
   const github = fakeGitHub({ remote: options.remote, user: options.user });
   const store = fakeStore(options.stored);
   const documents = fakeDocuments(options.fiddle);
-  const prefs = memoryPrefs({ isPublic: false, asRevision: options.asRevision ?? true });
+  const prefs = memoryPrefs({ asRevision: options.asRevision ?? true });
   const logins: Array<string | undefined> = [];
   const service = new GitHubService({
     store,
@@ -126,17 +158,23 @@ function setup(
   return { service, github, store, documents, prefs, logins };
 }
 
-function memoryPrefs(initial: PublishOptions = { isPublic: false, asRevision: true }): GistPrefs {
-  let options = { ...initial };
+function memoryPrefs(
+  initial: PublishOptions = { asRevision: true },
+): GistPrefs & { isPublic: () => boolean | undefined } {
+  let isPublic: boolean | undefined;
   return {
-    get: () => options,
-    setVisibility: (isPublic) => {
-      options = { ...options, isPublic };
+    get: () => initial,
+    setVisibility: (value) => {
+      isPublic = value;
     },
+    isPublic: () => isPublic,
   };
 }
 
-const stored: LoadResult = { kind: 'ok', credentials: { token: TOKEN, login: 'octocat' } };
+const stored: LoadResult = {
+  kind: 'ok',
+  credentials: { token: TOKEN, login: 'octocat' },
+};
 
 describe('whenReady', () => {
   it('settles at once when init never ran', async () => {
@@ -148,7 +186,9 @@ describe('whenReady', () => {
     let answer!: () => void;
     const checked = new Promise<void>((resolve) => (answer = resolve));
     const user = () =>
-      checked.then(() => json({ login: 'octocat' }, 200, { 'x-oauth-scopes': 'gist' })) as unknown as Response;
+      checked.then(() =>
+        json({ login: 'octocat' }, 200, { 'x-oauth-scopes': 'gist' }),
+      ) as unknown as Response;
     const { service, store } = setup({ stored, user });
     void service.init();
     void service.init();
@@ -192,16 +232,17 @@ describe('startup auth check', () => {
     expect(store.delete).not.toHaveBeenCalled();
   });
 
-  // @feature gist.token-startup-check
   it.each([401, 403])('deletes the token on a %i', async (status) => {
-    const { service, store, logins } = setup({ stored, user: () => json({ message: 'Bad credentials' }, status) });
+    const { service, store, logins } = setup({
+      stored,
+      user: () => json({ message: 'Bad credentials' }, status),
+    });
     await service.init();
     expect(store.delete).toHaveBeenCalledOnce();
     expect(service.login).toBeUndefined();
     expect(logins.at(-1)).toBeUndefined();
   });
 
-  // @feature gist.token-startup-check
   it('keeps the token and the stored login when offline', async () => {
     const { service, store } = setup({
       stored,
@@ -215,10 +256,45 @@ describe('startup auth check', () => {
   });
 
   it('keeps the token when rate limited', async () => {
-    const { service, store } = setup({ stored, user: () => json({ message: 'rate limit' }, 429) });
+    const { service, store } = setup({
+      stored,
+      user: () => json({ message: 'rate limit' }, 429),
+    });
     await service.init();
     expect(store.delete).not.toHaveBeenCalled();
     expect(service.login).toBe('octocat');
+  });
+
+  it('does not sign out a token the user signed in with while the check was running', async () => {
+    const other = `ghp_${'b'.repeat(36)}`;
+    const github = fakeGitHub();
+    let reject!: () => void;
+    const late = new Promise<Response>(
+      (resolve) => (reject = () => resolve(json({ message: 'Bad credentials' }, 401))),
+    );
+    const store = fakeStore(stored);
+    const service = new GitHubService({
+      store,
+      createClient: (token) =>
+        new GitHubClient({
+          token,
+          fetch:
+            token === TOKEN ? ((() => late) as unknown as typeof fetch) : github.fetchFn,
+        }),
+      documents: fakeDocuments(),
+      prefs: memoryPrefs(),
+      setLogin: () => undefined,
+      log: { warn: () => undefined, error: () => undefined },
+    });
+    const restoring = service.init();
+    await vi.waitFor(() => expect(service.login).toBe('octocat'));
+    await service.signIn(other, false);
+
+    reject();
+    await restoring;
+    expect(store.delete).not.toHaveBeenCalled();
+    expect(service.login).toBe('octocat');
+    expect(service.client()).toBeInstanceOf(GitHubClient);
   });
 
   it('signs out with a notice and keeps the file when decryption fails', async () => {
@@ -233,22 +309,29 @@ describe('startup auth check', () => {
 });
 
 describe('sign-in', () => {
-  // @feature gist.sign-in-token gist.token-login-only
   it('verifies the token, stores it and publishes only the login', async () => {
     const { service, store, logins } = setup();
-    expect(await service.signIn(` ${TOKEN} `, false)).toEqual({ login: 'octocat', persisted: true });
-    expect(store.save).toHaveBeenCalledWith({ token: TOKEN, login: 'octocat' }, { allowPlaintext: false });
+    expect(await service.signIn(` ${TOKEN} `, false)).toEqual({
+      login: 'octocat',
+      persisted: true,
+    });
+    expect(store.save).toHaveBeenCalledWith(
+      { token: TOKEN, login: 'octocat' },
+      { allowPlaintext: false },
+    );
     expect(logins).toEqual(['octocat']);
   });
 
-  // @feature gist.sign-in-token
   it('rejects a token without the gist scope', async () => {
-    const { service, store } = setup({ user: () => json({ login: 'octocat' }, 200, { 'x-oauth-scopes': 'repo' }) });
-    await expect(service.signIn(TOKEN, false)).rejects.toMatchObject({ details: { reason: 'missing-scope' } });
+    const { service, store } = setup({
+      user: () => json({ login: 'octocat' }, 200, { 'x-oauth-scopes': 'repo' }),
+    });
+    await expect(service.signIn(TOKEN, false)).rejects.toMatchObject({
+      details: { reason: 'missing-scope' },
+    });
     expect(store.save).not.toHaveBeenCalled();
   });
 
-  // @feature gist.sign-out
   it('signs out by deleting the token', async () => {
     const { service, store } = setup({ stored });
     await service.init();
@@ -261,12 +344,16 @@ describe('sign-in', () => {
 describe('publish', () => {
   it('asks for sign-in first', async () => {
     const { service } = setup();
-    const error = await service.publish('w', { description: 'd', isPublic: false }).catch((e: unknown) => e);
+    const error = await service
+      .publish('w', { description: 'd', isPublic: false })
+      .catch((e: unknown) => e);
     expect(error).toBeInstanceOf(FiddleError);
-    expect(error).toMatchObject({ code: ErrorCode.unauthorized, details: { reason: 'signed-out' } });
+    expect(error).toMatchObject({
+      code: ErrorCode.unauthorized,
+      details: { reason: 'signed-out' },
+    });
   });
 
-  // @feature gist.publish-revision
   it('as a revision: creates from the template, then updates with the real files', async () => {
     const { service, github, documents } = setup({ stored });
     await service.init();
@@ -275,10 +362,18 @@ describe('publish', () => {
     const link = await service.publish('w', { description: 'Demo', isPublic: true });
 
     const writes = github.calls.filter((c) => c.method !== 'GET');
-    expect(writes.map((c) => `${c.method} ${c.path}`)).toEqual(['POST /gists', `PATCH /gists/${ID}`]);
+    expect(writes.map((c) => `${c.method} ${c.path}`)).toEqual([
+      'POST /gists',
+      `PATCH /gists/${ID}`,
+    ]);
     const [create, update] = writes;
     expect(create!.body).toMatchObject({ description: 'Demo', public: true });
-    expect(Object.keys(create!.body!.files!).sort()).toEqual(['main.js', 'package.json', 'preload.js', 'styles.css']);
+    expect(Object.keys(create!.body!.files!).sort()).toEqual([
+      'main.js',
+      'package.json',
+      'preload.js',
+      'styles.css',
+    ]);
     expect(create!.body!.files!['main.js']).toEqual({ content: '// template' });
     // The update carries the real files and deletes template-only files.
     expect(update!.body!.files).toMatchObject({
@@ -289,10 +384,14 @@ describe('publish', () => {
     });
     expect(github.remote()).toEqual(gistFiles(await documents.getFiddle('w')));
     expect(link).toEqual({ id: ID, url: `https://gist.github.com/${ID}` });
-    expect(documents.saved).toEqual([{ id: ID, owner: 'octocat', url: link.url, revision: SHA2 }]);
+    expect(documents.saved).toMatchObject([
+      { id: ID, owner: 'octocat', url: link.url, revision: SHA2 },
+    ]);
+    expect(documents.sent).toMatchObject([
+      { files: { 'main.js': 'console.log(1)', 'index.html': '<p>hi</p>' }, fiddleRev: 3 },
+    ]);
   });
 
-  // @feature gist.publish-revision
   it('without revision: creates the gist with the real files in one step', async () => {
     const { service, github, documents } = setup({ stored, asRevision: false });
     await service.init();
@@ -325,22 +424,32 @@ describe('publish', () => {
       log: { warn: () => undefined, error: () => undefined },
     });
     await failing.init();
-    await expect(failing.publish('w', { description: 'Demo', isPublic: false })).rejects.toMatchObject({
+    await expect(
+      failing.publish('w', { description: 'Demo', isPublic: false }),
+    ).rejects.toMatchObject({
       code: ErrorCode.unavailable,
     });
     expect(patched).toBe(true);
     expect(documents.saved).toMatchObject([{ id: ID, revision: SHA1 }]);
+    // The gist holds only the template, so that is what the fiddle counts as saved.
+    expect(documents.sent).toMatchObject([
+      {
+        files: {
+          'main.js': '// template',
+          'preload.js': '// template',
+          'styles.css': 'body {}',
+        },
+      },
+    ]);
   });
 
-  // @feature gist.publish-visibility
   it('remembers the visibility choice', async () => {
     const { service, prefs } = setup({ stored });
     await service.init();
     await service.publish('w', { description: 'Demo', isPublic: true });
-    expect(prefs.get()).toEqual({ isPublic: true, asRevision: true });
+    expect(prefs.isPublic()).toBe(true);
   });
 
-  // @feature files.add-main files.pkg-deps files.pkg-electron
   it('adds package.json with the modules and the Electron version', () => {
     const files = gistFiles({
       files: { 'renderer.js': '' },
@@ -358,10 +467,17 @@ describe('publish', () => {
     });
   });
 
-  // @feature files.pkg-deps
   it('sets the author from the "Package author" setting', () => {
-    const fiddle = { files: { 'main.js': '' }, name: 'a', versionRef: { kind: 'release', version: '43.0.0' } as const, modules: {}, source: {} };
-    expect(JSON.parse(gistFiles(fiddle, 'octocat')['package.json']!)).toMatchObject({ author: 'octocat' });
+    const fiddle = {
+      files: { 'main.js': '' },
+      name: 'a',
+      versionRef: { kind: 'release', version: '43.0.0' } as const,
+      modules: {},
+      source: {},
+    };
+    expect(JSON.parse(gistFiles(fiddle, 'octocat')['package.json']!)).toMatchObject({
+      author: 'octocat',
+    });
     expect(JSON.parse(gistFiles(fiddle)['package.json']!)).not.toHaveProperty('author');
   });
 });
@@ -369,9 +485,13 @@ describe('publish', () => {
 describe('update and delete', () => {
   const loaded = { source: { gistId: ID, gistRevision: SHA1 } };
 
-  // @feature gist.update
   it('update deletes remote files that were removed locally', async () => {
-    const remote = { 'main.js': 'old', 'index.html': 'old', 'removed.css': 'x', 'package.json': '{}' };
+    const remote = {
+      'main.js': 'old',
+      'index.html': 'old',
+      'removed.css': 'x',
+      'package.json': '{}',
+    };
     const { service, github, documents } = setup({ stored, remote, fiddle: loaded });
     await service.init();
     github.calls.length = 0;
@@ -381,35 +501,77 @@ describe('update and delete', () => {
     const patch = github.calls.find((c) => c.method === 'PATCH')!;
     expect(patch.body!.files!['removed.css']).toBeNull();
     expect(patch.body!.files!['main.js']).toEqual({ content: 'console.log(1)' });
-    expect(Object.keys(github.remote()!).sort()).toEqual(['index.html', 'main.js', 'package.json']);
+    expect(Object.keys(github.remote()!).sort()).toEqual([
+      'index.html',
+      'main.js',
+      'package.json',
+    ]);
     expect(documents.saved).toMatchObject([{ id: ID, revision: SHA2 }]);
+  });
+
+  it('update leaves remote files the fiddle never held', async () => {
+    const remote = {
+      'main.js': 'old',
+      'index.html': 'old',
+      'removed.css': 'x',
+      'README.md': 'docs',
+      'logo.png': 'png',
+    };
+    const { service, github } = setup({ stored, remote, fiddle: loaded });
+    await service.init();
+
+    await service.update('w');
+
+    expect(Object.keys(github.remote()!).sort()).toEqual([
+      'README.md',
+      'index.html',
+      'logo.png',
+      'main.js',
+      'package.json',
+    ]);
   });
 
   it('update needs a loaded gist', async () => {
     const { service } = setup({ stored });
     await service.init();
-    await expect(service.update('w')).rejects.toMatchObject({ code: ErrorCode.notFound, details: { reason: 'no-gist' } });
+    await expect(service.update('w')).rejects.toMatchObject({
+      code: ErrorCode.notFound,
+      details: { reason: 'no-gist' },
+    });
   });
 
-  // @feature gist.delete save.gist-delete-dirty
   it('delete removes the gist and marks the fiddle unsaved', async () => {
-    const { service, github, documents } = setup({ stored, remote: { 'main.js': 'x' }, fiddle: loaded });
+    const { service, github, documents } = setup({
+      stored,
+      remote: { 'main.js': 'x' },
+      fiddle: loaded,
+    });
     await service.init();
     await service.delete('w');
-    expect(github.calls.some((c) => c.method === 'DELETE' && c.path === `/gists/${ID}`)).toBe(true);
+    expect(
+      github.calls.some((c) => c.method === 'DELETE' && c.path === `/gists/${ID}`),
+    ).toBe(true);
     expect(documents.deleted).toBe(1);
   });
 
-  // @feature gist.history
   it('history marks the active revision', async () => {
     // History works signed out; answer /commits directly.
     const commits = [
-      { version: SHA2, committed_at: '2026-09-13T10:00:00Z', change_status: { additions: 3, deletions: 1, total: 4 } },
-      { version: SHA1, committed_at: '2026-09-12T10:00:00Z', change_status: { additions: 10, deletions: 0, total: 10 } },
+      {
+        version: SHA2,
+        committed_at: '2026-09-13T10:00:00Z',
+        change_status: { additions: 3, deletions: 1, total: 4 },
+      },
+      {
+        version: SHA1,
+        committed_at: '2026-09-12T10:00:00Z',
+        change_status: { additions: 10, deletions: 0, total: 10 },
+      },
     ];
     const history = new GitHubService({
       store: fakeStore(),
-      createClient: () => new GitHubClient({ fetch: (async () => json(commits)) as typeof fetch }),
+      createClient: () =>
+        new GitHubClient({ fetch: (async () => json(commits)) as typeof fetch }),
       documents: fakeDocuments(loaded),
       prefs: memoryPrefs(),
       setLogin: () => undefined,

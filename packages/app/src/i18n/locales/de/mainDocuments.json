@@ -53,6 +53,8 @@
   "trustAllowScripts": "Installationsskripte für {{packages}} erlauben",
   "restoreMessage": "Nicht gespeicherte Änderungen wiederherstellen?",
   "restoreDetail": "Electron Fiddle hat nicht gespeicherte Änderungen aus einer früheren Sitzung gefunden: {{names}}.",
+  "restoreFailedMessage": "Einige Fenster konnten nicht wieder geöffnet werden",
+  "restoreFailedDetail": "Ordner oder Gist konnten nicht geladen werden: {{names}}. Prüfe, ob der Ordner verfügbar ist und ob du online bist.",
   "restore": "Wiederherstellen",
   "discardDrafts": "Verwerfen",
   "noRecent": "Keine zuletzt verwendeten Ordner",

@@ -18,8 +18,8 @@ real Electron in test mode, and drives the page through CDP.
   Bash sandbox (mach port / `listen EPERM`). Run everything through the user's
   Terminal panel (`mcp__terminal__run_in_terminal`, then `read_terminal` or a
   tee'd log). Each call opens a tab and the panel has a small tab limit, so put
-  the whole drive in ONE script (see below). Since the CDP harness change the
-  test app runs as a background accessory app and doesn't steal focus.
+  the whole drive in ONE script (see below). The test app runs as a background
+  accessory app and doesn't steal focus.
 
 ## Recipe
 
@@ -53,7 +53,7 @@ poll `read_terminal`, then read the log and PNGs from the sandbox.
   `getBoundingClientRect()`.
 - The menu dump prints before a window has focus, so most items show
   `(disabled)`; structure and accelerators are what to read.
-- Fixture data is small (5 releases), so list virtualization is better judged
+- Fixture data is small (a few releases), so list virtualization is better judged
   by the jsdom tests; the picker's look and width are visible here.
 - `yarn test:e2e <spec>` is the regression net; on macOS it also must run from
   the Terminal panel.

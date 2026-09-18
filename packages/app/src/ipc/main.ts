@@ -17,7 +17,6 @@ export { Settings } from './generated/browser/fiddle';
 export { Modules, Onboarding } from './generated/browser/fiddle';
 export { GitHub } from './generated/browser/fiddle';
 export { Run, Versions } from './generated/browser/fiddle';
-// Platform slice.
 export { AppPlatform } from './generated/browser/fiddle';
 
 interface Bindable<Impl, Dispatcher> {

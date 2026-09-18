@@ -1,5 +1,10 @@
 import { useState, useSyncExternalStore, type ReactNode } from 'react';
-import { Dialog as AriaDialog, Heading, Modal, ModalOverlay } from 'react-aria-components';
+import {
+  Dialog as AriaDialog,
+  Heading,
+  Modal,
+  ModalOverlay,
+} from 'react-aria-components';
 import { cx } from '../cx';
 import { Icon, type IconName } from '../icons/Icon';
 import { Button, IconButton } from './Button';
@@ -19,7 +24,16 @@ interface LayoutProps {
   onClose?: () => void;
 }
 
-function DialogLayout({ heading, description, icon, iconTone = 'accent', children, footer, closeLabel, onClose }: LayoutProps) {
+function DialogLayout({
+  heading,
+  description,
+  icon,
+  iconTone = 'accent',
+  children,
+  footer,
+  closeLabel,
+  onClose,
+}: LayoutProps) {
   const closable = Boolean(onClose && closeLabel);
   return (
     <>
@@ -30,7 +44,9 @@ function DialogLayout({ heading, description, icon, iconTone = 'accent', childre
           </span>
         )}
         {heading}
-        {closable && <IconButton icon="close" size="sm" label={closeLabel!} onPress={onClose} />}
+        {closable && (
+          <IconButton icon="close" size="sm" label={closeLabel!} onPress={onClose} />
+        )}
       </div>
       {description && <div className={styles.description}>{description}</div>}
       {children && <div className={styles.body}>{children}</div>}
@@ -46,7 +62,12 @@ export interface DialogSurfaceProps extends Omit<LayoutProps, 'heading'> {
 }
 
 /** The dialog panel on its own, for inline use and specimens. */
-export function DialogSurface({ title, width = 420, className, ...rest }: DialogSurfaceProps) {
+export function DialogSurface({
+  title,
+  width = 420,
+  className,
+  ...rest
+}: DialogSurfaceProps) {
   return (
     <div className={cx(styles.surface, className)} style={{ maxWidth: width }}>
       <DialogLayout {...rest} heading={<h2 className={styles.title}>{title}</h2>} />
@@ -64,10 +85,22 @@ export interface DialogProps extends Omit<LayoutProps, 'heading' | 'onClose'> {
   width?: number;
 }
 
-/** A modal dialog on overlay glass over a blurred scrim. 420 wide, radius-dialog. */
-export function Dialog({ title, isOpen, onOpenChange, isDismissable = true, role, width = 420, ...rest }: DialogProps) {
+export function Dialog({
+  title,
+  isOpen,
+  onOpenChange,
+  isDismissable = true,
+  role,
+  width = 420,
+  ...rest
+}: DialogProps) {
   return (
-    <ModalOverlay isOpen={isOpen} onOpenChange={onOpenChange} isDismissable={isDismissable} className={styles.scrim}>
+    <ModalOverlay
+      isOpen={isOpen}
+      onOpenChange={onOpenChange}
+      isDismissable={isDismissable}
+      className={styles.scrim}
+    >
       <Modal className={styles.modal} style={{ maxWidth: width }}>
         <AriaDialog role={role} className={styles.surface}>
           {({ close }) => (
@@ -87,14 +120,12 @@ export function Dialog({ title, isOpen, onOpenChange, isDismissable = true, role
   );
 }
 
-/* confirmDialog and promptDialog: promise-returning helpers rendered by one DialogHost. */
-
 export interface ConfirmOptions {
   title: string;
   message?: string;
   confirmLabel: string;
   cancelLabel: string;
-  /** danger makes the confirm button a danger button. */
+  /** danger makes the confirm button a danger button, and focuses Cancel rather than it. */
   tone?: 'default' | 'danger';
   icon?: IconName;
   iconTone?: DialogTone;
@@ -111,10 +142,21 @@ export interface PromptOptions {
 }
 
 type Request =
-  | { kind: 'confirm'; options: ConfirmOptions; resolve: (ok: boolean) => void }
-  | { kind: 'prompt'; options: PromptOptions; resolve: (value: string | null) => void };
+  | {
+      id: number;
+      kind: 'confirm';
+      options: ConfirmOptions;
+      resolve: (ok: boolean) => void;
+    }
+  | {
+      id: number;
+      kind: 'prompt';
+      options: PromptOptions;
+      resolve: (value: string | null) => void;
+    };
 
 let current: Request | null = null;
+let nextRequestId = 0;
 const listeners = new Set<() => void>();
 
 function setRequest(next: Request | null) {
@@ -134,12 +176,16 @@ function subscribe(listener: () => void) {
 
 /** Asks a yes-or-no question. Resolves true when confirmed. Needs a mounted DialogHost. */
 export function confirmDialog(options: ConfirmOptions): Promise<boolean> {
-  return new Promise((resolve) => setRequest({ kind: 'confirm', options, resolve }));
+  return new Promise((resolve) =>
+    setRequest({ id: nextRequestId++, kind: 'confirm', options, resolve }),
+  );
 }
 
 /** Asks for a line of text. Resolves null when cancelled. Needs a mounted DialogHost. */
 export function promptDialog(options: PromptOptions): Promise<string | null> {
-  return new Promise((resolve) => setRequest({ kind: 'prompt', options, resolve }));
+  return new Promise((resolve) =>
+    setRequest({ id: nextRequestId++, kind: 'prompt', options, resolve }),
+  );
 }
 
 function finish(value: boolean | string | null) {
@@ -185,6 +231,7 @@ function PromptBody({ options }: { options: PromptOptions }) {
 export function DialogHost() {
   const request = useSyncExternalStore(subscribe, () => current);
   const cancel = () => finish(request?.kind === 'confirm' ? false : null);
+  const danger = request?.kind === 'confirm' && request.options.tone === 'danger';
   return (
     <ModalOverlay
       isOpen={request !== null}
@@ -196,10 +243,16 @@ export function DialogHost() {
     >
       <Modal className={styles.modal} style={{ maxWidth: 400 }}>
         {request && (
-          <AriaDialog role={request.kind === 'confirm' ? 'alertdialog' : 'dialog'} className={styles.surface}>
+          <AriaDialog
+            role={request.kind === 'confirm' ? 'alertdialog' : 'dialog'}
+            className={styles.surface}
+          >
             <div className={styles.head}>
               {request.kind === 'confirm' && request.options.icon && (
-                <span className={styles.icon} data-tone={request.options.iconTone ?? 'accent'}>
+                <span
+                  className={styles.icon}
+                  data-tone={request.options.iconTone ?? 'accent'}
+                >
                   <Icon name={request.options.icon} size={18} />
                 </span>
               )}
@@ -207,22 +260,24 @@ export function DialogHost() {
                 {request.options.title}
               </Heading>
             </div>
-            {request.options.message && <div className={styles.description}>{request.options.message}</div>}
+            {request.options.message && (
+              <div className={styles.description}>{request.options.message}</div>
+            )}
             {request.kind === 'confirm' ? (
               <div className={styles.footer}>
-                <Button variant="ghost" onPress={() => finish(false)}>
+                <Button variant="ghost" onPress={() => finish(false)} autoFocus={danger}>
                   {request.options.cancelLabel}
                 </Button>
                 <Button
-                  variant={request.options.tone === 'danger' ? 'danger' : 'primary'}
+                  variant={danger ? 'danger' : 'primary'}
                   onPress={() => finish(true)}
-                  autoFocus
+                  autoFocus={!danger}
                 >
                   {request.options.confirmLabel}
                 </Button>
               </div>
             ) : (
-              <PromptBody key={request.options.title} options={request.options} />
+              <PromptBody key={request.id} options={request.options} />
             )}
           </AriaDialog>
         )}

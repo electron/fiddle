@@ -16,20 +16,13 @@ End-to-end specs drive a real test build of the app through the in-house driver
 ## Platforms
 
 The driver needs no OS focus: clicks, keys and typing go through CDP (`Input.*`) straight to the
-page, and every page emulates focus, so `document.hasFocus()`, focus events and `:focus` behave as
-in the key window whatever the OS does. That's what lets many apps run side by side.
+page, and every page emulates focus. That's what lets many apps run side by side.
 
-- **Linux** (CI and containers): each spec file gets its own Xvfb display (`Xvfb -displayfd`),
-  with openbox on it when installed. Nothing shows on a real screen.
-- **macOS** (a maintainer's desktop): no Xvfb needed. The app runs as a background app: no Dock
-  icon or Cmd-Tab entry, it never becomes the active app, and its windows open one level below
-  normal windows, so they never cover or take focus from what you're doing (you can see them on an
-  empty desktop or in Mission Control). Window focus is emulated the way a window manager hands it
-  out: a shown or focused window becomes the focused one for the app and for `windows()`. The
-  fiddles that specs run get the same treatment, through a module the launcher hands to runs with
-  `electron -r` (`FIDDLE_DEV_ELECTRON_FLAGS`). `FIDDLE_E2E_FOREGROUND=1` opens the windows in front
-  instead (still without taking focus), to watch a `yarn driver` session. Two things are shared
-  with your session: the clipboard (a couple of specs copy to it) and the CPU.
+- **Linux:** each spec file gets its own Xvfb display, with openbox on it when installed. Nothing
+  shows on a real screen.
+- **macOS:** no Xvfb needed. The app runs as a background app that never becomes the active app,
+  and its windows open below normal windows. `FIDDLE_E2E_FOREGROUND=1` opens them in front (still
+  without taking focus), to watch a `yarn driver` session.
 - **Workers:** `FIDDLE_E2E_WORKERS=<n>` sets how many spec files run at once. The default is one
   per core but one on Linux, and at most 4 on macOS and Windows.
 
@@ -65,40 +58,30 @@ describe('run', () => {
 });
 ```
 
-## What you can do
+The rest of the API (`snapshot`, `screenshot`, `console`, `logs`, `clipboard`, `sideEffects`,
+`dialogs`, `evalHook`, `mainHook` and more) is on `FiddleApp` in `e2e/driver.ts`, and the spec
+glue is in `e2e/harness.ts`.
 
-| Goal | Call |
-|---|---|
-| Find, click, type, press | `query(q)`, `waitForAbsent(q)`, `click(q)`, `type('text', q?)`, `press('CmdOrCtrl+S', q?)` |
-| Keys | Electron accelerator or DOM names: `Enter`, `Escape`, `Tab`, `Backspace`, `Delete`, `ArrowDown`, `PageUp`, `F5`, `CmdOrCtrl+Shift+P`, `Ctrl+Shift+PageDown`, `CmdOrCtrl+\\`. `Shift+F10` opens the focused element's context menu on every platform (on macOS the driver presses the Menu key, since Chromium ignores Shift+F10 there) |
-| Queries | `role('button', 'Run')`, `role('heading', /welcome/i)`, `text('Saved')`, and `{ nth, timeout, window }`. Without `window`, actions go to the focused window (the last one shown or focused), else the first |
-| Commands | `runCommand('app.newWindow')` |
-| State | `stores(window?)` returns `{ app, window }` |
-| Seeing | `snapshot()`, `screenshot(path?)`, `windows()`, `console()`, `logs()`, `clipboard()` |
-| Settling | `waitForIdle()`: no pending IPC, network requests or animation frames |
-| Native dialogs | `queueDialog('messageBox', { button: 'Save' })`, `{ response: 1 }`, `('open', { filePaths })`, `('save', { filePath })`, `{ canceled: true }`, then `dialogs()` |
-| OS side effects | `sideEffects()`: `shell.openExternal`, `showItemInFolder`, protocol registration, recent documents, notifications, native context menus (`menu.popup`, with the item labels), and so on |
-| Renderer hooks | `evalHook('name', ...args)` calls `window.__fiddleTest.name(...args)` |
-| Main hooks | `mainHook('name', ...args)` calls a hook registered with `registerMainTestHook` |
-| Network | `fixtures.requests` lists what the app fetched (pass your own `startFixtureServer()` to `launchApp({ fixtures })`) |
+- **Queries.** `role('button', 'Run')`, `role('heading', /welcome/i)` and `text('Saved')` take
+  `{ nth, timeout, window }`. Without `window`, actions go to the focused window, else the first.
+- **Keys.** `press` takes Electron accelerators or DOM key names (`CmdOrCtrl+Shift+P`, `Escape`).
+  `Shift+F10` opens the focused element's context menu on every platform.
+- **Dialogs.** Native dialogs must be scripted with `queueDialog` before they open. An unscripted
+  dialog fails the file.
+- **Side effects.** `shell.openExternal`, protocol registration, notifications and native context
+  menus are recorded, not performed. Read them with `sideEffects()`.
 
-A failed step throws a `DriverError`. Its message includes:
-- the step and the query;
-- the accessibility snapshot;
-- the path of a failure screenshot;
-- the tails of the main and renderer logs.
-
-When a test fails, `useApp()` also prints diagnostics and keeps the temp dir, including
-`artifacts/` and `app-output.log`. Isolation violations fail the file after its last test:
-- a request to a non-loopback host;
-- an unscripted dialog;
-- a crashed renderer.
+A failed step throws a `DriverError` with the step and query, the accessibility snapshot, the path
+of a failure screenshot and the tails of the main and renderer logs. When a test fails, `useApp()`
+also prints diagnostics and keeps the temp dir, including `artifacts/` and `app-output.log`.
+Isolation violations fail the file after its last test: a request to a non-loopback host, an
+unscripted dialog, or a crashed renderer.
 
 ## Test hooks for features
 
 - **Renderer.** For state that isn't in the stores or the accessibility tree, such as Monaco model
   content, register a hook in the renderer, and only in test builds, so it's compiled out of
-  releases:
+  releases. Call it with `evalHook('name', ...args)`:
 
   ```ts
   if (import.meta.env.MODE === 'test') {
@@ -109,7 +92,7 @@ When a test fails, `useApp()` also prints diagnostics and keeps the temp dir, in
   }
   ```
 
-- **Main.** Guard main-side hooks with `TEST_BUILD`:
+- **Main.** Guard main-side hooks with `TEST_BUILD`, and call them with `mainHook('name', ...args)`:
 
   ```ts
   if (TEST_BUILD) registerMainTestHook('run.output', (id) => getOutput(String(id)));
@@ -120,16 +103,6 @@ When a test fails, `useApp()` also prints diagnostics and keeps the temp dir, in
 ## Fixtures
 
 `fixtures/server.ts` serves every URL in `src/shared/endpoints.ts`. Its data is in
-`fixtures/data/`, and it records each request. Electron zips come from the local Electron download
-cache, or are zipped from `node_modules/electron`. Add data files there; add a route in `route()`
-only for a new endpoint.
-
-## Feature coverage
-
-Every REQUIREMENTS §17 bullet, settings row and shortcut ends with a stable ID such as
-`{#run.stop}`. Tests reference IDs with `@feature <id>`: in an e2e test title, or in a
-`// @feature <id> [<id>...]` comment above a unit test (many rules are best tested there).
-
-`yarn features-coverage` prints the covered and uncovered IDs, grouped by section (`--json` for
-details). It fails on a tag that names no ID or on a duplicate ID; `--strict` also fails when any
-ID has no test.
+`fixtures/data/`, and it records each request (`app.fixtures().requests`). Electron zips come from
+the local Electron download cache, or are zipped from `node_modules/electron`. Add data files
+there; add a route in `route()` only for a new endpoint.

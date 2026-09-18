@@ -63,6 +63,7 @@ export async function runFromCommandLine(argv: string[]): Promise<void> {
     const result = await runner.run(first, fiddle, {
       out: process.stdout,
       runWithIdentity: runWithIdentity,
+      childEnv: {},
     });
     const vals = ['test_passed', 'test_failed', 'test_error', 'system_error'];
     process.exitCode = vals.indexOf(result.status);
@@ -72,6 +73,7 @@ export async function runFromCommandLine(argv: string[]): Promise<void> {
   if (cmd === 'bisect' && versionArgs.length === 2 && first && second) {
     const result = await runner.bisect(first, second, fiddle, {
       out: process.stdout,
+      childEnv: {},
     });
     const vals = ['bisect_succeeded', 'test_error', 'system_error'];
     process.exitCode = vals.indexOf(result.status);

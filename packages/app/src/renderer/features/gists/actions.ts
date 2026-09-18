@@ -10,40 +10,65 @@ import { showGistDialog } from './state';
 export type GistT = TFunction<'gists'>;
 type GistAction = 'publish' | 'update' | 'delete';
 
-const failedTitle = { publish: 'publishFailed', update: 'updateFailed', delete: 'deleteFailed' } as const;
-
-function reasonOf(error: FiddleError): unknown {
-  return (error.details as { reason?: unknown } | undefined)?.reason;
-}
+const failedTitle = {
+  publish: 'publishFailed',
+  update: 'updateFailed',
+  delete: 'deleteFailed',
+} as const;
 
 export function copyShareLink(t: GistT, id: string): void {
   githubApi.CopyShareLink(id).then(
     () => showToast({ tone: 'success', title: t('linkCopied') }),
-    (error: unknown) => showToast({ tone: 'error', title: FiddleError.from(error).message }),
+    (error: unknown) =>
+      showToast({ tone: 'error', title: FiddleError.from(error).message }),
   );
 }
 
 export function setGistVisibility(isPublic: boolean): void {
-  void settingsApi.SetSetting('gistVisibility', isPublic ? 'public' : 'secret');
+  settingsApi
+    .SetSetting('gistVisibility', isPublic ? 'public' : 'secret')
+    .catch((error: unknown) =>
+      showToast({ tone: 'error', title: FiddleError.from(error).message }),
+    );
 }
 
-export function showGistSaved(t: GistT, title: 'published' | 'updated', id: string): void {
-  showToast({ tone: 'success', title: t(title), actionLabel: t('copyLink'), onAction: () => copyShareLink(t, id) });
+export function showGistSaved(
+  t: GistT,
+  title: 'published' | 'updated',
+  id: string,
+): void {
+  showToast({
+    tone: 'success',
+    title: t(title),
+    actionLabel: t('copyLink'),
+    onAction: () => copyShareLink(t, id),
+  });
 }
 
 /**
- * Signed out: sign in, then retry. Anything else: the error GitHub reported,
- * plus a hint about ownership or connectivity when one applies (`gistErrorHint`).
+ * Signed out, or a token GitHub no longer accepts: sign in, then retry.
+ * Anything else: the error GitHub reported, plus a hint about ownership or
+ * connectivity when one applies (`gistErrorHint`).
  */
-export function reportGistError(t: GistT, action: GistAction, error: unknown, retry?: () => void): void {
+export function reportGistError(
+  t: GistT,
+  action: GistAction,
+  error: unknown,
+  retry?: () => void,
+): void {
   const e = FiddleError.from(error);
-  if (e.code === ErrorCode.unauthorized && reasonOf(e) === 'signed-out' && retry) {
+  if (e.code === ErrorCode.unauthorized && retry) {
     showGistDialog({ kind: 'sign-in', then: retry });
     return;
   }
   const hint = gistErrorHint(e);
-  const description = hint ? t('errorWithHint', { error: e.message, hint: t(hint) }) : e.message;
-  showToast({ tone: 'error', title: t(failedTitle[action]), description }, { timeout: 10_000 });
+  const description = hint
+    ? t('errorWithHint', { error: e.message, hint: t(hint) })
+    : e.message;
+  showToast(
+    { tone: 'error', title: t(failedTitle[action]), description },
+    { timeout: 10_000 },
+  );
 }
 
 export async function updateGist(t: GistT): Promise<void> {

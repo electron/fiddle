@@ -62,7 +62,7 @@
   },
   "importExecutionMessage": {
     "message": "Import settings that change how fiddles run?",
-    "description": "Confirmation when an imported settings file changes Electron flags, environment variables or download mirrors.",
+    "description": "Confirmation when an imported settings file changes Electron flags, environment variables, download mirrors, the package manager or Socket Firewall.",
     "maxLength": 100
   },
   "importExecutionDetail": {

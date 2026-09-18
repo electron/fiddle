@@ -1,6 +1,11 @@
 import { describe, expect, it } from 'vitest';
 
-import { buildLucentTheme, cssColorToHex, EDITOR_TOKENS, type EditorTokens } from './theme';
+import {
+  buildLucentTheme,
+  cssColorToHex,
+  EDITOR_TOKENS,
+  type EditorTokens,
+} from './theme';
 
 describe('cssColorToHex', () => {
   it('converts computed colours', () => {
@@ -20,7 +25,9 @@ describe('cssColorToHex', () => {
 });
 
 describe('buildLucentTheme', () => {
-  const tokens = Object.fromEntries(EDITOR_TOKENS.map((t, i) => [t, `#0000${i.toString(16).padStart(2, '0')}`])) as EditorTokens;
+  const tokens = Object.fromEntries(
+    EDITOR_TOKENS.map((t, i) => [t, `#0000${i.toString(16).padStart(2, '0')}`]),
+  ) as EditorTokens;
 
   it('maps the syntax and editor colours from tokens', () => {
     const theme = buildLucentTheme(tokens, true);
@@ -28,7 +35,9 @@ describe('buildLucentTheme', () => {
     expect(theme.colors['editor.background']).toBe(tokens.surface);
     expect(theme.colors['editor.lineHighlightBackground']).toBe(tokens['cursor-line']);
     expect(theme.colors['editorLineNumber.foreground']).toBe(tokens['ink-faint']);
-    expect(theme.rules.find((r) => r.token === 'keyword')?.foreground).toBe(tokens['syntax-keyword'].slice(1));
+    expect(theme.rules.find((r) => r.token === 'keyword')?.foreground).toBe(
+      tokens['syntax-keyword'].slice(1),
+    );
     expect(buildLucentTheme(tokens, false).base).toBe('vs');
   });
 });

@@ -45,7 +45,8 @@ export interface CommandDefinition {
 
 const hasWindow: Enablement = (_app, win) => win !== undefined;
 /** The tab row has at least two tabs (visible files). */
-const hasTabs: Enablement = (_app, win) => (win?.fiddle.files.filter((file) => file.visible).length ?? 0) > 1;
+const hasTabs: Enablement = (_app, win) =>
+  (win?.fiddle.files.filter((file) => file.visible).length ?? 0) > 1;
 
 export const commands = {
   'app.newWindow': {
@@ -54,7 +55,7 @@ export const commands = {
   },
   'view.reload': {
     label: 'reload',
-    // CmdOrCtrl+R runs and stops the fiddle (Lucent); see PROGRESS.md "Decisions".
+    // CmdOrCtrl+R runs and stops the fiddle, so Reload takes Shift.
     accelerator: 'CmdOrCtrl+Shift+R',
     enabled: hasWindow,
   },
@@ -63,7 +64,6 @@ export const commands = {
     accelerator: 'CmdOrCtrl+Alt+I',
     enabled: hasWindow,
   },
-  // Shell slice: view-state commands, sent to the window as `Window.Command`.
   'view.toggleSplit': {
     label: 'toggleSplit',
     accelerator: 'CmdOrCtrl+\\',
@@ -104,7 +104,6 @@ export const commands = {
     accelerator: 'Shift+Alt+F',
     enabled: hasWindow,
   },
-  // Documents slice: the File menu.
   'file.newFiddle': {
     label: 'newFiddle',
     accelerator: 'CmdOrCtrl+N',
@@ -136,7 +135,6 @@ export const commands = {
     accelerator: 'CmdOrCtrl+W',
     enabled: hasWindow,
   },
-  // App UX slice: both are sent to the window as `Window.Command`.
   'app.commandPalette': {
     label: 'commandPalette',
     // F1 too, as in Monaco, whose own quick command it replaces.
@@ -147,13 +145,11 @@ export const commands = {
     label: 'showTour',
     enabled: hasWindow,
   },
-  // Settings slice: shows the settings page in the window (`Window.view`).
   'app.preferences': {
     label: 'preferences',
     accelerator: 'CmdOrCtrl+,',
     enabled: hasWindow,
   },
-  // Gists slice: each opens a gist dialog in the window (`Window.Command`).
   'gist.publish': {
     label: 'publishToGist',
     enabled: hasWindow,
@@ -166,14 +162,11 @@ export const commands = {
   },
   'gist.history': {
     label: 'showGistHistory',
-    // "Show gist revision history" off (§17.13) hides it from the menu, palette and gist menu.
-    enabled: (app, win) => app.settings.gistShowHistory && win?.fiddle.source.gistId !== undefined,
+    enabled: (app, win) =>
+      app.settings.gistShowHistory && win?.fiddle.source.gistId !== undefined,
   },
-  // Versions and run slice. `bisect.toggle` stops a bisect, or is sent to the
-  // window (`Window.Command`) to show the range dialog.
   'run.toggle': {
     label: 'runToggle',
-    // CmdOrCtrl+R (Lucent) in the menu; F5 (§17.14) is dispatched by the renderer.
     accelerator: ['CmdOrCtrl+R', 'F5'],
     enabled: hasWindow,
   },
@@ -185,27 +178,25 @@ export const commands = {
     label: 'makeFiddle',
     enabled: (_app, win) => win !== undefined && (win.run?.status ?? 'ready') === 'ready',
   },
+  // Stops a running bisect; otherwise the window shows the range dialog.
   'bisect.toggle': {
     label: 'toggleBisect',
     accelerator: 'CmdOrCtrl+Shift+B',
     enabled: hasWindow,
   },
-  // Platform slice: the Help menu.
   'help.about': { label: 'aboutFiddle' },
   'help.openLogsFolder': { label: 'openLogsFolder' },
   'help.copyDiagnostics': { label: 'copyDiagnostics' },
   'help.fiddleRepository': { label: 'openFiddleRepository' },
   'help.electronRepository': { label: 'openElectronRepository' },
   'help.reportIssue': { label: 'reportIssue' },
-  // Menus, context menus and keybindings (src/main/menu.ts, src/main/context-menu.ts).
   // Undo, redo and select all go to the focused Monaco editor through the
   // window; anywhere else they do what the native roles do. Always enabled,
   // so native dialogs keep them on macOS.
   'edit.undo': { label: 'undo', accelerator: 'CmdOrCtrl+Z' },
   'edit.redo': { label: 'redo', accelerator: 'Shift+CmdOrCtrl+Z' },
   'edit.selectAll': { label: 'selectAll', accelerator: 'CmdOrCtrl+A' },
-  // Sent to the window (`Window.Command`), like the other editor commands. In
-  // the Edit menu without its key: a scoped keybinding is the renderer's alone.
+  // In the Edit menu without its key: a scoped keybinding is the renderer's alone.
   'console.clear': {
     label: 'clearConsole',
     accelerator: 'CmdOrCtrl+K',
@@ -233,14 +224,14 @@ export const commands = {
     context: 'editor',
     enabled: hasWindow,
   },
-  // REQUIREMENTS §10. CmdOrCtrl+M is Minimize; Ctrl+Shift+M is Monaco's own
-  // macOS binding for this and free everywhere (PROGRESS.md "Decisions").
+  // CmdOrCtrl+M is Minimize; Ctrl+Shift+M is Monaco's own macOS binding for
+  // this and free everywhere.
   'editor.toggleTabFocus': {
     label: 'toggleTabFocus',
     accelerator: 'Ctrl+Shift+M',
     enabled: hasWindow,
   },
-  // Font changes apply after a reload (§17.2); Settings offers this next to them.
+  // Font changes apply after a reload; Settings offers this next to them.
   'view.reloadAllWindows': { label: 'reloadAllWindows' },
   // The Develop menu (unpackaged builds): shows or hides the title bar's menu
   // bar in every window, on any platform, without a restart.
@@ -266,14 +257,18 @@ export function getCommand(id: CommandId): CommandDefinition {
 }
 
 function forPlatform(accelerator: Accelerator, platform: Platform): string {
-  return typeof accelerator === 'string' ? accelerator : (accelerator[platform] ?? accelerator.default);
+  return typeof accelerator === 'string'
+    ? accelerator
+    : (accelerator[platform] ?? accelerator.default);
 }
 
 /** Every default keybinding of a command on this platform; the first is the menu's. */
 export function acceleratorsFor(id: CommandId, platform: Platform): string[] {
   const accelerator = getCommand(id).accelerator;
   if (accelerator === undefined) return [];
-  const list: readonly Accelerator[] = Array.isArray(accelerator) ? accelerator : [accelerator as Accelerator];
+  const list: readonly Accelerator[] = Array.isArray(accelerator)
+    ? accelerator
+    : [accelerator as Accelerator];
   return list.map((one) => forPlatform(one, platform));
 }
 
@@ -293,6 +288,9 @@ export function isCommandEnabled(
 }
 
 /** Whether the palette and Settings > Keyboard list the command: a dev-only one only in development builds. */
-export function isCommandListed(id: CommandId, app: Pick<AppState, 'dev'> | undefined): boolean {
+export function isCommandListed(
+  id: CommandId,
+  app: Pick<AppState, 'dev'> | undefined,
+): boolean {
   return !getCommand(id).devOnly || app?.dev === true;
 }

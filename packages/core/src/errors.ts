@@ -23,9 +23,9 @@ export type FiddleCoreErrorCode =
 /**
  * An `Error` with a stable {@link FiddleCoreErrorCode}.
  *
- * Messages match the plain `Error`s that fiddle-core 2.x threw. `name` stays
- * `'Error'` and `code` is non-enumerable, so these errors still compare equal
- * to the old ones (e.g. with `expect(...).toEqual(new Error(message))`).
+ * `name` stays `'Error'` and `code` is non-enumerable, so these errors still
+ * compare equal to a plain `Error` with the same message (e.g. with
+ * `expect(...).toEqual(new Error(message))`).
  */
 export class FiddleCoreError extends Error {
   declare public readonly code: FiddleCoreErrorCode;
@@ -47,9 +47,8 @@ export function isFiddleCoreError(
  * How errors are reported. Pass it as the `errors` option of `Installer`,
  * `Runner.create()` and `ElectronVersions.create()`.
  *
- * - `legacy` (default): as in fiddle-core 2.x. Download and extract failures
- *   throw the original error, and aborting a `Runner` `signal` resolves
- *   `system_error`.
+ * - `legacy` (default): download and extract failures throw the original
+ *   error, and aborting a `Runner` `signal` resolves `system_error`.
  * - `typed`: download and extract failures are wrapped in a
  *   {@link FiddleCoreError} (`download-failed`, `extract-failed`) with the
  *   original error in `cause`, and `Runner.run()` and `bisect()` reject with

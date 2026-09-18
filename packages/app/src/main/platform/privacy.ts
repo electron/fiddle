@@ -1,6 +1,5 @@
 /**
- * "Reset privacy permissions" (REQUIREMENTS §4), on macOS only. Fiddles run
- * as Electron Fiddle, so the camera, microphone and other grants they got
+ * "Reset privacy permissions", on macOS only. Fiddles run as Electron Fiddle, so the camera, microphone and other grants they got
  * are Electron Fiddle's. `tccutil reset All <bundle ID>` forgets them all,
  * after a confirmation.
  */
@@ -23,7 +22,10 @@ export function tccutilArgs(bundleId = BUNDLE_ID): string[] {
 /** Resolves false when the user cancels. */
 export async function resetPrivacyPermissions(windowId: string): Promise<boolean> {
   if (process.platform !== 'darwin') {
-    throw new FiddleError(ErrorCode.unavailable, 'Privacy permissions can only be reset on macOS');
+    throw new FiddleError(
+      ErrorCode.unavailable,
+      'Privacy permissions can only be reset on macOS',
+    );
   }
   const tp = tm('mainPlatform');
   const ok = await confirm(windowId, {

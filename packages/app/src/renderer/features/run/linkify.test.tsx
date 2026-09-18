@@ -18,12 +18,19 @@ describe('linkify', () => {
       { text: 'https://electronjs.org/docs', url: 'https://electronjs.org/docs' },
       { text: '.' },
     ]);
-    expect(linkify('(https://example.com)')[1]).toEqual({ text: 'https://example.com', url: 'https://example.com' });
-    expect(linkify('https://en.wikipedia.org/wiki/Foo_(bar)')[0]?.url).toBe('https://en.wikipedia.org/wiki/Foo_(bar)');
+    expect(linkify('(https://example.com)')[1]).toEqual({
+      text: 'https://example.com',
+      url: 'https://example.com',
+    });
+    expect(linkify('https://en.wikipedia.org/wiki/Foo_(bar)')[0]?.url).toBe(
+      'https://en.wikipedia.org/wiki/Foo_(bar)',
+    );
   });
 
   it('keeps lines without URLs whole', () => {
-    expect(linkify('file://nope and ftp://no')).toEqual([{ text: 'file://nope and ftp://no' }]);
+    expect(linkify('file://nope and ftp://no')).toEqual([
+      { text: 'file://nope and ftp://no' },
+    ]);
     expect(linkify('')).toEqual([]);
   });
 });

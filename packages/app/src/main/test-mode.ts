@@ -1,5 +1,5 @@
 /**
- * Test mode: the flags, paths and endpoints every slice reads, from one place.
+ * Test mode: the flags, paths and endpoints every module reads, from one place.
  *
  * Test mode is on only in a test build (`vite build --mode test`, which defines
  * `__FIDDLE_TEST_BUILD__`) launched with `FIDDLE_TEST_MODE=1`. The e2e
@@ -29,7 +29,7 @@ export function isTestMode(): boolean {
 }
 
 /**
- * What test mode turns off. Each slice checks its own flag, e.g.
+ * What test mode turns off. Each feature checks its own flag, e.g.
  * `if (!testFlags().updates) return;` before starting update-electron-app.
  * Outside test mode every flag is true.
  */
@@ -38,10 +38,9 @@ export function testFlags(): {
   sentry: boolean;
   firstRunPrompts: boolean;
   tour: boolean;
-  animations: boolean;
 } {
   const on = !isTestMode();
-  return { updates: on, sentry: on, firstRunPrompts: on, tour: on, animations: on };
+  return { updates: on, sentry: on, firstRunPrompts: on, tour: on };
 }
 
 /**
@@ -58,7 +57,7 @@ function getTestDir(): string | undefined {
 }
 
 /**
- * The `core` cache root (REQUIREMENTS §5): `<OS cache dir>/Electron Fiddle/cache-v1`,
+ * The `core` cache root: `<OS cache dir>/Electron Fiddle/cache-v1`,
  * or `<test dir>/cache` in test mode. Call it after main's entry has run (the
  * test harness sets FIDDLE_TEST_DIR there), never at import time.
  */
@@ -69,7 +68,7 @@ export function getCacheRoot(): string {
 }
 
 /**
- * The OS cache dir (§5): `~/Library/Caches` on macOS, `%LOCALAPPDATA%` on
+ * The OS cache dir: `~/Library/Caches` on macOS, `%LOCALAPPDATA%` on
  * Windows, `$XDG_CACHE_HOME` or `~/.cache` on Linux. Not env-paths' `cache`,
  * which adds `<name>\Cache` on Windows.
  */
@@ -79,7 +78,8 @@ export function osCacheDir(
   home: string = os.homedir(),
 ): string {
   if (platform === 'darwin') return path.join(home, 'Library', 'Caches');
-  if (platform === 'win32') return env.LOCALAPPDATA || path.join(home, 'AppData', 'Local');
+  if (platform === 'win32')
+    return env.LOCALAPPDATA || path.join(home, 'AppData', 'Local');
   return env.XDG_CACHE_HOME || path.join(home, '.cache');
 }
 
@@ -106,7 +106,6 @@ export function registerMainTestHook(name: string, hook: MainTestHook): void {
   if (isTestMode()) mainTestHooks.set(name, hook);
 }
 
-/** Used by the driver. */
 export function getMainTestHook(name: string): MainTestHook | undefined {
   return mainTestHooks.get(name);
 }

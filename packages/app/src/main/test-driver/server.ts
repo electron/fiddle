@@ -51,7 +51,10 @@ function findWindow(ref: WindowRef | undefined): BrowserWindow | undefined {
 
 function pageOf(ref: WindowRef | undefined): Page {
   const win = findWindow(ref);
-  if (!win) throw new Error(ref === undefined ? 'No app window is open' : `No window ${JSON.stringify(ref)}`);
+  if (!win)
+    throw new Error(
+      ref === undefined ? 'No app window is open' : `No window ${JSON.stringify(ref)}`,
+    );
   return pageFor(win.webContents);
 }
 
@@ -101,7 +104,10 @@ function createHandlers({ hub, registry, state }: DriverContext): Handlers {
     },
     stores: ({ window }) => {
       const windowId = windowIdOf(findWindow(window));
-      return { app: hub.app, window: windowId ? (hub.getWindow(windowId) ?? null) : null };
+      return {
+        app: hub.app,
+        window: windowId ? (hub.getWindow(windowId) ?? null) : null,
+      };
     },
     console: ({ window }) => state.consoles.get(pageOf(window).contents.id) ?? [],
     clipboard: () => clipboard.readText(),
@@ -118,7 +124,8 @@ function createHandlers({ hub, registry, state }: DriverContext): Handlers {
       await poll('idle', timeout, async () => {
         const busy: string[] = [];
         if (state.pendingIpc > 0) busy.push(`${state.pendingIpc} IPC call(s) pending`);
-        if (state.inflight.size > 0) busy.push(`${state.inflight.size} request(s) in flight`);
+        if (state.inflight.size > 0)
+          busy.push(`${state.inflight.size} request(s) in flight`);
         if (page && !(await page.framesIdle())) busy.push('animations running');
         if (busy.length > 0) {
           quiet = 0;
@@ -136,7 +143,9 @@ function createHandlers({ hub, registry, state }: DriverContext): Handlers {
           ? { value: true }
           : {
               reason: `window.__fiddleTest.${name} is not registered; registered: ${String(
-                await page.evaluate(`Object.keys(window.__fiddleTest ?? {}).join(', ') || 'none'`),
+                await page.evaluate(
+                  `Object.keys(window.__fiddleTest ?? {}).join(', ') || 'none'`,
+                ),
               )}`,
             },
       );
@@ -145,7 +154,8 @@ function createHandlers({ hub, registry, state }: DriverContext): Handlers {
     evaluate: ({ expression, window }) => pageOf(window).evaluate(expression),
     mainHook: async ({ name, args = [] }) => {
       const hook = getMainTestHook(name);
-      if (!hook) throw new Error(`No main test hook ${JSON.stringify(name)} is registered`);
+      if (!hook)
+        throw new Error(`No main test hook ${JSON.stringify(name)} is registered`);
       return await hook(...args);
     },
     queueDialog: ({ kind, response }) => {
@@ -167,7 +177,10 @@ function windowRefOf(params: unknown): WindowRef | undefined {
   return p.window ?? p.query?.window;
 }
 
-export function startDriverServer(socketPath: string, context: DriverContext): net.Server {
+export function startDriverServer(
+  socketPath: string,
+  context: DriverContext,
+): net.Server {
   const { state } = context;
   const handlers = createHandlers(context);
   let failures = 0;
@@ -214,14 +227,18 @@ export function startDriverServer(socketPath: string, context: DriverContext): n
       try {
         request = JSON.parse(line) as DriverRequest;
       } catch {
-        reply({ id: -1, ok: false, error: await failureReport('parse', line, 'Invalid JSON') });
+        reply({
+          id: -1,
+          ok: false,
+          error: await failureReport('parse', line, 'Invalid JSON'),
+        });
         return;
       }
       try {
         const handler = handlers[request.method] as
-          | ((params: unknown) => unknown)
-          | undefined;
-        if (!handler) throw new Error(`Unknown driver method ${JSON.stringify(request.method)}`);
+          ((params: unknown) => unknown) | undefined;
+        if (!handler)
+          throw new Error(`Unknown driver method ${JSON.stringify(request.method)}`);
         const result = await handler(request.params ?? {});
         reply({ id: request.id, ok: true, result: result ?? null });
       } catch (error) {
@@ -242,8 +259,12 @@ export function startDriverServer(socketPath: string, context: DriverContext): n
       }
     });
   });
-  server.on('error', (error) => console.error('[fiddle-test] driver server failed', error));
-  server.listen(socketPath, () => state.mainLog.push(`[test] driver listening on ${socketPath}`));
+  server.on('error', (error) =>
+    console.error('[fiddle-test] driver server failed', error),
+  );
+  server.listen(socketPath, () =>
+    state.mainLog.push(`[test] driver listening on ${socketPath}`),
+  );
   app.once('will-quit', () => server.close());
   return server;
 }

@@ -87,7 +87,7 @@
   "customMirrorElectron.description": "安定版とベータ版のリリースに使用されます。",
   "customMirrorNightly.title": "ナイトリーのミラー URL",
   "customMirrorNightly.description": "ナイトリーのリリースに使用されます。",
-  "mirror.invalidUrl": "http または https の URL を入力してください。",
+  "mirror.invalidUrl": "https の URL を入力してください。",
   "packageAuthor.title": "package.json の作成者",
   "packageAuthor.description": "Fiddle の保存時やパッケージ化時に使用されます。空欄にするとユーザー名を使用します。",
   "gistShowHistory.title": "Gist のリビジョン履歴を表示",

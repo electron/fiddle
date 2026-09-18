@@ -2,17 +2,23 @@
  * One app window's page, driven through `webContents.debugger` (CDP): the
  * accessibility tree for queries, and `Input.*` for clicks, keys and typing.
  * CDP input goes straight to the page's widget, so it needs no OS focus, and
- * the page emulates focus (`Emulation.setFocusEmulationEnabled`): it behaves
- * as the focused, active page whether or not its window is the key window.
- * That's what lets spec files run in parallel on one desktop (macOS), and
- * changes nothing on a display of their own (Xvfb). Every lookup waits for
- * its condition with `poll`, up to a timeout.
+ * the page emulates focus (`Emulation.setFocusEmulationEnabled`) whether or
+ * not its window is the key window. That's what lets spec files run in
+ * parallel on one desktop (macOS).
  */
 import fs from 'node:fs/promises';
 
 import type { WebContents } from 'electron';
 
-import { describeQuery, formatSnapshot, matchNodes, nameOf, roleOf, statesOf, type AXNode } from './ax';
+import {
+  describeQuery,
+  formatSnapshot,
+  matchNodes,
+  nameOf,
+  roleOf,
+  statesOf,
+  type AXNode,
+} from './ax';
 import { keyForCharacter, parseKeyCombo } from './keys';
 import type { ElementInfo, Query } from './protocol';
 
@@ -144,7 +150,9 @@ export class Page {
         await dbg.sendCommand('Emulation.setTimezoneOverride', {
           timezoneId: pageSetup.timezone,
         });
-        await dbg.sendCommand('Emulation.setLocaleOverride', { locale: pageSetup.locale });
+        await dbg.sendCommand('Emulation.setLocaleOverride', {
+          locale: pageSetup.locale,
+        });
         await dbg.sendCommand('Emulation.setEmulatedMedia', {
           features: [{ name: 'prefers-reduced-motion', value: 'reduce' }],
         });
@@ -230,7 +238,9 @@ export class Page {
 
   async #describe(node: AXNode): Promise<Found> {
     const box =
-      node.backendDOMNodeId === undefined ? undefined : await this.#box(node.backendDOMNodeId);
+      node.backendDOMNodeId === undefined
+        ? undefined
+        : await this.#box(node.backendDOMNodeId);
     return {
       box,
       info: {
@@ -247,21 +257,30 @@ export class Page {
 
   /** Waits for at least one match (or none, for `absent`) and describes the matches. */
   query(query: Query, state: 'present' | 'absent' = 'present'): Promise<ElementInfo[]> {
-    return poll<ElementInfo[]>(`query ${describeQuery(query)}`, query.timeout ?? DEFAULT_TIMEOUT, async () => {
-      const matches = matchNodes(await this.axNodes(), query);
-      if (state === 'absent') {
-        return matches.length === 0
-          ? { value: [] }
-          : { reason: `${matches.length} match(es) still present` };
-      }
-      const selected =
-        query.nth === undefined ? matches : matches.slice(query.nth, query.nth + 1);
-      if (selected.length === 0) {
-        return { reason: matches.length === 0 ? 'no match' : `only ${matches.length} match(es)` };
-      }
-      const found = await Promise.all(selected.slice(0, 50).map((n) => this.#describe(n)));
-      return { value: found.map((f) => f.info) };
-    });
+    return poll<ElementInfo[]>(
+      `query ${describeQuery(query)}`,
+      query.timeout ?? DEFAULT_TIMEOUT,
+      async () => {
+        const matches = matchNodes(await this.axNodes(), query);
+        if (state === 'absent') {
+          return matches.length === 0
+            ? { value: [] }
+            : { reason: `${matches.length} match(es) still present` };
+        }
+        const selected =
+          query.nth === undefined ? matches : matches.slice(query.nth, query.nth + 1);
+        if (selected.length === 0) {
+          return {
+            reason:
+              matches.length === 0 ? 'no match' : `only ${matches.length} match(es)`,
+          };
+        }
+        const found = await Promise.all(
+          selected.slice(0, 50).map((n) => this.#describe(n)),
+        );
+        return { value: found.map((f) => f.info) };
+      },
+    );
   }
 
   /**
@@ -278,49 +297,73 @@ export class Page {
       return undefined;
     };
     const same = (a: ElementInfo, b: ElementInfo) =>
-      Math.abs(a.x - b.x) < 1 && Math.abs(a.y - b.y) < 1 && Math.abs(a.width - b.width) < 1 && Math.abs(a.height - b.height) < 1;
-    return poll<ElementInfo>(`find ${describeQuery(query)}`, query.timeout ?? DEFAULT_TIMEOUT, async () => {
-      const matches = matchNodes(await this.axNodes(), query);
-      if (matches.length === 0) return { reason: 'no match' };
-      if (query.nth === undefined && matches.length > 1) {
-        const list = matches
-          .slice(0, 5)
-          .map((m) => `${roleOf(m)} ${JSON.stringify(nameOf(m))}`)
-          .join(', ');
-        return { reason: `${matches.length} matches (${list}); narrow the query or pass nth` };
-      }
-      const node = matches[query.nth ?? 0];
-      if (!node) return { reason: `only ${matches.length} match(es)` };
-      const first = await this.#describe(node);
-      const problem = check(first);
-      if (problem) return { reason: problem };
-      await this.#nextFrame();
-      const second = await this.#describe(node);
-      if (!same(first.info, second.info)) return { reason: 'the element is moving' };
-      const later = check(second);
-      return later ? { reason: later } : { value: second.info };
-    });
+      Math.abs(a.x - b.x) < 1 &&
+      Math.abs(a.y - b.y) < 1 &&
+      Math.abs(a.width - b.width) < 1 &&
+      Math.abs(a.height - b.height) < 1;
+    return poll<ElementInfo>(
+      `find ${describeQuery(query)}`,
+      query.timeout ?? DEFAULT_TIMEOUT,
+      async () => {
+        const matches = matchNodes(await this.axNodes(), query);
+        if (matches.length === 0) return { reason: 'no match' };
+        if (query.nth === undefined && matches.length > 1) {
+          const list = matches
+            .slice(0, 5)
+            .map((m) => `${roleOf(m)} ${JSON.stringify(nameOf(m))}`)
+            .join(', ');
+          return {
+            reason: `${matches.length} matches (${list}); narrow the query or pass nth`,
+          };
+        }
+        const node = matches[query.nth ?? 0];
+        if (!node) return { reason: `only ${matches.length} match(es)` };
+        const first = await this.#describe(node);
+        const problem = check(first);
+        if (problem) return { reason: problem };
+        await this.#nextFrame();
+        const second = await this.#describe(node);
+        if (!same(first.info, second.info)) return { reason: 'the element is moving' };
+        const later = check(second);
+        return later ? { reason: later } : { value: second.info };
+      },
+    );
   }
 
   /** A left click at the center of the match. Each event resolves once the renderer has handled it. */
   async click(query: Query): Promise<ElementInfo> {
     const element = await this.actionable(query);
     const at = { x: element.x, y: element.y };
-    await this.#input('Input.dispatchMouseEvent', { type: 'mouseMoved', ...at, button: 'none', buttons: 0 });
-    await this.#input('Input.dispatchMouseEvent', { type: 'mousePressed', ...at, button: 'left', buttons: 1, clickCount: 1 });
-    await this.#input('Input.dispatchMouseEvent', { type: 'mouseReleased', ...at, button: 'left', buttons: 0, clickCount: 1 });
+    await this.#input('Input.dispatchMouseEvent', {
+      type: 'mouseMoved',
+      ...at,
+      button: 'none',
+      buttons: 0,
+    });
+    await this.#input('Input.dispatchMouseEvent', {
+      type: 'mousePressed',
+      ...at,
+      button: 'left',
+      buttons: 1,
+      clickCount: 1,
+    });
+    await this.#input('Input.dispatchMouseEvent', {
+      type: 'mouseReleased',
+      ...at,
+      button: 'left',
+      buttons: 0,
+      clickCount: 1,
+    });
     return element;
   }
 
   /**
-   * Types into whatever has focus, a key at a time: keydown, keypress and input,
-   * then keyup, as from a US keyboard. Characters it has no key for (é, emoji)
-   * are inserted as text, as an input method would. `\n` presses Enter.
+   * Types into whatever has focus, a key at a time, as from a US keyboard.
+   * Characters it has no key for (é, emoji) are inserted as text. `\n` presses Enter.
    *
-   * Then it waits for the next animation frame, as a person would see the text
-   * before doing anything else: work the page batches per frame (the editor
-   * sends its edits to main once per frame) is done before the spec's next
-   * step, which may be a Save keystroke a frame is too long for.
+   * Then it waits for the next animation frame, so work the page batches per
+   * frame (the editor sends its edits to main once per frame) is done before
+   * the spec's next step, which may be a Save keystroke.
    */
   async type(text: string): Promise<void> {
     for (const char of text) {
@@ -333,8 +376,17 @@ export class Page {
         await this.#input('Input.insertText', { text: char });
         continue;
       }
-      const key = { key: char, code: definition.code, windowsVirtualKeyCode: definition.keyCode };
-      await this.#input('Input.dispatchKeyEvent', { type: 'keyDown', ...key, text: char, unmodifiedText: char });
+      const key = {
+        key: char,
+        code: definition.code,
+        windowsVirtualKeyCode: definition.keyCode,
+      };
+      await this.#input('Input.dispatchKeyEvent', {
+        type: 'keyDown',
+        ...key,
+        text: char,
+        unmodifiedText: char,
+      });
       await this.#input('Input.dispatchKeyEvent', { type: 'keyUp', ...key });
     }
     await this.#nextFrame();
@@ -354,14 +406,15 @@ export class Page {
   }
 
   /**
-   * Presses a combo such as `Enter`, `Escape`, `CmdOrCtrl+S` or `Shift+Tab`:
-   * one keydown with the modifiers held (and a keypress if it types
-   * something), then the keyup. A key the page doesn't handle goes no further:
-   * the native menu never sees it, exactly as with a display of one's own, so
-   * shortcuts work through the renderer's keybinding dispatcher.
+   * Presses a combo such as `Enter`, `Escape`, `CmdOrCtrl+S` or `Shift+Tab`.
+   * A key the page doesn't handle goes no further: the native menu never sees
+   * it, so shortcuts work through the renderer's keybinding dispatcher.
    */
   async press(combo: string): Promise<void> {
-    const { key, code, keyCode, modifiers, text, commands } = parseKeyCombo(combo, process.platform);
+    const { key, code, keyCode, modifiers, text, commands } = parseKeyCombo(
+      combo,
+      process.platform,
+    );
     const held = { key, code, windowsVirtualKeyCode: keyCode, modifiers };
     await this.#input('Input.dispatchKeyEvent', {
       type: text === undefined ? 'rawKeyDown' : 'keyDown',
@@ -372,7 +425,9 @@ export class Page {
     await this.#input('Input.dispatchKeyEvent', { type: 'keyUp', ...held });
   }
 
-  async screenshot(file: string): Promise<{ path: string; width: number; height: number }> {
+  async screenshot(
+    file: string,
+  ): Promise<{ path: string; width: number; height: number }> {
     const image = await this.contents.capturePage();
     await fs.writeFile(file, image.toPNG());
     return { path: file, ...image.getSize() };

@@ -1,7 +1,7 @@
 /**
- * Electron downloads in the headless CLI go through `net.fetch` (REQUIREMENTS
- * §7), so the system proxy and certificate store apply. This is an
- * `@electron/get` downloader, passed to core's Installer.
+ * Electron downloads in the headless CLI go through `net.fetch`, so the system
+ * proxy and certificate store apply. This is an `@electron/get` downloader,
+ * passed to core's Installer.
  */
 import fs from 'node:fs';
 import fsp from 'node:fs/promises';
@@ -31,7 +31,8 @@ export function fetchDownloader(fetchFn: typeof fetch): Downloader {
     async download(url: string, targetFilePath: string, options?: DownloadOptions) {
       const signal = options?.signal;
       const response = await fetchFn(url, signal ? { signal } : undefined);
-      if (!response.ok || !response.body) throw new Error(`Downloading ${url} failed: HTTP ${response.status}`);
+      if (!response.ok || !response.body)
+        throw new Error(`Downloading ${url} failed: HTTP ${response.status}`);
       const length = Number(response.headers.get('content-length'));
       const total = Number.isFinite(length) && length > 0 ? length : null;
       const progress = (transferred: number, percent: number) =>

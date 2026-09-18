@@ -81,7 +81,7 @@ interface Window {
     RunCommand(id: CommandId)
 
     // macOS: empty title bar space was double-clicked. Main minimizes or zooms
-    // the window, as the system preference says (§17.1).
+    // the window, as the system preference says.
     DoubleClickTitleBar()
 
     // A context menu is about to open over the editor, the console or anything
@@ -91,7 +91,7 @@ interface Window {
 
     // Windows and Linux: an item of the title bar's menu bar (`Window.menuBar`)
     // was chosen. Main does what the same item of the native menu does: runs
-    // the command, the role, or opens the recent folder or example (§17.14).
+    // the command, the role, or opens the recent folder or example.
     ActivateMenuItem(id: MenuItemId)
 
     // Main's one channel to the window: commands whose handlers act on Monaco,
@@ -100,8 +100,7 @@ interface Window {
     Command(id: CommandId)
 }
 
-// ---------------------------------------------------------------------------
-// Documents slice: the fiddle in each window, its editor mirror and loading.
+// The fiddle in each window, its editor mirror and loading.
 
 zod_reference FileMapValue {
     import = "../../../../shared/stores"
@@ -157,14 +156,11 @@ interface Documents {
     LoadGist(idOrUrl: ShortText, revision: string?) -> number
     // Loads a Show Me example by name.
     LoadExample(name: ShortText) -> number
-    // Loads `electron/<tag>/<path>` from electron/electron.
-    LoadDocsExample(tag: ShortText, path: ShortText) -> number
     // Text dropped on the window: a gist URL or an electron-fiddle:// link.
     OpenDropped(text: ShortText)
 }
 
-// ---------------------------------------------------------------------------
-// Settings slice: settings.json, themes and keybinding overrides.
+// Settings: settings.json, themes and keybinding overrides.
 
 zod_reference SettingKey {
     import = "../../../../shared/settings"
@@ -228,8 +224,7 @@ interface Settings {
     OpenThemesFolder()
 }
 
-// ---------------------------------------------------------------------------
-// App UX slice: npm modules and the onboarding tour.
+// npm modules and the onboarding tour.
 
 zod_reference PackageSearchResults {
     import = "../../../../shared/stores"
@@ -286,8 +281,7 @@ interface Onboarding {
     SetTourDone()
 }
 
-// ---------------------------------------------------------------------------
-// Versions and run slice: Electron versions, running, bisect and editor types.
+// Electron versions, running, bisect and editor types.
 // Install state lives in `App.versions`, run status in `Window.run`.
 
 zod_reference ReleaseList {
@@ -384,8 +378,7 @@ interface Run {
     OpenBisectCompare()
 }
 
-// ---------------------------------------------------------------------------
-// Gists slice: GitHub sign-in and gists. The token never leaves main; the App
+// GitHub sign-in and gists. The token never leaves main; the App
 // store only carries `githubLogin`. Bound per window in src/main/github/ipc.ts.
 
 subtype GitHubToken = string(
@@ -464,8 +457,7 @@ interface GitHub {
     CopyShareLink(id: GistId)
 }
 
-// ---------------------------------------------------------------------------
-// Platform slice: renderer logs, crash reporting and update notices.
+// Renderer logs, crash reporting and update notices.
 
 enum LogLevel {
     info
@@ -489,12 +481,12 @@ interface AppPlatform {
     // The update toast's action: opens the release page after confirmation.
     OpenUpdatePage()
     // True once, for the first window to ask: show the first-run notice that
-    // crash reports are on (§14). Recorded in state.json.
+    // crash reports are on. Recorded in state.json.
     TakeCrashReportsNotice() -> boolean
-    // Relaunches the app, e.g. after a language change (§9).
+    // Relaunches the app, e.g. after a language change.
     Relaunch()
     // macOS: forgets every privacy grant (camera, microphone, …) after a
-    // confirmation (§4). False when cancelled.
+    // confirmation. False when cancelled.
     ResetPrivacyPermissions() -> boolean
 
     // Linux and MSIX: a newer release is out (daily GitHub releases check).

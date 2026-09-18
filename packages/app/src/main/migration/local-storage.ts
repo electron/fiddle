@@ -1,7 +1,7 @@
 /**
- * Reads the previous Electron Fiddle's localStorage for the one-time import
- * (REQUIREMENTS §6). The old app kept its settings in the `file://` origin's
- * localStorage, in the default session of this same userData folder.
+ * Reads the previous Electron Fiddle's localStorage for the one-time import.
+ * The old app kept its settings in the `file://` origin's localStorage, in the
+ * default session of this same userData folder.
  *
  * This is the only `file://` load the app ever makes (see security.ts): a
  * hidden, sandboxed window with no preload and no IPC loads the blank page
@@ -21,6 +21,9 @@ function blankPage(): string {
   return path.join(dir, 'import-local-storage.html');
 }
 
+/** A hidden window that never answers must not hold up startup. */
+const READ_TIMEOUT_MS = 10_000;
+
 const READ_ALL = `JSON.stringify(Object.fromEntries(
   Array.from({ length: localStorage.length }, (_, i) => localStorage.key(i))
     .map((key) => [key, localStorage.getItem(key)]),
@@ -31,12 +34,15 @@ function parseStorageDump(json: unknown): Record<string, string> {
   const data: unknown = typeof json === 'string' ? JSON.parse(json) : undefined;
   const out: Record<string, string> = {};
   if (typeof data !== 'object' || data === null) return out;
-  for (const [key, value] of Object.entries(data)) if (typeof value === 'string') out[key] = value;
+  for (const [key, value] of Object.entries(data))
+    if (typeof value === 'string') out[key] = value;
   return out;
 }
 
 /** The old app's localStorage, or undefined when this profile has none. */
-export async function readOldLocalStorage(userData: string): Promise<Record<string, string> | undefined> {
+export async function readOldLocalStorage(
+  userData: string,
+): Promise<Record<string, string> | undefined> {
   if (!fs.existsSync(path.join(userData, 'Local Storage'))) return undefined;
   const win = new BrowserWindow({
     show: false,
@@ -52,10 +58,20 @@ export async function readOldLocalStorage(userData: string): Promise<Record<stri
   const contents = win.webContents;
   contents.on('will-navigate', (event) => event.preventDefault());
   contents.setWindowOpenHandler(() => ({ action: 'deny' }));
+  let timer: NodeJS.Timeout | undefined;
+  const timeout = new Promise<never>((_resolve, reject) => {
+    timer = setTimeout(
+      () => reject(new Error('reading the old localStorage timed out')),
+      READ_TIMEOUT_MS,
+    );
+  });
   try {
-    await win.loadFile(blankPage());
-    return parseStorageDump(await contents.executeJavaScript(READ_ALL));
+    const read = win
+      .loadFile(blankPage())
+      .then(() => contents.executeJavaScript(READ_ALL));
+    return parseStorageDump(await Promise.race([read, timeout]));
   } finally {
+    clearTimeout(timer);
     win.destroy();
   }
 }

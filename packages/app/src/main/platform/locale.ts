@@ -1,8 +1,8 @@
 /**
- * Chromium's UI language follows the language setting (REQUIREMENTS §9).
- * `--lang` must be set before `ready`, before any store exists, so the
- * setting is read straight from settings.json. A change applies after a
- * relaunch, which Settings offers.
+ * Chromium's UI language follows the language setting. `--lang` must be set
+ * before `ready`, before any store exists, so the setting is read straight
+ * from settings.json. A change applies after a relaunch, which Settings
+ * offers.
  */
 import fs from 'node:fs';
 import path from 'node:path';
@@ -25,7 +25,10 @@ export function localeSettingFrom(text: string | undefined): string | undefined 
 
 /** Before `ready`: `--lang` for a chosen language (or `FIDDLE_LOCALE` in dev and test runs). */
 export function applyChromiumLanguage(): void {
-  const forced = process.env.FIDDLE_LOCALE && (!app.isPackaged || isTestMode()) ? process.env.FIDDLE_LOCALE : undefined;
+  const forced =
+    process.env.FIDDLE_LOCALE && (!app.isPackaged || isTestMode())
+      ? process.env.FIDDLE_LOCALE
+      : undefined;
   let text: string | undefined;
   try {
     text = fs.readFileSync(path.join(app.getPath('userData'), 'settings.json'), 'utf8');
@@ -36,8 +39,26 @@ export function applyChromiumLanguage(): void {
   if (setting) app.commandLine.appendSwitch('lang', pickLocale([setting]));
 }
 
-/** Restarts the app, after the usual quit (unsaved-change prompts included). */
+let relaunchRequested = false;
+
+/**
+ * Restarts the app after the usual quit (unsaved-change prompts included). The
+ * relaunch is armed only once the app has really quit: `app.relaunch()` can't
+ * be undone, and the quit can be cancelled.
+ */
 export function relaunchApp(): void {
-  app.relaunch();
+  relaunchRequested = true;
   app.quit();
+}
+
+/** The user cancelled the quit that `relaunchApp` started. */
+export function cancelRelaunch(): void {
+  relaunchRequested = false;
+}
+
+/** Call once at startup. */
+export function installRelaunchOnQuit(): void {
+  app.on('quit', () => {
+    if (relaunchRequested) app.relaunch();
+  });
 }

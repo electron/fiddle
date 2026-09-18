@@ -27,9 +27,18 @@ interface Options {
 }
 
 function setup(options: Options = {}) {
-  const rows = [row('44.0.0-beta.3'), row('43.0.0'), row('42.4.1'), row('10.0.0', { supported: false })];
+  const rows = [
+    row('44.0.0-beta.3'),
+    row('43.0.0'),
+    row('42.4.1'),
+    row('10.0.0', { supported: false }),
+  ];
   const installed = new Set(options.installed ?? []);
-  const settings = { channels: options.channels ?? ['stable', 'beta'], showObsolete: false, showNotDownloaded: true };
+  const settings = {
+    channels: options.channels ?? ['stable', 'beta'],
+    showObsolete: false,
+    showNotDownloaded: true,
+  };
   const state = {
     version: options.version ?? release('43.0.0'),
     notices: [] as string[],
@@ -79,7 +88,9 @@ function setup(options: Options = {}) {
 describe('VersionSelector.select', () => {
   it('sets, remembers and downloads the picked version', async () => {
     const { selector, state, install } = setup();
-    await expect(selector.select('w', release('42.4.1'), { remember: true })).resolves.toBe(7);
+    await expect(
+      selector.select('w', release('42.4.1'), { remember: true }),
+    ).resolves.toBe(7);
     expect(state.version).toEqual(release('42.4.1'));
     expect(state.remembered).toEqual([release('42.4.1')]);
     expect(install).toHaveBeenCalledWith('42.4.1');
@@ -93,9 +104,15 @@ describe('VersionSelector.select', () => {
 
   it('refuses unknown and unrunnable versions, and busy windows', async () => {
     const { selector } = setup();
-    await expect(selector.select('w', release('99.0.0'))).rejects.toMatchObject({ code: ErrorCode.notFound });
-    await expect(selector.select('w', release('10.0.0'))).rejects.toMatchObject({ code: ErrorCode.invalidArgument });
-    await expect(setup({ busy: true }).selector.select('w', release('42.4.1'))).rejects.toMatchObject({
+    await expect(selector.select('w', release('99.0.0'))).rejects.toMatchObject({
+      code: ErrorCode.notFound,
+    });
+    await expect(selector.select('w', release('10.0.0'))).rejects.toMatchObject({
+      code: ErrorCode.invalidArgument,
+    });
+    await expect(
+      setup({ busy: true }).selector.select('w', release('42.4.1')),
+    ).rejects.toMatchObject({
       code: ErrorCode.conflict,
     });
   });
@@ -113,7 +130,9 @@ describe('VersionSelector.validate', () => {
     const { selector, state, install } = setup({ version: release('99.0.0') });
     await selector.validate('w');
     expect(state.version).toEqual(release('44.0.0-beta.3'));
-    expect(state.notices).toEqual(['fallback(versionUnknown(99.0.0)|electronVersion(44.0.0-beta.3))']);
+    expect(state.notices).toEqual([
+      'fallback(versionUnknown(99.0.0)|electronVersion(44.0.0-beta.3))',
+    ]);
     expect(install).toHaveBeenCalledWith('44.0.0-beta.3');
     expect(state.remembered).toEqual([]);
   });
@@ -126,7 +145,9 @@ describe('VersionSelector.validate', () => {
     const { selector, state } = setup({ version: { kind: 'local', id: 'gone' }, builds });
     await selector.validate('w');
     expect(state.version).toEqual({ kind: 'local', id: 'ok' });
-    expect(state.notices).toEqual(['fallback(localBuildMissing(gone)|gn/main - testing)']);
+    expect(state.notices).toEqual([
+      'fallback(localBuildMissing(gone)|gn/main - testing)',
+    ]);
   });
 
   it("doesn't touch a busy window", async () => {
@@ -153,7 +174,9 @@ describe('failed downloads', () => {
   it('keep the version and show the error when nothing is downloaded', async () => {
     const { selector, state } = setup({ install: failing });
     await selector.select('w', release('42.4.1'));
-    await vi.waitFor(() => expect(state.notices).toEqual(['downloadFailed(42.4.1|offline 42.4.1)']));
+    await vi.waitFor(() =>
+      expect(state.notices).toEqual(['downloadFailed(42.4.1|offline 42.4.1)']),
+    );
     expect(state.version).toEqual(release('42.4.1'));
   });
 
@@ -182,7 +205,10 @@ describe('failed downloads', () => {
 
 describe('docs examples', () => {
   it('offer to show a hidden channel, then download the version', async () => {
-    const { selector, state, install } = setup({ version: release('44.0.0-beta.3'), channels: ['stable'] });
+    const { selector, state, install } = setup({
+      version: release('44.0.0-beta.3'),
+      channels: ['stable'],
+    });
     await selector.docsExampleLoaded('w');
     expect(state.prompts).toEqual(['showBetaTitle']);
     expect(state.settings.channels).toEqual(['stable', 'beta']);
@@ -211,10 +237,15 @@ describe('docs examples', () => {
   });
 
   it('fall back when the version is unknown', async () => {
-    const { selector, state } = setup({ version: release('99.0.0-beta.1'), channels: ['stable'] });
+    const { selector, state } = setup({
+      version: release('99.0.0-beta.1'),
+      channels: ['stable'],
+    });
     await selector.docsExampleLoaded('w');
     expect(state.prompts).toEqual([]);
     expect(state.version).toEqual(release('43.0.0'));
-    expect(state.notices).toEqual(['fallback(versionUnknown(99.0.0-beta.1)|electronVersion(43.0.0))']);
+    expect(state.notices).toEqual([
+      'fallback(versionUnknown(99.0.0-beta.1)|electronVersion(43.0.0))',
+    ]);
   });
 });

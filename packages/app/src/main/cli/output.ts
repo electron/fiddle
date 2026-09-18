@@ -1,5 +1,5 @@
 /**
- * Headless CLI output (REQUIREMENTS §7): human text or JSON, exit codes and
+ * Headless CLI output: human text or JSON, exit codes and
  * the locale. Pure: writers are injected. No Electron imports.
  *
  * With `--json`, stdout gets one JSON object per line, each with `schemaVersion`:
@@ -45,9 +45,14 @@ export function exitCodeForError(code: string): number {
 }
 
 /** The fiddle's exit code. A signal gives 128 + its number, as in a shell; a failed spawn gives 1. */
-export function exitCodeForRun(outcome: { code?: number | null; signal?: string | null }): number {
+export function exitCodeForRun(outcome: {
+  code?: number | null;
+  signal?: string | null;
+}): number {
   if (outcome.signal) {
-    const number = (constants.signals as Readonly<Record<string, number>>)[outcome.signal];
+    const number = (constants.signals as Readonly<Record<string, number>>)[
+      outcome.signal
+    ];
     return number === undefined ? 1 : 128 + number;
   }
   return typeof outcome.code === 'number' ? outcome.code : 1;
@@ -55,7 +60,9 @@ export function exitCodeForRun(outcome: { code?: number | null; signal?: string 
 
 /** The locale from `LC_ALL`, `LC_MESSAGES` or `LANG`, first set wins, as a BCP 47 tag. */
 export function localeFromEnv(env: NodeJS.ProcessEnv): string[] {
-  const raw = [env.LC_ALL, env.LC_MESSAGES, env.LANG].find((value) => value !== undefined && value !== '');
+  const raw = [env.LC_ALL, env.LC_MESSAGES, env.LANG].find(
+    (value) => value !== undefined && value !== '',
+  );
   if (raw === undefined) return [];
   const tag = raw.split(/[.@]/)[0]!.replace(/_/g, '-');
   return tag === '' || tag === 'C' || tag === 'POSIX' ? ['en'] : [tag];
@@ -122,7 +129,8 @@ export class Reporter {
       return;
     }
     const base = { code: error.code, message: error.message };
-    const withDetails = error.details === undefined ? base : { ...base, details: error.details };
+    const withDetails =
+      error.details === undefined ? base : { ...base, details: error.details };
     const event = { type: 'result', command: this.command, ok: false };
     try {
       this.#event({ ...event, error: withDetails });

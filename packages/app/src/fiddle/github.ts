@@ -7,7 +7,8 @@ import { type FiddleOrigin, gistOrigin } from './trust';
 
 export const GITHUB_API_URL = 'https://api.github.com';
 export const GIST_RAW_ORIGIN = 'https://gist.githubusercontent.com';
-export const GITHUB_TOKEN_PATTERN = /^(ghp_[a-zA-Z0-9]{36}|github_pat_[a-zA-Z0-9]{22}_[a-zA-Z0-9]{59})$/;
+export const GITHUB_TOKEN_PATTERN =
+  /^(ghp_[a-zA-Z0-9]{36}|github_pat_[a-zA-Z0-9]{22}_[a-zA-Z0-9]{59})$/;
 export const GIST_MAX_FILES = 300;
 export const GIST_MAX_FILE_BYTES = 10 * 1024 * 1024;
 export const GIST_DESCRIPTION_MAX = 256;
@@ -19,7 +20,11 @@ export function isValidTokenFormat(token: string): boolean {
   return GITHUB_TOKEN_PATTERN.test(token);
 }
 
-function invalid(reason: string, message: string, details: Record<string, unknown> = {}): FiddleError {
+function invalid(
+  reason: string,
+  message: string,
+  details: Record<string, unknown> = {},
+): FiddleError {
   return new FiddleError(ErrorCode.invalidArgument, message, { reason, ...details });
 }
 
@@ -29,7 +34,10 @@ export function assertGistId(id: string): void {
 
 export function assertGistDescription(description: string): void {
   if (description.length < 1 || description.length > GIST_DESCRIPTION_MAX) {
-    throw invalid('invalid-description', `Description must be 1–${GIST_DESCRIPTION_MAX} characters`);
+    throw invalid(
+      'invalid-description',
+      `Description must be 1–${GIST_DESCRIPTION_MAX} characters`,
+    );
   }
 }
 
@@ -37,9 +45,11 @@ export function assertGistDescription(description: string): void {
 export function assertGistFiles(files: FileMap): void {
   const entries = Object.entries(files);
   if (entries.length === 0) throw invalid('no-files', 'A gist needs at least one file');
-  if (entries.length > GIST_MAX_FILES) throw invalid('too-many-files', `A gist can have at most ${GIST_MAX_FILES} files`);
+  if (entries.length > GIST_MAX_FILES)
+    throw invalid('too-many-files', `A gist can have at most ${GIST_MAX_FILES} files`);
   for (const [name, content] of entries) {
-    if (name === '' || /[/\\]/.test(name)) throw invalid('invalid-file-name', `Invalid gist file name: ${name}`, { name });
+    if (name === '' || /[/\\]/.test(name))
+      throw invalid('invalid-file-name', `Invalid gist file name: ${name}`, { name });
     if (Buffer.byteLength(content, 'utf8') > GIST_MAX_FILE_BYTES) {
       throw invalid('file-too-large', `${name} is larger than 10 MB`, { name });
     }
@@ -52,7 +62,8 @@ export function assertGistFiles(files: FileMap): void {
  */
 function nonBlankFiles(files: FileMap): [string, string][] {
   const kept = Object.entries(files).filter(([, content]) => content.trim() !== '');
-  if (kept.length === 0) throw invalid('no-files', 'A gist needs at least one file that is not empty');
+  if (kept.length === 0)
+    throw invalid('no-files', 'A gist needs at least one file that is not empty');
   return kept;
 }
 
@@ -80,13 +91,22 @@ const CommitsSchema = z.array(
     version: z.string(),
     committed_at: z.string(),
     change_status: z
-      .object({ total: z.number().optional(), additions: z.number().optional(), deletions: z.number().optional() })
+      .object({
+        total: z.number().optional(),
+        additions: z.number().optional(),
+        deletions: z.number().optional(),
+      })
       .optional(),
   }),
 );
 
 const ContentsSchema = z.array(
-  z.object({ name: z.string(), path: z.string(), type: z.string(), download_url: z.string().nullable() }),
+  z.object({
+    name: z.string(),
+    path: z.string(),
+    type: z.string(),
+    download_url: z.string().nullable(),
+  }),
 );
 
 const UserSchema = z.object({ login: z.string() });
@@ -110,6 +130,8 @@ export interface GistWriteResult {
   url: string;
   owner: string | null;
   revision: string | undefined;
+  /** The names of the gist's files after the write. */
+  files: string[];
 }
 
 /** Revision titles are data: render `created` as "Created" and `revision` as "Revision N". */
@@ -153,7 +175,11 @@ async function toResponseError(res: Response): Promise<FiddleError> {
   let githubMessage = '';
   try {
     const body: unknown = await res.json();
-    if (body && typeof body === 'object' && typeof (body as { message?: unknown }).message === 'string') {
+    if (
+      body &&
+      typeof body === 'object' &&
+      typeof (body as { message?: unknown }).message === 'string'
+    ) {
       githubMessage = (body as { message: string }).message;
     }
   } catch {
@@ -161,7 +187,8 @@ async function toResponseError(res: Response): Promise<FiddleError> {
   }
   // A rate-limited 403 isn't a bad token, so the startup check must keep it.
   const rateLimited =
-    res.status === 403 && (res.headers.get('x-ratelimit-remaining') === '0' || res.headers.has('retry-after'));
+    res.status === 403 &&
+    (res.headers.get('x-ratelimit-remaining') === '0' || res.headers.has('retry-after'));
   const code =
     res.status === 401
       ? ErrorCode.unauthorized
@@ -169,13 +196,13 @@ async function toResponseError(res: Response): Promise<FiddleError> {
         ? ErrorCode.unavailable
         : res.status === 403
           ? ErrorCode.forbidden
-        : res.status === 404
-          ? ErrorCode.notFound
-          : res.status === 422
-            ? ErrorCode.invalidArgument
-            : res.status >= 500 || res.status === 429
-              ? ErrorCode.unavailable
-              : ErrorCode.internal;
+          : res.status === 404
+            ? ErrorCode.notFound
+            : res.status === 422
+              ? ErrorCode.invalidArgument
+              : res.status >= 500 || res.status === 429
+                ? ErrorCode.unavailable
+                : ErrorCode.internal;
   const message = `GitHub responded ${res.status}${githubMessage ? `: ${githubMessage}` : ''}`;
   return new FiddleError(code, message, { status: res.status, githubMessage });
 }
@@ -185,9 +212,13 @@ function toFetchError(error: unknown, signal?: AbortSignal): FiddleError {
   if (signal?.aborted || (error instanceof Error && error.name === 'AbortError')) {
     return new FiddleError(ErrorCode.cancelled, 'The request was cancelled');
   }
-  return new FiddleError(ErrorCode.network, 'Could not reach GitHub. Your computer seems to be offline.', {
-    cause: error instanceof Error ? error.message : String(error),
-  });
+  return new FiddleError(
+    ErrorCode.network,
+    'Could not reach GitHub. Your computer seems to be offline.',
+    {
+      cause: error instanceof Error ? error.message : String(error),
+    },
+  );
 }
 
 /**
@@ -205,17 +236,18 @@ export class GitHubClient {
   constructor(options: GitHubClientOptions = {}) {
     this.token = options.token;
     this.apiBase = new URL(options.apiBaseUrl ?? GITHUB_API_URL);
-    this.trustedOrigins = new Set([this.apiBase.origin, ...(options.rawOrigins ?? [GIST_RAW_ORIGIN])]);
+    this.trustedOrigins = new Set([
+      this.apiBase.origin,
+      ...(options.rawOrigins ?? [GIST_RAW_ORIGIN]),
+    ]);
     this.fetchFn = options.fetch ?? fetch;
     this.allowLoopbackHttp = options.allowLoopbackHttp ?? false;
   }
 
-  get hasToken(): boolean {
-    return this.token !== undefined;
-  }
-
   private isSecure(url: URL): boolean {
-    return url.protocol === 'https:' || (this.allowLoopbackHttp && isLoopback(url.hostname));
+    return (
+      url.protocol === 'https:' || (this.allowLoopbackHttp && isLoopback(url.hostname))
+    );
   }
 
   private mayReceiveToken(url: URL): boolean {
@@ -223,7 +255,9 @@ export class GitHubClient {
   }
 
   private apiUrl(path: string): URL {
-    const base = this.apiBase.href.endsWith('/') ? this.apiBase.href : `${this.apiBase.href}/`;
+    const base = this.apiBase.href.endsWith('/')
+      ? this.apiBase.href
+      : `${this.apiBase.href}/`;
     return new URL(path.replace(/^\//, ''), base);
   }
 
@@ -247,7 +281,13 @@ export class GitHubClient {
 
       let res: Response;
       try {
-        res = await this.fetchFn(current, { method, body, headers, redirect: 'manual', signal: init.signal });
+        res = await this.fetchFn(current, {
+          method,
+          body,
+          headers,
+          redirect: 'manual',
+          signal: init.signal,
+        });
       } catch (error) {
         throw toFetchError(error, init.signal);
       }
@@ -256,7 +296,10 @@ export class GitHubClient {
       if (res.status >= 300 && res.status < 400 && location) {
         const next = new URL(location, current);
         if (next.origin !== current.origin) withToken = false;
-        if (res.status === 303 || ((res.status === 301 || res.status === 302) && method === 'POST')) {
+        if (
+          res.status === 303 ||
+          ((res.status === 301 || res.status === 302) && method === 'POST')
+        ) {
           method = 'GET';
           body = undefined;
         }
@@ -277,49 +320,67 @@ export class GitHubClient {
       data = undefined;
     }
     const parsed = schema.safeParse(data);
-    if (!parsed.success) throw new FiddleError(ErrorCode.internal, 'Unexpected response from GitHub');
+    if (!parsed.success)
+      throw new FiddleError(ErrorCode.internal, 'Unexpected response from GitHub');
     return parsed.data;
   }
 
   private requireToken(): void {
     if (!this.token) {
-      throw new FiddleError(ErrorCode.unauthorized, 'Sign in to GitHub first', { reason: 'signed-out' });
+      throw new FiddleError(ErrorCode.unauthorized, 'Sign in to GitHub first', {
+        reason: 'signed-out',
+      });
     }
   }
 
-  /** The signed-in user's login and the token's scopes. 401 → `unauthorized`, 403 → `forbidden`, offline → `network`. */
-  async getAuthenticatedUser(signal?: AbortSignal): Promise<{ login: string; scopes: string[] }> {
+  /**
+   * The signed-in user's login and the token's scopes, which GitHub reports
+   * for classic tokens only. 401 → `unauthorized`, 403 → `forbidden`, offline → `network`.
+   */
+  async getAuthenticatedUser(
+    signal?: AbortSignal,
+  ): Promise<{ login: string; scopes: string[] | undefined }> {
     this.requireToken();
     const res = await this.send(this.apiUrl('/user'), { signal });
     const user = await this.json(res, UserSchema);
-    const scopes = (res.headers.get('x-oauth-scopes') ?? '')
-      .split(',')
+    const header = res.headers.get('x-oauth-scopes');
+    const scopes = header
+      ?.split(',')
       .map((s) => s.trim())
       .filter(Boolean);
     return { login: user.login, scopes };
   }
 
   /**
-   * Sign-in check: the token must look right, be accepted, and have the
-   * `gist` scope. Failures carry `details.reason`: `bad-format`,
-   * `invalid-token` or `missing-scope`.
+   * Sign-in check: the token must look right, be accepted, and, if it is a
+   * classic token, have the `gist` scope (a fine-grained token's permissions
+   * are only known when it is used). Failures carry `details.reason`:
+   * `bad-format`, `invalid-token` or `missing-scope`.
    */
   async verifyToken(signal?: AbortSignal): Promise<string> {
     if (!this.token || !isValidTokenFormat(this.token)) {
-      throw new FiddleError(ErrorCode.invalidArgument, 'Invalid token format', { reason: 'bad-format' });
+      throw new FiddleError(ErrorCode.invalidArgument, 'Invalid token format', {
+        reason: 'bad-format',
+      });
     }
-    let user: { login: string; scopes: string[] };
+    let user: { login: string; scopes: string[] | undefined };
     try {
       user = await this.getAuthenticatedUser(signal);
     } catch (error) {
       const e = FiddleError.from(error);
       if (e.code === ErrorCode.unauthorized || e.code === ErrorCode.forbidden) {
-        throw new FiddleError(ErrorCode.unauthorized, 'Invalid GitHub token', { reason: 'invalid-token' });
+        throw new FiddleError(ErrorCode.unauthorized, 'Invalid GitHub token', {
+          reason: 'invalid-token',
+        });
       }
       throw e;
     }
-    if (!user.scopes.includes('gist')) {
-      throw new FiddleError(ErrorCode.forbidden, 'The token is missing the "gist" scope', { reason: 'missing-scope' });
+    if (user.scopes && !user.scopes.includes('gist')) {
+      throw new FiddleError(
+        ErrorCode.forbidden,
+        'The token is missing the "gist" scope',
+        { reason: 'missing-scope' },
+      );
     }
     return user.login;
   }
@@ -336,15 +397,27 @@ export class GitHubClient {
   }
 
   /** Loads a gist, optionally at a revision. Works signed out for public gists. */
-  async loadGist(id: string, revision?: string, signal?: AbortSignal): Promise<GistLoadResult> {
+  async loadGist(
+    id: string,
+    revision?: string,
+    signal?: AbortSignal,
+  ): Promise<GistLoadResult> {
     assertGistId(id);
     if (revision !== undefined && !isRevisionSha(revision)) {
       throw invalid('invalid-revision', `Invalid revision: ${revision}`);
     }
     const path = revision ? `/gists/${id}/${revision.toLowerCase()}` : `/gists/${id}`;
-    const gist = await this.json(await this.send(this.apiUrl(path), { signal }), GistSchema);
+    const gist = await this.json(
+      await this.send(this.apiUrl(path), { signal }),
+      GistSchema,
+    );
     const sha = revision?.toLowerCase() ?? gist.history?.[0]?.version;
-    if (!sha) throw new FiddleError(ErrorCode.internal, 'GitHub returned a gist without history', { reason: 'no-history' });
+    if (!sha)
+      throw new FiddleError(
+        ErrorCode.internal,
+        'GitHub returned a gist without history',
+        { reason: 'no-history' },
+      );
 
     const files = await Promise.all(
       Object.entries(gist.files ?? {}).flatMap(([key, file]) =>
@@ -352,7 +425,9 @@ export class GitHubClient {
           ? [
               (async (): Promise<[string, string]> => [
                 file.filename ?? key,
-                file.truncated && file.raw_url ? await this.fetchText(file.raw_url, signal) : (file.content ?? ''),
+                file.truncated && file.raw_url
+                  ? await this.fetchText(file.raw_url, signal)
+                  : (file.content ?? ''),
               ])(),
             ]
           : [],
@@ -381,16 +456,28 @@ export class GitHubClient {
     const body = {
       description: input.description,
       public: input.isPublic,
-      files: Object.fromEntries(nonBlankFiles(input.files).map(([name, content]) => [name, { content }])),
+      files: Object.fromEntries(
+        nonBlankFiles(input.files).map(([name, content]) => [name, { content }]),
+      ),
     };
     const res = await this.send(this.apiUrl('/gists'), { method: 'POST', body, signal });
     return this.writeResult(await this.json(res, GistSchema));
   }
 
-  /** Replaces the gist's files: remote files that are empty or missing from `files` are deleted. */
+  /**
+   * Writes `files` to the gist. A remote file that is missing from `files`, or
+   * empty in it, is deleted only if `canDelete` accepts its name; the gist's
+   * other files (a README, images, files the fiddle never loaded) stay.
+   * `remote` is the gist's file names, when the caller just wrote them.
+   */
   async updateGist(
     id: string,
-    input: { files: FileMap; description?: string },
+    input: {
+      files: FileMap;
+      canDelete: (name: string) => boolean;
+      remote?: readonly string[];
+      description?: string;
+    },
     signal?: AbortSignal,
   ): Promise<GistWriteResult> {
     this.requireToken();
@@ -399,22 +486,43 @@ export class GitHubClient {
     const kept = nonBlankFiles(input.files);
     if (input.description !== undefined) assertGistDescription(input.description);
 
-    const existing = await this.json(await this.send(this.apiUrl(`/gists/${id}`), { signal }), GistSchema);
+    const remote =
+      input.remote ??
+      Object.keys(
+        (
+          await this.json(
+            await this.send(this.apiUrl(`/gists/${id}`), { signal }),
+            GistSchema,
+          )
+        ).files ?? {},
+      );
     const keptNames = new Set(kept.map(([name]) => name));
-    const removed = Object.keys(existing.files ?? {}).filter((name) => !keptNames.has(name));
+    const removed = remote.filter(
+      (name) => !keptNames.has(name) && input.canDelete(name),
+    );
     const files = Object.fromEntries([
       ...kept.map(([name, content]) => [name, { content }] as const),
       ...removed.map((name) => [name, null] as const),
     ]);
-    const body = input.description === undefined ? { files } : { files, description: input.description };
-    const res = await this.send(this.apiUrl(`/gists/${id}`), { method: 'PATCH', body, signal });
+    const body =
+      input.description === undefined
+        ? { files }
+        : { files, description: input.description };
+    const res = await this.send(this.apiUrl(`/gists/${id}`), {
+      method: 'PATCH',
+      body,
+      signal,
+    });
     return this.writeResult(await this.json(res, GistSchema));
   }
 
   async deleteGist(id: string, signal?: AbortSignal): Promise<void> {
     this.requireToken();
     assertGistId(id);
-    const res = await this.send(this.apiUrl(`/gists/${id}`), { method: 'DELETE', signal });
+    const res = await this.send(this.apiUrl(`/gists/${id}`), {
+      method: 'DELETE',
+      signal,
+    });
     if (!res.ok) throw await toResponseError(res);
   }
 
@@ -432,7 +540,12 @@ export class GitHubClient {
 
     const oldest = commits.at(-1);
     return commits
-      .filter((c) => c === oldest || (c.change_status?.additions ?? 0) > 0 || (c.change_status?.deletions ?? 0) > 0)
+      .filter(
+        (c) =>
+          c === oldest ||
+          (c.change_status?.additions ?? 0) > 0 ||
+          (c.change_status?.deletions ?? 0) > 0,
+      )
       .reverse()
       .map((c, i) => ({
         sha: c.version,
@@ -459,8 +572,14 @@ export class GitHubClient {
     const res = await this.send(url, { signal });
     if (!res.ok) throw await toResponseError(res);
     const parsed = ContentsSchema.safeParse(await res.json().catch(() => undefined));
-    if (!parsed.success) throw invalid('not-a-directory', `${owner}/${repo}/${path}@${ref} is not a folder`);
-    return parsed.data.map((e) => ({ name: e.name, path: e.path, type: e.type, downloadUrl: e.download_url }));
+    if (!parsed.success)
+      throw invalid('not-a-directory', `${owner}/${repo}/${path}@${ref} is not a folder`);
+    return parsed.data.map((e) => ({
+      name: e.name,
+      path: e.path,
+      type: e.type,
+      downloadUrl: e.download_url,
+    }));
   }
 
   private writeResult(gist: z.infer<typeof GistSchema>): GistWriteResult {
@@ -469,6 +588,7 @@ export class GitHubClient {
       url: gist.html_url ?? gistUrl(gist.id),
       owner: gist.owner?.login ?? null,
       revision: gist.history?.[0]?.version,
+      files: Object.keys(gist.files ?? {}),
     };
   }
 }

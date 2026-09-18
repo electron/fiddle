@@ -65,7 +65,10 @@ const OTHER_KEYS: Record<string, string | ((platform: Platform) => string)> = {
 };
 
 /** An accelerator's key caps: `CmdOrCtrl+Shift+P` → ⌘ ⇧ P on macOS, Ctrl Shift P elsewhere. `CmdOrCtrl++` is Plus. */
-export function acceleratorKeys(accelerator: string | undefined | null, platform: Platform): string[] {
+export function acceleratorKeys(
+  accelerator: string | undefined | null,
+  platform: Platform,
+): string[] {
   if (!accelerator) return [];
   const names = platform === 'darwin' ? MAC_KEYS : OTHER_KEYS;
   // Split on a `+` that isn't the last character: `CmdOrCtrl++` ends in the plus key.
@@ -78,7 +81,10 @@ export function acceleratorKeys(accelerator: string | undefined | null, platform
 }
 
 /** An accelerator as menus write it: `⌘⇧P` on macOS (no separators), `Ctrl+Shift+P` elsewhere. */
-export function formatAccelerator(accelerator: string | undefined | null, platform: Platform): string | undefined {
+export function formatAccelerator(
+  accelerator: string | undefined | null,
+  platform: Platform,
+): string | undefined {
   const keys = acceleratorKeys(accelerator, platform);
   if (keys.length === 0) return undefined;
   return keys.join(platform === 'darwin' ? '' : '+');

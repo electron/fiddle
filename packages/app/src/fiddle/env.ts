@@ -9,7 +9,7 @@ export const ADVANCED_LOGGING_ENV: Readonly<Record<string, string>> = {
 
 /**
  * Parent-environment variables kept from fiddle processes on top of core's
- * default denylist (§4): app-internal variables, the e2e driver's included.
+ * default denylist: app-internal variables, the e2e driver's included.
  */
 export const FIDDLE_EXTRA_ENV_DENYLIST: readonly string[] = ['ELECTRON_FIDDLE_*'];
 
@@ -36,7 +36,11 @@ const BLOCKED_USER_ENV_KEYS: readonly string[] = ['NODE_OPTIONS', 'ELECTRON_RUN_
  */
 export function isBlockedUserEnvKey(key: string): boolean {
   const upper = key.toUpperCase();
-  return upper.startsWith('LD_') || upper.startsWith('DYLD_') || BLOCKED_USER_ENV_KEYS.includes(upper);
+  return (
+    upper.startsWith('LD_') ||
+    upper.startsWith('DYLD_') ||
+    BLOCKED_USER_ENV_KEYS.includes(upper)
+  );
 }
 
 /**
@@ -67,7 +71,11 @@ export function parseEnvEntry(entry: string): [string, string] | null {
   if (!KEY_RE.test(key)) return null;
   let value = trimmed.slice(eq + 1).trim();
   if (value.includes('\0')) return null;
-  if (value.length >= 2 && (value[0] === '"' || value[0] === "'") && value.at(-1) === value[0]) {
+  if (
+    value.length >= 2 &&
+    (value[0] === '"' || value[0] === "'") &&
+    value.at(-1) === value[0]
+  ) {
     value = value.slice(1, -1);
   }
   return [key, value];
@@ -78,7 +86,10 @@ export function parseEnvEntry(entry: string): [string, string] | null {
  * don't parse are reported in `invalid`, blocked keys in `blocked`. Later
  * entries win (ignoring case on Windows).
  */
-export function parseEnvEntries(entries: readonly string[], platform: NodeJS.Platform = process.platform): ParsedEnvEntries {
+export function parseEnvEntries(
+  entries: readonly string[],
+  platform: NodeJS.Platform = process.platform,
+): ParsedEnvEntries {
   const pairs: [string, string][] = [];
   const invalid: string[] = [];
   const blocked: string[] = [];
@@ -109,7 +120,10 @@ export interface FiddleEnvOptions {
  * {@link FIDDLE_EXTRA_ENV_DENYLIST}, then the advanced-logging variables,
  * then the user's. On Windows a variable replaces any differently-cased copy.
  */
-export function fiddleProcessEnv(options: FiddleEnvOptions = {}, parent: NodeJS.ProcessEnv = process.env): NodeJS.ProcessEnv {
+export function fiddleProcessEnv(
+  options: FiddleEnvOptions = {},
+  parent: NodeJS.ProcessEnv = process.env,
+): NodeJS.ProcessEnv {
   const vars = envFromEntries([
     ...Object.entries(options.advancedLogging ? ADVANCED_LOGGING_ENV : {}),
     ...Object.entries(options.userEnv ?? {}),

@@ -24,7 +24,14 @@ function RingGraphic({ value, size }: RingGraphicProps) {
       aria-hidden="true"
       focusable="false"
     >
-      <circle className={styles.ringTrack} cx={mid} cy={mid} r={r} fill="none" strokeWidth={stroke} />
+      <circle
+        className={styles.ringTrack}
+        cx={mid}
+        cy={mid}
+        r={r}
+        fill="none"
+        strokeWidth={stroke}
+      />
       <circle
         className={styles.ringBar}
         cx={mid}
@@ -61,7 +68,11 @@ export function ProgressRing({ value, size = 14, label, className }: ProgressRin
     );
   }
   return (
-    <AriaProgressBar value={value} aria-label={label} className={cx(styles.ringWrap, className)}>
+    <AriaProgressBar
+      value={value}
+      aria-label={label}
+      className={cx(styles.ringWrap, className)}
+    >
       <RingGraphic value={value} size={size} />
     </AriaProgressBar>
   );
@@ -83,7 +94,11 @@ export function Spinner({ size = 14, label, className }: SpinnerProps) {
     );
   }
   return (
-    <AriaProgressBar isIndeterminate aria-label={label} className={cx(styles.ringWrap, className)}>
+    <AriaProgressBar
+      isIndeterminate
+      aria-label={label}
+      className={cx(styles.ringWrap, className)}
+    >
       <RingGraphic size={size} />
     </AriaProgressBar>
   );
@@ -101,7 +116,13 @@ export interface ProgressBarProps {
   className?: string;
 }
 
-export function ProgressBar({ label, value, detail, className, ...rest }: ProgressBarProps) {
+export function ProgressBar({
+  label,
+  value,
+  detail,
+  className,
+  ...rest
+}: ProgressBarProps) {
   const indeterminate = value === undefined;
   return (
     <AriaProgressBar

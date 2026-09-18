@@ -18,7 +18,6 @@ All contributions follow [Electron's code of conduct](https://github.com/electro
   and pull request titles.
 - Please **don't** bump the version number. The maintainers do that. You're welcome to say
   whether a change needs a major, minor or patch bump under [semantic versioning](https://semver.org/).
-- `REQUIREMENTS.md` is the spec. If a change departs from it, update it in the same pull request.
 
 ## Running Fiddle from source
 

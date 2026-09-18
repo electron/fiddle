@@ -1,7 +1,4 @@
-/**
- * The Content-Security-Policy from REQUIREMENTS.md §4, sent as a response
- * header on every app:// response (see protocol.ts).
- */
+/** The Content-Security-Policy, sent as a response header on every app:// response (see protocol.ts). */
 import { session } from 'electron';
 
 /**

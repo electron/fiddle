@@ -1,4 +1,5 @@
 import { spawn } from 'node:child_process';
+import { createHash } from 'node:crypto';
 import fs from 'node:fs';
 import http from 'node:http';
 import type { AddressInfo } from 'node:net';
@@ -6,6 +7,7 @@ import os from 'node:os';
 import path from 'node:path';
 
 import { extract, type ExtractOptions } from '@electron-internal/extract-zip';
+import envPaths from 'env-paths';
 import {
   afterAll,
   afterEach,
@@ -91,7 +93,7 @@ afterAll(async () => {
   await new Promise((resolve) => server.close(resolve));
 });
 
-describe('fiddle-core 3.0 additions', () => {
+describe('Installer and ElectronVersions options', () => {
   let tmpdir: string;
   let paths: {
     electronDownloads: string;
@@ -116,6 +118,7 @@ describe('fiddle-core 3.0 additions', () => {
   });
 
   afterEach(() => {
+    vi.restoreAllMocks();
     fs.rmSync(tmpdir, { recursive: true, force: true });
   });
 
@@ -278,6 +281,82 @@ describe('fiddle-core 3.0 additions', () => {
       expect(ls(paths.electronVersions)).toStrictEqual(['.locks', '12.0.15']);
     });
 
+    it('keeps what is left in the state when a removal fails', async () => {
+      const installer = createInstaller({ layout: 'per-version' });
+      await installer.install('13.1.7');
+      const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
+      const rm = fs.promises.rm.bind(fs.promises);
+      vi.spyOn(fs.promises, 'rm').mockImplementation(((target: string, ...rest: []) =>
+        target.endsWith('.zip')
+          ? Promise.reject(new Error('busy'))
+          : rm(target, ...rest)) as never);
+
+      await installer.remove('13.1.7');
+      expect(warn).toHaveBeenCalled();
+      expect(fs.existsSync(versionsDir('13.1.7'))).toBe(false);
+      expect(fs.existsSync(path.join(paths.electronDownloads, zipName('13.1.7')))).toBe(
+        true,
+      );
+      expect(installer.state('13.1.7')).toBe(downloaded);
+    });
+
+    it('leaves the Electron download cache shared with other tools alone', async () => {
+      const cache = envPaths('electron', { suffix: '' }).cache;
+      const key = createHash('sha256').update(`${mirror}v13.1.7`).digest('hex');
+      const cached = path.join(cache, key, zipName('13.1.7'));
+      fs.rmSync(path.dirname(cached), { recursive: true, force: true });
+      fs.mkdirSync(path.dirname(cached), { recursive: true });
+      fs.copyFileSync(fixture('electron-v13.1.7.zip'), cached);
+      const tempDirs: string[] = [];
+      const mkdtemp = fs.promises.mkdtemp.bind(fs.promises);
+      vi.spyOn(fs.promises, 'mkdtemp').mockImplementation(((prefix: string) =>
+        mkdtemp(prefix).then((dir) => {
+          if (path.basename(prefix) === 'electron-download-') tempDirs.push(dir);
+          return dir;
+        })) as never);
+
+      try {
+        await createInstaller({ layout: 'per-version' }).install('13.1.7');
+        expect(fs.existsSync(cached)).toBe(true);
+        expect(zipHits()).toHaveLength(1);
+        expect(tempDirs.length).toBeGreaterThan(0);
+        for (const dir of tempDirs) expect(fs.existsSync(dir)).toBe(false);
+      } finally {
+        fs.rmSync(path.dirname(cached), { recursive: true, force: true });
+      }
+    });
+
+    it('never turns off asar support for the whole process', async () => {
+      const writes: unknown[] = [];
+      Object.defineProperty(process, 'noAsar', {
+        configurable: true,
+        get: () => undefined,
+        set: (value) => writes.push(value),
+      });
+      try {
+        for (const layout of ['current', 'per-version'] as const) {
+          const installer = createInstaller({ layout });
+          await installer.install('13.1.7');
+          await installer.remove('13.1.7');
+        }
+      } finally {
+        delete (process as { noAsar?: boolean }).noAsar;
+      }
+      expect(writes).toStrictEqual([]);
+    });
+
+    it('is not left installing when the temp folder cannot be created', async () => {
+      const mkdtemp = fs.promises.mkdtemp.bind(fs.promises);
+      vi.spyOn(fs.promises, 'mkdtemp').mockImplementation(((prefix: string) =>
+        path.basename(prefix).startsWith('.tmp-')
+          ? Promise.reject(new Error('no space left on device'))
+          : mkdtemp(prefix)) as never);
+      const installer = createInstaller({ layout: 'per-version' });
+
+      await expect(installer.install('13.1.7')).rejects.toThrow('no space left');
+      expect(installer.state('13.1.7')).toBe(downloaded);
+    });
+
     it('defaults electronVersions to a folder next to electronInstall', async () => {
       const installer = new Installer(
         {
@@ -388,7 +467,7 @@ describe('fiddle-core 3.0 additions', () => {
       expect(ls(versionsDir('.locks'))).toStrictEqual([]);
     });
 
-    it('accepts the old `locks` option and ignores it', async () => {
+    it('accepts the deprecated `locks` option and ignores it', async () => {
       await createInstaller({ locks: true }).install('13.1.7');
       expect(readVersion(paths.electronInstall)).toBe('13.1.7');
       expect(fs.existsSync(path.join(paths.electronDownloads, '.locks'))).toBe(false);
@@ -570,7 +649,7 @@ describe('fiddle-core 3.0 additions', () => {
       expect(installer.state('99.0.0')).toBe(missing);
     });
 
-    it('throws the original download error by default, as in 2.x', async () => {
+    it('throws the original download error by default', async () => {
       const installer = createInstaller();
       const err: unknown = await installer.ensureDownloaded('99.0.0').catch((e) => e);
       expect(err).toBeInstanceOf(Error);
@@ -601,13 +680,17 @@ describe('fiddle-core 3.0 additions', () => {
       expect((typed as Error).cause).toBeInstanceOf(TypeError);
     });
 
-    it('uses `invalid-version` for a bad version', async () => {
-      const installer = createInstaller({ layout: 'per-version' });
-      await expect(installer.install('../x')).rejects.toHaveProperty(
-        'code',
-        'invalid-version',
-      );
-    });
+    it.each(['../x', 'v13.1.7', ' 13.1.7', '=13.1.7'])(
+      'uses `invalid-version` for the bad version "%s"',
+      async (version) => {
+        const installer = createInstaller({ layout: 'per-version' });
+        await expect(installer.install(version)).rejects.toHaveProperty(
+          'code',
+          'invalid-version',
+        );
+        expect(hits).toStrictEqual([]);
+      },
+    );
 
     it('uses `already-installing` for a duplicate install into the current folder', async () => {
       const installer = createInstaller();
@@ -628,6 +711,33 @@ describe('fiddle-core 3.0 additions', () => {
   });
 
   describe("the 'current' layout", () => {
+    it('does not report the previous version as installed when replacing it fails', async () => {
+      const installer = createInstaller();
+      await installer.install('12.0.15');
+      vi.mocked(extract).mockRejectedValueOnce(new Error('disk full'));
+
+      await expect(installer.install('13.1.7')).rejects.toThrow('disk full');
+      expect(installer.installedVersion).toBe(undefined);
+      expect(installer.state('12.0.15')).toBe(downloaded);
+      expect(installer.state('13.1.7')).toBe(downloaded);
+
+      const exec = await installer.install('12.0.15');
+      expect(fs.existsSync(exec)).toBe(true);
+      expect(installer.installedVersions).toStrictEqual(['12.0.15']);
+    });
+
+    it('installs one version at a time, since they share a folder', async () => {
+      const installer = createInstaller();
+      const first = installer.install('12.0.15');
+      await expect(installer.install('13.1.7')).rejects.toHaveProperty(
+        'code',
+        'already-installing',
+      );
+      await first;
+      expect(readVersion(paths.electronInstall)).toBe('12.0.15');
+      expect(installer.installedVersions).toStrictEqual(['12.0.15']);
+    });
+
     it('still reports the current install after a restart', async () => {
       await createInstaller().install('13.1.7');
       const fresh = createInstaller();

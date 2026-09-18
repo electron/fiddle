@@ -1,5 +1,3 @@
-/* Tooltip: 26 tall, padding 5 9, 8px, Inter 12/16 500.
-   Tooltip fill, blur-tooltip, a 0.5px white rim at 14%. */
 .tooltip {
   z-index: var(--lu-z-tooltip);
   display: inline-flex;

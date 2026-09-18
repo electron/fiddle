@@ -1,5 +1,4 @@
-/* Menus and select lists: overlay material, blur-overlay, shadow-popover and the two rims.
-   Padding 5, radius-menu (radius-item plus the padding, so corners stay concentric).
+/* Menus and select lists. The radius is radius-item plus the padding, so corners stay concentric.
    Grows to fit the longest label, between 200 and 360px. */
 .popover {
   display: flex;
@@ -43,8 +42,6 @@
   display: block;
 }
 
-/* Items: 28 tall, padding 0 10 0 6, radius-item. Hover and keyboard-active: fill-strong,
-   and so is an item whose submenu is open. Selected: weight 500, no fill. */
 .item {
   display: flex;
   align-items: center;

@@ -14,5 +14,7 @@
   "showChannelOk": "表示する",
   "switchToBuild": "{{name}} に切り替えますか？",
   "switchToBuildDetail": "このフォルダーはすでにローカルビルドとして追加されています。",
-  "switchButton": "切り替える"
+  "switchButton": "切り替える",
+  "refreshFailed": "Electron のリリース一覧を更新できませんでした。接続を確認して、もう一度お試しください。",
+  "removeFailed": "Electron {{version}} を削除できませんでした。ファイルが使用中の可能性があります。"
 }

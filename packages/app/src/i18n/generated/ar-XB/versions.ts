@@ -3,5 +3,6 @@ export default {
   "searchVersions": "\u200f\u202eSearch\u202c\u200f \u200f\u202eversions\u202c\u200f",
   "noMatches": "\u200f\u202eNo\u202c\u200f \u200f\u202eversions\u202c\u200f \u200f\u202ematch\u202c\u200f",
   "copyVersion": "\u200f\u202eCopy\u202c\u200f \u200f\u202eversion\u202c\u200f \u200f\u202enumber\u202c\u200f",
-  "copied": "\u200f\u202eCopied\u202c\u200f {{version}}"
+  "copied": "\u200f\u202eCopied\u202c\u200f {{version}}",
+  "versionChangeFailed": "\u200f\u202eCouldn't\u202c\u200f \u200f\u202echange\u202c\u200f \u200f\u202ethe\u202c\u200f \u200f\u202eElectron\u202c\u200f \u200f\u202eversion\u202c\u200f"
 } as const;

@@ -1,5 +1,5 @@
 /**
- * Startup ordering (§17.4): links queued before the windows are up wait for
+ * Startup ordering: links queued before the windows are up wait for
  * the GitHub token restore, so a private gist loads with the user's token.
  */
 import fs from 'node:fs';
@@ -13,10 +13,18 @@ import type { Fiddle } from '../../fiddle/fiddle';
 let userData = '';
 const showMessageBox = vi.fn();
 vi.mock('electron', () => ({
-  app: { getPath: () => userData, isPackaged: false, getAppPath: () => userData, addRecentDocument: () => undefined },
+  app: {
+    getPath: () => userData,
+    isPackaged: false,
+    getAppPath: () => userData,
+    addRecentDocument: () => undefined,
+  },
   dialog: { showMessageBox: (...args: unknown[]) => showMessageBox(...args) },
 }));
-vi.mock('../windows', () => ({ getWindow: () => undefined, sendWindowCommand: () => undefined }));
+vi.mock('../windows', () => ({
+  getWindow: () => undefined,
+  sendWindowCommand: () => undefined,
+}));
 vi.mock('../i18n', () => ({ tm: () => (key: string) => key, t: (key: string) => key }));
 
 const ID = '8c5fc0c6a5153d49b5a4a56d3ed9da8f';
@@ -32,7 +40,6 @@ afterEach(() => {
   fs.rmSync(userData, { recursive: true, force: true });
 });
 
-// @feature load.deep-link-private
 it('handles a queued gist link only once the GitHub token is restored', async () => {
   const documents = await import('./service');
   const { createDoc } = await import('./model');
@@ -52,8 +59,13 @@ it('handles a queued gist link only once the GitHub token is restored', async ()
       },
     } as never,
     platform: 'linux',
-    versions: { releases: () => [], release: () => undefined, localBuild: () => undefined } as never,
+    versions: {
+      releases: () => [],
+      release: () => undefined,
+      localBuild: () => undefined,
+    } as never,
     github: { client: () => ({ loadGist }), whenReady } as never,
+    npm: { packument: async () => ({ versions: {} }) } as never,
     createWindow: async (id: string) => {
       windows.set(id, {});
     },

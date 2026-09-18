@@ -25,9 +25,15 @@ function getAppxArchitecture(): string {
   }
 }
 
-/**
- * Execute a PowerShell command and return the result.
- */
+/** A PowerShell single-quoted string. PowerShell also treats curly quotes as quotes. */
+function psQuote(value: string): string {
+  return `'${value.replace(/['\u2018\u2019\u201A\u201B]/g, (quote) => quote + quote)}'`;
+}
+
+function xmlEscape(value: string): string {
+  return value.replace(/[&<>"']/g, (c) => `&#${c.charCodeAt(0)};`);
+}
+
 function executePowerShell(command: string): Promise<string> {
   return new Promise((resolve, reject) => {
     const ps = spawn('powershell.exe', [
@@ -63,9 +69,6 @@ function executePowerShell(command: string): Promise<string> {
   });
 }
 
-/**
- * Unregister any previously registered sparse packages with our package name.
- */
 async function unregisterSparsePackage(): Promise<void> {
   try {
     const result = await executePowerShell(
@@ -80,7 +83,7 @@ async function unregisterSparsePackage(): Promise<void> {
 
     for (const pkg of packages) {
       console.log(`Unregistering sparse package: ${pkg}`);
-      await executePowerShell(`Remove-AppxPackage -Package "${pkg}"`);
+      await executePowerShell(`Remove-AppxPackage -Package ${psQuote(pkg)}`);
       console.log(`Successfully unregistered: ${pkg}`);
     }
   } catch {
@@ -89,11 +92,9 @@ async function unregisterSparsePackage(): Promise<void> {
 }
 
 /**
- * Register the sparse package for an Electron installation.
- * This gives Electron a Windows app identity. Same as an MSIX package.
- *
- * @param version - The Electron version string to display in the manifest.
- * @param electronDir - The directory containing the Electron executable.
+ * Registers a sparse package for the Electron install in `electronDir`, which
+ * gives it a Windows app identity like an MSIX package. Does nothing off
+ * Windows. Failures are logged, not thrown.
  */
 export async function registerElectronIdentity(
   version: string,
@@ -105,7 +106,6 @@ export async function registerElectronIdentity(
 
   const electronExe = path.join(electronDir, 'electron.exe');
 
-  // Check if Electron is actually installed
   if (!fs.existsSync(electronExe)) {
     console.log(`Electron not found at ${electronDir}, skipping identity registration`);
     return;
@@ -116,12 +116,11 @@ export async function registerElectronIdentity(
     const sourcePath = path.join(__dirname, '..', 'static', SOURCE_MANIFEST_FILENAME);
     const targetPath = path.join(electronDir, TARGET_MANIFEST_FILENAME);
 
-    // Read manifest and replace placeholders
     let manifest = fs.readFileSync(sourcePath, 'utf8');
     const displayName = `Electron (${version}) MSIX`;
     const architecture = getAppxArchitecture();
-    manifest = manifest.replace(/\$DISPLAY_NAME\$/g, displayName);
-    manifest = manifest.replace(/\$ARCHITECTURE\$/g, architecture);
+    manifest = manifest.replace(/\$DISPLAY_NAME\$/g, () => xmlEscape(displayName));
+    manifest = manifest.replace(/\$ARCHITECTURE\$/g, () => architecture);
 
     console.log(`Writing manifest with version ${version} to ${targetPath}`);
     fs.writeFileSync(targetPath, manifest, 'utf8');
@@ -130,7 +129,7 @@ export async function registerElectronIdentity(
 
     console.log(`Registering sparse package from: ${electronDir}`);
     await executePowerShell(
-      `Add-AppxPackage -ExternalLocation "${electronDir}" -Register "${targetPath}"`,
+      `Add-AppxPackage -ExternalLocation ${psQuote(electronDir)} -Register ${psQuote(targetPath)}`,
     );
 
     console.log('Sparse package registered successfully');

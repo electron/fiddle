@@ -1,5 +1,5 @@
 /**
- * Monaco's own strings (REQUIREMENTS §9). Monaco ships German and Japanese
+ * Monaco's own strings. Monaco ships German and Japanese
  * `nls` bundles that set globals Monaco reads while its modules load, so the
  * bundle must load before Monaco does. A new language applies after a
  * relaunch, which Settings offers.

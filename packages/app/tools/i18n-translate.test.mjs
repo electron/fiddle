@@ -25,10 +25,17 @@ import {
 
 const english = () => ({
   run: {
-    runButton: { message: 'Run', description: 'Button that runs the fiddle.', maxLength: 12 },
+    runButton: {
+      message: 'Run',
+      description: 'Button that runs the fiddle.',
+      maxLength: 12,
+    },
     running: { message: 'Running {{name}}…', description: 'Status while a fiddle runs.' },
     errorCount_one: { message: '{{count}} error', description: 'Console error count.' },
-    errorCount_other: { message: '{{count}} errors', description: 'Console error count.' },
+    errorCount_other: {
+      message: '{{count}} errors',
+      description: 'Console error count.',
+    },
   },
 });
 
@@ -49,7 +56,10 @@ function mockModel(overrides = {}) {
         overrides[unit.key] ??
         (unit.forms
           ? Object.fromEntries(
-              unit.forms.map((c) => [c, `${request.locale}:${unit.english[c] ?? unit.english.other}`]),
+              unit.forms.map((c) => [
+                c,
+                `${request.locale}:${unit.english[c] ?? unit.english.other}`,
+              ]),
             )
           : `${request.locale}:${unit.english}`);
     }
@@ -103,7 +113,11 @@ test("asks for each locale's own plural categories", async () => {
   const model = mockModel();
   const result = await run('ja', { messages: {}, meta: {} }, model);
   assert.deepEqual(model.calls[0].units[2].forms, ['other']);
-  assert.deepEqual(Object.keys(result.messages.run), ['runButton', 'running', 'errorCount_other']);
+  assert.deepEqual(Object.keys(result.messages.run), [
+    'runButton',
+    'running',
+    'errorCount_other',
+  ]);
 });
 
 test('does nothing when English and the translations are unchanged', async () => {
@@ -178,7 +192,11 @@ test('never overwrites a human edit, and flags it for re-review when English cha
 
 test('treats a translation with no state as written by a human', async () => {
   const model = mockModel();
-  const result = await run('de', { messages: { run: { runButton: 'Starten' } }, meta: {} }, model);
+  const result = await run(
+    'de',
+    { messages: { run: { runButton: 'Starten' } }, meta: {} },
+    model,
+  );
   assert.deepEqual(
     model.calls[0].units.map((u) => u.key),
     ['running', 'errorCount'],
@@ -193,9 +211,17 @@ test('removes keys English dropped and plural forms the locale lacks', async () 
   first.messages.run.gone = 'ja:gone';
   first.messages.oldNamespace = { title: 'ja:old' };
   const result = await run('ja', first, mockModel());
-  assert.deepEqual(result.plan.removed.sort(), ['oldNamespace:title', 'run:errorCount_one', 'run:gone']);
+  assert.deepEqual(result.plan.removed.sort(), [
+    'oldNamespace:title',
+    'run:errorCount_one',
+    'run:gone',
+  ]);
   assert.deepEqual(Object.keys(result.messages), ['run']);
-  assert.deepEqual(Object.keys(result.messages.run), ['runButton', 'running', 'errorCount_other']);
+  assert.deepEqual(Object.keys(result.messages.run), [
+    'runButton',
+    'running',
+    'errorCount_other',
+  ]);
 });
 
 test('rejects invalid model output and retries it on the next run', async () => {
@@ -205,7 +231,9 @@ test('rejects invalid model output and retries it on the next run', async () => 
     errorCount: { one: '{{count}} Fehler', other: '{{count}} Fehler', few: 'x' },
   });
   const result = await run('de', { messages: {}, meta: {} }, model);
-  const byId = Object.fromEntries(result.failed.map((f) => [f.id, f.problems.join('; ')]));
+  const byId = Object.fromEntries(
+    result.failed.map((f) => [f.id, f.problems.join('; ')]),
+  );
   assert.match(byId['run:runButton'], /longer than maxLength 12/);
   assert.match(byId['run:running'], /missing placeholder \{\{name\}\}/);
   assert.match(byId['run:errorCount'], /invalid plural form "few"/);
@@ -234,10 +262,20 @@ test('writeLocale writes namespaces and state, and drops empty namespaces', () =
     const state = path.join(dir, 'translations');
     fs.mkdirSync(path.join(locales, 'de'), { recursive: true });
     fs.writeFileSync(path.join(locales, 'de', 'old.json'), '{}');
-    writeLocale('de', { run: { runButton: 'Ausführen' }, empty: {} }, { a: 1 }, { dir: locales, stateDir: state });
+    writeLocale(
+      'de',
+      { run: { runButton: 'Ausführen' }, empty: {} },
+      { a: 1 },
+      { dir: locales, stateDir: state },
+    );
     assert.deepEqual(fs.readdirSync(path.join(locales, 'de')), ['run.json']);
-    assert.equal(fs.readFileSync(path.join(locales, 'de', 'run.json'), 'utf8'), '{\n  "runButton": "Ausführen"\n}\n');
-    assert.deepEqual(JSON.parse(fs.readFileSync(path.join(state, 'de.json'), 'utf8')), { a: 1 });
+    assert.equal(
+      fs.readFileSync(path.join(locales, 'de', 'run.json'), 'utf8'),
+      '{\n  "runButton": "Ausführen"\n}\n',
+    );
+    assert.deepEqual(JSON.parse(fs.readFileSync(path.join(state, 'de.json'), 'utf8')), {
+      a: 1,
+    });
   } finally {
     fs.rmSync(dir, { recursive: true, force: true });
   }
@@ -256,7 +294,12 @@ test('anthropicTranslator posts to the Messages API and parses the JSON reply', 
     };
   };
   const translate = anthropicTranslator({ apiKey: 'test-key', fetchImpl });
-  const request = { locale: 'de', namespace: 'run', glossary: {}, units: [{ key: 'runButton', english: 'Run' }] };
+  const request = {
+    locale: 'de',
+    namespace: 'run',
+    glossary: {},
+    units: [{ key: 'runButton', english: 'Run' }],
+  };
   assert.deepEqual(await translate(request), { runButton: 'Ausführen' });
   const [{ url, init }] = sent;
   assert.equal(url, 'https://api.anthropic.com/v1/messages');
@@ -293,7 +336,11 @@ test('fileTranslator reads { locale: { "ns:key": value } }', async () => {
     const file = path.join(dir, 'de.json');
     fs.writeFileSync(file, JSON.stringify({ de: { 'run:runButton': 'Ausführen' } }));
     const translate = fileTranslator(file);
-    const out = await translate({ locale: 'de', namespace: 'run', units: [{ key: 'runButton' }, { key: 'running' }] });
+    const out = await translate({
+      locale: 'de',
+      namespace: 'run',
+      units: [{ key: 'runButton' }, { key: 'running' }],
+    });
     assert.deepEqual(out, { runButton: 'Ausführen' });
   } finally {
     fs.rmSync(dir, { recursive: true, force: true });
@@ -334,14 +381,31 @@ test('i18n-check reports missing, unused, plural, placeholder and tag problems',
     'de/run.json: extra: unused (English has no such key)',
   ]);
 
-  const ja = { run: { runButton: '実行', running: '{{name}} を実行中…', errorCount_one: 'x', errorCount_other: '{{count}} 件', linked: '<0>ドキュメント</0>を参照' } };
+  const ja = {
+    run: {
+      runButton: '実行',
+      running: '{{name}} を実行中…',
+      errorCount_one: 'x',
+      errorCount_other: '{{count}} 件',
+      linked: '<0>ドキュメント</0>を参照',
+    },
+  };
   assert.deepEqual(checkLocale(eng, 'ja', ja).errors, [
     'ja/run.json: errorCount_one: invalid plural form (ja uses other)',
   ]);
 
   assert.deepEqual(
-    checkEnglish({ run: { a_one: { message: 'x' }, b_few: { message: 'x' }, b_other: { message: 'y' } } }),
-    ['en/run.json: a_one: plural key without a_other', 'en/run.json: b_few: invalid plural form for English (use one, other or zero)'],
+    checkEnglish({
+      run: {
+        a_one: { message: 'x' },
+        b_few: { message: 'x' },
+        b_other: { message: 'y' },
+      },
+    }),
+    [
+      'en/run.json: a_one: plural key without a_other',
+      'en/run.json: b_few: invalid plural form for English (use one, other or zero)',
+    ],
   );
 });
 
@@ -351,19 +415,28 @@ test('the unused-key scan accepts literals and template patterns', () => {
       'appearance.dark': { message: 'Dark', description: 'x' },
       'notice.corrupt.title': { message: 'x', description: 'x' },
       orphan: { message: 'x', description: 'x' },
+      // Used after a '\n' literal on the same line, which must not throw the scan off.
+      unlisted: { message: 'x', description: 'x' },
     },
     run: english().run,
   };
   const texts = [
-    "t(`appearance.${value}`); t(`notice.${kind}.title`)",
+    't(`appearance.${value}`); t(`notice.${kind}.title`)',
     "t('runButton'); t(\"running\", { name }); t('errorCount', { count })",
+    "lines.join('\\n') || t('unlisted')",
   ];
   assert.deepEqual(findUnusedEnglish(eng, texts), ['settings:orphan']);
 });
 
 test('validateUnit measures maxLength like generate does', () => {
   // {{file}} counts as 3 characters: "{{file}} öffnen" is 10 long, "Öffne {{file}}" 9.
-  const u = { key: 'k', plural: false, message: 'Open {{file}}', maxLength: 9, description: 'x' };
+  const u = {
+    key: 'k',
+    plural: false,
+    message: 'Open {{file}}',
+    maxLength: 9,
+    description: 'x',
+  };
   assert.deepEqual(validateUnit(u, 'de', '{{file}} öffnen'), ['longer than maxLength 9']);
   assert.deepEqual(validateUnit(u, 'de', 'Öffne {{file}}'), []);
 });
@@ -379,7 +452,14 @@ test('pseudo-locales keep placeholders; en-XA is ~40% longer, ar-XB forces RTL',
 
   // ar-XB gets all six Arabic plural forms, falling back to English `other`.
   const messages = pseudoMessages('ar-XB', english().run);
-  assert.deepEqual(pluralCategories('ar-XB'), ['zero', 'one', 'two', 'few', 'many', 'other']);
+  assert.deepEqual(pluralCategories('ar-XB'), [
+    'zero',
+    'one',
+    'two',
+    'few',
+    'many',
+    'other',
+  ]);
   for (const category of ['zero', 'two', 'few', 'many', 'other']) {
     assert.match(messages[`errorCount_${category}`], /errors/);
   }

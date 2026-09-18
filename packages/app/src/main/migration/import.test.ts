@@ -5,7 +5,9 @@ import { fileURLToPath } from 'node:url';
 
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-vi.mock('../log', () => ({ log: { debug: vi.fn(), info: vi.fn(), warn: vi.fn(), error: vi.fn() } }));
+vi.mock('../log', () => ({
+  log: { debug: vi.fn(), info: vi.fn(), warn: vi.fn(), error: vi.fn() },
+}));
 
 import { log } from '../log';
 import { importElectronVersions, importOldApp, type ImportDeps } from './import';
@@ -22,7 +24,10 @@ const safeStorage: ImportDeps['safeStorage'] = {
   },
   isAsyncEncryptionAvailable: async () => true,
   encryptStringAsync: async (text) => Buffer.from(`new:${text}`),
-  decryptStringAsync: async (data) => ({ result: data.toString().slice(4), shouldReEncrypt: false }),
+  decryptStringAsync: async (data) => ({
+    result: data.toString().slice(4),
+    shouldReEncrypt: false,
+  }),
   getSelectedStorageBackend: () => 'gnome_libsecret',
 };
 
@@ -46,7 +51,10 @@ function deps(overrides: Partial<ImportDeps> = {}): ImportDeps {
 }
 
 async function readJson(file: string): Promise<Record<string, unknown>> {
-  return JSON.parse(await readFile(path.join(userData, file), 'utf8')) as Record<string, unknown>;
+  return JSON.parse(await readFile(path.join(userData, file), 'utf8')) as Record<
+    string,
+    unknown
+  >;
 }
 
 /** Every file under `dir` with its content, to prove old files are left untouched. */
@@ -67,10 +75,9 @@ beforeEach(async () => {
   await cp(path.join(fixtures, 'user-data'), userData, { recursive: true });
   await cp(path.join(fixtures, 'home'), home, { recursive: true });
   await writeFile(path.join(userData, '.github-credentials'), `old:${token}`);
-  localStorage = JSON.parse(await readFile(path.join(fixtures, 'local-storage.json'), 'utf8')) as Record<
-    string,
-    string
-  >;
+  localStorage = JSON.parse(
+    await readFile(path.join(fixtures, 'local-storage.json'), 'utf8'),
+  ) as Record<string, string>;
   vi.mocked(log.warn).mockClear();
 });
 
@@ -93,19 +100,40 @@ describe('importOldApp', () => {
     });
     expect(settings).not.toHaveProperty('gistPublishAsRevision');
 
-    const { builds } = (await readJson('local-builds.json')) as { builds: Record<string, string>[] };
+    const { builds } = (await readJson('local-builds.json')) as {
+      builds: Record<string, string>[];
+    };
     expect(builds.map(({ id: _id, ...rest }) => rest)).toEqual([
-      { name: 'My build', path: '/src/electron/out/Testing', addedAt: '2023-11-14T22:13:20.000Z' },
-      { name: 'Release', path: '/src/electron/out/Release', addedAt: '2023-11-14T22:13:20.001Z' },
-      { name: 'Old build', path: '/src/electron-old/out/Testing', addedAt: '2023-07-22T04:26:40.000Z' },
+      {
+        name: 'My build',
+        path: '/src/electron/out/Testing',
+        addedAt: '2023-11-14T22:13:20.000Z',
+      },
+      {
+        name: 'Release',
+        path: '/src/electron/out/Release',
+        addedAt: '2023-11-14T22:13:20.001Z',
+      },
+      {
+        name: 'Old build',
+        path: '/src/electron-old/out/Testing',
+        addedAt: '2023-07-22T04:26:40.000Z',
+      },
     ]);
     expect(new Set(builds.map((build) => build.id)).size).toBe(3);
 
-    const credentials = await readFile(path.join(userData, 'credentials', 'github'), 'utf8');
+    const credentials = await readFile(
+      path.join(userData, 'credentials', 'github'),
+      'utf8',
+    );
     expect(credentials).toBe(`new:${JSON.stringify({ token, login: 'octocat' })}`);
-    expect((await stat(path.join(userData, 'credentials', 'github'))).mode & 0o777).toBe(0o600);
+    expect((await stat(path.join(userData, 'credentials', 'github'))).mode & 0o777).toBe(
+      0o600,
+    );
 
-    const theme = JSON.parse(await readFile(path.join(userData, 'themes', 'dracula.json'), 'utf8'));
+    const theme = JSON.parse(
+      await readFile(path.join(userData, 'themes', 'dracula.json'), 'utf8'),
+    );
     expect(theme).toEqual({
       schemaVersion: 1,
       name: 'Dracula',
@@ -127,14 +155,17 @@ describe('importOldApp', () => {
       tourDone: true,
       importedFrom: { version: '1.0.0', at: '2026-09-13T12:00:00.000Z' },
     });
-    expect(log.warn).toHaveBeenCalledWith('import: ignoring unknown localStorage keys', ['devtools-extension-state']);
+    expect(log.warn).toHaveBeenCalledWith('import: ignoring unknown localStorage keys', [
+      'devtools-extension-state',
+    ]);
   });
 
   it('never moves, changes or deletes old files', async () => {
     const before = { userData: await snapshot(userData), home: await snapshot(home) };
     await importOldApp(deps());
     const after = await snapshot(userData);
-    for (const [file, content] of Object.entries(before.userData)) expect(after[file]).toBe(content);
+    for (const [file, content] of Object.entries(before.userData))
+      expect(after[file]).toBe(content);
     expect(await snapshot(home)).toEqual(before.home);
   });
 
@@ -142,19 +173,33 @@ describe('importOldApp', () => {
     await importOldApp(deps());
     const first = await snapshot(userData);
     localStorage = { fontSize: '20' };
-    const again = await importOldApp(deps({ now: () => new Date('2030-01-01T00:00:00.000Z') }));
+    const again = await importOldApp(
+      deps({ now: () => new Date('2030-01-01T00:00:00.000Z') }),
+    );
     expect(again.firstLaunch).toBe(false);
     expect(await snapshot(userData)).toEqual(first);
   });
 
   it('never overwrites files that exist when an interrupted import runs again', async () => {
-    await writeFile(path.join(userData, 'settings.json'), '{"schemaVersion":1,"editorFontSize":12}\n');
-    await writeFile(path.join(userData, 'state.json'), '{"schemaVersion":1,"sessions":[]}\n');
+    await writeFile(
+      path.join(userData, 'settings.json'),
+      '{"schemaVersion":1,"editorFontSize":12}\n',
+    );
+    await writeFile(
+      path.join(userData, 'state.json'),
+      '{"schemaVersion":1,"sessions":[]}\n',
+    );
     const result = await importOldApp(deps());
     expect(result.firstLaunch).toBe(true);
-    expect(await readJson('settings.json')).toEqual({ schemaVersion: 1, editorFontSize: 12 });
-    // Other slices' keys in state.json are kept.
-    expect(await readJson('state.json')).toMatchObject({ sessions: [], importedFrom: { version: '1.0.0' } });
+    expect(await readJson('settings.json')).toEqual({
+      schemaVersion: 1,
+      editorFontSize: 12,
+    });
+    // Other keys in state.json are kept.
+    expect(await readJson('state.json')).toMatchObject({
+      sessions: [],
+      importedFrom: { version: '1.0.0' },
+    });
   });
 
   it('records the import even without an old app', async () => {
@@ -166,18 +211,42 @@ describe('importOldApp', () => {
     expect(await readdir(empty)).toEqual(['state.json']);
   });
 
-  it('keeps going when the old token cannot be decrypted or localStorage cannot be read', async () => {
+  it('keeps going when the old token cannot be decrypted', async () => {
     await writeFile(path.join(userData, '.github-credentials'), 'garbage');
-    const result = await importOldApp(
-      deps({
-        readLocalStorage: async () => {
-          throw new Error('window failed');
-        },
-      }),
-    );
-    expect(result.summary).toMatchObject({ github: 'undecryptable', themes: 1, localBuilds: 2 });
+    const result = await importOldApp(deps());
+    expect(result.summary).toMatchObject({
+      github: 'undecryptable',
+      themes: 1,
+      localBuilds: 3,
+    });
     await expect(stat(path.join(userData, 'credentials', 'github'))).rejects.toThrow();
+  });
+
+  it('records nothing when the old localStorage cannot be read, so the next launch tries again', async () => {
+    const failing = deps({
+      readLocalStorage: async () => {
+        throw new Error('window failed');
+      },
+    });
+    await expect(importOldApp(failing)).rejects.toThrow('window failed');
+    await expect(stat(path.join(userData, 'state.json'))).rejects.toThrow();
     await expect(stat(path.join(userData, 'settings.json'))).rejects.toThrow();
+
+    const result = await importOldApp(deps());
+    expect(result.firstLaunch).toBe(true);
+    expect(await readJson('settings.json')).toMatchObject({ theme: 'dracula' });
+  });
+
+  it('leaves an unreadable state.json alone instead of treating it as a first launch', async () => {
+    const corrupt = '{"schemaVersion":1,"sessions":[{"windowId":';
+    await writeFile(path.join(userData, 'state.json'), corrupt);
+    await expect(importOldApp(deps())).rejects.toThrow();
+    expect(await readFile(path.join(userData, 'state.json'), 'utf8')).toBe(corrupt);
+    await expect(stat(path.join(userData, 'settings.json'))).rejects.toThrow();
+
+    await writeFile(path.join(userData, 'state.json'), '[]');
+    await expect(importOldApp(deps())).rejects.toThrow('not an object');
+    expect(await readFile(path.join(userData, 'state.json'), 'utf8')).toBe('[]');
   });
 
   it('keeps the token for the session only on Linux without a keyring', async () => {
@@ -192,15 +261,50 @@ describe('importElectronVersions', () => {
   it('copies extracted versions into the per-version cache, once', async () => {
     const cache = path.join(root, 'cache', 'electron');
     const oldBin = path.join(userData, 'electron-bin');
-    expect((await importElectronVersions(oldBin, cache)).sort()).toEqual(['29.1.0', '30.0.0']);
-    expect(await readFile(path.join(cache, '30.0.0', 'version'), 'utf8')).toBe('30.0.0\n');
-    expect(await readFile(path.join(cache, '29.1.0', 'version'), 'utf8')).toBe('v29.1.0\n');
+    expect((await importElectronVersions(oldBin, cache)).sort()).toEqual([
+      '29.1.0',
+      '30.0.0',
+    ]);
+    expect(await readFile(path.join(cache, '30.0.0', 'version'), 'utf8')).toBe(
+      '30.0.0\n',
+    );
+    expect(await readFile(path.join(cache, '29.1.0', 'version'), 'utf8')).toBe(
+      'v29.1.0\n',
+    );
     expect(await importElectronVersions(oldBin, cache)).toEqual([]);
     // The old folder is untouched.
-    expect(await readFile(path.join(oldBin, 'current', 'version'), 'utf8')).toBe('30.0.0\n');
+    expect(await readFile(path.join(oldBin, 'current', 'version'), 'utf8')).toBe(
+      '30.0.0\n',
+    );
+  });
+
+  it("never turns on process.noAsar, which would break reads of the app's own asar while it copies", async () => {
+    const cache = path.join(root, 'cache', 'electron');
+    const assigned: unknown[] = [];
+    let current: unknown;
+    Object.defineProperty(process, 'noAsar', {
+      configurable: true,
+      get: () => current,
+      set: (value: unknown) => {
+        assigned.push(value);
+        current = value;
+      },
+    });
+    try {
+      const imported = await importElectronVersions(
+        path.join(userData, 'electron-bin'),
+        cache,
+      );
+      expect(imported.sort()).toEqual(['29.1.0', '30.0.0']);
+      expect(assigned).toEqual([]);
+    } finally {
+      Reflect.deleteProperty(process, 'noAsar');
+    }
   });
 
   it('does nothing without an old electron-bin folder', async () => {
-    expect(await importElectronVersions(path.join(root, 'nope'), path.join(root, 'cache'))).toEqual([]);
+    expect(
+      await importElectronVersions(path.join(root, 'nope'), path.join(root, 'cache')),
+    ).toEqual([]);
   });
 });

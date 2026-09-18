@@ -1,18 +1,29 @@
-/**
- * The main window, built to Lucent's window anatomy: title bar, sidebar,
- * sheet and status bar. Main owns the state; this renders the Window store
- * (with optimistic changes) and requests changes through Documents.
- */
-import { useEffect, useEffectEvent, useRef } from 'react';
+import { memo, useEffect, useLayoutEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { windowApi } from '../../ipc/renderer';
-import { closePane, dropOnPane, MAX_PANES, neighbourOf, shownPanes, storedPanes, type PaneDropPosition } from '../../shared/panes';
-import { DEFAULT_LAYOUT, type WindowState } from '../../shared/stores';
+import {
+  closePane,
+  dropOnPane,
+  MAX_PANES,
+  neighbourOf,
+  shownPanes,
+  storedPanes,
+  type PaneDropPosition,
+} from '../../shared/panes';
+import { DEFAULT_LAYOUT, type Platform, type WindowState } from '../../shared/stores';
 import { SplitHandle } from '../../ui';
-import { formatFocusedEditor, toggleMinimap, toggleSoftWrap } from '../editor/editor-state';
+import {
+  formatFocusedEditor,
+  toggleMinimap,
+  toggleSoftWrap,
+} from '../editor/editor-state';
 import { applyRuntimeErrors, markModelsSynced, syncModels } from '../editor/models';
-import { useRevealRequest, useRuntimeErrors } from '../editor/runtime-errors';
+import {
+  claimReveal,
+  useRevealRequest,
+  useRuntimeErrors,
+} from '../editor/runtime-errors';
 import { useDocumentDrop } from '../features/documents/useDocumentDrop';
 import { useEditorTypes } from '../editor/types';
 import { Sidebar } from '../features/files/Sidebar';
@@ -24,7 +35,13 @@ import { TitleBar } from './TitleBar';
 import { ErrorBoundary } from './ErrorBoundary';
 import { useDraft } from './use-draft';
 import { useAppState, useWindowState } from '../state';
-import { moveFile, setActiveFile, setFileVisible, setLayout, setView } from './window-state';
+import {
+  moveFile,
+  setActiveFile,
+  setFileVisible,
+  setLayout,
+  setView,
+} from './window-state';
 
 const SIDEBAR_MIN = 200;
 const SIDEBAR_MAX = 320;
@@ -36,14 +53,20 @@ export function Shell() {
   return <ShellView state={state} platform={app.platform} />;
 }
 
-function ShellView({ state, platform }: { state: WindowState; platform: 'darwin' | 'win32' | 'linux' }) {
+// Memoized: a store push that changes nothing this shows (download progress in the App store) skips the whole tree.
+const ShellView = memo(function ShellView({
+  state,
+  platform,
+}: {
+  state: WindowState;
+  platform: Platform;
+}) {
   const { t } = useTranslation('shell');
   const { fiddle, layout } = state;
   const failTitle = t('fileChangeFailed');
   const names = fiddle.files.map((file) => file.name);
   const namesKey = names.join('\n');
 
-  // Monaco models follow the file list and fiddleRev.
   useEffect(() => {
     syncModels(namesKey ? namesKey.split('\n') : [], fiddle.fiddleRev)
       .catch((error: unknown) => {
@@ -56,17 +79,26 @@ function ShellView({ state, platform }: { state: WindowState; platform: 'darwin'
   const errors = useRuntimeErrors();
   useEffect(() => applyRuntimeErrors(errors), [errors]);
 
-  // Gist links, deep links and folders dropped on the window.
   const dropping = useDocumentDrop();
 
-  const changeLayout = (patch: Partial<WindowState['layout']>) => void setLayout(layout, patch, failTitle);
+  const changeLayout = (patch: Partial<WindowState['layout']>) =>
+    void setLayout(layout, patch, failTitle);
   const openFile = (name: string) => void setActiveFile(name, failTitle);
+  // Picking a file in the sidebar leaves the Settings page.
+  const openFromSidebar = (name: string) => {
+    if (state.view !== 'editor') void setView('editor', failTitle);
+    openFile(name);
+  };
 
   // The tab row shows the visible files and selects the focused pane's file.
   // `panes` are the files in the editor panes; a single entry means no split.
-  const visibleNames = fiddle.files.filter((file) => file.visible).map((file) => file.name);
+  const visibleNames = fiddle.files
+    .filter((file) => file.visible)
+    .map((file) => file.name);
   const active =
-    fiddle.activeFile && visibleNames.includes(fiddle.activeFile) ? fiddle.activeFile : (visibleNames[0] ?? null);
+    fiddle.activeFile && visibleNames.includes(fiddle.activeFile)
+      ? fiddle.activeFile
+      : (visibleNames[0] ?? null);
   const panes = shownPanes(layout.panes, visibleNames, active);
   const split = panes.length > 1;
 
@@ -76,7 +108,10 @@ function ShellView({ state, platform }: { state: WindowState; platform: 'darwin'
   useEffect(() => {
     if (!reveal || reveal.seq <= revealed.current) return;
     revealed.current = reveal.seq;
-    if (!names.includes(reveal.file)) return;
+    if (!names.includes(reveal.file)) {
+      claimReveal(reveal.seq);
+      return;
+    }
     if (state.view !== 'editor') void setView('editor', failTitle);
     if (reveal.file !== fiddle.activeFile) openFile(reveal.file);
   });
@@ -84,7 +119,10 @@ function ShellView({ state, platform }: { state: WindowState; platform: 'darwin'
   /** Shows these panes (layout first, so main sees them before the focus change), focusing `focus`. */
   const showPanes = (next: readonly string[], focus?: string | null) => {
     const stored = storedPanes(next);
-    if (stored.length !== layout.panes.length || stored.some((name, i) => name !== layout.panes[i])) {
+    if (
+      stored.length !== layout.panes.length ||
+      stored.some((name, i) => name !== layout.panes[i])
+    ) {
       changeLayout({ panes: stored });
     }
     if (focus && focus !== fiddle.activeFile) openFile(focus);
@@ -106,7 +144,10 @@ function ShellView({ state, platform }: { state: WindowState; platform: 'darwin'
   // Closing a tab hides its file. Its pane closes with it; the last pane shows the next tab instead.
   const closeFile = (name: string) => {
     if (split && panes.includes(name)) {
-      showPanes(closePane(panes, name), name === active ? neighbourOf(panes, name) : undefined);
+      showPanes(
+        closePane(panes, name),
+        name === active ? neighbourOf(panes, name) : undefined,
+      );
     } else if (name === active) {
       const index = visibleNames.indexOf(name);
       const next = visibleNames[index + 1] ?? visibleNames[index - 1];
@@ -115,7 +156,6 @@ function ShellView({ state, platform }: { state: WindowState; platform: 'darwin'
     void setFileVisible(name, false, failTitle);
   };
 
-  // A tab dropped on a pane shows its file there, or in a new pane beside it, and focuses it.
   const dropTab = (name: string, index: number, position: PaneDropPosition) => {
     if (!visibleNames.includes(name)) return;
     const next = dropOnPane(panes, name, index, position);
@@ -132,23 +172,30 @@ function ShellView({ state, platform }: { state: WindowState; platform: 'darwin'
     void moveFile(active, before ?? null, failTitle);
   };
 
-  // Commands whose handlers act on view state and Monaco (Window.Command).
-  const onCommand = useEffectEvent((id: string) => {
+  // Commands whose handlers act on view state and Monaco (Window.Command). The handler is kept in a ref, not
+  // `useEffectEvent`: React never updates the effect events of a memo component, so it would keep the first render's state.
+  const onCommand = (id: string) => {
     if (id === 'view.toggleSplit') toggleSplit();
     else if (id === 'editor.moveTabLeft') moveTab(-1);
     else if (id === 'editor.moveTabRight') moveTab(1);
     else if (id === 'view.toggleSidebar') changeLayout({ sidebar: !layout.sidebar });
-    else if (id === 'view.toggleConsole') changeLayout({ consoleVisible: !layout.consoleVisible });
+    else if (id === 'view.toggleConsole')
+      changeLayout({ consoleVisible: !layout.consoleVisible });
     else if (id === 'editor.toggleSoftWrap') toggleSoftWrap();
     else if (id === 'editor.toggleMinimap') toggleMinimap();
     else if (id === 'editor.format') void formatFocusedEditor();
+  };
+  const latestOnCommand = useRef(onCommand);
+  useLayoutEffect(() => {
+    latestOnCommand.current = onCommand;
   });
-  useEffect(() => windowApi.onCommand((id) => onCommand(id)), []);
+  useEffect(() => windowApi.onCommand((id) => latestOnCommand.current(id)), []);
   useEditorTypes();
 
-  // The OS window title shows unsaved changes.
   useEffect(() => {
-    document.title = fiddle.dirty ? t('windowTitleEdited', { name: fiddle.name }) : fiddle.name;
+    document.title = fiddle.dirty
+      ? t('windowTitleEdited', { name: fiddle.name })
+      : fiddle.name;
   }, [fiddle.dirty, fiddle.name, t]);
 
   const [sidebarWidth, setSidebarWidth] = useDraft(layout.sidebarWidth, (width) =>
@@ -158,7 +205,8 @@ function ShellView({ state, platform }: { state: WindowState; platform: 'darwin'
 
   const resetLayout = () => {
     changeLayout({ ...DEFAULT_LAYOUT });
-    for (const file of fiddle.files) if (!file.visible) void setFileVisible(file.name, true, failTitle);
+    for (const file of fiddle.files)
+      if (!file.visible) void setFileVisible(file.name, true, failTitle);
   };
 
   return (
@@ -171,7 +219,9 @@ function ShellView({ state, platform }: { state: WindowState; platform: 'darwin'
         settingsOpen={state.view === 'settings'}
         menuBar={state.menuBar}
         onToggleSidebar={() => changeLayout({ sidebar: !layout.sidebar })}
-        onToggleSettings={() => void setView(state.view === 'settings' ? 'editor' : 'settings', failTitle)}
+        onToggleSettings={() =>
+          void setView(state.view === 'settings' ? 'editor' : 'settings', failTitle)
+        }
       />
       {layout.sidebar && (
         <div className={styles.side} style={{ width: shownSidebarWidth }}>
@@ -180,8 +230,9 @@ function ShellView({ state, platform }: { state: WindowState; platform: 'darwin'
               <Sidebar
                 files={fiddle.files}
                 dirtyFiles={fiddle.dirtyFiles}
-                activeFile={fiddle.activeFile}
-                onOpen={openFile}
+                // No row is current while the Settings page covers the editor, so picking the current file opens it too.
+                activeFile={state.view === 'editor' ? fiddle.activeFile : null}
+                onOpen={openFromSidebar}
                 onSetVisible={(name, visible) =>
                   visible ? void setFileVisible(name, true, failTitle) : closeFile(name)
                 }
@@ -202,7 +253,6 @@ function ShellView({ state, platform }: { state: WindowState; platform: 'darwin'
         <ErrorBoundary region="sheet">
           <Sheet
             state={state}
-            platform={platform}
             active={active}
             panes={panes}
             // A tab (or sidebar row) picks the focused pane's file: a file in another pane moves focus there instead.
@@ -214,7 +264,12 @@ function ShellView({ state, platform }: { state: WindowState; platform: 'darwin'
               if (name !== fiddle.activeFile) openFile(name);
             }}
             onToggleSplit={toggleSplit}
-            onClosePane={(name) => showPanes(closePane(panes, name), name === active ? neighbourOf(panes, name) : undefined)}
+            onClosePane={(name) =>
+              showPanes(
+                closePane(panes, name),
+                name === active ? neighbourOf(panes, name) : undefined,
+              )
+            }
             onMaximize={(name) => showPanes([name], name)}
             onConsoleHeight={(height) => changeLayout({ consoleHeight: height })}
             onHideConsole={() => changeLayout({ consoleVisible: false })}
@@ -226,4 +281,4 @@ function ShellView({ state, platform }: { state: WindowState; platform: 'darwin'
       <StatusBar files={names} />
     </div>
   );
-}
+});

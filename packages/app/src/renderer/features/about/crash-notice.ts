@@ -1,5 +1,5 @@
 /**
- * The first-run notice that crash reports are on (REQUIREMENTS §14): a
+ * The first-run notice that crash reports are on: a
  * non-blocking toast with a link to Settings → Privacy. Main says whether to
  * show it, once ever (state.json).
  */

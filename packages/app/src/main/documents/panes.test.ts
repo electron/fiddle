@@ -1,5 +1,5 @@
 /**
- * Split view (§17.2): main keeps `layout.panes` in step with the fiddle, so
+ * Split view: main keeps `layout.panes` in step with the fiddle, so
  * the focused pane follows `activeFile` however it changes (tab, sidebar,
  * palette, tour, a new file), and hidden or removed files leave their panes.
  */
@@ -14,10 +14,18 @@ import { DEFAULT_LAYOUT, type WindowLayout } from '../../shared/stores';
 
 let userData = '';
 vi.mock('electron', () => ({
-  app: { getPath: () => userData, isPackaged: false, getAppPath: () => userData, addRecentDocument: () => undefined },
+  app: {
+    getPath: () => userData,
+    isPackaged: false,
+    getAppPath: () => userData,
+    addRecentDocument: () => undefined,
+  },
   dialog: { showMessageBox: vi.fn() },
 }));
-vi.mock('../windows', () => ({ getWindow: () => undefined, sendWindowCommand: () => undefined }));
+vi.mock('../windows', () => ({
+  getWindow: () => undefined,
+  sendWindowCommand: () => undefined,
+}));
 vi.mock('../i18n', () => ({ tm: () => (key: string) => key, t: (key: string) => key }));
 
 beforeEach(() => {
@@ -43,8 +51,13 @@ async function setup(panes: string[]) {
       },
     } as never,
     platform: 'linux',
-    versions: { releases: () => [], release: () => undefined, localBuild: () => undefined } as never,
+    versions: {
+      releases: () => [],
+      release: () => undefined,
+      localBuild: () => undefined,
+    } as never,
     github: { client: () => undefined } as never,
+    npm: { packument: async () => ({ versions: {} }) } as never,
     createWindow: async (id: string, init: Record<string, unknown>) => {
       windows.set(id, { ...init });
     },
@@ -54,12 +67,15 @@ async function setup(panes: string[]) {
     version: { kind: 'release', version: '30.0.0' },
   });
   const layout: WindowLayout = { ...DEFAULT_LAYOUT, panes };
-  await documents.openFiddleWindow({ windowId: 'w', doc: model.createDoc(fiddle, 'fiddle'), layout });
+  await documents.openFiddleWindow({
+    windowId: 'w',
+    doc: model.createDoc(fiddle, 'fiddle'),
+    layout,
+  });
   const layoutNow = () => (windows.get('w') as { layout: WindowLayout }).layout;
   return { documents, model, panes: () => layoutNow().panes };
 }
 
-// @feature editor.split-n
 describe('panes follow the fiddle', () => {
   it('shows a newly focused file in the focused pane, and only moves focus to a file that has one', async () => {
     const { documents, model, panes } = await setup(['main.js', 'renderer.js']);
@@ -67,13 +83,17 @@ describe('panes follow the fiddle', () => {
     expect(panes()).toEqual(['main.js', 'renderer.js']);
     documents.updateDoc('w', (doc) => model.docSetActiveFile(doc, 'index.html'));
     expect(panes()).toEqual(['main.js', 'index.html']);
-    // A new file takes focus (§17.3), so it takes the focused pane too.
+    // A new file takes focus, so it takes the focused pane too.
     documents.updateDoc('w', (doc) => model.docAddFile(doc, 'styles.css'));
     expect(panes()).toEqual(['main.js', 'styles.css']);
   });
 
   it('closes the pane of a hidden or removed file, and the split below two panes', async () => {
-    const { documents, model, panes } = await setup(['main.js', 'renderer.js', 'index.html']);
+    const { documents, model, panes } = await setup([
+      'main.js',
+      'renderer.js',
+      'index.html',
+    ]);
     documents.updateDoc('w', (doc) => model.docRemoveFile(doc, 'index.html'));
     expect(panes()).toEqual(['main.js', 'renderer.js']);
     documents.updateDoc('w', (doc) => model.docSetFileVisible(doc, 'renderer.js', false));

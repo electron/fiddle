@@ -15,7 +15,9 @@ function fakeHub(modules: Record<string, string>) {
       fiddle = { ...fiddle, modules: next };
       writes.push(normalized);
       rev += 1;
-      queueMicrotask(() => listeners.forEach((l) => l({ store: 'window', windowId: 'w' })));
+      queueMicrotask(() =>
+        listeners.forEach((l) => l({ store: 'window', windowId: 'w' })),
+      );
       return rev;
     },
     onChange: (listener) => {
@@ -26,11 +28,12 @@ function fakeHub(modules: Record<string, string>) {
   return { hub, modules: () => fiddle.modules, writes };
 }
 
-const npm = { latestVersion: vi.fn(async (name: string) => (name === 'lodash' ? '4.17.21' : '1.2.3')) };
+const npm = {
+  latestVersion: vi.fn(async (name: string) => (name === 'lodash' ? '4.17.21' : '1.2.3')),
+};
 const log = () => {};
 
 describe('ModulesService', () => {
-  // @feature modules.add
   it('adds a module at its latest version', async () => {
     const { hub, modules } = fakeHub({});
     const service = new ModulesService(hub, npm, log);
@@ -38,7 +41,6 @@ describe('ModulesService', () => {
     expect(modules()).toEqual({ lodash: '4.17.21' });
   });
 
-  // @feature modules.edit modules.normalize
   it('keeps an exact version and normalizes anything else', async () => {
     const { hub, modules } = fakeHub({ a: '1.0.0' });
     const service = new ModulesService(hub, npm, log);
@@ -49,22 +51,26 @@ describe('ModulesService', () => {
 
   it('rejects invalid names, specs and unknown modules', async () => {
     const service = new ModulesService(fakeHub({}).hub, npm, log);
-    await expect(service.add('w', '../x')).rejects.toMatchObject({ code: 'invalid-argument' });
+    await expect(service.add('w', '../x')).rejects.toMatchObject({
+      code: 'invalid-argument',
+    });
     await expect(service.add('w', 'x', 'git+https://evil')).rejects.toMatchObject({
       code: 'invalid-argument',
     });
-    await expect(service.setVersion('w', 'missing', '1.0.0')).rejects.toMatchObject({ code: 'not-found' });
-    await expect(service.add('nope', 'x', '1.0.0')).rejects.toMatchObject({ code: 'not-found' });
+    await expect(service.setVersion('w', 'missing', '1.0.0')).rejects.toMatchObject({
+      code: 'not-found',
+    });
+    await expect(service.add('nope', 'x', '1.0.0')).rejects.toMatchObject({
+      code: 'not-found',
+    });
   });
 
-  // @feature modules.edit
   it('removes a module', () => {
     const { hub, modules } = fakeHub({ a: '1.0.0', b: '2.0.0' });
     new ModulesService(hub, npm, log).remove('w', 'a');
     expect(modules()).toEqual({ b: '2.0.0' });
   });
 
-  // @feature modules.normalize
   it('normalizes loaded non-semver versions to the latest', async () => {
     const { hub, modules } = fakeHub({ lodash: '*', exact: '1.0.0', range: '^1.0.0' });
     await new ModulesService(hub, npm, log).normalize('w');
@@ -98,7 +104,9 @@ describe('ModulesService', () => {
     await pending;
     expect(modules()).toEqual({ a: '1.0.0' });
 
-    const failing = { latestVersion: vi.fn(async () => Promise.reject(new Error('offline'))) };
+    const failing = {
+      latestVersion: vi.fn(async () => Promise.reject(new Error('offline'))),
+    };
     const other = fakeHub({ b: 'latest' });
     const retrying = new ModulesService(other.hub, failing, log);
     await retrying.normalize('w');

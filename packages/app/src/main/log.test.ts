@@ -2,16 +2,22 @@ import { mkdtemp, readdir, readFile, rm, stat } from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
 
-import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { formatEntry, LogFile } from './log';
+import { flushLog, formatEntry, initLogFile, log, LogFile } from './log';
 
 const home = os.homedir();
 const token = `ghp_${'Zz09'.repeat(9)}`;
 
 describe('formatEntry', () => {
   it('writes one JSON line with a timestamp, level and process', () => {
-    const line = formatEntry('warn', 'hello', [], 'renderer', new Date('2026-01-02T03:04:05.000Z'));
+    const line = formatEntry(
+      'warn',
+      'hello',
+      [],
+      'renderer',
+      new Date('2026-01-02T03:04:05.000Z'),
+    );
     expect(line).not.toContain('\n');
     expect(JSON.parse(line)).toEqual({
       t: '2026-01-02T03:04:05.000Z',
@@ -33,14 +39,23 @@ describe('formatEntry', () => {
     const entry = JSON.parse(line);
     expect(entry.level).toBe('error');
     expect(entry.msg).toBe('sign-in with [redacted] from ~/x');
-    expect(entry.details[0]).toMatchObject({ name: 'Error', message: `cannot read ${path.join('~', 'secret.txt')}` });
-    expect(entry.details[1]).toEqual({ apiKey: '[redacted]', nested: { GITHUB_TOKEN: '[redacted]', file: '~/y' } });
+    expect(entry.details[0]).toMatchObject({
+      name: 'Error',
+      message: `cannot read ${path.join('~', 'secret.txt')}`,
+    });
+    expect(entry.details[1]).toEqual({
+      apiKey: '[redacted]',
+      nested: { GITHUB_TOKEN: '[redacted]', file: '~/y' },
+    });
   });
 
   it('survives cycles and odd values', () => {
     const cyclic: Record<string, unknown> = { n: 1n };
     cyclic.self = cyclic;
-    expect(JSON.parse(formatEntry('info', 'x', [cyclic])).details[0]).toEqual({ n: '1', self: '[circular]' });
+    expect(JSON.parse(formatEntry('info', 'x', [cyclic])).details[0]).toEqual({
+      n: '1',
+      self: '[circular]',
+    });
   });
 });
 
@@ -78,7 +93,9 @@ describe('LogFile', () => {
       expect((await stat(path.join(dir, name))).size).toBeLessThanOrEqual(100);
     }
     // Newest last in main.log; older entries shift into .1 and .2; the oldest are gone.
-    const [current, older, oldest] = await Promise.all(['main.log', 'main.1.log', 'main.2.log'].map(read));
+    const [current, older, oldest] = await Promise.all(
+      ['main.log', 'main.1.log', 'main.2.log'].map(read),
+    );
     expect(current!.at(-1)).toBe(19);
     expect(Math.max(...older!)).toBeLessThan(Math.min(...current!));
     expect(Math.max(...oldest!)).toBeLessThan(Math.min(...older!));
@@ -92,7 +109,34 @@ describe('LogFile', () => {
     const second = new LogFile(dir, { maxBytes: 50 });
     second.write('y'.repeat(20));
     await second.flush();
-    expect(await readFile(path.join(dir, 'main.1.log'), 'utf8')).toBe(`${'x'.repeat(40)}\n`);
-    expect(await readFile(path.join(dir, 'main.log'), 'utf8')).toBe(`${'y'.repeat(20)}\n`);
+    expect(await readFile(path.join(dir, 'main.1.log'), 'utf8')).toBe(
+      `${'x'.repeat(40)}\n`,
+    );
+    expect(await readFile(path.join(dir, 'main.log'), 'utf8')).toBe(
+      `${'y'.repeat(20)}\n`,
+    );
+  });
+});
+
+describe('flushLog', () => {
+  let dir: string;
+
+  beforeEach(async () => {
+    dir = await mkdtemp(path.join(os.tmpdir(), 'fiddle-log-'));
+    vi.spyOn(console, 'error').mockImplementation(() => undefined);
+  });
+
+  afterEach(async () => {
+    vi.restoreAllMocks();
+    await rm(dir, { recursive: true, force: true });
+  });
+
+  it('resolves once the entries logged so far are in the file', async () => {
+    initLogFile(dir);
+    log.error('startup failed', new Error('boom'));
+    await flushLog();
+    expect(await readFile(path.join(dir, 'main.log'), 'utf8')).toContain(
+      'startup failed',
+    );
   });
 });

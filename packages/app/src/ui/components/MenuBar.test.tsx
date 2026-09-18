@@ -1,39 +1,60 @@
-// @vitest-environment jsdom
-import { act, cleanup, fireEvent, render, screen } from '@testing-library/react';
+import { act, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { deriveMnemonics, MenuBar, type MenuBarMenu } from './MenuBar';
 
 afterEach(() => {
-  cleanup();
   vi.useRealTimers();
 });
 
-const submenu = (id: string, label: string, children: MenuBarMenu['children']): MenuBarMenu => ({
+const submenu = (
+  id: string,
+  label: string,
+  children: MenuBarMenu['children'],
+): MenuBarMenu => ({
   kind: 'submenu',
   id,
   label,
   enabled: true,
   children,
 });
-const item = (id: string, label: string, extra: { enabled?: boolean; checked?: boolean; accelerator?: string } = {}) => ({
+const item = (
+  id: string,
+  label: string,
+  extra: {
+    enabled?: boolean;
+    checked?: boolean;
+    radio?: boolean;
+    accelerator?: string;
+  } = {},
+) => ({
   kind: 'item' as const,
   id,
   label,
   enabled: extra.enabled ?? true,
   ...(extra.checked === undefined ? {} : { checked: extra.checked }),
+  ...(extra.radio ? { radio: true } : {}),
   ...(extra.accelerator === undefined ? {} : { accelerator: extra.accelerator }),
 });
 
 const MENUS: MenuBarMenu[] = [
   submenu('menu:file', 'File', [
     item('file.newFiddle', 'New fiddle', { accelerator: 'Ctrl+N' }),
-    submenu('menu:openRecent', 'Open recent', [item('recent:0', '/tmp/one'), item('recent:1', '/tmp/two')]),
+    submenu('menu:openRecent', 'Open recent', [
+      item('recent:0', '/tmp/one'),
+      item('recent:1', '/tmp/two'),
+    ]),
     item('file.save', 'Save', { enabled: false, accelerator: 'Ctrl+S' }),
     { kind: 'separator' },
     item('role:quit', 'Exit'),
   ]),
-  submenu('menu:edit', 'Edit', [item('role:cut', 'Cut', { accelerator: 'Ctrl+X' }), item('role:copy', 'Copy', { accelerator: 'Ctrl+C' })]),
-  submenu('menu:view', 'View', [item('editor.toggleSoftWrap', 'Soft wrap', { checked: true }), item('editor.toggleMinimap', 'Minimap', { checked: false })]),
+  submenu('menu:edit', 'Edit', [
+    item('role:cut', 'Cut', { accelerator: 'Ctrl+X' }),
+    item('role:copy', 'Copy', { accelerator: 'Ctrl+C' }),
+  ]),
+  submenu('menu:view', 'View', [
+    item('editor.toggleSoftWrap', 'Soft wrap', { checked: true }),
+    item('editor.toggleMinimap', 'Minimap', { checked: false }),
+  ]),
   submenu('menu:help', 'Help', [item('help.about', 'About Electron Fiddle')]),
 ];
 
@@ -79,27 +100,40 @@ const tapAlt = () => {
 const focused = () => document.activeElement;
 /** The bar's titles: their text, or the label of an icon button (More, Menu). */
 const barTitles = () =>
-  [...screen.getByRole('menubar').querySelectorAll('[role="menuitem"]')].map((node) => node.getAttribute('aria-label') ?? node.textContent);
+  [...screen.getByRole('menubar').querySelectorAll('[role="menuitem"]')].map(
+    (node) => node.getAttribute('aria-label') ?? node.textContent,
+  );
 /** The submenus an open menu lists. */
 const submenusIn = (menu: string) =>
-  [...screen.getByRole('menu', { name: menu }).querySelectorAll(':scope > [aria-haspopup="menu"]')].map((node) => node.textContent);
+  [
+    ...screen
+      .getByRole('menu', { name: menu })
+      .querySelectorAll(':scope > [aria-haspopup="menu"]'),
+  ].map((node) => node.textContent);
 /**
  * Widths for the unseen specimens the bar measures: every title 60px, the More button 28px
  * (jsdom lays nothing out). Returns the spy to restore.
  */
 function mockTitleWidths() {
-  return vi.spyOn(HTMLElement.prototype, 'offsetWidth', 'get').mockImplementation(function (this: HTMLElement) {
-    if (!this.parentElement || this.parentElement.getAttribute('aria-hidden') !== 'true') return 0;
-    return this.querySelector('svg') ? 28 : 60;
-  });
+  return vi
+    .spyOn(HTMLElement.prototype, 'offsetWidth', 'get')
+    .mockImplementation(function (this: HTMLElement) {
+      if (
+        !this.parentElement ||
+        this.parentElement.getAttribute('aria-hidden') !== 'true'
+      )
+        return 0;
+      return this.querySelector('svg') ? 28 : 60;
+    });
 }
 
-// @feature workspace.menubar
 describe('MenuBar', () => {
   it('is a named menu bar of titles, with no menu open', () => {
     setup();
     const bar = screen.getByRole('menubar', { name: 'Application menu' });
-    expect([...bar.querySelectorAll('[role="menuitem"]')].map((node) => node.textContent)).toEqual(['File', 'Edit', 'View', 'Help']);
+    expect(
+      [...bar.querySelectorAll('[role="menuitem"]')].map((node) => node.textContent),
+    ).toEqual(['File', 'Edit', 'View', 'Help']);
     expect(title('File').getAttribute('aria-haspopup')).toBe('menu');
     expect(title('File').getAttribute('aria-expanded')).toBe('false');
     expect(screen.queryByRole('menu')).toBeNull();
@@ -113,9 +147,15 @@ describe('MenuBar', () => {
     expect(title('File').getAttribute('aria-expanded')).toBe('true');
     expect(focused()).toBe(screen.getByRole('menu', { name: 'File' }));
     // Items are named by their label and described by their key.
-    expect(screen.getByRole('menuitem', { name: 'New fiddle', description: 'Ctrl+N' })).toBeTruthy();
-    expect(screen.getByRole('menuitem', { name: 'Save' }).getAttribute('aria-disabled')).toBe('true');
-    expect(screen.getByRole('menuitem', { name: 'Open recent' }).getAttribute('aria-haspopup')).toBe('menu');
+    expect(
+      screen.getByRole('menuitem', { name: 'New fiddle', description: 'Ctrl+N' }),
+    ).toBeTruthy();
+    expect(
+      screen.getByRole('menuitem', { name: 'Save' }).getAttribute('aria-disabled'),
+    ).toBe('true');
+    expect(
+      screen.getByRole('menuitem', { name: 'Open recent' }).getAttribute('aria-haspopup'),
+    ).toBe('menu');
     expect(screen.getAllByRole('separator')).toHaveLength(1);
     fireEvent.mouseDown(title('File'), { button: 0 });
     expect(openMenus()).toEqual([]);
@@ -150,11 +190,52 @@ describe('MenuBar', () => {
   it('shows checked items as menuitemcheckbox', () => {
     setup();
     fireEvent.mouseDown(title('View'), { button: 0 });
-    expect(screen.getByRole('menuitemcheckbox', { name: 'Soft wrap' }).getAttribute('aria-checked')).toBe('true');
-    expect(screen.getByRole('menuitemcheckbox', { name: 'Minimap' }).getAttribute('aria-checked')).toBe('false');
+    expect(
+      screen
+        .getByRole('menuitemcheckbox', { name: 'Soft wrap' })
+        .getAttribute('aria-checked'),
+    ).toBe('true');
+    expect(
+      screen
+        .getByRole('menuitemcheckbox', { name: 'Minimap' })
+        .getAttribute('aria-checked'),
+    ).toBe('false');
   });
 
-  // @feature keys.menubar-alt
+  it('shows a radio group as menuitemradio, one checked', () => {
+    setup({
+      menus: [
+        submenu('menu:showMe', 'Show me', [
+          item('example:Menu', 'Menu', { checked: true, radio: true }),
+          item('example:Tabs', 'Tabs', { checked: false, radio: true }),
+        ]),
+      ],
+    });
+    fireEvent.mouseDown(title('Show me'), { button: 0 });
+    expect(
+      screen.getByRole('menuitemradio', { name: 'Menu' }).getAttribute('aria-checked'),
+    ).toBe('true');
+    expect(
+      screen.getByRole('menuitemradio', { name: 'Tabs' }).getAttribute('aria-checked'),
+    ).toBe('false');
+    expect(screen.queryByRole('menuitemcheckbox')).toBeNull();
+  });
+
+  it('turns the window no-drag while the bar has the keyboard or a menu is open, so a title bar click reaches the page', () => {
+    setup();
+    const noDrag = () =>
+      screen.getByRole('menubar').querySelector(':scope > [aria-hidden="true"]:empty');
+    expect(noDrag()).toBeNull();
+    fireEvent.mouseDown(title('File'), { button: 0 });
+    expect(noDrag()).not.toBeNull();
+    fireEvent.mouseDown(title('File'), { button: 0 });
+    expect(noDrag()).toBeNull();
+    tapAlt();
+    expect(noDrag()).not.toBeNull();
+    press('Escape');
+    expect(noDrag()).toBeNull();
+  });
+
   it('takes the keyboard on a lone Alt, underlines the mnemonics, and gives focus back on Escape', () => {
     const { editor } = setup();
     const bar = screen.getByRole('menubar');
@@ -196,7 +277,6 @@ describe('MenuBar', () => {
     expect(focused()).toBe(editor);
   });
 
-  // @feature keys.menubar-alt
   it('opens a menu with Alt and its mnemonic, and with the letter alone once the bar has the keyboard', () => {
     const { editor } = setup();
     press('f', { altKey: true });
@@ -223,7 +303,6 @@ describe('MenuBar', () => {
     expect(focused()).toBe(title('File'));
   });
 
-  // @feature keys.menubar-alt
   it('treats Alt with a click, or with another key, as no tap', () => {
     const { editor } = setup();
     fireEvent.keyDown(editor, { key: 'Alt', altKey: true });
@@ -240,7 +319,6 @@ describe('MenuBar', () => {
     expect(focused()).toBe(editor);
   });
 
-  // @feature keys.menubar-alt
   it('leaves Alt and the mnemonics to a dialog, or to a field recording a shortcut', () => {
     const { onAction } = setup();
     render(
@@ -284,7 +362,9 @@ describe('MenuBar', () => {
     expect(focused()).toBe(screen.getByRole('menuitem', { name: 'Open recent' }));
     press('ArrowRight');
     expect(openMenus()).toEqual(['File', 'Open recent']);
-    expect(screen.getByRole('menuitem', { name: 'Open recent' }).getAttribute('aria-expanded')).toBe('true');
+    expect(
+      screen.getByRole('menuitem', { name: 'Open recent' }).getAttribute('aria-expanded'),
+    ).toBe('true');
     expect(focused()).toBe(screen.getByRole('menuitem', { name: '/tmp/one' }));
     press('ArrowLeft');
     expect(openMenus()).toEqual(['File']);
@@ -376,7 +456,9 @@ describe('MenuBar', () => {
       press('h', { altKey: true });
       expect(openMenus()).toEqual(['More', 'Help']);
       expect(title('More').getAttribute('aria-expanded')).toBe('true');
-      expect(focused()).toBe(screen.getByRole('menuitem', { name: 'About Electron Fiddle' }));
+      expect(focused()).toBe(
+        screen.getByRole('menuitem', { name: 'About Electron Fiddle' }),
+      );
       press('Enter');
       expect(onAction).toHaveBeenCalledWith('help.about');
       expect(focused()).toBe(editor);
@@ -447,12 +529,22 @@ describe('MenuBar', () => {
   });
 });
 
-// @feature keys.menubar-alt
 describe('deriveMnemonics', () => {
   it('takes the first letter, then the next unused one on a collision', () => {
-    expect(deriveMnemonics(['File', 'Edit', 'View', 'Run', 'Window', 'Help']).map((m) => m?.key)).toEqual(['f', 'e', 'v', 'r', 'w', 'h']);
+    expect(
+      deriveMnemonics(['File', 'Edit', 'View', 'Run', 'Window', 'Help']).map(
+        (m) => m?.key,
+      ),
+    ).toEqual(['f', 'e', 'v', 'r', 'w', 'h']);
     // German: Ansicht takes A, so Ausführen takes U.
-    const german = deriveMnemonics(['Datei', 'Bearbeiten', 'Ansicht', 'Ausführen', 'Fenster', 'Hilfe']);
+    const german = deriveMnemonics([
+      'Datei',
+      'Bearbeiten',
+      'Ansicht',
+      'Ausführen',
+      'Fenster',
+      'Hilfe',
+    ]);
     expect(german.map((m) => m?.key)).toEqual(['d', 'b', 'a', 'u', 'f', 'h']);
     expect(german[3]).toEqual({ index: 1, key: 'u' });
   });

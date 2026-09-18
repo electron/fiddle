@@ -20,7 +20,7 @@ export const glossaryFile = path.join(i18nDir, 'glossary.json');
 export const pseudoLocales = ['en-XA', 'ar-XB'];
 
 const CATEGORIES = ['zero', 'one', 'two', 'few', 'many', 'other'];
-const PLURAL_KEY = /^(.+)_(zero|one|two|few|many|other)$/;
+export const PLURAL_KEY = /^(.+)_(zero|one|two|few|many|other)$/;
 
 export function readJsonFile(file) {
   let text;
@@ -150,7 +150,10 @@ export function sourceText(unit, category) {
 /** English forms in canonical order. */
 function englishForms(unit) {
   return Object.fromEntries(
-    CATEGORIES.filter((category) => category in unit.forms).map((c) => [c, unit.forms[c]]),
+    CATEGORIES.filter((category) => category in unit.forms).map((c) => [
+      c,
+      unit.forms[c],
+    ]),
   );
 }
 
@@ -170,7 +173,9 @@ export function readUnit(unit, locale, messages = {}) {
 
 export function writeUnit(unit, locale, messages, value) {
   if (!unit.plural) messages[unit.key] = value;
-  else for (const category of categoriesFor(unit, locale)) messages[`${unit.key}_${category}`] = value[category];
+  else
+    for (const category of categoriesFor(unit, locale))
+      messages[`${unit.key}_${category}`] = value[category];
 }
 
 export function hashText(text) {
@@ -222,14 +227,19 @@ export function validateUnit(unit, locale, value, { checkLength = true } = {}) {
     if (!value || typeof value !== 'object') return ['expected plural forms'];
     const wanted = categoriesFor(unit, locale);
     for (const category of wanted) {
-      if (typeof value[category] !== 'string') problems.push(`missing plural form "${category}"`);
+      if (typeof value[category] !== 'string')
+        problems.push(`missing plural form "${category}"`);
     }
     for (const category of Object.keys(value)) {
       if (!wanted.includes(category)) {
-        problems.push(`invalid plural form "${category}" (${locale} uses ${wanted.join(', ')})`);
+        problems.push(
+          `invalid plural form "${category}" (${locale} uses ${wanted.join(', ')})`,
+        );
       }
     }
-    entries = wanted.filter((c) => typeof value[c] === 'string').map((c) => [c, value[c]]);
+    entries = wanted
+      .filter((c) => typeof value[c] === 'string')
+      .map((c) => [c, value[c]]);
   } else {
     if (typeof value !== 'string') return ['expected a string'];
     entries = [[undefined, value]];
@@ -248,14 +258,20 @@ export function validateUnit(unit, locale, value, { checkLength = true } = {}) {
     const have = placeholdersOf(text);
     const unknown = have.filter((p) => !known.includes(p));
     const missing = required.filter((p) => !have.includes(p));
-    if (unknown.length) problems.push(`unknown placeholder ${unknown.join(', ')}${where}`);
-    if (missing.length) problems.push(`missing placeholder ${missing.join(', ')}${where}`);
+    if (unknown.length)
+      problems.push(`unknown placeholder ${unknown.join(', ')}${where}`);
+    if (missing.length)
+      problems.push(`missing placeholder ${missing.join(', ')}${where}`);
     const wantTags = tagsOf(sourceText(unit, category)).join(' ');
     const haveTags = tagsOf(text).join(' ');
     if (wantTags !== haveTags) {
       problems.push(`tags differ from English${where}: "${haveTags}" vs "${wantTags}"`);
     }
-    if (checkLength && typeof unit.maxLength === 'number' && visibleLength(text) > unit.maxLength) {
+    if (
+      checkLength &&
+      typeof unit.maxLength === 'number' &&
+      visibleLength(text) > unit.maxLength
+    ) {
       problems.push(`longer than maxLength ${unit.maxLength}${where}`);
     }
   }
@@ -264,10 +280,58 @@ export function validateUnit(unit, locale, value, { checkLength = true } = {}) {
 
 // Pseudo-locales, as Chromium and Android define them.
 const ACCENTS = {
-  a: 'á', b: 'ƀ', c: 'ç', d: 'ð', e: 'é', f: 'ƒ', g: 'ĝ', h: 'ĥ', i: 'î', j: 'ĵ', k: 'ķ', l: 'ļ', m: 'ɱ',
-  n: 'ñ', o: 'ö', p: 'þ', q: 'ǫ', r: 'ŕ', s: 'š', t: 'ţ', u: 'û', v: 'ṽ', w: 'ŵ', x: 'ẋ', y: 'ý', z: 'ž',
-  A: 'Å', B: 'Ɓ', C: 'Ç', D: 'Ð', E: 'É', F: 'Ƒ', G: 'Ĝ', H: 'Ĥ', I: 'Î', J: 'Ĵ', K: 'Ķ', L: 'Ļ', M: 'Ṁ',
-  N: 'Ñ', O: 'Ö', P: 'Þ', Q: 'Ǫ', R: 'Ŕ', S: 'Š', T: 'Ţ', U: 'Û', V: 'Ṽ', W: 'Ŵ', X: 'Ẋ', Y: 'Ý', Z: 'Ž',
+  a: 'á',
+  b: 'ƀ',
+  c: 'ç',
+  d: 'ð',
+  e: 'é',
+  f: 'ƒ',
+  g: 'ĝ',
+  h: 'ĥ',
+  i: 'î',
+  j: 'ĵ',
+  k: 'ķ',
+  l: 'ļ',
+  m: 'ɱ',
+  n: 'ñ',
+  o: 'ö',
+  p: 'þ',
+  q: 'ǫ',
+  r: 'ŕ',
+  s: 'š',
+  t: 'ţ',
+  u: 'û',
+  v: 'ṽ',
+  w: 'ŵ',
+  x: 'ẋ',
+  y: 'ý',
+  z: 'ž',
+  A: 'Å',
+  B: 'Ɓ',
+  C: 'Ç',
+  D: 'Ð',
+  E: 'É',
+  F: 'Ƒ',
+  G: 'Ĝ',
+  H: 'Ĥ',
+  I: 'Î',
+  J: 'Ĵ',
+  K: 'Ķ',
+  L: 'Ļ',
+  M: 'Ṁ',
+  N: 'Ñ',
+  O: 'Ö',
+  P: 'Þ',
+  Q: 'Ǫ',
+  R: 'Ŕ',
+  S: 'Š',
+  T: 'Ţ',
+  U: 'Û',
+  V: 'Ṽ',
+  W: 'Ŵ',
+  X: 'Ẋ',
+  Y: 'Ý',
+  Z: 'Ž',
 };
 const PADDING = 'one two three four five six seven eight nine ten'.split(' ');
 // Placeholders, $t() references and tags pass through untouched.
@@ -302,7 +366,10 @@ export function pseudoMessages(locale, entries) {
     if (!unit.plural) messages[unit.key] = pseudoLocalize(locale, unit.message);
     else {
       for (const category of categoriesFor(unit, locale)) {
-        messages[`${unit.key}_${category}`] = pseudoLocalize(locale, sourceText(unit, category));
+        messages[`${unit.key}_${category}`] = pseudoLocalize(
+          locale,
+          sourceText(unit, category),
+        );
       }
     }
   }

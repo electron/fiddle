@@ -23,13 +23,20 @@ function tier(v: semver.SemVer): number {
   return PRE_TAGS.indexOf(String(v.prerelease[0]));
 }
 
-/**
- * Ascending comparator. Within the same x.y.z: nightly < alpha < beta < stable.
- * Non-semver strings (local builds) sort below every release.
- */
-export function compareVersions(a: string, b: string): number {
-  const pa = semver.parse(a);
-  const pb = semver.parse(b);
+interface ParsedVersion {
+  text: string;
+  semver: semver.SemVer | null;
+}
+
+const parseVersion = (text: string): ParsedVersion => ({
+  text,
+  semver: semver.parse(text),
+});
+
+function compareParsed(
+  { text: a, semver: pa }: ParsedVersion,
+  { text: b, semver: pb }: ParsedVersion,
+): number {
   if (pa && pb) {
     const main = pa.compareMain(pb);
     if (main !== 0) return main;
@@ -42,9 +49,20 @@ export function compareVersions(a: string, b: string): number {
   return a < b ? -1 : a > b ? 1 : 0;
 }
 
-/** Newest first by {@link compareVersions}, so non-semver versions go last. Returns a new array. */
+/**
+ * Ascending comparator. Within the same x.y.z: nightly < alpha < beta < stable.
+ * Non-semver strings (local builds) sort below every release.
+ */
+export function compareVersions(a: string, b: string): number {
+  return compareParsed(parseVersion(a), parseVersion(b));
+}
+
+/** Newest first by {@link compareVersions}, so non-semver versions go last. Returns a new array. Parses each version once. */
 export function sortVersions<T extends Versioned>(items: readonly T[]): T[] {
-  return [...items].sort((x, y) => compareVersions(versionOf(y), versionOf(x)));
+  return items
+    .map((item) => ({ item, key: parseVersion(versionOf(item)) }))
+    .sort((x, y) => compareParsed(y.key, x.key))
+    .map(({ item }) => item);
 }
 
 export function isObsolete(version: string, oldestSupportedMajor: number): boolean {
@@ -66,37 +84,19 @@ export function getOldestSupportedMajor(input: {
   return input.supportedMajors[0];
 }
 
-export interface VersionFilter {
-  channels: readonly ReleaseChannel[];
-  showObsolete: boolean;
-  oldestSupportedMajor?: number;
-  showNotDownloaded: boolean;
-  isDownloaded?: (version: string) => boolean;
-  /** Always kept, such as the current version. */
-  keep?: readonly string[];
-}
-
-export function filterVersions<T extends Versioned>(items: readonly T[], filter: VersionFilter): T[] {
-  return items.filter((item) => {
-    const version = versionOf(item);
-    if (filter.keep?.includes(version)) return true;
-    if (!filter.channels.includes(getReleaseChannel(version))) return false;
-    if (!filter.showObsolete && filter.oldestSupportedMajor !== undefined && isObsolete(version, filter.oldestSupportedMajor)) {
-      return false;
-    }
-    if (!filter.showNotDownloaded && !(filter.isDownloaded?.(version) ?? false)) return false;
-    return true;
-  });
-}
-
 /**
  * False for releases this platform can't run: macOS arm64 needs 11 or later,
  * Windows arm64 needs 6.0.8 or later. Non-semver versions pass.
  */
-export function isSupportedOnPlatform(version: string, platform: string, arch: string): boolean {
+export function isSupportedOnPlatform(
+  version: string,
+  platform: string,
+  arch: string,
+): boolean {
   if (!semver.valid(version) || arch !== 'arm64') return true;
   if (platform === 'darwin') return !semver.lt(version, '11.0.0');
-  if (platform === 'win32') return semver.satisfies(version, '>=6.0.8', { includePrerelease: true });
+  if (platform === 'win32')
+    return semver.satisfies(version, '>=6.0.8', { includePrerelease: true });
   return true;
 }
 
@@ -116,16 +116,31 @@ export function suggestLocalBuildName(folder: string): string {
 }
 
 /** Releases from `from` to `to` inclusive, oldest first. Empty unless both are semver releases in `versions`. */
-export function getVersionRange(from: string, to: string, versions: readonly string[]): string[] {
-  if (!semver.valid(from) || !semver.valid(to) || !versions.includes(from) || !versions.includes(to)) return [];
+export function getVersionRange(
+  from: string,
+  to: string,
+  versions: readonly string[],
+): string[] {
+  if (
+    !semver.valid(from) ||
+    !semver.valid(to) ||
+    !versions.includes(from) ||
+    !versions.includes(to)
+  )
+    return [];
   const [lo, hi] = compareVersions(from, to) <= 0 ? [from, to] : [to, from];
-  return versions
-    .filter((v) => semver.valid(v) && compareVersions(v, lo) >= 0 && compareVersions(v, hi) <= 0)
-    .sort(compareVersions);
+  return sortVersions(
+    versions.filter(
+      (v) =>
+        semver.valid(v) && compareVersions(v, lo) >= 0 && compareVersions(v, hi) <= 0,
+    ),
+  ).reverse();
 }
 
 /** Bisect defaults from the visible releases (newest first): the 11th as good, the newest as bad. Local builds are skipped. */
-export function getDefaultBisectRange(visible: readonly string[]): { good: string; bad: string } | undefined {
+export function getDefaultBisectRange(
+  visible: readonly string[],
+): { good: string; bad: string } | undefined {
   const releases = visible.filter((v) => semver.valid(v));
   if (releases.length < 2) return undefined;
   return { good: releases[Math.min(10, releases.length - 1)]!, bad: releases[0]! };

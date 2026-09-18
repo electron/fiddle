@@ -26,8 +26,16 @@ export interface TreeProps {
   className?: string;
 }
 
-/** A tree of rows, 2px apart. Arrow keys move between rows; one Tab stop. */
-export function Tree({ children, value, defaultValue, onChange, variant = 'sheet', className, ...rest }: TreeProps) {
+/** Arrow keys move between rows; one Tab stop. */
+export function Tree({
+  children,
+  value,
+  defaultValue,
+  onChange,
+  variant = 'sheet',
+  className,
+  ...rest
+}: TreeProps) {
   return (
     <AriaTree
       {...rest}
@@ -67,7 +75,6 @@ export interface TreeRowProps {
   className?: string;
 }
 
-/** 28 tall, padding 0 8, radius-item, 16px icon with a 6px gap. */
 export function TreeRow({
   id,
   label,
@@ -82,7 +89,12 @@ export function TreeRow({
   className,
 }: TreeRowProps) {
   return (
-    <TreeItem id={id} textValue={label} isDisabled={isDisabled} className={cx(styles.row, className)}>
+    <TreeItem
+      id={id}
+      textValue={label}
+      isDisabled={isDisabled}
+      className={cx(styles.row, className)}
+    >
       <TreeItemContent>
         {({ hasChildItems, isExpanded }) => (
           <>
@@ -101,7 +113,9 @@ export function TreeRow({
               </span>
             )}
             {unsaved && <span className={styles.dot} aria-hidden="true" />}
-            {unsaved && unsavedLabel && <VisuallyHidden>{`, ${unsavedLabel}`}</VisuallyHidden>}
+            {unsaved && unsavedLabel && (
+              <VisuallyHidden>{`, ${unsavedLabel}`}</VisuallyHidden>
+            )}
           </>
         )}
       </TreeItemContent>

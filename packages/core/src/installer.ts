@@ -4,7 +4,11 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { inspect } from 'node:util';
 
-import { download as electronDownload, type ElectronDownloadRequestOptions } from '@electron/get';
+import {
+  download as electronDownload,
+  ElectronDownloadCacheMode,
+  type ElectronDownloadRequestOptions,
+} from '@electron/get';
 import debug from 'debug';
 import semver from 'semver';
 
@@ -15,12 +19,14 @@ import {
   throwIfAborted,
   wrapError,
 } from './errors.js';
+import { extractZip } from './extract.js';
 import {
+  copyFolder,
+  remove,
   removeBestEffort,
   rename,
   renameIntoPlace,
   safeHostname,
-  withNoAsar,
 } from './fs-util.js';
 import { LOCK_STALE_MS, isProcessAlive, withLock } from './lock.js';
 import { DefaultPaths, type Paths } from './paths.js';
@@ -30,7 +36,7 @@ function getZipName(version: string): string {
 }
 
 function assertValidVersion(version: string): void {
-  if (!semver.valid(version)) {
+  if (semver.valid(version) !== version) {
     throw new FiddleCoreError(
       'invalid-version',
       `Invalid Electron version: "${version}"`,
@@ -47,13 +53,6 @@ export type ExtractFunction = (
   destDir: string,
   signal?: AbortSignal,
 ) => Promise<void>;
-
-// Loaded on first use, so importing core never loads the native addon. The
-// import stays outside `withNoAsar`: in a packaged app its JS is in the asar.
-const defaultExtract: ExtractFunction = async (zipPath, dir) => {
-  const { extract } = await import('@electron-internal/extract-zip');
-  await withNoAsar(() => extract(zipPath, { dir }));
-};
 
 /** Written into `paths.electronInstall` once an install into it is complete. */
 const INSTALLED_MARKER = '.fiddle-core-installed';
@@ -127,12 +126,7 @@ export interface InstallerOptions {
   mirror?: Partial<Mirrors>;
   /** See {@link ErrorMode}. Default: `legacy`. */
   errors?: ErrorMode;
-  /**
-   * Extracts a downloaded zip. The default extracts on the calling thread and
-   * sets `process.noAsar` while it runs, which in Electron's main process
-   * turns off asar support for the whole app. Pass a function that extracts
-   * in a worker thread to avoid that.
-   */
+  /** Extracts a downloaded zip. The default is a native extractor. */
   extract?: ExtractFunction;
   /**
    * Downloads each file (`@electron/get`'s `downloader`). The default uses
@@ -177,7 +171,7 @@ export class Installer extends EventEmitter {
   private readonly stateMap = new Map<string, InstallState>();
   /** Downloads and per-version installs in flight, keyed `download:<version>` and `install:<version>`. */
   private readonly inflight = new Map<string, SharedTask<unknown>>();
-  /** keep a track of all currently installing versions (`current` layout) */
+  /** Versions being installed (`current` layout). */
   private readonly installing = new Set<string>();
 
   constructor(pathsIn: Partial<Paths> = {}, options: InstallerOptions = {}) {
@@ -193,7 +187,7 @@ export class Installer extends EventEmitter {
       layout: options.layout ?? 'current',
       mirror: { ...options.mirror },
       errors: options.errors,
-      extract: options.extract ?? defaultExtract,
+      extract: options.extract ?? extractZip,
       downloader: options.downloader,
     });
     this.rebuildStates();
@@ -253,7 +247,6 @@ export class Installer extends EventEmitter {
   private rebuildStates() {
     this.stateMap.clear();
 
-    // already downloaded...
     const str = `^electron-v(.*)-${process.platform}-${process.arch}.zip$`;
     const reg = new RegExp(str);
     try {
@@ -277,7 +270,6 @@ export class Installer extends EventEmitter {
       // no download directory yet
     }
 
-    // installed...
     if (this.options.layout === 'per-version') {
       try {
         for (const name of fs.readdirSync(this.paths.electronVersions)) {
@@ -294,7 +286,7 @@ export class Installer extends EventEmitter {
         const { electronInstall } = this.paths;
         const versionFile = path.join(electronInstall, 'version');
         const version = fs.readFileSync(versionFile, 'utf8').trim();
-        // without the marker, the install may be partial or from fiddle-core 2.x
+        // without the marker, the install may be partial
         const complete = fs.existsSync(path.join(electronInstall, INSTALLED_MARKER));
         this.setState(
           version,
@@ -310,69 +302,40 @@ export class Installer extends EventEmitter {
     });
   }
 
-  /** Removes an Electron download or Electron install from the disk. */
+  /**
+   * Removes an Electron download or Electron install from the disk. A failure
+   * is logged, not thrown, and the state then says what is left.
+   */
   public async remove(version: string): Promise<void> {
     const d = debug('fiddle-core:Installer:remove');
     d(version);
     assertValidVersion(version);
-    let isBinaryDeleted: boolean;
-    // utility to re-run removal functions upon failure
-    // due to windows filesystem lockfile jank
-    const rerunner = async (
-      path: string,
-      func: (path: string) => void,
-      counter = 1,
-    ): Promise<boolean> => {
-      try {
-        func(path);
-        return true;
-      } catch (error) {
-        console.warn(
-          `Installer: failed to run ${func.name} for ${version}, but failed`,
-          error,
-        );
-        if (counter < 4) {
-          console.log(`Installer: Trying again to run ${func.name}`);
-          await rerunner(path, func, counter + 1);
-        }
-      }
-      return false;
-    };
+    const removed = (target: string) =>
+      remove(target).then(
+        () => true,
+        (err: unknown) => {
+          console.warn(`Installer: failed to remove ${target}`, err);
+          return false;
+        },
+      );
 
-    const binaryCleaner = (path: string) => {
-      if (fs.existsSync(path)) {
-        const { noAsar } = process;
-        try {
-          process.noAsar = true;
-          fs.rmSync(path, { recursive: true, force: true });
-        } finally {
-          process.noAsar = noAsar;
-        }
-      }
-    };
-    // get the zip path
     const zipPath = path.join(this.paths.electronDownloads, getZipName(version));
-    // Or, maybe the version was already installed and kept in file system
+    // a download folder may hold an unzipped version instead of a zip
     const preInstalledPath = path.join(this.paths.electronDownloads, version);
+    const downloadsRemoved = [await removed(zipPath), await removed(preInstalledPath)];
 
-    const isZipDeleted = await rerunner(zipPath, binaryCleaner);
-    const isPathDeleted = await rerunner(preInstalledPath, binaryCleaner);
-
-    // maybe uninstall it
+    let installRemoved = true;
     if (this.options.layout === 'per-version') {
-      isBinaryDeleted = await this.removeVersionDir(version);
+      installRemoved = await this.removeVersionDir(version);
     } else if (this.installedVersion === version) {
-      isBinaryDeleted = await rerunner(this.paths.electronInstall, binaryCleaner);
-    } else {
-      // If the current version binary doesn't exists
-      isBinaryDeleted = true;
+      installRemoved = await removed(this.paths.electronInstall);
     }
 
-    if ((isZipDeleted || isPathDeleted) && isBinaryDeleted) {
-      this.setState(version, InstallState.missing);
-    } else {
-      // Ideally the execution shouldn't reach this point
-      console.warn(`Installer: Failed to remove version ${version}`);
+    if (installRemoved) {
+      this.setState(
+        version,
+        downloadsRemoved.every(Boolean) ? InstallState.missing : InstallState.downloaded,
+      );
     }
   }
 
@@ -508,7 +471,6 @@ export class Installer extends EventEmitter {
     let pctDone = 0;
     const getProgressCallback = (progress: ProgressObject) => {
       if (opts?.progressCallback) {
-        // Call the user passed callback function
         opts.progressCallback(progress);
       }
       const pct = Math.round(progress.percent * 100);
@@ -532,6 +494,9 @@ export class Installer extends EventEmitter {
           getProgressCallback,
           ...(signal ? { signal } : {}),
         },
+        // Fiddle keeps its own copy, so leave the cache shared with other
+        // tools alone. The temp file is ours to move and clean up.
+        cacheMode: ElectronDownloadCacheMode.Bypass,
         ...(this.options.downloader ? { downloader: this.options.downloader } : {}),
       });
     } catch (err) {
@@ -574,19 +539,19 @@ export class Installer extends EventEmitter {
       this.setState(version, InstallState.downloading);
       try {
         const tempFile = await this.download(version, opts);
-        await fs.promises.mkdir(electronDownloads, { recursive: true });
         try {
-          await rename(tempFile, zipFile);
-        } catch (err) {
-          // cross-device move not permitted, fallback to copy
-          if ((err as NodeJS.ErrnoException).code === 'EXDEV') {
+          await fs.promises.mkdir(electronDownloads, { recursive: true });
+          try {
+            await rename(tempFile, zipFile);
+          } catch (err) {
+            // cross-device move not permitted, fallback to copy
+            if ((err as NodeJS.ErrnoException).code !== 'EXDEV') throw err;
             const partial = `${zipFile}.${process.pid}.partial`;
             await fs.promises.copyFile(tempFile, partial);
             await rename(partial, zipFile);
-            await fs.promises.rm(tempFile);
-          } else {
-            throw err;
           }
+        } finally {
+          await removeBestEffort(path.dirname(tempFile));
         }
       } catch (err) {
         this.setState(version, InstallState.missing);
@@ -658,20 +623,17 @@ export class Installer extends EventEmitter {
 
     const d = debug(`fiddle-core:Installer:${version}:install`);
     const { electronInstall } = this.paths;
-    const isVersionInstalling = this.installing.has(version);
     const electronExec = Installer.getExecPath(electronInstall);
 
-    if (isVersionInstalling) {
-      throw new FiddleCoreError(
-        'already-installing',
-        `Currently installing "${version}"`,
-      );
+    // every version installs into the same folder
+    const [busy] = this.installing;
+    if (busy !== undefined) {
+      throw new FiddleCoreError('already-installing', `Currently installing "${busy}"`);
     }
 
     this.installing.add(version);
 
     try {
-      // see if the current version (if any) is already `version`
       const { installedVersion } = this;
       if (installedVersion === version) {
         d(`already installed`);
@@ -684,13 +646,8 @@ export class Installer extends EventEmitter {
 
         await this.installVersionImpl(version, source, async () => {
           if (alreadyExtracted) {
-            // An unzipped version already exists at `electronDownload` path.
-            // Simply copy over the files from preinstalled version to `electronInstall`
-            await withNoAsar(() =>
-              fs.promises.cp(source, electronInstall, {
-                recursive: true,
-              }),
-            );
+            // already unzipped in the downloads folder, so copy it over
+            await copyFolder(source, electronInstall);
           } else {
             await this.extractZip(source, electronInstall, opts?.signal);
           }
@@ -701,7 +658,6 @@ export class Installer extends EventEmitter {
       this.installing.delete(version);
     }
 
-    // return the full path to the electron executable
     d(inspect({ electronExec, version }));
     return electronExec;
   }
@@ -721,24 +677,14 @@ export class Installer extends EventEmitter {
     this.setState(version, InstallState.installing);
     try {
       d(`installing from "${source}"`);
-      await withNoAsar(() =>
-        fs.promises.rm(electronInstall, {
-          recursive: true,
-          force: true,
-        }),
-      );
-
-      // Call the user defined callback which unzips/copies files content
-      if (installCallback) {
-        await installCallback();
-      }
+      await remove(electronInstall);
+      await installCallback();
     } catch (err) {
       this.setState(version, originalState);
       throw err;
-    }
-
-    if (installedVersion) {
-      this.setState(installedVersion, InstallState.downloaded);
+    } finally {
+      // the previous version's files are gone or incomplete
+      if (installedVersion) this.setState(installedVersion, InstallState.downloaded);
     }
     this.setState(version, InstallState.installed);
   }
@@ -768,18 +714,16 @@ export class Installer extends EventEmitter {
       if (fs.existsSync(exec)) return done();
       await this.sweep();
 
-      const originalState = this.state(version);
-      this.setState(version, InstallState.installing);
       const tmp = await fs.promises.mkdtemp(
         path.join(electronVersions, `.tmp-${Installer.leftoverTag(version)}`),
       );
+      const originalState = this.state(version);
+      this.setState(version, InstallState.installing);
       try {
         d(`installing from "${source}" via "${tmp}"`);
         if (alreadyExtracted) {
           throwIfAborted(signal);
-          await withNoAsar(() =>
-            fs.promises.cp(source, tmp, { recursive: true, verbatimSymlinks: true }),
-          );
+          await copyFolder(source, tmp, { verbatimSymlinks: true });
         } else {
           await this.extractZip(source, tmp, signal);
         }

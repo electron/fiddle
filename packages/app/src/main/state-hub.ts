@@ -1,15 +1,11 @@
 /**
- * The one place main's state lives, and the only caller of EIPC's
- * `update*Store`. It holds the `App` value and one `Window` value per window,
- * bumps each store's `rev` on every change, and fans pushes out:
+ * Holds the `App` value and one `Window` value per window, bumps each store's
+ * `rev` on every change, and fans pushes out: `App` changes go to every
+ * registered window, `Window` changes only to their own. Pushes are coalesced
+ * within a tick: several changes in one synchronous block produce one push per
+ * store per window, carrying the latest value.
  *
- * - `App` changes go to every registered window.
- * - `Window` changes go only to their own window.
- * - Pushes are coalesced within a tick: several changes in one synchronous
- *   block produce one push per store per window, carrying the latest value.
- *
- * No Electron imports. Windows are represented by a `WindowSink`, which main
- * backs with the window's EIPC dispatchers (see `ipc.ts`).
+ * No Electron imports: windows are represented by a `WindowSink`.
  */
 import { ErrorCode, FiddleError } from '../shared/errors';
 import {

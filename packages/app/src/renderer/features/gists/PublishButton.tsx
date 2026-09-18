@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useEffectEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { githubApi, windowApi } from '../../../ipc/renderer';
@@ -13,6 +13,7 @@ import {
   ToolbarButton,
   Tooltip,
 } from '../../../ui';
+import { useShortcut } from '../../use-shortcut';
 import { copyShareLink, deleteGist, setGistVisibility, updateGist } from './actions';
 import { GistDialogs } from './GistDialogs';
 import {
@@ -21,44 +22,44 @@ import {
   useGistSettings,
   useGitHubLogin,
   useLoadedGist,
-  useOpenGistKbd,
   withSignIn,
 } from './state';
+
+const DIALOGS = {
+  'gist.open': 'open',
+  'gist.history': 'history',
+  'gist.signIn': 'sign-in',
+} as const;
 
 /**
  * The title bar's Publish capsule. With no gist loaded it publishes; once a
  * gist is loaded it opens the gist menu. It also hosts the gist dialogs and
- * answers the gist commands (`Window.Command`).
+ * answers the gist commands (`Window.Command`). `compact`: a narrow title bar
+ * shows Publish as an icon button; its tooltip keeps the label.
  */
-const DIALOGS = { 'gist.open': 'open', 'gist.history': 'history', 'gist.signIn': 'sign-in' } as const;
-
-/** `compact`: a narrow title bar shows Publish as an icon button; its tooltip keeps the label. */
 export function PublishButton({ compact = false }: { compact?: boolean } = {}) {
   const { t } = useTranslation('gists');
   const login = useGitHubLogin();
   const gist = useLoadedGist();
   const { isPublic, showHistory } = useGistSettings();
-  const openKbd = useOpenGistKbd();
+  const openKbd = useShortcut('gist.open');
 
-  const loginRef = useRef(login);
-  useEffect(() => {
-    loginRef.current = login;
-  }, [login]);
-
-  useEffect(
-    () =>
-      windowApi.onCommand((id) => {
-        if (id === 'gist.publish') requestPublish(loginRef.current);
-        else if (Object.hasOwn(DIALOGS, id)) showGistDialog({ kind: DIALOGS[id as keyof typeof DIALOGS] });
-      }),
-    [],
-  );
+  const onCommand = useEffectEvent((id: string) => {
+    if (id === 'gist.publish') requestPublish(login);
+    else if (Object.hasOwn(DIALOGS, id))
+      showGistDialog({ kind: DIALOGS[id as keyof typeof DIALOGS] });
+  });
+  useEffect(() => windowApi.onCommand((id) => onCommand(id)), []);
 
   useEffect(() => {
     githubApi.TakeNotice().then(
       (notice) => {
         if (notice === 'decrypt-failed') {
-          showToast({ tone: 'warning', title: t('noticeDecryptFailed'), description: t('noticeDecryptFailedDetail') });
+          showToast({
+            tone: 'warning',
+            title: t('noticeDecryptFailed'),
+            description: t('noticeDecryptFailedDetail'),
+          });
         }
       },
       () => undefined,
@@ -93,15 +94,24 @@ export function PublishButton({ compact = false }: { compact?: boolean } = {}) {
     }
   };
 
+  const button = (
+    <Tooltip label={t('publishButton')} isDisabled={!compact}>
+      <ToolbarButton
+        data-tour="publish"
+        icon="upload"
+        label={t('publishButton')}
+        onPress={gist ? undefined : () => requestPublish(login)}
+      >
+        {compact ? undefined : t('publishButton')}
+      </ToolbarButton>
+    </Tooltip>
+  );
+
   return (
     <>
       {gist ? (
         <MenuTrigger>
-          <Tooltip label={t('publishButton')} isDisabled={!compact}>
-            <ToolbarButton data-tour="publish" icon="upload" label={t('publishButton')}>
-              {compact ? undefined : t('publishButton')}
-            </ToolbarButton>
-          </Tooltip>
+          {button}
           <MenuPopover placement="bottom end" offset={10}>
             <Menu aria-label={t('menuLabel')} onAction={(key) => onAction(String(key))}>
               <MenuItem id="update" icon="upload">
@@ -144,11 +154,7 @@ export function PublishButton({ compact = false }: { compact?: boolean } = {}) {
           </MenuPopover>
         </MenuTrigger>
       ) : (
-        <Tooltip label={t('publishButton')} isDisabled={!compact}>
-          <ToolbarButton data-tour="publish" icon="upload" label={t('publishButton')} onPress={() => requestPublish(login)}>
-            {compact ? undefined : t('publishButton')}
-          </ToolbarButton>
-        </Tooltip>
+        button
       )}
       <GistDialogs />
     </>

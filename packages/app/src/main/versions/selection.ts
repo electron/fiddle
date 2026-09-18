@@ -1,7 +1,7 @@
 /**
- * Which version a window uses (§17.8), pure so it runs under plain Node: the
- * default for new windows, whether a version is usable, the fallback when it
- * isn't, and whether a docs example's channel is hidden.
+ * Which version a window uses, pure so it runs under plain Node: the default
+ * for new windows, whether a version is usable, the fallback when it isn't,
+ * and whether a docs example's channel is hidden.
  */
 import type { VersionRef } from '../../fiddle/fiddle';
 import { getReleaseChannel, type ReleaseChannel } from '../../fiddle/versions';
@@ -17,7 +17,10 @@ export interface VersionLookup {
 export type VersionProblem = 'unknown' | 'unsupported' | 'localUnknown' | 'localMissing';
 
 /** Undefined when the version is usable: a release this computer can run, or a local build with its binary. */
-export function versionProblem(ref: VersionRef, lookup: VersionLookup): VersionProblem | undefined {
+export function versionProblem(
+  ref: VersionRef,
+  lookup: VersionLookup,
+): VersionProblem | undefined {
   if (ref.kind === 'local') {
     const build = lookup.localBuild(ref.id);
     if (!build) return 'localUnknown';
@@ -57,7 +60,9 @@ export function firstUsableVersion(
     const ref: VersionRef = { kind: 'local', id: build.id };
     if (build.available && allowed(ref)) return ref;
   }
-  const visible = visibleVersions(catalog.rows, catalog.settings, (version) => catalog.isInstalled(version));
+  const visible = visibleVersions(catalog.rows, catalog.settings, (version) =>
+    catalog.isInstalled(version),
+  );
   const runnable = catalog.rows.filter((row) => row.supported).map((row) => row.version);
   for (const version of [...visible, ...runnable]) {
     const ref: VersionRef = { kind: 'release', version };
@@ -67,7 +72,7 @@ export function firstUsableVersion(
 }
 
 /**
- * The version new windows start with (§17.8): the last one the user picked
+ * The version new windows start with: the last one the user picked
  * while it's still usable, otherwise the latest stable release this computer
  * can run. Undefined without a release list.
  */
@@ -78,12 +83,16 @@ export function defaultVersionFor(
 ): VersionRef | undefined {
   if (last && !versionProblem(last, lookup)) return last;
   const runnable = rows.filter((row) => row.supported);
-  const latest = runnable.find((row) => getReleaseChannel(row.version) === 'stable') ?? runnable[0];
+  const latest =
+    runnable.find((row) => getReleaseChannel(row.version) === 'stable') ?? runnable[0];
   return latest ? { kind: 'release', version: latest.version } : undefined;
 }
 
-/** The release channel of `version` when the settings hide it (§17.4 docs examples), else undefined. */
-export function hiddenChannel(version: string, channels: readonly ReleaseChannel[]): ReleaseChannel | undefined {
+/** The release channel of `version` when the settings hide it, else undefined. */
+export function hiddenChannel(
+  version: string,
+  channels: readonly ReleaseChannel[],
+): ReleaseChannel | undefined {
   const channel = getReleaseChannel(version);
   return channels.includes(channel) ? undefined : channel;
 }

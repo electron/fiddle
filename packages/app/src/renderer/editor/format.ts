@@ -1,5 +1,5 @@
 /**
- * Formatting with standalone Prettier (REQUIREMENTS §15, §17.2) for
+ * Formatting with standalone Prettier for
  * JavaScript, HTML and CSS: the whole document or the selection. Prettier
  * loads on the first format. monaco.ts registers it as Monaco's document and
  * range formatter, so the `editor.format` command and the context menu's
@@ -7,15 +7,23 @@
  */
 import type { editor, IDisposable, IRange, languages } from 'monaco-editor';
 
-/** Monaco language → Prettier parser. */
-export const PRETTIER_PARSERS = { javascript: 'babel', html: 'html', css: 'css' } as const;
+export const PRETTIER_PARSERS = {
+  javascript: 'babel',
+  html: 'html',
+  css: 'css',
+} as const;
 export type FormatLanguage = keyof typeof PRETTIER_PARSERS;
 
 /** Fiddle's templates have no semicolons and use single quotes; formatting keeps that style. */
 const STYLE = { semi: false, singleQuote: true };
 
 type Prettier = typeof import('prettier/standalone');
-let loading: Promise<{ format: Prettier['format']; plugins: NonNullable<Parameters<Prettier['format']>[1]>['plugins'] }> | undefined;
+let loading:
+  | Promise<{
+      format: Prettier['format'];
+      plugins: NonNullable<Parameters<Prettier['format']>[1]>['plugins'];
+    }>
+  | undefined;
 
 function loadPrettier() {
   loading ??= Promise.all([
@@ -36,7 +44,11 @@ export interface FormatOptions {
 }
 
 /** `text` formatted by Prettier. Throws on a syntax error. */
-export async function formatText(text: string, language: FormatLanguage, options: FormatOptions): Promise<string> {
+export async function formatText(
+  text: string,
+  language: FormatLanguage,
+  options: FormatOptions,
+): Promise<string> {
   const { format, plugins } = await loadPrettier();
   return format(text, {
     ...STYLE,
@@ -44,7 +56,10 @@ export async function formatText(text: string, language: FormatLanguage, options
     plugins,
     tabWidth: options.tabSize,
     useTabs: !options.insertSpaces,
-    ...(options.range && { rangeStart: options.range.start, rangeEnd: options.range.end }),
+    ...(options.range && {
+      rangeStart: options.range.start,
+      rangeEnd: options.range.end,
+    }),
   });
 }
 
@@ -62,7 +77,10 @@ async function formatModel(
   if (!isFormatLanguage(language)) return [];
   const text = model.getValue();
   const selection = range && {
-    start: model.getOffsetAt({ lineNumber: range.startLineNumber, column: range.startColumn }),
+    start: model.getOffsetAt({
+      lineNumber: range.startLineNumber,
+      column: range.startColumn,
+    }),
     end: model.getOffsetAt({ lineNumber: range.endLineNumber, column: range.endColumn }),
   };
   try {
@@ -71,7 +89,9 @@ async function formatModel(
       insertSpaces: options.insertSpaces,
       ...(selection && { range: selection }),
     });
-    return formatted === text ? [] : [{ range: model.getFullModelRange(), text: formatted }];
+    return formatted === text
+      ? []
+      : [{ range: model.getFullModelRange(), text: formatted }];
   } catch (error) {
     // Usually a syntax error: leave the text alone. The editor's markers show where.
     console.warn('[fiddle] formatting failed', error);
@@ -84,7 +104,6 @@ export type FormattingRegistry = Pick<
   'registerDocumentFormattingEditProvider' | 'registerDocumentRangeFormattingEditProvider'
 >;
 
-/** Registers Prettier as the document and range formatter for JavaScript, HTML and CSS. */
 export function registerPrettierFormatter(registry: FormattingRegistry): IDisposable[] {
   return Object.keys(PRETTIER_PARSERS).flatMap((language) => [
     registry.registerDocumentFormattingEditProvider(language, {
@@ -93,7 +112,8 @@ export function registerPrettierFormatter(registry: FormattingRegistry): IDispos
     }),
     registry.registerDocumentRangeFormattingEditProvider(language, {
       displayName: 'Prettier',
-      provideDocumentRangeFormattingEdits: (model, range, options) => formatModel(model, options, range),
+      provideDocumentRangeFormattingEdits: (model, range, options) =>
+        formatModel(model, options, range),
     }),
   ]);
 }

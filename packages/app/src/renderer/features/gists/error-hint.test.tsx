@@ -4,7 +4,6 @@ import { ErrorCode, FiddleError } from '../../../shared/errors';
 import { gistErrorHint } from './error-hint';
 
 describe('gistErrorHint', () => {
-  // @feature gist.result-error
   it.each([
     ['a 404', ErrorCode.notFound, 'hintOwnership'],
     ['a 403', ErrorCode.forbidden, 'hintOwnership'],

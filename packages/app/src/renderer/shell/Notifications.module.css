@@ -1,4 +1,3 @@
-/* The status bar bell with its unseen count, and the notification list popover. */
 .anchor {
   position: relative;
   display: inline-flex;
@@ -53,7 +52,6 @@
   list-style: none;
 }
 
-/* Rows are separated by hairlines. */
 .entry {
   display: grid;
   grid-template-columns: 16px minmax(0, 1fr);
@@ -68,13 +66,13 @@
   margin-top: 1px;
   color: var(--lu-accent);
 }
-.entry[data-tone="success"] .icon {
+.entry[data-tone='success'] .icon {
   color: var(--lu-success);
 }
-.entry[data-tone="warning"] .icon {
+.entry[data-tone='warning'] .icon {
   color: var(--lu-warning);
 }
-.entry[data-tone="error"] .icon {
+.entry[data-tone='error'] .icon {
   color: var(--lu-spark);
 }
 

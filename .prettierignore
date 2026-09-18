@@ -8,4 +8,4 @@ docs/design/
 packages/app/static/
 packages/app/src/ipc/generated/
 packages/app/src/i18n/generated/
-REQUIREMENTS.md
+packages/app/src/main/migration/fixtures/

@@ -1,5 +1,0 @@
-{
-  "appName": "Electron Fiddle",
-  "loading": "読み込み中…",
-  "scaffoldStatus": "{{platform}} で実行中です。ストアのリビジョン：アプリ {{appRev}}、ウィンドウ {{windowRev}}。"
-}

@@ -1,7 +1,7 @@
 /**
- * Bisect (REQUIREMENTS §17.9): the range dialog (opened by the
- * `bisect.toggle` command), Good / Bad / Skip / Cancel in the status bar
- * while bisecting, and the result with the GitHub comparison.
+ * Bisect: the range dialog (opened by the `bisect.toggle` command),
+ * Good / Bad / Skip / Cancel in the status bar while bisecting, and the result
+ * with the GitHub comparison.
  */
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -13,46 +13,35 @@ import { visibleVersions } from '../../../main/versions/releases';
 import { Button, Dialog, InlineCode, Select } from '../../../ui';
 import styles from '../run/Run.module.css';
 import { useAppState } from '../../state';
+import { toastError } from '../../toast-error';
 import { useReleases } from '../run/use-run';
 
-const call = (promise: Promise<unknown>) =>
-  promise.catch((error: unknown) => console.error('[fiddle] bisect failed', error));
+/** Runs a bisect call and shows why it failed. */
+const attempt = (promise: Promise<unknown>, failedTitle: string) =>
+  promise.catch((error: unknown) => toastError(error, failedTitle));
 
-/** Shown in the status bar while a bisect is in progress. */
 export function BisectControls({ run }: { run: RunState }) {
   const { t } = useTranslation('run');
   const bisect = run.bisect;
-  if (!bisect || bisect.result || !bisect.current) {
-    return bisect && !bisect.result ? (
-      <span className={styles.bisect}>
-        <Button size="sm" variant="ghost" onPress={() => call(runApi.StopBisect())}>
-          {t('cancel')}
-        </Button>
-      </span>
-    ) : null;
-  }
-  if (bisect.auto) {
-    return (
-      <span className={styles.bisect}>
-        {t('bisectAutoRunning', { version: bisect.current })}
-        <Button size="sm" variant="ghost" onPress={() => call(runApi.StopBisect())}>
-          {t('cancel')}
-        </Button>
-      </span>
-    );
-  }
+  if (!bisect || bisect.result) return null;
+  const call = (promise: Promise<unknown>) => attempt(promise, t('bisectFailed'));
+  const { current, auto } = bisect;
   return (
     <span className={styles.bisect}>
-      {t('bisectTesting', { version: bisect.current })}
-      <Button size="sm" variant="secondary" onPress={() => call(runApi.BisectGood())}>
-        {t('bisectGood')}
-      </Button>
-      <Button size="sm" variant="secondary" onPress={() => call(runApi.BisectBad())}>
-        {t('bisectBad')}
-      </Button>
-      <Button size="sm" variant="ghost" onPress={() => call(runApi.BisectSkip())}>
-        {t('bisectSkip')}
-      </Button>
+      {current && t(auto ? 'bisectAutoRunning' : 'bisectTesting', { version: current })}
+      {current && !auto && (
+        <>
+          <Button size="sm" variant="secondary" onPress={() => call(runApi.BisectGood())}>
+            {t('bisectGood')}
+          </Button>
+          <Button size="sm" variant="secondary" onPress={() => call(runApi.BisectBad())}>
+            {t('bisectBad')}
+          </Button>
+          <Button size="sm" variant="ghost" onPress={() => call(runApi.BisectSkip())}>
+            {t('bisectSkip')}
+          </Button>
+        </>
+      )}
       <Button size="sm" variant="ghost" onPress={() => call(runApi.StopBisect())}>
         {t('cancel')}
       </Button>
@@ -60,7 +49,6 @@ export function BisectControls({ run }: { run: RunState }) {
   );
 }
 
-/** The range dialog and the result dialog. */
 export function BisectDialogs({ run }: { run: RunState }) {
   const { t } = useTranslation('run');
   const [open, setOpen] = useState(false);
@@ -74,6 +62,7 @@ export function BisectDialogs({ run }: { run: RunState }) {
     }
   }, []);
   const result = run.bisect?.result ?? null;
+  const call = (promise: Promise<unknown>) => attempt(promise, t('bisectFailed'));
 
   return (
     <>
@@ -88,7 +77,11 @@ export function BisectDialogs({ run }: { run: RunState }) {
               <Button variant="ghost" onPress={() => call(runApi.StopBisect())}>
                 {t('close')}
               </Button>
-              <Button variant="primary" icon="external" onPress={() => call(runApi.OpenBisectCompare())}>
+              <Button
+                variant="primary"
+                icon="external"
+                onPress={() => call(runApi.OpenBisectCompare())}
+              >
                 {t('openCompare')}
               </Button>
             </>
@@ -107,19 +100,23 @@ function RangeDialog({ onClose }: { onClose: () => void }) {
   const app = useAppState();
   const rows = useReleases();
   const installs = app?.versions?.installs ?? {};
-  const visible = app ? visibleVersions(rows, app.settings, (v) => installs[v]?.state === 'installed') : [];
+  const visible = app
+    ? visibleVersions(rows, app.settings, (v) => installs[v]?.state === 'installed')
+    : [];
   const defaults = getDefaultBisectRange(visible);
   const [good, setGood] = useState<string | null>(null);
   const [bad, setBad] = useState<string | null>(null);
   const goodValue = good ?? defaults?.good ?? null;
   const badValue = bad ?? defaults?.bad ?? null;
-  const invalid = goodValue !== null && badValue !== null && compareVersions(goodValue, badValue) >= 0;
+  const invalid =
+    goodValue !== null && badValue !== null && compareVersions(goodValue, badValue) >= 0;
   const items = visible.map((version) => ({ id: version, label: version }));
 
   const start = (auto: boolean) => {
     if (!goodValue || !badValue || invalid) return;
     onClose();
-    call(runApi.StartBisect(goodValue, badValue, auto));
+    // The dialog is gone by the time main can refuse a range, so the failure is a toast.
+    void attempt(runApi.StartBisect(goodValue, badValue, auto), t('bisectFailed'));
   };
 
   return (

@@ -3,15 +3,21 @@
  * `yarn generate` into one small module per locale and namespace
  * (src/i18n/generated/), so startup never parses a full catalog:
  *
- * - main loads only `main` (menus and dialogs);
- * - a window loads only `common` before first paint, and other namespaces
- *   lazily through `useTranslation('<ns>')`.
+ * - main loads only the `main*` namespaces (menus, dialogs, notices);
+ * - a window loads the shell's namespaces before first paint (renderer.ts),
+ *   and the others lazily through `useTranslation('<ns>')`.
  *
  * English is the fallback, key by key.
  */
 import type { BackendModule, InitOptions } from 'i18next';
 
-import { loaders, locales, pseudoLocales, type Locale, type Namespace } from './generated/index';
+import {
+  loaders,
+  locales,
+  pseudoLocales,
+  type Locale,
+  type Namespace,
+} from './generated/index';
 
 export {
   locales,
@@ -33,7 +39,9 @@ export function isPseudoLocale(locale: string): boolean {
 }
 
 /** Real languages: the language setting's choices and macOS's CFBundleLocalizations. */
-export const shippedLocales: readonly Locale[] = locales.filter((locale) => !isPseudoLocale(locale));
+export const shippedLocales: readonly Locale[] = locales.filter(
+  (locale) => !isPseudoLocale(locale),
+);
 
 const RTL_LANGUAGES = ['ar', 'ckb', 'dv', 'fa', 'he', 'ps', 'sd', 'ug', 'ur', 'yi'];
 

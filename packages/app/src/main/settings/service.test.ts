@@ -7,9 +7,14 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 vi.mock('../log', () => ({ log: { info: vi.fn(), warn: vi.fn(), error: vi.fn() } }));
 
 import { FiddleError } from '../../shared/errors';
-import { defaultSettings, fromSparse, settingsSchema, type SparseSettings } from '../../shared/settings';
+import {
+  defaultSettings,
+  fromSparse,
+  settingsSchema,
+  type SparseSettings,
+} from '../../shared/settings';
 import type { AppState } from '../../shared/stores';
-import { createJsonStore } from '../persistence/json-store';
+import { createJsonStore, flushAll } from '../persistence/json-store';
 import { sanitizeSettings, SettingsService, type SettingsHub } from './service';
 
 let dir: string;
@@ -21,6 +26,7 @@ beforeEach(async () => {
 });
 
 afterEach(async () => {
+  await flushAll();
   await rm(dir, { recursive: true, force: true });
 });
 
@@ -36,7 +42,12 @@ function fakeHub(settings = defaultSettings): SettingsHub & { app: AppState } {
 }
 
 function open() {
-  const store = createJsonStore<SparseSettings>({ file, schema: settingsSchema, defaults: {}, version: 1 });
+  const store = createJsonStore<SparseSettings>({
+    file,
+    schema: settingsSchema,
+    defaults: {},
+    version: 1,
+  });
   // As in main: the App store starts from the file.
   const hub = fakeHub(fromSparse(store.get()));
   return { store, hub, service: new SettingsService(hub, store) };
@@ -53,13 +64,16 @@ describe('SettingsService', () => {
     expect(hub.app.settings.packageManager).toBe('yarn');
   });
 
-  // @feature settings.persist-sync
   it('keeps settings.json sparse', async () => {
     const { store, service } = open();
     service.set('packageManager', 'yarn');
     service.set('showObsolete', true);
     await store.flush();
-    expect(await readJson()).toEqual({ schemaVersion: 1, packageManager: 'yarn', showObsolete: true });
+    expect(await readJson()).toEqual({
+      schemaVersion: 1,
+      packageManager: 'yarn',
+      showObsolete: true,
+    });
 
     service.set('showObsolete', false);
     service.reset('packageManager');
@@ -75,7 +89,10 @@ describe('SettingsService', () => {
   });
 
   it('keeps keys from newer app versions in the file', async () => {
-    await writeFile(file, JSON.stringify({ schemaVersion: 1, futureSetting: 42, showObsolete: true }));
+    await writeFile(
+      file,
+      JSON.stringify({ schemaVersion: 1, futureSetting: 42, showObsolete: true }),
+    );
     const { store, service } = open();
     service.set('packageManager', 'yarn');
     await store.flush();
@@ -87,7 +104,6 @@ describe('SettingsService', () => {
     });
   });
 
-  // @feature new.settings-import-export
   it('replaces everything on import and exports the sparse values', () => {
     const { hub, service } = open();
     service.set('showObsolete', true);
@@ -107,7 +123,9 @@ describe('SettingsService', () => {
   it('adds and dismisses storage notices', () => {
     const { hub, service } = open();
     service.addStorageNotice({ kind: 'corrupt', file: '/x/state.json', movedTo: '/x/y' });
-    expect(hub.app.storageNotices).toEqual([{ id: expect.any(String), kind: 'corrupt', file: 'state.json' }]);
+    expect(hub.app.storageNotices).toEqual([
+      { id: expect.any(String), kind: 'corrupt', file: 'state.json' },
+    ]);
     service.dismissStorageNotice(hub.app.storageNotices[0]!.id);
     expect(hub.app.storageNotices).toEqual([]);
   });
@@ -119,7 +137,10 @@ describe('SettingsService', () => {
     await writeFile(file, JSON.stringify({ schemaVersion: 1, packageManager: 'yarn' }));
     expect(store.reload()).toBe(true);
     service.applyFromDisk(store.get());
-    expect(hub.app.settings).toMatchObject({ packageManager: 'yarn', showObsolete: false });
+    expect(hub.app.settings).toMatchObject({
+      packageManager: 'yarn',
+      showObsolete: false,
+    });
     // Our own write, and half-typed JSON, are ignored.
     expect(store.reload()).toBe(false);
     await writeFile(file, '{ "packageManager": ');

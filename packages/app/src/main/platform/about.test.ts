@@ -16,7 +16,6 @@ vi.mock('../i18n', () => ({ tm: () => (key: string) => key }));
 
 const { contributorNames, setupAboutPanel } = await import('./about');
 
-// @feature platform.about
 describe('contributorNames', () => {
   it('reads the shape tools/release-data.mjs writes, preferring a name over the login', () => {
     const data = {
@@ -24,31 +23,60 @@ describe('contributorNames', () => {
       source: 'https://api.github.com/repos/electron/fiddle/contributors',
       contributors: [
         { login: 'octocat', url: 'https://github.com/octocat', contributions: 9 },
-        { login: 'hubot', name: ' Hubot H. ', url: 'https://github.com/hubot', contributions: 1 },
+        {
+          login: 'hubot',
+          name: ' Hubot H. ',
+          url: 'https://github.com/hubot',
+          contributions: 1,
+        },
       ],
     };
     expect(contributorNames(data)).toEqual(['octocat', 'Hubot H.']);
   });
 
   it('accepts a bare array, and skips entries without a label', () => {
-    expect(contributorNames([{ login: 'a' }, { name: '  ', login: 'b' }, { name: 'C' }, {}, null, 'x', 3])).toEqual(['a', 'b', 'C']);
+    expect(
+      contributorNames([
+        { login: 'a' },
+        { name: '  ', login: 'b' },
+        { name: 'C' },
+        {},
+        null,
+        'x',
+        3,
+      ]),
+    ).toEqual(['a', 'b', 'C']);
   });
 
   it('is empty for anything else', () => {
-    for (const junk of [undefined, null, 'x', 3, {}, { contributors: 'nope' }, { contributors: {} }]) {
+    for (const junk of [
+      undefined,
+      null,
+      'x',
+      3,
+      {},
+      { contributors: 'nope' },
+      { contributors: {} },
+    ]) {
       expect(contributorNames(junk)).toEqual([]);
     }
   });
 });
 
-// @feature platform.about
 describe('setupAboutPanel', () => {
   it('lists the bundled contributors', () => {
     setupAboutPanel();
     expect(setAboutPanelOptions).toHaveBeenCalledTimes(1);
-    const options = setAboutPanelOptions.mock.calls[0]![0] as { authors: string[]; credits: string; website: string };
+    const options = setAboutPanelOptions.mock.calls[0]![0] as {
+      authors: string[];
+      credits: string;
+      website: string;
+    };
     const bundled: unknown = JSON.parse(
-      fs.readFileSync(path.join(import.meta.dirname, '../../../static/contributors.json'), 'utf8'),
+      fs.readFileSync(
+        path.join(import.meta.dirname, '../../../static/contributors.json'),
+        'utf8',
+      ),
     );
     const names = contributorNames(bundled);
     expect(names.length).toBeGreaterThan(0);

@@ -1,4 +1,3 @@
-/* The version select sits in the toolbar capsule at 180 wide. */
 .picker {
   width: 180px;
 }
@@ -8,8 +7,6 @@
   color: inherit;
 }
 
-/* Searchable menus (version picker, module versions): a search field above a
-   scrolling list, inside the menu's glass surface. */
 .searchMenu {
   display: flex;
   flex-direction: column;
@@ -43,10 +40,9 @@
   visibility: hidden;
 }
 
-/* The install state after a version's label. */
 .detail {
   flex: none;
-  margin-left: var(--lu-space-3);
+  margin-inline-start: var(--lu-space-3);
   font: var(--lu-type-hint);
   color: var(--lu-ink-faint);
 }
@@ -63,7 +59,6 @@
   color: var(--lu-ink-muted);
 }
 
-/* Version manager: toolbar, table, note. */
 .manager {
   display: flex;
   flex-direction: column;

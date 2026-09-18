@@ -8,7 +8,6 @@ import {
   suggestFileName,
 } from './processes';
 
-// @feature files.groups
 describe('processOf', () => {
   it('puts the main entry and main-* helpers under main', () => {
     expect(processOf('main.js')).toBe('main');
@@ -74,7 +73,6 @@ describe('groupByProcess', () => {
   });
 });
 
-// @feature files.add-in-group
 describe('suggestFileName', () => {
   it("suggests the group's own name when it is free", () => {
     expect(suggestFileName('preload', ['main.js', 'index.html'])).toBe('preload.js');

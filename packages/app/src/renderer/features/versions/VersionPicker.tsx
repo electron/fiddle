@@ -1,12 +1,9 @@
 /**
- * The Electron version picker in the toolbar capsule (Lucent "Version
- * picker", §17.8): transparent inside the capsule, 180 wide. Its menu opens
- * 10px below the capsule with a search field, then local builds and the
- * "Stable" and "Pre-release" groups, each newest first; a search drops the
- * groups for one newest-first list. Each row shows its install state, the
- * design's hints ("latest", "beta") sit on the right, and versions this
- * computer can't run are disabled. "Copy version number" ends the menu.
- * Disabled while running or bisecting.
+ * The Electron version picker in the toolbar capsule. Its menu lists local
+ * builds and the "Stable" and "Pre-release" groups, each newest first; a search
+ * drops the groups for one newest-first list. Versions this computer can't run
+ * are disabled, and "Copy version number" ends the menu. Disabled while running
+ * or bisecting.
  *
  * It also shows the window's version notices (fallbacks and failed
  * downloads) as toasts, and retries the version's download when the
@@ -33,7 +30,8 @@ import type {
   VersionRefValue,
   VersionsState,
 } from '../../../shared/stores';
-import { cx, showToast, type IconName } from '../../../ui';
+import { cx, showToast } from '../../../ui';
+import { setVersionRef } from '../../shell/window-state';
 import { useAppState, useWindowState } from '../../state';
 import { IDLE_RUN, useReleases, versionLabel } from '../run/use-run';
 import { SearchSelect, type SearchGroup, type SearchOption } from './SearchSelect';
@@ -62,12 +60,6 @@ export function parseRefId(id: string): VersionRefValue | undefined {
   if (id.startsWith('r:')) return { kind: 'release', version: id.slice(2) };
   if (id.startsWith('l:')) return { kind: 'local', id: id.slice(2) };
   return undefined;
-}
-
-export const isStable = (version: string) => !version.includes('-');
-
-export function installIcon(install: Installs[string] | undefined): IconName {
-  return install?.state === 'installed' ? 'success' : 'cloud';
 }
 
 /**
@@ -159,7 +151,7 @@ function useVersionNotice(notice: VersionNotice | null | undefined) {
   }, [notice]);
 }
 
-/** Back online: download the window's version if it still isn't (§17.8). */
+/** Back online: download the window's version if it still isn't. */
 function useRetryWhenOnline() {
   useEffect(() => {
     const retry = () => {
@@ -244,14 +236,9 @@ export function VersionPicker({ className }: { className?: string } = {}) {
     (id: string) => {
       const next = parseRefId(id);
       if (!next || id === currentId) return;
-      versionsApi.SetVersion(next).catch((error: unknown) =>
-        showToast({
-          tone: 'error',
-          title: error instanceof Error ? error.message : String(error),
-        }),
-      );
+      void setVersionRef(next, tv('versionChangeFailed'));
     },
-    [currentId],
+    [currentId, tv],
   );
 
   return (

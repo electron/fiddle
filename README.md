@@ -4,18 +4,11 @@ Electron Fiddle lets you create and play with small Electron experiments. It gre
 quick-start template: change a few things, choose the Electron version to run it with, and play
 around. Then save your fiddle as a GitHub Gist or to a local folder, so anyone can try it out.
 
-This branch is a from-scratch rewrite of Electron Fiddle. It keeps the app's identity, so it
-installs over the current app and imports its settings, and it's built on current Electron,
-Electron Forge 8, Vite, React and TypeScript.
-
-**[Download the current Fiddle](https://www.electronjs.org/fiddle)**
+**[Download Electron Fiddle](https://www.electronjs.org/fiddle)**
 
 ## Documentation
 
-- [`REQUIREMENTS.md`](REQUIREMENTS.md) is the spec: architecture, security, data model,
-  migration, testing, packaging and the feature catalog.
-- [`PROGRESS.md`](PROGRESS.md) tracks milestones, decisions and deferred work.
-- [`docs/design/`](docs/design/) holds the "Lucent" design system and its handover.
+- [`docs/design/`](docs/design/) holds the "Lucent" design system reference: the handover page, tokens and fonts.
 
 ## Packages
 

@@ -23,9 +23,9 @@ function withOverride(preferred: readonly string[]): readonly string[] {
 }
 
 /**
- * Main loads `main` (command labels and menus) plus every slice namespace
- * named `main<Slice>` (e.g. `mainDocuments`) for its dialogs and notices.
- * Renderer namespaces are never loaded here.
+ * Main loads `main` (command labels and menus) plus every `main<Name>`
+ * namespace (e.g. `mainDocuments`) for its dialogs and notices. Renderer
+ * namespaces are never loaded here.
  */
 const mainNamespaces = namespaces.filter(
   (ns) => ns === 'main' || /^main[A-Z]/.test(ns),
@@ -37,7 +37,7 @@ export async function initMainI18n(preferred: readonly string[]): Promise<Locale
   return locale;
 }
 
-/** Switches main's strings to the best shipped match for `preferred` (Settings slice). */
+/** Switches main's strings to the best shipped match for `preferred`. */
 export async function setMainLocale(preferred: readonly string[]): Promise<Locale> {
   const locale = pickLocale(withOverride(preferred));
   if (instance.language !== locale) await instance.changeLanguage(locale);
@@ -47,7 +47,7 @@ export async function setMainLocale(preferred: readonly string[]): Promise<Local
 /** Translates a key in the `main` namespace. */
 export const t: TFunction<'main'> = instance.getFixedT(null, 'main');
 
-/** Translator for a main-process slice namespace, e.g. `tm('mainDocuments')`. */
+/** Translator for a `main<Name>` namespace, e.g. `tm('mainDocuments')`. */
 export function tm<N extends Namespace>(ns: N): TFunction<N> {
   return instance.getFixedT(null, ns);
 }

@@ -1,5 +1,10 @@
 import type { ReactElement, ReactNode } from 'react';
-import { Focusable, Tooltip as AriaTooltip, TooltipTrigger, type TooltipProps as AriaTooltipProps } from 'react-aria-components';
+import {
+  Focusable,
+  Tooltip as AriaTooltip,
+  TooltipTrigger,
+  type TooltipProps as AriaTooltipProps,
+} from 'react-aria-components';
 import styles from './Tooltip.module.css';
 
 export interface TooltipProps {

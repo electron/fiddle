@@ -87,7 +87,7 @@
   "customMirrorElectron.description": "Wird für stabile und Beta-Releases verwendet.",
   "customMirrorNightly.title": "Nightly-Mirror-URL",
   "customMirrorNightly.description": "Wird für Nightly-Releases verwendet.",
-  "mirror.invalidUrl": "Gib eine http- oder https-URL ein.",
+  "mirror.invalidUrl": "Gib eine https-URL ein.",
   "packageAuthor.title": "Autor in package.json",
   "packageAuthor.description": "Wird beim Speichern oder Paketieren eines Fiddles verwendet. Lass das Feld leer, um deinen Benutzernamen zu verwenden.",
   "gistShowHistory.title": "Revisionsverlauf von Gists anzeigen",

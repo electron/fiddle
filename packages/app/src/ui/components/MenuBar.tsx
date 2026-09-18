@@ -1,27 +1,13 @@
 /**
- * A Windows and Linux style menu bar for the title bar (REQUIREMENTS §17.14):
- * File, Edit, … as text buttons, each opening a menu drawn like Menu.tsx's
- * (the same surface, items, key column and separators). react-aria has menus
- * but no menu bar, and its menus are modal (an underlay swallows the hover
- * that switches menus), so the bar runs its own:
+ * A Windows and Linux style menu bar for the title bar, its menus drawn like
+ * Menu.tsx's. react-aria has menus but no menu bar, and its menus are modal
+ * (an underlay swallows the hover that switches menus), so the bar runs its
+ * own, with the keyboard behaviour of a native one: arrows, first-letter
+ * jumps, Alt or F10 to focus the bar, and Alt+letter mnemonics.
  *
- * - A click opens a menu; a second click, Escape or a click elsewhere closes
- *   it. While one is open, hovering another title switches to it.
- * - Left and Right move along the bar, wrapping, and take an open menu with
- *   them. Down, Enter or Space open with the first item focused, Up with the
- *   last. In a menu: Up, Down, Home, End, a letter jumps to the next item
- *   that starts with it, Right opens a submenu and Left closes it.
- * - Alt pressed and released alone, or F10, focuses the bar and underlines
- *   each title's mnemonic (its first unused letter); Alt+letter opens that
- *   menu from anywhere. Escape gives focus back to where it was.
- * - Choosing an item closes everything and restores focus first, then calls
- *   `onAction`, so Cut or Format document act on what had focus. Pressing a
- *   title never takes focus itself.
- * - When the titles don't all fit (`availableWidth`), as many as fit stay, in
- *   order, and the rest fold into a trailing More button whose menu holds
- *   them as submenus; when not even two fit beside it, the whole bar becomes
- *   one Menu button. Left and Right, hover and Alt+letter treat that button
- *   like any title (a folded menu's letter opens it inside the button's menu).
+ * Choosing an item closes everything and restores focus first, then calls
+ * `onAction`, so Cut or Format document act on what had focus. Pressing a
+ * title never takes focus itself.
  */
 import {
   useEffect,
@@ -43,8 +29,22 @@ import menuStyles from './Menu.module.css';
 import styles from './MenuBar.module.css';
 
 export type MenuBarNode =
-  | { kind: 'submenu'; id: string; label: string; enabled: boolean; children: MenuBarNode[] }
-  | { kind: 'item'; id: string; label: string; enabled: boolean; checked?: boolean; accelerator?: string }
+  | {
+      kind: 'submenu';
+      id: string;
+      label: string;
+      enabled: boolean;
+      children: MenuBarNode[];
+    }
+  | {
+      kind: 'item';
+      id: string;
+      label: string;
+      enabled: boolean;
+      checked?: boolean;
+      radio?: boolean;
+      accelerator?: string;
+    }
   | { kind: 'separator' };
 export type MenuBarMenu = Extract<MenuBarNode, { kind: 'submenu' }>;
 type MenuBarEntry = Exclude<MenuBarNode, { kind: 'separator' }>;
@@ -100,7 +100,8 @@ const HOVER_DELAY = 200;
 /** Menus keep this far from the window's edges. */
 const MARGIN = 8;
 /** Where Alt, F10 and mnemonics leave the keyboard alone: dialogs, and a field recording a shortcut. */
-const INERT_TARGETS = '[role="dialog"], [role="alertdialog"], [aria-modal="true"], [data-keybinding-recorder]';
+const INERT_TARGETS =
+  '[role="dialog"], [role="alertdialog"], [aria-modal="true"], [data-keybinding-recorder]';
 
 type FocusTarget =
   | { kind: 'title'; index: number }
@@ -108,9 +109,19 @@ type FocusTarget =
   | { kind: 'panel'; id: string; which: 'first' | 'last' | 'panel' };
 
 const isEntry = (node: MenuBarNode): node is MenuBarEntry => node.kind !== 'separator';
-const isSubmenu = (node: MenuBarNode | undefined): node is MenuBarMenu => node?.kind === 'submenu';
+const isSubmenu = (node: MenuBarNode | undefined): node is MenuBarMenu =>
+  node?.kind === 'submenu';
 
-export function MenuBar({ menus, label, moreLabel, menuLabel, availableWidth, measureKey, onAction, className }: MenuBarProps) {
+export function MenuBar({
+  menus,
+  label,
+  moreLabel,
+  menuLabel,
+  availableWidth,
+  measureKey,
+  onAction,
+  className,
+}: MenuBarProps) {
   const uid = useId();
   const rootRef = useRef<HTMLDivElement>(null);
   const layerRef = useRef<HTMLDivElement>(null);
@@ -141,45 +152,82 @@ export function MenuBar({ menus, label, moreLabel, menuLabel, availableWidth, me
   const compact = folded && shownCount < MIN_TITLES;
   const tops = useMemo<MenuBarMenu[]>(() => {
     if (!folded) return menus;
-    if (compact) return [{ kind: 'submenu', id: MENU_ID, label: menuLabel, enabled: true, children: menus }];
-    const more: MenuBarMenu = { kind: 'submenu', id: MORE_ID, label: moreLabel, enabled: true, children: menus.slice(shownCount) };
+    if (compact)
+      return [
+        {
+          kind: 'submenu',
+          id: MENU_ID,
+          label: menuLabel,
+          enabled: true,
+          children: menus,
+        },
+      ];
+    const more: MenuBarMenu = {
+      kind: 'submenu',
+      id: MORE_ID,
+      label: moreLabel,
+      enabled: true,
+      children: menus.slice(shownCount),
+    };
     return [...menus.slice(0, shownCount), more];
   }, [folded, compact, shownCount, menus, moreLabel, menuLabel]);
   /** The title a menu opens from: its own, or the More or Menu button it's folded into. */
-  const topIndexOf = (menuIndex: number) => (compact ? 0 : Math.min(menuIndex, shownCount));
-  const mnemonics = useMemo(() => deriveMnemonics(menus.map((menu) => menu.label)), [menus]);
+  const topIndexOf = (menuIndex: number) =>
+    compact ? 0 : Math.min(menuIndex, shownCount);
+  const mnemonics = useMemo(
+    () => deriveMnemonics(menus.map((menu) => menu.label)),
+    [menus],
+  );
   const openTop = open.length > 0 ? tops.findIndex((menu) => menu.id === open[0]) : -1;
   /** The roving focus, kept on a title that exists. */
   const currentIndex = Math.min(current, Math.max(0, tops.length - 1));
 
   // The open path as menus, outermost first. A path entry whose menu is gone ends it.
   const panels: MenuBarMenu[] = [];
-  for (let node: MenuBarMenu | undefined = tops[openTop]; node && panels.length < open.length; ) {
+  for (
+    let node: MenuBarMenu | undefined = tops[openTop];
+    node && panels.length < open.length;
+  ) {
     if (node.id !== open[panels.length]) break;
     panels.push(node);
     const next = open[panels.length];
-    node = node.children.find((child): child is MenuBarMenu => isSubmenu(child) && child.id === next);
+    node = node.children.find(
+      (child): child is MenuBarMenu => isSubmenu(child) && child.id === next,
+    );
   }
 
-  const domId = (kind: string, key: string | number) => `${uid}-${kind}-${String(key).replace(/\s+/g, '_')}`;
+  const domId = (kind: string, key: string | number) =>
+    `${uid}-${kind}-${String(key).replace(/\s+/g, '_')}`;
   const titleDomId = (index: number) => domId('title', index);
   const panelDomId = (id: string) => domId('menu', id);
   const itemDomId = (id: string) => domId('item', id);
 
   const withinBar = (node: EventTarget | null) =>
-    node instanceof Node && ((rootRef.current?.contains(node) ?? false) || (layerRef.current?.contains(node) ?? false));
+    node instanceof Node &&
+    ((rootRef.current?.contains(node) ?? false) ||
+      (layerRef.current?.contains(node) ?? false));
 
-  const enabledItems = (panel: HTMLElement) =>
-    [...panel.querySelectorAll<HTMLElement>(':scope > [data-menu-item]:not([aria-disabled="true"])')];
+  const enabledItems = (panel: HTMLElement) => [
+    ...panel.querySelectorAll<HTMLElement>(
+      ':scope > [data-menu-item]:not([aria-disabled="true"])',
+    ),
+  ];
 
   const focusTarget = (target: FocusTarget) => {
     let element: HTMLElement | null | undefined;
-    if (target.kind === 'title') element = document.getElementById(titleDomId(target.index));
-    else if (target.kind === 'item') element = document.getElementById(itemDomId(target.id));
+    if (target.kind === 'title')
+      element = document.getElementById(titleDomId(target.index));
+    else if (target.kind === 'item')
+      element = document.getElementById(itemDomId(target.id));
     else {
       const panel = document.getElementById(panelDomId(target.id));
       const items = panel ? enabledItems(panel) : [];
-      element = target.which === 'first' ? items[0] : target.which === 'last' ? items.at(-1) : undefined;
+      element =
+        target.which === 'first'
+          ? items[0]
+          : target.which === 'last'
+            ? items.at(-1)
+            : undefined;
       element ??= panel;
     }
     element?.focus({ preventScroll: target.kind !== 'item' });
@@ -193,14 +241,21 @@ export function MenuBar({ menus, label, moreLabel, menuLabel, availableWidth, me
       focusTarget(target);
     } else if (open.length > 0 && document.activeElement === document.body) {
       // A menu is open but its focused item went away (main pushed a new model): keep the keys working.
-      document.getElementById(panelDomId(open[open.length - 1]!))?.focus({ preventScroll: true });
+      document
+        .getElementById(panelDomId(open[open.length - 1]!))
+        ?.focus({ preventScroll: true });
     }
   });
 
   const rememberFocus = () => {
     if (returnFocus.current) return;
     const element = document.activeElement;
-    if (element instanceof HTMLElement && element !== document.body && !withinBar(element)) returnFocus.current = element;
+    if (
+      element instanceof HTMLElement &&
+      element !== document.body &&
+      !withinBar(element)
+    )
+      returnFocus.current = element;
   };
 
   /** Closes every menu and lets go of the keyboard. `restore` puts focus back where it came from. */
@@ -213,10 +268,17 @@ export function MenuBar({ menus, label, moreLabel, menuLabel, availableWidth, me
     returnFocus.current = null;
     if (!restore) return;
     if (previous?.isConnected) previous.focus({ preventScroll: true });
-    else if (withinBar(document.activeElement)) (document.activeElement as HTMLElement).blur();
+    else if (withinBar(document.activeElement))
+      (document.activeElement as HTMLElement).blur();
   };
 
-  const openTopMenu = (index: number, which: 'first' | 'last' | 'panel', fromKeyboard: boolean) => {
+  /** Opens the menu of title `index`, and `inner` (a menu folded into it) on top when given. */
+  const openTopMenu = (
+    index: number,
+    which: 'first' | 'last' | 'panel',
+    fromKeyboard: boolean,
+    inner?: string,
+  ) => {
     const menu = tops[index];
     if (!menu?.enabled) return;
     rememberFocus();
@@ -225,8 +287,8 @@ export function MenuBar({ menus, label, moreLabel, menuLabel, availableWidth, me
     setEngaged(true);
     if (fromKeyboard) setKeyboard(true);
     setCurrent(index);
-    setOpen([menu.id]);
-    pendingFocus.current = { kind: 'panel', id: menu.id, which };
+    setOpen(inner ? [menu.id, inner] : [menu.id]);
+    pendingFocus.current = { kind: 'panel', id: inner ?? menu.id, which };
   };
 
   const openSubmenu = (depth: number, id: string, which: 'first' | 'panel' | 'keep') => {
@@ -269,23 +331,12 @@ export function MenuBar({ menus, label, moreLabel, menuLabel, availableWidth, me
     const menu = menus[index];
     if (!menu?.enabled) return false;
     const top = topIndexOf(index);
-    const holder = tops[top];
-    if (!holder || holder === menu) {
-      openTopMenu(top, 'first', true);
-      return true;
-    }
-    rememberFocus();
-    window.clearTimeout(hoverTimer.current);
-    setEntering(open.length === 0);
-    setEngaged(true);
-    setKeyboard(true);
-    setCurrent(top);
-    setOpen([holder.id, menu.id]);
-    pendingFocus.current = { kind: 'panel', id: menu.id, which: 'first' };
+    openTopMenu(top, 'first', true, tops[top] === menu ? undefined : menu.id);
     return true;
   };
 
-  const rtl = () => rootRef.current !== null && getComputedStyle(rootRef.current).direction === 'rtl';
+  const rtl = () =>
+    rootRef.current !== null && getComputedStyle(rootRef.current).direction === 'rtl';
 
   /** Moves the roving focus along the bar, wrapping; an open menu moves with it. */
   const moveTitle = (delta: number) => {
@@ -303,18 +354,30 @@ export function MenuBar({ menus, label, moreLabel, menuLabel, availableWidth, me
     const items = enabledItems(panel);
     if (items.length === 0) return;
     const index = from ? items.indexOf(from) : -1;
-    const next = index < 0 ? (delta > 0 ? 0 : items.length - 1) : (index + delta + items.length) % items.length;
+    const next =
+      index < 0
+        ? delta > 0
+          ? 0
+          : items.length - 1
+        : (index + delta + items.length) % items.length;
     items[next]?.focus();
   };
 
   /** First-letter navigation: the next enabled item whose label starts with `char`. */
-  const typeahead = (panel: HTMLElement, menu: MenuBarMenu, from: HTMLElement | null, char: string) => {
+  const typeahead = (
+    panel: HTMLElement,
+    menu: MenuBarMenu,
+    from: HTMLElement | null,
+    char: string,
+  ) => {
     const items = enabledItems(panel);
     const start = from ? items.indexOf(from) : -1;
     const lower = char.toLowerCase();
     for (let step = 1; step <= items.length; step++) {
       const element = items[(start + step + items.length) % items.length]!;
-      const node = menu.children.find((child) => isEntry(child) && child.id === element.dataset.menuItem);
+      const node = menu.children.find(
+        (child) => isEntry(child) && child.id === element.dataset.menuItem,
+      );
       if (node && isEntry(node) && node.label.trim().toLowerCase().startsWith(lower)) {
         element.focus();
         return;
@@ -355,7 +418,8 @@ export function MenuBar({ menus, label, moreLabel, menuLabel, availableWidth, me
         closeAll(false);
         return false;
       default:
-        if (event.key.length === 1 && !event.ctrlKey && !event.metaKey) return openByMnemonic(event.key);
+        if (event.key.length === 1 && !event.ctrlKey && !event.metaKey)
+          return openByMnemonic(event.key);
         return false;
     }
   };
@@ -367,7 +431,11 @@ export function MenuBar({ menus, label, moreLabel, menuLabel, availableWidth, me
     const menu = panels[depth];
     if (!panel || !menu) return false;
     const itemElement = target.closest<HTMLElement>('[data-menu-item]');
-    const item = itemElement ? menu.children.find((child) => isEntry(child) && child.id === itemElement.dataset.menuItem) : undefined;
+    const item = itemElement
+      ? menu.children.find(
+          (child) => isEntry(child) && child.id === itemElement.dataset.menuItem,
+        )
+      : undefined;
     const forward = rtl() ? 'ArrowLeft' : 'ArrowRight';
     switch (event.key) {
       case 'ArrowDown':
@@ -418,7 +486,9 @@ export function MenuBar({ menus, label, moreLabel, menuLabel, availableWidth, me
   const onKeyDown = (event: ReactKeyboardEvent<HTMLDivElement>) => {
     if (event.nativeEvent.isComposing || event.defaultPrevented) return;
     const target = event.target as HTMLElement;
-    const handled = layerRef.current?.contains(target) ? panelKey(event, target) : barKey(event);
+    const handled = layerRef.current?.contains(target)
+      ? panelKey(event, target)
+      : barKey(event);
     if (!handled) return;
     event.preventDefault();
     event.stopPropagation();
@@ -445,7 +515,12 @@ export function MenuBar({ menus, label, moreLabel, menuLabel, availableWidth, me
   };
 
   /** The pointer reached an item: it takes the focus, and after a beat its submenu opens (or a sibling's closes). */
-  const onItemMouseEnter = (event: ReactMouseEvent<HTMLElement>, menu: MenuBarMenu, depth: number, node: MenuBarNode) => {
+  const onItemMouseEnter = (
+    event: ReactMouseEvent<HTMLElement>,
+    menu: MenuBarMenu,
+    depth: number,
+    node: MenuBarNode,
+  ) => {
     window.clearTimeout(hoverTimer.current);
     const panel = event.currentTarget.parentElement;
     if (isEntry(node) && node.enabled) event.currentTarget.focus({ preventScroll: true });
@@ -474,7 +549,10 @@ export function MenuBar({ menus, label, moreLabel, menuLabel, availableWidth, me
     if (target?.closest(INERT_TARGETS)) return;
     if (event.key === 'Alt') {
       if (!event.repeat) {
-        alt.current = { down: true, alone: !event.ctrlKey && !event.shiftKey && !event.metaKey };
+        alt.current = {
+          down: true,
+          alone: !event.ctrlKey && !event.shiftKey && !event.metaKey,
+        };
         setAltHeld(true);
       }
       // On Linux this also keeps the auto-hidden native menu bar from appearing.
@@ -489,7 +567,12 @@ export function MenuBar({ menus, label, moreLabel, menuLabel, availableWidth, me
       event.preventDefault();
       event.stopPropagation();
       toggleBar();
-    } else if (event.altKey && plain && event.key.length === 1 && !withinBar(event.target)) {
+    } else if (
+      event.altKey &&
+      plain &&
+      event.key.length === 1 &&
+      !withinBar(event.target)
+    ) {
       if (!openByMnemonic(event.key)) return;
       event.preventDefault();
       event.stopPropagation();
@@ -507,7 +590,11 @@ export function MenuBar({ menus, label, moreLabel, menuLabel, availableWidth, me
   // Alt+click and Alt+wheel aren't taps either.
   const onGlobalPointer = useEffectEvent((event: Event) => {
     alt.current.alone = false;
-    if (event.type === 'mousedown' && (engaged || open.length > 0) && !withinBar(event.target)) {
+    if (
+      event.type === 'mousedown' &&
+      (engaged || open.length > 0) &&
+      !withinBar(event.target)
+    ) {
       returnFocus.current = null;
       closeAll(false);
     }
@@ -553,7 +640,8 @@ export function MenuBar({ menus, label, moreLabel, menuLabel, availableWidth, me
         // The More button goes on the end; titles stay while they fit before it.
         let used = moreWidth;
         next = 0;
-        while (next < widths.length && used + widths[next]! <= room) used += widths[next++]!;
+        while (next < widths.length && used + widths[next]! <= room)
+          used += widths[next++]!;
         if (next < MIN_TITLES) next = 0;
       }
     }
@@ -586,7 +674,8 @@ export function MenuBar({ menus, label, moreLabel, menuLabel, availableWidth, me
     >
       {tops.map((menu, index) => {
         // The More and Menu buttons are icons named by their label; real titles show their text and mnemonic.
-        const icon = menu.id === MORE_ID ? 'more' : menu.id === MENU_ID ? 'menu' : undefined;
+        const icon =
+          menu.id === MORE_ID ? 'more' : menu.id === MENU_ID ? 'menu' : undefined;
         return (
           <div
             key={menu.id}
@@ -602,7 +691,11 @@ export function MenuBar({ menus, label, moreLabel, menuLabel, availableWidth, me
             onMouseDown={(event) => onTitleMouseDown(event, index)}
             onMouseEnter={() => onTitleMouseEnter(index)}
           >
-            {icon ? <Icon name={icon} /> : <TitleLabel label={menu.label} mnemonic={mnemonics[index]} />}
+            {icon ? (
+              <Icon name={icon} />
+            ) : (
+              <TitleLabel label={menu.label} mnemonic={mnemonics[index]} />
+            )}
           </div>
         );
       })}
@@ -617,6 +710,10 @@ export function MenuBar({ menus, label, moreLabel, menuLabel, availableWidth, me
           <Icon name="more" />
         </span>
       </div>
+      {/* The title bar is a drag region, which no click on reaches the page: while the bar is engaged the window is no-drag, so one closes it like any outside click. */}
+      {(engaged || open.length > 0) && (
+        <div className={styles.noDrag} aria-hidden="true" />
+      )}
       {panels.length > 0 &&
         createPortal(
           <div ref={layerRef} className={styles.layer}>
@@ -642,7 +739,13 @@ export function MenuBar({ menus, label, moreLabel, menuLabel, availableWidth, me
 }
 
 /** A title with its mnemonic letter marked; the underline shows only while the bar says so. */
-function TitleLabel({ label, mnemonic }: { label: string; mnemonic: Mnemonic | undefined }) {
+function TitleLabel({
+  label,
+  mnemonic,
+}: {
+  label: string;
+  mnemonic: Mnemonic | undefined;
+}) {
   if (!mnemonic) return <span>{label}</span>;
   const end = mnemonic.index + (label.codePointAt(mnemonic.index)! > 0xffff ? 2 : 1);
   return (
@@ -664,15 +767,32 @@ interface MenuPanelProps {
   entering: boolean;
   /** The child submenu that is open, if any. */
   openChild: string | undefined;
-  onItemMouseEnter: (event: ReactMouseEvent<HTMLElement>, menu: MenuBarMenu, depth: number, node: MenuBarNode) => void;
+  onItemMouseEnter: (
+    event: ReactMouseEvent<HTMLElement>,
+    menu: MenuBarMenu,
+    depth: number,
+    node: MenuBarNode,
+  ) => void;
   onItemClick: (depth: number, node: MenuBarNode) => void;
 }
 
 /** One open menu: below its title, or beside the item that opens it, kept inside the window. */
-function MenuPanel({ menu, depth, domId, itemDomId, anchorId, entering, openChild, onItemMouseEnter, onItemClick }: MenuPanelProps) {
+function MenuPanel({
+  menu,
+  depth,
+  domId,
+  itemDomId,
+  anchorId,
+  entering,
+  openChild,
+  onItemMouseEnter,
+  onItemClick,
+}: MenuPanelProps) {
   const ref = useRef<HTMLDivElement>(null);
   const [position, setPosition] = useState<CSSProperties>({ left: 0, top: 0 });
-  const contentKey = menu.children.map((child) => (isEntry(child) ? `${child.id}\t${child.label}` : '-')).join('\n');
+  const contentKey = menu.children
+    .map((child) => (isEntry(child) ? `${child.id}\t${child.label}` : '-'))
+    .join('\n');
 
   useLayoutEffect(() => {
     const panel = ref.current;
@@ -699,11 +819,15 @@ function MenuPanel({ menu, depth, domId, itemDomId, anchorId, entering, openChil
       if (top + p.height > vh - MARGIN) top = vh - MARGIN - p.height;
       maxHeight = vh - 2 * MARGIN;
     }
-    left = Math.round(Math.min(Math.max(MARGIN, left), Math.max(MARGIN, vw - MARGIN - p.width)));
+    left = Math.round(
+      Math.min(Math.max(MARGIN, left), Math.max(MARGIN, vw - MARGIN - p.width)),
+    );
     top = Math.round(Math.max(MARGIN, top));
     maxHeight = Math.max(80, Math.round(maxHeight));
     setPosition((previous) =>
-      previous.left === left && previous.top === top && previous.maxHeight === maxHeight ? previous : { left, top, maxHeight },
+      previous.left === left && previous.top === top && previous.maxHeight === maxHeight
+        ? previous
+        : { left, top, maxHeight },
     );
   }, [anchorId, depth, contentKey]);
 
@@ -722,7 +846,14 @@ function MenuPanel({ menu, depth, domId, itemDomId, anchorId, entering, openChil
       onMouseDown={(event) => event.preventDefault()}
     >
       {menu.children.map((node, index) => {
-        if (node.kind === 'separator') return <div key={`separator:${index}`} role="separator" className={menuStyles.separator} />;
+        if (node.kind === 'separator')
+          return (
+            <div
+              key={`separator:${index}`}
+              role="separator"
+              className={menuStyles.separator}
+            />
+          );
         const id = itemDomId(node.id);
         const submenu = isSubmenu(node);
         const checkable = node.kind === 'item' && node.checked !== undefined;
@@ -730,9 +861,17 @@ function MenuPanel({ menu, depth, domId, itemDomId, anchorId, entering, openChil
           <div
             key={node.id}
             id={id}
-            role={checkable ? 'menuitemcheckbox' : 'menuitem'}
+            role={
+              checkable
+                ? node.kind === 'item' && node.radio
+                  ? 'menuitemradio'
+                  : 'menuitemcheckbox'
+                : 'menuitem'
+            }
             aria-labelledby={`${id}-label`}
-            aria-describedby={node.kind === 'item' && node.accelerator ? `${id}-kbd` : undefined}
+            aria-describedby={
+              node.kind === 'item' && node.accelerator ? `${id}-kbd` : undefined
+            }
             aria-checked={checkable ? node.checked : undefined}
             aria-disabled={!node.enabled || undefined}
             aria-haspopup={submenu ? 'menu' : undefined}
@@ -747,7 +886,9 @@ function MenuPanel({ menu, depth, domId, itemDomId, anchorId, entering, openChil
             onMouseDown={(event) => event.preventDefault()}
             onClick={() => onItemClick(depth, node)}
           >
-            <span className={menuStyles.lead}>{checkable && node.checked ? <Icon name="check" /> : null}</span>
+            <span className={menuStyles.lead}>
+              {checkable && node.checked ? <Icon name="check" /> : null}
+            </span>
             <span id={`${id}-label`} className={menuStyles.label}>
               {node.label}
             </span>
@@ -756,7 +897,7 @@ function MenuPanel({ menu, depth, domId, itemDomId, anchorId, entering, openChil
                 {node.accelerator}
               </span>
             )}
-            {submenu && <Icon name="chevron-right" className={styles.chevron} />}
+            {submenu && <Icon name="chevron-right" className={menuStyles.chevron} />}
           </div>
         );
       })}

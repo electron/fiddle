@@ -1,5 +1,0 @@
-{
-  "appName": "Electron Fiddle",
-  "loading": "Wird geladen …",
-  "scaffoldStatus": "Läuft auf {{platform}}. App-Store-Revision {{appRev}}, Fenster-Store-Revision {{windowRev}}."
-}

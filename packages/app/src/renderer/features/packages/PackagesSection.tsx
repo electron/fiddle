@@ -5,9 +5,16 @@
  * `Window.fiddle.modules`; every change goes through the `Modules` methods in
  * main.
  */
-import { useEffect, useRef, useState } from 'react';
+import { memo, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ComboBox, Input, ListBox, ListBoxItem, Popover, type Key } from 'react-aria-components';
+import {
+  ComboBox,
+  Input,
+  ListBox,
+  ListBoxItem,
+  Popover,
+  type Key,
+} from 'react-aria-components';
 
 import { modulesApi } from '../../../ipc/renderer';
 import type { PackageSearchResults, PackageVersions } from '../../../shared/stores';
@@ -32,16 +39,23 @@ function errorText(error: unknown): string {
   return error instanceof Error ? error.message : String(error);
 }
 
-/** Shared across rows and remounts; main caches too, this just avoids repeat IPC. */
-const versionRequests = new Map<string, Promise<PackageVersions>>();
+/** How long a version list is reused; main's npm client caches for the same time, so asking earlier gains nothing. */
+const VERSIONS_TTL_MS = 5 * 60_000;
 
-function loadVersions(name: string): Promise<PackageVersions> {
-  let request = versionRequests.get(name);
-  if (!request) {
-    request = modulesApi.GetPackageVersions(name);
-    versionRequests.set(name, request);
-    request.catch(() => versionRequests.delete(name));
-  }
+/** Shared across rows and remounts, so several rows avoid repeat IPC. */
+const versionRequests = new Map<
+  string,
+  { at: number; request: Promise<PackageVersions> }
+>();
+
+export function loadVersions(name: string): Promise<PackageVersions> {
+  const cached = versionRequests.get(name);
+  if (cached && Date.now() - cached.at < VERSIONS_TTL_MS) return cached.request;
+  const request = modulesApi.GetPackageVersions(name);
+  versionRequests.set(name, { at: Date.now(), request });
+  request.catch(() => {
+    if (versionRequests.get(name)?.request === request) versionRequests.delete(name);
+  });
   return request;
 }
 
@@ -102,12 +116,20 @@ function PackageSearch() {
     const name = String(key);
     onInputChange('');
     modulesApi.AddModule(name, null).catch((error: unknown) => {
-      showToast({ title: t('addFailed', { name }), description: errorText(error), tone: 'error' });
+      showToast({
+        title: t('addFailed', { name }),
+        description: errorText(error),
+        tone: 'error',
+      });
     });
   };
 
   const empty =
-    status === 'loading' ? t('searching') : status === 'error' ? t('searchFailed') : t('noResults');
+    status === 'loading'
+      ? t('searching')
+      : status === 'error'
+        ? t('searchFailed')
+        : t('noResults');
 
   return (
     <div className={field.root} data-size="sm" data-glass>
@@ -133,7 +155,11 @@ function PackageSearch() {
             renderEmptyState={() => <div className={styles.empty}>{empty}</div>}
           >
             {(result) => (
-              <ListBoxItem id={result.name} textValue={result.name} className={cx(menu.item, styles.result)}>
+              <ListBoxItem
+                id={result.name}
+                textValue={result.name}
+                className={cx(menu.item, styles.result)}
+              >
                 <span className={menu.lead}>
                   <Icon name="package" />
                 </span>
@@ -158,7 +184,14 @@ function PackageSearch() {
   );
 }
 
-function ModuleRow({ name, version }: { name: string; version: string }) {
+// Memoized on its two strings: a store push re-renders the sidebar, and each row's version menu builds a hidden collection.
+const ModuleRow = memo(function ModuleRow({
+  name,
+  version,
+}: {
+  name: string;
+  version: string;
+}) {
   const { t } = useTranslation('packages');
   const [versions, setVersions] = useState<PackageVersions | null>(null);
   const [query, setQuery] = useState('');
@@ -174,16 +207,23 @@ function ModuleRow({ name, version }: { name: string; version: string }) {
     };
   }, [name]);
 
-  const { listed, total } = listedVersions(versions?.versions ?? [], version, query);
-  const options: SearchOption[] = listed.map((v) => ({
-    id: v,
-    label: v,
-    ...(v === versions?.latest ? { hint: t('latest') } : {}),
-  }));
+  const { groups, total } = useMemo(() => {
+    const { listed, total } = listedVersions(versions?.versions ?? [], version, query);
+    const options: SearchOption[] = listed.map((v) => ({
+      id: v,
+      label: v,
+      ...(v === versions?.latest ? { hint: t('latest') } : {}),
+    }));
+    return { groups: [{ options }], total };
+  }, [versions, version, query, t]);
   const shown = Math.min(total, MAX_LISTED);
 
   const failed = (error: unknown) =>
-    showToast({ title: t('changeFailed', { name }), description: errorText(error), tone: 'error' });
+    showToast({
+      title: t('changeFailed', { name }),
+      description: errorText(error),
+      tone: 'error',
+    });
 
   return (
     <li className={styles.row}>
@@ -194,7 +234,7 @@ function ModuleRow({ name, version }: { name: string; version: string }) {
       <SearchSelect
         aria-label={t('version', { name })}
         size="sm"
-        groups={[{ options }]}
+        groups={groups}
         value={version}
         placeholder={version}
         query={query}
@@ -218,7 +258,7 @@ function ModuleRow({ name, version }: { name: string; version: string }) {
       />
     </li>
   );
-}
+});
 
 export function PackagesSection() {
   const { t } = useTranslation('packages');
@@ -226,7 +266,11 @@ export function PackagesSection() {
   const modules = win ? Object.entries(win.fiddle.modules) : [];
 
   return (
-    <section className={styles.section} aria-labelledby="packages-title" data-tour="packages">
+    <section
+      className={styles.section}
+      aria-labelledby="packages-title"
+      data-tour="packages"
+    >
       <h2 id="packages-title" className={styles.head}>
         {t('title')}
       </h2>

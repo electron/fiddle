@@ -54,6 +54,8 @@ export default {
   "trustAllowScripts": "[Åļļöŵ îñšţáļļ šçŕîþţš ƒöŕ {{packages}} one two three]",
   "restoreMessage": "[Ŕéšţöŕé ûñšáṽéð çĥáñĝéš? one two three]",
   "restoreDetail": "[Éļéçţŕöñ Ƒîððļé ƒöûñð ûñšáṽéð çĥáñĝéš ƒŕöɱ áñ éáŕļîéŕ šéššîöñ: {{names}}. one two three four five six]",
+  "restoreFailedMessage": "[Šöɱé ŵîñðöŵš çöûļð ñöţ ƀé ŕéöþéñéð one two three]",
+  "restoreFailedDetail": "[Çöûļð ñöţ ļöáð ţĥé ƒöļðéŕ öŕ ĝîšţ öƒ: {{names}}. Çĥéçķ ţĥáţ ţĥé ƒöļðéŕ îš áṽáîļáƀļé áñð ţĥáţ ýöû'ŕé öñļîñé. one two three four five six seven eight nine]",
   "restore": "[Ŕéšţöŕé one]",
   "discardDrafts": "[Ðîšçáŕð one]",
   "noRecent": "[Ñö ŕéçéñţ ƒöļðéŕš one two]",

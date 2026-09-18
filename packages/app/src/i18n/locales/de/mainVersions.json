@@ -14,5 +14,7 @@
   "showChannelOk": "Anzeigen",
   "switchToBuild": "Zu {{name}} wechseln?",
   "switchToBuildDetail": "Dieser Ordner ist bereits als lokaler Build hinzugefügt.",
-  "switchButton": "Wechseln"
+  "switchButton": "Wechseln",
+  "refreshFailed": "Die Liste der Electron-Versionen konnte nicht aktualisiert werden. Prüfe deine Verbindung und versuche es erneut.",
+  "removeFailed": "Electron {{version}} konnte nicht entfernt werden. Möglicherweise wird eine Datei verwendet."
 }

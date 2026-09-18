@@ -1,84 +1,58 @@
 /**
- * The Window store with optimistic changes replayed on top (REQUIREMENTS §3,
- * "Optimistic updates"). A change shows at once; it's dropped once the store
- * reaches the `rev` the change method returned, or when main rejects it (the
- * error is shown as a toast).
+ * Changes to the Window store that show at once (see ../optimistic.ts), and
+ * the store with the pending ones on top.
  */
-import { useSyncExternalStore } from 'react';
-
 import { moveName } from '../../fiddle/files';
+import { documentsApi, versionsApi } from '../../ipc/renderer';
 import { followActiveFile } from '../../shared/panes';
-import type { WindowLayout, WindowState } from '../../shared/stores';
-import { documentsApi } from '../../ipc/renderer';
-import { showToast } from '../../ui';
+import type { VersionRefValue, WindowLayout, WindowState } from '../../shared/stores';
+import { createOptimistic } from '../optimistic';
 
-type Apply = (state: WindowState) => WindowState;
+const windowChanges = createOptimistic<WindowState>();
+const change = windowChanges.change;
 
-interface Pending {
-  apply: Apply;
-  /** The rev that includes the change, once main has answered. */
-  rev: number | null;
+/** The Window store with pending changes on top, or null before it has loaded. */
+export function useWithPending(base: WindowState | null): WindowState | null {
+  return windowChanges.use(base, base?.rev ?? 0);
 }
 
-let pending: readonly Pending[] = [];
-const listeners = new Set<() => void>();
-
-function setPending(next: readonly Pending[]) {
-  pending = next;
-  for (const listener of listeners) listener();
-}
-
-function subscribe(listener: () => void) {
-  listeners.add(listener);
-  return () => listeners.delete(listener);
-}
-
-/** Shows `apply` at once, then asks main with `call`. */
-export function change(apply: Apply, call: () => Promise<number>, errorTitle: string): Promise<void> {
-  const entry: Pending = { apply, rev: null };
-  setPending([...pending, entry]);
-  return call().then(
-    (rev) => {
-      entry.rev = rev;
-      setPending([...pending]);
-    },
-    (error: unknown) => {
-      setPending(pending.filter((p) => p !== entry));
-      showToast({ tone: 'error', title: errorTitle, description: error instanceof Error ? error.message : String(error) });
-    },
+export function setLayout(
+  current: WindowLayout,
+  patch: Partial<WindowLayout>,
+  errorTitle: string,
+): Promise<boolean> {
+  const layout = { ...current, ...patch };
+  return change(
+    (state) => ({ ...state, layout: { ...state.layout, ...patch } }),
+    () => documentsApi.SetLayout(layout),
+    errorTitle,
   );
 }
 
-/**
- * `base` (the Window store) with pending changes on top, or null before it's
- * ready. Components read it through `useWindowState()` in `renderer/state.ts`.
- */
-export function useWithPending(base: WindowState | null): WindowState | null {
-  const list = useSyncExternalStore(subscribe, () => pending);
-  if (!base) return null;
-  const live = list.filter((p) => p.rev === null || p.rev > base.rev);
-  if (live.length !== list.length) queueMicrotask(() => setPending(pending.filter((p) => p.rev === null || p.rev > base.rev)));
-  return live.reduce((state, p) => p.apply(state), base);
-}
-
-/** Changes part of the layout, optimistically. */
-export function setLayout(current: WindowLayout, patch: Partial<WindowLayout>, errorTitle: string): Promise<void> {
-  const layout = { ...current, ...patch };
-  return change((state) => ({ ...state, layout: { ...state.layout, ...patch } }), () => documentsApi.SetLayout(layout), errorTitle);
-}
-
 /** Like main (Documents' `commit`): the focused pane follows the active file, and hidden files leave the panes. */
-function withFiles(state: WindowState, files: WindowState['fiddle']['files'], activeFile: string | null): WindowState {
+function withFiles(
+  state: WindowState,
+  files: WindowState['fiddle']['files'],
+  activeFile: string | null,
+): WindowState {
   const visible = files.filter((f) => f.visible).map((f) => f.name);
-  const panes = followActiveFile(state.layout.panes, state.fiddle.activeFile, activeFile, visible);
+  const panes = followActiveFile(
+    state.layout.panes,
+    state.fiddle.activeFile,
+    activeFile,
+    visible,
+  );
   return {
     ...state,
     fiddle: { ...state.fiddle, files, activeFile },
-    layout: panes === state.layout.panes ? state.layout : { ...state.layout, panes: [...panes] },
+    layout:
+      panes === state.layout.panes
+        ? state.layout
+        : { ...state.layout, panes: [...panes] },
   };
 }
 
-export function setActiveFile(name: string, errorTitle: string): Promise<void> {
+export function setActiveFile(name: string, errorTitle: string): Promise<boolean> {
   return change(
     (state) =>
       withFiles(
@@ -91,7 +65,11 @@ export function setActiveFile(name: string, errorTitle: string): Promise<void> {
   );
 }
 
-export function setFileVisible(name: string, visible: boolean, errorTitle: string): Promise<void> {
+export function setFileVisible(
+  name: string,
+  visible: boolean,
+  errorTitle: string,
+): Promise<boolean> {
   return change(
     (state) =>
       withFiles(
@@ -105,18 +83,44 @@ export function setFileVisible(name: string, visible: boolean, errorTitle: strin
 }
 
 /** Moves a file's tab in front of `before`'s, or to the end. */
-export function moveFile(name: string, before: string | null, errorTitle: string): Promise<void> {
+export function moveFile(
+  name: string,
+  before: string | null,
+  errorTitle: string,
+): Promise<boolean> {
   return change(
     (state) => {
       const byName = new Map(state.fiddle.files.map((f) => [f.name, f]));
-      const names = moveName(state.fiddle.files.map((f) => f.name), name, before);
-      return { ...state, fiddle: { ...state.fiddle, files: names.map((n) => byName.get(n)!) } };
+      const names = moveName(
+        state.fiddle.files.map((f) => f.name),
+        name,
+        before,
+      );
+      return {
+        ...state,
+        fiddle: { ...state.fiddle, files: names.map((n) => byName.get(n)!) },
+      };
     },
     () => documentsApi.MoveFile(name, before),
     errorTitle,
   );
 }
 
-export function setView(view: WindowState['view'], errorTitle: string): Promise<void> {
-  return change((state) => ({ ...state, view }), () => documentsApi.SetView(view), errorTitle);
+export function setVersionRef(
+  ref: VersionRefValue,
+  errorTitle: string,
+): Promise<boolean> {
+  return change(
+    (state) => ({ ...state, fiddle: { ...state.fiddle, versionRef: ref } }),
+    () => versionsApi.SetVersion(ref),
+    errorTitle,
+  );
+}
+
+export function setView(view: WindowState['view'], errorTitle: string): Promise<boolean> {
+  return change(
+    (state) => ({ ...state, view }),
+    () => documentsApi.SetView(view),
+    errorTitle,
+  );
 }

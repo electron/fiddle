@@ -15,7 +15,7 @@ import {
   isDirty,
   isTrusted,
   isUneditedTemplate,
-  markSaved,
+  removedFileNames,
   toFiddleState,
 } from './model';
 
@@ -38,7 +38,6 @@ describe('editor mirror', () => {
     expect(doc.activeFile).toBe('main.js');
   });
 
-  // @feature files.dirty-tracking
   it('applies edits for the current fiddleRev and derives dirty from the baseline', () => {
     const doc = templateDoc();
     const edited = applyEdit(doc, 'main.js', 'changed', doc.fiddleRev)!;
@@ -49,7 +48,6 @@ describe('editor mirror', () => {
     expect(isDirty(reverted)).toBe(false);
   });
 
-  // @feature files.dirty-tracking
   it('counts hidden files when tracking changes', () => {
     const doc = templateDoc();
     expect(doc.fiddle.hidden).toContain('styles.css');
@@ -84,7 +82,6 @@ describe('editor mirror', () => {
     expect(isDirty(doc)).toBe(false);
   });
 
-  // @feature files.show-hidden-on-click
   it('shows a hidden file when it is focused, and moves focus off a hidden one', () => {
     let doc = docSetActiveFile(templateDoc(), 'styles.css');
     expect(doc.fiddle.hidden).not.toContain('styles.css');
@@ -93,23 +90,33 @@ describe('editor mirror', () => {
     expect(doc.activeFile).toBe('main.js');
   });
 
-  // @feature load.template-swap
   it('knows an unedited template', () => {
     const doc = templateDoc();
     expect(isUneditedTemplate(doc)).toBe(true);
-    expect(isUneditedTemplate(applyEdit(doc, 'main.js', 'x', doc.fiddleRev)!)).toBe(false);
+    expect(isUneditedTemplate(applyEdit(doc, 'main.js', 'x', doc.fiddleRev)!)).toBe(
+      false,
+    );
   });
 
-  // @feature files.dirty-tracking
-  it('resets the baseline on save', () => {
-    const doc = applyEdit(templateDoc(), 'main.js', 'x', 1)!;
-    const saved = markSaved(doc, { localPath: '/tmp/f' });
-    expect(isDirty(saved)).toBe(false);
-    expect(saved.fiddle.source.localPath).toBe('/tmp/f');
+  it('lists the files removed or renamed since the last save', () => {
+    const doc = templateDoc();
+    expect(removedFileNames(doc)).toEqual([]);
+    const removed = docRemoveFile(doc, 'styles.css');
+    expect(removedFileNames(removed)).toEqual(['styles.css']);
+    const renamed = docRenameFile(removed, 'index.html', 'view.html');
+    expect(removedFileNames(renamed).sort()).toEqual(['index.html', 'styles.css']);
+    expect(removedFileNames({ ...renamed, baseline: renamed.fiddle.files })).toEqual([]);
   });
 
   it('counts module changes as unsaved, but not normalizing a loaded `*`', () => {
-    const doc = createDoc(createFiddle({ files: { 'main.js': '' }, version, modules: { a: '*', b: '1.0.0' } }), 'x');
+    const doc = createDoc(
+      createFiddle({
+        files: { 'main.js': '' },
+        version,
+        modules: { a: '*', b: '1.0.0' },
+      }),
+      'x',
+    );
     const normalized = docSetModules(doc, { a: '2.0.0', b: '1.0.0' }, true);
     expect(isDirty(normalized)).toBe(false);
     expect(toFiddleState(normalized).modules).toEqual({ a: '2.0.0', b: '1.0.0' });
@@ -117,7 +124,7 @@ describe('editor mirror', () => {
     const changed = docSetModules(normalized, { a: '2.0.0', b: '1.1.0' });
     expect(isDirty(changed)).toBe(true);
     expect(isDirty(docSetModules(changed, { a: '2.0.0', b: '1.0.0' }))).toBe(false);
-    expect(isDirty(markSaved(changed, {}))).toBe(false);
+    expect(isDirty({ ...changed, baselineModules: changed.fiddle.modules })).toBe(false);
 
     // Normalizing one module keeps the user's change to another unsaved.
     const edited = docSetModules(doc, { a: '*', b: '1.1.0' });
@@ -135,37 +142,59 @@ describe('toFiddleState', () => {
       { name: 'index.html', visible: true },
       { name: 'styles.css', visible: false },
     ]);
-    expect(state.source).toEqual({ origin: 'local', trusted: true, templateName: DEFAULT_TEMPLATE });
+    expect(state.source).toEqual({
+      origin: 'local',
+      trusted: true,
+      templateName: DEFAULT_TEMPLATE,
+    });
     expect(state.dirty).toBe(false);
     expect(state.dirtyFiles).toEqual([]);
   });
 
-  // @feature editor.tab-reorder
   it('lists files in the order the user moved them, without a new fiddleRev or unsaved changes', () => {
     const doc = templateDoc();
     const moved = docMoveFile(doc, 'styles.css', 'main.js');
-    expect(toFiddleState(moved).files.map((file) => file.name)).toEqual(['styles.css', 'main.js', 'index.html']);
+    expect(toFiddleState(moved).files.map((file) => file.name)).toEqual([
+      'styles.css',
+      'main.js',
+      'index.html',
+    ]);
     expect(moved.fiddleRev).toBe(doc.fiddleRev);
     expect(moved.activeFile).toBe(doc.activeFile);
     expect(isDirty(moved)).toBe(false);
-    expect(toFiddleState(docMoveFile(moved, 'styles.css', null)).files.at(-1)).toEqual({ name: 'styles.css', visible: false });
+    expect(toFiddleState(docMoveFile(moved, 'styles.css', null)).files.at(-1)).toEqual({
+      name: 'styles.css',
+      visible: false,
+    });
     expect(docMoveFile(doc, 'main.js', 'index.html')).toBe(doc);
   });
 
-  // @feature files.dirty-tracking
   it('lists the files that differ from the last save, new files included', () => {
     const doc = docAddFile(templateDoc(), 'extra.js');
     const edited = applyEdit(doc, 'main.js', 'changed', doc.fiddleRev)!;
     expect([...toFiddleState(edited).dirtyFiles].sort()).toEqual(['extra.js', 'main.js']);
-    expect(toFiddleState(markSaved(edited, edited.fiddle.source)).dirtyFiles).toEqual([]);
+    expect(
+      toFiddleState({ ...edited, baseline: edited.fiddle.files }).dirtyFiles,
+    ).toEqual([]);
   });
 
   it('marks remote fiddles untrusted until their origin is approved', () => {
-    const origin = { kind: 'gist', owner: 'octocat', id: 'a'.repeat(32), sha: 'b'.repeat(40) } as const;
-    const doc = createDoc(createFiddle({ files: { 'main.js': '' }, version, origin }), 'x');
+    const origin = {
+      kind: 'gist',
+      owner: 'octocat',
+      id: 'a'.repeat(32),
+      sha: 'b'.repeat(40),
+    } as const;
+    const doc = createDoc(
+      createFiddle({ files: { 'main.js': '' }, version, origin }),
+      'x',
+    );
     expect(isTrusted(doc)).toBe(false);
     expect(toFiddleState(doc).source.trusted).toBe(false);
-    const approved = { ...doc, approvedOrigin: `gist:octocat/${'a'.repeat(32)}@${'b'.repeat(40)}` };
+    const approved = {
+      ...doc,
+      approvedOrigin: `gist:octocat/${'a'.repeat(32)}@${'b'.repeat(40)}`,
+    };
     expect(isTrusted(approved)).toBe(true);
   });
 });

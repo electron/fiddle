@@ -1,6 +1,13 @@
 import { ErrorCode, FiddleError } from '../shared/errors';
 import { versionFromTag } from './deep-link';
-import { type FileMap, findMainEntry, isMainEntry, isReservedFileName, isSupportedFileName, PACKAGE_JSON } from './files';
+import {
+  type FileMap,
+  findMainEntry,
+  isMainEntry,
+  isReservedFileName,
+  isSupportedFileName,
+  PACKAGE_JSON,
+} from './files';
 import type { GitHubClient } from './github';
 import { type PickedFiles, pickFiddleFiles } from './pick';
 import type { FiddleOrigin } from './trust';
@@ -26,7 +33,10 @@ export interface DocsExample extends PickedFiles {
 function assertExamplePath(p: string): void {
   const segments = p.split('/');
   if (segments.some((s) => s === '' || s === '.' || s === '..' || /[\\\0]/.test(s))) {
-    throw new FiddleError(ErrorCode.invalidArgument, `Invalid example path: ${p}`, { reason: 'invalid-path', path: p });
+    throw new FiddleError(ErrorCode.invalidArgument, `Invalid example path: ${p}`, {
+      reason: 'invalid-path',
+      path: p,
+    });
   }
 }
 
@@ -34,10 +44,14 @@ function assertExamplePath(p: string): void {
 export async function loadDocsExample(options: DocsExampleOptions): Promise<DocsExample> {
   const version = versionFromTag(options.tag);
   if (!version) {
-    throw new FiddleError(ErrorCode.invalidArgument, `Could not determine the Electron version from ${options.tag}`, {
-      reason: 'invalid-tag',
-      tag: options.tag,
-    });
+    throw new FiddleError(
+      ErrorCode.invalidArgument,
+      `Could not determine the Electron version from ${options.tag}`,
+      {
+        reason: 'invalid-tag',
+        tag: options.tag,
+      },
+    );
   }
   assertExamplePath(options.path);
 
@@ -52,18 +66,29 @@ export async function loadDocsExample(options: DocsExampleOptions): Promise<Docs
     (e) =>
       e.type === 'file' &&
       e.downloadUrl &&
-      (e.name === PACKAGE_JSON || (isSupportedFileName(e.name) && !isReservedFileName(e.name))),
+      (e.name === PACKAGE_JSON ||
+        (isSupportedFileName(e.name) && !isReservedFileName(e.name))),
   );
   if (!wanted.some((e) => e.name !== PACKAGE_JSON)) {
-    throw new FiddleError(ErrorCode.invalidArgument, `${options.path} has no supported files`, {
-      reason: 'no-supported-files',
-      path: options.path,
-    });
+    throw new FiddleError(
+      ErrorCode.invalidArgument,
+      `${options.path} has no supported files`,
+      {
+        reason: 'no-supported-files',
+        path: options.path,
+      },
+    );
   }
   const [template, fetched] = await Promise.all([
     options.getTemplate(version),
     Promise.all(
-      wanted.map(async (e) => [e.name, await options.github.fetchText(e.downloadUrl!, options.signal)] as const),
+      wanted.map(
+        async (e) =>
+          [
+            e.name,
+            await options.github.fetchText(e.downloadUrl!, options.signal),
+          ] as const,
+      ),
     ),
   ]);
 

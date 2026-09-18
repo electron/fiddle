@@ -42,7 +42,6 @@ export const appStateSchema = z.object({
    * the packaged app.
    */
   dev: z.boolean().optional(),
-  // Settings slice: effective settings (see src/shared/settings.ts).
   settings: settingsSchema,
   /** Custom themes in `<userData>/themes/`. The data is fetched with `Settings.GetTheme`. */
   themes: z.array(themeSummarySchema),
@@ -50,11 +49,10 @@ export const appStateSchema = z.object({
   screenReaderActive: z.boolean(),
   /** Corrupt or too-new data files; shown as toasts until dismissed. */
   storageNotices: z.array(storageNoticeSchema),
-  /** OS high contrast (`nativeTheme.shouldUseHighContrastColors`): Lucent shows its high-contrast variant (§10). */
+  /** OS high contrast (`nativeTheme.shouldUseHighContrastColors`): Lucent shows its high-contrast variant. */
   highContrast: z.boolean().optional(),
-  // Versions and run slice: install state, local builds and `releasesRev`.
   versions: z.lazy(() => versionsStateSchema).optional(),
-  // Gists slice: the signed-in GitHub login. The token itself never leaves main.
+  // The token itself never leaves main.
   githubLogin: z.string().optional(),
 });
 export type AppState = z.infer<typeof appStateSchema>;
@@ -66,27 +64,26 @@ export const windowStateSchema = z.object({
   /** UUID assigned by main. Renderers never send it; handlers close over it. */
   windowId: z.uuid(),
   title: z.string(),
-  // Documents slice: see "Window store fiddle contract" in PROGRESS.md.
   view: z.lazy(() => windowViewSchema),
   fiddle: z.lazy(() => fiddleStateSchema),
   layout: z.lazy(() => windowLayoutSchema),
-  // Versions and run slice: run, package and bisect status. Absent means ready.
+  // Run, package and bisect status. Absent means ready.
   run: z.lazy(() => runStateSchema).optional(),
-  // Versions and run slice: the last version fallback or failed download, shown as a toast, then dismissed.
-  versionNotice: z.lazy(() => versionNoticeSchema).nullable().optional(),
+  // The last version fallback or failed download, shown as a toast, then dismissed.
+  versionNotice: z
+    .lazy(() => versionNoticeSchema)
+    .nullable()
+    .optional(),
   /**
-   * Windows and Linux: the application menu for the title bar's menu bar
-   * (§17.14), built for this window by src/main/menu.ts and pushed whenever
-   * the native menu is rebuilt. Absent on macOS, which has the OS menu bar,
-   * unless a test or dev run forces it; the Develop menu's toggle adds or
-   * removes it on any platform. Absent means the title bar draws no menu bar.
+   * Windows and Linux: the application menu for the title bar's menu bar,
+   * built for this window by src/main/menu.ts and pushed whenever the native
+   * menu is rebuilt. Absent on macOS, which has the OS menu bar, unless a test
+   * or dev run forces it; the Develop menu's toggle adds or removes it on any
+   * platform. Absent means the title bar draws no menu bar.
    */
   menuBar: z.lazy(() => z.array(menuNodeSchema)).optional(),
 });
 export type WindowState = z.infer<typeof windowStateSchema>;
-
-// ---------------------------------------------------------------------------
-// Menus slice: the serialized application menu (`Window.menuBar`).
 
 /**
  * One entry of a menu, as the renderer draws it. `id` is what
@@ -96,7 +93,15 @@ export type WindowState = z.infer<typeof windowStateSchema>;
  */
 export type MenuNode =
   | { kind: 'submenu'; id: string; label: string; enabled: boolean; children: MenuNode[] }
-  | { kind: 'item'; id: string; label: string; enabled: boolean; checked?: boolean; accelerator?: string }
+  | {
+      kind: 'item';
+      id: string;
+      label: string;
+      enabled: boolean;
+      checked?: boolean;
+      radio?: boolean;
+      accelerator?: string;
+    }
   | { kind: 'separator' };
 
 export const menuItemIdSchema = z.string().min(1).max(300);
@@ -116,6 +121,7 @@ export const menuNodeSchema: z.ZodType<MenuNode> = z.lazy(() =>
       label: z.string(),
       enabled: z.boolean(),
       checked: z.boolean().optional(),
+      radio: z.boolean().optional(),
       accelerator: z.string().optional(),
     }),
     z.object({ kind: z.literal('separator') }),
@@ -130,9 +136,6 @@ export const versionNoticeSchema = z.object({
   message: z.string(),
 });
 export type VersionNotice = z.infer<typeof versionNoticeSchema>;
-
-// ---------------------------------------------------------------------------
-// Documents slice: the fiddle part of the Window store.
 
 /** A fiddle's files, name → text. Fetched with `Documents.GetFiles`, never stored. */
 export const fileMapSchema = z.record(z.string(), z.string());
@@ -151,7 +154,7 @@ export const windowLayoutSchema = z.object({
   panes: z.array(z.string()).default([]),
   consoleHeight: z.number().nonnegative(),
   sidebarWidth: z.number().nonnegative(),
-  /** View > Toggle console, or its splitter dragged closed. Runs, package and make open it (§17.7). */
+  /** View > Toggle console, or its splitter dragged closed. Runs, package and make open it. */
   consoleVisible: z.boolean().default(true),
 });
 export type WindowLayout = z.infer<typeof windowLayoutSchema>;
@@ -177,7 +180,6 @@ export const fiddleSourceStateSchema = z.object({
   /** False while the fiddle has a remote origin the user hasn't approved. */
   trusted: z.boolean(),
 });
-export type FiddleSourceState = z.infer<typeof fiddleSourceStateSchema>;
 
 export const versionRefSchema = VersionRefSchema;
 
@@ -199,10 +201,7 @@ export const fiddleStateSchema = z.object({
 });
 export type FiddleState = z.infer<typeof fiddleStateSchema>;
 
-// ---------------------------------------------------------------------------
-// App UX slice: npm search results and version lists. Fetched with `Modules`
-// methods, never stored.
-
+// Fetched with `Modules` methods, never stored.
 export const packageSearchResultsSchema = z.array(
   z.object({ name: z.string(), version: z.string(), description: z.string() }),
 );
@@ -215,11 +214,6 @@ export const packageVersionsSchema = z.object({
   versions: z.array(z.string()),
 });
 export type PackageVersions = z.infer<typeof packageVersionsSchema>;
-
-// ---------------------------------------------------------------------------
-// Versions and run slice. `App.versions` holds install state and local builds;
-// `Window.run` holds run, package and bisect status. Release lists, console
-// output and editor types are fetched with `Versions` and `Run` methods.
 
 export type VersionRefValue = z.infer<typeof versionRefSchema>;
 
@@ -303,11 +297,18 @@ export type BisectState = z.infer<typeof bisectStateSchema>;
 
 export const runStateSchema = z.object({
   /**
-   * §17.6 "Run/Stop control states": `checking` (pre-run checks), `downloading`
-   * and `unzipping` (installing the version), `installing` (modules), then
-   * `starting` and `running`.
+   * `checking` (pre-run checks), `downloading` and `unzipping` (installing the
+   * version), `installing` (modules), then `starting` and `running`.
    */
-  status: z.enum(['ready', 'checking', 'downloading', 'unzipping', 'installing', 'starting', 'running']),
+  status: z.enum([
+    'ready',
+    'checking',
+    'downloading',
+    'unzipping',
+    'installing',
+    'starting',
+    'running',
+  ]),
   /** What the status is about: the fiddle, or Forge package or make. */
   task: z.enum(['run', 'package', 'make']),
   /** Download progress, 0–100, while `downloading`. */

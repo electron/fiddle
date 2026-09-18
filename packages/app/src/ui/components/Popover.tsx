@@ -12,7 +12,10 @@ import styles from './Popover.module.css';
 /** Wraps a trigger button and a Popover. */
 export const PopoverTrigger = DialogTrigger;
 
-export interface PopoverProps extends Omit<AriaPopoverProps, 'className' | 'children' | 'style'> {
+export interface PopoverProps extends Omit<
+  AriaPopoverProps,
+  'className' | 'children' | 'style'
+> {
   children: ReactNode;
   /** Accessible name for the popover's dialog. */
   'aria-label'?: string;
@@ -22,7 +25,15 @@ export interface PopoverProps extends Omit<AriaPopoverProps, 'className' | 'chil
 }
 
 /** Anchored floating content on overlay glass, with an arrow cut from the same material. */
-export function Popover({ children, width, className, style, placement = 'bottom', offset = 10, ...rest }: PopoverProps) {
+export function Popover({
+  children,
+  width,
+  className,
+  style,
+  placement = 'bottom',
+  offset = 10,
+  ...rest
+}: PopoverProps) {
   const { 'aria-label': ariaLabel, ...popoverProps } = rest;
   return (
     <AriaPopover

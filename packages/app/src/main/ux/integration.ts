@@ -20,14 +20,19 @@ import {
 } from 'electron';
 
 import { findDeepLinkInArgv } from '../../fiddle/deep-link';
-import { commands, isCommandId } from '../../shared/commands';
+import { commands, type CommandId } from '../../shared/commands';
 import type { RunState, WindowState } from '../../shared/stores';
 import { openFolderIn, recentFolders } from '../documents/service';
 import { t, tm } from '../i18n';
 import { log } from '../log';
 import type { Services } from '../services';
 import { focusedWindowId, getWindow } from '../windows';
-import { ARG_NEW_FIDDLE, ARG_NEW_WINDOW, ARG_OPEN_FOLDER, jumpListFolder } from './jump-list';
+import {
+  ARG_NEW_FIDDLE,
+  ARG_NEW_WINDOW,
+  ARG_OPEN_FOLDER,
+  jumpListFolder,
+} from './jump-list';
 import {
   downloadsFinished,
   finishedWindowOperations,
@@ -44,8 +49,7 @@ const TITLES = {
   run: { ok: 'runDone', failed: 'runFailed' },
 } as const satisfies Record<OperationKind, { ok: string; failed: string }>;
 
-
-/** `Window.run` belongs to the Versions and run slice; absent means ready. */
+/** `Window.run`; absent means ready. */
 const runOf = (state: WindowState | undefined): RunState | undefined => state?.run;
 
 export function installOsIntegration({ hub, registry }: Services): void {
@@ -63,7 +67,9 @@ export function installOsIntegration({ hub, registry }: Services): void {
   };
 
   const openFolder = (dir: string) => {
-    openFolderIn(undefined, dir).catch((error: unknown) => log.error('open recent failed', error));
+    openFolderIn(undefined, dir).catch((error: unknown) =>
+      log.error('open recent failed', error),
+    );
   };
 
   const showProgress = (windowId: string) => {
@@ -75,7 +81,8 @@ export function installOsIntegration({ hub, registry }: Services): void {
     shownProgress.set(windowId, key);
     // Below 0 removes the bar; above 1 is indeterminate.
     if (progress.mode === 'none') win.setProgressBar(-1);
-    else if (progress.mode === 'indeterminate') win.setProgressBar(2, { mode: 'indeterminate' });
+    else if (progress.mode === 'indeterminate')
+      win.setProgressBar(2, { mode: 'indeterminate' });
     else win.setProgressBar(progress.progress);
   };
 
@@ -93,14 +100,17 @@ export function installOsIntegration({ hub, registry }: Services): void {
     if (!target || target.isDestroyed()) return;
     // Downloads are app-wide: any focused window counts.
     const focused =
-      windowId === undefined ? BrowserWindow.getFocusedWindow() !== null : target.isFocused();
+      windowId === undefined
+        ? BrowserWindow.getFocusedWindow() !== null
+        : target.isFocused();
     if (focused) return;
     if (!operation.ok) attention(target);
     if (hub.app.settings.notifications === false || !Notification.isSupported()) return;
 
     const tu = tm('mainUx');
     const title = TITLES[operation.kind];
-    const name = windowId === undefined ? undefined : hub.getWindow(windowId)?.fiddle.name;
+    const name =
+      windowId === undefined ? undefined : hub.getWindow(windowId)?.fiddle.name;
     const notification = new Notification({
       title: tu(operation.ok ? title.ok : title.failed),
       body: name ? tu('notificationBody', { name }) : '',
@@ -120,18 +130,13 @@ export function installOsIntegration({ hub, registry }: Services): void {
   let shownRecent: string | undefined;
   const refreshSessionMenus = () => {
     if (process.platform !== 'win32' && process.platform !== 'darwin') return;
-    let recent: string[];
-    try {
-      recent = recentFolders();
-    } catch (error) {
-      log.warn('recent folders unavailable', error);
-      return;
-    }
+    const recent = recentFolders();
     const key = JSON.stringify(recent);
     if (key === shownRecent) return;
     shownRecent = key;
     if (process.platform === 'win32') setJumpList(recent);
-    else app.dock?.setMenu(Menu.buildFromTemplate(dockMenu(recent, runCommand, openFolder)));
+    else
+      app.dock?.setMenu(Menu.buildFromTemplate(dockMenu(recent, runCommand, openFolder)));
   };
 
   hub.onChange((change) => {
@@ -153,7 +158,12 @@ export function installOsIntegration({ hub, registry }: Services): void {
       const prev = runs.get(windowId);
       const next = runOf(state);
       const now = Date.now();
-      for (const operation of finishedWindowOperations(prev, next, runStarts.get(windowId), now)) {
+      for (const operation of finishedWindowOperations(
+        prev,
+        next,
+        runStarts.get(windowId),
+        now,
+      )) {
         announce(windowId, operation);
       }
       if (runStarted(prev, next)) runStarts.set(windowId, now);
@@ -183,13 +193,13 @@ export function installOsIntegration({ hub, registry }: Services): void {
  */
 export function openColdStartFolder(argv: readonly string[] = process.argv): void {
   const dir = jumpListFolder(argv, recentFolders());
-  if (dir) openFolderIn(undefined, dir).catch((error: unknown) => log.error('open recent failed', error));
+  if (dir)
+    openFolderIn(undefined, dir).catch((error: unknown) =>
+      log.error('open recent failed', error),
+    );
 }
 
-/** The label of a command, if that command exists (other slices own some of them). */
-function commandLabel(id: string): string | undefined {
-  return isCommandId(id) ? t(commands[id].label) : undefined;
-}
+const commandLabel = (id: CommandId): string => t(commands[id].label);
 
 function dockMenu(
   recent: readonly string[],
@@ -197,13 +207,13 @@ function dockMenu(
   openFolder: (dir: string) => void,
 ): MenuItemConstructorOptions[] {
   const items: MenuItemConstructorOptions[] = [];
-  for (const id of ['app.newWindow', 'file.newFiddle']) {
-    const label = commandLabel(id);
-    if (label) items.push({ label, click: () => runCommand(id) });
+  for (const id of ['app.newWindow', 'file.newFiddle'] as const) {
+    items.push({ label: commandLabel(id), click: () => runCommand(id) });
   }
   if (recent.length > 0) {
     items.push({ type: 'separator' });
-    for (const dir of recent) items.push({ label: path.basename(dir), click: () => openFolder(dir) });
+    for (const dir of recent)
+      items.push({ label: path.basename(dir), click: () => openFolder(dir) });
   }
   return items;
 }
@@ -219,17 +229,17 @@ function setJumpList(recent: readonly string[]): void {
     iconIndex: 0,
   });
   const tasks = [
-    [commandLabel('app.newWindow'), ARG_NEW_WINDOW],
-    [commandLabel('file.newFiddle'), ARG_NEW_FIDDLE],
-  ]
-    .filter((entry): entry is [string, string] => entry[0] !== undefined)
-    .map(([title, args]) => task(title, args));
+    task(commandLabel('app.newWindow'), ARG_NEW_WINDOW),
+    task(commandLabel('file.newFiddle'), ARG_NEW_FIDDLE),
+  ];
   const categories: JumpListCategory[] = [{ type: 'tasks', items: tasks }];
   if (recent.length > 0) {
     categories.push({
       type: 'custom',
       name: tm('mainUx')('recent'),
-      items: recent.map((dir) => task(path.basename(dir), `${ARG_OPEN_FOLDER} "${dir}"`, dir)),
+      items: recent.map((dir) =>
+        task(path.basename(dir), `${ARG_OPEN_FOLDER} "${dir}"`, dir),
+      ),
     });
   }
   const result = app.setJumpList(categories);

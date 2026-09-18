@@ -1,6 +1,6 @@
 /**
  * Native dialogs, modal to a window when there is one. Always through
- * Electron's `dialog`, so the e2e driver can answer them (CLAUDE.md "E2E").
+ * Electron's `dialog`, so the e2e driver can answer them.
  */
 import {
   dialog,
@@ -21,7 +21,10 @@ function parentOf(parent: DialogParent): BrowserWindow | undefined {
   return typeof parent === 'string' ? getWindow(parent) : parent;
 }
 
-export function messageBox(parent: DialogParent, options: MessageBoxOptions): Promise<MessageBoxReturnValue> {
+export function messageBox(
+  parent: DialogParent,
+  options: MessageBoxOptions,
+): Promise<MessageBoxReturnValue> {
   const win = parentOf(parent);
   return win ? dialog.showMessageBox(win, options) : dialog.showMessageBox(options);
 }
@@ -42,22 +45,44 @@ export async function confirm(
   return response === 0;
 }
 
-async function pick(parent: DialogParent, options: OpenDialogOptions): Promise<string | undefined> {
+async function pick(
+  parent: DialogParent,
+  options: OpenDialogOptions,
+): Promise<string | undefined> {
   const win = parentOf(parent);
-  const result = win ? await dialog.showOpenDialog(win, options) : await dialog.showOpenDialog(options);
+  const result = win
+    ? await dialog.showOpenDialog(win, options)
+    : await dialog.showOpenDialog(options);
   return result.canceled ? undefined : result.filePaths[0];
 }
 
-export function pickFolder(parent: DialogParent, options: OpenDialogOptions): Promise<string | undefined> {
-  return pick(parent, { ...options, properties: ['openDirectory', ...(options.properties ?? [])] });
+export function pickFolder(
+  parent: DialogParent,
+  options: OpenDialogOptions,
+): Promise<string | undefined> {
+  return pick(parent, {
+    ...options,
+    properties: ['openDirectory', ...(options.properties ?? [])],
+  });
 }
 
-export function pickFile(parent: DialogParent, options: OpenDialogOptions): Promise<string | undefined> {
-  return pick(parent, { ...options, properties: ['openFile', ...(options.properties ?? [])] });
+export function pickFile(
+  parent: DialogParent,
+  options: OpenDialogOptions,
+): Promise<string | undefined> {
+  return pick(parent, {
+    ...options,
+    properties: ['openFile', ...(options.properties ?? [])],
+  });
 }
 
-export async function pickSave(parent: DialogParent, options: SaveDialogOptions): Promise<string | undefined> {
+export async function pickSave(
+  parent: DialogParent,
+  options: SaveDialogOptions,
+): Promise<string | undefined> {
   const win = parentOf(parent);
-  const result = win ? await dialog.showSaveDialog(win, options) : await dialog.showSaveDialog(options);
+  const result = win
+    ? await dialog.showSaveDialog(win, options)
+    : await dialog.showSaveDialog(options);
   return result.canceled ? undefined : result.filePath || undefined;
 }

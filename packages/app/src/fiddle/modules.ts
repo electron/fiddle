@@ -48,16 +48,23 @@ export function checkModuleSpec(name: string, spec: string): ModuleSpecProblem |
 export function assertModuleSpec(name: string, spec: string): void {
   const reason = checkModuleSpec(name, spec);
   if (reason) {
-    throw new FiddleError(ErrorCode.invalidArgument, `Unsupported module spec: ${name}@${spec}`, {
-      reason,
-      name,
-      spec,
-    });
+    throw new FiddleError(
+      ErrorCode.invalidArgument,
+      `Unsupported module spec: ${name}@${spec}`,
+      {
+        reason,
+        name,
+        spec,
+      },
+    );
   }
 }
 
 /** Keeps exact semver versions. Anything else (`*`, ranges, tags) becomes `latest` when it's known. */
-export function normalizeModuleVersion(version: string, latest: string | undefined): string {
+export function normalizeModuleVersion(
+  version: string,
+  latest: string | undefined,
+): string {
   return semver.valid(version) ? version : (latest ?? version);
 }
 
@@ -107,7 +114,10 @@ export function buildInstallCommand(options: InstallCommandOptions): CommandLine
 }
 
 /** `<pm> run <script>`, for Forge package and make. */
-export function buildRunScriptCommand(packageManager: PackageManager, script: string): CommandLine {
+export function buildRunScriptCommand(
+  packageManager: PackageManager,
+  script: string,
+): CommandLine {
   return { command: packageManager === 'yarn' ? 'yarn' : 'npm', args: ['run', script] };
 }
 
@@ -134,11 +144,16 @@ export interface HostOptions {
 }
 
 /** The package manager's path via `which` (`where.exe` on Windows), or null if it isn't on PATH. */
-export async function findPackageManager(pm: PackageManager, options: HostOptions = {}): Promise<string | null> {
+export async function findPackageManager(
+  pm: PackageManager,
+  options: HostOptions = {},
+): Promise<string | null> {
   const win = (options.platform ?? process.platform) === 'win32';
   const exec = options.exec ?? defaultExec;
   try {
-    const stdout = await exec(win ? 'where.exe' : 'which', [pm], { env: options.env ?? process.env });
+    const stdout = await exec(win ? 'where.exe' : 'which', [pm], {
+      env: options.env ?? process.env,
+    });
     return stdout.split(/\r?\n/)[0]?.trim() || null;
   } catch {
     return null;
@@ -151,19 +166,28 @@ const PATH_MARKER = '__FIDDLE_SHELL_PATH__';
  * The PATH from the user's login shell on macOS and Linux, so npm and yarn
  * installed through shell profiles are found. Undefined on Windows or failure.
  */
-export async function loadLoginShellPath(options: HostOptions & { timeoutMs?: number } = {}): Promise<string | undefined> {
+export async function loadLoginShellPath(
+  options: HostOptions & { timeoutMs?: number } = {},
+): Promise<string | undefined> {
   const platform = options.platform ?? process.platform;
   if (platform === 'win32') return undefined;
   const env = options.env ?? process.env;
   const shell = env.SHELL || (platform === 'darwin' ? '/bin/zsh' : '/bin/sh');
   const exec = options.exec ?? defaultExec;
   try {
-    const stdout = await exec(shell, ['-ilc', `echo ${PATH_MARKER}; printenv PATH; echo ${PATH_MARKER}`], {
-      env: { ...env, DISABLE_AUTO_UPDATE: 'true' },
-      timeout: options.timeoutMs ?? 10_000,
-    });
-    // eslint-disable-next-line no-control-regex
-    const value = stdout.split(PATH_MARKER)[1]?.replace(/\[[0-9;?]*[A-Za-z]/g, '').trim();
+    const stdout = await exec(
+      shell,
+      ['-ilc', `echo ${PATH_MARKER}; printenv PATH; echo ${PATH_MARKER}`],
+      {
+        env: { ...env, DISABLE_AUTO_UPDATE: 'true' },
+        timeout: options.timeoutMs ?? 10_000,
+      },
+    );
+    const value = stdout
+      .split(PATH_MARKER)[1]
+      // eslint-disable-next-line no-control-regex
+      ?.replace(/\[[0-9;?]*[A-Za-z]/g, '')
+      .trim();
     return value || undefined;
   } catch {
     return undefined;
@@ -192,13 +216,20 @@ const MAX_OUTPUT = 1024 * 1024;
  * shell (npm and yarn are `.cmd` files) with every argument double-quoted;
  * arguments containing `"`, `%` or newlines are refused there.
  */
-export function runCommand(line: CommandLine, options: RunCommandOptions = {}): Promise<CommandResult> {
+export function runCommand(
+  line: CommandLine,
+  options: RunCommandOptions = {},
+): Promise<CommandResult> {
   const win = (options.platform ?? process.platform) === 'win32';
   if (win && line.args.some((a) => /["%\r\n]/.test(a))) {
-    return Promise.reject(new FiddleError(ErrorCode.invalidArgument, 'Argument not allowed on Windows'));
+    return Promise.reject(
+      new FiddleError(ErrorCode.invalidArgument, 'Argument not allowed on Windows'),
+    );
   }
   if (options.signal?.aborted) {
-    return Promise.reject(new FiddleError(ErrorCode.cancelled, `${line.command} was cancelled`));
+    return Promise.reject(
+      new FiddleError(ErrorCode.cancelled, `${line.command} was cancelled`),
+    );
   }
   return new Promise((resolve, reject) => {
     const child = spawn(line.command, win ? line.args.map((a) => `"${a}"`) : line.args, {
@@ -210,25 +241,32 @@ export function runCommand(line: CommandLine, options: RunCommandOptions = {}): 
       stdio: ['ignore', 'pipe', 'pipe'],
     });
     let output = '';
-    const onData = (chunk: Buffer) => {
-      const text = chunk.toString('utf8');
+    const onData = (text: string) => {
       output = (output + text).slice(-MAX_OUTPUT);
       options.onOutput?.(text);
     };
-    child.stdout?.on('data', onData);
-    child.stderr?.on('data', onData);
+    // Strings, so a multi-byte character split between two chunks stays whole.
+    child.stdout?.setEncoding('utf8').on('data', onData);
+    child.stderr?.setEncoding('utf8').on('data', onData);
     child.once('error', (error: NodeJS.ErrnoException) => {
       if (options.signal?.aborted || error.name === 'AbortError') {
         reject(new FiddleError(ErrorCode.cancelled, `${line.command} was cancelled`));
       } else {
-        reject(new FiddleError(ErrorCode.unavailable, `Could not start ${line.command}: ${error.message}`, {
-          command: line.command,
-          errno: error.code,
-        }));
+        reject(
+          new FiddleError(
+            ErrorCode.unavailable,
+            `Could not start ${line.command}: ${error.message}`,
+            {
+              command: line.command,
+              errno: error.code,
+            },
+          ),
+        );
       }
     });
     child.once('close', (code, signal) => {
-      if (options.signal?.aborted) reject(new FiddleError(ErrorCode.cancelled, `${line.command} was cancelled`));
+      if (options.signal?.aborted)
+        reject(new FiddleError(ErrorCode.cancelled, `${line.command} was cancelled`));
       else resolve({ code, signal, output });
     });
   });
@@ -239,7 +277,11 @@ export async function assertInsideDir(root: string, dir: string): Promise<void> 
   const [realRoot, realDir] = await Promise.all([realpath(root), realpath(dir)]);
   const rel = path.relative(realRoot, realDir);
   if (rel === '..' || rel.startsWith(`..${path.sep}`) || path.isAbsolute(rel)) {
-    throw new FiddleError(ErrorCode.invalidArgument, 'Modules can only be installed in a temp directory', { dir });
+    throw new FiddleError(
+      ErrorCode.invalidArgument,
+      'Modules can only be installed in a temp directory',
+      { dir },
+    );
   }
 }
 
@@ -255,11 +297,16 @@ export interface InstallModulesOptions extends InstallCommandOptions {
 }
 
 /** Runs the install in `dir`. Throws `install-failed` on a non-zero exit and `cancelled` on abort. */
-export async function installModules(options: InstallModulesOptions): Promise<CommandResult> {
+export async function installModules(
+  options: InstallModulesOptions,
+): Promise<CommandResult> {
   await assertInsideDir(options.tempRoot, options.dir);
   const line = buildInstallCommand(options);
   const env = envFromEntries(
-    [...Object.entries(options.env ?? fiddleProcessEnv()), ...Object.entries(line.env ?? {})],
+    [
+      ...Object.entries(options.env ?? fiddleProcessEnv()),
+      ...Object.entries(line.env ?? {}),
+    ],
     options.platform,
   );
   const result = await runCommand(line, {
@@ -281,32 +328,6 @@ export async function installModules(options: InstallModulesOptions): Promise<Co
 
 /** Fetches a package's registry metadata. */
 export type RegistryFetch = (name: string, signal?: AbortSignal) => Promise<unknown>;
-
-export const NPM_REGISTRY_URL = 'https://registry.npmjs.org';
-
-/** A `RegistryFetch` for the abbreviated metadata, which carries `hasInstallScript` per version. */
-export function createRegistryFetch(options: { fetch?: typeof fetch; registryUrl?: string } = {}): RegistryFetch {
-  const fetchFn = options.fetch ?? fetch;
-  const base = (options.registryUrl ?? NPM_REGISTRY_URL).replace(/\/+$/, '');
-  return async (name, signal) => {
-    if (!isValidPackageName(name)) throw new FiddleError(ErrorCode.invalidArgument, `Invalid package name: ${name}`);
-    const url = `${base}/${name.replace('/', '%2f')}`;
-    let res: Response;
-    try {
-      res = await fetchFn(url, { headers: { accept: 'application/vnd.npm.install-v1+json' }, signal });
-    } catch (error) {
-      if (signal?.aborted) throw new FiddleError(ErrorCode.cancelled, 'The registry request was cancelled');
-      throw new FiddleError(ErrorCode.network, `Could not reach ${base}`, {
-        cause: error instanceof Error ? error.message : String(error),
-      });
-    }
-    if (!res.ok) {
-      const code = res.status === 404 ? ErrorCode.notFound : ErrorCode.network;
-      throw new FiddleError(code, `${url} responded ${res.status}`, { status: res.status, name });
-    }
-    return res.json();
-  };
-}
 
 const PackumentSchema = z.object({
   'dist-tags': z.record(z.string(), z.string()).optional(),
@@ -330,14 +351,27 @@ export async function findInstallScripts(
   signal?: AbortSignal,
 ): Promise<InstallScriptPackage[]> {
   const found = await Promise.all(
-    Object.entries(modules).map(async ([name, spec]): Promise<InstallScriptPackage | null> => {
-      const parsed = PackumentSchema.safeParse(await registryFetch(name, signal));
-      if (!parsed.success) throw new FiddleError(ErrorCode.internal, `Unexpected registry metadata for ${name}`, { name });
-      const tags = parsed.data['dist-tags'] ?? {};
-      const { versions } = parsed.data;
-      const version = Object.hasOwn(tags, spec) ? tags[spec] : semver.maxSatisfying(Object.keys(versions), spec);
-      return version && Object.hasOwn(versions, version) && versions[version]!.hasInstallScript ? { name, version } : null;
-    }),
+    Object.entries(modules).map(
+      async ([name, spec]): Promise<InstallScriptPackage | null> => {
+        const parsed = PackumentSchema.safeParse(await registryFetch(name, signal));
+        if (!parsed.success)
+          throw new FiddleError(
+            ErrorCode.internal,
+            `Unexpected registry metadata for ${name}`,
+            { name },
+          );
+        const tags = parsed.data['dist-tags'] ?? {};
+        const { versions } = parsed.data;
+        const version = Object.hasOwn(tags, spec)
+          ? tags[spec]
+          : semver.maxSatisfying(Object.keys(versions), spec);
+        return version &&
+          Object.hasOwn(versions, version) &&
+          versions[version]!.hasInstallScript
+          ? { name, version }
+          : null;
+      },
+    ),
   );
   return found.filter((p) => p !== null);
 }

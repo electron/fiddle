@@ -1,7 +1,6 @@
 /**
- * One Monaco editor showing one fiddle file. Lucent editor: Commit Mono 13/20,
- * a 66px gutter, the cursor-line colour, minimap off and soft wrap on by
- * default. Runtime errors get an error lens: a view zone under the line.
+ * One Monaco editor showing one fiddle file. Runtime errors get an error lens:
+ * a view zone under the line.
  */
 import './editor.css';
 
@@ -13,11 +12,17 @@ import { windowApi } from '../../ipc/renderer';
 import { Icon } from '../../ui';
 import { useAppState } from '../state';
 import { setEditorActionProvider } from '../features/palette/editor-actions';
-import { clearFocusedEditor, setCursor, setFocusedEditor, useEditorViewState } from './editor-state';
+import {
+  clearFocusedEditor,
+  setCursor,
+  setFocusedEditor,
+  useEditorViewState,
+} from './editor-state';
 import styles from './EditorPane.module.css';
 import { useModel } from './models';
 import { monaco, monoFontFamily } from './monaco';
 import {
+  claimReveal,
   splitErrorMessage,
   useRevealRequest,
   useRuntimeErrors,
@@ -31,7 +36,6 @@ export interface EditorPaneProps {
   file: string;
   /** The focused pane: reports its cursor to the status bar even before its editor has focus. */
   primary?: boolean;
-  /** The editor's text area took focus. */
   onFocus?: () => void;
 }
 
@@ -51,7 +55,7 @@ export function EditorPane({ file, primary = false, onFocus }: EditorPaneProps) 
   const view = useEditorViewState();
   const app = useAppState();
   const settings = app?.settings ?? null;
-  // Font changes apply after a reload (REQUIREMENTS §17.2), so read them once.
+  // Font changes apply after a reload, so read them once.
   const font = useRef({
     family: settings?.editorFontFamily || monoFontFamily(),
     size: settings?.editorFontSize ?? 13,
@@ -93,7 +97,11 @@ export function EditorPane({ file, primary = false, onFocus }: EditorPaneProps) 
       overviewRulerLanes: 0,
       hideCursorInOverviewRuler: true,
       fixedOverflowWidgets: true,
-      scrollbar: { useShadows: false, verticalScrollbarSize: 10, horizontalScrollbarSize: 10 },
+      scrollbar: {
+        useShadows: false,
+        verticalScrollbarSize: 10,
+        horizontalScrollbarSize: 10,
+      },
       tabSize: 2,
     });
 
@@ -101,7 +109,8 @@ export function EditorPane({ file, primary = false, onFocus }: EditorPaneProps) 
     const fitGutter = () => {
       const info = instance.getLayoutInfo();
       const want = Math.max(0, GUTTER - info.glyphMarginWidth - info.lineNumbersWidth);
-      if (info.decorationsWidth !== want) instance.updateOptions({ lineDecorationsWidth: want });
+      if (info.decorationsWidth !== want)
+        instance.updateOptions({ lineDecorationsWidth: want });
     };
     const subscriptions = [
       instance.onDidLayoutChange(fitGutter),
@@ -144,7 +153,8 @@ export function EditorPane({ file, primary = false, onFocus }: EditorPaneProps) 
     if (!editor) return;
     const next = model ?? null;
     if (editor.getModel() === next) return;
-    if (shown.current && editor.getModel()) viewStates.current.set(shown.current, editor.saveViewState());
+    if (shown.current && editor.getModel())
+      viewStates.current.set(shown.current, editor.saveViewState());
     editor.setModel(next);
     shown.current = next ? file : null;
     const saved = viewStates.current.get(file);
@@ -169,11 +179,16 @@ export function EditorPane({ file, primary = false, onFocus }: EditorPaneProps) 
 
   // revealLocation(): move the cursor there and focus.
   const reveal = useRevealRequest();
-  const handled = useRef(0);
   useEffect(() => {
-    if (!editor || !model || !reveal || reveal.file !== file) return;
-    if (reveal.seq <= handled.current || editor.getModel() !== model) return;
-    handled.current = reveal.seq;
+    if (
+      !editor ||
+      !model ||
+      !reveal ||
+      reveal.file !== file ||
+      editor.getModel() !== model
+    )
+      return;
+    if (!claimReveal(reveal.seq)) return;
     editor.setPosition({ lineNumber: reveal.line, column: reveal.column });
     editor.revealLineInCenterIfOutsideViewport(reveal.line);
     editor.focus();
@@ -183,7 +198,8 @@ export function EditorPane({ file, primary = false, onFocus }: EditorPaneProps) 
   const errors = useRuntimeErrors();
   const mine = useMemo(() => {
     const byLine = new Map<number, RuntimeError>();
-    for (const error of errors) if (error.file === file && !byLine.has(error.line)) byLine.set(error.line, error);
+    for (const error of errors)
+      if (error.file === file && !byLine.has(error.line)) byLine.set(error.line, error);
     return [...byLine.values()];
   }, [errors, file]);
   useEffect(() => {
@@ -196,7 +212,11 @@ export function EditorPane({ file, primary = false, onFocus }: EditorPaneProps) 
         const inner = document.createElement('div');
         inner.className = 'lu-lens-zone';
         node.appendChild(inner);
-        const zone: monaco.editor.IViewZone = { afterLineNumber: error.line, heightInPx: 64, domNode: node };
+        const zone: monaco.editor.IViewZone = {
+          afterLineNumber: error.line,
+          heightInPx: 64,
+          domNode: node,
+        };
         const root = createRoot(inner);
         root.render(
           <I18nextProvider i18n={i18n}>
@@ -256,7 +276,12 @@ function Lens({ error }: { error: RuntimeError }) {
           <span className="lu-lens-title">{title ?? t('lensErrorTitle')}</span> {text}
         </div>
         <div className="lu-lens-hint">
-          {t('lensHint', { process, file: error.file, line: error.line, column: error.column })}
+          {t('lensHint', {
+            process,
+            file: error.file,
+            line: error.line,
+            column: error.column,
+          })}
         </div>
       </div>
     </div>

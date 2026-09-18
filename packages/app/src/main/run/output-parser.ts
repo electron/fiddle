@@ -45,12 +45,17 @@ const INSPECTOR_NOISE = [
   /^Waiting for the debugger to disconnect\.*$/,
 ];
 const LEVELS = '(INFO|WARNING|ERROR|FATAL|VERBOSE\\d*)';
-const CONSOLE_START = new RegExp(`^\\[[^\\]]*?:${LEVELS}:CONSOLE(?:\\(\\d+\\)|:\\d+)\\] "`);
+const CONSOLE_START = new RegExp(
+  `^\\[[^\\]]*?:${LEVELS}:CONSOLE(?:\\(\\d+\\)|:\\d+)\\] "`,
+);
 const CONSOLE_END = /", source: (.*?) \((\d+)\)$/;
 const CHROMIUM_LOG = new RegExp(`^\\[\\d+:[^\\]]*?:${LEVELS}:[^\\]]*\\]`);
-const ERROR_HEADER = /^(?:Uncaught Exception:\s*)?((?:[A-Z][\w$]*)?Error|[A-Z][\w$]*Exception)(?::\s?(.*))?$/;
-const UNCAUGHT = /^Uncaught (?:\(in promise\) )?((?:[A-Z][\w$]*)?Error|[A-Z][\w$]*Exception)(?::\s?([\s\S]*))?$/;
-const FRAME = /^\s+at (?:.*? \()?((?:file:\/\/)?(?:\/|[A-Za-z]:[\\/]).*?):(\d+):(\d+)\)?$/;
+const ERROR_HEADER =
+  /^(?:Uncaught Exception:\s*)?((?:[A-Z][\w$]*)?Error|[A-Z][\w$]*Exception)(?::\s?(.*))?$/;
+const UNCAUGHT =
+  /^Uncaught (?:\(in promise\) )?((?:[A-Z][\w$]*)?Error|[A-Z][\w$]*Exception)(?::\s?([\s\S]*))?$/;
+const FRAME =
+  /^\s+at (?:.*? \()?((?:file:\/\/)?(?:\/|[A-Za-z]:[\\/]).*?):(\d+):(\d+)\)?$/;
 const FRAME_ANY = /^\s+at /;
 const INLINE_FRAME = /\(?((?:file:\/\/)?(?:\/|[A-Za-z]:[\\/])[^\s()]*?):(\d+):(\d+)\)?/g;
 
@@ -70,7 +75,8 @@ export function mapToFiddleFile(
   }
   for (const root of roots) {
     const rel = path.relative(root, file);
-    if (rel && !rel.startsWith('..') && !path.isAbsolute(rel) && files.includes(rel)) return rel;
+    if (rel && !rel.startsWith('..') && !path.isAbsolute(rel) && files.includes(rel))
+      return rel;
   }
   return undefined;
 }
@@ -106,9 +112,12 @@ export class OutputParser {
 
   /** Feeds a chunk. Complete lines are parsed; a trailing partial line waits. */
   push(stream: 'stdout' | 'stderr', chunk: string): ParseResult {
-    const text = this.#partial[stream] + chunk;
-    const parts = text.split(/\r?\n/);
-    this.#partial[stream] = parts.pop() ?? '';
+    const parts = (this.#partial[stream] + chunk).split(/\r?\n/);
+    const partial = parts.pop() ?? '';
+    // Only the first MAX_LINE characters of an unfinished line are ever shown,
+    // so a huge line without a newline doesn't pile up or get re-scanned.
+    this.#partial[stream] =
+      partial.length > MAX_LINE ? partial.slice(0, MAX_LINE + 1) : partial;
     return this.#parseLines(stream, parts);
   }
 
@@ -138,7 +147,9 @@ export class OutputParser {
       const end = CONSOLE_END.exec(line);
       if (end || this.#console.parts.length >= MAX_CONTINUATION) {
         this.#console.parts.push(end ? line.slice(0, end.index) : line);
-        return this.#finishConsole(end ? { source: end[1]!, line: Number(end[2]) } : undefined);
+        return this.#finishConsole(
+          end ? { source: end[1]!, line: Number(end[2]) } : undefined,
+        );
       }
       this.#console.parts.push(line);
       return result;
@@ -184,12 +195,18 @@ export class OutputParser {
     if (pending && FRAME_ANY.test(line)) {
       const parsed: ParsedLine = { process: 'main', kind: 'error', text: truncate(line) };
       const frame = FRAME.exec(line);
-      const file = frame && mapToFiddleFile(frame[1]!, this.#options.roots, this.#options.files);
+      const file =
+        frame && mapToFiddleFile(frame[1]!, this.#options.roots, this.#options.files);
       if (frame && file && !pending.located) {
         pending.located = true;
         const location = { file, line: Number(frame[2]), column: Number(frame[3]) };
         parsed.location = location;
-        result.errors.push({ ...location, process: processFor(file), name: pending.name, message: pending.message });
+        result.errors.push({
+          ...location,
+          process: processFor(file),
+          name: pending.name,
+          message: pending.message,
+        });
       }
       result.lines.push(parsed);
       return result;
@@ -203,7 +220,8 @@ export class OutputParser {
     }
 
     this.#mainError = undefined;
-    if (line !== '') result.lines.push({ process: 'main', kind: 'log', text: truncate(line) });
+    if (line !== '')
+      result.lines.push({ process: 'main', kind: 'log', text: truncate(line) });
     return result;
   }
 
@@ -242,7 +260,10 @@ export class OutputParser {
   }
 
   /** A stack frame inside the run directory wins (it has a column); otherwise the `source`. */
-  #locate(message: string, end: { source: string; line: number } | undefined): SourceLocation | undefined {
+  #locate(
+    message: string,
+    end: { source: string; line: number } | undefined,
+  ): SourceLocation | undefined {
     const { roots, files } = this.#options;
     for (const match of message.matchAll(INLINE_FRAME)) {
       const file = mapToFiddleFile(match[1]!, roots, files);

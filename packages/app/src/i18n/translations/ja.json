@@ -34,21 +34,6 @@
     "translation": "059281f9b795",
     "reviewed": false
   },
-  "common:appName": {
-    "source": "ec28e55d864c",
-    "translation": "ec28e55d864c",
-    "reviewed": false
-  },
-  "common:loading": {
-    "source": "ba3bbbe10d8b",
-    "translation": "6dc96d99ab72",
-    "reviewed": false
-  },
-  "common:scaffoldStatus": {
-    "source": "7e3aa721426f",
-    "translation": "d3d7fc00e23f",
-    "reviewed": false
-  },
   "gists:accountLabel": {
     "source": "d686f873a566",
     "translation": "d7fc95247813",
@@ -1394,6 +1379,16 @@
     "translation": "008c93ee6a59",
     "reviewed": false
   },
+  "mainDocuments:restoreFailedDetail": {
+    "source": "62556a003538",
+    "translation": "cf150597dd8a",
+    "reviewed": false
+  },
+  "mainDocuments:restoreFailedMessage": {
+    "source": "d43045656631",
+    "translation": "ebf645a59d31",
+    "reviewed": false
+  },
   "mainDocuments:restoreMessage": {
     "source": "3082330c3c06",
     "translation": "142a8b8bb13d",
@@ -1607,11 +1602,6 @@
   "mainRun:cancel": {
     "source": "19766ed6ccb2",
     "translation": "bca84ea5c65f",
-    "reviewed": false
-  },
-  "mainRun:cannotChangeWhileRunning": {
-    "source": "bc31d120b783",
-    "translation": "df42ee75f184",
     "reviewed": false
   },
   "mainRun:cannotRemoveActive": {
@@ -2519,19 +2509,9 @@
     "translation": "569af1a47dbd",
     "reviewed": false
   },
-  "run:hintMissing": {
-    "source": "ffa63583dfa6",
-    "translation": "c911a6feff6b",
-    "reviewed": false
-  },
   "run:hintNightly": {
     "source": "2a3b62b53ddb",
     "translation": "d309b9ec5e8f",
-    "reviewed": false
-  },
-  "run:hintPercent": {
-    "source": "6eae0dff5b4b",
-    "translation": "6eae0dff5b4b",
     "reviewed": false
   },
   "run:installingModules": {
@@ -3050,8 +3030,8 @@
     "reviewed": false
   },
   "settings:mirror.invalidUrl": {
-    "source": "0c2dd775232e",
-    "translation": "4278a13f6bfb",
+    "source": "9ba6da027206",
+    "translation": "2af0087237ef",
     "reviewed": false
   },
   "settings:mirror.title": {
@@ -3444,11 +3424,6 @@
     "translation": "fd792ff85de0",
     "reviewed": false
   },
-  "shell:hiddenFile": {
-    "source": "7e6fefff0f0a",
-    "translation": "8389c10f44c0",
-    "reviewed": false
-  },
   "shell:hideFile": {
     "source": "ac20a57bfde0",
     "translation": "8389c10f44c0",
@@ -3529,11 +3504,6 @@
     "translation": "87683296a693",
     "reviewed": false
   },
-  "shell:popOut": {
-    "source": "fd37e36d80f3",
-    "translation": "451eaf3a386e",
-    "reviewed": false
-  },
   "shell:processMain": {
     "source": "8d1a09cfd347",
     "translation": "52d2eb29762f",
@@ -3607,51 +3577,6 @@
   "shell:status": {
     "source": "920e413c7d41",
     "translation": "bc30238ae718",
-    "reviewed": false
-  },
-  "shell:stubAddPackage": {
-    "source": "6a6e7053ec9b",
-    "translation": "1f432de0e995",
-    "reviewed": false
-  },
-  "shell:stubCloseSettings": {
-    "source": "11a6767d5674",
-    "translation": "103163945403",
-    "reviewed": false
-  },
-  "shell:stubConsole": {
-    "source": "29a40861bafe",
-    "translation": "04e33ef78efe",
-    "reviewed": false
-  },
-  "shell:stubPackages": {
-    "source": "40a2085371b8",
-    "translation": "faca15b19ede",
-    "reviewed": false
-  },
-  "shell:stubPublish": {
-    "source": "859390eb495b",
-    "translation": "b8765f4645e4",
-    "reviewed": false
-  },
-  "shell:stubReady": {
-    "source": "5fa7aac5375c",
-    "translation": "d888e7c7a830",
-    "reviewed": false
-  },
-  "shell:stubRun": {
-    "source": "00d60e31a4e6",
-    "translation": "77721d5dea60",
-    "reviewed": false
-  },
-  "shell:stubSettingsTitle": {
-    "source": "74a883a037bc",
-    "translation": "0d8619aae051",
-    "reviewed": false
-  },
-  "shell:stubVersion": {
-    "source": "61a62a841f54",
-    "translation": "61a62a841f54",
     "reviewed": false
   },
   "shell:tabFocusMode": {

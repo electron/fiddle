@@ -1,5 +1,5 @@
 /**
- * Headless mode (REQUIREMENTS §7): `electron-fiddle --headless <command>`.
+ * Headless mode: `electron-fiddle --headless <command>`.
  *
  * main/index.ts checks for `--headless` before the single-instance lock and
  * hands over here instead of starting the app. So headless mode never takes
@@ -11,7 +11,7 @@
  */
 import { app } from 'electron';
 
-import { FiddleError } from '../../shared/errors';
+import { ErrorCode, FiddleError } from '../../shared/errors';
 import { initMainI18n, tm } from '../i18n';
 import { helpText, parseCommandLine } from './argv';
 import { runCommand } from './commands';
@@ -31,11 +31,22 @@ export function startHeadless(args: string[]): void {
   // There are no windows, so Chromium needn't start the GPU process.
   app.disableHardwareAcceleration();
   quietConsole();
+  // A closed pipe (`fiddle run x | head -1`) is not a crash: stop the command the way Ctrl+C does.
+  for (const stream of [process.stdout, process.stderr]) {
+    stream.on('error', (error: NodeJS.ErrnoException) => {
+      if (error.code === 'EPIPE') controller.abort();
+    });
+  }
   main(args).then(exit, (error: unknown) => {
-    process.stderr.write(`${error instanceof Error ? (error.stack ?? error.message) : String(error)}\n`);
+    process.stderr.write(
+      `${error instanceof Error ? (error.stack ?? error.message) : String(error)}\n`,
+    );
     return exit(70);
   });
 }
+
+/** Aborted by SIGINT, SIGTERM or a closed pipe. */
+const controller = new AbortController();
 
 const io: Writers = {
   stdout: (text) => void process.stdout.write(text),
@@ -62,14 +73,23 @@ async function main(args: string[]): Promise<number> {
   }
 
   const reporter = new Reporter(parsed.json, parsed.command, io);
-  const controller = new AbortController();
-  for (const signal of ['SIGINT', 'SIGTERM'] as const) process.on(signal, () => controller.abort());
+  for (const signal of ['SIGINT', 'SIGTERM'] as const) {
+    process.on(signal, () => {
+      // A second signal doesn't wait for the command to wind down.
+      if (controller.signal.aborted) void exit(130);
+      else controller.abort();
+    });
+  }
   try {
-    const code = await runCommand(parsed.command, parsed.input, { reporter, signal: controller.signal });
+    const code = await runCommand(parsed.command, parsed.input, {
+      reporter,
+      signal: controller.signal,
+    });
     return controller.signal.aborted ? 130 : code;
   } catch (error) {
-    if (controller.signal.aborted) return 130;
     const e = FiddleError.from(error);
+    // Ctrl+C at a prompt cancels the command, like a signal does.
+    if (controller.signal.aborted || e.code === ErrorCode.cancelled) return 130;
     if (e.code === 'internal') console.error(error);
     reporter.error(e, t('errorPrefix', { message: e.message }));
     return exitCodeForError(e.code);
@@ -79,7 +99,9 @@ async function main(args: string[]): Promise<number> {
 /** Main's info logs would mix into stdout. FIDDLE_CLI_VERBOSE=1 sends them to stderr instead. */
 function quietConsole(): void {
   const sink =
-    process.env.FIDDLE_CLI_VERBOSE === '1' ? (...data: unknown[]) => console.error(...data) : () => {};
+    process.env.FIDDLE_CLI_VERBOSE === '1'
+      ? (...data: unknown[]) => console.error(...data)
+      : () => {};
   console.log = sink;
   console.info = sink;
   console.debug = sink;
@@ -87,7 +109,8 @@ function quietConsole(): void {
 
 async function exit(code: number): Promise<void> {
   // Pipes can be asynchronous; let them drain before the process ends.
-  const drain = (stream: NodeJS.WriteStream) => new Promise<void>((resolve) => stream.write('', () => resolve()));
+  const drain = (stream: NodeJS.WriteStream) =>
+    new Promise<void>((resolve) => stream.write('', () => resolve()));
   await Promise.all([drain(process.stdout), drain(process.stderr)]);
   app.exit(code);
 }

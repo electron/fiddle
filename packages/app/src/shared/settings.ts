@@ -1,6 +1,6 @@
 /**
- * Settings: the zod schema with a default for every setting (REQUIREMENTS
- * §17.13), plus the pure helpers main and the renderer share.
+ * Settings: the zod schema with a default for every setting, plus the pure
+ * helpers main and the renderer share.
  *
  * - `<userData>/settings.json` stores only values that differ from the
  *   defaults (sparse). The defaults live here, in code.
@@ -24,12 +24,19 @@ import type { Platform } from './stores';
 /** The built-in theme: Lucent dark or Lucent light, following `appearance`. */
 export const BUILTIN_THEME = 'lucent';
 
-/** The built-in high-contrast themes (REQUIREMENTS §10). OS high contrast shows Lucent this way too. */
-export const HIGH_CONTRAST_THEMES = { dark: 'lucent-hc-dark', light: 'lucent-hc-light' } as const;
+/** The built-in high-contrast themes. OS high contrast shows Lucent this way too. */
+export const HIGH_CONTRAST_THEMES = {
+  dark: 'lucent-hc-dark',
+  light: 'lucent-hc-light',
+} as const;
 
 /** Lucent and its high-contrast variants: themes without a file. */
 export function isBuiltinTheme(id: string): boolean {
-  return id === BUILTIN_THEME || id === HIGH_CONTRAST_THEMES.dark || id === HIGH_CONTRAST_THEMES.light;
+  return (
+    id === BUILTIN_THEME ||
+    id === HIGH_CONTRAST_THEMES.dark ||
+    id === HIGH_CONTRAST_THEMES.light
+  );
 }
 
 export const releaseChannelSchema = z.enum(['stable', 'beta', 'nightly']);
@@ -61,25 +68,31 @@ export function isHttpsUrl(value: string): boolean {
 
 const mirrorUrl = z.union([z.literal(''), z.url({ protocol: /^https$/ }).max(2000)]);
 
-/** Settings that change what a run executes or where Electron comes from. */
+/** Settings that change what a run executes, how modules install, or where Electron comes from. */
 export const EXECUTION_SETTINGS = [
   'electronFlags',
   'environmentVariables',
   'mirror',
   'customMirrorElectron',
   'customMirrorNightly',
+  'packageManager',
+  'socketFirewall',
 ] as const;
 
 /** The execution settings `next` changes from `current`, e.g. for the settings import confirmation. */
-export function changedExecutionSettings(current: Settings, next: Settings): (typeof EXECUTION_SETTINGS)[number][] {
-  return EXECUTION_SETTINGS.filter((key) => JSON.stringify(current[key]) !== JSON.stringify(next[key]));
+export function changedExecutionSettings(
+  current: Settings,
+  next: Settings,
+): (typeof EXECUTION_SETTINGS)[number][] {
+  return EXECUTION_SETTINGS.filter(
+    (key) => JSON.stringify(current[key]) !== JSON.stringify(next[key]),
+  );
 }
 /** Theme IDs are file names in `<userData>/themes/`, without `.json`. */
 export const themeIdSchema = z.string().regex(/^[A-Za-z0-9][\w.-]{0,99}$/);
 export const acceleratorSchema = z.string().min(1).max(100);
 
 export const settingsSchema = z.object({
-  // General
   appearance: z.enum(['system', 'light', 'dark']).default('system'),
   theme: themeIdSchema.default(BUILTIN_THEME),
   /** `system` or a language code such as `de` or `pt-BR`. */
@@ -90,7 +103,7 @@ export const settingsSchema = z.object({
   sessionRestore: z.boolean().default(true),
   notifications: z.boolean().default(true),
 
-  // Editor. Empty or null means Lucent's default.
+  // Editor font: empty or null means Lucent's default.
   editorFontFamily: z
     .string()
     .max(200)
@@ -98,12 +111,16 @@ export const settingsSchema = z.object({
     .default(''),
   editorFontSize: z.number().int().min(8).max(40).nullable().default(null),
 
-  // Execution
   clearConsoleOnRun: z.boolean().default(false),
   electronFlags: z.array(z.string().min(1).max(1000)).max(100).default([]),
   /** `KEY=value` entries. */
   environmentVariables: z
-    .array(z.string().max(10_000).regex(/^[A-Za-z_][A-Za-z0-9_]*=/))
+    .array(
+      z
+        .string()
+        .max(10_000)
+        .regex(/^[A-Za-z_][A-Za-z0-9_]*=/),
+    )
     .max(100)
     .default([]),
   packageManager: z.enum(['npm', 'yarn']).default('npm'),
@@ -111,7 +128,6 @@ export const settingsSchema = z.object({
   keepUserDataDirs: z.boolean().default(false),
   electronLogging: z.boolean().default(false),
 
-  // Electron
   channels: z.array(releaseChannelSchema).default(['stable', 'beta']),
   showNotDownloaded: z.boolean().default(true),
   showObsolete: z.boolean().default(false),
@@ -119,18 +135,19 @@ export const settingsSchema = z.object({
   customMirrorElectron: mirrorUrl.default(''),
   customMirrorNightly: mirrorUrl.default(''),
 
-  // GitHub. An empty author means the OS user name.
+  // An empty author means the OS user name.
   packageAuthor: z.string().max(200).default(''),
   gistShowHistory: z.boolean().default(true),
   gistPublishAsRevision: z.boolean().default(true),
   gistVisibility: z.enum(['secret', 'public']).default('secret'),
 
-  // Accessibility, privacy, updates
   screenReader: z.enum(['auto', 'on', 'off']).default('auto'),
   crashReports: z.boolean().default(true),
   betaUpdates: z.boolean().default(false),
 
-  keybindings: z.record(z.string().min(1).max(100), acceleratorSchema.nullable()).default({}),
+  keybindings: z
+    .record(z.string().min(1).max(100), acceleratorSchema.nullable())
+    .default({}),
 });
 
 export type Settings = z.infer<typeof settingsSchema>;
@@ -144,8 +161,6 @@ export const defaultSettings: Settings = settingsSchema.parse({});
 export const settingKeySchema = z.enum(settingKeys as [SettingKey, ...SettingKey[]]);
 export const settingValueSchema = z.unknown();
 export type SettingValue = z.infer<typeof settingValueSchema>;
-
-// Themes (REQUIREMENTS §17.12). Custom themes are `<userData>/themes/<id>.json`.
 
 const HEX = /^#?[0-9a-fA-F]{3,8}$/;
 const CSS_FUNCTION = /^(?:rgba?|hsla?|hwb|lab|lch|oklab|oklch)\([\d\s.,%/+-]*\)$/i;
@@ -171,7 +186,11 @@ export const monacoThemeSchema = z
           token: z.string().max(200),
           foreground: monacoColor.optional(),
           background: monacoColor.optional(),
-          fontStyle: z.string().max(50).regex(/^[a-z ]*$/).optional(),
+          fontStyle: z
+            .string()
+            .max(50)
+            .regex(/^[a-z ]*$/)
+            .optional(),
         }),
       )
       .max(5000)
@@ -186,9 +205,13 @@ export type MonacoTheme = z.infer<typeof monacoThemeSchema>;
 /** `common` keys are Lucent token names without the prefix: `accent` sets `--lu-accent`. */
 export const themeTokensSchema = z
   .record(z.string().regex(/^[a-z][a-z0-9-]{0,60}$/), z.string().max(300))
-  .refine((tokens) => Object.entries(tokens).every(([name, value]) => isSafeTokenValue(name, value)), {
-    message: 'Theme tokens must be colours or font names',
-  });
+  .refine(
+    (tokens) =>
+      Object.entries(tokens).every(([name, value]) => isSafeTokenValue(name, value)),
+    {
+      message: 'Theme tokens must be colours or font names',
+    },
+  );
 
 /** Written into every theme file. Files without one are version 1. */
 export const THEME_SCHEMA_VERSION = 1;
@@ -227,7 +250,6 @@ export const storageNoticeSchema = z.object({
   /** The file's base name, e.g. `settings.json`. */
   file: z.string(),
 });
-export type StorageNotice = z.infer<typeof storageNoticeSchema>;
 
 /** What `settings.json` holds: only the values that differ from the defaults. */
 export type SparseSettings = Partial<Settings>;
@@ -244,7 +266,8 @@ export function parseSetting<K extends SettingKey>(
 /** Structural equality for JSON values; object key order doesn't matter. */
 export function sameValue(a: unknown, b: unknown): boolean {
   if (a === b) return true;
-  if (typeof a !== 'object' || typeof b !== 'object' || a === null || b === null) return false;
+  if (typeof a !== 'object' || typeof b !== 'object' || a === null || b === null)
+    return false;
   if (Array.isArray(a) !== Array.isArray(b)) return false;
   const aKeys = Object.keys(a);
   const bKeys = Object.keys(b);
@@ -253,7 +276,10 @@ export function sameValue(a: unknown, b: unknown): boolean {
     aKeys.every(
       (key) =>
         Object.hasOwn(b, key) &&
-        sameValue((a as Record<string, unknown>)[key], (b as Record<string, unknown>)[key]),
+        sameValue(
+          (a as Record<string, unknown>)[key],
+          (b as Record<string, unknown>)[key],
+        ),
     )
   );
 }
@@ -264,34 +290,16 @@ export function isModified(settings: Settings, key: SettingKey): boolean {
 
 export function toSparse(settings: Settings): SparseSettings {
   const sparse: Record<string, unknown> = {};
-  for (const key of settingKeys) if (isModified(settings, key)) sparse[key] = settings[key];
+  for (const key of settingKeys)
+    if (isModified(settings, key)) sparse[key] = settings[key];
   return sparse as SparseSettings;
 }
 
 export function fromSparse(sparse: SparseSettings): Settings {
   const settings: Record<string, unknown> = { ...defaultSettings };
-  for (const key of settingKeys) if (sparse[key] !== undefined) settings[key] = sparse[key];
+  for (const key of settingKeys)
+    if (sparse[key] !== undefined) settings[key] = sparse[key];
   return settings as Settings;
-}
-
-/** The download mirror for a channel, resolving `auto` from the system locales. */
-export function resolveMirror(
-  settings: Pick<Settings, 'mirror' | 'customMirrorElectron' | 'customMirrorNightly'>,
-  systemLocales: readonly string[],
-): { electron: string; nightly: string } {
-  switch (settings.mirror) {
-    case 'custom':
-      return {
-        electron: settings.customMirrorElectron || MIRRORS.default.electron,
-        nightly: settings.customMirrorNightly || MIRRORS.default.nightly,
-      };
-    case 'china':
-      return MIRRORS.china;
-    case 'default':
-      return MIRRORS.default;
-    case 'auto':
-      return /^zh(-|$)/i.test(systemLocales[0] ?? '') ? MIRRORS.china : MIRRORS.default;
-  }
 }
 
 /** Locales to pick the UI language from: the setting first (unless `system`), then the OS's. */
@@ -307,13 +315,15 @@ export function resolveScreenReader(
   return setting === 'auto' ? osEnabled : setting === 'on';
 }
 
-// Keybindings
-
 /**
  * A command's keybindings after overrides. An override (or `null`) replaces
  * all of the command's defaults, so overriding `run.toggle` drops F5 too.
  */
-export function effectiveAccelerators(id: CommandId, platform: Platform, keybindings: Keybindings): string[] {
+export function effectiveAccelerators(
+  id: CommandId,
+  platform: Platform,
+  keybindings: Keybindings,
+): string[] {
   if (Object.hasOwn(keybindings, id)) {
     const override = keybindings[id];
     return override ? [override] : [];
@@ -346,7 +356,7 @@ function isKeyContext(value: string): value is KeyContext {
 }
 
 /**
- * Every keybinding after overrides (REQUIREMENTS §3). A command's bindings
+ * Every keybinding after overrides. A command's bindings
  * take its definition's context. An override key `<commandId>@<context>`
  * (`editor`, `console` or `running`) adds a binding that only applies there,
  * e.g. `{ "run.toggle@editor": "CmdOrCtrl+Enter" }`; `null` there adds none.
@@ -360,21 +370,25 @@ export function resolveKeybindings(
   const add = (id: CommandId, accelerator: string, context: KeyContext | undefined) =>
     bindings.push(context ? { id, accelerator, context } : { id, accelerator });
   for (const id of ids) {
-    for (const accelerator of effectiveAccelerators(id, platform, keybindings)) add(id, accelerator, getCommand(id).context);
+    for (const accelerator of effectiveAccelerators(id, platform, keybindings))
+      add(id, accelerator, getCommand(id).context);
   }
   for (const [key, accelerator] of Object.entries(keybindings)) {
     const at = key.lastIndexOf('@');
     if (at < 0 || !accelerator) continue;
     const id = key.slice(0, at);
     const context = key.slice(at + 1);
-    if (isCommandId(id) && ids.includes(id) && isKeyContext(context)) add(id, accelerator, context);
+    if (isCommandId(id) && ids.includes(id) && isKeyContext(context))
+      add(id, accelerator, context);
   }
   return bindings;
 }
 
 /** The editor and the console never have focus together; the fiddle runs whatever has focus. */
 function contextsOverlap(a: KeyContext | undefined, b: KeyContext | undefined): boolean {
-  return a === undefined || b === undefined || a === b || a === 'running' || b === 'running';
+  return (
+    a === undefined || b === undefined || a === b || a === 'running' || b === 'running'
+  );
 }
 
 /**
@@ -471,7 +485,8 @@ export function findConflicts(
   for (const [key, list] of byAccelerator) {
     const clashing = new Set<CommandId>();
     for (const a of list) {
-      if (list.some((b) => b.id !== a.id && contextsOverlap(a.context, b.context))) clashing.add(a.id);
+      if (list.some((b) => b.id !== a.id && contextsOverlap(a.context, b.context)))
+        clashing.add(a.id);
     }
     if (clashing.size > 1) conflicts.set(key, [...clashing]);
   }
@@ -485,7 +500,11 @@ export interface KeyInput {
   ctrlKey: boolean;
   altKey: boolean;
   shiftKey: boolean;
+  /** A `KeyboardEvent` has it. Tells AltGr, which types a character, from a Ctrl+Alt shortcut. */
+  getModifierState?: (key: string) => boolean;
 }
+
+const ASCII_PRINTABLE = /^[\x20-\x7e]$/;
 
 const NAMED_KEYS: Record<string, string> = {
   ' ': 'Space',
@@ -510,14 +529,23 @@ const NAMED_KEYS: Record<string, string> = {
  * Turns a key press into an Electron accelerator, or undefined while only
  * modifiers are held. The platform's primary modifier becomes `CmdOrCtrl`.
  */
-export function acceleratorFromKey(input: KeyInput, platform: Platform): string | undefined {
-  if (['Meta', 'Control', 'Alt', 'Shift', 'AltGraph', 'OS'].includes(input.key)) return undefined;
+export function acceleratorFromKey(
+  input: KeyInput,
+  platform: Platform,
+): string | undefined {
+  if (['Meta', 'Control', 'Alt', 'Shift', 'AltGraph', 'OS'].includes(input.key))
+    return undefined;
+  if (input.key.length === 1 && input.getModifierState?.('AltGraph')) return undefined;
   let key: string | undefined = NAMED_KEYS[input.key];
   if (!key && /^F([1-9]|1\d|2[0-4])$/.test(input.key)) key = input.key;
-  // Prefer the physical key for letters and digits, so Alt+letter on macOS isn't "å".
+  // What the user typed on their layout (AZERTY, Dvorak, ...) is what accelerators name.
+  if (!key && /^[a-z0-9]$/i.test(input.key)) key = input.key.toUpperCase();
+  // The physical key stands in where the typed character isn't a Latin letter or digit:
+  // a non-Latin layout, macOS Option ("å"), or a symbol on the digit row ("&" on AZERTY, "!" with Shift).
   if (!key && input.code) {
     const match = /^(?:Key([A-Z])|Digit(\d))$/.exec(input.code);
-    if (match) key = match[1] ?? match[2];
+    if (match && (match[2] || !ASCII_PRINTABLE.test(input.key)))
+      key = match[1] ?? match[2];
   }
   if (!key && input.key.length === 1) key = input.key.toUpperCase();
   if (!key) return undefined;

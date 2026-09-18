@@ -2,25 +2,30 @@ import { act, fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 const mocks = vi.hoisted(() => ({
-  githubApi: { ReadClipboardGist: vi.fn<() => Promise<string | null>>(() => Promise.resolve(null)) },
+  githubApi: {
+    ReadClipboardGist: vi.fn<() => Promise<string | null>>(() => Promise.resolve(null)),
+  },
   documentsApi: { LoadGist: vi.fn(() => Promise.resolve(1)) },
 }));
 
-vi.mock('../../../ipc/renderer', () => ({ githubApi: mocks.githubApi, documentsApi: mocks.documentsApi }));
+vi.mock('../../../ipc/renderer', () => ({
+  githubApi: mocks.githubApi,
+  documentsApi: mocks.documentsApi,
+}));
 vi.mock('./state', () => ({ useLoadedGist: () => undefined }));
 vi.mock('react-i18next', () => ({ useTranslation: () => ({ t: (key: string) => key }) }));
 
 import { OpenGistDialog } from './OpenGistDialog';
 
 const LINK = 'https://gist.github.com/fiddle/8c5fc0c6a5153d49b5a4a56d3ed9da8f';
-const field = () => screen.getByRole('textbox', { name: 'openLabel' }) as HTMLInputElement;
+const field = () =>
+  screen.getByRole('textbox', { name: 'openLabel' }) as HTMLInputElement;
 
 beforeEach(() => {
   vi.clearAllMocks();
   mocks.githubApi.ReadClipboardGist.mockResolvedValue(null);
 });
 
-// @feature load.gist-open-clipboard
 describe('OpenGistDialog', () => {
   it('offers the gist link on the clipboard, selected, and opens it', async () => {
     mocks.githubApi.ReadClipboardGist.mockResolvedValue(LINK);
@@ -29,12 +34,16 @@ describe('OpenGistDialog', () => {
     expect([field().selectionStart, field().selectionEnd]).toEqual([0, LINK.length]);
 
     fireEvent.click(screen.getByRole('button', { name: 'openSubmit' }));
-    await waitFor(() => expect(mocks.documentsApi.LoadGist).toHaveBeenCalledWith(LINK, null));
+    await waitFor(() =>
+      expect(mocks.documentsApi.LoadGist).toHaveBeenCalledWith(LINK, null),
+    );
   });
 
   it('leaves the field alone once something was typed', async () => {
     let paste: (text: string | null) => void = () => undefined;
-    mocks.githubApi.ReadClipboardGist.mockReturnValue(new Promise((resolve) => (paste = resolve)));
+    mocks.githubApi.ReadClipboardGist.mockReturnValue(
+      new Promise((resolve) => (paste = resolve)),
+    );
     render(<OpenGistDialog onClose={vi.fn()} />);
     fireEvent.change(field(), { target: { value: 'abc' } });
     await act(async () => paste(LINK));

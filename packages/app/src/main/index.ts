@@ -1,24 +1,24 @@
 /**
- * Main process entry and composition root. Main owns all state (StateHub),
- * the command registry, menus, windows and the app:// protocol. See
- * CLAUDE.md "Architecture map".
- *
- * Before `ready`: Squirrel → headless CLI → test harness → crash reporting →
- * scheme and sandbox → single-instance lock and deep-link queue → main().
- * The harness comes before the lock because it moves userData, which the
- * lock is keyed on.
+ * Main process entry and composition root. Before `ready`: Squirrel, headless
+ * CLI, test harness, crash reporting, scheme and sandbox, then the
+ * single-instance lock and deep-link queue. The harness comes before the lock
+ * because it moves userData, which the lock is keyed on.
  */
 import path from 'node:path';
 
-import { app, BrowserWindow } from 'electron';
+import { app, BrowserWindow, dialog } from 'electron';
 
 import { registerCommands } from './app-commands';
 import { headlessArgs, startHeadless } from './cli';
 import { initCrashReporting } from './crash/sentry';
 import { installDevCsp } from './csp';
-import { installEarlyDocumentHandlers, openFiddleWindow, startDocuments } from './documents/service';
+import {
+  installEarlyDocumentHandlers,
+  openFiddleWindow,
+  startDocuments,
+} from './documents/service';
 import { initMainI18n } from './i18n';
-import { initLogFile, log } from './log';
+import { flushLog, initLogFile, log, logsDir } from './log';
 import { installMenu } from './menu';
 import { runMigration } from './migration';
 import { installFlushOnExit } from './persistence/lifecycle';
@@ -39,14 +39,15 @@ import { detectMaterial, detectPlatform, rendererEntry } from './window';
 // creates or removes shortcuts, then quits.
 const squirrelEvent = handleSquirrelStartup();
 
-// Headless CLI (REQUIREMENTS §7): `--headless <command>` runs one command and
+// Headless CLI: `--headless <command>` runs one command and
 // exits with its code. No lock, windows, migration, updates, crash reports or stores.
 const headless = squirrelEvent ? undefined : headlessArgs(process.argv);
 if (headless) startHeadless(headless);
 
-// Test builds only (CLAUDE.md "E2E"): temp dirs, stubs, network guard and the
-// e2e driver, before anything reads app paths. Release builds compile it out.
-const testHarness = __FIDDLE_TEST_BUILD__ && isTestMode() ? installTestHarness() : undefined;
+// Test builds only: temp dirs, stubs, network guard and the e2e driver, before
+// anything reads app paths. Release builds compile it out.
+const testHarness =
+  __FIDDLE_TEST_BUILD__ && isTestMode() ? installTestHarness() : undefined;
 
 // Sentry starts before `ready`, if "Send crash reports" allows it (off in dev, test and headless mode).
 if (!squirrelEvent) initCrashReporting();
@@ -54,7 +55,7 @@ if (!squirrelEvent) initCrashReporting();
 // Both must happen before `ready`.
 registerAppScheme();
 app.enableSandbox();
-// Chromium's UI language (`--lang`) follows the language setting (§9).
+// Chromium's UI language (`--lang`) follows the language setting.
 if (!squirrelEvent && !headless) applyChromiumLanguage();
 
 // The single-instance lock, and deep links (`argv`, `second-instance`,
@@ -77,7 +78,13 @@ async function main(): Promise<void> {
   const locale = await initMainI18n(preferredLocales(settingsFile.store));
   const hub = new StateHub(
     // `dev`: unpackaged (development and test) builds get the Develop menu and its commands.
-    { locale, platform, material: detectMaterial(platform), dev: !app.isPackaged, ...settingsFile.initialApp },
+    {
+      locale,
+      platform,
+      material: detectMaterial(platform),
+      dev: !app.isPackaged,
+      ...settingsFile.initialApp,
+    },
     (error) => log.error('store push failed', error),
   );
   installFlushOnExit();
@@ -95,7 +102,12 @@ async function main(): Promise<void> {
   }
 
   // 4. Services, each created once.
-  const services = await createServices({ hub, settings, platform, rendererUrl: entry.url });
+  const services = await createServices({
+    hub,
+    settings,
+    platform,
+    rendererUrl: entry.url,
+  });
 
   // 5. Commands and the menu.
   registerCommands(services.registry, services);
@@ -107,18 +119,36 @@ async function main(): Promise<void> {
   await startPlatform(hub, migration.firstLaunch);
   installOsIntegration(services);
   app.on('activate', () => {
-    if (BrowserWindow.getAllWindows().length === 0) void openFiddleWindow();
+    if (BrowserWindow.getAllWindows().length === 0) {
+      openFiddleWindow().catch((error: unknown) =>
+        log.error('could not open a window', error),
+      );
+    }
   });
   await startDocuments();
   // A Windows jump list task that started the app opens its folder now.
   openColdStartFolder();
 }
 
+/** A failed startup leaves no window: the reason goes to the log file and an error box, then the app exits. */
+async function failStartup(error: unknown): Promise<void> {
+  log.error('startup failed', error);
+  try {
+    if (!logsDir()) initLogFile(path.join(app.getPath('userData'), 'logs'));
+    await flushLog();
+  } catch {
+    // The console has the entry.
+  }
+  if (!isTestMode())
+    dialog.showErrorBox(
+      app.getName(),
+      error instanceof Error ? error.message : String(error),
+    );
+  app.exit(1);
+}
+
 if (primary) {
-  main().catch((error: unknown) => {
-    log.error('startup failed', error);
-    app.exit(1);
-  });
+  void main().catch(failStartup);
 } else if (!squirrelEvent && !headless) {
   // Another instance has the lock; it got our deep link or focus request.
   app.quit();

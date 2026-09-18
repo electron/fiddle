@@ -1,13 +1,10 @@
-import { randomBytes } from 'node:crypto';
 import fs from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
 import { setTimeout as sleep } from 'node:timers/promises';
 
 import { FiddleCoreError, abortError, throwIfAborted } from './errors.js';
-import { rename } from './fs-util.js';
 
-/** The contents of a lock file. */
 export interface LockInfo {
   pid: number;
   hostname: string;
@@ -26,15 +23,16 @@ export interface LockOptions {
   /** How often to retry a held lock. Default: 100 ms. */
   pollMs?: number;
   /**
-   * Age after which a lock from another host is stale. A held lock refreshes
-   * its file's mtime every third of this. Default: {@link LOCK_STALE_MS}.
+   * Age after which a lock is stale, if its file hasn't been touched. A held
+   * lock refreshes its file's mtime every third of this. Default:
+   * {@link LOCK_STALE_MS}.
    */
   staleMs?: number;
 }
 
 /**
- * A lock from another host is stale once its file hasn't been touched for this
- * long. While a lock is held, its mtime is refreshed every third of this.
+ * A lock is stale once its file hasn't been touched for this long. While a lock
+ * is held, its mtime is refreshed every third of this.
  */
 export const LOCK_STALE_MS = 10 * 60 * 1000;
 
@@ -67,7 +65,6 @@ function parseLockInfo(text: string): LockInfo | undefined {
   return undefined;
 }
 
-/** A lock file as read from disk. */
 export interface HeldLock {
   text: string;
   /** `undefined` if the contents can't be parsed. */
@@ -92,8 +89,9 @@ export async function readLock(lockPath: string): Promise<HeldLock | undefined> 
 /**
  * Whether a lock is stale:
  * - A lock from this host is stale when its process is dead.
- * - A lock from another host is stale when its file hasn't been touched for
- *   `staleMs`, because its owner stopped refreshing it.
+ * - Any lock is stale when its file hasn't been touched for `staleMs`, because
+ *   its owner stopped refreshing it. On this host that catches a dead owner's
+ *   pid having been reused by an unrelated process.
  * - A lock that can't be parsed is stale after a short grace period.
  */
 export function isLockStale(
@@ -103,7 +101,7 @@ export function isLockStale(
 ): boolean {
   const { info, mtimeMs } = held;
   if (!info) return now - mtimeMs > UNREADABLE_GRACE_MS;
-  if (info.hostname === os.hostname()) return !isProcessAlive(info.pid);
+  if (info.hostname === os.hostname() && !isProcessAlive(info.pid)) return true;
   return now - mtimeMs > staleMs;
 }
 
@@ -140,32 +138,43 @@ export class Lock {
   }
 }
 
+// A takeover guard left by a waiter that died is ignored after this long.
+const TAKEOVER_GUARD_MS = 10_000;
+
 /**
- * Removes a stale lock without racing another waiter: moves it aside, then
- * checks that what was moved is the lock that was judged stale. If another
- * waiter already replaced it with a live lock, that lock is put back.
+ * Deletes a stale lock, unless it has since been replaced. Takeovers hold a
+ * guard folder, so a waiter can't delete a lock that another waiter took after
+ * the first judged the old one stale. Returns false when another waiter holds
+ * the guard, so the caller should wait and look again.
  */
-async function removeStaleLock(lockPath: string, staleText: string): Promise<void> {
-  const aside = `${lockPath}.stale-${process.pid}-${randomBytes(4).toString('hex')}`;
+async function removeStaleLock(lockPath: string, staleText: string): Promise<boolean> {
+  const guard = `${lockPath}.takeover`;
   try {
-    await rename(lockPath, aside);
+    await fs.mkdir(guard);
   } catch (err) {
-    if ((err as NodeJS.ErrnoException).code === 'ENOENT') return;
-    throw err;
+    if ((err as NodeJS.ErrnoException).code !== 'EEXIST') throw err;
+    const st = await fs.stat(guard).catch(() => undefined);
+    if (st && Date.now() - st.mtimeMs > TAKEOVER_GUARD_MS) {
+      await fs.rmdir(guard).catch(() => {});
+    }
+    return false;
   }
-  if ((await fs.readFile(aside, 'utf8')) === staleText) {
-    await fs.rm(aside, { force: true });
-  } else {
-    await rename(aside, lockPath);
+  try {
+    if ((await readLock(lockPath))?.text === staleText) {
+      await fs.rm(lockPath, { force: true });
+    }
+  } finally {
+    await fs.rmdir(guard).catch(() => {});
   }
+  return true;
 }
 
 /**
  * Acquires a cross-process lock file at `lockPath`.
  *
  * The file is created with `O_EXCL` and holds a {@link LockInfo}. A held lock
- * is waited on; a stale one is moved aside and retried. While held, the
- * file's mtime is refreshed so other hosts can tell it is still in use.
+ * is waited on; a stale one is deleted and retried. While held, the file's
+ * mtime is refreshed so other processes can tell it is still in use.
  */
 export async function acquireLock(
   lockPath: string,
@@ -192,8 +201,7 @@ export async function acquireLock(
     const held = await readLock(lockPath);
     if (!held) continue; // released between our attempt and our read
     const now = Date.now();
-    if (isLockStale(held, staleMs, now)) {
-      await removeStaleLock(lockPath, held.text);
+    if (isLockStale(held, staleMs, now) && (await removeStaleLock(lockPath, held.text))) {
       continue;
     }
 
@@ -212,7 +220,6 @@ export async function acquireLock(
   }
 }
 
-/** Runs `fn` while holding the lock at `lockPath`. */
 export async function withLock<T>(
   lockPath: string,
   opts: LockOptions,

@@ -1,5 +1,5 @@
 /**
- * Sentry in the renderer (REQUIREMENTS §14). It starts only when main's
+ * Sentry in the renderer. It starts only when main's
  * Sentry is on (packaged, not test or headless, "Send crash reports" on).
  *
  * Events travel to main over Sentry's classic IPC, exposed by the app's own

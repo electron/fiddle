@@ -1,6 +1,5 @@
-/* Fields: 30 tall (24 small), padding 0 11, radius-control squircle, 1px line-strong border.
-   Focus: accent border plus a 3.5px ring of accent at 26%. Invalid: spark border, ring at 22%. */
-.root {
+.root,
+.formField {
   display: flex;
   flex-direction: column;
   gap: 6px;
@@ -34,7 +33,7 @@
     box-shadow var(--lu-dur-base) var(--lu-ease);
 }
 
-.root[data-size="sm"] .field {
+.root[data-size='sm'] .field {
   height: var(--lu-size-control-sm);
 }
 
@@ -57,7 +56,6 @@
   cursor: default;
 }
 
-/* On the chrome: field-on-glass with a field-edge-on-glass border. */
 .root[data-glass] .field {
   background: var(--lu-field-on-glass);
   border-color: var(--lu-field-edge-on-glass);
@@ -115,14 +113,6 @@
   color: var(--lu-spark);
 }
 
-/* Form field */
-.formField {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  min-width: 0;
-}
-
 .formField[data-inline] {
   display: grid;
   grid-template-columns: 160px minmax(0, 1fr);
@@ -136,7 +126,6 @@
 
 .formField[data-disabled] {
   opacity: var(--lu-disabled-opacity);
-  pointer-events: none;
 }
 
 .control {

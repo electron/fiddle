@@ -1,4 +1,3 @@
-/* Badge and Tag: 20 tall capsules, caption type, tone at 14% with tone text. */
 .badge {
   --tone: var(--lu-ink-muted);
   display: inline-flex;
@@ -15,16 +14,16 @@
   white-space: nowrap;
 }
 
-.badge[data-tone="accent"] {
+.badge[data-tone='accent'] {
   --tone: var(--lu-accent);
 }
-.badge[data-tone="success"] {
+.badge[data-tone='success'] {
   --tone: var(--lu-success);
 }
-.badge[data-tone="warning"] {
+.badge[data-tone='warning'] {
   --tone: var(--lu-warning);
 }
-.badge[data-tone="danger"] {
+.badge[data-tone='danger'] {
   --tone: var(--lu-spark);
 }
 
@@ -68,7 +67,6 @@
   outline-offset: 1px;
 }
 
-/* Key caps: 19 tall, min 22 wide, padding 4 6, radius-sm squircle, Inter 11/11 500. */
 .kbds {
   display: inline-flex;
   gap: 3px;
@@ -90,7 +88,6 @@
   white-space: nowrap;
 }
 
-/* Inline code: padding 2 5, radius-code, fill. */
 .code {
   padding: 2px 5px;
   border-radius: var(--lu-radius-code);

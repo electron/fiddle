@@ -1,152 +1,624 @@
 {
-  "title": { "message": "Settings", "description": "Title of the settings page, at the top of its side navigation.", "maxLength": 30 },
-  "navLabel": { "message": "Settings sections", "description": "Accessible name of the settings page's side navigation." },
-  "close": { "message": "Close settings", "description": "Accessible name of the button that closes the settings page and returns to the editor." },
-  "closeHint": { "message": "esc", "description": "Key cap under the close button: the Escape key. Keep it short and lowercase.", "maxLength": 6 },
-  "search": { "message": "Search settings", "description": "Placeholder and accessible name of the field that filters settings by name, description and key.", "maxLength": 30 },
-  "noResults": { "message": "No settings match “{{query}}”.", "description": "Shown when the settings search finds nothing. {{query}} is what the user typed." },
-  "openFile": { "message": "Open settings.json", "description": "Button that opens the settings file in the default editor. settings.json is a file name; keep it as is.", "maxLength": 30 },
-  "import": { "message": "Import…", "description": "Button that imports settings from a JSON file.", "maxLength": 20 },
-  "export": { "message": "Export…", "description": "Button that exports the settings to a JSON file.", "maxLength": 20 },
-  "modified": { "message": "Changed from the default", "description": "Accessible name of the dot next to a setting that differs from its default." },
-  "reset": { "message": "Reset", "description": "Button next to a changed setting that puts it back to its default.", "maxLength": 20 },
-  "changeFailed": { "message": "Couldn't change this setting", "description": "Toast title when a setting change is rejected. The reason is shown below it.", "maxLength": 60 },
-  "actionFailed": { "message": "That didn't work", "description": "Toast title when a settings action (import, export, open a file or folder, a theme action) fails. The reason is shown below it.", "maxLength": 60 },
+  "title": {
+    "message": "Settings",
+    "description": "Title of the settings page, at the top of its side navigation.",
+    "maxLength": 30
+  },
+  "navLabel": {
+    "message": "Settings sections",
+    "description": "Accessible name of the settings page's side navigation."
+  },
+  "close": {
+    "message": "Close settings",
+    "description": "Accessible name of the button that closes the settings page and returns to the editor."
+  },
+  "closeHint": {
+    "message": "esc",
+    "description": "Key cap under the close button: the Escape key. Keep it short and lowercase.",
+    "maxLength": 6
+  },
+  "search": {
+    "message": "Search settings",
+    "description": "Placeholder and accessible name of the field that filters settings by name, description and key.",
+    "maxLength": 30
+  },
+  "noResults": {
+    "message": "No settings match “{{query}}”.",
+    "description": "Shown when the settings search finds nothing. {{query}} is what the user typed."
+  },
+  "openFile": {
+    "message": "Open settings.json",
+    "description": "Button that opens the settings file in the default editor. settings.json is a file name; keep it as is.",
+    "maxLength": 30
+  },
+  "import": {
+    "message": "Import…",
+    "description": "Button that imports settings from a JSON file.",
+    "maxLength": 20
+  },
+  "export": {
+    "message": "Export…",
+    "description": "Button that exports the settings to a JSON file.",
+    "maxLength": 20
+  },
+  "modified": {
+    "message": "Changed from the default",
+    "description": "Accessible name of the dot next to a setting that differs from its default."
+  },
+  "reset": {
+    "message": "Reset",
+    "description": "Button next to a changed setting that puts it back to its default.",
+    "maxLength": 20
+  },
+  "changeFailed": {
+    "message": "Couldn't change this setting",
+    "description": "Toast title when a setting change is rejected. The reason is shown below it.",
+    "maxLength": 60
+  },
+  "actionFailed": {
+    "message": "That didn't work",
+    "description": "Toast title when a settings action (import, export, open a file or folder, a theme action) fails. The reason is shown below it.",
+    "maxLength": 60
+  },
 
-  "section.general": { "message": "General", "description": "Settings section: appearance, theme, language and app behavior.", "maxLength": 30 },
-  "section.editor": { "message": "Editor", "description": "Settings section for the code editor.", "maxLength": 30 },
-  "section.execution": { "message": "Execution", "description": "Settings section for how fiddles run.", "maxLength": 30 },
-  "section.electron": { "message": "Electron", "description": "Settings section for Electron versions and downloads.", "maxLength": 30 },
-  "section.github": { "message": "GitHub", "description": "Settings section for the GitHub account and gists. GitHub is a product name.", "maxLength": 30 },
-  "section.keybindings": { "message": "Keyboard shortcuts", "description": "Settings section that lists every command and its shortcut.", "maxLength": 30 },
-  "section.accessibility": { "message": "Accessibility", "description": "Settings section for accessibility.", "maxLength": 30 },
-  "section.privacy": { "message": "Privacy", "description": "Settings section for crash reports.", "maxLength": 30 },
-  "section.updates": { "message": "Updates", "description": "Settings section for app updates.", "maxLength": 30 },
-  "section.about": { "message": "About and credits", "description": "Settings section with the app version and its contributors.", "maxLength": 30 },
+  "section.general": {
+    "message": "General",
+    "description": "Settings section: appearance, theme, language and app behavior.",
+    "maxLength": 30
+  },
+  "section.editor": {
+    "message": "Editor",
+    "description": "Settings section for the code editor.",
+    "maxLength": 30
+  },
+  "section.execution": {
+    "message": "Execution",
+    "description": "Settings section for how fiddles run.",
+    "maxLength": 30
+  },
+  "section.electron": {
+    "message": "Electron",
+    "description": "Settings section for Electron versions and downloads.",
+    "maxLength": 30
+  },
+  "section.github": {
+    "message": "GitHub",
+    "description": "Settings section for the GitHub account and gists. GitHub is a product name.",
+    "maxLength": 30
+  },
+  "section.keybindings": {
+    "message": "Keyboard shortcuts",
+    "description": "Settings section that lists every command and its shortcut.",
+    "maxLength": 30
+  },
+  "section.accessibility": {
+    "message": "Accessibility",
+    "description": "Settings section for accessibility.",
+    "maxLength": 30
+  },
+  "section.privacy": {
+    "message": "Privacy",
+    "description": "Settings section for crash reports.",
+    "maxLength": 30
+  },
+  "section.updates": {
+    "message": "Updates",
+    "description": "Settings section for app updates.",
+    "maxLength": 30
+  },
+  "section.about": {
+    "message": "About and credits",
+    "description": "Settings section with the app version and its contributors.",
+    "maxLength": 30
+  },
 
-  "appearance.title": { "message": "Appearance", "description": "Setting: light, dark, or follow the system." },
-  "appearance.description": { "message": "Follow the system, or always use light or dark.", "description": "Help for the appearance setting." },
-  "appearance.system": { "message": "System", "description": "Appearance option: follow the operating system's light or dark mode.", "maxLength": 12 },
-  "appearance.light": { "message": "Light", "description": "Appearance option.", "maxLength": 12 },
-  "appearance.dark": { "message": "Dark", "description": "Appearance option.", "maxLength": 12 },
-  "appearance.fromTheme": { "message": "{{theme}} sets its own light or dark mode.", "description": "Shown under the appearance setting while a custom theme is active. {{theme}} is the theme's name." },
+  "appearance.title": {
+    "message": "Appearance",
+    "description": "Setting: light, dark, or follow the system."
+  },
+  "appearance.description": {
+    "message": "Follow the system, or always use light or dark.",
+    "description": "Help for the appearance setting."
+  },
+  "appearance.system": {
+    "message": "System",
+    "description": "Appearance option: follow the operating system's light or dark mode.",
+    "maxLength": 12
+  },
+  "appearance.light": {
+    "message": "Light",
+    "description": "Appearance option.",
+    "maxLength": 12
+  },
+  "appearance.dark": {
+    "message": "Dark",
+    "description": "Appearance option.",
+    "maxLength": 12
+  },
+  "appearance.fromTheme": {
+    "message": "{{theme}} sets its own light or dark mode.",
+    "description": "Shown under the appearance setting while a custom theme is active. {{theme}} is the theme's name."
+  },
   "theme.title": { "message": "Theme", "description": "Setting: the color theme." },
-  "theme.description": { "message": "Lucent is built in. Custom themes are JSON files in your themes folder.", "description": "Help for the theme setting. Lucent is the built-in theme's name; keep it as is. JSON is a file format." },
-  "theme.lucent": { "message": "Lucent", "description": "Name of the built-in theme. Keep it as is.", "maxLength": 30 },
-  "theme.highContrastDark": { "message": "Lucent high contrast dark", "description": "Name of the built-in high-contrast dark theme. Lucent is the design system's name; keep it as is.", "maxLength": 30 },
-  "theme.highContrastLight": { "message": "Lucent high contrast light", "description": "Name of the built-in high-contrast light theme. Lucent is the design system's name; keep it as is.", "maxLength": 30 },
-  "theme.dark": { "message": "dark", "description": "Hint next to a custom theme that is dark.", "maxLength": 10 },
-  "theme.light": { "message": "light", "description": "Hint next to a custom theme that is light.", "maxLength": 10 },
-  "theme.importMonaco": { "message": "Import Monaco theme…", "description": "Button that imports a Monaco editor theme file. Monaco is a product name.", "maxLength": 30 },
-  "theme.create": { "message": "Create from current", "description": "Button that writes a new theme file based on the current theme.", "maxLength": 30 },
-  "theme.openFolder": { "message": "Open themes folder", "description": "Button that opens the folder with custom theme files.", "maxLength": 30 },
-  "locale.title": { "message": "Language", "description": "Setting: the app's language." },
-  "locale.description": { "message": "Menus and the app switch right away. The editor switches after a restart.", "description": "Help for the language setting." },
-  "locale.system": { "message": "System default", "description": "Language option: use the operating system's language.", "maxLength": 30 },
-  "locale.relaunchTitle": { "message": "Relaunch to finish switching the language", "description": "Toast title after the language setting changes.", "maxLength": 60 },
-  "locale.relaunchDescription": { "message": "Menus and the app use it already. The editor and system texts switch after a relaunch.", "description": "Toast text after the language setting changes. System texts are the ones Chromium draws, like context menus and form controls." },
-  "locale.relaunch": { "message": "Relaunch", "description": "Toast action that restarts the app.", "maxLength": 16 },
-  "sessionRestore.title": { "message": "Restore windows on launch", "description": "Setting: reopen the last session's windows." },
-  "sessionRestore.description": { "message": "Reopen every window from the last session, with its fiddle, version and layout.", "description": "Help for the session restore setting." },
-  "notifications.title": { "message": "Notifications", "description": "Setting: system notifications." },
-  "notifications.description": { "message": "Notify me when a long operation finishes while Fiddle is in the background.", "description": "Help for the notifications setting. Fiddle is the app's short name." },
+  "theme.description": {
+    "message": "Lucent is built in. Custom themes are JSON files in your themes folder.",
+    "description": "Help for the theme setting. Lucent is the built-in theme's name; keep it as is. JSON is a file format."
+  },
+  "theme.lucent": {
+    "message": "Lucent",
+    "description": "Name of the built-in theme. Keep it as is.",
+    "maxLength": 30
+  },
+  "theme.highContrastDark": {
+    "message": "Lucent high contrast dark",
+    "description": "Name of the built-in high-contrast dark theme. Lucent is the design system's name; keep it as is.",
+    "maxLength": 30
+  },
+  "theme.highContrastLight": {
+    "message": "Lucent high contrast light",
+    "description": "Name of the built-in high-contrast light theme. Lucent is the design system's name; keep it as is.",
+    "maxLength": 30
+  },
+  "theme.dark": {
+    "message": "dark",
+    "description": "Hint next to a custom theme that is dark.",
+    "maxLength": 10
+  },
+  "theme.light": {
+    "message": "light",
+    "description": "Hint next to a custom theme that is light.",
+    "maxLength": 10
+  },
+  "theme.importMonaco": {
+    "message": "Import Monaco theme…",
+    "description": "Button that imports a Monaco editor theme file. Monaco is a product name.",
+    "maxLength": 30
+  },
+  "theme.create": {
+    "message": "Create from current",
+    "description": "Button that writes a new theme file based on the current theme.",
+    "maxLength": 30
+  },
+  "theme.openFolder": {
+    "message": "Open themes folder",
+    "description": "Button that opens the folder with custom theme files.",
+    "maxLength": 30
+  },
+  "locale.title": {
+    "message": "Language",
+    "description": "Setting: the app's language."
+  },
+  "locale.description": {
+    "message": "Menus and the app switch right away. The editor switches after a restart.",
+    "description": "Help for the language setting."
+  },
+  "locale.system": {
+    "message": "System default",
+    "description": "Language option: use the operating system's language.",
+    "maxLength": 30
+  },
+  "locale.relaunchTitle": {
+    "message": "Relaunch to finish switching the language",
+    "description": "Toast title after the language setting changes.",
+    "maxLength": 60
+  },
+  "locale.relaunchDescription": {
+    "message": "Menus and the app use it already. The editor and system texts switch after a relaunch.",
+    "description": "Toast text after the language setting changes. System texts are the ones Chromium draws, like context menus and form controls."
+  },
+  "locale.relaunch": {
+    "message": "Relaunch",
+    "description": "Toast action that restarts the app.",
+    "maxLength": 16
+  },
+  "sessionRestore.title": {
+    "message": "Restore windows on launch",
+    "description": "Setting: reopen the last session's windows."
+  },
+  "sessionRestore.description": {
+    "message": "Reopen every window from the last session, with its fiddle, version and layout.",
+    "description": "Help for the session restore setting."
+  },
+  "notifications.title": {
+    "message": "Notifications",
+    "description": "Setting: system notifications."
+  },
+  "notifications.description": {
+    "message": "Notify me when a long operation finishes while Fiddle is in the background.",
+    "description": "Help for the notifications setting. Fiddle is the app's short name."
+  },
 
-  "editorFontFamily.title": { "message": "Font family", "description": "Setting: the editor's font." },
-  "editorFontFamily.description": { "message": "A list of font names, such as Fira Code, monospace. Leave it empty to use Commit Mono.", "description": "Help for the editor font setting. Fira Code and Commit Mono are font names; keep them as is." },
-  "editorFontFamily.invalid": { "message": "Use font names separated by commas.", "description": "Error under the editor font field when the value isn't a font list." },
-  "editorFontSize.title": { "message": "Font size", "description": "Setting: the editor's font size." },
-  "editorFontSize.description": { "message": "In pixels, from 8 to 40. Leave it empty for the default.", "description": "Help for the editor font size setting." },
-  "editorFontSize.invalid": { "message": "Enter a whole number from 8 to 40.", "description": "Error under the font size field." },
-  "editorFont.reloadHint": { "message": "Font changes apply after the windows reload.", "description": "Note under the editor font settings, next to a button that reloads every window." },
-  "editorFont.reload": { "message": "Reload windows", "description": "Button next to the editor font settings that reloads every window so a new font applies. Unsaved text is kept.", "maxLength": 24 },
+  "editorFontFamily.title": {
+    "message": "Font family",
+    "description": "Setting: the editor's font."
+  },
+  "editorFontFamily.description": {
+    "message": "A list of font names, such as Fira Code, monospace. Leave it empty to use Commit Mono.",
+    "description": "Help for the editor font setting. Fira Code and Commit Mono are font names; keep them as is."
+  },
+  "editorFontFamily.invalid": {
+    "message": "Use font names separated by commas.",
+    "description": "Error under the editor font field when the value isn't a font list."
+  },
+  "editorFontSize.title": {
+    "message": "Font size",
+    "description": "Setting: the editor's font size."
+  },
+  "editorFontSize.description": {
+    "message": "In pixels, from 8 to 40. Leave it empty for the default.",
+    "description": "Help for the editor font size setting."
+  },
+  "editorFontSize.invalid": {
+    "message": "Enter a whole number from 8 to 40.",
+    "description": "Error under the font size field."
+  },
+  "editorFont.reloadHint": {
+    "message": "Font changes apply after the windows reload.",
+    "description": "Note under the editor font settings, next to a button that reloads every window."
+  },
+  "editorFont.reload": {
+    "message": "Reload windows",
+    "description": "Button next to the editor font settings that reloads every window so a new font applies. Unsaved text is kept.",
+    "maxLength": 24
+  },
 
-  "electronFlags.title": { "message": "Electron flags", "description": "Setting: extra command-line flags for Electron." },
-  "electronFlags.description": { "message": "Passed to Electron when a fiddle runs.", "description": "Help for the Electron flags list." },
-  "environmentVariables.title": { "message": "Environment variables", "description": "Setting: environment variables for every run." },
-  "environmentVariables.description": { "message": "Set for every run, one KEY=value per row.", "description": "Help for the environment variables list. Keep KEY=value as is." },
-  "environmentVariables.invalid": { "message": "Use KEY=value. The key needs letters, digits or underscores.", "description": "Error under an environment variable row. Keep KEY=value as is." },
-  "list.add": { "message": "Add row", "description": "Button that adds an empty row to a list setting.", "maxLength": 20 },
-  "list.remove": { "message": "Remove", "description": "Accessible name of the button that removes a row from a list setting." },
-  "packageManager.title": { "message": "Package manager", "description": "Setting: npm or yarn." },
-  "packageManager.description": { "message": "Installs the fiddle's npm modules.", "description": "Help for the package manager setting. npm is a product name." },
-  "socketFirewall.title": { "message": "Use Socket Firewall", "description": "Setting: check packages with Socket Firewall. Socket Firewall is a product name." },
-  "socketFirewall.description": { "message": "Checks packages for malware before they're installed.", "description": "Help for the Socket Firewall setting." },
-  "keepUserDataDirs.title": { "message": "Keep user data folders", "description": "Setting: keep each run's user data folder." },
-  "keepUserDataDirs.description": { "message": "Don't delete a fiddle's user data folder after it runs.", "description": "Help for the keep user data folders setting." },
-  "electronLogging.title": { "message": "Advanced Electron logging", "description": "Setting: verbose Electron logging." },
-  "electronLogging.description": { "message": "Run Electron with verbose logging.", "description": "Help for the advanced logging setting." },
-  "clearConsoleOnRun.title": { "message": "Clear the console on every run", "description": "Setting: empty the console when a run starts." },
-  "clearConsoleOnRun.description": { "message": "Start each run with an empty console.", "description": "Help for the clear console setting." },
+  "electronFlags.title": {
+    "message": "Electron flags",
+    "description": "Setting: extra command-line flags for Electron."
+  },
+  "electronFlags.description": {
+    "message": "Passed to Electron when a fiddle runs.",
+    "description": "Help for the Electron flags list."
+  },
+  "environmentVariables.title": {
+    "message": "Environment variables",
+    "description": "Setting: environment variables for every run."
+  },
+  "environmentVariables.description": {
+    "message": "Set for every run, one KEY=value per row.",
+    "description": "Help for the environment variables list. Keep KEY=value as is."
+  },
+  "environmentVariables.invalid": {
+    "message": "Use KEY=value. The key needs letters, digits or underscores.",
+    "description": "Error under an environment variable row. Keep KEY=value as is."
+  },
+  "list.add": {
+    "message": "Add row",
+    "description": "Button that adds an empty row to a list setting.",
+    "maxLength": 20
+  },
+  "list.remove": {
+    "message": "Remove",
+    "description": "Accessible name of the button that removes a row from a list setting."
+  },
+  "packageManager.title": {
+    "message": "Package manager",
+    "description": "Setting: npm or yarn."
+  },
+  "packageManager.description": {
+    "message": "Installs the fiddle's npm modules.",
+    "description": "Help for the package manager setting. npm is a product name."
+  },
+  "socketFirewall.title": {
+    "message": "Use Socket Firewall",
+    "description": "Setting: check packages with Socket Firewall. Socket Firewall is a product name."
+  },
+  "socketFirewall.description": {
+    "message": "Checks packages for malware before they're installed.",
+    "description": "Help for the Socket Firewall setting."
+  },
+  "keepUserDataDirs.title": {
+    "message": "Keep user data folders",
+    "description": "Setting: keep each run's user data folder."
+  },
+  "keepUserDataDirs.description": {
+    "message": "Don't delete a fiddle's user data folder after it runs.",
+    "description": "Help for the keep user data folders setting."
+  },
+  "electronLogging.title": {
+    "message": "Advanced Electron logging",
+    "description": "Setting: verbose Electron logging."
+  },
+  "electronLogging.description": {
+    "message": "Run Electron with verbose logging.",
+    "description": "Help for the advanced logging setting."
+  },
+  "clearConsoleOnRun.title": {
+    "message": "Clear the console on every run",
+    "description": "Setting: empty the console when a run starts."
+  },
+  "clearConsoleOnRun.description": {
+    "message": "Start each run with an empty console.",
+    "description": "Help for the clear console setting."
+  },
 
-  "channels.title": { "message": "Release channels", "description": "Setting: which Electron release channels the version picker shows." },
-  "channels.description": { "message": "The version picker shows these channels. The current version's channel stays on.", "description": "Help for the release channels setting." },
-  "channel.stable": { "message": "Stable", "description": "Electron release channel.", "maxLength": 12 },
-  "channel.beta": { "message": "Beta", "description": "Electron release channel.", "maxLength": 12 },
-  "channel.nightly": { "message": "Nightly", "description": "Electron release channel.", "maxLength": 12 },
-  "showNotDownloaded.title": { "message": "Show versions that aren't downloaded", "description": "Setting: list every release in the version picker." },
-  "showNotDownloaded.description": { "message": "List every release, not only the ones on this computer.", "description": "Help for the show not-downloaded versions setting." },
-  "showObsolete.title": { "message": "Show obsolete versions", "description": "Setting: include unsupported Electron versions." },
-  "showObsolete.description": { "message": "Include major versions that are no longer supported.", "description": "Help for the show obsolete versions setting." },
-  "mirror.title": { "message": "Download mirror", "description": "Setting: where Electron downloads come from." },
-  "mirror.description": { "message": "Use a mirror if you can't reach GitHub releases.", "description": "Help for the mirror setting. GitHub is a product name." },
-  "mirror.auto": { "message": "Automatic", "description": "Mirror option: pick by the system's language and region.", "maxLength": 30 },
-  "mirror.default": { "message": "GitHub", "description": "Mirror option: Electron's GitHub releases. Product name.", "maxLength": 30 },
-  "mirror.china": { "message": "China (npmmirror)", "description": "Mirror option: the npmmirror.com mirror in China. Keep npmmirror as is.", "maxLength": 30 },
-  "mirror.custom": { "message": "Custom", "description": "Mirror option: the user's own mirror URLs.", "maxLength": 30 },
-  "customMirrorElectron.title": { "message": "Electron mirror URL", "description": "Setting: the custom mirror for Electron releases." },
-  "customMirrorElectron.description": { "message": "Used for stable and beta releases.", "description": "Help for the custom Electron mirror URL." },
-  "customMirrorNightly.title": { "message": "Nightly mirror URL", "description": "Setting: the custom mirror for nightly releases." },
-  "customMirrorNightly.description": { "message": "Used for nightly releases.", "description": "Help for the custom nightly mirror URL." },
-  "mirror.invalidUrl": { "message": "Enter an http or https URL.", "description": "Error under a mirror URL field." },
+  "channels.title": {
+    "message": "Release channels",
+    "description": "Setting: which Electron release channels the version picker shows."
+  },
+  "channels.description": {
+    "message": "The version picker shows these channels. The current version's channel stays on.",
+    "description": "Help for the release channels setting."
+  },
+  "channel.stable": {
+    "message": "Stable",
+    "description": "Electron release channel.",
+    "maxLength": 12
+  },
+  "channel.beta": {
+    "message": "Beta",
+    "description": "Electron release channel.",
+    "maxLength": 12
+  },
+  "channel.nightly": {
+    "message": "Nightly",
+    "description": "Electron release channel.",
+    "maxLength": 12
+  },
+  "showNotDownloaded.title": {
+    "message": "Show versions that aren't downloaded",
+    "description": "Setting: list every release in the version picker."
+  },
+  "showNotDownloaded.description": {
+    "message": "List every release, not only the ones on this computer.",
+    "description": "Help for the show not-downloaded versions setting."
+  },
+  "showObsolete.title": {
+    "message": "Show obsolete versions",
+    "description": "Setting: include unsupported Electron versions."
+  },
+  "showObsolete.description": {
+    "message": "Include major versions that are no longer supported.",
+    "description": "Help for the show obsolete versions setting."
+  },
+  "mirror.title": {
+    "message": "Download mirror",
+    "description": "Setting: where Electron downloads come from."
+  },
+  "mirror.description": {
+    "message": "Use a mirror if you can't reach GitHub releases.",
+    "description": "Help for the mirror setting. GitHub is a product name."
+  },
+  "mirror.auto": {
+    "message": "Automatic",
+    "description": "Mirror option: pick by the system's language and region.",
+    "maxLength": 30
+  },
+  "mirror.default": {
+    "message": "GitHub",
+    "description": "Mirror option: Electron's GitHub releases. Product name.",
+    "maxLength": 30
+  },
+  "mirror.china": {
+    "message": "China (npmmirror)",
+    "description": "Mirror option: the npmmirror.com mirror in China. Keep npmmirror as is.",
+    "maxLength": 30
+  },
+  "mirror.custom": {
+    "message": "Custom",
+    "description": "Mirror option: the user's own mirror URLs.",
+    "maxLength": 30
+  },
+  "customMirrorElectron.title": {
+    "message": "Electron mirror URL",
+    "description": "Setting: the custom mirror for Electron releases."
+  },
+  "customMirrorElectron.description": {
+    "message": "Used for stable and beta releases.",
+    "description": "Help for the custom Electron mirror URL."
+  },
+  "customMirrorNightly.title": {
+    "message": "Nightly mirror URL",
+    "description": "Setting: the custom mirror for nightly releases."
+  },
+  "customMirrorNightly.description": {
+    "message": "Used for nightly releases.",
+    "description": "Help for the custom nightly mirror URL."
+  },
+  "mirror.invalidUrl": {
+    "message": "Enter an https URL.",
+    "description": "Error under a mirror URL field."
+  },
 
-  "packageAuthor.title": { "message": "package.json author", "description": "Setting: the author written to package.json. package.json is a file name; keep it as is." },
-  "packageAuthor.description": { "message": "Used when a fiddle is saved or packaged. Leave it empty to use your user name.", "description": "Help for the package.json author setting." },
-  "gistShowHistory.title": { "message": "Show gist revision history", "description": "Setting: show a gist's revisions." },
-  "gistShowHistory.description": { "message": "Show a gist's revisions when you open it.", "description": "Help for the gist history setting." },
-  "gistPublishAsRevision.title": { "message": "Publish as a revision", "description": "Setting: update the fiddle's gist instead of making a new one." },
-  "gistPublishAsRevision.description": { "message": "Update the fiddle's gist instead of creating a new one.", "description": "Help for the publish as revision setting." },
-  "gistVisibility.title": { "message": "New gist visibility", "description": "Setting: whether new gists are secret or public." },
-  "gistVisibility.description": { "message": "Secret gists are only visible to people with the link.", "description": "Help for the gist visibility setting." },
-  "gistVisibility.secret": { "message": "Secret", "description": "Gist visibility option.", "maxLength": 12 },
-  "gistVisibility.public": { "message": "Public", "description": "Gist visibility option.", "maxLength": 12 },
+  "packageAuthor.title": {
+    "message": "package.json author",
+    "description": "Setting: the author written to package.json. package.json is a file name; keep it as is."
+  },
+  "packageAuthor.description": {
+    "message": "Used when a fiddle is saved or packaged. Leave it empty to use your user name.",
+    "description": "Help for the package.json author setting."
+  },
+  "gistShowHistory.title": {
+    "message": "Show gist revision history",
+    "description": "Setting: show a gist's revisions."
+  },
+  "gistShowHistory.description": {
+    "message": "Show a gist's revisions when you open it.",
+    "description": "Help for the gist history setting."
+  },
+  "gistPublishAsRevision.title": {
+    "message": "Publish as a revision",
+    "description": "Setting: update the fiddle's gist instead of making a new one."
+  },
+  "gistPublishAsRevision.description": {
+    "message": "Update the fiddle's gist instead of creating a new one.",
+    "description": "Help for the publish as revision setting."
+  },
+  "gistVisibility.title": {
+    "message": "New gist visibility",
+    "description": "Setting: whether new gists are secret or public."
+  },
+  "gistVisibility.description": {
+    "message": "Secret gists are only visible to people with the link.",
+    "description": "Help for the gist visibility setting."
+  },
+  "gistVisibility.secret": {
+    "message": "Secret",
+    "description": "Gist visibility option.",
+    "maxLength": 12
+  },
+  "gistVisibility.public": {
+    "message": "Public",
+    "description": "Gist visibility option.",
+    "maxLength": 12
+  },
 
-  "keybindings.title": { "message": "Keyboard shortcuts", "description": "Setting: shortcut overrides." },
-  "keybindings.description": { "message": "Change, remove or reset the shortcut for any command.", "description": "Help for the keyboard shortcuts section." },
-  "keybindings.none": { "message": "None", "description": "Shown instead of a shortcut when a command has none.", "maxLength": 12 },
-  "keybindings.change": { "message": "Change", "description": "Button that records a new shortcut for a command.", "maxLength": 16 },
-  "keybindings.record": { "message": "Press a shortcut…", "description": "Shown while recording a shortcut. Escape cancels.", "maxLength": 30 },
-  "keybindings.recordLabel": { "message": "New shortcut for {{command}}. Press Escape to cancel.", "description": "Accessible name of the recording field. {{command}} is the command's name." },
-  "keybindings.remove": { "message": "Remove shortcut", "description": "Accessible name of the button that unbinds a command's shortcut." },
-  "keybindings.resetLabel": { "message": "Reset {{command}} to its default shortcut", "description": "Accessible name of the reset button in a shortcut row. {{command}} is the command's name." },
-  "keybindings.conflict": { "message": "Also used by {{commands}}", "description": "Warning when a shortcut is shared. {{commands}} lists the other commands' names." },
-  "keybindings.filter": { "message": "Filter commands", "description": "Placeholder of the field that filters the shortcut list.", "maxLength": 30 },
+  "keybindings.title": {
+    "message": "Keyboard shortcuts",
+    "description": "Setting: shortcut overrides."
+  },
+  "keybindings.description": {
+    "message": "Change, remove or reset the shortcut for any command.",
+    "description": "Help for the keyboard shortcuts section."
+  },
+  "keybindings.none": {
+    "message": "None",
+    "description": "Shown instead of a shortcut when a command has none.",
+    "maxLength": 12
+  },
+  "keybindings.change": {
+    "message": "Change",
+    "description": "Button that records a new shortcut for a command.",
+    "maxLength": 16
+  },
+  "keybindings.record": {
+    "message": "Press a shortcut…",
+    "description": "Shown while recording a shortcut. Escape cancels.",
+    "maxLength": 30
+  },
+  "keybindings.recordLabel": {
+    "message": "New shortcut for {{command}}. Press Escape to cancel.",
+    "description": "Accessible name of the recording field. {{command}} is the command's name."
+  },
+  "keybindings.remove": {
+    "message": "Remove shortcut",
+    "description": "Accessible name of the button that unbinds a command's shortcut."
+  },
+  "keybindings.resetLabel": {
+    "message": "Reset {{command}} to its default shortcut",
+    "description": "Accessible name of the reset button in a shortcut row. {{command}} is the command's name."
+  },
+  "keybindings.conflict": {
+    "message": "Also used by {{commands}}",
+    "description": "Warning when a shortcut is shared. {{commands}} lists the other commands' names."
+  },
+  "keybindings.filter": {
+    "message": "Filter commands",
+    "description": "Placeholder of the field that filters the shortcut list.",
+    "maxLength": 30
+  },
 
-  "screenReader.title": { "message": "Screen reader optimized", "description": "Setting: optimize the editor for screen readers." },
-  "screenReader.description": { "message": "Makes the editor work well with a screen reader. Automatic follows your system.", "description": "Help for the screen reader setting." },
-  "screenReader.auto": { "message": "Automatic", "description": "Screen reader option: follow the system.", "maxLength": 12 },
-  "screenReader.on": { "message": "On", "description": "Screen reader option.", "maxLength": 12 },
-  "screenReader.off": { "message": "Off", "description": "Screen reader option.", "maxLength": 12 },
-  "screenReader.active": { "message": "The editor is in screen reader mode.", "description": "Status under the screen reader setting." },
-  "screenReader.inactive": { "message": "The editor is in standard mode.", "description": "Status under the screen reader setting." },
+  "screenReader.title": {
+    "message": "Screen reader optimized",
+    "description": "Setting: optimize the editor for screen readers."
+  },
+  "screenReader.description": {
+    "message": "Makes the editor work well with a screen reader. Automatic follows your system.",
+    "description": "Help for the screen reader setting."
+  },
+  "screenReader.auto": {
+    "message": "Automatic",
+    "description": "Screen reader option: follow the system.",
+    "maxLength": 12
+  },
+  "screenReader.on": {
+    "message": "On",
+    "description": "Screen reader option.",
+    "maxLength": 12
+  },
+  "screenReader.off": {
+    "message": "Off",
+    "description": "Screen reader option.",
+    "maxLength": 12
+  },
+  "screenReader.active": {
+    "message": "The editor is in screen reader mode.",
+    "description": "Status under the screen reader setting."
+  },
+  "screenReader.inactive": {
+    "message": "The editor is in standard mode.",
+    "description": "Status under the screen reader setting."
+  },
 
-  "crashReports.title": { "message": "Send crash reports", "description": "Setting: send crash reports." },
-  "crashReports.description": { "message": "Helps fix bugs. Fiddle contents, console output and environment variables are never sent.", "description": "Help for the crash reports setting." },
-  "betaUpdates.title": { "message": "Beta updates", "description": "Setting: get beta releases of the app." },
-  "betaUpdates.description": { "message": "Get new versions of Fiddle before they're stable.", "description": "Help for the beta updates setting. Fiddle is the app's short name." },
+  "crashReports.title": {
+    "message": "Send crash reports",
+    "description": "Setting: send crash reports."
+  },
+  "crashReports.description": {
+    "message": "Helps fix bugs. Fiddle contents, console output and environment variables are never sent.",
+    "description": "Help for the crash reports setting."
+  },
+  "betaUpdates.title": {
+    "message": "Beta updates",
+    "description": "Setting: get beta releases of the app."
+  },
+  "betaUpdates.description": {
+    "message": "Get new versions of Fiddle before they're stable.",
+    "description": "Help for the beta updates setting. Fiddle is the app's short name."
+  },
 
-  "about.version": { "message": "Version {{version}}", "description": "The app's version in the about section. {{version}} is a version number." },
-  "about.electron": { "message": "Electron {{version}}", "description": "The Electron version the app runs on. {{version}} is a version number." },
-  "about.contributors": { "message": "Contributors", "description": "Heading of the contributor list.", "maxLength": 30 },
-  "about.contributions_one": { "message": "{{count}} contribution", "description": "A contributor's commit count, singular." },
-  "about.contributions_other": { "message": "{{count}} contributions", "description": "A contributor's commit count, plural." },
+  "about.version": {
+    "message": "Version {{version}}",
+    "description": "The app's version in the about section. {{version}} is a version number."
+  },
+  "about.electron": {
+    "message": "Electron {{version}}",
+    "description": "The Electron version the app runs on. {{version}} is a version number."
+  },
+  "about.contributors": {
+    "message": "Contributors",
+    "description": "Heading of the contributor list.",
+    "maxLength": 30
+  },
+  "about.contributions_one": {
+    "message": "{{count}} contribution",
+    "description": "A contributor's commit count, singular."
+  },
+  "about.contributions_other": {
+    "message": "{{count}} contributions",
+    "description": "A contributor's commit count, plural."
+  },
 
-  "notice.corrupt.title": { "message": "{{file}} was damaged", "description": "Toast title when a data file couldn't be read. {{file}} is the file name.", "maxLength": 60 },
-  "notice.corrupt.description": { "message": "Fiddle set it aside and is using a backup or the defaults.", "description": "Toast text when a data file couldn't be read." },
-  "notice.newer.title": { "message": "{{file}} is from a newer Fiddle", "description": "Toast title when a data file was written by a newer version of the app. {{file}} is the file name.", "maxLength": 60 },
-  "notice.newer.description": { "message": "Changes won't be saved to it until you update Fiddle.", "description": "Toast text when a data file is from a newer app version." },
-  "notice.dismiss": { "message": "Dismiss", "description": "Toast action that dismisses a data file notice.", "maxLength": 16 },
-  "privacyReset.title": { "message": "Reset privacy permissions", "description": "Title of the macOS action that resets the privacy permissions (camera, microphone and so on) given to the app.", "maxLength": 40 },
-  "privacyReset.description": { "message": "Fiddles run as Electron Fiddle, so the camera, microphone and other permissions you gave a fiddle belong to the app. This forgets them all.", "description": "Help for the reset privacy permissions action." },
-  "privacyReset.button": { "message": "Reset…", "description": "Button that resets the privacy permissions, after a confirmation.", "maxLength": 20 },
-  "privacyReset.done": { "message": "Privacy permissions reset", "description": "Toast after the privacy permissions were reset.", "maxLength": 60 }
+  "notice.corrupt.title": {
+    "message": "{{file}} was damaged",
+    "description": "Toast title when a data file couldn't be read. {{file}} is the file name.",
+    "maxLength": 60
+  },
+  "notice.corrupt.description": {
+    "message": "Fiddle set it aside and is using a backup or the defaults.",
+    "description": "Toast text when a data file couldn't be read."
+  },
+  "notice.newer.title": {
+    "message": "{{file}} is from a newer Fiddle",
+    "description": "Toast title when a data file was written by a newer version of the app. {{file}} is the file name.",
+    "maxLength": 60
+  },
+  "notice.newer.description": {
+    "message": "Changes won't be saved to it until you update Fiddle.",
+    "description": "Toast text when a data file is from a newer app version."
+  },
+  "notice.dismiss": {
+    "message": "Dismiss",
+    "description": "Toast action that dismisses a data file notice.",
+    "maxLength": 16
+  },
+  "privacyReset.title": {
+    "message": "Reset privacy permissions",
+    "description": "Title of the macOS action that resets the privacy permissions (camera, microphone and so on) given to the app.",
+    "maxLength": 40
+  },
+  "privacyReset.description": {
+    "message": "Fiddles run as Electron Fiddle, so the camera, microphone and other permissions you gave a fiddle belong to the app. This forgets them all.",
+    "description": "Help for the reset privacy permissions action."
+  },
+  "privacyReset.button": {
+    "message": "Reset…",
+    "description": "Button that resets the privacy permissions, after a confirmation.",
+    "maxLength": 20
+  },
+  "privacyReset.done": {
+    "message": "Privacy permissions reset",
+    "description": "Toast after the privacy permissions were reset.",
+    "maxLength": 60
+  }
 }

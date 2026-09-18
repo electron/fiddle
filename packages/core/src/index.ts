@@ -1,4 +1,3 @@
-// Everything fiddle-core 2.x exported, with the same names.
 export { DefaultPaths } from './paths.js';
 export type { Paths } from './paths.js';
 export { InstallState, Installer } from './installer.js';
@@ -27,7 +26,6 @@ export type {
 } from './versions.js';
 export { runFromCommandLine } from './command-line.js';
 
-// Additions in 3.0.
 export type { ExtractFunction, InstallLayout, InstallerOptions } from './installer.js';
 export type { InspectOptions, RunnerCreateOptions } from './runner.js';
 export { FiddleCoreError, isFiddleCoreError } from './errors.js';
@@ -35,4 +33,6 @@ export type { ErrorMode, FiddleCoreErrorCode } from './errors.js';
 export { LOCK_STALE_MS, Lock, acquireLock, withLock } from './lock.js';
 export type { LockInfo, LockOptions } from './lock.js';
 export { ALWAYS_BLOCKED_ENV, DEFAULT_ENV_DENYLIST, buildChildEnv } from './env.js';
+export { copyFolder, removeBestEffort, rename as renameWithRetry } from './fs-util.js';
 export type { ChildEnvOptions } from './env.js';
+export { extractZip } from './extract.js';

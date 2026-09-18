@@ -1,9 +1,8 @@
 /**
  * The sidebar's file list: every file in the fiddle, open in a tab or not,
  * grouped by name into Main, Preload, Renderer and Other (`processOf`), then
- * the Packages slot. Clicking a file opens its tab. File operations (add,
- * rename, delete, open and close) go through the Documents methods; main
- * validates them too. Each group head has its own add button, which opens the
+ * the packages section. Clicking a file opens its tab. File operations are
+ * checked here for early feedback; main validates them too. Each group head has its own add button, which opens the
  * new-file prompt with the group's naming hint and a free name filled in.
  * Each row's pill counts the file's errors, or its warnings when it has none.
  */
@@ -24,15 +23,20 @@ import {
   MenuItem,
   MenuPopover,
   promptDialog,
-  showToast,
   TextField,
   Tooltip,
   Tree,
   TreeRow,
 } from '../../../ui';
 import { badgeOf, useDiagnostics } from '../../editor/diagnostics';
+import { toastError } from '../../toast-error';
 import { PackagesSection } from '../packages/PackagesSection';
-import { groupByProcess, PROCESS_ORDER, suggestFileName, type FileProcess } from '../../shell/processes';
+import {
+  groupByProcess,
+  PROCESS_ORDER,
+  suggestFileName,
+  type FileProcess,
+} from '../../shell/processes';
 import { processLabelKey, useBadgeLabel } from '../../shell/Sheet';
 import styles from './Sidebar.module.css';
 
@@ -74,7 +78,13 @@ interface MenuState {
   open: boolean;
 }
 
-export function Sidebar({ files, dirtyFiles, activeFile, onOpen, onSetVisible }: SidebarProps) {
+export function Sidebar({
+  files,
+  dirtyFiles,
+  activeFile,
+  onOpen,
+  onSetVisible,
+}: SidebarProps) {
   const { t } = useTranslation('shell');
   const diagnostics = useDiagnostics();
   const badgeLabel = useBadgeLabel();
@@ -82,16 +92,14 @@ export function Sidebar({ files, dirtyFiles, activeFile, onOpen, onSetVisible }:
   const [menu, setMenu] = useState<MenuState | null>(null);
   const anchor = useRef<HTMLSpanElement>(null);
   const names = files.map((file) => file.name);
-  const query = filter.trim().toLowerCase();
-  const shown = query ? files.filter((file) => file.name.toLowerCase().includes(query)) : files;
+  // The filter field is there only past the threshold, so a leftover filter mustn't keep hiding files.
+  const query = files.length > FILTER_THRESHOLD ? filter.trim().toLowerCase() : '';
+  const shown = query
+    ? files.filter((file) => file.name.toLowerCase().includes(query))
+    : files;
   const groups = groupByProcess(shown);
 
-  const fail = (error: unknown) =>
-    showToast({
-      tone: 'error',
-      title: t('fileChangeFailed'),
-      description: error instanceof Error ? error.message : String(error),
-    });
+  const fail = (error: unknown) => toastError(error, t('fileChangeFailed'));
 
   /**
    * Asks for a name and adds the file. From a group head, the prompt explains
@@ -169,10 +177,16 @@ export function Sidebar({ files, dirtyFiles, activeFile, onOpen, onSetVisible }:
   };
 
   const closeMenu = () => setMenu((current) => current && { ...current, open: false });
-  const menuFileVisible = (menu ? files.find((file) => file.name === menu.name) : undefined)?.visible ?? true;
+  const menuFileVisible =
+    (menu ? files.find((file) => file.name === menu.name) : undefined)?.visible ?? true;
 
   return (
-    <nav className={styles.sidebar} aria-label={t('files')} onContextMenu={onContextMenu} data-tour="sidebar">
+    <nav
+      className={styles.sidebar}
+      aria-label={t('files')}
+      onContextMenu={onContextMenu}
+      data-tour="sidebar"
+    >
       {files.length > FILTER_THRESHOLD && (
         <TextField
           className={styles.search}
@@ -233,7 +247,13 @@ export function Sidebar({ files, dirtyFiles, activeFile, onOpen, onSetVisible }:
           </section>
         );
       })}
-      <Button className={styles.add} variant="ghost" size="sm" icon="plus" onPress={() => void addFile()}>
+      <Button
+        className={styles.add}
+        variant="ghost"
+        size="sm"
+        icon="plus"
+        onPress={() => void addFile()}
+      >
         {t('addFile')}
       </Button>
       <PackagesSection />

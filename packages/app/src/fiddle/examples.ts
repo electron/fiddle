@@ -24,6 +24,7 @@ export function findExample(name: string): ExampleInfo | undefined {
 /** Loads `<staticDir>/show-me/<dir>/`. */
 export async function loadExample(staticDir: string, name: string): Promise<FileMap> {
   const example = findExample(name);
-  if (!example) throw new FiddleError(ErrorCode.notFound, `No example named "${name}"`, { name });
+  if (!example)
+    throw new FiddleError(ErrorCode.notFound, `No example named "${name}"`, { name });
   return (await readFiddleFolder(path.join(staticDir, 'show-me', example.dir))).files;
 }

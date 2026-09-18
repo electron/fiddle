@@ -3,7 +3,8 @@ export function thrownReason(fn: () => unknown): string | null {
   try {
     fn();
   } catch (error) {
-    return ((error as { details?: { reason?: string } }).details?.reason ?? null) as string | null;
+    return ((error as { details?: { reason?: string } }).details?.reason ?? null) as
+      string | null;
   }
   return null;
 }

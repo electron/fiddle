@@ -29,15 +29,17 @@ interface NpmEndpoints {
 }
 
 /** The npm endpoints from the app's endpoint set: `getEndpoints()` (src/shared/endpoints.ts). */
-export function npmEndpoints(base: { algolia: string; npmRegistry: string }): NpmEndpoints {
+export function npmEndpoints(base: {
+  algolia: string;
+  npmRegistry: string;
+}): NpmEndpoints {
   return {
     searchUrl: `${base.algolia}/1/indexes/npm-search/query`,
     registryUrl: base.npmRegistry,
   };
 }
 
-// Algolia's public, search-only credentials for its npm index (the same ones
-// Fiddle has always shipped).
+// Algolia's public, search-only credentials for its npm index.
 const ALGOLIA_APP_ID = 'OFCNCOG2CU';
 const ALGOLIA_API_KEY = '4efa2042cf4dba11be6e96e5c394e1a4';
 
@@ -94,7 +96,9 @@ export function toVersionList(
   const valid = versions.filter((version) => semver.valid(version) !== null);
   valid.sort(semver.rcompare);
   const latest =
-    latestTag && valid.includes(latestTag) ? latestTag : (pickLatestVersion(valid) ?? valid[0]);
+    latestTag && valid.includes(latestTag)
+      ? latestTag
+      : (pickLatestVersion(valid) ?? valid[0]);
   return { latest: latest ?? null, versions: valid };
 }
 
@@ -162,25 +166,40 @@ export class NpmClient {
     return results;
   }
 
-  /** Every published version of `name`, newest first. */
-  async versions(name: string): Promise<PackageVersionList> {
+  /** A package's registry metadata: the abbreviated document, with versions, dist-tags and `hasInstallScript`. Not cached. */
+  async packument(name: string, signal?: AbortSignal): Promise<unknown> {
     if (!isValidPackageName(name)) {
-      throw new FiddleError(ErrorCode.invalidArgument, `Invalid package name: ${name}`, { name });
+      throw new FiddleError(ErrorCode.invalidArgument, `Invalid package name: ${name}`, {
+        name,
+      });
     }
+    // Scoped names keep their `@` and escape the slash: `@scope%2Fname`.
+    const url = `${this.#endpoints.registryUrl}/${name.replace('/', '%2F')}`;
+    return this.#request(
+      url,
+      { headers: { accept: 'application/vnd.npm.install-v1+json' }, signal },
+      name,
+    );
+  }
+
+  async versions(name: string): Promise<PackageVersionList> {
     const cached = this.#versions.get(name, this.#now(), VERSIONS_TTL_MS);
     if (cached) return cached;
 
-    // Scoped names keep their `@` and escape the slash: `@scope%2Fname`.
-    const url = `${this.#endpoints.registryUrl}/${name.replace('/', '%2F')}`;
-    const body = (await this.#request(url, {
-      // The abbreviated document: versions and dist-tags without READMEs.
-      headers: { accept: 'application/vnd.npm.install-v1+json' },
-    }, name)) as { versions?: unknown; 'dist-tags'?: { latest?: unknown } };
+    const body = (await this.packument(name)) as {
+      versions?: unknown;
+      'dist-tags'?: { latest?: unknown };
+    };
 
     const versions =
-      body.versions && typeof body.versions === 'object' ? Object.keys(body.versions) : [];
+      body.versions && typeof body.versions === 'object'
+        ? Object.keys(body.versions)
+        : [];
     const latestTag = body['dist-tags']?.latest;
-    const list = toVersionList(versions, typeof latestTag === 'string' ? latestTag : undefined);
+    const list = toVersionList(
+      versions,
+      typeof latestTag === 'string' ? latestTag : undefined,
+    );
     this.#versions.set(name, list, this.#now());
     return list;
   }
@@ -189,7 +208,9 @@ export class NpmClient {
   async latestVersion(name: string): Promise<string> {
     const { latest } = await this.versions(name);
     if (!latest) {
-      throw new FiddleError(ErrorCode.notFound, `${name} has no published versions`, { name });
+      throw new FiddleError(ErrorCode.notFound, `${name} has no published versions`, {
+        name,
+      });
     }
     return latest;
   }
@@ -199,6 +220,8 @@ export class NpmClient {
     try {
       response = await this.#fetch(url, init);
     } catch (error) {
+      if (init.signal?.aborted)
+        throw new FiddleError(ErrorCode.cancelled, 'The request was cancelled');
       throw new FiddleError(ErrorCode.network, `Could not reach ${new URL(url).host}`, {
         cause: error instanceof Error ? error.message : String(error),
       });
@@ -209,9 +232,13 @@ export class NpmClient {
       });
     }
     if (!response.ok) {
-      throw new FiddleError(ErrorCode.network, `${new URL(url).host} answered ${response.status}`, {
-        status: response.status,
-      });
+      throw new FiddleError(
+        ErrorCode.network,
+        `${new URL(url).host} answered ${response.status}`,
+        {
+          status: response.status,
+        },
+      );
     }
     try {
       return await response.json();

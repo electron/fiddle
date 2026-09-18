@@ -1,11 +1,13 @@
+import { act, render } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
 
 import {
-  countByFile,
+  claimReveal,
   getRuntimeErrors,
   revealLocation,
   setRuntimeErrors,
   splitErrorMessage,
+  useRevealRequest,
   type RuntimeError,
 } from './runtime-errors';
 
@@ -25,23 +27,39 @@ describe('runtime errors', () => {
     expect(getRuntimeErrors()).toEqual([]);
   });
 
-  it('counts errors per file', () => {
-    const counts = countByFile([error('a.js'), error('b.js'), error('a.js', 3)]);
-    expect(counts.get('a.js')).toBe(2);
-    expect(counts.get('b.js')).toBe(1);
-    expect(counts.get('c.js')).toBeUndefined();
-  });
-
   it('splits the error type from the message', () => {
-    expect(splitErrorMessage("Uncaught TypeError: Cannot read properties of undefined (reading 'x')")).toEqual({
+    expect(
+      splitErrorMessage(
+        "Uncaught TypeError: Cannot read properties of undefined (reading 'x')",
+      ),
+    ).toEqual({
       title: 'TypeError',
       text: "Cannot read properties of undefined (reading 'x')",
     });
-    expect(splitErrorMessage('ReferenceError: foo is not defined').title).toBe('ReferenceError');
-    expect(splitErrorMessage('something broke')).toEqual({ title: null, text: 'something broke' });
+    expect(splitErrorMessage('ReferenceError: foo is not defined').title).toBe(
+      'ReferenceError',
+    );
+    expect(splitErrorMessage('something broke')).toEqual({
+      title: null,
+      text: 'something broke',
+    });
   });
 
-  it('accepts reveal requests', () => {
-    expect(() => revealLocation('renderer.js', 4, 36)).not.toThrow();
+  it('lets one pane act on each reveal request', () => {
+    const requests: ReturnType<typeof useRevealRequest>[] = [];
+    function Reader() {
+      requests.push(useRevealRequest());
+      return null;
+    }
+    render(<Reader />);
+    const latest = () => requests.at(-1)!;
+    act(() => revealLocation('renderer.js', 4, 36));
+    expect(latest()).toMatchObject({ file: 'renderer.js', line: 4, column: 36 });
+    const seq = latest().seq;
+    expect(claimReveal(seq)).toBe(true);
+    // A pane mounted afterwards sees the old request and must not replay it.
+    expect(claimReveal(seq)).toBe(false);
+    act(() => revealLocation('renderer.js', 4, 36));
+    expect(claimReveal(latest().seq)).toBe(true);
   });
 });

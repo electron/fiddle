@@ -10,7 +10,7 @@ import { StateHub, type WindowInit, type WindowSink } from './state-hub';
 
 const nextTick = () => new Promise((resolve) => setTimeout(resolve, 0));
 
-/** A complete App value with every slice's defaults. */
+/** A complete App value with defaults. */
 function appInit(): Omit<AppState, 'rev'> {
   return {
     locale: 'en',
@@ -23,7 +23,7 @@ function appInit(): Omit<AppState, 'rev'> {
   };
 }
 
-/** A complete Window value with every slice's defaults. */
+/** A complete Window value with defaults. */
 function windowInit(title: string): WindowInit {
   return { title, view: 'editor', fiddle: emptyFiddleState(), layout: DEFAULT_LAYOUT };
 }

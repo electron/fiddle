@@ -2,7 +2,7 @@
  * Settings in main: validates changes, keeps `settings.json` sparse (only
  * values that differ from the defaults) and puts the effective settings in
  * the `App` store. Every change returns the `App` rev that includes it, which
- * the renderer uses to reconcile its optimistic updates (REQUIREMENTS §3).
+ * the renderer uses to reconcile its optimistic updates.
  *
  * No Electron imports.
  */
@@ -70,23 +70,25 @@ export class SettingsService {
     return this.#hub.app.settings;
   }
 
-  get file(): string {
-    return this.#store.file;
-  }
-
   set(key: string, value: unknown): number {
-    if (!isSettingKey(key)) throw new FiddleError(ErrorCode.invalidArgument, `Unknown setting: ${key}`);
+    if (!isSettingKey(key))
+      throw new FiddleError(ErrorCode.invalidArgument, `Unknown setting: ${key}`);
     const parsed = parseSetting(key, value);
     if (!parsed) {
-      throw new FiddleError(ErrorCode.invalidArgument, `Invalid value for setting "${key}"`, {
-        key,
-      });
+      throw new FiddleError(
+        ErrorCode.invalidArgument,
+        `Invalid value for setting "${key}"`,
+        {
+          key,
+        },
+      );
     }
     return this.replace({ ...this.settings, [key]: parsed.value });
   }
 
   reset(key: string): number {
-    if (!isSettingKey(key)) throw new FiddleError(ErrorCode.invalidArgument, `Unknown setting: ${key}`);
+    if (!isSettingKey(key))
+      throw new FiddleError(ErrorCode.invalidArgument, `Unknown setting: ${key}`);
     return this.set(key, defaultSettings[key]);
   }
 

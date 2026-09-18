@@ -7,7 +7,7 @@ on:
 
 permissions: {}
 
-# REQUIREMENTS §12 and §4 "Release integrity":
+# Release integrity:
 # - Each platform runs `publish --dry-run`; `release` runs `--from-dry-run`.
 # - Jobs that hold secrets install with `--mode=skip-build`, so no dependency
 #   lifecycle scripts run there. Forge downloads its own Electron to package.
@@ -236,8 +236,8 @@ jobs:
         with:
           name: vite-source-maps
           path: packages/app/.vite
-      # REQUIREMENTS §14: the release name comes from package.json, with no
-      # `v` prefix, exactly as the app reports it to Sentry.
+      # The release name comes from package.json, with no `v` prefix, exactly
+      # as the app reports it to Sentry.
       - name: Read version
         id: version
         run: echo "version=$(node -p "require('./packages/app/package.json').version")" >> "$GITHUB_OUTPUT"

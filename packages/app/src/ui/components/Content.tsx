@@ -4,8 +4,6 @@ import { cx } from '../cx';
 import { Icon, type IconName } from '../icons/Icon';
 import styles from './Content.module.css';
 
-/* Card */
-
 export interface CardProps {
   title: ReactNode;
   description?: ReactNode;
@@ -28,8 +26,15 @@ function initials(name: string): string {
     .toUpperCase();
 }
 
-/** Surface with a 0.5px button-edge ring, padding 12, radius-panel. Hover adds a soft shadow. */
-export function Card({ title, description, icon, avatar, onPress, children, className }: CardProps) {
+export function Card({
+  title,
+  description,
+  icon,
+  avatar,
+  onPress,
+  children,
+  className,
+}: CardProps) {
   const content = (
     <>
       {(icon || avatar) && (
@@ -53,8 +58,6 @@ export function Card({ title, description, icon, avatar, onPress, children, clas
   );
 }
 
-/* List and ListRow */
-
 export interface ListProps {
   'aria-label': string;
   children: ReactNode;
@@ -66,7 +69,15 @@ export interface ListProps {
 }
 
 /** A selectable list of rows. Arrow keys move; one Tab stop. */
-export function List({ children, value, defaultValue, onChange, onAction, className, ...rest }: ListProps) {
+export function List({
+  children,
+  value,
+  defaultValue,
+  onChange,
+  onAction,
+  className,
+  ...rest
+}: ListProps) {
   return (
     <ListBox
       aria-label={rest['aria-label']}
@@ -97,10 +108,22 @@ export interface ListRowProps {
   className?: string;
 }
 
-/** Min 48 tall, padding 8 10, radius-control. Selected: accent-soft. Hover: hover. */
-export function ListRow({ id, title, meta, icon, tags, isDisabled, className }: ListRowProps) {
+export function ListRow({
+  id,
+  title,
+  meta,
+  icon,
+  tags,
+  isDisabled,
+  className,
+}: ListRowProps) {
   return (
-    <ListBoxItem id={id} textValue={title} isDisabled={isDisabled} className={cx(styles.row, className)}>
+    <ListBoxItem
+      id={id}
+      textValue={title}
+      isDisabled={isDisabled}
+      className={cx(styles.row, className)}
+    >
       {icon && <Icon name={icon} className={styles.rowIcon} />}
       <span className={styles.rowMain}>
         <span className={styles.rowTitle}>{title}</span>
@@ -110,8 +133,6 @@ export function ListRow({ id, title, meta, icon, tags, isDisabled, className }: 
     </ListBoxItem>
   );
 }
-
-/* Table */
 
 export interface TableColumn<Row> {
   key: string;
@@ -142,7 +163,6 @@ function isSection<Row>(row: Row | TableSection): row is TableSection {
   return typeof row === 'object' && row !== null && 'section' in row;
 }
 
-/** Surface-sunken head in caption type, 32px rows with hairlines. */
 export function Table<Row extends { id: string }>({
   columns,
   rows,
@@ -157,7 +177,10 @@ export function Table<Row extends { id: string }>({
       <table className={styles.table} aria-label={rest['aria-label']}>
         <colgroup>
           {columns.map((column) => (
-            <col key={column.key} style={column.width ? { width: column.width } : undefined} />
+            <col
+              key={column.key}
+              style={column.width ? { width: column.width } : undefined}
+            />
           ))}
         </colgroup>
         <thead>
@@ -211,14 +234,12 @@ export function Table<Row extends { id: string }>({
   );
 }
 
-/* StatusPill */
-
 export interface StatusPillProps {
   children: ReactNode;
   className?: string;
 }
 
-/** The status bar's "Running" pill: a capsule, spark on spark-soft, 600, with a dot. */
+/** The status bar's "Running" pill. */
 export function StatusPill({ children, className }: StatusPillProps) {
   return (
     <span className={cx(styles.pill, className)}>

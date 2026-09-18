@@ -14,7 +14,7 @@ export interface BadgeProps {
   className?: string;
 }
 
-/** One or two words of status: a capsule, caption type, tone at 14% with tone text. */
+/** One or two words of status. */
 export function Badge({ tone = 'neutral', dot, children, className }: BadgeProps) {
   return (
     <span className={cx(styles.badge, className)} data-tone={tone}>
@@ -35,7 +35,13 @@ export interface TagProps {
 }
 
 /** A short label like Badge, neutral by default and optionally removable. */
-export function Tag({ tone = 'neutral', children, onRemove, removeLabel, className }: TagProps) {
+export function Tag({
+  tone = 'neutral',
+  children,
+  onRemove,
+  removeLabel,
+  className,
+}: TagProps) {
   return (
     <span className={cx(styles.badge, styles.tag, className)} data-tone={tone}>
       {children}
@@ -55,7 +61,6 @@ export interface KbdProps {
   className?: string;
 }
 
-/** Key caps: caption-sized sans on the kbd fill, a line-strong ring and a 1px lip. */
 export function Kbd({ keys, children, className }: KbdProps) {
   const list = keys ?? [children];
   return (
@@ -74,7 +79,6 @@ export interface InlineCodeProps {
   className?: string;
 }
 
-/** Code inside running text: Commit Mono at 92% on the neutral fill. */
 export function InlineCode({ children, className }: InlineCodeProps) {
   return <code className={cx(styles.code, className)}>{children}</code>;
 }

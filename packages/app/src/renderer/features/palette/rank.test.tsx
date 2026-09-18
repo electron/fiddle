@@ -2,7 +2,11 @@ import { describe, expect, it } from 'vitest';
 
 import { matchScore, pushRecent, rankItems, type PaletteItem } from './rank';
 
-const command = (id: string, label: string, extra: Partial<PaletteItem> = {}): PaletteItem => ({
+const command = (
+  id: string,
+  label: string,
+  extra: Partial<PaletteItem> = {},
+): PaletteItem => ({
   id: `command:${id}`,
   kind: 'command',
   label,
@@ -38,7 +42,9 @@ describe('matchScore', () => {
   });
 
   it('prefers substrings over scattered letters', () => {
-    expect(matchScore('new', 'New window')!).toBeGreaterThan(matchScore('nw', 'New window')!);
+    expect(matchScore('new', 'New window')!).toBeGreaterThan(
+      matchScore('nw', 'New window')!,
+    );
   });
 });
 
@@ -59,7 +65,6 @@ describe('rankItems', () => {
     expect(labels(rankItems(items, '', ['command:gone']))[0]).toBe('New window');
   });
 
-  // @feature new.palette
   it('searches every kind once there is a query', () => {
     expect(labels(rankItems(items, 'main', []))).toEqual(['main.js']);
     expect(labels(rankItems(items, '44', []))).toEqual(['44.0.0']);

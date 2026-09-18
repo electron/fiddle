@@ -1,9 +1,8 @@
 /**
- * The version manager, for the Settings page's Electron section (Lucent
- * "VersionManager"): a filter, channel and "downloaded only" checkboxes, bulk
+ * The version manager, for the Settings page's Electron section: a filter, channel and "downloaded only" checkboxes, bulk
  * actions, and a table of local builds and releases with status and action.
  */
-import { useState } from 'react';
+import { memo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { getReleaseChannel, type ReleaseChannel } from '../../../fiddle/versions';
@@ -15,7 +14,6 @@ import {
   confirmDialog,
   Icon,
   ProgressRing,
-  showToast,
   Spinner,
   Table,
   TextField,
@@ -23,6 +21,7 @@ import {
   type TableSection,
 } from '../../../ui';
 import { useAppState } from '../../state';
+import { toastError } from '../../toast-error';
 import { useReleases } from '../run/use-run';
 import styles from './Versions.module.css';
 
@@ -33,17 +32,126 @@ type Row =
   | { id: string; kind: 'release'; release: ReleaseRow }
   | { id: string; kind: 'local'; build: LocalBuild };
 
+type InstallState = VersionsState['installs'][string]['state'];
+
 const report = (promise: Promise<unknown>) =>
-  promise.catch((error: unknown) =>
-    showToast({ tone: 'error', title: error instanceof Error ? error.message : String(error) }),
+  promise.catch((error: unknown) => toastError(error));
+
+// The rows below are memoized on primitives, so a download's progress pushes re-render only the row it is on.
+const LocalStatus = memo(function LocalStatus({ available }: { available: boolean }) {
+  const { t } = useTranslation('run');
+  return (
+    <span className={styles.state}>
+      <Icon name={available ? 'folder' : 'warning'} className={styles.muted} />
+      {available ? t('stateLocal') : t('stateLocalMissing')}
+    </span>
   );
+});
+
+const ReleaseStatus = memo(function ReleaseStatus({
+  supported,
+  state,
+  percent,
+}: {
+  supported: boolean;
+  state: InstallState | undefined;
+  percent: number;
+}) {
+  const { t } = useTranslation('run');
+  if (!supported) return <span className={styles.muted}>{t('stateUnsupported')}</span>;
+  switch (state) {
+    case 'installed':
+      return (
+        <span className={styles.state}>
+          <Icon name="success" className={styles.installed} />
+          {t('stateInstalled')}
+        </span>
+      );
+    case 'downloading':
+      return (
+        <span className={styles.state}>
+          <ProgressRing value={percent} />
+          {t('stateDownloading', { percent })}
+        </span>
+      );
+    case 'installing':
+      return (
+        <span className={styles.state}>
+          <Spinner />
+          {t('stateInstalling')}
+        </span>
+      );
+    case 'downloaded':
+      return <span className={styles.state}>{t('stateDownloaded')}</span>;
+    default:
+      return (
+        <span className={styles.state}>
+          <Icon name="cloud" className={styles.muted} />
+          {t('stateMissing')}
+        </span>
+      );
+  }
+});
+
+const RemoveLocalBuild = memo(function RemoveLocalBuild({ id }: { id: string }) {
+  const { t } = useTranslation('run');
+  return (
+    <Button
+      size="sm"
+      variant="ghost"
+      icon="trash"
+      onPress={() => report(versionsApi.RemoveLocalBuild(id))}
+    >
+      {t('remove')}
+    </Button>
+  );
+});
+
+const ReleaseAction = memo(function ReleaseAction({
+  version,
+  supported,
+  state,
+}: {
+  version: string;
+  supported: boolean;
+  state: InstallState | undefined;
+}) {
+  const { t } = useTranslation('run');
+  if (state === 'installed' || state === 'downloaded') {
+    return (
+      <Button
+        size="sm"
+        variant="ghost"
+        icon="trash"
+        onPress={() => report(versionsApi.Remove(version))}
+      >
+        {t('remove')}
+      </Button>
+    );
+  }
+  if (state === undefined && supported) {
+    return (
+      <Button
+        size="sm"
+        variant="ghost"
+        icon="download"
+        onPress={() => report(versionsApi.Download(version))}
+      >
+        {t('download')}
+      </Button>
+    );
+  }
+  return null;
+});
 
 export function VersionManager() {
   const { t } = useTranslation('run');
   const app = useAppState();
   const rows = useReleases();
   const [query, setQuery] = useState('');
-  const [channels, setChannels] = useState<readonly ReleaseChannel[]>(() => app?.settings.channels ?? ['stable', 'beta']);
+  const [channels, setChannels] = useState<readonly ReleaseChannel[]>(
+    () => app?.settings.channels ?? ['stable', 'beta'],
+  );
   const [downloadedOnly, setDownloadedOnly] = useState(false);
   const installs: VersionsState['installs'] = app?.versions?.installs ?? {};
   const builds = app?.versions?.localBuilds ?? [];
@@ -57,96 +165,54 @@ export function VersionManager() {
       (!needle || row.version.includes(needle)),
   );
   const shown = matches.slice(0, ROW_LIMIT);
-  const localRows = builds.filter((b) => !needle || b.name.toLowerCase().includes(needle));
+  const localRows = builds.filter(
+    (b) => !needle || b.name.toLowerCase().includes(needle),
+  );
 
   const tableRows: Array<Row | TableSection> = [];
   if (localRows.length > 0) {
     tableRows.push({ section: t('groupLocal') });
-    for (const build of localRows) tableRows.push({ id: `l:${build.id}`, kind: 'local', build });
+    for (const build of localRows)
+      tableRows.push({ id: `l:${build.id}`, kind: 'local', build });
   }
   for (const channel of CHANNELS) {
     const inChannel = shown.filter((row) => getReleaseChannel(row.version) === channel);
     if (inChannel.length === 0) continue;
-    tableRows.push({ section: t(channel === 'stable' ? 'channelStable' : channel === 'beta' ? 'channelBeta' : 'channelNightly') });
-    for (const release of inChannel) tableRows.push({ id: `r:${release.version}`, kind: 'release', release });
+    tableRows.push({
+      section: t(
+        channel === 'stable'
+          ? 'channelStable'
+          : channel === 'beta'
+            ? 'channelBeta'
+            : 'channelNightly',
+      ),
+    });
+    for (const release of inChannel)
+      tableRows.push({ id: `r:${release.version}`, kind: 'release', release });
   }
 
   const status = (row: Row) => {
-    if (row.kind === 'local') {
-      return row.build.available ? (
-        <span className={styles.state}>
-          <Icon name="folder" className={styles.muted} />
-          {t('stateLocal')}
-        </span>
-      ) : (
-        <span className={styles.state}>
-          <Icon name="warning" className={styles.muted} />
-          {t('stateLocalMissing')}
-        </span>
-      );
-    }
+    if (row.kind === 'local') return <LocalStatus available={row.build.available} />;
     const install = installs[row.release.version];
-    if (!row.release.supported) return <span className={styles.muted}>{t('stateUnsupported')}</span>;
-    switch (install?.state) {
-      case 'installed':
-        return (
-          <span className={styles.state}>
-            <Icon name="success" className={styles.installed} />
-            {t('stateInstalled')}
-          </span>
-        );
-      case 'downloading':
-        return (
-          <span className={styles.state}>
-            <ProgressRing value={install.percent ?? 0} />
-            {t('stateDownloading', { percent: install.percent ?? 0 })}
-          </span>
-        );
-      case 'installing':
-        return (
-          <span className={styles.state}>
-            <Spinner />
-            {t('stateInstalling')}
-          </span>
-        );
-      case 'downloaded':
-        return <span className={styles.state}>{t('stateDownloaded')}</span>;
-      default:
-        return (
-          <span className={styles.state}>
-            <Icon name="cloud" className={styles.muted} />
-            {t('stateMissing')}
-          </span>
-        );
-    }
+    return (
+      <ReleaseStatus
+        supported={row.release.supported}
+        state={install?.state}
+        percent={install?.percent ?? 0}
+      />
+    );
   };
 
-  const action = (row: Row) => {
-    if (row.kind === 'local') {
-      return (
-        <Button size="sm" variant="ghost" icon="trash" onPress={() => report(versionsApi.RemoveLocalBuild(row.build.id))}>
-          {t('remove')}
-        </Button>
-      );
-    }
-    const { version, supported } = row.release;
-    const state = installs[version]?.state;
-    if (state === 'installed' || state === 'downloaded') {
-      return (
-        <Button size="sm" variant="ghost" icon="trash" onPress={() => report(versionsApi.Remove(version))}>
-          {t('remove')}
-        </Button>
-      );
-    }
-    if (state === undefined && supported) {
-      return (
-        <Button size="sm" variant="ghost" icon="download" onPress={() => report(versionsApi.Download(version))}>
-          {t('download')}
-        </Button>
-      );
-    }
-    return null;
-  };
+  const action = (row: Row) =>
+    row.kind === 'local' ? (
+      <RemoveLocalBuild id={row.build.id} />
+    ) : (
+      <ReleaseAction
+        version={row.release.version}
+        supported={row.release.supported}
+        state={installs[row.release.version]?.state}
+      />
+    );
 
   const columns: TableColumn<Row>[] = [
     {
@@ -156,7 +222,13 @@ export function VersionManager() {
       render: (row) => (row.kind === 'local' ? row.build.name : row.release.version),
     },
     { key: 'status', label: t('columnStatus'), render: status },
-    { key: 'action', label: t('columnAction'), align: 'right', width: '140px', render: action },
+    {
+      key: 'action',
+      label: t('columnAction'),
+      align: 'right',
+      width: '140px',
+      render: action,
+    },
   ];
 
   const toggleChannel = (channel: ReleaseChannel, on: boolean) =>
@@ -186,22 +258,47 @@ export function VersionManager() {
           className={styles.filter}
         />
         {CHANNELS.map((channel) => (
-          <Checkbox key={channel} isSelected={channels.includes(channel)} onChange={(on) => toggleChannel(channel, on)}>
-            {t(channel === 'stable' ? 'channelStable' : channel === 'beta' ? 'channelBeta' : 'channelNightly')}
+          <Checkbox
+            key={channel}
+            isSelected={channels.includes(channel)}
+            onChange={(on) => toggleChannel(channel, on)}
+          >
+            {t(
+              channel === 'stable'
+                ? 'channelStable'
+                : channel === 'beta'
+                  ? 'channelBeta'
+                  : 'channelNightly',
+            )}
           </Checkbox>
         ))}
         <Checkbox isSelected={downloadedOnly} onChange={setDownloadedOnly}>
           {t('downloadedOnly')}
         </Checkbox>
         <span className={styles.spacer} />
-        <Button size="sm" variant="ghost" icon="refresh" onPress={() => report(versionsApi.RefreshReleases())}>
+        <Button
+          size="sm"
+          variant="ghost"
+          icon="refresh"
+          onPress={() => report(versionsApi.RefreshReleases())}
+        >
           {t('refreshReleases')}
         </Button>
-        <Button size="sm" variant="secondary" icon="folder" onPress={() => report(versionsApi.AddLocalBuild())}>
+        <Button
+          size="sm"
+          variant="secondary"
+          icon="folder"
+          onPress={() => report(versionsApi.AddLocalBuild())}
+        >
           {t('addLocalBuild')}
         </Button>
         {downloadingAll ? (
-          <Button size="sm" variant="secondary" icon="stop" onPress={() => report(versionsApi.StopDownloadAll())}>
+          <Button
+            size="sm"
+            variant="secondary"
+            icon="stop"
+            onPress={() => report(versionsApi.StopDownloadAll())}
+          >
             {t('stopDownloads')}
           </Button>
         ) : (
@@ -209,12 +306,14 @@ export function VersionManager() {
             size="sm"
             variant="secondary"
             icon="download"
-            // Only the rows on screen (§17.8), not the ones past the row limit.
+            // Only the rows on screen, not the ones past the row limit.
             onPress={() =>
               report(
                 versionsApi.DownloadAll(
                   shown
-                    .filter((r) => r.supported && installs[r.version]?.state !== 'installed')
+                    .filter(
+                      (r) => r.supported && installs[r.version]?.state !== 'installed',
+                    )
                     .map((r) => r.version),
                 ),
               )
@@ -227,9 +326,16 @@ export function VersionManager() {
           {t('deleteAll')}
         </Button>
       </div>
-      <Table<Row> aria-label={t('columnVersion')} columns={columns} rows={tableRows} emptyMessage={t('noVersions')} />
+      <Table<Row>
+        aria-label={t('columnVersion')}
+        columns={columns}
+        rows={tableRows}
+        emptyMessage={t('noVersions')}
+      />
       {matches.length > shown.length && (
-        <p className={styles.note}>{t('truncated', { shown: shown.length, total: matches.length })}</p>
+        <p className={styles.note}>
+          {t('truncated', { shown: shown.length, total: matches.length })}
+        </p>
       )}
     </div>
   );

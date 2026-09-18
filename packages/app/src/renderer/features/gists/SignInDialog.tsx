@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { githubApi } from '../../../ipc/renderer';
@@ -13,7 +13,8 @@ function signInError(t: GistT, error: unknown): string {
   if (reason === 'bad-format') return t('signInErrorFormat');
   if (reason === 'invalid-token') return t('signInErrorInvalid');
   if (reason === 'missing-scope') return t('signInErrorScope');
-  if (e.code === ErrorCode.network || e.code === ErrorCode.unavailable) return t('signInErrorNetwork');
+  if (e.code === ErrorCode.network || e.code === ErrorCode.unavailable)
+    return t('signInErrorNetwork');
   return t('signInErrorOther', { message: e.message });
 }
 
@@ -26,7 +27,7 @@ export interface SignInDialogProps {
 /**
  * Personal access token sign-in. Mount it only while it's open. A token on
  * the clipboard is used when the field is left empty; main reads it, so the
- * renderer never sees it (§4).
+ * renderer never sees it.
  */
 export function SignInDialog({ onClose, onSignedIn }: SignInDialogProps) {
   const { t } = useTranslation('gists');
@@ -36,9 +37,11 @@ export function SignInDialog({ onClose, onSignedIn }: SignInDialogProps) {
   const [busy, setBusy] = useState(false);
   const [storage, setStorage] = useState<string>('encrypted');
   const [remember, setRemember] = useState(false);
+  const mounted = useRef(true);
 
   useEffect(() => {
     let live = true;
+    mounted.current = true;
     githubApi.HasClipboardToken().then(
       (has) => {
         if (live) setClipboardToken(has);
@@ -53,6 +56,7 @@ export function SignInDialog({ onClose, onSignedIn }: SignInDialogProps) {
     );
     return () => {
       live = false;
+      mounted.current = false;
     };
   }, []);
 
@@ -72,8 +76,11 @@ export function SignInDialog({ onClose, onSignedIn }: SignInDialogProps) {
         title: t('signedIn', { login: result.login }),
         description: result.persisted ? undefined : t('signedInSession'),
       });
-      onClose();
-      onSignedIn?.();
+      // Cancelling while the sign-in was in flight also cancels what it was for.
+      if (mounted.current) {
+        onClose();
+        onSignedIn?.();
+      }
     } catch (e) {
       setError(signInError(t, e));
       setBusy(false);
@@ -95,7 +102,12 @@ export function SignInDialog({ onClose, onSignedIn }: SignInDialogProps) {
           <Button variant="ghost" onPress={onClose}>
             {t('cancel')}
           </Button>
-          <Button variant="primary" loading={busy} isDisabled={!token.trim() && !fromClipboard} onPress={() => void submit()}>
+          <Button
+            variant="primary"
+            loading={busy}
+            isDisabled={!token.trim() && !fromClipboard}
+            onPress={() => void submit()}
+          >
             {t('signInSubmit')}
           </Button>
         </>

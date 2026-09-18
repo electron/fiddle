@@ -88,7 +88,6 @@ const option = (id: string) =>
   document.querySelector(`[role="option"][data-key="${id}"]`);
 
 describe('VersionPicker', () => {
-  // @feature versions.picker versions.install-state
   it('lists local builds, stable releases and pre-releases with their install state', () => {
     render(<VersionPicker />);
     const trigger = screen.getByRole('button');
@@ -117,7 +116,6 @@ describe('VersionPicker', () => {
     });
   });
 
-  // @feature versions.download
   it('updates a downloading row in place: progress pushes do not rebuild the list', () => {
     const { rerender } = render(<VersionPicker />);
     fireEvent.click(screen.getByRole('button'));

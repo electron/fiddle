@@ -1,0 +1,271 @@
+/** The Electron versions service: mirrors, the release list, installs and removals. */
+import fs from 'node:fs';
+import os from 'node:os';
+import path from 'node:path';
+
+import { InstallState } from '@electron/fiddle-core';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+
+import { ErrorCode } from '../../shared/errors';
+import { MIRRORS } from '../../shared/settings';
+
+vi.mock('electron', () => ({
+  app: { getSystemLocale: () => 'en-US' },
+  net: { fetch: vi.fn() },
+}));
+vi.mock('../dialogs', () => ({
+  confirm: vi.fn(),
+  messageBox: vi.fn(),
+  pickFolder: vi.fn(),
+}));
+vi.mock('../i18n', () => ({
+  tm: () => (key: string, options?: Record<string, unknown>) =>
+    options ? `${key}:${JSON.stringify(options)}` : key,
+}));
+vi.mock('../log', () => ({
+  log: { debug: vi.fn(), info: vi.fn(), warn: vi.fn(), error: vi.fn() },
+}));
+
+const { VersionsService, mirrorsFor, readReleaseList } = await import('./service');
+const { cachePaths } = await import('./paths');
+
+const DEFAULT_ELECTRON = 'https://github.com/electron/electron/releases/download/';
+const DEFAULT_NIGHTLY = 'https://github.com/electron/nightlies/releases/download/';
+
+describe('mirrorsFor', () => {
+  const base = {
+    mirror: 'auto' as const,
+    customMirrorElectron: '',
+    customMirrorNightly: '',
+  };
+
+  it('picks the China mirror for automatic mode only on a zh-CN locale', () => {
+    expect(mirrorsFor(base, 'zh-CN')).toEqual({
+      electronMirror: MIRRORS.china.electron,
+      electronNightlyMirror: MIRRORS.china.nightly,
+    });
+    expect(mirrorsFor(base, 'zh-cn').electronMirror).toBe(MIRRORS.china.electron);
+    expect(mirrorsFor(base, 'zh-TW').electronMirror).toBe(DEFAULT_ELECTRON);
+    expect(mirrorsFor(base, 'en-US')).toEqual({
+      electronMirror: DEFAULT_ELECTRON,
+      electronNightlyMirror: DEFAULT_NIGHTLY,
+    });
+  });
+
+  it('follows an explicit choice whatever the locale', () => {
+    expect(mirrorsFor({ ...base, mirror: 'china' }, 'en-US').electronMirror).toBe(
+      MIRRORS.china.electron,
+    );
+    expect(mirrorsFor({ ...base, mirror: 'default' }, 'zh-CN').electronMirror).toBe(
+      DEFAULT_ELECTRON,
+    );
+  });
+
+  it('uses custom mirrors, and adds the trailing slash @electron/get needs', () => {
+    const custom = { ...base, mirror: 'custom' as const };
+    expect(
+      mirrorsFor(
+        {
+          ...custom,
+          customMirrorElectron: 'https://mirror.example.com/electron',
+          customMirrorNightly: 'https://n.example.com/',
+        },
+        'en-US',
+      ),
+    ).toEqual({
+      electronMirror: 'https://mirror.example.com/electron/',
+      electronNightlyMirror: 'https://n.example.com/',
+    });
+  });
+
+  it('falls back to the default for an empty or non-https custom mirror', () => {
+    const custom = { ...base, mirror: 'custom' as const };
+    expect(mirrorsFor(custom, 'en-US')).toEqual({
+      electronMirror: DEFAULT_ELECTRON,
+      electronNightlyMirror: DEFAULT_NIGHTLY,
+    });
+    expect(
+      mirrorsFor(
+        {
+          ...custom,
+          customMirrorElectron: 'http://insecure.example.com/',
+          customMirrorNightly: 'not a url',
+        },
+        'en-US',
+      ),
+    ).toEqual({
+      electronMirror: DEFAULT_ELECTRON,
+      electronNightlyMirror: DEFAULT_NIGHTLY,
+    });
+  });
+});
+
+let dir = '';
+beforeEach(() => {
+  dir = fs.mkdtempSync(path.join(os.tmpdir(), 'fiddle-versions-'));
+});
+afterEach(() => {
+  vi.useRealTimers();
+  fs.rmSync(dir, { recursive: true, force: true });
+});
+
+const release = (version: string) => ({ version, date: '2026-01-01', node: '24.0.0' });
+const listText = (...versions: string[]) => JSON.stringify(versions.map(release));
+
+function setup(options: { active?: string[]; cached?: string } = {}) {
+  const cache = cachePaths(path.join(dir, 'cache'));
+  if (options.cached !== undefined) {
+    fs.mkdirSync(cache.root, { recursive: true });
+    fs.writeFileSync(cache.releases, options.cached);
+  }
+  const updateApp = vi.fn();
+  const hub = {
+    app: {
+      settings: { mirror: 'default', customMirrorElectron: '', customMirrorNightly: '' },
+    },
+    updateApp,
+  };
+  const fetch = vi.fn<(url: string) => Promise<Response>>();
+  const onRemoved = vi.fn();
+  const service = new VersionsService({
+    hub: hub as never,
+    cache,
+    userData: path.join(dir, 'user'),
+    releasesUrl: 'https://example.test/releases.json',
+    fetch,
+    activeVersions: () => ({
+      releases: new Set(options.active ?? []),
+      builds: new Set(),
+    }),
+    onRemoved,
+  });
+  const rev = () =>
+    (updateApp.mock.calls.at(-1)?.[0] as { versions: { releasesRev: number } }).versions
+      .releasesRev;
+  return { service, cache, fetch, updateApp, onRemoved, rev };
+}
+
+const respond = (text: string) => async () => new Response(text);
+
+describe('release list', () => {
+  it('falls back to the bundled list when the cached one is not a release list', async () => {
+    const { cache } = setup({ cached: '{"oops":true}' });
+    const data = await readReleaseList(cache);
+    expect(Array.isArray(data) && data.length > 100).toBe(true);
+  });
+
+  it('publishes a refreshed list, caches its text, and skips a refresh that changes nothing', async () => {
+    const first = listText('30.0.0', '29.0.0');
+    const { service, cache, fetch, updateApp, rev } = setup({ cached: first });
+    fetch.mockImplementation(respond(first));
+    await service.init();
+    await vi.waitFor(() => expect(fetch).toHaveBeenCalledTimes(1));
+    await service.refresh();
+    expect(updateApp).toHaveBeenCalledTimes(1);
+    expect(rev()).toBe(1);
+
+    const second = listText('31.0.0', '30.0.0', '29.0.0');
+    fetch.mockImplementation(respond(second));
+    await service.refresh();
+    expect(rev()).toBe(2);
+    expect(service.releases().map((row) => row.version)).toEqual([
+      '31.0.0',
+      '30.0.0',
+      '29.0.0',
+    ]);
+    expect(fs.readFileSync(cache.releases, 'utf8')).toBe(second);
+  });
+
+  it('keeps a fetched list when it cannot be cached', async () => {
+    const { service, cache, fetch } = setup();
+    fs.mkdirSync(cache.root, { recursive: true });
+    fs.mkdirSync(cache.releases);
+    fetch.mockImplementation(respond(listText('99.0.0')));
+    await service.refresh();
+    expect(service.releases().map((row) => row.version)).toEqual(['99.0.0']);
+  });
+
+  it('reports a failed refresh to the caller, and keeps the list it has', async () => {
+    const { service, fetch } = setup({ cached: listText('30.0.0') });
+    fetch.mockRejectedValue(new Error('offline'));
+    await service.init();
+    await expect(service.refresh()).rejects.toMatchObject({
+      code: ErrorCode.network,
+      message: 'refreshFailed',
+    });
+    fetch.mockImplementation(async () => new Response('nope', { status: 503 }));
+    await expect(service.refresh()).rejects.toMatchObject({ code: ErrorCode.network });
+    expect(service.releases().map((row) => row.version)).toEqual(['30.0.0']);
+  });
+});
+
+describe('downloads', () => {
+  it('publishes progress only when the percent changes', async () => {
+    vi.useFakeTimers();
+    const { service, updateApp } = setup();
+    vi.spyOn(service.installer, 'install').mockImplementation(
+      async (_version, options) => {
+        for (const percent of [0.1, 0.1, 0.101, 0.2])
+          options?.progressCallback?.({ percent } as never);
+        return '/electron';
+      },
+    );
+    await service.install('30.0.0');
+    vi.advanceTimersByTime(100);
+    const percents = updateApp.mock.calls.map(
+      (call) =>
+        (call[0] as { versions: { installs: Record<string, { percent?: number }> } })
+          .versions.installs['30.0.0']?.percent,
+    );
+    expect(percents).toEqual([20]);
+  });
+});
+
+describe('removing versions', () => {
+  function installed(
+    service: InstanceType<typeof VersionsService>,
+    ...versions: string[]
+  ) {
+    for (const version of versions)
+      service.installer.emit('state-changed', { version, state: InstallState.installed });
+  }
+
+  it('refuses a version that a window or a run uses', async () => {
+    const { service, onRemoved } = setup({ active: ['30.0.0'] });
+    vi.spyOn(service.installer, 'remove').mockResolvedValue();
+    await expect(service.remove('30.0.0')).rejects.toMatchObject({
+      code: ErrorCode.conflict,
+    });
+    expect(onRemoved).not.toHaveBeenCalled();
+  });
+
+  it('drops the version and its types when it is gone', async () => {
+    const { service, onRemoved } = setup();
+    vi.spyOn(service.installer, 'remove').mockResolvedValue();
+    vi.spyOn(service.installer, 'state').mockReturnValue(InstallState.missing);
+    await service.remove('30.0.0');
+    expect(onRemoved).toHaveBeenCalledWith('30.0.0');
+  });
+
+  it('reports a version that could not be removed, and keeps its types', async () => {
+    const { service, onRemoved } = setup();
+    vi.spyOn(service.installer, 'remove').mockResolvedValue();
+    vi.spyOn(service.installer, 'state').mockReturnValue(InstallState.installed);
+    await expect(service.remove('30.0.0')).rejects.toMatchObject({
+      code: ErrorCode.unavailable,
+    });
+    expect(onRemoved).not.toHaveBeenCalled();
+  });
+
+  it('deletes all but the versions in use, and drops the types of the ones it removed', async () => {
+    const { service, onRemoved } = setup({ active: ['29.0.0'] });
+    installed(service, '30.0.0', '29.0.0', '28.0.0');
+    const remove = vi.spyOn(service.installer, 'remove').mockResolvedValue();
+    vi.spyOn(service.installer, 'state').mockImplementation((version) =>
+      version === '28.0.0' ? InstallState.installed : InstallState.missing,
+    );
+    await service.deleteAll();
+    expect(remove.mock.calls.map(([version]) => version)).toEqual(['30.0.0', '28.0.0']);
+    expect(onRemoved.mock.calls.map(([version]) => version)).toEqual(['30.0.0']);
+  });
+});

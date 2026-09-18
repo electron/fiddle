@@ -1,12 +1,7 @@
 /**
- * The atomic JSON store every persisted file goes through (REQUIREMENTS §5).
+ * The atomic JSON store every persisted file goes through. Every file is JSON
+ * with a `schemaVersion`. No Electron imports.
  *
- *   const store = createJsonStore({ file, schema, defaults, version });
- *   store.get();                      // current value, always valid
- *   store.set((prev) => ({ ...prev, x: 1 }));
- *   await store.flush();              // resolves once it is on disk
- *
- * - Every file is JSON with a `schemaVersion`.
  * - Reads (synchronous, once, at creation) try the file, then `<file>.bak`,
  *   then the defaults. The `.bak` is only used when the file exists but can't
  *   be read or parsed: a file the user deleted means "start over".
@@ -20,19 +15,24 @@
  *   latest value: temp file, fsync, copy the current file to `.bak`, rename
  *   (retried on Windows), then fsync the directory on POSIX.
  *
- * No Electron imports. `flushAll()` is called on quit, `session-end` and
- * `powerMonitor` `shutdown` (see ./lifecycle.ts).
+ * `flushAll()` is called on quit, `session-end` and `powerMonitor` `shutdown`
+ * (see ./lifecycle.ts).
  */
 import { randomUUID } from 'node:crypto';
 import fs from 'node:fs';
 import fsp from 'node:fs/promises';
 import path from 'node:path';
 
+import { renameWithRetry } from '@electron/fiddle-core';
+
 import { log } from '../log';
 
 /** Anything with a zod-style object `shape`: each key is validated on its own. */
 interface ObjectSchema {
-  shape: Record<string, { safeParse(value: unknown): { success: boolean; data?: unknown; error?: unknown } }>;
+  shape: Record<
+    string,
+    { safeParse(value: unknown): { success: boolean; data?: unknown; error?: unknown } }
+  >;
 }
 
 type Migration = (data: Record<string, unknown>) => Record<string, unknown>;
@@ -93,17 +93,17 @@ function notify(notice: JsonStoreNotice): void {
   else queuedNotices.push(notice);
 }
 
-const stores = new Set<JsonStore<unknown>>();
-let pendingWrites = 0;
+/** The stores with a write in flight; a store leaves the set when it is idle, so closed windows' drafts can be collected. */
+const writingStores = new Set<JsonStore<unknown>>();
 
 /** Flushes every store. Main awaits this before quitting. */
 export async function flushAll(): Promise<void> {
-  await Promise.all([...stores].map((store) => store.flush()));
+  await Promise.all([...writingStores].map((store) => store.flush()));
 }
 
 /** True while any store has a value that isn't on disk yet. */
 export function hasPendingWrites(): boolean {
-  return pendingWrites > 0;
+  return writingStores.size > 0;
 }
 
 const VERSION_KEY = 'schemaVersion';
@@ -148,17 +148,18 @@ export function createJsonStore<T>(options: JsonStoreOptions<T>): JsonStore<T> {
     if (loaded.readOnly) return;
     dirty = true;
     if (writing) return;
-    pendingWrites++;
+    writingStores.add(store as JsonStore<unknown>);
     writing = drain().finally(() => {
       writing = undefined;
-      pendingWrites--;
+      writingStores.delete(store as JsonStore<unknown>);
     });
   };
 
   const store: JsonStore<T> = {
     get: () => value,
     set(next) {
-      const resolved = typeof next === 'function' ? (next as (prev: T) => T)(value) : next;
+      const resolved =
+        typeof next === 'function' ? (next as (prev: T) => T)(value) : next;
       value = validate(schema, resolved as Record<string, unknown>, file) as T;
       schedule();
     },
@@ -185,7 +186,6 @@ export function createJsonStore<T>(options: JsonStoreOptions<T>): JsonStore<T> {
     readOnly: loaded.readOnly,
     file,
   };
-  stores.add(store as JsonStore<unknown>);
   return store;
 }
 
@@ -213,7 +213,8 @@ function decode<T>(
 ): Loaded<T> {
   const { [VERSION_KEY]: fileVersion, ...rest } = raw;
   let data: Record<string, unknown> = rest;
-  let current = typeof fileVersion === 'number' && Number.isInteger(fileVersion) ? fileVersion : 1;
+  let current =
+    typeof fileVersion === 'number' && Number.isInteger(fileVersion) ? fileVersion : 1;
   let readOnly = false;
 
   if (current > version) {
@@ -240,7 +241,11 @@ function decode<T>(
 }
 
 /** Drops (and logs) keys whose value fails their schema. Unknown keys are kept as they are. */
-function validate(schema: ObjectSchema, data: Record<string, unknown>, file: string): Record<string, unknown> {
+function validate(
+  schema: ObjectSchema,
+  data: Record<string, unknown>,
+  file: string,
+): Record<string, unknown> {
   const out: Record<string, unknown> = {};
   for (const [key, entry] of Object.entries(data)) {
     const field = schema.shape[key];
@@ -259,12 +264,15 @@ function validate(schema: ObjectSchema, data: Record<string, unknown>, file: str
  * Reads one candidate. Returns undefined if it is missing, unreadable or
  * corrupt; a corrupt file is moved aside first.
  */
-function readCandidate(file: string): { data: Record<string, unknown>; text: string } | undefined {
+function readCandidate(
+  file: string,
+): { data: Record<string, unknown>; text: string } | undefined {
   let text: string;
   try {
     text = fs.readFileSync(file, 'utf8');
   } catch (error) {
-    if ((error as NodeJS.ErrnoException).code !== 'ENOENT') log.error('failed to read', file, error);
+    if ((error as NodeJS.ErrnoException).code !== 'ENOENT')
+      log.error('failed to read', file, error);
     return undefined;
   }
   const data = parseObject(text);
@@ -344,43 +352,5 @@ async function syncDir(dir: string): Promise<void> {
     // Some file systems can't fsync a directory; the rename is still atomic.
   } finally {
     await handle?.close();
-  }
-}
-
-const RETRYABLE = new Set(['EPERM', 'EACCES', 'EBUSY']);
-
-/**
- * `rename`, retried with backoff for up to 10 seconds on EPERM, EACCES or
- * EBUSY on Windows, where virus scanners and indexers hold files briefly.
- */
-export async function renameWithRetry(
-  from: string,
-  to: string,
-  {
-    platform = process.platform,
-    rename = fsp.rename,
-    sleep = (ms: number) => new Promise<void>((resolve) => setTimeout(resolve, ms)),
-    budgetMs = 10_000,
-  }: {
-    platform?: NodeJS.Platform;
-    rename?: (from: string, to: string) => Promise<void>;
-    sleep?: (ms: number) => Promise<void>;
-    budgetMs?: number;
-  } = {},
-): Promise<void> {
-  let waited = 0;
-  let delay = 20;
-  for (;;) {
-    try {
-      await rename(from, to);
-      return;
-    } catch (error) {
-      const code = (error as NodeJS.ErrnoException).code ?? '';
-      if (platform !== 'win32' || !RETRYABLE.has(code) || waited >= budgetMs) throw error;
-      const wait = Math.min(delay, budgetMs - waited);
-      await sleep(wait);
-      waited += wait;
-      delay = Math.min(delay * 2, 1000);
-    }
   }
 }

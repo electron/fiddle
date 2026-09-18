@@ -37,7 +37,11 @@ describe('mapOldSettings', () => {
     expect(result.tourDone).toBe(true);
     expect(result.gitHubLogin).toBe('octocat');
     expect(result.localVersions).toEqual([
-      { version: '0.0.0-local.1690000000000', localPath: '/src/electron-old/out/Testing', name: 'Old build' },
+      {
+        version: '0.0.0-local.1690000000000',
+        localPath: '/src/electron-old/out/Testing',
+        name: 'Old build',
+      },
     ]);
     expect(result.ignored.sort()).toEqual(['known-electron-versions', 'version']);
     expect(result.unknown).toEqual(['devtools-extension-state']);
@@ -66,7 +70,10 @@ describe('mapOldSettings', () => {
 
   it('maps the built-in themes to an appearance when the system theme was off', () => {
     const map = (theme?: string) =>
-      mapOldSettings({ isUsingSystemTheme: 'false', ...(theme ? { theme } : {}) }, options).settings;
+      mapOldSettings(
+        { isUsingSystemTheme: 'false', ...(theme ? { theme } : {}) },
+        options,
+      ).settings;
     expect(map('defaultLight')).toEqual({ appearance: 'light' });
     expect(map('defaultDark')).toEqual({ appearance: 'dark' });
     expect(map()).toEqual({ appearance: 'dark' });
@@ -76,17 +83,29 @@ describe('mapOldSettings', () => {
   });
 
   it('maps the China mirror', () => {
-    expect(mapOldSettings({ electronMirror: '{"sourceType":"CHINA"}' }, options).settings).toEqual({
+    expect(
+      mapOldSettings({ electronMirror: '{"sourceType":"CHINA"}' }, options).settings,
+    ).toEqual({
       mirror: 'china',
     });
   });
 
   it('reports values that do not fit the new schema', () => {
     const result = mapOldSettings(
-      { fontSize: 'huge', packageManager: 'pnpm', isClearingConsoleOnRun: 'maybe', channelsToShow: '["Canary"]' },
+      {
+        fontSize: 'huge',
+        packageManager: 'pnpm',
+        isClearingConsoleOnRun: 'maybe',
+        channelsToShow: '["Canary"]',
+      },
       options,
     );
     expect(result.settings).toEqual({});
-    expect(result.invalid.sort()).toEqual(['channelsToShow', 'fontSize', 'isClearingConsoleOnRun', 'packageManager']);
+    expect(result.invalid.sort()).toEqual([
+      'channelsToShow',
+      'fontSize',
+      'isClearingConsoleOnRun',
+      'packageManager',
+    ]);
   });
 });

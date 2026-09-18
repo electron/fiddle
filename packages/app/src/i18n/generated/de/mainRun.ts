@@ -24,7 +24,6 @@ export default {
   "noBinaryTitle": "In diesem Ordner gibt es keinen Electron-Build",
   "noBinaryDetail": "Fiddle hat in {{path}} nach {{file}} gesucht.",
   "cannotRemoveActive": "Electron {{version}} wird verwendet und kann daher nicht entfernt werden.",
-  "cannotChangeWhileRunning": "Stoppe das Fiddle, bevor du die Electron-Version änderst.",
   "packaging": "Wird mit Electron Forge in {{path}} paketiert …",
   "making": "Installer werden mit Electron Forge in {{path}} erstellt …",
   "packageDone": "Fertig. Die Ausgabe liegt in {{path}}",

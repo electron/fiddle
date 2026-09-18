@@ -3,7 +3,11 @@ import { describe, expect, it, vi } from 'vitest';
 import { FiddleError } from '../../shared/errors';
 import { NpmClient, rankSearchHits, toVersionList, type FetchFn } from './npm-client';
 
-const hit = (name: string, version = '1.0.0', description = '') => ({ name, version, description });
+const hit = (name: string, version = '1.0.0', description = '') => ({
+  name,
+  version,
+  description,
+});
 
 function json(body: unknown, status = 200): Response {
   return new Response(JSON.stringify(body), {
@@ -20,11 +24,19 @@ describe('rankSearchHits', () => {
       hit('react'),
       hit('react-is'),
     ]);
-    expect(ranked.map((r) => r.name)).toEqual(['react', 'react-dom', 'preact', 'react-is']);
+    expect(ranked.map((r) => r.name)).toEqual([
+      'react',
+      'react-dom',
+      'preact',
+      'react-is',
+    ]);
   });
 
   it('matches names case-insensitively and ignores surrounding space', () => {
-    const ranked = rankSearchHits('  jsonstream ', [hit('json-stream'), hit('JSONStream')]);
+    const ranked = rankSearchHits('  jsonstream ', [
+      hit('json-stream'),
+      hit('JSONStream'),
+    ]);
     expect(ranked[0]?.name).toBe('JSONStream');
   });
 
@@ -33,7 +45,6 @@ describe('rankSearchHits', () => {
     expect(ranked.map((r) => r.name)).toEqual(['lodash', 'lodash.merge']);
   });
 
-  // @feature modules.search
   it('returns at most five results, drops malformed and duplicate hits', () => {
     const hits = [
       { name: 1, version: '1.0.0' },
@@ -46,7 +57,13 @@ describe('rankSearchHits', () => {
       hit('e'),
       hit('f'),
     ];
-    expect(rankSearchHits('x', hits).map((r) => r.name)).toEqual(['a', 'b', 'c', 'd', 'e']);
+    expect(rankSearchHits('x', hits).map((r) => r.name)).toEqual([
+      'a',
+      'b',
+      'c',
+      'd',
+      'e',
+    ]);
   });
 
   it('keeps an exact match that Algolia ranked past the limit', () => {
@@ -58,7 +75,6 @@ describe('rankSearchHits', () => {
 });
 
 describe('toVersionList', () => {
-  // @feature modules.edit
   it('sorts newest first and uses the latest dist-tag', () => {
     expect(toVersionList(['1.0.0', '2.0.0-beta.1', '1.2.0'], '1.2.0')).toEqual({
       latest: '1.2.0',
@@ -67,7 +83,9 @@ describe('toVersionList', () => {
   });
 
   it('falls back to the newest stable version without a usable tag', () => {
-    expect(toVersionList(['1.0.0', '3.0.0-rc.1', '2.1.0'], undefined).latest).toBe('2.1.0');
+    expect(toVersionList(['1.0.0', '3.0.0-rc.1', '2.1.0'], undefined).latest).toBe(
+      '2.1.0',
+    );
     expect(toVersionList(['1.0.0'], 'not-published').latest).toBe('1.0.0');
   });
 
@@ -78,11 +96,15 @@ describe('toVersionList', () => {
 });
 
 describe('NpmClient', () => {
-  const endpoints = { searchUrl: 'http://fixture.test/search', registryUrl: 'http://fixture.test/npm' };
+  const endpoints = {
+    searchUrl: 'http://fixture.test/search',
+    registryUrl: 'http://fixture.test/npm',
+  };
 
-  // @feature modules.search
   it('queries the search endpoint and caches by query', async () => {
-    const fetch = vi.fn<FetchFn>(async () => json({ hits: [hit('lodash-es'), hit('lodash')] }));
+    const fetch = vi.fn<FetchFn>(async () =>
+      json({ hits: [hit('lodash-es'), hit('lodash')] }),
+    );
     const client = new NpmClient({ fetch, endpoints });
 
     const results = await client.search('lodash');
@@ -107,7 +129,10 @@ describe('NpmClient', () => {
 
   it('lists versions from the registry, escaping scoped names', async () => {
     const fetch = vi.fn<FetchFn>(async () =>
-      json({ 'dist-tags': { latest: '2.0.0' }, versions: { '1.0.0': {}, '2.0.0': {}, '3.0.0-next.0': {} } }),
+      json({
+        'dist-tags': { latest: '2.0.0' },
+        versions: { '1.0.0': {}, '2.0.0': {}, '3.0.0-next.0': {} },
+      }),
     );
     const client = new NpmClient({ fetch, endpoints });
     expect(await client.versions('@scope/pkg')).toEqual({
@@ -117,6 +142,42 @@ describe('NpmClient', () => {
     expect(fetch.mock.calls[0]?.[0]).toBe('http://fixture.test/npm/@scope%2Fpkg');
     expect(await client.latestVersion('@scope/pkg')).toBe('2.0.0');
     expect(fetch).toHaveBeenCalledTimes(1);
+  });
+
+  it('reads registry metadata for a package without caching it', async () => {
+    const fetch = vi.fn<FetchFn>(async () =>
+      json({ versions: { '1.0.0': { hasInstallScript: true } } }),
+    );
+    const client = new NpmClient({ fetch, endpoints });
+    const controller = new AbortController();
+    expect(await client.packument('@scope/pkg', controller.signal)).toEqual({
+      versions: { '1.0.0': { hasInstallScript: true } },
+    });
+    await client.packument('@scope/pkg');
+    expect(fetch).toHaveBeenCalledTimes(2);
+    expect(fetch.mock.calls[0]?.[0]).toBe('http://fixture.test/npm/@scope%2Fpkg');
+    expect(fetch.mock.calls[0]?.[1]).toMatchObject({
+      headers: { accept: 'application/vnd.npm.install-v1+json' },
+      signal: controller.signal,
+    });
+    await expect(client.packument('-bad')).rejects.toMatchObject({
+      code: 'invalid-argument',
+    });
+    expect(fetch).toHaveBeenCalledTimes(2);
+  });
+
+  it('reports an aborted request as cancelled', async () => {
+    const controller = new AbortController();
+    const client = new NpmClient({
+      fetch: async () => {
+        controller.abort();
+        throw new DOMException('aborted', 'AbortError');
+      },
+      endpoints,
+    });
+    await expect(client.packument('a', controller.signal)).rejects.toMatchObject({
+      code: 'cancelled',
+    });
   });
 
   it('refetches versions once the cache entry is old', async () => {
@@ -131,7 +192,9 @@ describe('NpmClient', () => {
 
   it('throws typed errors', async () => {
     const notFound = new NpmClient({ fetch: async () => json({}, 404), endpoints });
-    await expect(notFound.versions('missing')).rejects.toMatchObject({ code: 'not-found' });
+    await expect(notFound.versions('missing')).rejects.toMatchObject({
+      code: 'not-found',
+    });
 
     const offline = new NpmClient({
       fetch: async () => {
@@ -143,6 +206,8 @@ describe('NpmClient', () => {
 
     const client = new NpmClient({ fetch: async () => json({}), endpoints });
     await expect(client.versions('../etc')).rejects.toBeInstanceOf(FiddleError);
-    await expect(client.latestVersion('empty')).rejects.toMatchObject({ code: 'not-found' });
+    await expect(client.latestVersion('empty')).rejects.toMatchObject({
+      code: 'not-found',
+    });
   });
 });

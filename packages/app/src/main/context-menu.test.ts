@@ -5,7 +5,11 @@ vi.mock('electron', () => ({ app: { isPackaged: false }, BrowserWindow: {}, Menu
 vi.mock('./i18n', () => ({ t: (key: string) => key }));
 vi.mock('./log', () => ({ log: { info: vi.fn(), error: vi.fn() } }));
 
-import { buildContextMenuTemplate, describeMenu, type ContextMenuInput } from './context-menu';
+import {
+  buildContextMenuTemplate,
+  describeMenu,
+  type ContextMenuInput,
+} from './context-menu';
 
 function build(overrides: Partial<ContextMenuInput> = {}): MenuItemConstructorOptions[] {
   return buildContextMenuTemplate({
@@ -21,18 +25,32 @@ function build(overrides: Partial<ContextMenuInput> = {}): MenuItemConstructorOp
 }
 
 const items = (template: MenuItemConstructorOptions[]) =>
-  template.map((item) => (item.type === 'separator' ? '---' : (item.id ?? item.role ?? item.label)));
+  template.map((item) =>
+    item.type === 'separator' ? '---' : (item.id ?? item.role ?? item.label),
+  );
 
 describe('context menu', () => {
-  // @feature keys.context-menu
   it('has Cut, Copy, Paste, Run and Clear console everywhere', () => {
     const template = build();
-    expect(items(template)).toEqual(['cut', 'copy', 'paste', '---', 'run.toggle', 'console.clear']);
+    expect(items(template)).toEqual([
+      'cut',
+      'copy',
+      'paste',
+      '---',
+      'run.toggle',
+      'console.clear',
+    ]);
     // Edit items follow Chromium's edit flags; registry items their enablement.
-    expect(template.map((item) => item.enabled)).toEqual([false, true, true, undefined, true, false]);
+    expect(template.map((item) => item.enabled)).toEqual([
+      false,
+      true,
+      true,
+      undefined,
+      true,
+      false,
+    ]);
   });
 
-  // @feature keys.context-menu-editor
   it('adds definition, references and format commands in the editor', () => {
     expect(items(build({ context: 'editor' }))).toEqual([
       'editor.goToDefinition',
@@ -51,10 +69,14 @@ describe('context menu', () => {
   });
 
   it('offers only Copy to edit in the read-only console', () => {
-    expect(items(build({ context: 'console' }))).toEqual(['copy', '---', 'run.toggle', 'console.clear']);
+    expect(items(build({ context: 'console' }))).toEqual([
+      'copy',
+      '---',
+      'run.toggle',
+      'console.clear',
+    ]);
   });
 
-  // @feature keys.context-menu-inspect
   it('adds Inspect element in development builds only', () => {
     const inspect = vi.fn();
     const template = build({ dev: true, inspect });
@@ -67,10 +89,21 @@ describe('context menu', () => {
   it('describes a menu for the dev log', () => {
     expect(
       describeMenu([
-        { label: 'View', submenu: [{ label: 'Zoom in', role: 'zoomIn', accelerator: 'CmdOrCtrl+Plus' }, { type: 'separator' }] },
+        {
+          label: 'View',
+          submenu: [
+            { label: 'Zoom in', role: 'zoomIn', accelerator: 'CmdOrCtrl+Plus' },
+            { type: 'separator' },
+          ],
+        },
         { label: 'Hidden', visible: false },
         { label: 'Off', enabled: false },
       ]),
-    ).toEqual(['View', '  Zoom in [CmdOrCtrl+Plus] (role zoomIn)', '  ---', 'Off (disabled)']);
+    ).toEqual([
+      'View',
+      '  Zoom in [CmdOrCtrl+Plus] (role zoomIn)',
+      '  ---',
+      'Off (disabled)',
+    ]);
   });
 });

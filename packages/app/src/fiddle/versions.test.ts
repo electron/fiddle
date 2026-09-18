@@ -2,7 +2,6 @@ import { describe, expect, it } from 'vitest';
 
 import {
   compareVersions,
-  filterVersions,
   getDefaultBisectRange,
   getOldestSupportedMajor,
   getReleaseChannel,
@@ -14,7 +13,6 @@ import {
 } from './versions';
 
 describe('getReleaseChannel', () => {
-  // @feature versions.channels
   it('maps alpha and beta to beta, nightly to nightly, the rest to stable', () => {
     expect(getReleaseChannel('30.0.0')).toBe('stable');
     expect(getReleaseChannel('30.0.0-alpha.1')).toBe('beta');
@@ -25,9 +23,14 @@ describe('getReleaseChannel', () => {
 });
 
 describe('sorting', () => {
-  // @feature versions.picker
   it('orders nightly < alpha < beta < stable within the same x.y.z', () => {
-    const order = ['2.0.0-nightly.20200101', '2.0.0-alpha.2', '2.0.0-alpha.10', '2.0.0-beta.1', '2.0.0'];
+    const order = [
+      '2.0.0-nightly.20200101',
+      '2.0.0-alpha.2',
+      '2.0.0-alpha.10',
+      '2.0.0-beta.1',
+      '2.0.0',
+    ];
     for (let i = 0; i < order.length - 1; i++) {
       expect(compareVersions(order[i]!, order[i + 1]!)).toBe(-1);
       expect(compareVersions(order[i + 1]!, order[i]!)).toBe(1);
@@ -36,9 +39,18 @@ describe('sorting', () => {
     expect(compareVersions('1.9.9', '2.0.0-nightly.1')).toBe(-1);
   });
 
-  // @feature versions.picker
   it('sorts newest first with non-semver last', () => {
-    const input = ['1.0.0', '2.0.0-nightly.20200101', 'local-b', '2.0.0', '2.0.0-beta.1', '2.0.0-alpha.2', '2.0.0-alpha.10', '10.0.0', 'abc'];
+    const input = [
+      '1.0.0',
+      '2.0.0-nightly.20200101',
+      'local-b',
+      '2.0.0',
+      '2.0.0-beta.1',
+      '2.0.0-alpha.2',
+      '2.0.0-alpha.10',
+      '10.0.0',
+      'abc',
+    ];
     expect(sortVersions(input)).toEqual([
       '10.0.0',
       '2.0.0',
@@ -54,44 +66,28 @@ describe('sorting', () => {
   });
 
   it('sorts objects by their version', () => {
-    expect(sortVersions([{ version: '1.0.0' }, { version: '3.0.0' }, { version: '2.0.0' }]).map((v) => v.version)).toEqual([
-      '3.0.0',
-      '2.0.0',
-      '1.0.0',
-    ]);
+    expect(
+      sortVersions([
+        { version: '1.0.0' },
+        { version: '3.0.0' },
+        { version: '2.0.0' },
+      ]).map((v) => v.version),
+    ).toEqual(['3.0.0', '2.0.0', '1.0.0']);
   });
 });
 
-describe('filtering', () => {
-  const versions = ['32.0.0-nightly.1', '31.0.0-beta.1', '31.0.0-alpha.1', '30.1.0', '29.0.0', '20.0.0'];
-
-  // @feature versions.channels settings.channels
-  it('filters by channel', () => {
-    const base = { showObsolete: true, showNotDownloaded: true };
-    expect(filterVersions(versions, { ...base, channels: ['stable'] })).toEqual(['30.1.0', '29.0.0', '20.0.0']);
-    expect(filterVersions(versions, { ...base, channels: ['beta'] })).toEqual(['31.0.0-beta.1', '31.0.0-alpha.1']);
-    expect(filterVersions(versions, { ...base, channels: ['nightly', 'stable'] })).toHaveLength(4);
-  });
-
-  // @feature versions.obsolete settings.show-obsolete settings.show-not-downloaded
-  it('hides obsolete and not-downloaded versions, but keeps the current one', () => {
-    const filter = {
-      channels: ['stable', 'beta', 'nightly'] as const,
-      showObsolete: false,
-      oldestSupportedMajor: 29,
-      showNotDownloaded: false,
-      isDownloaded: (v: string) => v !== '29.0.0',
-      keep: ['20.0.0'],
-    };
-    expect(filterVersions(versions, filter)).toEqual(['32.0.0-nightly.1', '31.0.0-beta.1', '31.0.0-alpha.1', '30.1.0', '20.0.0']);
+describe('obsolete versions', () => {
+  it('is a release older than the oldest supported major', () => {
     expect(isObsolete('28.3.0', 29)).toBe(true);
     expect(isObsolete('29.0.0-alpha.1', 29)).toBe(false);
     expect(isObsolete('local', 29)).toBe(false);
   });
 
-  // @feature versions.obsolete
   it('finds the oldest supported major, with the NUM_STABLE_BRANCHES override', () => {
-    const input = { stableMajors: [26, 27, 28, 29, 30], supportedMajors: [28, 29, 30, 31] };
+    const input = {
+      stableMajors: [26, 27, 28, 29, 30],
+      supportedMajors: [28, 29, 30, 31],
+    };
     expect(getOldestSupportedMajor(input)).toBe(28);
     expect(getOldestSupportedMajor({ ...input, numStableBranches: '2' })).toBe(29);
     expect(getOldestSupportedMajor({ ...input, numStableBranches: 'x' })).toBe(28);
@@ -99,7 +95,6 @@ describe('filtering', () => {
   });
 });
 
-// @feature versions.platform-limits
 describe('platform limits', () => {
   it('needs 11 or later on macOS arm64', () => {
     expect(isSupportedOnPlatform('10.4.7', 'darwin', 'arm64')).toBe(false);
@@ -124,7 +119,6 @@ describe('platform limits', () => {
   });
 });
 
-// @feature versions.local-name
 describe('suggestLocalBuildName', () => {
   it.each([
     ['/home/username/electron/gn/main/src/out/testing', 'gn/main - testing'],
@@ -138,14 +132,22 @@ describe('suggestLocalBuildName', () => {
 describe('bisect ranges', () => {
   const visible = ['3.0.0', '2.1.0', '2.1.0-beta.1', '2.0.0', '1.0.0'];
 
-  // @feature bisect.range
   it('returns the inclusive range oldest first', () => {
-    expect(getVersionRange('1.0.0', '2.1.0', visible)).toEqual(['1.0.0', '2.0.0', '2.1.0-beta.1', '2.1.0']);
-    expect(getVersionRange('2.1.0', '1.0.0', visible)).toEqual(['1.0.0', '2.0.0', '2.1.0-beta.1', '2.1.0']);
+    expect(getVersionRange('1.0.0', '2.1.0', visible)).toEqual([
+      '1.0.0',
+      '2.0.0',
+      '2.1.0-beta.1',
+      '2.1.0',
+    ]);
+    expect(getVersionRange('2.1.0', '1.0.0', visible)).toEqual([
+      '1.0.0',
+      '2.0.0',
+      '2.1.0-beta.1',
+      '2.1.0',
+    ]);
     expect(getVersionRange('1.0.0', '9.0.0', visible)).toEqual([]);
   });
 
-  // @feature bisect.range-defaults
   it('defaults to the 11th visible version and the newest', () => {
     const many = Array.from({ length: 15 }, (_, i) => `${15 - i}.0.0`);
     expect(getDefaultBisectRange(many)).toEqual({ good: '5.0.0', bad: '15.0.0' });
@@ -155,8 +157,17 @@ describe('bisect ranges', () => {
 
   it('skips local builds', () => {
     expect(getVersionRange('local-a', '2.0.0', [...visible, 'local-a'])).toEqual([]);
-    expect(getVersionRange('1.0.0', '3.0.0', [...visible, 'local-a'])).toEqual(['1.0.0', '2.0.0', '2.1.0-beta.1', '2.1.0', '3.0.0']);
-    expect(getDefaultBisectRange(['3.0.0', '2.0.0', 'local-a', 'local-b'])).toEqual({ good: '2.0.0', bad: '3.0.0' });
+    expect(getVersionRange('1.0.0', '3.0.0', [...visible, 'local-a'])).toEqual([
+      '1.0.0',
+      '2.0.0',
+      '2.1.0-beta.1',
+      '2.1.0',
+      '3.0.0',
+    ]);
+    expect(getDefaultBisectRange(['3.0.0', '2.0.0', 'local-a', 'local-b'])).toEqual({
+      good: '2.0.0',
+      bad: '3.0.0',
+    });
     expect(getDefaultBisectRange(['3.0.0', 'local-a'])).toBeUndefined();
   });
 });

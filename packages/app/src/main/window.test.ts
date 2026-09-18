@@ -1,0 +1,174 @@
+import { EventEmitter } from 'node:events';
+
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+
+const mocks = vi.hoisted(() => ({
+  windows: [] as unknown[],
+  loadURL: vi.fn<(url: string) => Promise<void>>(),
+  bindWindowIpc: vi.fn(),
+  attachWindow: vi.fn(),
+  trackWindow: vi.fn(),
+  untrackWindow: vi.fn(),
+}));
+
+vi.mock('electron', async () => {
+  const { EventEmitter } = await import('node:events');
+  class BrowserWindow extends EventEmitter {
+    readonly options: unknown;
+    readonly webContents = Object.assign(new EventEmitter(), {
+      getURL: () => 'app://main/index.html',
+    });
+    destroyed = false;
+    show = vi.fn();
+    destroy = vi.fn(() => {
+      this.destroyed = true;
+    });
+    setMenuBarVisibility = vi.fn();
+    setTitleBarOverlay = vi.fn();
+    isDestroyed = () => this.destroyed;
+    loadURL = (url: string) => mocks.loadURL(url);
+    constructor(options: unknown) {
+      super();
+      this.options = options;
+      mocks.windows.push(this);
+    }
+  }
+  return {
+    app: { getName: () => 'Electron Fiddle', isPackaged: true },
+    BrowserWindow,
+    nativeTheme: Object.assign(new EventEmitter(), { shouldUseDarkColors: false }),
+  };
+});
+vi.mock('./context-menu', () => ({ attachContextMenu: vi.fn() }));
+vi.mock('./documents/service', () => ({ attachWindow: mocks.attachWindow }));
+vi.mock('./ipc', () => ({ bindWindowIpc: mocks.bindWindowIpc }));
+vi.mock('./log', () => ({
+  log: { debug: vi.fn(), info: vi.fn(), warn: vi.fn(), error: vi.fn() },
+}));
+vi.mock('./security', () => ({ blockNavigation: vi.fn() }));
+vi.mock('./windows', () => ({
+  trackWindow: mocks.trackWindow,
+  untrackWindow: mocks.untrackWindow,
+}));
+
+import { log } from './log';
+import { createAppWindow, windowOptions } from './window';
+
+interface FakeWindow extends EventEmitter {
+  options: { webPreferences: Record<string, unknown> };
+  webContents: EventEmitter;
+  show: ReturnType<typeof vi.fn>;
+  destroy: ReturnType<typeof vi.fn>;
+}
+
+const hub = { app: { material: 'none' }, unregisterWindow: vi.fn() };
+const services = { hub, platform: 'linux' } as never;
+
+function lastWindow(): FakeWindow {
+  return mocks.windows.at(-1) as FakeWindow;
+}
+
+/** The `onReady` callback the window gave to `bindWindowIpc`. */
+function reportReady(): void {
+  (mocks.bindWindowIpc.mock.calls.at(-1)![2] as () => void)();
+}
+
+beforeEach(() => {
+  vi.useFakeTimers();
+  mocks.windows.length = 0;
+  mocks.loadURL.mockReset().mockResolvedValue(undefined);
+  mocks.bindWindowIpc.mockReset();
+  mocks.trackWindow.mockClear();
+  mocks.untrackWindow.mockClear();
+  hub.unregisterWindow.mockClear();
+  vi.mocked(log.error).mockClear();
+});
+
+describe('windowOptions', () => {
+  it.each(['darwin', 'win32', 'linux'] as const)(
+    'locks the renderer down on %s',
+    (platform) => {
+      const { webPreferences } = windowOptions(platform, 'none');
+      expect(webPreferences).toMatchObject({
+        sandbox: true,
+        contextIsolation: true,
+        nodeIntegration: false,
+        nodeIntegrationInSubFrames: false,
+        webSecurity: true,
+      });
+      expect(webPreferences?.preload).toMatch(/preload\.js$/);
+      expect(windowOptions(platform, 'none').show).toBe(false);
+    },
+  );
+});
+
+describe('createAppWindow', () => {
+  it('starts hidden and shows the window once, when the renderer reports ready', async () => {
+    const win = await createAppWindow({
+      services,
+      url: 'app://main/index.html',
+      windowId: 'w',
+    }).then(() => lastWindow());
+    expect(win.show).not.toHaveBeenCalled();
+    reportReady();
+    reportReady();
+    expect(win.show).toHaveBeenCalledOnce();
+  });
+
+  describe('a page that loads but never reports ready', () => {
+    it('is shown after a wait, so its failure is visible', async () => {
+      await createAppWindow({ services, url: 'app://main/index.html', windowId: 'w' });
+      const win = lastWindow();
+      win.webContents.emit('did-finish-load');
+      await vi.advanceTimersByTimeAsync(4999);
+      expect(win.show).not.toHaveBeenCalled();
+      await vi.advanceTimersByTimeAsync(1);
+      expect(win.show).toHaveBeenCalledOnce();
+      expect(log.error).toHaveBeenCalledWith(
+        expect.stringContaining('did not report ready'),
+        'w',
+      );
+    });
+
+    it('is left alone when it reports ready in time', async () => {
+      await createAppWindow({ services, url: 'app://main/index.html', windowId: 'w' });
+      const win = lastWindow();
+      win.webContents.emit('did-finish-load');
+      reportReady();
+      await vi.advanceTimersByTimeAsync(10_000);
+      expect(win.show).toHaveBeenCalledOnce();
+      expect(log.error).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('a window that cannot start', () => {
+    it('is destroyed and forgotten when loading fails', async () => {
+      mocks.loadURL.mockRejectedValue(new Error('ERR_FILE_NOT_FOUND'));
+      await expect(
+        createAppWindow({ services, url: 'app://main/index.html', windowId: 'w' }),
+      ).rejects.toThrow('ERR_FILE_NOT_FOUND');
+      const win = lastWindow();
+      expect(win.destroy).toHaveBeenCalledOnce();
+
+      win.webContents.emit('destroyed');
+      expect(hub.unregisterWindow).toHaveBeenCalledWith('w');
+      expect(mocks.untrackWindow).toHaveBeenCalledWith('w');
+    });
+
+    it('is destroyed and forgotten when its IPC cannot be bound', async () => {
+      mocks.bindWindowIpc.mockImplementation(() => {
+        throw new Error('Window w is already registered');
+      });
+      await expect(
+        createAppWindow({ services, url: 'app://main/index.html', windowId: 'w' }),
+      ).rejects.toThrow('already registered');
+      const win = lastWindow();
+      expect(win.destroy).toHaveBeenCalledOnce();
+      expect(mocks.loadURL).not.toHaveBeenCalled();
+
+      win.webContents.emit('destroyed');
+      expect(hub.unregisterWindow).toHaveBeenCalledWith('w');
+      expect(mocks.untrackWindow).toHaveBeenCalledWith('w');
+    });
+  });
+});

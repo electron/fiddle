@@ -3,17 +3,25 @@
    Force a mode with data-theme="light" | "dark" on <html>. */
 
 :root {
-  --lu-font-sans: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
-  --lu-font-mono: "Commit Mono", ui-monospace, "SF Mono", "Cascadia Mono", Menlo, monospace;
-  --lu-font-features: "cv05", "ss03";
+  --lu-font-sans: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --lu-font-mono:
+    'Commit Mono', ui-monospace, 'SF Mono', 'Cascadia Mono', Menlo, monospace;
+  --lu-font-features: 'cv05', 'ss03';
   /* type scale: size / line height / weight / tracking */
-  --lu-type-display: 650 40px/44px var(--lu-font-sans); --lu-type-display-tracking: -0.028em;
-  --lu-type-title: 650 22px/28px var(--lu-font-sans); --lu-type-title-tracking: -0.018em;
-  --lu-type-headline: 600 15px/20px var(--lu-font-sans); --lu-type-headline-tracking: -0.01em;
-  --lu-type-body: 400 13px/18px var(--lu-font-sans); --lu-type-body-tracking: 0;
-  --lu-type-label: 500 13px/16px var(--lu-font-sans); --lu-type-label-tracking: 0;
-  --lu-type-caption: 600 11px/14px var(--lu-font-sans); --lu-type-caption-tracking: 0.005em;
-  --lu-type-code: 400 13px/20px var(--lu-font-mono); --lu-type-code-tracking: 0;
+  --lu-type-display: 650 40px/44px var(--lu-font-sans);
+  --lu-type-display-tracking: -0.028em;
+  --lu-type-title: 650 22px/28px var(--lu-font-sans);
+  --lu-type-title-tracking: -0.018em;
+  --lu-type-headline: 600 15px/20px var(--lu-font-sans);
+  --lu-type-headline-tracking: -0.01em;
+  --lu-type-body: 400 13px/18px var(--lu-font-sans);
+  --lu-type-body-tracking: 0;
+  --lu-type-label: 500 13px/16px var(--lu-font-sans);
+  --lu-type-label-tracking: 0;
+  --lu-type-caption: 600 11px/14px var(--lu-font-sans);
+  --lu-type-caption-tracking: 0.005em;
+  --lu-type-code: 400 13px/20px var(--lu-font-mono);
+  --lu-type-code-tracking: 0;
   /* radius (round). Where CSS.supports("corner-shape", "squircle"), use the squircle set below. */
   --lu-radius-code: 5px;
   --lu-radius-check: 5px;
@@ -71,7 +79,9 @@
     --lu-radius-sheet: 26px;
     --lu-radius-float: 40px;
   }
-  .lu-squircle { corner-shape: squircle; }
+  .lu-squircle {
+    corner-shape: squircle;
+  }
 }
 
 :root {
@@ -81,21 +91,21 @@
   --lu-surface: #ffffff;
   --lu-surface-raised: #ffffff;
   --lu-surface-sunken: #f3f6fa;
-  --lu-hover: rgba(27,28,38,0.06);
-  --lu-fill: rgba(118,118,128,0.12);
-  --lu-fill-strong: rgba(118,118,128,0.20);
-  --lu-line: rgba(27,28,38,0.12);
+  --lu-hover: rgba(27, 28, 38, 0.06);
+  --lu-fill: rgba(118, 118, 128, 0.12);
+  --lu-fill-strong: rgba(118, 118, 128, 0.2);
+  --lu-line: rgba(27, 28, 38, 0.12);
   --lu-line-strong: #7b8196;
   /* materials */
-  --lu-material-chrome: rgba(250,250,253,0.62);
-  --lu-material-thin: rgba(255,255,255,0.42);
-  --lu-material-overlay: rgba(252,252,254,0.86);
-  --lu-capsule: rgba(255,255,255,0.60);
-  --lu-capsule-hover: rgba(255,255,255,0.86);
-  --lu-chip: rgba(255,255,255,0.88);
-  --lu-rim: rgba(255,255,255,0.95);
-  --lu-rim-soft: rgba(255,255,255,0.34);
-  --lu-scrim: rgba(226,228,238,0.40);
+  --lu-material-chrome: rgba(250, 250, 253, 0.62);
+  --lu-material-thin: rgba(255, 255, 255, 0.42);
+  --lu-material-overlay: rgba(252, 252, 254, 0.86);
+  --lu-capsule: rgba(255, 255, 255, 0.6);
+  --lu-capsule-hover: rgba(255, 255, 255, 0.86);
+  --lu-chip: rgba(255, 255, 255, 0.88);
+  --lu-rim: rgba(255, 255, 255, 0.95);
+  --lu-rim-soft: rgba(255, 255, 255, 0.34);
+  --lu-scrim: rgba(226, 228, 238, 0.4);
   /* text */
   --lu-ink: #1b1c26;
   --lu-ink-muted: #4c5266;
@@ -112,14 +122,14 @@
   --lu-warning: #9e5100;
   /* controls */
   --lu-field: #ffffff;
-  --lu-field-on-glass: rgba(255,255,255,0.72);
-  --lu-field-edge-on-glass: rgba(29,29,31,0.56);
+  --lu-field-on-glass: rgba(255, 255, 255, 0.72);
+  --lu-field-edge-on-glass: rgba(29, 29, 31, 0.56);
   --lu-button: #ffffff;
   --lu-button-hover: #f6f6f8;
-  --lu-button-edge: rgba(20,22,40,0.16);
+  --lu-button-edge: rgba(20, 22, 40, 0.16);
   --lu-thumb: #ffffff;
   --lu-kbd: #ffffff;
-  --lu-tooltip: rgba(27,28,38,0.90);
+  --lu-tooltip: rgba(27, 28, 38, 0.9);
   --lu-tooltip-ink: #f3f5fa;
   /* editor */
   --lu-syntax-keyword: #006f85;
@@ -130,13 +140,28 @@
   --lu-cursor-line: color-mix(in srgb, var(--lu-accent) 7%, var(--lu-surface));
   --lu-assist-ring: linear-gradient(100deg, #1f7cff, #00a3bf 38%, #6fd6ea 70%, #1b1c26);
   /* elevation */
-  --lu-shadow-popover: 0 0 0 0.5px rgba(20,22,40,0.14), 0 12px 32px -8px rgba(20,24,48,0.28), 0 2px 6px rgba(20,24,48,0.08);
-  --lu-shadow-island: 0 0 0 0.5px rgba(20,22,40,0.10), 0 1px 2px rgba(20,24,48,0.06), 0 8px 24px -12px rgba(20,24,48,0.22);
-  --lu-shadow-lift: 0 0 0 0.5px rgba(20,22,40,0.08), 0 1px 2px rgba(20,22,40,0.12), 0 2px 6px -2px rgba(20,22,40,0.1);
-  --lu-shadow-capsule: inset 0 0.5px 0 #fff, inset 0 0 0 0.5px rgba(255,255,255,0.55), 0 0 0 0.5px rgba(20,22,40,0.08), 0 3px 10px -3px rgba(30,40,90,0.18);
-  --lu-shadow-button: 0 0 0 0.5px rgba(20,22,40,0.16), 0 1px 2px rgba(0,0,0,0.07), inset 0 0.5px 0 rgba(255,255,255,0.7);
-  --lu-shadow-primary: inset 0 0.5px 0 rgba(255,255,255,0.5), inset 0 -0.5px 0 rgba(0,0,0,0.12), 0 1px 2px color-mix(in srgb, var(--lu-action) 35%, transparent), 0 4px 12px -4px color-mix(in srgb, var(--lu-action) 60%, transparent);
-  --lu-shadow-float: 0 0 0 0.5px rgba(20,22,40,0.18), 0 44px 90px -24px rgba(18,40,90,0.42), 0 14px 30px -12px rgba(18,40,90,0.2);
+  --lu-shadow-popover:
+    0 0 0 0.5px rgba(20, 22, 40, 0.14), 0 12px 32px -8px rgba(20, 24, 48, 0.28),
+    0 2px 6px rgba(20, 24, 48, 0.08);
+  --lu-shadow-island:
+    0 0 0 0.5px rgba(20, 22, 40, 0.1), 0 1px 2px rgba(20, 24, 48, 0.06),
+    0 8px 24px -12px rgba(20, 24, 48, 0.22);
+  --lu-shadow-lift:
+    0 0 0 0.5px rgba(20, 22, 40, 0.08), 0 1px 2px rgba(20, 22, 40, 0.12),
+    0 2px 6px -2px rgba(20, 22, 40, 0.1);
+  --lu-shadow-capsule:
+    inset 0 0.5px 0 #fff, inset 0 0 0 0.5px rgba(255, 255, 255, 0.55),
+    0 0 0 0.5px rgba(20, 22, 40, 0.08), 0 3px 10px -3px rgba(30, 40, 90, 0.18);
+  --lu-shadow-button:
+    0 0 0 0.5px rgba(20, 22, 40, 0.16), 0 1px 2px rgba(0, 0, 0, 0.07),
+    inset 0 0.5px 0 rgba(255, 255, 255, 0.7);
+  --lu-shadow-primary:
+    inset 0 0.5px 0 rgba(255, 255, 255, 0.5), inset 0 -0.5px 0 rgba(0, 0, 0, 0.12),
+    0 1px 2px color-mix(in srgb, var(--lu-action) 35%, transparent),
+    0 4px 12px -4px color-mix(in srgb, var(--lu-action) 60%, transparent);
+  --lu-shadow-float:
+    0 0 0 0.5px rgba(20, 22, 40, 0.18), 0 44px 90px -24px rgba(18, 40, 90, 0.42),
+    0 14px 30px -12px rgba(18, 40, 90, 0.2);
   /* blur */
   --lu-blur-chrome: blur(34px) saturate(180%);
   --lu-blur-overlay: blur(24px) saturate(180%);
@@ -146,28 +171,28 @@
 }
 
 @media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) {
+  :root:not([data-theme='light']) {
     color-scheme: dark;
     /* ground and surfaces */
     --lu-window: #10121b;
     --lu-surface: #1b1c26;
     --lu-surface-raised: #262837;
     --lu-surface-sunken: #15161f;
-    --lu-hover: rgba(159,234,249,0.08);
-    --lu-fill: rgba(255,255,255,0.08);
-    --lu-fill-strong: rgba(255,255,255,0.13);
-    --lu-line: rgba(159,234,249,0.12);
+    --lu-hover: rgba(159, 234, 249, 0.08);
+    --lu-fill: rgba(255, 255, 255, 0.08);
+    --lu-fill-strong: rgba(255, 255, 255, 0.13);
+    --lu-line: rgba(159, 234, 249, 0.12);
     --lu-line-strong: #6d7594;
     /* materials */
-    --lu-material-chrome: rgba(22,24,36,0.62);
-    --lu-material-thin: rgba(27,28,38,0.42);
-    --lu-material-overlay: rgba(38,40,56,0.90);
-    --lu-capsule: rgba(255,255,255,0.08);
-    --lu-capsule-hover: rgba(255,255,255,0.15);
-    --lu-chip: rgba(255,255,255,0.13);
-    --lu-rim: rgba(255,255,255,0.30);
-    --lu-rim-soft: rgba(255,255,255,0.07);
-    --lu-scrim: rgba(6,8,18,0.50);
+    --lu-material-chrome: rgba(22, 24, 36, 0.62);
+    --lu-material-thin: rgba(27, 28, 38, 0.42);
+    --lu-material-overlay: rgba(38, 40, 56, 0.9);
+    --lu-capsule: rgba(255, 255, 255, 0.08);
+    --lu-capsule-hover: rgba(255, 255, 255, 0.15);
+    --lu-chip: rgba(255, 255, 255, 0.13);
+    --lu-rim: rgba(255, 255, 255, 0.3);
+    --lu-rim-soft: rgba(255, 255, 255, 0.07);
+    --lu-scrim: rgba(6, 8, 18, 0.5);
     /* text */
     --lu-ink: #eef1f8;
     --lu-ink-muted: #aeb4c9;
@@ -184,14 +209,14 @@
     --lu-warning: #f3c46b;
     /* controls */
     --lu-field: #171923;
-    --lu-field-on-glass: rgba(255,255,255,0.07);
-    --lu-field-edge-on-glass: rgba(245,245,247,0.50);
-    --lu-button: rgba(255,255,255,0.11);
-    --lu-button-hover: rgba(255,255,255,0.16);
-    --lu-button-edge: rgba(0,0,0,0.45);
+    --lu-field-on-glass: rgba(255, 255, 255, 0.07);
+    --lu-field-edge-on-glass: rgba(245, 245, 247, 0.5);
+    --lu-button: rgba(255, 255, 255, 0.11);
+    --lu-button-hover: rgba(255, 255, 255, 0.16);
+    --lu-button-edge: rgba(0, 0, 0, 0.45);
     --lu-thumb: #3c4058;
-    --lu-kbd: rgba(255,255,255,0.08);
-    --lu-tooltip: rgba(38,40,56,0.92);
+    --lu-kbd: rgba(255, 255, 255, 0.08);
+    --lu-tooltip: rgba(38, 40, 56, 0.92);
     --lu-tooltip-ink: #eef1f8;
     /* editor */
     --lu-syntax-keyword: #9feaf9;
@@ -202,13 +227,29 @@
     --lu-cursor-line: color-mix(in srgb, var(--lu-accent) 7%, var(--lu-surface));
     --lu-assist-ring: linear-gradient(100deg, #9feaf9, #47a8ff 38%, #2f6bff 70%, #7fdcff);
     /* elevation */
-    --lu-shadow-popover: 0 0 0 0.5px rgba(4,6,16,0.6), 0 16px 40px -8px rgba(4,6,16,0.65), 0 2px 8px rgba(4,6,16,0.35);
-    --lu-shadow-island: 0 0 0 0.5px rgba(4,6,16,0.55), 0 1px 2px rgba(4,6,16,0.3), 0 10px 28px -12px rgba(4,6,16,0.6);
-    --lu-shadow-lift: inset 0 0.5px 0 rgba(255,255,255,0.14), 0 0 0 0.5px rgba(0,0,0,0.5), 0 1px 3px rgba(0,0,0,0.35);
-    --lu-shadow-capsule: inset 0 0.5px 0 rgba(255,255,255,0.2), inset 0 0 0 0.5px rgba(255,255,255,0.06), 0 0 0 0.5px rgba(0,0,0,0.45), 0 3px 10px -3px rgba(0,0,0,0.45);
-    --lu-shadow-button: 0 0 0 0.5px rgba(0,0,0,0.45), 0 1px 2px rgba(0,0,0,0.3), inset 0 0.5px 0 rgba(255,255,255,0.12);
-    --lu-shadow-primary: inset 0 0.5px 0 rgba(255,255,255,0.5), inset 0 -0.5px 0 rgba(0,0,0,0.12), 0 1px 2px color-mix(in srgb, var(--lu-action) 35%, transparent), 0 4px 12px -4px color-mix(in srgb, var(--lu-action) 60%, transparent);
-    --lu-shadow-float: 0 0 0 0.5px rgba(0,0,0,0.85), 0 44px 90px -24px rgba(0,0,0,0.75), 0 14px 30px -12px rgba(0,0,0,0.5);
+    --lu-shadow-popover:
+      0 0 0 0.5px rgba(4, 6, 16, 0.6), 0 16px 40px -8px rgba(4, 6, 16, 0.65),
+      0 2px 8px rgba(4, 6, 16, 0.35);
+    --lu-shadow-island:
+      0 0 0 0.5px rgba(4, 6, 16, 0.55), 0 1px 2px rgba(4, 6, 16, 0.3),
+      0 10px 28px -12px rgba(4, 6, 16, 0.6);
+    --lu-shadow-lift:
+      inset 0 0.5px 0 rgba(255, 255, 255, 0.14), 0 0 0 0.5px rgba(0, 0, 0, 0.5),
+      0 1px 3px rgba(0, 0, 0, 0.35);
+    --lu-shadow-capsule:
+      inset 0 0.5px 0 rgba(255, 255, 255, 0.2),
+      inset 0 0 0 0.5px rgba(255, 255, 255, 0.06), 0 0 0 0.5px rgba(0, 0, 0, 0.45),
+      0 3px 10px -3px rgba(0, 0, 0, 0.45);
+    --lu-shadow-button:
+      0 0 0 0.5px rgba(0, 0, 0, 0.45), 0 1px 2px rgba(0, 0, 0, 0.3),
+      inset 0 0.5px 0 rgba(255, 255, 255, 0.12);
+    --lu-shadow-primary:
+      inset 0 0.5px 0 rgba(255, 255, 255, 0.5), inset 0 -0.5px 0 rgba(0, 0, 0, 0.12),
+      0 1px 2px color-mix(in srgb, var(--lu-action) 35%, transparent),
+      0 4px 12px -4px color-mix(in srgb, var(--lu-action) 60%, transparent);
+    --lu-shadow-float:
+      0 0 0 0.5px rgba(0, 0, 0, 0.85), 0 44px 90px -24px rgba(0, 0, 0, 0.75),
+      0 14px 30px -12px rgba(0, 0, 0, 0.5);
     /* blur */
     --lu-blur-chrome: blur(34px) saturate(170%);
     --lu-blur-overlay: blur(24px) saturate(170%);
@@ -218,28 +259,28 @@
   }
 }
 
-:root[data-theme="dark"] {
+:root[data-theme='dark'] {
   color-scheme: dark;
   /* ground and surfaces */
   --lu-window: #10121b;
   --lu-surface: #1b1c26;
   --lu-surface-raised: #262837;
   --lu-surface-sunken: #15161f;
-  --lu-hover: rgba(159,234,249,0.08);
-  --lu-fill: rgba(255,255,255,0.08);
-  --lu-fill-strong: rgba(255,255,255,0.13);
-  --lu-line: rgba(159,234,249,0.12);
+  --lu-hover: rgba(159, 234, 249, 0.08);
+  --lu-fill: rgba(255, 255, 255, 0.08);
+  --lu-fill-strong: rgba(255, 255, 255, 0.13);
+  --lu-line: rgba(159, 234, 249, 0.12);
   --lu-line-strong: #6d7594;
   /* materials */
-  --lu-material-chrome: rgba(22,24,36,0.62);
-  --lu-material-thin: rgba(27,28,38,0.42);
-  --lu-material-overlay: rgba(38,40,56,0.90);
-  --lu-capsule: rgba(255,255,255,0.08);
-  --lu-capsule-hover: rgba(255,255,255,0.15);
-  --lu-chip: rgba(255,255,255,0.13);
-  --lu-rim: rgba(255,255,255,0.30);
-  --lu-rim-soft: rgba(255,255,255,0.07);
-  --lu-scrim: rgba(6,8,18,0.50);
+  --lu-material-chrome: rgba(22, 24, 36, 0.62);
+  --lu-material-thin: rgba(27, 28, 38, 0.42);
+  --lu-material-overlay: rgba(38, 40, 56, 0.9);
+  --lu-capsule: rgba(255, 255, 255, 0.08);
+  --lu-capsule-hover: rgba(255, 255, 255, 0.15);
+  --lu-chip: rgba(255, 255, 255, 0.13);
+  --lu-rim: rgba(255, 255, 255, 0.3);
+  --lu-rim-soft: rgba(255, 255, 255, 0.07);
+  --lu-scrim: rgba(6, 8, 18, 0.5);
   /* text */
   --lu-ink: #eef1f8;
   --lu-ink-muted: #aeb4c9;
@@ -256,14 +297,14 @@
   --lu-warning: #f3c46b;
   /* controls */
   --lu-field: #171923;
-  --lu-field-on-glass: rgba(255,255,255,0.07);
-  --lu-field-edge-on-glass: rgba(245,245,247,0.50);
-  --lu-button: rgba(255,255,255,0.11);
-  --lu-button-hover: rgba(255,255,255,0.16);
-  --lu-button-edge: rgba(0,0,0,0.45);
+  --lu-field-on-glass: rgba(255, 255, 255, 0.07);
+  --lu-field-edge-on-glass: rgba(245, 245, 247, 0.5);
+  --lu-button: rgba(255, 255, 255, 0.11);
+  --lu-button-hover: rgba(255, 255, 255, 0.16);
+  --lu-button-edge: rgba(0, 0, 0, 0.45);
   --lu-thumb: #3c4058;
-  --lu-kbd: rgba(255,255,255,0.08);
-  --lu-tooltip: rgba(38,40,56,0.92);
+  --lu-kbd: rgba(255, 255, 255, 0.08);
+  --lu-tooltip: rgba(38, 40, 56, 0.92);
   --lu-tooltip-ink: #eef1f8;
   /* editor */
   --lu-syntax-keyword: #9feaf9;
@@ -274,13 +315,28 @@
   --lu-cursor-line: color-mix(in srgb, var(--lu-accent) 7%, var(--lu-surface));
   --lu-assist-ring: linear-gradient(100deg, #9feaf9, #47a8ff 38%, #2f6bff 70%, #7fdcff);
   /* elevation */
-  --lu-shadow-popover: 0 0 0 0.5px rgba(4,6,16,0.6), 0 16px 40px -8px rgba(4,6,16,0.65), 0 2px 8px rgba(4,6,16,0.35);
-  --lu-shadow-island: 0 0 0 0.5px rgba(4,6,16,0.55), 0 1px 2px rgba(4,6,16,0.3), 0 10px 28px -12px rgba(4,6,16,0.6);
-  --lu-shadow-lift: inset 0 0.5px 0 rgba(255,255,255,0.14), 0 0 0 0.5px rgba(0,0,0,0.5), 0 1px 3px rgba(0,0,0,0.35);
-  --lu-shadow-capsule: inset 0 0.5px 0 rgba(255,255,255,0.2), inset 0 0 0 0.5px rgba(255,255,255,0.06), 0 0 0 0.5px rgba(0,0,0,0.45), 0 3px 10px -3px rgba(0,0,0,0.45);
-  --lu-shadow-button: 0 0 0 0.5px rgba(0,0,0,0.45), 0 1px 2px rgba(0,0,0,0.3), inset 0 0.5px 0 rgba(255,255,255,0.12);
-  --lu-shadow-primary: inset 0 0.5px 0 rgba(255,255,255,0.5), inset 0 -0.5px 0 rgba(0,0,0,0.12), 0 1px 2px color-mix(in srgb, var(--lu-action) 35%, transparent), 0 4px 12px -4px color-mix(in srgb, var(--lu-action) 60%, transparent);
-  --lu-shadow-float: 0 0 0 0.5px rgba(0,0,0,0.85), 0 44px 90px -24px rgba(0,0,0,0.75), 0 14px 30px -12px rgba(0,0,0,0.5);
+  --lu-shadow-popover:
+    0 0 0 0.5px rgba(4, 6, 16, 0.6), 0 16px 40px -8px rgba(4, 6, 16, 0.65),
+    0 2px 8px rgba(4, 6, 16, 0.35);
+  --lu-shadow-island:
+    0 0 0 0.5px rgba(4, 6, 16, 0.55), 0 1px 2px rgba(4, 6, 16, 0.3),
+    0 10px 28px -12px rgba(4, 6, 16, 0.6);
+  --lu-shadow-lift:
+    inset 0 0.5px 0 rgba(255, 255, 255, 0.14), 0 0 0 0.5px rgba(0, 0, 0, 0.5),
+    0 1px 3px rgba(0, 0, 0, 0.35);
+  --lu-shadow-capsule:
+    inset 0 0.5px 0 rgba(255, 255, 255, 0.2), inset 0 0 0 0.5px rgba(255, 255, 255, 0.06),
+    0 0 0 0.5px rgba(0, 0, 0, 0.45), 0 3px 10px -3px rgba(0, 0, 0, 0.45);
+  --lu-shadow-button:
+    0 0 0 0.5px rgba(0, 0, 0, 0.45), 0 1px 2px rgba(0, 0, 0, 0.3),
+    inset 0 0.5px 0 rgba(255, 255, 255, 0.12);
+  --lu-shadow-primary:
+    inset 0 0.5px 0 rgba(255, 255, 255, 0.5), inset 0 -0.5px 0 rgba(0, 0, 0, 0.12),
+    0 1px 2px color-mix(in srgb, var(--lu-action) 35%, transparent),
+    0 4px 12px -4px color-mix(in srgb, var(--lu-action) 60%, transparent);
+  --lu-shadow-float:
+    0 0 0 0.5px rgba(0, 0, 0, 0.85), 0 44px 90px -24px rgba(0, 0, 0, 0.75),
+    0 14px 30px -12px rgba(0, 0, 0, 0.5);
   /* blur */
   --lu-blur-chrome: blur(34px) saturate(170%);
   --lu-blur-overlay: blur(24px) saturate(170%);
@@ -290,10 +346,23 @@
 }
 
 /* No native material (Linux, a failed material) or Reduce transparency: go opaque. */
-:root.lu-no-material { --lu-material-chrome: var(--lu-window); --lu-material-thin: var(--lu-surface-raised); --lu-material-overlay: var(--lu-surface-raised); }
+:root.lu-no-material {
+  --lu-material-chrome: var(--lu-window);
+  --lu-material-thin: var(--lu-surface-raised);
+  --lu-material-overlay: var(--lu-surface-raised);
+}
 @media (prefers-reduced-transparency: reduce) {
-  :root { --lu-material-chrome: var(--lu-window); --lu-material-thin: var(--lu-surface-raised); --lu-material-overlay: var(--lu-surface-raised); }
+  :root {
+    --lu-material-chrome: var(--lu-window);
+    --lu-material-thin: var(--lu-surface-raised);
+    --lu-material-overlay: var(--lu-surface-raised);
+  }
 }
 @media (prefers-reduced-motion: reduce) {
-  :root { --lu-dur-base: 0ms; --lu-dur-slow: 0ms; --lu-dur-enter: 0ms; --lu-press-scale: 1; }
+  :root {
+    --lu-dur-base: 0ms;
+    --lu-dur-slow: 0ms;
+    --lu-dur-enter: 0ms;
+    --lu-press-scale: 1;
+  }
 }

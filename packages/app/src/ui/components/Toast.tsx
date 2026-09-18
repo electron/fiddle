@@ -8,18 +8,12 @@ import {
   UNSTABLE_ToastRegion as AriaToastRegion,
 } from 'react-aria-components';
 import { cx } from '../cx';
-import { Icon, type IconName } from '../icons/Icon';
+import { Icon } from '../icons/Icon';
 import { IconButton } from './Button';
 import styles from './Toast.module.css';
 
+/** Also the name of the tone's icon. */
 export type ToastTone = 'info' | 'success' | 'warning' | 'error';
-
-const toneIcon: Record<ToastTone, IconName> = {
-  info: 'info',
-  success: 'success',
-  warning: 'warning',
-  error: 'error',
-};
 
 export interface ToastProps {
   tone?: ToastTone;
@@ -33,10 +27,19 @@ export interface ToastProps {
 }
 
 /** A toast on its own, for inline use and specimens. Live toasts go through showToast and Toaster. */
-export function Toast({ tone = 'info', title, children, actionLabel, onAction, closeLabel, onClose, className }: ToastProps) {
+export function Toast({
+  tone = 'info',
+  title,
+  children,
+  actionLabel,
+  onAction,
+  closeLabel,
+  onClose,
+  className,
+}: ToastProps) {
   return (
     <div className={cx(styles.toast, className)} data-tone={tone}>
-      <Icon name={toneIcon[tone]} className={styles.icon} />
+      <Icon name={tone} className={styles.icon} />
       <div className={styles.body}>
         <div className={styles.title}>{title}</div>
         {children && <div className={styles.text}>{children}</div>}
@@ -47,7 +50,13 @@ export function Toast({ tone = 'info', title, children, actionLabel, onAction, c
         )}
       </div>
       {onClose && closeLabel && (
-        <IconButton icon="close" size="sm" label={closeLabel} onPress={onClose} className={styles.close} />
+        <IconButton
+          icon="close"
+          size="sm"
+          label={closeLabel}
+          onPress={onClose}
+          className={styles.close}
+        />
       )}
     </div>
   );
@@ -65,7 +74,10 @@ export interface ToastContent {
 export const toastQueue = new ToastQueue<ToastContent>({ maxVisibleToasts: 5 });
 
 /** Shows a toast. Toasts with an action never time out; others close after 5s by default. */
-export function showToast(content: ToastContent, options: { timeout?: number } = {}): string {
+export function showToast(
+  content: ToastContent,
+  options: { timeout?: number } = {},
+): string {
   const timeout = content.actionLabel ? undefined : (options.timeout ?? 5000);
   return toastQueue.add(content, { timeout });
 }
@@ -78,15 +90,19 @@ export interface ToasterProps {
   queue?: ToastQueue<ToastContent>;
 }
 
-/** The toaster region: toasts stack bottom-right, 8px apart. Mount once. */
+/** The toaster region. Mount once. */
 export function Toaster({ closeLabel, queue = toastQueue, ...rest }: ToasterProps) {
   return (
-    <AriaToastRegion queue={queue} aria-label={rest['aria-label']} className={styles.region}>
+    <AriaToastRegion
+      queue={queue}
+      aria-label={rest['aria-label']}
+      className={styles.region}
+    >
       {({ toast }) => {
         const tone = toast.content.tone ?? 'info';
         return (
           <AriaToast toast={toast} className={styles.toast} data-tone={tone}>
-            <Icon name={toneIcon[tone]} className={styles.icon} />
+            <Icon name={tone} className={styles.icon} />
             <AriaToastContent className={styles.body}>
               <Text slot="title" className={styles.title}>
                 {toast.content.title}
@@ -108,7 +124,13 @@ export function Toaster({ closeLabel, queue = toastQueue, ...rest }: ToasterProp
                 </AriaButton>
               )}
             </AriaToastContent>
-            <IconButton slot="close" icon="close" size="sm" label={closeLabel} className={styles.close} />
+            <IconButton
+              slot="close"
+              icon="close"
+              size="sm"
+              label={closeLabel}
+              className={styles.close}
+            />
           </AriaToast>
         );
       }}

@@ -1,6 +1,5 @@
 #!/usr/bin/env node
-// Fails if the e2e test driver was packaged into a build (REQUIREMENTS §4
-// "Release integrity" and §11 "Kept out of releases").
+// Fails if the e2e test driver was packaged into a build.
 //
 //   node tools/release-check-asar.mjs [outDir]   (default: packages/app/out)
 //
@@ -10,9 +9,9 @@ import fs from 'node:fs';
 import path from 'node:path';
 
 // Strings that exist only in src/main/test-driver and the renderer test hooks.
-// Keep in sync with MARKERS in packages/app/tools/driver-release-check.ts,
-// which the Test infrastructure slice owns. That script is TypeScript; this one
-// runs on any Node with no dependencies, on every release runner.
+// Keep in sync with MARKERS in packages/app/tools/driver-release-check.ts.
+// That script is TypeScript; this one runs on any Node with no dependencies, on
+// every release runner.
 const MARKERS = [
   'ELECTRON_FIDDLE_DRIVER_SOCKET',
   'Accessibility.getFullAXTree',

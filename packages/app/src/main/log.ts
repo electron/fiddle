@@ -1,18 +1,13 @@
 /**
- * The main-process logger (REQUIREMENTS §14).
+ * The main-process logger. Entries go to the console (prefixed `[fiddle]`)
+ * and, once `initLogFile()` has run, to JSON-lines files in `<userData>/logs/`:
+ * `main.log`, then `main.1.log` and `main.2.log`. The file rotates at 5 MB, so
+ * at most three files are kept. Secrets are redacted: token patterns, and the
+ * home directory becomes `~` (see ./crash/scrub.ts). Renderer logs arrive
+ * through `AppPlatform.Log`. Entries logged before `initLogFile()` are
+ * buffered, then written.
  *
- * - Entries go to the console (prefixed `[fiddle]`) and, once `initLogFile()`
- *   has run, to JSON-lines files in `<userData>/logs/`: `main.log`, then
- *   `main.1.log` and `main.2.log`. The file rotates at 5 MB, so at most three
- *   files are kept.
- * - Every entry has a level. Secrets are redacted: token patterns, and the
- *   home directory becomes `~` (see ./crash/scrub.ts).
- * - Renderer logs arrive through `AppPlatform.Log` and are written with
- *   `process: "renderer"`.
- * - Entries logged before `initLogFile()` are buffered, then written.
- *
- * Call sites use `log.info|warn|error(message, ...details)`. No Electron
- * imports, so modules that log still run under plain Node tests.
+ * No Electron imports, so modules that log still run under plain Node tests.
  */
 import fs from 'node:fs';
 import fsp from 'node:fs/promises';
@@ -54,7 +49,9 @@ function toJson(value: unknown, seen: WeakSet<object>, depth: number): unknown {
   const out: Record<string, unknown> = {};
   for (const [key, item] of Object.entries(value)) {
     out[redactSecrets(key, home)] =
-      typeof item === 'string' && isSecretKey(key) ? REDACTED : toJson(item, seen, depth + 1);
+      typeof item === 'string' && isSecretKey(key)
+        ? REDACTED
+        : toJson(item, seen, depth + 1);
   }
   return out;
 }
@@ -72,7 +69,9 @@ export function formatEntry(
     level,
     process: source,
     msg: redactSecrets(message, home),
-    ...(details.length ? { details: details.map((detail) => toJson(detail, new WeakSet(), 0)) } : {}),
+    ...(details.length
+      ? { details: details.map((detail) => toJson(detail, new WeakSet(), 0)) }
+      : {}),
   });
 }
 
@@ -99,7 +98,10 @@ export class LogFile {
 
   /** `main.log`, `main.1.log`, `main.2.log`, … */
   file(index: number): string {
-    return path.join(this.dir, index === 0 ? LOG_FILE : LOG_FILE.replace(/\.log$/, `.${index}.log`));
+    return path.join(
+      this.dir,
+      index === 0 ? LOG_FILE : LOG_FILE.replace(/\.log$/, `.${index}.log`),
+    );
   }
 
   write(line: string): void {
@@ -122,7 +124,10 @@ export class LogFile {
       let chunkBytes = 0;
       for (const line of this.#pending.splice(0)) {
         const bytes = Buffer.byteLength(line);
-        if (this.#size + chunkBytes > 0 && this.#size + chunkBytes + bytes > this.#maxBytes) {
+        if (
+          this.#size + chunkBytes > 0 &&
+          this.#size + chunkBytes + bytes > this.#maxBytes
+        ) {
           await this.#append(chunk, chunkBytes);
           await this.#rotate();
           chunk = '';
@@ -149,9 +154,11 @@ export class LogFile {
     try {
       await fsp.rm(this.file(this.#maxFiles - 1), { force: true });
       for (let index = this.#maxFiles - 2; index >= 0; index--) {
-        await fsp.rename(this.file(index), this.file(index + 1)).catch((error: NodeJS.ErrnoException) => {
-          if (error.code !== 'ENOENT') throw error;
-        });
+        await fsp
+          .rename(this.file(index), this.file(index + 1))
+          .catch((error: NodeJS.ErrnoException) => {
+            if (error.code !== 'ENOENT') throw error;
+          });
       }
     } catch (error) {
       console.error(PREFIX, 'failed to rotate the log file', error);
@@ -170,24 +177,43 @@ export function initLogFile(dir: string): void {
   early = [];
 }
 
+/** Resolves once everything logged so far is on disk. Call before `app.exit()`, which doesn't wait. */
+export async function flushLog(): Promise<void> {
+  await sink?.flush();
+}
+
 /** The logs folder, once `initLogFile()` has run. */
 export function logsDir(): string | undefined {
   return sink?.dir;
 }
 
-function write(level: LogLevel, message: string, details: unknown[], source: LogSource): void {
+function write(
+  level: LogLevel,
+  message: string,
+  details: unknown[],
+  source: LogSource,
+): void {
   const method = level === 'debug' || level === 'info' ? 'log' : level;
-  console[method](source === 'main' ? PREFIX : `${PREFIX} [renderer]`, message, ...details);
+  console[method](
+    source === 'main' ? PREFIX : `${PREFIX} [renderer]`,
+    message,
+    ...details,
+  );
   const line = formatEntry(level, message, details, source);
   if (sink) sink.write(line);
   else if (early.length < MAX_EARLY_LINES) early.push(line);
 }
 
 export const log = {
-  debug: (message: string, ...details: unknown[]) => write('debug', message, details, 'main'),
-  info: (message: string, ...details: unknown[]) => write('info', message, details, 'main'),
-  warn: (message: string, ...details: unknown[]) => write('warn', message, details, 'main'),
-  error: (message: string, ...details: unknown[]) => write('error', message, details, 'main'),
+  debug: (message: string, ...details: unknown[]) =>
+    write('debug', message, details, 'main'),
+  info: (message: string, ...details: unknown[]) =>
+    write('info', message, details, 'main'),
+  warn: (message: string, ...details: unknown[]) =>
+    write('warn', message, details, 'main'),
+  error: (message: string, ...details: unknown[]) =>
+    write('error', message, details, 'main'),
   /** An entry forwarded from a renderer through `AppPlatform.Log`. */
-  fromRenderer: (level: LogLevel, message: string) => write(level, message, [], 'renderer'),
+  fromRenderer: (level: LogLevel, message: string) =>
+    write(level, message, [], 'renderer'),
 };

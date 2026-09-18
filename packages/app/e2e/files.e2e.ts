@@ -18,7 +18,7 @@ describe('files', () => {
     await app().type(name, role('textbox', 'File name'));
   };
 
-  it('adds a file, confirming its name with Enter @feature files.operations keys.new-file-name keys.confirm-dialog', async () => {
+  it('adds a file, confirming its name with Enter', async () => {
     await addFile('extra.js');
     await app().press('Enter');
     await app().waitForAbsent(role('dialog', 'New file'));
@@ -28,7 +28,7 @@ describe('files', () => {
     expect((await windowState(app())).fiddle.activeFile).toBe('extra.js');
   });
 
-  it('cancels a new file with Escape @feature keys.new-file-name', async () => {
+  it('cancels a new file with Escape', async () => {
     await addFile('cancelled.js');
     await app().press('Escape');
     await app().waitForAbsent(role('dialog', 'New file'));
@@ -41,7 +41,7 @@ describe('files', () => {
     ['a duplicate name', 'extra.js'],
     ['a reserved name', 'package.json'],
     ['a second main entry', 'main.mjs'],
-  ])('refuses %s @feature files.extensions files.no-duplicates files.reserved-names files.one-main', async (_what, name) => {
+  ])('refuses %s', async (_what, name) => {
     const before = await files();
     const shown = await failures();
     await addFile(name);
@@ -50,7 +50,7 @@ describe('files', () => {
     expect(await files()).toEqual(before);
   });
 
-  it('renames, closes, opens and deletes a file from its context menu @feature files.operations', async () => {
+  it('renames, closes, opens and deletes a file from its context menu', async () => {
     const fromMenu = async (file: string, item: string) => {
       await app().press('Shift+F10', role('row', file));
       await app().click(role('menuitem', item));
@@ -72,9 +72,9 @@ describe('files', () => {
 
     await fromMenu('renamed.js', 'Close tab');
     await expect.poll(files).toContainEqual({ name: 'renamed.js', visible: false });
-    // Clicking the row would open the file, which shows it again (§17.3), so
-    // reopen the menu from the keyboard on the row, once the closed menu has
-    // given focus back to it.
+    // Clicking the row would open the file, which shows it again, so reopen
+    // the menu from the keyboard on the row, once the closed menu has given
+    // focus back to it.
     await app().waitForAbsent(role('menu', 'File actions'));
     await app().waitForIdle();
     await app().press('Shift+F10');
@@ -101,7 +101,7 @@ describe('files', () => {
       .map(([line]) => line);
   };
 
-  it('groups files by name under Main, Preload and Renderer, and shows Other only when it has files @feature files.groups', async () => {
+  it('groups files by name under Main, Preload and Renderer, and shows Other only when it has files', async () => {
     await app().query(role('heading', 'Main'));
     await app().query(role('heading', 'Preload'));
     await app().query(role('heading', 'Renderer'));
@@ -127,7 +127,7 @@ describe('files', () => {
     expect(await snapshotOrder(expected)).toEqual(expected);
   });
 
-  it('adds a file from a group head, starting from a free name for the group @feature files.add-in-group', async () => {
+  it('adds a file from a group head, starting from a free name for the group', async () => {
     // preload.js exists, so the Preload prompt suggests preload-2.js; Enter takes it.
     await app().click(role('button', 'Add preload file'));
     await app().query(role('dialog', 'New file'));
@@ -135,7 +135,12 @@ describe('files', () => {
     await app().waitForAbsent(role('dialog', 'New file'));
     await app().query(role('tab', /^preload-2\.js\b/));
     expect(await files()).toContainEqual({ name: 'preload-2.js', visible: true });
-    const preload = ['heading "Preload"', 'row "preload.js"', 'row "preload-2.js"', 'heading "Renderer"'];
+    const preload = [
+      'heading "Preload"',
+      'row "preload.js"',
+      'row "preload-2.js"',
+      'heading "Renderer"',
+    ];
     expect(await snapshotOrder(preload)).toEqual(preload);
 
     // The typed name decides the group: a page added from Main's head lands under Renderer.

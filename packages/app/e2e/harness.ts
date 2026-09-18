@@ -50,21 +50,23 @@ export function useApp(options: LaunchOptions = {}): AppHandle {
   });
 
   const get = () => {
-    if (!app) throw new Error('useApp(): the app is only available inside tests and hooks');
+    if (!app)
+      throw new Error('useApp(): the app is only available inside tests and hooks');
     return app;
   };
   return Object.assign(get, {
     fixtures: () => {
-      if (!fixtures) throw new Error('useApp(): fixtures are only available inside tests and hooks');
+      if (!fixtures)
+        throw new Error('useApp(): fixtures are only available inside tests and hooks');
       return fixtures;
     },
   });
 }
 
-// ---- Stores ---------------------------------------------------------------
 // The parts of src/shared/stores.ts that specs read.
 
-export type VersionRef = { kind: 'release'; version: string } | { kind: 'local'; id: string };
+export type VersionRef =
+  { kind: 'release'; version: string } | { kind: 'local'; id: string };
 
 export interface WindowState {
   windowId: string;
@@ -90,7 +92,13 @@ export interface WindowState {
     };
   };
   /** `panes`: the files in the editor panes, from the start; empty when the editor isn't split. */
-  layout: { sidebar: boolean; panes: string[]; consoleHeight: number; sidebarWidth: number; consoleVisible: boolean };
+  layout: {
+    sidebar: boolean;
+    panes: string[];
+    consoleHeight: number;
+    sidebarWidth: number;
+    consoleVisible: boolean;
+  };
   run?: {
     status: string;
     result?: string;
@@ -115,7 +123,10 @@ export interface AppState {
 }
 
 /** The Window store of `window` (default: the first window). */
-export async function windowState(app: FiddleApp, window: number | string = 0): Promise<WindowState> {
+export async function windowState(
+  app: FiddleApp,
+  window: number | string = 0,
+): Promise<WindowState> {
   return (await app.stores(window)).window as WindowState;
 }
 
@@ -123,13 +134,16 @@ export async function appState(app: FiddleApp): Promise<AppState> {
   return (await app.stores(0)).app as AppState;
 }
 
-// ---- Files ----------------------------------------------------------------
-
 /** A folder in the app's temp dir (removed with it), holding `files` (name → content). */
-export function makeFolder(app: FiddleApp, name: string, files: Record<string, string> = {}): string {
+export function makeFolder(
+  app: FiddleApp,
+  name: string,
+  files: Record<string, string> = {},
+): string {
   const dir = path.join(app.testDir ?? os.tmpdir(), 'work', name);
   fs.mkdirSync(dir, { recursive: true });
-  for (const [file, content] of Object.entries(files)) fs.writeFileSync(path.join(dir, file), content);
+  for (const [file, content] of Object.entries(files))
+    fs.writeFileSync(path.join(dir, file), content);
   return dir;
 }
 
@@ -139,7 +153,9 @@ export function readJson<T = Record<string, unknown>>(file: string): T {
 
 /** What the app recorded for native dialogs, newest last. */
 export async function dialogMessages(app: FiddleApp): Promise<string[]> {
-  return (await app.dialogs()).map((dialog) => String(dialog.options.message ?? dialog.options.title ?? ''));
+  return (await app.dialogs()).map((dialog) =>
+    String(dialog.options.message ?? dialog.options.title ?? ''),
+  );
 }
 
 /** URLs passed to `shell.openExternal`. */

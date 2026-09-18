@@ -31,8 +31,15 @@ function isHeading(item: SideNavItem | SideNavHeading): item is SideNavHeading {
   return 'heading' in item;
 }
 
-/** Vertical navigation for settings. The current item takes the hover fill and an accent icon. */
-export function SideNav({ items, value, defaultValue, onChange, className, ...rest }: SideNavProps) {
+/** Vertical navigation for settings. */
+export function SideNav({
+  items,
+  value,
+  defaultValue,
+  onChange,
+  className,
+  ...rest
+}: SideNavProps) {
   const first = items.find((item): item is SideNavItem => !isHeading(item))?.id;
   const [inner, setInner] = useState(defaultValue ?? first);
   const current = value ?? inner;
@@ -78,7 +85,16 @@ export interface PageProps {
 }
 
 /** A full-window page with a side nav, used for settings. Fills its container. */
-export function Page({ title, nav, children, onClose, closeLabel, closeHint, className, style }: PageProps) {
+export function Page({
+  title,
+  nav,
+  children,
+  onClose,
+  closeLabel,
+  closeHint,
+  className,
+  style,
+}: PageProps) {
   return (
     <div
       className={cx(styles.page, className)}
@@ -86,7 +102,11 @@ export function Page({ title, nav, children, onClose, closeLabel, closeHint, cla
       onKeyDown={
         onClose
           ? (e) => {
-              if (e.key === 'Escape') {
+              if (
+                e.key === 'Escape' &&
+                !e.nativeEvent.isComposing &&
+                !e.defaultPrevented
+              ) {
                 e.stopPropagation();
                 onClose();
               }

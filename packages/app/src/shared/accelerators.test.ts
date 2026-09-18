@@ -2,7 +2,6 @@ import { describe, expect, it } from 'vitest';
 
 import { acceleratorKeys, formatAccelerator } from './accelerators';
 
-// @feature new.palette
 describe('acceleratorKeys', () => {
   it('formats macOS symbols', () => {
     expect(acceleratorKeys('CmdOrCtrl+Shift+P', 'darwin')).toEqual(['⌘', '⇧', 'P']);
@@ -14,7 +13,11 @@ describe('acceleratorKeys', () => {
     expect(acceleratorKeys('CmdOrCtrl+Shift+P', 'win32')).toEqual(['Ctrl', 'Shift', 'P']);
     expect(acceleratorKeys('CommandOrControl+X', 'linux')).toEqual(['Ctrl', 'X']);
     expect(acceleratorKeys('F5', 'linux')).toEqual(['F5']);
-    expect(acceleratorKeys('Ctrl+Shift+PageUp', 'win32')).toEqual(['Ctrl', 'Shift', 'PageUp']);
+    expect(acceleratorKeys('Ctrl+Shift+PageUp', 'win32')).toEqual([
+      'Ctrl',
+      'Shift',
+      'PageUp',
+    ]);
     expect(acceleratorKeys('Shift+Alt+F', 'linux')).toEqual(['Shift', 'Alt', 'F']);
   });
 
@@ -35,7 +38,6 @@ describe('acceleratorKeys', () => {
   });
 });
 
-// @feature workspace.menubar
 describe('formatAccelerator', () => {
   it('joins with + on Windows and Linux, and without on macOS', () => {
     expect(formatAccelerator('CmdOrCtrl+Shift+P', 'win32')).toBe('Ctrl+Shift+P');

@@ -1,11 +1,15 @@
 /**
- * GitHub sign-in and the gist flows (REQUIREMENTS §4 and §17.11). The token
- * lives only here, in main; the `App` store only ever gets the login name.
+ * GitHub sign-in and the gist flows. The token lives only here, in main; the
+ * `App` store only ever gets the login name.
  *
- * No Electron imports: storage, the client, Documents and settings are injected.
+ * No Electron imports: storage, the client, documents and settings are injected.
  */
-import { findMainEntry, PACKAGE_JSON, ensureMainEntry, type FileMap } from '../../fiddle/files';
-import { gistUrl } from '../../fiddle/gist-id';
+import {
+  findMainEntry,
+  PACKAGE_JSON,
+  ensureMainEntry,
+  type FileMap,
+} from '../../fiddle/files';
 import type { GistRevision, GistWriteResult, GitHubClient } from '../../fiddle/github';
 import { generatePackageJson } from '../../fiddle/package-json';
 import { ErrorCode, FiddleError } from '../../shared/errors';
@@ -39,6 +43,9 @@ interface GitHubServiceOptions {
   log: { warn(...args: unknown[]): void; error(...args: unknown[]): void };
 }
 
+/** The startup check of the stored token. A slow answer keeps the token and lets session restore and deep links go on. */
+const STARTUP_CHECK_TIMEOUT_MS = 5000;
+
 export class GitHubService {
   readonly #options: GitHubServiceOptions;
   #token: string | undefined;
@@ -66,7 +73,7 @@ export class GitHubService {
   /**
    * Settles once `init` has restored and checked the stored token, or at once
    * if it never ran. Session restore and deep links wait for it, so private
-   * gists load with the user's token (§17.4). Never rejects.
+   * gists load with the user's token. Never rejects.
    */
   whenReady(): Promise<void> {
     return (this.#init ?? Promise.resolve()).catch(() => undefined);
@@ -79,14 +86,23 @@ export class GitHubService {
       this.#notice = 'decrypt-failed';
       return;
     }
-    this.#setSignedIn(loaded.credentials.token, loaded.credentials.login);
+    const { token } = loaded.credentials;
+    this.#setSignedIn(token, loaded.credentials.login);
     try {
-      const user = await this.#options.createClient(this.#token).getAuthenticatedUser();
-      if (user.login !== this.#login) this.#setSignedIn(loaded.credentials.token, user.login);
+      const user = await this.#options
+        .createClient(token)
+        .getAuthenticatedUser(AbortSignal.timeout(STARTUP_CHECK_TIMEOUT_MS));
+      // Signed in with another token, or out, while the check was running.
+      if (this.#token !== token) return;
+      if (user.login !== this.#login) this.#setSignedIn(token, user.login);
     } catch (error) {
+      if (this.#token !== token) return;
       const e = FiddleError.from(error);
       if (e.code === ErrorCode.unauthorized || e.code === ErrorCode.forbidden) {
-        this.#options.log.warn('the stored GitHub token was rejected; signing out', e.code);
+        this.#options.log.warn(
+          'the stored GitHub token was rejected; signing out',
+          e.code,
+        );
         await this.signOut();
       } else {
         this.#options.log.warn('could not check the GitHub token; keeping it', e.code);
@@ -102,14 +118,23 @@ export class GitHubService {
    * Verifies a personal access token (format, validity, `gist` scope) and
    * stores it. Returns whether it was persisted or kept for this session only.
    */
-  async signIn(token: string, allowPlaintext: boolean): Promise<{ login: string; persisted: boolean }> {
+  async signIn(
+    token: string,
+    allowPlaintext: boolean,
+  ): Promise<{ login: string; persisted: boolean }> {
     const trimmed = token.trim();
     const login = await this.#options.createClient(trimmed).verifyToken();
     let persisted = false;
     try {
-      persisted = await this.#options.store.save({ token: trimmed, login }, { allowPlaintext });
+      persisted = await this.#options.store.save(
+        { token: trimmed, login },
+        { allowPlaintext },
+      );
     } catch (error) {
-      this.#options.log.error('could not store the GitHub token; keeping it for this session', error);
+      this.#options.log.error(
+        'could not store the GitHub token; keeping it for this session',
+        error,
+      );
     }
     this.#setSignedIn(trimmed, login);
     return { login, persisted };
@@ -134,28 +159,43 @@ export class GitHubService {
    * the gist is created from the default template first and then updated with
    * the real files, so its history shows the fiddle as a diff.
    */
-  async publish(windowId: string, input: { description: string; isPublic: boolean }): Promise<GistLink> {
+  async publish(
+    windowId: string,
+    input: { description: string; isPublic: boolean },
+  ): Promise<GistLink> {
     const client = this.#authedClient();
     const fiddle = await this.#options.documents.getFiddle(windowId);
     const { asRevision, author } = this.#options.prefs.get();
     const files = gistFiles(fiddle, author);
     this.#options.prefs.setVisibility(input.isPublic);
-    const template = asRevision ? await this.#options.documents.getTemplate(windowId) : undefined;
-    // If the update fails, the gist exists with the template; link it so Update can finish the job.
+    const template = asRevision
+      ? await this.#options.documents.getTemplate(windowId)
+      : undefined;
+    // If the update fails, the gist exists with the template: link it, still unsaved, so Update can finish the job.
     const saved = await publishGist(client, input, files, template, (created) =>
-      this.#options.documents.markGistSaved(windowId, created),
+      this.#options.documents.markGistSaved(windowId, created, {
+        ...fiddle,
+        files: template ?? {},
+      }),
     );
-    this.#options.documents.markGistSaved(windowId, saved);
+    this.#options.documents.markGistSaved(windowId, saved, fiddle);
     return { id: saved.id, url: saved.url };
   }
 
-  /** Syncs the files to the loaded gist. Remote files removed locally are deleted. */
+  /**
+   * Syncs the files to the loaded gist. Remote files the fiddle held and has
+   * removed are deleted; any others (a README, images) stay.
+   */
   async update(windowId: string): Promise<GistLink> {
     const client = this.#authedClient();
     const fiddle = await this.#options.documents.getFiddle(windowId);
     const id = loadedGistId(fiddle);
-    const updated = await client.updateGist(id, { files: gistFiles(fiddle, this.#options.prefs.get().author) });
-    this.#options.documents.markGistSaved(windowId, updated);
+    const ours = new Set([...fiddle.savedNames, PACKAGE_JSON]);
+    const updated = await client.updateGist(id, {
+      files: gistFiles(fiddle, this.#options.prefs.get().author),
+      canDelete: (name) => ours.has(name),
+    });
+    this.#options.documents.markGistSaved(windowId, updated, fiddle);
     return { id: updated.id, url: updated.url };
   }
 
@@ -171,17 +211,16 @@ export class GitHubService {
     const fiddle = await this.#options.documents.getFiddle(windowId);
     const id = loadedGistId(fiddle);
     const revisions = await this.#options.createClient(this.#token).listGistRevisions(id);
-    return { id, activeSha: fiddle.source.gistRevision ?? revisions.at(-1)?.sha, revisions };
+    return {
+      id,
+      activeSha: fiddle.source.gistRevision ?? revisions.at(-1)?.sha,
+      revisions,
+    };
   }
 
-  /** A client with the user's token when signed in; used by Documents to load private gists. */
+  /** A client with the user's token when signed in; used to load private gists. */
   client(): GitHubClient {
     return this.#options.createClient(this.#token);
-  }
-
-  shareLink(id: string): string {
-    // TODO(share): an https redirect to electron-fiddle:// once the web endpoint exists (§17.17).
-    return gistUrl(id);
   }
 
   #setSignedIn(token: string, login: string): void {
@@ -192,7 +231,9 @@ export class GitHubService {
 
   #authedClient(): GitHubClient {
     if (!this.#token) {
-      throw new FiddleError(ErrorCode.unauthorized, 'Sign in to GitHub first', { reason: 'signed-out' });
+      throw new FiddleError(ErrorCode.unauthorized, 'Sign in to GitHub first', {
+        reason: 'signed-out',
+      });
     }
     return this.#options.createClient(this.#token);
   }
@@ -200,19 +241,26 @@ export class GitHubService {
 
 function loadedGistId(fiddle: GistFiddle): string {
   const id = fiddle.source.gistId;
-  if (!id) throw new FiddleError(ErrorCode.notFound, 'No gist is loaded in this window', { reason: 'no-gist' });
+  if (!id)
+    throw new FiddleError(ErrorCode.notFound, 'No gist is loaded in this window', {
+      reason: 'no-gist',
+    });
   return id;
 }
 
-/** The fiddle's files plus a generated package.json with its modules, Electron version and author (§17.3). */
-export function gistFiles(fiddle: GistFiddle, author?: string): FileMap {
+/** The fiddle's files plus a generated package.json with its modules, Electron version and author. */
+export function gistFiles(
+  fiddle: Omit<GistFiddle, 'savedNames' | 'fiddleRev'>,
+  author?: string,
+): FileMap {
   const files = ensureMainEntry(fiddle.files);
   const packageJson = generatePackageJson({
-    name: packageName(fiddle.name),
+    name: fiddle.name,
     main: findMainEntry(Object.keys(files)),
     ...(author ? { author } : {}),
     modules: fiddle.modules,
-    electronVersion: fiddle.versionRef.kind === 'release' ? fiddle.versionRef.version : undefined,
+    electronVersion:
+      fiddle.versionRef.kind === 'release' ? fiddle.versionRef.version : undefined,
   });
   return { ...files, [PACKAGE_JSON]: packageJson };
 }
@@ -232,20 +280,18 @@ export async function publishGist(
   onUpdateFailed: (created: GistWriteResult) => void = () => {},
 ): Promise<GistWriteResult> {
   if (!template) return client.createGist({ ...input, files });
-  const created = await client.createGist({ ...input, files: { ...template, [PACKAGE_JSON]: files[PACKAGE_JSON]! } });
+  const created = await client.createGist({
+    ...input,
+    files: { ...template, [PACKAGE_JSON]: files[PACKAGE_JSON]! },
+  });
   try {
-    return await client.updateGist(created.id, { files });
+    return await client.updateGist(created.id, {
+      files,
+      canDelete: () => true,
+      remote: created.files,
+    });
   } catch (error) {
     onUpdateFailed(created);
     throw error;
   }
-}
-
-function packageName(name: string): string {
-  const cleaned = name
-    .toLowerCase()
-    .replace(/[^a-z0-9._-]+/g, '-')
-    .replace(/^[-._]+|[-._]+$/g, '')
-    .slice(0, 214);
-  return cleaned || 'electron-fiddle';
 }

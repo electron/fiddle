@@ -1,10 +1,16 @@
 import { describe, expect, it } from 'vitest';
 
 import { ErrorCode, FiddleError } from '../shared/errors';
-import { DEFAULT_DESCRIPTION, electronPackageName, generatePackageJson, parsePackageJson, stripRangePrefix } from './package-json';
+import {
+  DEFAULT_DESCRIPTION,
+  electronPackageName,
+  generatePackageJson,
+  parsePackageJson,
+  stripRangePrefix,
+  toPackageName,
+} from './package-json';
 
 describe('generatePackageJson', () => {
-  // @feature files.pkg-fields files.pkg-deps files.pkg-electron
   it('writes every field, in the original order', () => {
     const text = generatePackageJson({
       name: 'sleepy-golden-otter',
@@ -41,17 +47,29 @@ describe('generatePackageJson', () => {
     expect(text).toContain('\n  "name"');
   });
 
-  // @feature files.pkg-fields
   it('always has a description, because Forge’s deb, rpm and Squirrel makers need one', () => {
     const pkg = JSON.parse(generatePackageJson({ name: 'x' }));
     expect(pkg.description).toMatch(/\S/);
   });
 
-  // @feature files.pkg-electron
   it('uses electron-nightly for nightlies', () => {
-    const pkg = JSON.parse(generatePackageJson({ name: 'x', electronVersion: '32.0.0-nightly.20240101' }));
-    expect(pkg.devDependencies).toEqual({ 'electron-nightly': '32.0.0-nightly.20240101' });
+    const pkg = JSON.parse(
+      generatePackageJson({ name: 'x', electronVersion: '32.0.0-nightly.20240101' }),
+    );
+    expect(pkg.devDependencies).toEqual({
+      'electron-nightly': '32.0.0-nightly.20240101',
+    });
     expect(electronPackageName('30.0.0-beta.1')).toBe('electron');
+  });
+
+  it('writes a valid package name, however the fiddle is named', () => {
+    const pkg = JSON.parse(generatePackageJson({ name: 'My Fiddle' }));
+    expect(pkg.name).toBe('my-fiddle');
+    expect(pkg.productName).toBe('my-fiddle');
+    expect(toPackageName('.hidden_Thing!!')).toBe('hidden_thing');
+    expect(toPackageName('foo_')).toBe('foo');
+    expect(toPackageName('\u2605')).toBe('fiddle');
+    expect(toPackageName('a'.repeat(300))).toHaveLength(214);
   });
 
   it('leaves out optional parts', () => {
@@ -69,7 +87,12 @@ describe('generatePackageJson', () => {
 });
 
 describe('parsePackageJson', () => {
-  // @feature load.gist-modules load.gist-version
+  it('accepts a byte order mark', () => {
+    expect(
+      parsePackageJson('\uFEFF{"dependencies":{"lodash":"4.17.21"}}').modules,
+    ).toEqual({ lodash: '4.17.21' });
+  });
+
   it('turns dependencies into modules and takes the Electron version', () => {
     const result = parsePackageJson(
       JSON.stringify({
@@ -84,15 +107,20 @@ describe('parsePackageJson', () => {
     });
   });
 
-  // @feature load.gist-version
   it('handles electron-nightly and ~ prefixes', () => {
-    const result = parsePackageJson(JSON.stringify({ devDependencies: { 'electron-nightly': '~33.0.0-nightly.20240801' } }));
+    const result = parsePackageJson(
+      JSON.stringify({
+        devDependencies: { 'electron-nightly': '~33.0.0-nightly.20240801' },
+      }),
+    );
     expect(result.electronVersion).toBe('33.0.0-nightly.20240801');
     expect(result.modules).toEqual({});
   });
 
   it('reports an invalid Electron version and drops it from modules', () => {
-    const result = parsePackageJson(JSON.stringify({ devDependencies: { electron: 'latest', left: '1.0.0' } }));
+    const result = parsePackageJson(
+      JSON.stringify({ devDependencies: { electron: 'latest', left: '1.0.0' } }),
+    );
     expect(result.electronVersion).toBeUndefined();
     expect(result.invalidElectronVersion).toBe('latest');
     expect(result.modules).toEqual({ left: '1.0.0' });
@@ -138,12 +166,14 @@ describe('parsePackageJson', () => {
   });
 
   it('accepts a package.json with no dependencies', () => {
-    expect(parsePackageJson('{"name":"x"}')).toEqual({ modules: {}, rejectedModules: [] });
+    expect(parsePackageJson('{"name":"x"}')).toEqual({
+      modules: {},
+      rejectedModules: [],
+    });
   });
 });
 
 describe('stripRangePrefix', () => {
-  // @feature load.gist-version
   it('strips up to the first digit', () => {
     expect(stripRangePrefix('^1.2.0')).toBe('1.2.0');
     expect(stripRangePrefix('~2.3.4')).toBe('2.3.4');

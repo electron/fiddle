@@ -13,8 +13,12 @@ const MAX_DESCRIPTION = 256;
 export function PublishDialog({ onClose }: { onClose: () => void }) {
   const { t } = useTranslation('gists');
   const settings = useGistSettings();
-  const [description, setDescription] = useState<string>(() => t('publishDefaultDescription'));
-  const [visibility, setVisibility] = useState<'secret' | 'public'>(settings.isPublic ? 'public' : 'secret');
+  const [description, setDescription] = useState<string>(() =>
+    t('publishDefaultDescription'),
+  );
+  const [visibility, setVisibility] = useState<'secret' | 'public'>(
+    settings.isPublic ? 'public' : 'secret',
+  );
   const [busy, setBusy] = useState(false);
 
   const trimmed = description.trim();
@@ -47,7 +51,12 @@ export function PublishDialog({ onClose }: { onClose: () => void }) {
           <Button variant="ghost" onPress={onClose}>
             {t('cancel')}
           </Button>
-          <Button variant="primary" loading={busy} isDisabled={!valid} onPress={() => void publish()}>
+          <Button
+            variant="primary"
+            loading={busy}
+            isDisabled={!valid}
+            onPress={() => void publish()}
+          >
             {t('publishSubmit')}
           </Button>
         </>

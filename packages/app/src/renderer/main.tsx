@@ -9,7 +9,7 @@ import { I18nextProvider } from 'react-i18next';
 import { loadMonacoMessages } from '../i18n/monaco-nls';
 import { initRendererI18n } from '../i18n/renderer';
 import { appApi, windowApi } from '../ipc/renderer';
-import { installPlatformRenderer } from './features/about';
+import { installPlatformRenderer, log } from './features/about';
 import { StoreProvider } from './state';
 
 async function start(): Promise<void> {
@@ -27,12 +27,11 @@ async function start(): Promise<void> {
   root.classList.toggle('lu-no-material', app.material === 'none');
   root.dataset.material = app.material;
 
-  // Monaco reads its strings (§9) while its modules load, and App imports it: the locale's bundle goes first.
+  // Monaco reads its strings while its modules load, and App imports it: the locale's bundle goes first.
   const [i18n, { App }] = await Promise.all([
     initRendererI18n(app.locale),
     loadMonacoMessages(app.locale).then(() => import('./App')),
   ]);
-  // Platform slice: log forwarding, Sentry and the update toast.
   void installPlatformRenderer(i18n);
   const container = document.getElementById('root');
   if (!container) throw new Error('#root is missing from index.html');
@@ -48,4 +47,8 @@ async function start(): Promise<void> {
   );
 }
 
-void start();
+// Main shows the window only once it hears from the renderer, so a failed start still reports: a bare window beats a hidden one.
+start().catch((error: unknown) => {
+  log.error('the window failed to start', error);
+  windowApi.ReportReady().catch(() => undefined);
+});

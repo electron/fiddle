@@ -3,9 +3,9 @@ import { describe, expect, it } from 'vitest';
 import { getProjectName, projectNameFromFolder, randomProjectName } from './names';
 
 describe('randomProjectName', () => {
-  // @feature files.project-name
   it('makes three hyphenated lower-case words', () => {
-    for (let i = 0; i < 50; i++) expect(randomProjectName()).toMatch(/^[a-z]+-[a-z]+-[a-z]+$/);
+    for (let i = 0; i < 50; i++)
+      expect(randomProjectName()).toMatch(/^[a-z]+-[a-z]+-[a-z]+$/);
   });
 
   it('uses the injected random source', () => {
@@ -34,7 +34,6 @@ describe('projectNameFromFolder', () => {
 });
 
 describe('getProjectName', () => {
-  // @feature files.project-name
   it('prefers the folder name', () => {
     expect(getProjectName('a/b/myFiddle')).toBe('myFiddle');
     expect(getProjectName(undefined, () => 0)).toBe('amber-amber-badger');

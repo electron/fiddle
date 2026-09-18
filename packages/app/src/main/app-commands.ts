@@ -1,9 +1,15 @@
-/** Every command handler, for the definitions in src/shared/commands.ts. */
 import { app, BrowserWindow, Menu, shell, webContents } from 'electron';
 
 import type { CommandId } from '../shared/commands';
 import type { CommandRegistry } from './commands';
-import { closeWindow, newFiddleIn, openFiddleWindow, openFolderIn, saveIn, withErrorDialog } from './documents/service';
+import {
+  closeWindow,
+  newFiddleIn,
+  openFiddleWindow,
+  openFolderIn,
+  saveIn,
+  withErrorDialog,
+} from './documents/service';
 import { log, logsDir } from './log';
 import { toggleWindowMenuBar } from './menu';
 import { packageFiddle } from './packaging/service';
@@ -42,7 +48,10 @@ const FORWARDED = [
  * focus (DevTools) or, on macOS, a native dialog gets them the way the native
  * roles would send them.
  */
-function editCommand(windowId: string | undefined, action: 'undo' | 'redo' | 'selectAll'): void {
+function editCommand(
+  windowId: string | undefined,
+  action: 'undo' | 'redo' | 'selectAll',
+): void {
   if (!BrowserWindow.getFocusedWindow()) {
     if (process.platform === 'darwin') Menu.sendActionToFirstResponder(`${action}:`);
     return;
@@ -60,7 +69,8 @@ const LINKS = {
 
 export function registerCommands(registry: CommandRegistry, services: Services): void {
   const { hub, runs, bisect } = services;
-  for (const id of FORWARDED) registry.register(id, ({ windowId }) => sendWindowCommand(windowId, id));
+  for (const id of FORWARDED)
+    registry.register(id, ({ windowId }) => sendWindowCommand(windowId, id));
 
   registry.register('app.newWindow', async () => {
     await openFiddleWindow();
@@ -68,25 +78,40 @@ export function registerCommands(registry: CommandRegistry, services: Services):
   registry.register('app.preferences', ({ windowId }) => {
     if (windowId) hub.updateWindow(windowId, { view: 'settings' });
   });
-  registry.register('view.reload', ({ windowId }) => getWindow(windowId)?.webContents.reload());
-  registry.register('view.toggleDevTools', ({ windowId }) => getWindow(windowId)?.webContents.toggleDevTools());
+  registry.register('view.reload', ({ windowId }) =>
+    getWindow(windowId)?.webContents.reload(),
+  );
+  registry.register('view.toggleDevTools', ({ windowId }) =>
+    getWindow(windowId)?.webContents.toggleDevTools(),
+  );
   registry.register('view.reloadAllWindows', () => {
-    for (const win of BrowserWindow.getAllWindows()) if (windowIdOf(win)) win.webContents.reload();
+    for (const win of BrowserWindow.getAllWindows())
+      if (windowIdOf(win)) win.webContents.reload();
   });
   for (const action of ['undo', 'redo', 'selectAll'] as const) {
     registry.register(`edit.${action}`, ({ windowId }) => editCommand(windowId, action));
   }
 
-  // The File menu.
-  registry.register('file.newFiddle', ({ windowId }) => withErrorDialog(windowId, () => newFiddleIn(windowId, 'template')));
-  registry.register('file.newTest', ({ windowId }) => withErrorDialog(windowId, () => newFiddleIn(windowId, 'test')));
-  registry.register('file.open', ({ windowId }) => withErrorDialog(windowId, () => openFolderIn(windowId)));
-  registry.register('file.save', ({ windowId }) => withErrorDialog(windowId, () => saveIn(windowId!, 'save')));
-  registry.register('file.saveAs', ({ windowId }) => withErrorDialog(windowId, () => saveIn(windowId!, 'saveAs')));
-  registry.register('file.saveAsForge', ({ windowId }) => withErrorDialog(windowId, () => saveIn(windowId!, 'forge')));
+  registry.register('file.newFiddle', ({ windowId }) =>
+    withErrorDialog(windowId, () => newFiddleIn(windowId, 'template')),
+  );
+  registry.register('file.newTest', ({ windowId }) =>
+    withErrorDialog(windowId, () => newFiddleIn(windowId, 'test')),
+  );
+  registry.register('file.open', ({ windowId }) =>
+    withErrorDialog(windowId, () => openFolderIn(windowId)),
+  );
+  registry.register('file.save', ({ windowId }) =>
+    withErrorDialog(windowId, () => saveIn(windowId!, 'save')),
+  );
+  registry.register('file.saveAs', ({ windowId }) =>
+    withErrorDialog(windowId, () => saveIn(windowId!, 'saveAs')),
+  );
+  registry.register('file.saveAsForge', ({ windowId }) =>
+    withErrorDialog(windowId, () => saveIn(windowId!, 'forge')),
+  );
   registry.register('file.close', ({ windowId }) => closeWindow(windowId));
 
-  // Run, package, make and bisect.
   registry.register('run.toggle', ({ windowId }) => {
     if (windowId) runs.toggle(windowId);
   });
@@ -101,7 +126,6 @@ export function registerCommands(registry: CommandRegistry, services: Services):
     else sendWindowCommand(windowId, 'bisect.toggle');
   });
 
-  // The Help menu.
   registry.register('help.about', () => app.showAboutPanel());
   registry.register('help.openLogsFolder', async () => {
     const dir = logsDir();
@@ -113,7 +137,7 @@ export function registerCommands(registry: CommandRegistry, services: Services):
     registry.register(id, () => openExternalLink(url));
   }
 
-  // The Develop menu (unpackaged builds; `devOnly`, so disabled in the packaged app).
+  // `devOnly`: disabled in the packaged app.
   registry.register('dev.toggleMenuBar', () => {
     toggleWindowMenuBar();
   });

@@ -2,7 +2,7 @@ import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 
 /**
  * Continuous input (a splitter drag) stays local and is committed once it
- * settles, instead of on every pointer move (REQUIREMENTS §3). The commit is
+ * settles, instead of on every pointer move. The commit is
  * optimistic, so dropping the draft right after it doesn't flicker.
  */
 export function useDraft(

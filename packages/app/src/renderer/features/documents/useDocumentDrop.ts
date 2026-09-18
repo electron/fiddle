@@ -1,5 +1,5 @@
 /**
- * Drag and drop onto the window (§17.17). Mount once in the shell:
+ * Drag and drop onto the window. Mount once in the shell:
  *
  *   const dragging = useDocumentDrop();   // true while something is dragged over the window
  *
@@ -30,7 +30,20 @@ export function droppedLink(data: Pick<DataTransfer, 'getData'>): string | undef
 
 function isTextDrag(event: DragEvent): boolean {
   const types = event.dataTransfer?.types ?? [];
-  return !types.includes('Files') && (types.includes('text/uri-list') || types.includes('text/plain'));
+  return (
+    !types.includes('Files') &&
+    (types.includes('text/uri-list') || types.includes('text/plain'))
+  );
+}
+
+/** Files, and text or links: the things a drop here can open. */
+function canOpen(data: DataTransfer | null): boolean {
+  const types = data?.types ?? [];
+  return (
+    types.includes('Files') ||
+    types.includes('text/uri-list') ||
+    types.includes('text/plain')
+  );
 }
 
 export function useDocumentDrop(): boolean {
@@ -38,14 +51,24 @@ export function useDocumentDrop(): boolean {
 
   useEffect(() => {
     let depth = 0;
+    /** A drag that started in this window (selected text, a link): nothing to open. */
+    let local = false;
     // Editor tabs dragged within the window are the sheet's business.
+    const ignored = (event: DragEvent) =>
+      local || isTabDrag(event.dataTransfer) || !canOpen(event.dataTransfer);
+    const onStart = () => {
+      local = true;
+    };
+    const onEnd = () => {
+      local = false;
+    };
     const onEnter = (event: DragEvent) => {
-      if (isTabDrag(event.dataTransfer)) return;
+      if (ignored(event)) return;
       depth += 1;
       setDragging(true);
     };
     const onLeave = (event: DragEvent) => {
-      if (isTabDrag(event.dataTransfer)) return;
+      if (ignored(event)) return;
       depth = Math.max(0, depth - 1);
       if (depth === 0) setDragging(false);
     };
@@ -64,11 +87,15 @@ export function useDocumentDrop(): boolean {
         // Main shows load errors natively.
       });
     };
+    window.addEventListener('dragstart', onStart);
+    window.addEventListener('dragend', onEnd);
     window.addEventListener('dragenter', onEnter);
     window.addEventListener('dragleave', onLeave);
     window.addEventListener('dragover', onOver);
     window.addEventListener('drop', onDrop, true);
     return () => {
+      window.removeEventListener('dragstart', onStart);
+      window.removeEventListener('dragend', onEnd);
       window.removeEventListener('dragenter', onEnter);
       window.removeEventListener('dragleave', onLeave);
       window.removeEventListener('dragover', onOver);

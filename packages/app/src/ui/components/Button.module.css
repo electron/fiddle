@@ -1,5 +1,3 @@
-/* Buttons: 30 tall (24 small), radius-control squircle, label type.
-   Press scales to 0.965 over 220ms. Disabled is 40%, with no hover or press. */
 .button {
   appearance: none;
   display: inline-flex;
@@ -61,7 +59,6 @@
   font-variant-numeric: tabular-nums;
 }
 
-/* Key-cap hint: sans, at 80% */
 .kbd {
   margin-left: 2px;
   font: var(--lu-type-hint);
@@ -69,75 +66,67 @@
   opacity: 0.8;
 }
 
-/* Primary: action fill with the white sheen, shadow-primary. Hover lifts the sheen.
-   Pressed darkens the action 14% toward black and drops the sheen. */
-.button[data-variant="primary"] {
+.button[data-variant='primary'] {
   padding: 0 15px 0 13px;
   color: var(--lu-on-action);
   background: var(--lu-sheen), var(--lu-action);
   box-shadow: var(--lu-shadow-primary);
 }
-.button[data-variant="primary"][data-hovered] {
+.button[data-variant='primary'][data-hovered] {
   background: var(--lu-sheen-hover), var(--lu-action);
 }
-.button[data-variant="primary"][data-pressed] {
+.button[data-variant='primary'][data-pressed] {
   background: var(--lu-action-pressed);
 }
 
-/* Secondary: button fill with shadow-button. Hover: button-hover. Pressed: fill-strong. */
-.button[data-variant="secondary"] {
+.button[data-variant='secondary'] {
   background: var(--lu-button);
   box-shadow: var(--lu-shadow-button);
 }
-.button[data-variant="secondary"][data-hovered] {
+.button[data-variant='secondary'][data-hovered] {
   background: var(--lu-button-hover);
 }
-.button[data-variant="secondary"][data-pressed] {
+.button[data-variant='secondary'][data-pressed] {
   background: var(--lu-fill-strong);
 }
 
-/* Ghost: no fill, ink-muted. Hover: fill with ink. */
-.button[data-variant="ghost"] {
+.button[data-variant='ghost'] {
   color: var(--lu-ink-muted);
 }
-.button[data-variant="ghost"][data-hovered] {
+.button[data-variant='ghost'][data-hovered] {
   background: var(--lu-fill);
   color: var(--lu-ink);
 }
-.button[data-variant="ghost"][data-pressed] {
+.button[data-variant='ghost'][data-pressed] {
   background: var(--lu-fill-strong);
   color: var(--lu-ink);
 }
 
-/* Danger: spark at 9% (15% on hover), spark text. */
-.button[data-variant="danger"] {
+.button[data-variant='danger'] {
   color: var(--lu-spark);
   background: color-mix(in srgb, var(--lu-spark) 9%, transparent);
 }
-.button[data-variant="danger"][data-hovered] {
+.button[data-variant='danger'][data-hovered] {
   background: color-mix(in srgb, var(--lu-spark) 15%, transparent);
 }
-.button[data-variant="danger"][data-pressed] {
+.button[data-variant='danger'][data-pressed] {
   background: color-mix(in srgb, var(--lu-spark) 20%, transparent);
 }
 
-/* Stop (running): secondary with a spark-soft fill and a faint red ring. */
-.button[data-variant="stop"] {
+.button[data-variant='stop'] {
   /* The label and stop square stay ink, not red. */
   color: var(--lu-ink);
   background: var(--lu-spark-soft);
   box-shadow: var(--lu-shadow-stop);
 }
-.button[data-variant="stop"][data-hovered] {
+.button[data-variant='stop'][data-hovered] {
   background: color-mix(in srgb, var(--lu-spark) 8%, var(--lu-spark-soft));
 }
-.button[data-variant="stop"][data-pressed] {
+.button[data-variant='stop'][data-pressed] {
   background: color-mix(in srgb, var(--lu-spark) 14%, var(--lu-spark-soft));
 }
 
-/* Link: inline text in accent with an underline, in the surrounding type.
-   No fill, no height, no press scale. */
-.button[data-variant="link"] {
+.button[data-variant='link'] {
   display: inline;
   height: auto;
   padding: 0;
@@ -151,43 +140,39 @@
   vertical-align: baseline;
   cursor: pointer;
 }
-.button[data-variant="link"][data-hovered] {
+.button[data-variant='link'][data-hovered] {
   text-decoration-thickness: 2px;
 }
 
-/* Toggled on */
-.button[aria-pressed="true"] {
+.button[aria-pressed='true'] {
   background: var(--lu-fill-strong);
   color: var(--lu-ink);
   box-shadow: none;
 }
-.button[aria-pressed="true"][data-variant="secondary"] {
+.button[aria-pressed='true'][data-variant='secondary'] {
   box-shadow: var(--lu-ring-edge);
 }
 
-/* Small: 24 tall, padding 0 11, 4px icon gap. */
-.button[data-size="sm"] {
+.button[data-size='sm'] {
   height: var(--lu-size-control-sm);
   padding: 0 11px;
   gap: 4px;
 }
 
-/* Inside a toolbar capsule: 30px capsules. */
 .button[data-capsule] {
   height: var(--lu-size-toolbar-inner);
   border-radius: var(--lu-radius-capsule);
   corner-shape: round;
 }
-.button[data-capsule][data-variant="primary"] {
+.button[data-capsule][data-variant='primary'] {
   padding: 0 14px 0 12px;
 }
 
-/* Icon button: square, 16px icon at 1.4 stroke. */
 .button.iconOnly {
   width: var(--lu-size-control);
   padding: 0;
 }
-.button.iconOnly[data-size="sm"] {
+.button.iconOnly[data-size='sm'] {
   width: var(--lu-size-control-sm);
   padding: 0;
 }

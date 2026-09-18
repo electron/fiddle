@@ -19,8 +19,6 @@ function collector() {
       callback();
     },
   });
-  // stdout and stderr both pipe here; don't let the first to finish end it
-  out.end = (() => out) as Writable['end'];
   return { out, text: () => chunks.join('') };
 }
 
@@ -72,7 +70,6 @@ describe('Runner with a real child process', () => {
     return { main, started };
   }
 
-  // @feature run.result-success run.result-failure
   it('reports the exit code', async () => {
     const main = 'process.exit(Number(process.env.EXIT_CODE ?? 0));';
     const opts = { out: undefined, showConfig: false };
@@ -103,6 +100,17 @@ describe('Runner with a real child process', () => {
     expect(env).not.toHaveProperty('GITHUB_TOKEN');
     expect(env).not.toHaveProperty('SENTRY_DSN');
     expect(env).not.toHaveProperty('LD_PRELOAD');
+  });
+
+  it('leaves `out` open, so later runs can write to it', async () => {
+    const { out, text } = collector();
+    const opts = { out, showConfig: false };
+    await runner.run(electron, fiddle('process.stdout.write("first\\n");'), opts);
+    await expect.poll(text).toContain('first');
+    expect(out.writableEnded).toBe(false);
+
+    await runner.run(electron, fiddle('process.stderr.write("second\\n");'), opts);
+    await expect.poll(text).toContain('second');
   });
 
   it('starts the inspector on a random local port', async () => {

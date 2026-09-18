@@ -8,21 +8,6 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { FiddleCoreError, LOCK_STALE_MS, acquireLock, withLock } from '../src/index.js';
 import { isLockStale } from '../src/lock.js';
 
-// Lets a test act between a waiter judging a lock stale and moving it aside.
-const hooks = vi.hoisted(() => ({
-  beforeRename: undefined as ((from: string) => void) | undefined,
-}));
-vi.mock('../src/fs-util.js', async (importOriginal) => {
-  const actual = await importOriginal<typeof import('../src/fs-util.js')>();
-  return {
-    ...actual,
-    rename: (from: string, to: string) => {
-      hooks.beforeRename?.(from);
-      return actual.rename(from, to);
-    },
-  };
-});
-
 /** The pid of a process that has already exited. */
 async function deadPid(): Promise<number> {
   const child = spawn(process.execPath, ['-e', '']);
@@ -42,7 +27,7 @@ describe('locks', () => {
   });
 
   afterEach(() => {
-    hooks.beforeRename = undefined;
+    vi.restoreAllMocks();
     fs.rmSync(tmpdir, { recursive: true, force: true });
   });
 
@@ -107,11 +92,18 @@ describe('locks', () => {
     await lock.release();
   });
 
-  it('trusts a live process on this host, however old its lock', async () => {
-    writeLock({ pid: process.pid, hostname: os.hostname(), startedAt: 0 }, longAgo());
+  it('trusts a live process on this host while its lock is being refreshed', async () => {
+    writeLock({ pid: process.pid, hostname: os.hostname(), startedAt: 0 });
     await expect(
       acquireLock(lockPath, { timeoutMs: 50, pollMs: 10 }),
     ).rejects.toMatchObject({ code: 'locked' });
+  });
+
+  it('recovers an old lock from this host whose pid now belongs to another process', async () => {
+    writeLock({ pid: process.pid, hostname: os.hostname(), startedAt: 0 }, longAgo());
+    const lock = await acquireLock(lockPath, { timeoutMs: 1000 });
+    expect(lock.info.startedAt).toBeGreaterThan(0);
+    await lock.release();
   });
 
   it('does not check the pid of a lock from another host', async () => {
@@ -162,16 +154,20 @@ describe('locks', () => {
     expect(fs.statSync(lockPath).mtimeMs).toBeLessThan(past.getTime() + 1000);
   });
 
-  it('puts back a lock that another waiter replaced before this one moved it aside', async () => {
+  it('leaves alone a lock that another waiter took after this one judged the old one stale', async () => {
     writeLock({ pid: await deadPid(), hostname: os.hostname(), startedAt: 0 });
     const live = { pid: process.pid, hostname: os.hostname(), startedAt: Date.now() };
+    const guard = `${lockPath}.takeover`;
+    const mkdir = fs.promises.mkdir.bind(fs.promises);
     let raced = false;
-    hooks.beforeRename = (from) => {
-      if (from !== lockPath || raced) return;
-      // another waiter removed the stale lock and took the lock itself
-      raced = true;
-      fs.writeFileSync(lockPath, JSON.stringify(live));
-    };
+    vi.spyOn(fs.promises, 'mkdir').mockImplementation(((target: string, ...rest: []) => {
+      if (target === guard && !raced) {
+        // another waiter removed the stale lock and took the lock itself
+        raced = true;
+        fs.writeFileSync(lockPath, JSON.stringify(live));
+      }
+      return mkdir(target, ...rest);
+    }) as never);
 
     await expect(
       acquireLock(lockPath, { timeoutMs: 100, pollMs: 10 }),
@@ -181,23 +177,39 @@ describe('locks', () => {
     expect(fs.readdirSync(path.dirname(lockPath))).toStrictEqual(['thing.lock']);
   });
 
-  it('lets only one of two waiters take over a stale lock', async () => {
+  it('waits while another waiter is taking over, and ignores a guard its owner left behind', async () => {
+    writeLock({ pid: await deadPid(), hostname: os.hostname(), startedAt: 0 });
+    const guard = `${lockPath}.takeover`;
+    fs.mkdirSync(guard);
+    await expect(
+      acquireLock(lockPath, { timeoutMs: 50, pollMs: 10 }),
+    ).rejects.toMatchObject({ code: 'locked' });
+
+    const old = new Date(Date.now() - 60_000);
+    fs.utimesSync(guard, old, old);
+    const lock = await acquireLock(lockPath, { timeoutMs: 1000, pollMs: 10 });
+    await lock.release();
+    expect(fs.readdirSync(path.dirname(lockPath))).toStrictEqual([]);
+  });
+
+  it('lets only one of several waiters take over a stale lock', async () => {
     const dead = await deadPid();
     let holders = 0;
     let most = 0;
     const hold = () =>
       withLock(lockPath, { pollMs: 1 }, async () => {
         most = Math.max(most, ++holders);
-        await sleep(2);
+        await sleep(1);
         holders--;
       });
-    for (let round = 0; round < 50; round++) {
+    // The race is rare, about one round in fifty, so this takes many rounds.
+    for (let round = 0; round < 250; round++) {
       writeLock({ pid: dead, hostname: os.hostname(), startedAt: round });
-      await Promise.all([hold(), hold()]);
+      await Promise.all(Array.from({ length: 4 }, hold));
     }
     expect(most).toBe(1);
     expect(fs.readdirSync(path.dirname(lockPath))).toStrictEqual([]);
-  });
+  }, 20_000);
 
   it('release() leaves alone a lock that someone else took over', async () => {
     const lock = await acquireLock(lockPath);
@@ -250,8 +262,14 @@ describe('locks', () => {
     const mine = { pid: process.pid, hostname: os.hostname(), startedAt: 0 };
     const remote = { ...mine, hostname: 'some-other-host' };
 
-    it('trusts the pid of a lock from this host, whatever its age', () => {
-      expect(isLockStale({ info: mine, mtimeMs: 0 }, LOCK_STALE_MS, now)).toBe(false);
+    it('trusts the pid of a lock from this host while its mtime is fresh', () => {
+      const fresh = { info: mine, mtimeMs: now - 1000 };
+      expect(isLockStale(fresh, LOCK_STALE_MS, now)).toBe(false);
+    });
+
+    it('treats a lock from this host as stale once its mtime is old, whoever has its pid', () => {
+      const old = { info: mine, mtimeMs: now - LOCK_STALE_MS - 1 };
+      expect(isLockStale(old, LOCK_STALE_MS, now)).toBe(true);
     });
 
     it('goes by the mtime of a lock from another host', () => {

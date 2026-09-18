@@ -21,15 +21,29 @@ import styles from './Menu.module.css';
 /** Wraps a trigger button and a MenuPopover. */
 export const MenuTrigger = AriaMenuTrigger;
 
-export interface MenuPopoverProps extends Omit<AriaPopoverProps, 'className' | 'children'> {
+export interface MenuPopoverProps extends Omit<
+  AriaPopoverProps,
+  'className' | 'children'
+> {
   children: ReactNode;
   className?: string;
 }
 
 /** Positions a menu. The Menu inside draws the glass. */
-export function MenuPopover({ children, className, placement = 'bottom start', offset = 4, ...rest }: MenuPopoverProps) {
+export function MenuPopover({
+  children,
+  className,
+  placement = 'bottom start',
+  offset = 4,
+  ...rest
+}: MenuPopoverProps) {
   return (
-    <AriaPopover {...rest} placement={placement} offset={offset} className={cx(styles.popover, className)}>
+    <AriaPopover
+      {...rest}
+      placement={placement}
+      offset={offset}
+      className={cx(styles.popover, className)}
+    >
       {children}
     </AriaPopover>
   );
@@ -39,7 +53,6 @@ export interface MenuProps<T> extends Omit<AriaMenuProps<T>, 'className'> {
   className?: string;
 }
 
-/** A list of commands on overlay glass: padding 5, radius-menu, shadow-popover and the two rims. */
 export function Menu<T extends object>({ className, ...rest }: MenuProps<T>) {
   return <AriaMenu {...rest} className={cx(styles.surface, className)} />;
 }
@@ -55,7 +68,16 @@ export interface MenuItemProps extends Omit<AriaMenuItemProps, 'children' | 'cla
   className?: string;
 }
 
-export function MenuItem({ children, icon, hint, kbd, isDanger, className, textValue, ...rest }: MenuItemProps) {
+export function MenuItem({
+  children,
+  icon,
+  hint,
+  kbd,
+  isDanger,
+  className,
+  textValue,
+  ...rest
+}: MenuItemProps) {
   return (
     <AriaMenuItem
       {...rest}
@@ -84,18 +106,26 @@ export function MenuItem({ children, icon, hint, kbd, isDanger, className, textV
   );
 }
 
-export interface MenuSectionProps
-  extends Pick<
-    AriaMenuSectionProps<object>,
-    'selectionMode' | 'selectedKeys' | 'defaultSelectedKeys' | 'onSelectionChange' | 'disallowEmptySelection'
-  > {
+export interface MenuSectionProps extends Pick<
+  AriaMenuSectionProps<object>,
+  | 'selectionMode'
+  | 'selectedKeys'
+  | 'defaultSelectedKeys'
+  | 'onSelectionChange'
+  | 'disallowEmptySelection'
+> {
   title?: string;
   children: ReactNode;
   className?: string;
 }
 
 /** A group of items with an optional caption header. Can carry its own selection. */
-export function MenuSection({ title, children, className, ...selection }: MenuSectionProps) {
+export function MenuSection({
+  title,
+  children,
+  className,
+  ...selection
+}: MenuSectionProps) {
   return (
     <AriaMenuSection {...selection} className={cx(styles.section, className)}>
       {title && <Header className={styles.header}>{title}</Header>}
@@ -104,7 +134,6 @@ export function MenuSection({ title, children, className, ...selection }: MenuSe
   );
 }
 
-/** A 0.5px hairline between groups. */
 export function MenuSeparator() {
   return <Separator className={styles.separator} />;
 }

@@ -1,7 +1,6 @@
-/* Lucent global styles. Import once from the renderer entry. */
-@import "./fonts/fonts.css";
-@import "./tokens/lucent-tokens.css";
-@import "./tokens/lucent-extensions.css";
+@import './fonts/fonts.css';
+@import './tokens/lucent-tokens.css';
+@import './tokens/lucent-extensions.css';
 
 /* The OS material shows through: the page itself is transparent. */
 html,
@@ -40,7 +39,7 @@ body {
 
 input,
 textarea,
-[contenteditable="true"] {
+[contenteditable='true'] {
   user-select: text;
   cursor: auto;
 }

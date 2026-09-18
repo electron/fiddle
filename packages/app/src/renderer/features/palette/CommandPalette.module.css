@@ -1,5 +1,4 @@
-/* The palette floats on overlay glass under the title bar, like a menu (Menu surface and
-   item styling), 560 wide. No scrim: it's a transient menu, not a dialog. */
+/* No scrim: the palette is a transient menu, not a dialog. */
 .overlay {
   position: fixed;
   inset: 0;

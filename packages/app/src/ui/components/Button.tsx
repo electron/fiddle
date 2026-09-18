@@ -1,5 +1,8 @@
 import type { CSSProperties, ReactNode } from 'react';
-import { Button as AriaButton, type ButtonProps as AriaButtonProps } from 'react-aria-components';
+import {
+  Button as AriaButton,
+  type ButtonProps as AriaButtonProps,
+} from 'react-aria-components';
 import { cx } from '../cx';
 import { Icon, type IconName } from '../icons/Icon';
 import { useInCapsule } from './capsule';
@@ -10,7 +13,8 @@ import styles from './Button.module.css';
  * primary, secondary, ghost and danger, plus stop (the running Run button) and
  * link (inline accent text with an underline, such as a console location).
  */
-export type ButtonVariant = 'primary' | 'secondary' | 'ghost' | 'danger' | 'stop' | 'link';
+export type ButtonVariant =
+  'primary' | 'secondary' | 'ghost' | 'danger' | 'stop' | 'link';
 
 type BaseProps = Omit<AriaButtonProps, 'children' | 'className' | 'style' | 'isPending'>;
 

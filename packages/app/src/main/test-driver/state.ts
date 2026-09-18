@@ -21,7 +21,7 @@ export class Ring {
   }
 
   tail(count = this.#max): string[] {
-    return this.#lines.slice(-count);
+    return count <= 0 ? [] : this.#lines.slice(-count);
   }
 }
 

@@ -26,14 +26,21 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 }
 
 function invalidPackageJson(): FiddleError {
-  return new FiddleError(ErrorCode.invalidArgument, 'Invalid JSON found in package.json', {
-    reason: 'invalid-json',
-    file: PACKAGE_JSON,
-  });
+  return new FiddleError(
+    ErrorCode.invalidArgument,
+    'Invalid JSON found in package.json',
+    {
+      reason: 'invalid-json',
+      file: PACKAGE_JSON,
+    },
+  );
 }
 
 /** Turns a generated `package.json` into an Electron Forge project's. */
-export function forgeTransformPackageJson(text: string, options: ForgeTransformOptions): string {
+export function forgeTransformPackageJson(
+  text: string,
+  options: ForgeTransformOptions,
+): string {
   let pkg: unknown;
   try {
     pkg = JSON.parse(text);
@@ -47,7 +54,8 @@ export function forgeTransformPackageJson(text: string, options: ForgeTransformO
   const scripts = isRecord(pkg.scripts) ? pkg.scripts : {};
   const config = isRecord(pkg.config) ? pkg.config : {};
 
-  for (const name of [FORGE_CLI, ...FORGE_MAKERS]) devDependencies[name] = options.forgeVersion;
+  for (const name of [FORGE_CLI, ...FORGE_MAKERS])
+    devDependencies[name] = options.forgeVersion;
 
   scripts.start = 'electron-forge start';
   scripts.package = 'electron-forge package';
@@ -62,9 +70,15 @@ export function forgeTransformPackageJson(text: string, options: ForgeTransformO
   }
   if (options.localElectronPath) {
     devDependencies[FORGE_PLUGIN_LOCAL_ELECTRON] = options.forgeVersion;
-    forge.plugins = [{ name: FORGE_PLUGIN_LOCAL_ELECTRON, config: { electronPath: options.localElectronPath } }];
+    forge.plugins = [
+      {
+        name: FORGE_PLUGIN_LOCAL_ELECTRON,
+        config: { electronPath: options.localElectronPath },
+      },
+    ];
     if ('electron' in devDependencies) {
-      if (options.latestStableVersion) devDependencies.electron = options.latestStableVersion;
+      if (options.latestStableVersion)
+        devDependencies.electron = options.latestStableVersion;
       else delete devDependencies.electron;
     }
   }
@@ -86,9 +100,13 @@ export function forgeTransformPackageJson(text: string, options: ForgeTransformO
 export function forgeTransform(files: FileMap, options: ForgeTransformOptions): FileMap {
   const text = files[PACKAGE_JSON];
   if (text === undefined) {
-    throw new FiddleError(ErrorCode.invalidArgument, 'The Forge transform needs a package.json', {
-      reason: 'missing-package-json',
-    });
+    throw new FiddleError(
+      ErrorCode.invalidArgument,
+      'The Forge transform needs a package.json',
+      {
+        reason: 'missing-package-json',
+      },
+    );
   }
   return { ...files, [PACKAGE_JSON]: forgeTransformPackageJson(text, options) };
 }

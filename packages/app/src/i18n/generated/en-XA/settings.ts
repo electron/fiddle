@@ -93,7 +93,7 @@ export default {
   "customMirrorElectron.description": "[Ûšéð ƒöŕ šţáƀļé áñð ƀéţá ŕéļéášéš. one two three]",
   "customMirrorNightly.title": "[Ñîĝĥţļý ɱîŕŕöŕ ÛŔĻ one two]",
   "customMirrorNightly.description": "[Ûšéð ƒöŕ ñîĝĥţļý ŕéļéášéš. one two three]",
-  "mirror.invalidUrl": "[Éñţéŕ áñ ĥţţþ öŕ ĥţţþš ÛŔĻ. one two three]",
+  "mirror.invalidUrl": "[Éñţéŕ áñ ĥţţþš ÛŔĻ. one two]",
   "packageAuthor.title": "[þáçķáĝé.ĵšöñ áûţĥöŕ one two]",
   "packageAuthor.description": "[Ûšéð ŵĥéñ á ƒîððļé îš šáṽéð öŕ þáçķáĝéð. Ļéáṽé îţ éɱþţý ţö ûšé ýöûŕ ûšéŕ ñáɱé. one two three four five six seven]",
   "gistShowHistory.title": "[Šĥöŵ ĝîšţ ŕéṽîšîöñ ĥîšţöŕý one two three]",

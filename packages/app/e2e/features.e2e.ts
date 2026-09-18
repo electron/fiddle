@@ -6,13 +6,13 @@ import { openedUrls, role, text, useApp, windowState } from './harness.ts';
 describe('features', () => {
   const app = useApp();
 
-  it('downloads the template for the current major at startup @feature load.template-download', async () => {
+  it('downloads the template for the current major at startup', async () => {
     await expect
       .poll(() => app.fixtures().requests.map((r) => `${r.status} ${r.path}`))
       .toContain('200 /minimal-repro/archive/44-x-y.zip');
   });
 
-  it('starts a new fiddle from the template with CmdOrCtrl+N @feature load.new-fiddle keys.new-fiddle', async () => {
+  it('starts a new fiddle from the template with CmdOrCtrl+N', async () => {
     const before = await windowState(app());
     await app().press('CmdOrCtrl+N');
     await expect
@@ -24,7 +24,7 @@ describe('features', () => {
     await app().query(role('tab', 'main.js'));
   });
 
-  it('opens settings with CmdOrCtrl+, @feature keys.preferences', async () => {
+  it('opens settings with CmdOrCtrl+,', async () => {
     await app().press('CmdOrCtrl+,');
     await app().query(role('navigation', 'Settings sections'));
     expect((await windowState(app())).view).toBe('settings');
@@ -34,7 +34,7 @@ describe('features', () => {
   });
 
   // Focus stays on the title bar button, outside the page.
-  it('opens settings from the title bar and closes them with Escape @feature keys.close-settings', async () => {
+  it('opens settings from the title bar and closes them with Escape', async () => {
     await app().click(role('button', 'Settings'));
     await app().query(role('navigation', 'Settings sections'));
     await app().press('Escape');
@@ -42,7 +42,7 @@ describe('features', () => {
   });
 
   // Focus stays where it was before the shortcut, outside the page.
-  it('closes settings opened with CmdOrCtrl+, on Escape @feature keys.close-settings', async () => {
+  it('closes settings opened with CmdOrCtrl+, on Escape', async () => {
     await app().press('CmdOrCtrl+,');
     await app().query(role('navigation', 'Settings sections'));
     await app().press('Escape');
@@ -50,7 +50,7 @@ describe('features', () => {
     expect((await windowState(app())).view).toBe('editor');
   });
 
-  it('runs a command from the palette, which shows keybindings @feature new.palette', async () => {
+  it('runs a command from the palette, which shows keybindings', async () => {
     await app().press('CmdOrCtrl+Shift+P');
     await app().query(role('dialog', 'Command palette'));
     await app().query(role('option', /^New window .*N$/));
@@ -65,7 +65,7 @@ describe('features', () => {
     await expect.poll(async () => (await windowState(app())).layout.sidebar).toBe(true);
   });
 
-  it('offers the menu actions that have no shortcut @feature keys.menu-file keys.menu-editor keys.menu-help', async () => {
+  it('offers the menu actions that have no shortcut', async () => {
     await app().press('CmdOrCtrl+Shift+P');
     for (const name of [
       'Publish to gist…',
@@ -87,20 +87,26 @@ describe('features', () => {
     await app().waitForAbsent(role('dialog', 'Command palette'));
 
     // Each link asks before opening in the browser.
-    for (const id of ['help.fiddleRepository', 'help.electronRepository', 'help.reportIssue']) {
+    for (const id of [
+      'help.fiddleRepository',
+      'help.electronRepository',
+      'help.reportIssue',
+    ]) {
       await app().queueDialog('messageBox', { button: 'Open link' });
       await app().runCommand(id);
     }
-    await expect.poll(() => openedUrls(app())).toEqual(
-      expect.arrayContaining([
-        expect.stringMatching(/^https:\/\/github\.com\/electron\/fiddle\/?$/),
-        expect.stringMatching(/^https:\/\/github\.com\/electron\/electron\/?$/),
-        expect.stringMatching(/^https:\/\/github\.com\/electron\/fiddle\/issues/),
-      ]),
-    );
+    await expect
+      .poll(() => openedUrls(app()))
+      .toEqual(
+        expect.arrayContaining([
+          expect.stringMatching(/^https:\/\/github\.com\/electron\/fiddle\/?$/),
+          expect.stringMatching(/^https:\/\/github\.com\/electron\/electron\/?$/),
+          expect.stringMatching(/^https:\/\/github\.com\/electron\/fiddle\/issues/),
+        ]),
+      );
   });
 
-  it('loads a Show Me example from the palette @feature load.examples', async () => {
+  it('loads a Show Me example from the palette', async () => {
     await app().press('CmdOrCtrl+Shift+P');
     await app().type('BrowserWindow', role('combobox', 'Command palette'));
     await app().query(role('option', /^BrowserWindow\b/));
@@ -111,7 +117,7 @@ describe('features', () => {
     await app().query(role('tab', 'main.js'));
   });
 
-  it('replays the welcome tour @feature onboarding.replay', async () => {
+  it('replays the welcome tour', async () => {
     await app().runCommand('help.showTour');
     await app().query(text(/^1 of \d+$/));
     await app().click(role('button', 'Skip tour'));

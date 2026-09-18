@@ -3,5 +3,6 @@ export default {
   "searchVersions": "Search versions",
   "noMatches": "No versions match",
   "copyVersion": "Copy version number",
-  "copied": "Copied {{version}}"
+  "copied": "Copied {{version}}",
+  "versionChangeFailed": "Couldn't change the Electron version"
 } as const;

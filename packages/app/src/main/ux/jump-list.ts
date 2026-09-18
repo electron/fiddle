@@ -13,7 +13,10 @@ export const ARG_OPEN_FOLDER = '--fiddle-open-folder';
  * folders, so only one of `recent` is accepted. An `argv` that holds a deep
  * link is Documents' to handle, so a crafted link never acts as a task.
  */
-export function jumpListFolder(argv: readonly string[], recent: readonly string[]): string | undefined {
+export function jumpListFolder(
+  argv: readonly string[],
+  recent: readonly string[],
+): string | undefined {
   if (findDeepLinkInArgv([...argv])) return undefined;
   const index = argv.indexOf(ARG_OPEN_FOLDER);
   const dir = index === -1 ? undefined : argv[index + 1];

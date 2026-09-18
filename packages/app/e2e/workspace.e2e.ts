@@ -7,7 +7,7 @@ describe('workspace', () => {
   const app = useApp();
   const layout = async () => (await windowState(app())).layout;
 
-  it('shows the editor, console, files, packages and the toolbar controls @feature workspace.editor workspace.console workspace.sidebar workspace.controls', async () => {
+  it('shows the editor, console, files, packages and the toolbar controls', async () => {
     await app().query(role('code'));
     await app().query(role('region', 'Console'));
     await app().query(role('navigation', 'Files'));
@@ -18,28 +18,36 @@ describe('workspace', () => {
     await app().query(role('button', 'Publish'));
   });
 
-  it('opens one editor tab per visible file @feature editor.per-file', async () => {
+  it('opens one editor tab per visible file', async () => {
     const { fiddle } = await windowState(app());
     const tabs = (await app().query(role('tab'))).map((tab) => tab.name).sort();
-    expect(tabs).toEqual(fiddle.files.filter((file) => file.visible).map((file) => file.name).sort());
+    expect(tabs).toEqual(
+      fiddle.files
+        .filter((file) => file.visible)
+        .map((file) => file.name)
+        .sort(),
+    );
   });
 
-  it('splits the editor and closes the split @feature editor.panes', async () => {
+  it('splits the editor and closes the split', async () => {
     await app().click(role('button', 'Split editor'));
-    // A second pane opens beside the focused one, showing renderer.js (§17.2).
-    await expect.poll(async () => (await layout()).panes).toEqual(['main.js', 'renderer.js']);
+    // A second pane opens beside the focused one, showing renderer.js.
+    await expect
+      .poll(async () => (await layout()).panes)
+      .toEqual(['main.js', 'renderer.js']);
     expect(await app().query(role('code'))).toHaveLength(2);
     await app().click(role('button', 'Close split', { nth: 0 }));
     await expect.poll(async () => (await layout()).panes).toEqual([]);
     expect(await app().query(role('code'))).toHaveLength(1);
   });
 
-  // ---- Tabs and panes ------------------------------------------------------
   // Synthetic drag and drop: the driver has no pointer drag, so these dispatch
   // the DragEvents a real drag produces, sharing one DataTransfer.
 
   const visibleTabs = async () =>
-    (await windowState(app())).fiddle.files.filter((file) => file.visible).map((file) => file.name);
+    (await windowState(app())).fiddle.files
+      .filter((file) => file.visible)
+      .map((file) => file.name);
   const activeFile = async () => (await windowState(app())).fiddle.activeFile;
   const panes = async () => (await layout()).panes;
   const tabNamed = (name: string) =>
@@ -54,7 +62,11 @@ describe('workspace', () => {
     }
     if (!document.querySelector('[data-tab-dragging]')) throw new Error('The tab drag did not start');`;
   /** Drops `name`'s tab on a zone ('before', 'center' or 'after') of the pane at `index`. */
-  const dragTabToPane = (name: string, index: number, zone: 'before' | 'center' | 'after') =>
+  const dragTabToPane = (
+    name: string,
+    index: number,
+    zone: 'before' | 'center' | 'after',
+  ) =>
     app().evaluate(`(async () => {
       ${startDrag(name)}
       const target = document.querySelector('[data-pane-index="${index}"] [data-drop-zone="${zone}"]');
@@ -64,7 +76,11 @@ describe('workspace', () => {
       tab.dispatchEvent(new DragEvent('dragend', { bubbles: true, dataTransfer: data }));
     })()`);
   /** Drops `name`'s tab on the near or far half of `onto`'s tab, or past the last tab (`onto` null). */
-  const dragTabAlongRow = (name: string, onto: string | null, side: 'before' | 'after' = 'before') =>
+  const dragTabAlongRow = (
+    name: string,
+    onto: string | null,
+    side: 'before' | 'after' = 'before',
+  ) =>
     app().evaluate(`(async () => {
       ${startDrag(name)}
       const onto = ${onto === null ? 'null' : tabNamed(onto)};
@@ -88,7 +104,7 @@ describe('workspace', () => {
       return zones;
     })()`);
 
-  it('closes tabs and opens a dragged tab in a pane or beside it @feature editor.tabs', async () => {
+  it('closes tabs and opens a dragged tab in a pane or beside it', async () => {
     // Delete closes the focused tab. The file stays in the sidebar, and clicking it there reopens the tab.
     await app().click(role('tab', /^main\.js\b/));
     await app().press('Delete', role('tab', /^main\.js\b/));
@@ -120,7 +136,9 @@ describe('workspace', () => {
     await dragTabToPane('main.js', 0, 'before');
     await expect.poll(panes).toEqual(['main.js', 'renderer.js']);
     await expect.poll(activeFile).toBe('main.js');
-    await app().evaluate(`${tabNamed('main.js')}.querySelector('[data-tab-close]').click()`);
+    await app().evaluate(
+      `${tabNamed('main.js')}.querySelector('[data-tab-close]').click()`,
+    );
     await expect.poll(panes).toEqual([]);
     await expect.poll(visibleTabs).not.toContain('main.js');
     expect(await activeFile()).toBe('renderer.js');
@@ -129,7 +147,7 @@ describe('workspace', () => {
     await app().query(role('tab', /^main\.js\b/));
   });
 
-  it('moves tabs by dragging them along the row, and with Move tab left and right @feature editor.tab-reorder keys.move-tab', async () => {
+  it('moves tabs by dragging them along the row, and with Move tab left and right', async () => {
     const before = await visibleTabs();
     expect(before.length).toBeGreaterThanOrEqual(3);
     const [first, second] = before as [string, string];
@@ -140,7 +158,9 @@ describe('workspace', () => {
     await dragTabAlongRow(last, first, 'before');
     await expect.poll(visibleTabs).toEqual([last, ...before.slice(0, -1)]);
     // The sidebar follows: within its group, the file moved too (main owns one order for both).
-    expect((await windowState(app())).fiddle.files.map((file) => file.name).indexOf(last)).toBe(0);
+    expect(
+      (await windowState(app())).fiddle.files.map((file) => file.name).indexOf(last),
+    ).toBe(0);
 
     // Move tab right acts on the selected tab.
     await app().click(role('tab', tabPattern(last)));
@@ -149,7 +169,9 @@ describe('workspace', () => {
     await expect.poll(visibleTabs).toEqual([first, last, ...before.slice(1, -1)]);
     // Ctrl+Shift+PageUp moves it back (Ctrl+Shift+PageDown the other way), as in VS Code; Ctrl+Cmd+Left and Right on macOS.
     const [moveLeft, moveRight] =
-      process.platform === 'darwin' ? ['Ctrl+Cmd+Left', 'Ctrl+Cmd+Right'] : ['Ctrl+Shift+PageUp', 'Ctrl+Shift+PageDown'];
+      process.platform === 'darwin'
+        ? ['Ctrl+Cmd+Left', 'Ctrl+Cmd+Right']
+        : ['Ctrl+Shift+PageUp', 'Ctrl+Shift+PageDown'];
     await app().press(moveLeft);
     await expect.poll(visibleTabs).toEqual([last, ...before.slice(0, -1)]);
     await app().press(moveRight);
@@ -166,7 +188,7 @@ describe('workspace', () => {
     await expect.poll(visibleTabs).toEqual(before);
   });
 
-  it('splits a split view: up to four panes side by side, each its own drop target @feature editor.split-n editor.panes keys.split', async () => {
+  it('splits a split view: up to four panes side by side, each its own drop target', async () => {
     const files = await visibleTabs();
     expect(files.length).toBeGreaterThanOrEqual(4);
     const [a, b, c, d] = files as [string, string, string, string];
@@ -188,7 +210,12 @@ describe('workspace', () => {
 
     // Four is the limit, and every file is showing, so a dragged tab can only move its pane:
     // a pane offers just the drops that change something, and the file's own pane none.
-    expect(await dropZonesWhileDragging(a)).toEqual(['before center', '', 'center after', 'before center after']);
+    expect(await dropZonesWhileDragging(a)).toEqual([
+      'before center',
+      '',
+      'center after',
+      'before center after',
+    ]);
     await dragTabToPane(a, 3, 'after');
     await expect.poll(panes).toEqual([d, b, c, a]);
     await expect.poll(async () => (await app().query(role('code'))).length).toBe(4);
@@ -215,7 +242,7 @@ describe('workspace', () => {
     await expect.poll(async () => (await app().query(role('code'))).length).toBe(1);
   });
 
-  it('hides and shows the sidebar and the console @feature workspace.panels console.visibility', async () => {
+  it('hides and shows the sidebar and the console', async () => {
     await app().query(role('separator', 'Resize sidebar'));
     await app().query(role('separator', 'Resize console'));
     await app().click(role('button', 'Hide sidebar'));
@@ -230,7 +257,7 @@ describe('workspace', () => {
     await app().query(role('region', 'Console'));
   });
 
-  it('routes undo, redo, select all and copy to the editor @feature keys.edit keys.clipboard', async () => {
+  it('routes undo, redo, select all and copy to the editor', async () => {
     const dirty = async () => (await windowState(app())).fiddle.dirty;
     const undoAll = async () => {
       for (let i = 0; i < 10 && (await dirty()); i++) await app().press('CmdOrCtrl+Z');
@@ -250,21 +277,24 @@ describe('workspace', () => {
     await undoAll();
   });
 
-  it('shows the editor diagnostics on the file tab @feature editor.diagnostics', async () => {
+  it('shows the editor diagnostics on the file tab', async () => {
     await app().click(role('tab', /^renderer\.js\b/));
     await app().click(role('code'));
     await app().type('const = ;');
     await app().query(role('tab', /^renderer\.js , \d+ errors?\b/, { timeout: 10_000 }));
-    for (let i = 0; i < 10 && (await windowState(app())).fiddle.dirty; i++) await app().press('CmdOrCtrl+Z');
+    for (let i = 0; i < 10 && (await windowState(app())).fiddle.dirty; i++)
+      await app().press('CmdOrCtrl+Z');
     await expect.poll(async () => (await windowState(app())).fiddle.dirty).toBe(false);
     await app().query(role('tab', 'renderer.js', { timeout: 10_000 }));
   });
 
-  it('focuses the window that already has a folder open @feature new.focus-open-folder', async () => {
+  it('focuses the window that already has a folder open', async () => {
     const dir = makeFolder(app(), 'shared', { 'main.js': '// shared\n' });
     await app().queueDialog('open', { filePaths: [dir] });
     await app().runCommand('file.open', 0);
-    await expect.poll(async () => (await windowState(app(), 0)).fiddle.source.localPath).toBe(dir);
+    await expect
+      .poll(async () => (await windowState(app(), 0)).fiddle.source.localPath)
+      .toBe(dir);
 
     await app().runCommand('app.newWindow');
     await app().waitForWindow(1);
@@ -280,7 +310,7 @@ describe('workspace', () => {
     await expect.poll(async () => (await app().windows()).length).toBe(1);
   });
 
-  it('opens a second window with its own fiddle, and closes it with CmdOrCtrl+W @feature workspace.multi-window keys.new-window keys.minimize-close', async () => {
+  it('opens a second window with its own fiddle, and closes it with CmdOrCtrl+W', async () => {
     await app().press('CmdOrCtrl+Shift+N');
     await app().waitForWindow(1);
     const first = await windowState(app(), 0);

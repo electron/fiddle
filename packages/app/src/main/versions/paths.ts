@@ -1,4 +1,4 @@
-/** The versioned `core` cache (REQUIREMENTS §5): `<OS cache dir>/Electron Fiddle/cache-v1/`, or `<test dir>/cache` in test mode. */
+/** The versioned `core` cache: `<OS cache dir>/Electron Fiddle/cache-v1/`, or `<test dir>/cache` in test mode. */
 import path from 'node:path';
 
 import { getCacheRoot } from '../test-mode';

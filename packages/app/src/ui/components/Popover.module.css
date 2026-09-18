@@ -1,4 +1,3 @@
-/* Popover: padding 14 16, radius-panel squircle, overlay material with an arrow. */
 .popover {
   z-index: var(--lu-z-popover);
   min-width: 200px;
@@ -37,14 +36,14 @@
   stroke-width: var(--lu-size-hairline);
 }
 
-.arrow[data-placement="bottom"] svg {
+.arrow[data-placement='bottom'] svg {
   transform: rotate(180deg);
 }
 
-.arrow[data-placement="left"] svg {
+.arrow[data-placement='left'] svg {
   transform: rotate(-90deg);
 }
 
-.arrow[data-placement="right"] svg {
+.arrow[data-placement='right'] svg {
   transform: rotate(90deg);
 }

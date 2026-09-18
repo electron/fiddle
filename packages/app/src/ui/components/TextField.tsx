@@ -11,7 +11,10 @@ import { cx } from '../cx';
 import { Icon, type IconName } from '../icons/Icon';
 import styles from './Field.module.css';
 
-export interface TextFieldProps extends Omit<AriaTextFieldProps, 'className' | 'children' | 'style'> {
+export interface TextFieldProps extends Omit<
+  AriaTextFieldProps,
+  'className' | 'children' | 'style'
+> {
   label?: string;
   description?: string;
   /** Shown below the field in spark when the field is invalid. */
@@ -56,8 +59,14 @@ export function TextField({
     >
       {label && <Label className={styles.label}>{label}</Label>}
       <div className={styles.field}>
-        {icon && <Icon name={icon} size={size === 'sm' ? 14 : 16} className={styles.icon} />}
-        <Input ref={inputRef} className={cx(styles.input, mono && styles.mono)} placeholder={placeholder} />
+        {icon && (
+          <Icon name={icon} size={size === 'sm' ? 14 : 16} className={styles.icon} />
+        )}
+        <Input
+          ref={inputRef}
+          className={cx(styles.input, mono && styles.mono)}
+          placeholder={placeholder}
+        />
         {suffix && <span className={styles.suffix}>{suffix}</span>}
       </div>
       {description && (
@@ -81,7 +90,14 @@ export interface FormFieldProps {
 }
 
 /** A caption label, a control and helper text, for controls that don't carry their own label. */
-export function FormField({ label, helper, inline, isDisabled, children, className }: FormFieldProps) {
+export function FormField({
+  label,
+  helper,
+  inline,
+  isDisabled,
+  children,
+  className,
+}: FormFieldProps) {
   const id = useId();
   return (
     <div
@@ -97,7 +113,9 @@ export function FormField({ label, helper, inline, isDisabled, children, classNa
           {label}
         </div>
       )}
-      <div className={styles.control}>{children}</div>
+      <div className={styles.control} inert={isDisabled}>
+        {children}
+      </div>
       {helper && <div className={styles.help}>{helper}</div>}
     </div>
   );

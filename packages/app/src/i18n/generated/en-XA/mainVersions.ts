@@ -15,5 +15,7 @@ export default {
   "showChannelOk": "[Šĥöŵ ţĥéɱ one]",
   "switchToBuild": "[Šŵîţçĥ ţö {{name}}? one two]",
   "switchToBuildDetail": "[Ţĥîš ƒöļðéŕ îš áļŕéáðý áððéð áš á ļöçáļ ƀûîļð. one two three four]",
-  "switchButton": "[Šŵîţçĥ one]"
+  "switchButton": "[Šŵîţçĥ one]",
+  "refreshFailed": "[Çöûļðñ'ţ ŕéƒŕéšĥ ţĥé ļîšţ öƒ Éļéçţŕöñ ŕéļéášéš. Çĥéçķ ýöûŕ çöññéçţîöñ áñð ţŕý áĝáîñ. one two three four five six seven]",
+  "removeFailed": "[Çöûļðñ'ţ ŕéɱöṽé Éļéçţŕöñ {{version}}. Å ƒîļé ɱáý ƀé îñ ûšé. one two three four five]"
 } as const;

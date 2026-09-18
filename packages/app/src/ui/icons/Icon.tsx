@@ -2,11 +2,12 @@ import type { ReactElement } from 'react';
 import styles from './Icon.module.css';
 import { cx } from '../cx';
 
-/* Lucent icons: a 16px grid, 1.4px stroke, round caps and joins, drawn in currentColor.
-   Shapes come from the prototype where it has them. */
+/* Lucent icons: a 16px grid, 1.4px stroke, round caps and joins, drawn in currentColor. */
 const paths = {
   play: <path d="M4.6 2.9v10.2L13 8z" fill="currentColor" stroke="none" />,
-  stop: <rect x="4" y="4" width="8" height="8" rx="1" fill="currentColor" stroke="none" />,
+  stop: (
+    <rect x="4" y="4" width="8" height="8" rx="1" fill="currentColor" stroke="none" />
+  ),
   columns: (
     <>
       <rect x="2" y="3" width="12" height="10" rx="1.5" />

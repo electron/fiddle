@@ -1,4 +1,3 @@
-/* Scrim: the scrim tint with blur-scrim. */
 .scrim {
   position: fixed;
   inset: 0;
@@ -41,7 +40,6 @@
   }
 }
 
-/* Dialog: 420 wide, radius-dialog squircle, overlay material. Padding 18 20, no footer divider. */
 .surface {
   width: 100%;
   border-radius: var(--lu-radius-dialog);
@@ -79,13 +77,13 @@
   display: inline-flex;
   color: var(--lu-accent);
 }
-.icon[data-tone="warning"] {
+.icon[data-tone='warning'] {
   color: var(--lu-warning);
 }
-.icon[data-tone="success"] {
+.icon[data-tone='success'] {
   color: var(--lu-success);
 }
-.icon[data-tone="danger"] {
+.icon[data-tone='danger'] {
   color: var(--lu-spark);
 }
 

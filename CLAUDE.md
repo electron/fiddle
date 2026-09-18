@@ -1,21 +1,21 @@
 # Electron Fiddle (rewrite)
 
-- **Spec:** `REQUIREMENTS.md` is the single source of truth. §17 is the feature catalog. Where §17 conflicts with §1–§16, §1–§16 win.
 - **Design:** "Lucent", in `docs/design/`:
-  - `lucent-handover.html` is the handover. `lucent-handover.txt` is its text.
+  - `lucent-handover.html` is the design system reference: principles, materials, layout, components and specimens.
   - `lucent-tokens.css` and `lucent-tokens.json` hold the tokens, verbatim.
   - `fonts/` has the fonts.
-  - `prototype/` has the prototype's component bundle, specimens and CSS, for reference only.
-- **Ledger:** `PROGRESS.md` tracks milestones, decisions and deferred items.
 
 ## Rules
 
 - **Prefer the simple option.** Over-engineering is the main risk. If a simple option works, use it.
 - **Tokens:** every colour, radius, shadow and duration in component styles comes from a `--lu-*` token. No literals.
-- **Strings:** every user-visible string comes from the i18n catalog, in sentence case.
+- **Strings:** every user-visible string comes from the i18n catalog, in sentence case. Edit `packages/app/src/i18n/locales/<locale>/<ns>.json`, give every English key a `description`, then run `yarn generate`.
 - **IPC:** only through EIPC-generated bindings. Never expose `ipcRenderer`. Errors are `FiddleError`s with a stable `code`, thrown and caught normally.
 - **State:** main owns all state (`App` and `Window` stores through the `StateHub`). Renderers render and request changes.
 - **Fiddle logic:** `packages/app/src/fiddle/` must not import `electron`, so it runs under plain Node in tests.
+- **Persistence:** `createJsonStore()` for every JSON file, and `writeAtomic()` for any other file main replaces.
+- **CSP:** add a Trusted Types policy name in `src/main/csp.ts` before calling `trustedTypes.createPolicy`.
+- **Dev tooling:** new dev-only commands are marked `devOnly` in `src/shared/commands.ts` and go in the Develop menu.
 - **Tests:** no Playwright or WebDriver. End-to-end tests use the in-house driver.
 - **Installs:** run `yarn install` only through `flock /tmp/fiddle-2027-yarn.lock yarn install`, because several agents share this checkout.
 - **Git:** pull before you start changing code, and pull with rebase before you commit. Commit when asked.
@@ -43,17 +43,16 @@ Run from the repo root.
 
 The full guide, with a template spec, is in `packages/app/e2e/README.md`.
 
-- **Run.** `yarn test:e2e` builds the test build once (`packages/app/out/test-build`, Vite mode `test`), then runs every `packages/app/e2e/*.e2e.ts` in parallel forks.
-  - Each spec file gets its own app, temp dir and fixture server. On Linux each also gets its own Xvfb display, with openbox when installed. macOS needs no Xvfb: the app runs in the background there (no Dock icon, never the active app, windows one level below normal ones, window focus emulated), so runs don't disturb the desktop. `FIDDLE_E2E_FOREGROUND=1` shows the windows in front.
-  - Files run in parallel: one per core but one on Linux, at most 4 on macOS and Windows. `FIDDLE_E2E_WORKERS=<n>` overrides that.
+- **Run.** `yarn test:e2e` builds the test build once (`packages/app/out/test-build`, Vite mode `test`), then runs every `packages/app/e2e/*.e2e.ts` in parallel forks. Each spec file gets its own app, temp dir and fixture server.
   - Run it outside the Bash sandbox (on macOS, in the Terminal panel: Electron can't start in the sandbox).
   - `yarn test:e2e smoke` runs one file. `FIDDLE_E2E_SKIP_BUILD=1` reuses the last build, and `FIDDLE_E2E_VERBOSE=1` echoes the app's output.
+  - `FIDDLE_E2E_WORKERS=<n>` sets the parallelism. On macOS the app runs in the background and never takes focus. `FIDDLE_E2E_FOREGROUND=1` shows the windows in front.
 - **Explore.** Start with `yarn driver launch`, then run `snapshot`, `click button Settings`, `type`, `press Enter`, `screenshot`, `logs` or `eval-hook`, and finish with `yarn driver quit`. Every command prints JSON, and the app stays up between commands. The full list is in the header of `packages/app/tools/driver.ts`.
 - **Write a spec.** `const app = useApp()`, from `e2e/harness.ts`:
   - Find elements by role and name, for example `app().click(role('button', 'Run'))`. Queries auto-wait, so never sleep.
   - `runCommand(id)` runs a command, `stores()` reads state, and `queueDialog()` answers the next native dialog.
-  - Tag each test with `@feature <id>` for `yarn features-coverage`.
-- **Test mode** (`src/main/test-mode.ts`) is on only in test builds launched with `FIDDLE_TEST_MODE=1`, which the launcher sets. Every slice must use:
+  - A key the page doesn't handle never reaches the native menu, so shortcuts under test go through the renderer's keybinding dispatcher.
+- **Test mode** (`src/main/test-mode.ts`) is on only in test builds launched with `FIDDLE_TEST_MODE=1`, which the launcher sets. Every feature must use:
   - `getEndpoints()` for every network URL (`src/shared/endpoints.ts`). In test mode these point at the fixture server in `e2e/fixtures/`, and any non-loopback request fails the test.
   - `getCacheRoot()` for the `core` cache.
   - `isTestMode()`, or `testFlags().updates`, `.sentry`, `.firstRunPrompts` and `.tour`, to skip what tests must not trigger.
@@ -61,85 +60,31 @@ The full guide, with a template spec, is in `packages/app/e2e/README.md`.
   - `shell`, protocol, recent-document, notification and `Menu.popup` calls through Electron as usual. Test mode records and stubs them.
   - `win.show()` and `win.focus()` for windows, never `app.focus()` or `webContents.focus()`, which would pull the app in front of whoever runs the tests on macOS.
 - **Test hooks.** A renderer hook goes on `window.__fiddleTest` under `import.meta.env.MODE === 'test'`. A main hook uses `registerMainTestHook()` under `TEST_BUILD`. Either way, release builds compile it out. `yarn workspace electron-fiddle driver:release-check` verifies that.
-- **Harness internals.** The harness is `src/main/test-driver/` and is compiled in only when `__FIDDLE_TEST_BUILD__` is set:
-  - it serves a socket at `ELECTRON_FIDDLE_DRIVER_SOCKET`;
-  - it drives the page through CDP (`webContents.debugger`): the accessibility tree for queries, `Input.*` for clicks, keys and typing, and focus emulation, so no window needs OS focus. A key the page doesn't handle never reaches the native menu, so shortcuts under test go through the renderer's keybinding dispatcher;
-  - on macOS it patches `win.show()`, `win.focus()` and `win.isFocused()` to keep the app in the background and emulate window focus;
-  - it owns `webRequest.onBeforeRequest`, `onCompleted` and `onErrorOccurred` on every session.
 
 ## Dev differences
 
 These apply only to `yarn start`, on an unpackaged app. `yarn start:xvfb` and packaged builds have none.
 
 - The renderer comes from the Vite dev server (`http://localhost:<port>`) instead of `app://main`. The EIPC validator accepts that origin only when `is_packaged is false`.
-- The CSP is added to dev-server responses by `webRequest` (`src/main/csp.ts`):
-  - `script-src` adds `'unsafe-inline'`, for React Refresh's inline preamble.
-  - `connect-src` adds `ws://localhost:<port>`, for hot reload.
-
-## Architecture map
-
-Paths below are in `packages/app/`.
-
-- `src/main/index.ts`: main entry and composition root.
-  - Before `ready`: Squirrel events, the headless CLI, the test harness, crash reporting, the scheme and sandbox, then the single-instance lock and deep-link queue. The harness comes before the lock, because it moves userData.
-  - `main()` runs six numbered steps: disk (logs, then the one-time import, before any store), state (settings, i18n, `StateHub`, flush on quit), security and protocol, services, commands and menu, then platform and windows.
-- `src/main/services.ts`: `createServices()` creates every service once, with explicit dependencies: versions, types, runs, bisect, GitHub, npm, modules, onboarding and the command registry. It also calls `initDocuments({ versions, github, … })`. Main passes the one `Services` object down. Documents (`src/main/documents/service.ts`) stays a module, and other slices call its exports.
-- `src/main/state-hub.ts`: the `StateHub` holds the `App` and `Window` stores, bumps `rev` and fans pushes out. It's the only caller of `update*Store`. Store schemas and types live in `src/shared/stores.ts`.
-- IPC:
-  - The schema is `src/ipc/fiddle.eipc`, generated into `src/ipc/generated/`, which is committed.
-  - Main binds each window in `src/main/ipc.ts`. `bindWindowIpc` calls each slice's `bind<Slice>Ipc({ contents, windowId, services })`, which binds through `implement()` from `src/ipc/main.ts`.
-  - The renderer imports only `src/ipc/renderer.ts`: `appApi`, `windowApi`, `useAppStore` and `useWindowStore`.
-  - Main has one channel to a window: the `Window.Command` event, sent with `sendWindowCommand(windowId, id)` from `src/main/windows.ts`. Renderers listen with `windowApi.onCommand`. It carries the forwarded commands (view, editor, palette, tour, `gist.publish`, `gist.open`, `gist.history` and `bisect.toggle`) and `gist.signIn`.
-  - Errors cross IPC via `src/shared/error-transport.ts`.
-- Commands:
-  - Definitions: `src/shared/commands.ts`.
-  - Registry: `src/main/commands.ts`.
-  - Handlers: all in `src/main/app-commands.ts`, in `registerCommands(registry, services)`. Handlers that act in the window are in its `FORWARDED` list.
-  - Native menu: `src/main/menu.ts`. It's rebuilt only when enablement, keybindings, recent folders, the locale or the focused window change.
-  - Develop menu (before Help): unpackaged builds only (`App.dev`, set from `!app.isPackaged`). It holds Toggle title bar menu bar (`dev.toggleMenuBar`), Reload and Reload all windows. A command marked `devOnly` in `src/shared/commands.ts` is disabled without `App.dev` and left out of the palette and Settings > Keyboard (`isCommandListed`). New dev tooling goes in this menu.
-  - Title bar menu bar (Windows and Linux; on macOS, `FIDDLE_TEST_MENUBAR=1` or `FIDDLE_DEV_MENUBAR=1` force it at launch, and Develop › Toggle title bar menu bar shows or hides it live on any platform, `toggleWindowMenuBar()` in `menu.ts`): the same template, built per window, goes to `Window.menuBar` as `MenuNode`s (`src/shared/stores.ts`, serialized by `src/main/menu-model.ts`; every item has an `id`: the command ID, `role:<role>`, `menu:<name>`, `recent:<n>` or `example:<name>`). The renderer draws it with `MenuBar` (`src/ui/components/MenuBar.tsx`, in `renderer/shell/TitleBar.tsx`) and calls `Window.ActivateMenuItem(id)`, which runs what the native item runs (roles through an explicit table). Linux windows keep the native menu bar hidden (`autoHideMenuBar`).
-  - Context menus: `src/main/context-menu.ts`, native, from the registry. The renderer reports what was right-clicked with `Window.ReportContextMenu`.
-  - Keybindings: `src/renderer/features/commands/keybindings.ts` dispatches every keybinding of the focused window by command ID, after overrides. The native menu registers only each command's first accelerator, and never a scoped one (a definition's `context`, or a `<commandId>@<context>` override).
-  - The renderer calls `windowApi.RunCommand(id)`.
-- Windows:
-  - `src/main/window.ts`: `createAppWindow()`. It sets Lucent window options and web preferences, calls Documents' `attachWindow` (close prompt, focus tracking, dropped folders), binds IPC, and shows the window on `ReportReady`.
-  - `src/main/windows.ts`: maps `windowId` to its `BrowserWindow`, and sends `Window.Command`.
-  - `src/main/dialogs.ts`: native dialogs (`messageBox`, `confirm`, `pickFolder`, `pickFile` and `pickSave`), modal to a window given by `windowId` or `BrowserWindow`.
-- Persistence:
-  - `src/main/persistence/json-store.ts`: `createJsonStore()` for every JSON file, and `writeAtomic()` for any other file main replaces.
-  - `lifecycle.ts` holds quit until pending writes are flushed.
-  - `state.json` is Documents' (`getStateStore()`). It also holds onboarding (`tourDone`, `crashNoticeShown`).
-- Security:
-  - `src/main/protocol.ts` and `bundle.ts`: `app://` serves only files in `bundle-manifest.json`.
-  - `csp.ts`: the CSP. Add a Trusted Types policy name there before calling `trustedTypes.createPolicy`.
-  - `security.ts`: permissions, navigation and external links.
-- i18n:
-  - Edit `src/i18n/locales/<locale>/<ns>.json`. Every English key needs a `description`. Then run `yarn generate`.
-  - Main loads the `main` namespace (`src/main/i18n.ts`). Renderers load `common` first and other namespaces lazily (`src/i18n/renderer.ts`).
-- The preload is `src/preload/index.ts`, bundled as CommonJS, and it exposes EIPC only. The renderer entry is `src/renderer/main.tsx`.
-- Build:
-  - `forge.config.ts`.
-  - `vite.{main,preload,renderer}.config.mts`, each runnable with plain `vite build -c`.
-  - `tools/generate.mjs` and `tools/start-headless.mjs`.
+- The CSP is added to dev-server responses by `webRequest` (`src/main/csp.ts`). It allows React Refresh's inline preamble and the hot-reload websocket.
 
 ## Headless CLI
 
-REQUIREMENTS §7. The code is `packages/app/src/main/cli/`.
+The code is `packages/app/src/main/cli/`. To add a command, add a descriptor in `descriptors.ts`, its help strings (`mainCli` keys `cmd<Command>` and `arg<Field>`) and a handler in `commands.ts`.
 
-- **Run.** `yarn fiddle <command> [--json]` builds main in development mode, then runs `electron <app> --headless <command>` in your directory (`packages/app/tools/fiddle-cli.mjs`). `FIDDLE_CLI_SKIP_BUILD=1` reuses the last build, and `FIDDLE_CLI_VERBOSE=1` shows main's logs on stderr. Run `yarn generate` first if the catalogs changed. An installed app runs `electron-fiddle --headless <command>`.
+- **Run.** `yarn fiddle <command> [--json]` builds main in development mode, then runs `electron <app> --headless <command>` in your directory. `yarn fiddle --help` and `<command> --help` list the commands and their options. `FIDDLE_CLI_SKIP_BUILD=1` reuses the last build, and `FIDDLE_CLI_VERBOSE=1` shows main's logs on stderr. Run `yarn generate` first if the catalogs changed.
   - Run it outside the Bash sandbox. Headless mode needs no display, but a fiddle that opens windows does: use `xvfb-run -a yarn fiddle run ...`, with `FIDDLE_DEV_ELECTRON_FLAGS=--no-sandbox` as root.
-  - Commands: `run`, `bisect`, `versions list|download|remove`, `gist load|publish|update|delete|history`, `export`, `package`, `make`. `yarn fiddle --help` and `<command> --help` list them and their options.
-- **Startup.** `main/index.ts` checks for `--headless` first and calls `startHeadless()`. It never takes the single-instance lock, opens no windows, and skips the migration, updates, Sentry and the app's stores. Options come from flags, with `defaultSettings` as defaults. It shares the core cache (`getCacheRoot()`).
-- **Descriptors.** `descriptors.ts` has one descriptor per command: a zod input schema, a description key, an output schema and error codes. `argv.ts` builds the `parseArgs` options, the validation and `--help` from it. Positional fields are listed in `positionals`, and every other field is a flag (`electronPath` becomes `--electron-path`). Help strings are `mainCli` keys `cmd<Command>` and `arg<Field>`. To add a command, add a descriptor, its strings, and a handler in `commands.ts`.
-- **Output.** `--json` writes JSON lines to stdout, each with `schemaVersion`: `log` and `output` events, then one `result` with `ok` and `data` or `error: { code, message }`. Without it, results go to stdout, and Fiddle's own lines and errors go to stderr. A fiddle's output goes to the stream it was written to.
-- **Exit codes.** `run` exits with the fiddle's code (128 + n for a signal). Errors exit with 64 (usage), 66 (not found), 69 (unavailable), 70 (internal), 75 (network), 77 (untrusted or unauthorized), 130 (interrupted) or 1.
-- **Trust.** `run`, `bisect`, `package` and `make` on a remote fiddle (a gist, or `electron:<tag>/<path>`) need `--trust` or a "y" at the TTY prompt. Without a TTY they fail with `untrusted` before anything runs. Remote fiddles install modules with install scripts off.
-- **Reuse.** The CLI calls the window-free pieces of each service:
-  - `documents/load.ts`: loading and saving;
-  - `run/process.ts`: run dir, spawn, wait and stop;
-  - `versions/service.ts`: `createInstaller`, `readReleaseList`, `fetchReleaseList`, `loadReleases`, `mirrorsFor`, `installRelease`, `installedExecPath`;
-  - `bisect/auto.ts`;
-  - `packaging/service.ts`: `forgeOptionsFor`, `forgeProject`, `runForgeTask`;
-  - `github/service.ts`: `gistFiles`, `publishGist`.
+- **Trust.** `run`, `bisect`, `package` and `make` on a remote fiddle (a gist, or `electron:<tag>/<path>`) need `--trust` or a "y" at the TTY prompt. Without a TTY they fail with `untrusted` before anything runs.
+- **Token.** `GITHUB_TOKEN` is the only token the CLI uses.
 
-  Network calls use `net.fetch`. `GITHUB_TOKEN` is the only token.
+## Where things are
+
+Paths are under `packages/app/` unless noted.
+
+- `src/main/`: the main process. `index.ts` is the entry, `services.ts` creates the services, `state-hub.ts` owns the stores, `app-commands.ts` has the command handlers.
+- `src/renderer/`: the React renderer. `src/ui/`: the Lucent component library and gallery.
+- `src/shared/`: types shared by both sides: stores, commands and endpoints.
+- `src/ipc/fiddle.eipc`: the IPC schema. The bindings in `src/ipc/generated/` are committed.
+- `src/fiddle/`: fiddle logic, plain Node. `src/i18n/`: catalogs and tooling.
+- `e2e/` and `tools/`: end-to-end specs, the driver and the build tooling.
+- `packages/core/`: the `fiddle-core` port.

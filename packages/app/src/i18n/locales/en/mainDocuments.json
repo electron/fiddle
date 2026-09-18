@@ -269,6 +269,16 @@
     "description": "Detail of the restore question. {{names}} is a comma-separated list of fiddle names.",
     "maxLength": 300
   },
+  "restoreFailedMessage": {
+    "message": "Some windows could not be reopened",
+    "description": "Error title shown at startup when windows from the last session could not be loaded from their folder or gist.",
+    "maxLength": 80
+  },
+  "restoreFailedDetail": {
+    "message": "Could not load the folder or gist of: {{names}}. Check that the folder is available and that you're online.",
+    "description": "Detail of the restore error. {{names}} is a comma-separated list of window names.",
+    "maxLength": 300
+  },
   "restore": {
     "message": "Restore",
     "description": "Button that restores unsaved drafts.",

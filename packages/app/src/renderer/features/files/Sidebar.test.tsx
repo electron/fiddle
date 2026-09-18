@@ -55,7 +55,6 @@ beforeEach(() => {
   vi.clearAllMocks();
 });
 
-// @feature files.groups
 describe('Sidebar groups', () => {
   it('always shows Main, Preload and Renderer, and Other only when it has files', () => {
     renderSidebar(['main.js']);
@@ -85,7 +84,35 @@ describe('Sidebar groups', () => {
   });
 });
 
-// @feature files.add-in-group
+describe('Sidebar filter', () => {
+  const MANY = [...TEMPLATE, 'a.js', 'b.js', 'c.js', 'd.js', 'e.js'];
+  const sidebar = (names: readonly string[]) => (
+    <Sidebar
+      files={names.map((name) => ({ name, visible: true }))}
+      dirtyFiles={[]}
+      activeFile="main.js"
+      onOpen={vi.fn()}
+      onSetVisible={vi.fn()}
+    />
+  );
+
+  it('filters only while its field is there', () => {
+    const { rerender } = render(sidebar(MANY));
+    fireEvent.change(screen.getByRole('textbox', { name: 'filterFiles' }), {
+      target: { value: 'c.js' },
+    });
+    expect(screen.queryByRole('row', { name: /renderer\.js/ })).toBeNull();
+    expect(screen.getByRole('row', { name: /c\.js/ })).toBeTruthy();
+
+    // A smaller fiddle has no filter field, so nothing may stay hidden by the old text.
+    rerender(sidebar(TEMPLATE));
+    expect(screen.queryByRole('textbox', { name: 'filterFiles' })).toBeNull();
+    expect(headings()).toEqual(['processMain', 'processPreload', 'processRenderer']);
+    expect(screen.getByRole('row', { name: /renderer\.js/ })).toBeTruthy();
+    expect(screen.getByRole('row', { name: /main\.js/ })).toBeTruthy();
+  });
+});
+
 describe('Sidebar add in group', () => {
   it("opens the prompt with the group's hint and a free name, and adds it", async () => {
     const onOpen = renderSidebar();
@@ -133,7 +160,7 @@ describe('Sidebar add in group', () => {
     fireEvent.click(screen.getByRole('button', { name: 'addRendererFile' }));
     const input = await nameField();
     expect(input.value).toBe('renderer-2.js');
-    // A second main entry breaks the file rules (§17.3).
+    // A second main entry breaks the file rules.
     fireEvent.change(input, { target: { value: 'main.mjs' } });
     fireEvent.click(screen.getByRole('button', { name: 'create' }));
     await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull());

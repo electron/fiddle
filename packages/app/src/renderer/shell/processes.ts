@@ -2,7 +2,7 @@
  * Which sidebar group a fiddle file belongs to, for the sidebar sections, the
  * tab row's process label and the split view. Pure; no DOM.
  *
- * Groups are inferred from names alone (REQUIREMENTS §17.3, "Groups"):
+ * Groups are inferred from names alone:
  * - main: the main entry, and helper scripts named `main-*` or `main.*`;
  * - preload: `preload.{js,cjs,mjs}` and scripts named `preload-*` or `preload.*`;
  * - renderer: every `.html` and `.css` file, `renderer.{js,cjs,mjs}` and

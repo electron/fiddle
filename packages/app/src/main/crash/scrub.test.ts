@@ -1,6 +1,13 @@
 import { describe, expect, it, vi } from 'vitest';
 
-import { prepareEvent, redactSecrets, scrubBreadcrumb, scrubEvent, scrubText } from './scrub';
+import {
+  prepareEvent,
+  REDACTED,
+  redactSecrets,
+  scrubBreadcrumb,
+  scrubEvent,
+  scrubText,
+} from './scrub';
 
 const home = '/home/fiddler';
 // Built at runtime so no token-shaped literal is committed.
@@ -11,14 +18,18 @@ const gistId = '0123456789abcdef0123456789abcdef';
 
 describe('redactSecrets', () => {
   it('replaces the home directory with ~', () => {
-    expect(redactSecrets(`open ${home}/fiddles/main.js`, home)).toBe('open ~/fiddles/main.js');
+    expect(redactSecrets(`open ${home}/fiddles/main.js`, home)).toBe(
+      'open ~/fiddles/main.js',
+    );
   });
 
   it('matches Windows homes in any case, with either slash, and JSON-escaped', () => {
     const win = 'C:\\Users\\Fiddler';
     expect(redactSecrets('c:\\users\\fiddler\\a.js', win)).toBe('~\\a.js');
     expect(redactSecrets('C:/Users/Fiddler/a.js', win)).toBe('~/a.js');
-    expect(redactSecrets(JSON.stringify('C:\\Users\\Fiddler\\a.js'), win)).toBe('"~\\\\a.js"');
+    expect(redactSecrets(JSON.stringify('C:\\Users\\Fiddler\\a.js'), win)).toBe(
+      '"~\\\\a.js"',
+    );
   });
 
   it('redacts GitHub and npm tokens, auth headers, secret pairs and URL passwords', () => {
@@ -32,7 +43,15 @@ describe('redactSecrets', () => {
       'https://user:hunter4@example.com/x',
     ].join('\n');
     const out = redactSecrets(text, home);
-    for (const secret of [token, pat, npmToken, 'abcdefghijklmnop', 'hunter2', 'hunter3', 'hunter4']) {
+    for (const secret of [
+      token,
+      pat,
+      npmToken,
+      'abcdefghijklmnop',
+      'hunter2',
+      'hunter3',
+      'hunter4',
+    ]) {
       expect(out).not.toContain(secret);
     }
     expect(out).toContain('GITHUB_TOKEN=[redacted]');
@@ -44,14 +63,33 @@ describe('redactSecrets', () => {
     const text = `author: Jane, commit ${sha}, token check failed`;
     expect(redactSecrets(text, home)).toBe(text);
   });
+
+  it('takes linear time on long runs of word characters, hyphens and dots', () => {
+    const started = performance.now();
+    for (const unit of ['a-', 'a.', 'a-b.']) {
+      const text = unit.repeat(40_000);
+      expect(redactSecrets(text, home)).toBe(text);
+      expect(scrubText(text, home)).toBe(text);
+    }
+    expect(performance.now() - started).toBeLessThan(1000);
+  });
+
+  it('still redacts a secret pair and URL password inside long text', () => {
+    const padding = 'a-'.repeat(1000);
+    expect(
+      redactSecrets(`${padding} apiKey=hunter2 https://u:pw@example.com/`, home),
+    ).toBe(`${padding} apiKey=${REDACTED} https://${REDACTED}@example.com/`);
+  });
 });
 
 describe('scrubText', () => {
   it('strips URL query strings and gist IDs', () => {
-    expect(scrubText(`https://gist.github.com/someone/${gistId}?token=abc#files`, home)).toBe(
-      'https://gist.github.com/someone/<gist-id>#files',
+    expect(
+      scrubText(`https://gist.github.com/someone/${gistId}?token=abc#files`, home),
+    ).toBe('https://gist.github.com/someone/<gist-id>#files');
+    expect(scrubText('loading 0123456789abcdef0123 now', home)).toBe(
+      'loading <gist-id> now',
     );
-    expect(scrubText('loading 0123456789abcdef0123 now', home)).toBe('loading <gist-id> now');
   });
 });
 
@@ -68,14 +106,20 @@ describe('scrubEvent', () => {
       fiddle: { output: 'console output line' },
       trace: { trace_id: gistId },
     },
-    request: { url: 'app://main/index.html?x=1', headers: { cookie: 'c=1' }, data: 'request body' },
+    request: {
+      url: 'app://main/index.html?x=1',
+      headers: { cookie: 'c=1' },
+      data: 'request body',
+    },
     exception: {
       values: [
         {
           type: 'Error',
           value: `bad token ${token}`,
           stacktrace: {
-            frames: [{ filename: `${home}/app/main.js`, vars: { text: 'const fiddleCode = 2' } }],
+            frames: [
+              { filename: `${home}/app/main.js`, vars: { text: 'const fiddleCode = 2' } },
+            ],
           },
         },
       ],
@@ -109,10 +153,15 @@ describe('scrubEvent', () => {
   it('keeps identifiers, allowed contexts and scrubbed messages', () => {
     const out = scrubEvent(event, home);
     expect(out.event_id).toBe(gistId);
-    expect(out.contexts).toEqual({ app: { app_name: 'Electron Fiddle' }, trace: { trace_id: gistId } });
+    expect(out.contexts).toEqual({
+      app: { app_name: 'Electron Fiddle' },
+      trace: { trace_id: gistId },
+    });
     expect(out.request).toEqual({ url: 'app://main/index.html' });
     expect(out.message).toBe('failed to load ~/fiddles/<gist-id>');
-    expect(out.exception.values[0]?.stacktrace.frames[0]).toEqual({ filename: '~/app/main.js' });
+    expect(out.exception.values[0]?.stacktrace.frames[0]).toEqual({
+      filename: '~/app/main.js',
+    });
     expect(out.breadcrumbs).toEqual([
       { category: 'ui.click', message: 'clicked ~/x', data: { apiKey: '[redacted]' } },
     ]);
@@ -146,15 +195,24 @@ describe('prepareEvent', () => {
   });
 
   it('sends a renderer dump only with consent, crash by crash', async () => {
-    const ask = vi.fn<() => Promise<boolean>>().mockResolvedValueOnce(true).mockResolvedValueOnce(false);
-    expect(await prepareEvent(native('renderer'), home, ask)).toMatchObject({ message: '~/dump' });
+    const ask = vi
+      .fn<() => Promise<boolean>>()
+      .mockResolvedValueOnce(true)
+      .mockResolvedValueOnce(false);
+    expect(await prepareEvent(native('renderer'), home, ask)).toMatchObject({
+      message: '~/dump',
+    });
     expect(await prepareEvent(native('renderer'), home, ask)).toBeNull();
     expect(ask).toHaveBeenCalledTimes(2);
   });
 
   it('sends JavaScript errors without asking, scrubbed', async () => {
     const ask = vi.fn(async () => false);
-    const out = await prepareEvent({ tags: { 'event.process': 'renderer' }, message: token }, home, ask);
+    const out = await prepareEvent(
+      { tags: { 'event.process': 'renderer' }, message: token },
+      home,
+      ask,
+    );
     expect(out).toEqual({ tags: { 'event.process': 'renderer' }, message: '[redacted]' });
     expect(ask).not.toHaveBeenCalled();
   });

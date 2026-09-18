@@ -4,7 +4,6 @@ import { asGistReference, getGistId, gistUrl, isGistId, isRevisionSha } from './
 
 const ID = '8c5fc0c6a5153d49b5a4a56d3ed9da8f';
 
-// @feature load.gist-id-parse
 describe('getGistId', () => {
   it.each([
     '8C5FC0C6A5153D49B5A4A56D3ED9DA8F',
@@ -24,18 +23,28 @@ describe('getGistId', () => {
   });
 });
 
-// @feature load.gist-open-clipboard
 describe('asGistReference', () => {
   it.each([
     [ID, ID],
     [`  ${ID}\n`, ID],
     [ID.toUpperCase(), ID],
     [`https://gist.github.com/${ID}`, `https://gist.github.com/${ID}`],
-    [`https://gist.github.com/ckerr/${ID}/0123456789abcdef0123456789abcdef01234567`, `https://gist.github.com/ckerr/${ID}`],
-    [`HTTPS://Gist.GitHub.com/ckerr/${ID}#file-main-js`, `https://gist.github.com/ckerr/${ID}`],
-    [`https://gist.github.com/ckerr/${ID}?permalink_comment_id=1`, `https://gist.github.com/ckerr/${ID}`],
+    [
+      `https://gist.github.com/ckerr/${ID}/0123456789abcdef0123456789abcdef01234567`,
+      `https://gist.github.com/ckerr/${ID}`,
+    ],
+    [
+      `HTTPS://Gist.GitHub.com/ckerr/${ID}#file-main-js`,
+      `https://gist.github.com/ckerr/${ID}`,
+    ],
+    [
+      `https://gist.github.com/ckerr/${ID}?permalink_comment_id=1`,
+      `https://gist.github.com/ckerr/${ID}`,
+    ],
     [`gist.github.com/ckerr/${ID}`, `https://gist.github.com/ckerr/${ID}`],
-  ])('turns %s into its canonical reference', (input, expected) => expect(asGistReference(input)).toBe(expected));
+  ])('turns %s into its canonical reference', (input, expected) =>
+    expect(asGistReference(input)).toBe(expected),
+  );
 
   it.each([
     '',

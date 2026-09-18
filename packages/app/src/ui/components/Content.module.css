@@ -1,5 +1,3 @@
-/* Card: surface, 0.5px button-edge ring, padding 12, radius-panel squircle.
-   Hover (clickable cards) adds a soft 10/24 shadow. */
 .card {
   appearance: none;
   display: flex;
@@ -48,7 +46,8 @@
   font: 600 13px/1 var(--lu-font-sans);
 }
 
-.cardMain {
+.cardMain,
+.rowMain {
   display: flex;
   flex: 1;
   flex-direction: column;
@@ -68,7 +67,6 @@
   line-height: 16px;
 }
 
-/* List rows: min 48 tall, padding 8 10, radius-control. */
 .list {
   display: flex;
   flex-direction: column;
@@ -117,13 +115,6 @@
   color: var(--lu-accent);
 }
 
-.rowMain {
-  display: flex;
-  flex: 1;
-  flex-direction: column;
-  min-width: 0;
-}
-
 .rowTitle {
   font-weight: 500;
   overflow: hidden;
@@ -145,7 +136,6 @@
   gap: 6px;
 }
 
-/* Table: surface-sunken head (33 tall, caption type), 32px rows with hairlines. */
 .tableWrap {
   position: relative;
   overflow: hidden;
@@ -155,7 +145,7 @@
 }
 
 .tableWrap::after {
-  content: "";
+  content: '';
   position: absolute;
   inset: 0;
   border-radius: inherit;
@@ -204,7 +194,7 @@
   background: var(--lu-hover);
 }
 
-.tr[aria-selected="true"] {
+.tr[aria-selected='true'] {
   background: var(--lu-accent-soft);
 }
 
@@ -232,7 +222,6 @@
   white-space: normal;
 }
 
-/* The running pill: spark on spark-soft, 600, with a dot. */
 .pill {
   display: inline-flex;
   align-items: center;

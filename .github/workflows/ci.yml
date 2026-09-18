@@ -10,9 +10,17 @@ on:
 
 permissions: {}
 
+# A new push to a pull request cancels the run it supersedes. Pushes to main
+# and release tags are never cancelled. Called from release.yml, the group is
+# the release run's own.
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.event_name == 'pull_request' && github.ref || github.sha }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
 jobs:
   test:
     name: Test (${{ matrix.os }})
+    timeout-minutes: 45
     strategy:
       fail-fast: false
       matrix:
@@ -34,17 +42,30 @@ jobs:
         with:
           node-version-file: .nvmrc
           cache: yarn
+      # Electron's install script and `yarn package` download the same zip.
+      - name: Cache the Electron download
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: |
+            ~/.cache/electron
+            ~/Library/Caches/electron
+            ~/AppData/Local/electron/Cache
+          key: electron-${{ runner.os }}-${{ hashFiles('yarn.lock') }}
+          restore-keys: electron-${{ runner.os }}-
       # This job holds no secrets, so Electron's install script may run
       # (`dependenciesMeta.electron.built`); e2e tests need its binary.
       - name: Install dependencies
         run: yarn install --immutable
+      # `git add -N` makes a generated file that was never committed show up in
+      # the diff.
       - name: Generated source is up to date
         shell: bash
         run: |
           yarn generate
+          git add --intent-to-add .
           git diff --exit-code
-      # REQUIREMENTS §9: missing or unused keys, placeholder, tag and plural
-      # mismatches, and the translate script's own tests.
+      # Missing or unused keys, placeholder, tag and plural mismatches, and the
+      # translate script's own tests.
       - name: i18n catalogs
         shell: bash
         run: |
@@ -62,11 +83,6 @@ jobs:
       - name: End-to-end tests
         if: runner.os != 'Linux'
         run: yarn test:e2e
-      # REQUIREMENTS §11 "Coverage": prints which §17 IDs have a test. It fails
-      # only on unknown or duplicate IDs; add --strict once every ID is covered.
-      - name: Feature coverage
-        if: runner.os == 'Linux'
-        run: yarn features-coverage
       # Unsigned: no signing variables are set here.
       - name: Package smoke test
         run: yarn package
@@ -76,6 +92,7 @@ jobs:
   identity:
     name: App identity
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     permissions:
       contents: read
     steps:
@@ -90,12 +107,12 @@ jobs:
           cache: yarn
       - name: Install dependencies
         run: yarn install --immutable --mode=skip-build
-      # REQUIREMENTS §6: the identity must match the previous release, or the
-      # old app's settings, credentials and installs aren't found.
+      # The identity must match the previous release, or its settings,
+      # credentials and installs aren't found.
       - name: Check app identity
         run: node tools/release-identity.mjs
 
-  # TODO(REQUIREMENTS §6): upgrade test. Deferred; see PROGRESS.md.
+  # Upgrade test, disabled until it is implemented:
   #   1. Install the latest published release.
   #   2. Seed it with fixture data, including an encrypted token.
   #   3. Update to the candidate through Squirrel from a local feed.
@@ -124,7 +141,8 @@ jobs:
     needs:
       - test
       - identity
-    if: always() && !contains(needs.*.result, 'failure')
+    if: always() && !contains(needs.*.result, 'failure') && !contains(needs.*.result, 'cancelled')
+    timeout-minutes: 5
     permissions: {}
     steps:
       - run: echo "All GitHub Actions jobs are done"

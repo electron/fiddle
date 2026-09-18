@@ -114,11 +114,17 @@ export interface DriverMethods {
   console: [{ window?: WindowRef }, ConsoleLine[]];
   clipboard: [NoParams, string];
   logs: [{ tail?: number }, { main: string[]; renderer: string[] }];
-  screenshot: [{ window?: WindowRef; path?: string }, { path: string; width: number; height: number }];
+  screenshot: [
+    { window?: WindowRef; path?: string },
+    { path: string; width: number; height: number },
+  ];
   /** No pending IPC, network or animation frames, twice in a row. */
   waitForIdle: [{ timeout?: number; window?: WindowRef }, { waitedMs: number }];
   /** Calls `window.__fiddleTest[name](...args)` in the renderer, waiting for it to be registered. */
-  evalHook: [{ name: string; args?: unknown[]; window?: WindowRef; timeout?: number }, unknown];
+  evalHook: [
+    { name: string; args?: unknown[]; window?: WindowRef; timeout?: number },
+    unknown,
+  ];
   /** Evaluates an expression in the renderer's main world (exploration and debugging). */
   evaluate: [{ expression: string; window?: WindowRef }, unknown];
   /** Calls a hook registered in main with `registerMainTestHook`. */

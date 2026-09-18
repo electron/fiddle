@@ -4,7 +4,12 @@ import path from 'node:path';
 import debug from 'debug';
 import { parse as semverParse, SemVer } from 'semver';
 
-import { type ErrorMode, FiddleCoreError, wrapError } from './errors.js';
+import {
+  type ErrorMode,
+  FiddleCoreError,
+  isFiddleCoreError,
+  wrapError,
+} from './errors.js';
 import { writeFileAtomic } from './fs-util.js';
 import { DefaultPaths, type Paths } from './paths.js';
 
@@ -66,7 +71,10 @@ export interface Versions {
   /** @returns all versions matching that major number. Sorted in branch order. */
   inMajor(major: number): SemVer[];
 
-  /** @returns all versions in a range, inclusive. Sorted in branch order. */
+  /**
+   * @returns all versions in a range, inclusive. Sorted in branch order.
+   * @throws an `invalid-version` {@link FiddleCoreError} if `a` or `b` is not a release that this object knows about
+   */
   inRange(a: SemOrStr, b: SemOrStr): SemVer[];
 
   /** @returns {@link ReleaseInfo} iff `version` is a release that this object knows about */
@@ -103,8 +111,6 @@ export function compareVersions(a: SemVer, b: SemVer): number {
   if (prea !== 'nightly' && preb === 'nightly') return 1;
   return a.comparePre(b);
 }
-
-// ts type guards
 
 function hasVersion(val: unknown): val is { version: unknown } {
   return typeof val === 'object' && val !== null && 'version' in val;
@@ -149,12 +155,9 @@ function isArrayOfStrings(val: unknown): val is Array<string> {
 }
 
 /**
- * Whether an Electron release is recent enough to be supported.
- *
- * Mirrors the filtering done by Electron Fiddle: anything in the 0.2x series
- * is dropped. The oldest version known to releases.electronjs.org is 0.20, and
- * everything before 0.30.0 (Aug 2015) is unsupported. Pre-0.24.0 releases were
- * technically 'atom-shell' and cannot be downloaded with @electron/get.
+ * Drops the 0.2x series. Pre-0.24.0 releases were 'atom-shell' and cannot be
+ * downloaded with @electron/get, and everything before 0.30.0 (Aug 2015) is
+ * unsupported.
  */
 function isSupportedVersion({ version }: { version: string }): boolean {
   return !version.startsWith('0.2');
@@ -175,15 +178,12 @@ export class BaseVersions implements Versions {
   private readonly releaseInfo = new Map<string, ReleaseInfo>();
 
   protected setVersions(val: unknown): void {
-    // release info doesn't need to be in sorted order
     this.releaseInfo.clear();
 
-    // build the array
     let parsed: Array<SemVer | null> = [];
     if (isArrayOfVersionObjects(val)) {
       parsed = val.filter(isSupportedVersion).map(({ version }) => semverParse(version));
 
-      // build release info
       for (const entry of val) {
         if (isReleaseInfo(entry) && isSupportedVersion(entry)) {
           this.releaseInfo.set(entry.version, {
@@ -208,7 +208,6 @@ export class BaseVersions implements Versions {
       console.warn('Unrecognized versions:', val);
     }
 
-    // insert them in sorted order
     const semvers = parsed.filter((sem): sem is SemVer => Boolean(sem));
     semvers.sort((a, b) => compareVersions(a, b));
     this.map.clear();
@@ -283,12 +282,20 @@ export class BaseVersions implements Versions {
   }
 
   public inRange(a: SemOrStr, b: SemOrStr): SemVer[] {
-    if (typeof a !== 'string') a = a.version;
-    if (typeof b !== 'string') b = b.version;
-
     const versions = [...this.map.values()];
-    let first = versions.findIndex((ver) => ver.version === a);
-    let last = versions.findIndex((ver) => ver.version === b);
+    const indexOf = (ver: SemOrStr) => {
+      const normal = semverParse(ver)?.version;
+      const index = versions.findIndex((known) => known.version === normal);
+      if (index === -1) {
+        throw new FiddleCoreError(
+          'invalid-version',
+          `Unknown Electron version: "${ver.toString()}"`,
+        );
+      }
+      return index;
+    };
+    let first = indexOf(a);
+    let last = indexOf(b);
     if (first > last) [first, last] = [last, first];
     return versions.slice(first, last + 1);
   }
@@ -321,28 +328,28 @@ export class ElectronVersions extends BaseVersions {
   ): Promise<unknown> {
     const d = debug('fiddle-core:ElectronVersions:fetchVersions');
     d('fetching releases list from', url);
-    let response: Response;
     try {
-      response = await fetch(url);
+      const response = await fetch(url);
+      if (!response.ok) {
+        throw new FiddleCoreError(
+          'download-failed',
+          `Fetching versions failed with status code: ${response.status}`,
+        );
+      }
+      const json: unknown = await response.json();
+      if (!Array.isArray(json)) {
+        throw new FiddleCoreError('download-failed', 'The releases list is not an array');
+      }
+      await fs.promises.mkdir(path.dirname(cacheFile), { recursive: true });
+      await writeFileAtomic(cacheFile, JSON.stringify(json));
+      return json;
     } catch (err) {
-      throw wrapError(errors, 'download-failed', err);
+      throw isFiddleCoreError(err) ? err : wrapError(errors, 'download-failed', err);
     }
-    if (!response.ok) {
-      throw new FiddleCoreError(
-        'download-failed',
-        `Fetching versions failed with status code: ${response.status}`,
-      );
-    }
-    const json: unknown = await response.json();
-    await fs.promises.mkdir(path.dirname(cacheFile), {
-      recursive: true,
-    });
-    await writeFileAtomic(cacheFile, JSON.stringify(json));
-    return json;
   }
 
   private static isCacheFresh(cacheTimeMs: number, now: number): boolean {
-    const VERSION_CACHE_TTL_MS = 4 * 60 * 60 * 1000; // cache for N hours
+    const VERSION_CACHE_TTL_MS = 4 * 60 * 60 * 1000;
     return now <= cacheTimeMs + VERSION_CACHE_TTL_MS;
   }
 
@@ -356,13 +363,15 @@ export class ElectronVersions extends BaseVersions {
     // Use initialVersions instead if provided, and don't fetch if so
     let versions = options.initialVersions;
     let staleCache = false;
-    const now = Date.now();
+    // when the list was last fetched; a stale cache that can't be refreshed keeps its age
+    let mtimeMs = Date.now();
 
     if (!options.ignoreCache) {
       try {
         const st = await fs.promises.stat(versionsCache);
         versions = JSON.parse(await fs.promises.readFile(versionsCache, 'utf8'));
-        staleCache = !ElectronVersions.isCacheFresh(st.mtimeMs, now);
+        mtimeMs = st.mtimeMs;
+        staleCache = !ElectronVersions.isCacheFresh(mtimeMs, Date.now());
       } catch (err) {
         d('cache file missing or cannot be read', err);
       }
@@ -375,6 +384,7 @@ export class ElectronVersions extends BaseVersions {
           releasesUrl,
           options.errors,
         );
+        mtimeMs = Date.now();
       } catch (err) {
         d('error fetching versions', err);
         if (!versions) {
@@ -383,10 +393,10 @@ export class ElectronVersions extends BaseVersions {
       }
     }
 
-    return new ElectronVersions(versionsCache, now, versions, releasesUrl);
+    return new ElectronVersions(versionsCache, mtimeMs, versions, releasesUrl);
   }
 
-  // update the cache
+  /** Refetches the releases list. A failed fetch is ignored and the current list kept. */
   public async fetch(): Promise<void> {
     const d = debug('fiddle-core:ElectronVersions:fetch');
     const { mtimeMs, versionsCache } = this;
@@ -404,7 +414,6 @@ export class ElectronVersions extends BaseVersions {
     }
   }
 
-  // update the cache iff it's too old
   private async keepFresh(): Promise<void> {
     if (!ElectronVersions.isCacheFresh(this.mtimeMs, Date.now())) {
       await this.fetch();

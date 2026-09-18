@@ -1,7 +1,7 @@
 /**
- * Drafts: a dirty window's mirror, saved to `<userData>/drafts/<windowId>.json`
- * (REQUIREMENTS §5 "Drafts"). A draft is written 500 ms after the last edit,
- * and at least every 5 seconds during continuous editing. No Electron imports.
+ * Drafts: a dirty window's mirror, saved to `<userData>/drafts/<windowId>.json`.
+ * A draft is written 500 ms after the last edit, and at least every 5 seconds
+ * during continuous editing. No Electron imports.
  */
 import fs from 'node:fs';
 import fsp from 'node:fs/promises';
@@ -20,7 +20,12 @@ const fileMap = z.record(z.string(), z.string());
 const originSchema = z.discriminatedUnion('kind', [
   z.object({ kind: z.literal('local') }),
   z.object({ kind: z.literal('example') }),
-  z.object({ kind: z.literal('gist'), owner: z.string(), id: z.string(), sha: z.string() }),
+  z.object({
+    kind: z.literal('gist'),
+    owner: z.string(),
+    id: z.string(),
+    sha: z.string(),
+  }),
   z.object({ kind: z.literal('electron'), tag: z.string(), path: z.string() }),
 ]);
 
@@ -95,8 +100,14 @@ export class DraftScheduler {
     const entry = this.#pending.get(id);
     const since = entry?.since ?? now;
     if (entry) this.#timers.clearTimeout(entry.handle);
-    const wait = Math.max(0, Math.min(DRAFT_DEBOUNCE_MS, since + DRAFT_MAX_WAIT_MS - now));
-    this.#pending.set(id, { since, handle: this.#timers.setTimeout(() => this.#fire(id), wait) });
+    const wait = Math.max(
+      0,
+      Math.min(DRAFT_DEBOUNCE_MS, since + DRAFT_MAX_WAIT_MS - now),
+    );
+    this.#pending.set(id, {
+      since,
+      handle: this.#timers.setTimeout(() => this.#fire(id), wait),
+    });
   }
 
   cancel(id: string): void {
@@ -166,7 +177,10 @@ export class DraftStore {
     this.#stores.delete(id);
     await store?.flush();
     const file = this.#file(id);
-    await Promise.all([fsp.rm(file, { force: true }), fsp.rm(`${file}.bak`, { force: true })]);
+    await Promise.all([
+      fsp.rm(file, { force: true }),
+      fsp.rm(`${file}.bak`, { force: true }),
+    ]);
   }
 
   /** IDs of every draft on disk. */

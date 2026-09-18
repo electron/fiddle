@@ -3,5 +3,6 @@ export default {
   "searchVersions": "バージョンを検索",
   "noMatches": "一致するバージョンはありません",
   "copyVersion": "バージョン番号をコピー",
-  "copied": "{{version}} をコピーしました"
+  "copied": "{{version}} をコピーしました",
+  "versionChangeFailed": "Electron のバージョンを変更できませんでした"
 } as const;

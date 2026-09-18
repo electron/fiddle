@@ -10,7 +10,13 @@ import type { z } from 'zod';
 
 import { ErrorCode, FiddleError } from '../../shared/errors';
 import { tm } from '../i18n';
-import { commandIds, descriptorOf, type CliKey, type CommandId, type Descriptor } from './descriptors';
+import {
+  commandIds,
+  descriptorOf,
+  type CliKey,
+  type CommandId,
+  type Descriptor,
+} from './descriptors';
 
 const PROGRAM = 'electron-fiddle --headless';
 
@@ -19,7 +25,12 @@ const GLOBAL_SWITCHES = ['--json', '--help', '-h'];
 
 type ParsedCommandLine =
   | { kind: 'help'; json: boolean; command?: CommandId; group?: string }
-  | { kind: 'command'; json: boolean; command: CommandId; input: Record<string, unknown> };
+  | {
+      kind: 'command';
+      json: boolean;
+      command: CommandId;
+      input: Record<string, unknown>;
+    };
 
 export interface Field {
   name: string;
@@ -66,11 +77,19 @@ interface MinimalDef {
 
 const defOf = (schema: z.ZodType) => schema.def as unknown as MinimalDef;
 
-function unwrap(schema: z.ZodType): { inner: z.ZodType; optional: boolean; defaultValue?: unknown } {
+function unwrap(schema: z.ZodType): {
+  inner: z.ZodType;
+  optional: boolean;
+  defaultValue?: unknown;
+} {
   let inner = schema;
   let optional = false;
   let defaultValue: unknown;
-  for (let def = defOf(inner); def.type === 'optional' || def.type === 'default'; def = defOf(inner)) {
+  for (
+    let def = defOf(inner);
+    def.type === 'optional' || def.type === 'default';
+    def = defOf(inner)
+  ) {
     optional = true;
     if (def.type === 'default') defaultValue = def.defaultValue;
     inner = def.innerType!;
@@ -80,32 +99,40 @@ function unwrap(schema: z.ZodType): { inner: z.ZodType; optional: boolean; defau
 
 /** A descriptor's fields, in schema order, with how each is given on the command line. */
 export function fields(descriptor: Descriptor): Field[] {
-  return Object.entries(descriptor.input.shape as Record<string, z.ZodType>).map(([name, schema]) => {
-    const { inner, optional, defaultValue } = unwrap(schema);
-    const type = defOf(inner).type;
-    const element = type === 'array' ? unwrap(defOf(inner).element!).inner : inner;
-    const choices = defOf(element).type === 'enum' ? (element as unknown as { options: string[] }).options : undefined;
-    return {
-      name,
-      flag: `--${kebab(name)}`,
-      type: type === 'boolean' ? 'boolean' : 'string',
-      multiple: type === 'array',
-      positional: (descriptor.positionals as readonly string[]).includes(name),
-      optional,
-      ...(choices ? { choices } : {}),
-      ...(defaultValue !== undefined ? { defaultValue } : {}),
-    };
-  });
+  return Object.entries(descriptor.input.shape as Record<string, z.ZodType>).map(
+    ([name, schema]) => {
+      const { inner, optional, defaultValue } = unwrap(schema);
+      const type = defOf(inner).type;
+      const element = type === 'array' ? unwrap(defOf(inner).element!).inner : inner;
+      const choices =
+        defOf(element).type === 'enum'
+          ? (element as unknown as { options: string[] }).options
+          : undefined;
+      return {
+        name,
+        flag: `--${kebab(name)}`,
+        type: type === 'boolean' ? 'boolean' : 'string',
+        multiple: type === 'array',
+        positional: (descriptor.positionals as readonly string[]).includes(name),
+        optional,
+        ...(choices ? { choices } : {}),
+        ...(defaultValue !== undefined ? { defaultValue } : {}),
+      };
+    },
+  );
 }
 
 function displayName(field: Field): string {
   return field.positional ? `<${field.name}>` : field.flag;
 }
 
-function matchCommand(args: readonly string[]): { id: CommandId; rest: string[] } | undefined {
+function matchCommand(
+  args: readonly string[],
+): { id: CommandId; rest: string[] } | undefined {
   for (const id of commandIds) {
     const words = id.split(' ');
-    if (words.every((word, i) => args[i] === word)) return { id, rest: args.slice(words.length) };
+    if (words.every((word, i) => args[i] === word))
+      return { id, rest: args.slice(words.length) };
   }
   return undefined;
 }
@@ -120,13 +147,17 @@ export function parseCommandLine(argv: readonly string[]): ParsedCommandLine {
   const before = end === -1 ? argv : argv.slice(0, end);
   const json = before.includes('--json');
   const help = before.includes('--help') || before.includes('-h');
-  const args = [...before.filter((arg) => !GLOBAL_SWITCHES.includes(arg)), ...(end === -1 ? [] : argv.slice(end))];
+  const args = [
+    ...before.filter((arg) => !GLOBAL_SWITCHES.includes(arg)),
+    ...(end === -1 ? [] : argv.slice(end)),
+  ];
 
   const match = matchCommand(args);
   if (!match) {
     const [first, second] = args;
     if (first === undefined) return { kind: 'help', json };
-    if (isGroup(first) && (second === undefined || second.startsWith('-'))) return { kind: 'help', json, group: first };
+    if (isGroup(first) && (second === undefined || second.startsWith('-')))
+      return { kind: 'help', json, group: first };
     const command = isGroup(first) ? `${first} ${second}` : first;
     throw usageError(t('errorUnknownCommand', { command }));
   }
@@ -137,7 +168,9 @@ export function parseCommandLine(argv: readonly string[]): ParsedCommandLine {
   const flags = all.filter((field) => !field.positional);
   const { values, positionals, tokens } = parseArgs({
     args: match.rest,
-    options: Object.fromEntries(flags.map((f) => [kebab(f.name), { type: f.type, multiple: f.multiple }])),
+    options: Object.fromEntries(
+      flags.map((f) => [kebab(f.name), { type: f.type, multiple: f.multiple }]),
+    ),
     // Unknown options are reported below, in our words. Not strict, so `--flag --no-sandbox` works.
     strict: false,
     allowPositionals: true,
@@ -146,7 +179,10 @@ export function parseCommandLine(argv: readonly string[]): ParsedCommandLine {
   for (const token of tokens) {
     if (token.kind !== 'option') continue;
     const field = flags.find((f) => kebab(f.name) === token.name);
-    if (!field) throw usageError(t('errorUnknownOption', { option: token.rawName, command: match.id }));
+    if (!field)
+      throw usageError(
+        t('errorUnknownOption', { option: token.rawName, command: match.id }),
+      );
     if (field.type === 'string' && token.value === undefined) {
       throw usageError(t('errorMissingValue', { option: token.rawName }));
     }
@@ -156,7 +192,9 @@ export function parseCommandLine(argv: readonly string[]): ParsedCommandLine {
   }
   const expected = descriptor.positionals.length;
   if (positionals.length > expected) {
-    throw usageError(t('errorTooManyArguments', { args: positionals.slice(expected).join(' ') }));
+    throw usageError(
+      t('errorTooManyArguments', { args: positionals.slice(expected).join(' ') }),
+    );
   }
 
   const raw: Record<string, unknown> = {};
@@ -169,11 +207,20 @@ export function parseCommandLine(argv: readonly string[]): ParsedCommandLine {
     const issue = result.error.issues[0]!;
     const field = all.find((f) => f.name === issue.path[0]);
     const name = field ? displayName(field) : String(issue.path[0] ?? '');
-    if (field && raw[field.name] === undefined) throw usageError(t('errorMissingArgument', { name }));
-    if (field?.choices) throw usageError(t('errorInvalidChoice', { name, choices: field.choices.join(', ') }));
+    if (field && raw[field.name] === undefined)
+      throw usageError(t('errorMissingArgument', { name }));
+    if (field?.choices)
+      throw usageError(
+        t('errorInvalidChoice', { name, choices: field.choices.join(', ') }),
+      );
     throw usageError(t('errorInvalidValue', { name, message: issue.message }));
   }
-  return { kind: 'command', json, command: match.id, input: result.data as Record<string, unknown> };
+  return {
+    kind: 'command',
+    json,
+    command: match.id,
+    input: result.data as Record<string, unknown>,
+  };
 }
 
 function table(rows: readonly (readonly [string, string])[]): string[] {
@@ -182,7 +229,9 @@ function table(rows: readonly (readonly [string, string])[]): string[] {
 }
 
 function valueHint(field: Field): string {
-  return field.type === 'boolean' ? '' : ` <${field.choices ? field.choices.join('|') : 'value'}>`;
+  return field.type === 'boolean'
+    ? ''
+    : ` <${field.choices ? field.choices.join('|') : 'value'}>`;
 }
 
 function usageOf(id: CommandId): string {
@@ -190,7 +239,9 @@ function usageOf(id: CommandId): string {
   const required = fields(descriptor)
     .filter((f) => !f.positional && !f.optional)
     .map((f) => `${f.flag}${valueHint(f)}`);
-  return [id, ...descriptor.positionals.map((name) => `<${name}>`), ...required].join(' ');
+  return [id, ...descriptor.positionals.map((name) => `<${name}>`), ...required].join(
+    ' ',
+  );
 }
 
 function flagHelp(field: Field): string {
@@ -198,7 +249,9 @@ function flagHelp(field: Field): string {
   if (field.multiple) parts.push(t('helpRepeatable'));
   const value = field.defaultValue;
   if (typeof value === 'string' || (Array.isArray(value) && value.length > 0)) {
-    parts.push(t('helpDefault', { value: Array.isArray(value) ? value.join(', ') : value }));
+    parts.push(
+      t('helpDefault', { value: Array.isArray(value) ? value.join(', ') : value }),
+    );
   }
   return parts.join(' ');
 }
@@ -221,14 +274,25 @@ export function helpText(target: { command?: CommandId; group?: string }): strin
       t(descriptor.description),
       '',
       ...(positionals.length > 0
-        ? [t('helpArguments'), ...table(positionals.map((f) => [`<${f.name}>`, t(fieldKey(f.name))] as const)), '']
+        ? [
+            t('helpArguments'),
+            ...table(
+              positionals.map((f) => [`<${f.name}>`, t(fieldKey(f.name))] as const),
+            ),
+            '',
+          ]
         : []),
       t('helpOptions'),
-      ...table([...flags.map((f) => [`${f.flag}${valueHint(f)}`, flagHelp(f)] as const), ...GLOBAL_ROWS()]),
+      ...table([
+        ...flags.map((f) => [`${f.flag}${valueHint(f)}`, flagHelp(f)] as const),
+        ...GLOBAL_ROWS(),
+      ]),
       '',
     ].join('\n');
   }
-  const ids = target.group ? commandIds.filter((id) => id.startsWith(`${target.group} `)) : commandIds;
+  const ids = target.group
+    ? commandIds.filter((id) => id.startsWith(`${target.group} `))
+    : commandIds;
   return [
     t('helpUsage', { usage: `${PROGRAM} <command> [options]` }),
     '',

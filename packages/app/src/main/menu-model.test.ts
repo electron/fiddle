@@ -11,12 +11,19 @@ vi.mock('electron', () => electron);
 const testMode = vi.hoisted(() => ({ testMenuBar: vi.fn(() => false) }));
 vi.mock('./test-mode', () => testMode);
 
-const { activateMenuItem, findMenuItem, hasWindowMenuBar, toMenuModel } = await import('./menu-model');
+const { activateMenuItem, findMenuItem, hasWindowMenuBar, toMenuModel } =
+  await import('./menu-model');
 
 type Item = MenuItemConstructorOptions;
 
 function fakeWindow() {
-  const webContents = { cut: vi.fn(), copy: vi.fn(), paste: vi.fn(), zoomLevel: 1, toggleDevTools: vi.fn() };
+  const webContents = {
+    cut: vi.fn(),
+    copy: vi.fn(),
+    paste: vi.fn(),
+    zoomLevel: 1,
+    toggleDevTools: vi.fn(),
+  };
   const win = {
     webContents,
     minimize: vi.fn(),
@@ -34,13 +41,26 @@ const template: Item[] = [
     id: 'menu:file',
     label: 'File',
     submenu: [
-      { id: 'file.newFiddle', label: 'New fiddle', accelerator: 'CmdOrCtrl+N', click: (_item, win) => newFiddle(win) },
-      { id: 'file.save', label: 'Save', accelerator: 'CmdOrCtrl+S', enabled: false, click: vi.fn() },
+      {
+        id: 'file.newFiddle',
+        label: 'New fiddle',
+        accelerator: 'CmdOrCtrl+N',
+        click: (_item, win) => newFiddle(win),
+      },
+      {
+        id: 'file.save',
+        label: 'Save',
+        accelerator: 'CmdOrCtrl+S',
+        enabled: false,
+        click: vi.fn(),
+      },
       { type: 'separator' },
       {
         id: 'menu:openRecent',
         label: 'Open recent',
-        submenu: [{ id: 'recent:0', label: '/tmp/one', click: () => openRecent('/tmp/one') }],
+        submenu: [
+          { id: 'recent:0', label: '/tmp/one', click: () => openRecent('/tmp/one') },
+        ],
       },
       { id: 'hidden', label: 'Hidden', visible: false, click: vi.fn() },
       { id: 'role:quit', role: 'quit', label: 'Exit' },
@@ -51,8 +71,17 @@ const template: Item[] = [
     label: 'Edit',
     submenu: [
       { id: 'role:cut', role: 'cut', label: 'Cut' },
-      { id: 'role:zoomIn', role: 'zoomIn', label: 'Zoom in', accelerator: 'CmdOrCtrl+Plus' },
-      { id: 'role:togglefullscreen', role: 'togglefullscreen', label: 'Enter full screen' },
+      {
+        id: 'role:zoomIn',
+        role: 'zoomIn',
+        label: 'Zoom in',
+        accelerator: 'CmdOrCtrl+Plus',
+      },
+      {
+        id: 'role:togglefullscreen',
+        role: 'togglefullscreen',
+        label: 'Enter full screen',
+      },
       { id: 'role:minimize', role: 'minimize', label: 'Minimize' },
       { id: 'example:Menu', label: 'Menu', type: 'radio', checked: true, click: vi.fn() },
       { id: 'role:help', role: 'help', label: 'Help' },
@@ -65,7 +94,6 @@ beforeEach(() => {
   testMode.testMenuBar.mockReturnValue(false);
 });
 
-// @feature workspace.menubar
 describe('toMenuModel', () => {
   it('serializes submenus, items and separators, drops hidden items and formats keys for the platform', () => {
     expect(toMenuModel(template, 'win32')).toEqual([
@@ -75,15 +103,29 @@ describe('toMenuModel', () => {
         label: 'File',
         enabled: true,
         children: [
-          { kind: 'item', id: 'file.newFiddle', label: 'New fiddle', enabled: true, accelerator: 'Ctrl+N' },
-          { kind: 'item', id: 'file.save', label: 'Save', enabled: false, accelerator: 'Ctrl+S' },
+          {
+            kind: 'item',
+            id: 'file.newFiddle',
+            label: 'New fiddle',
+            enabled: true,
+            accelerator: 'Ctrl+N',
+          },
+          {
+            kind: 'item',
+            id: 'file.save',
+            label: 'Save',
+            enabled: false,
+            accelerator: 'Ctrl+S',
+          },
           { kind: 'separator' },
           {
             kind: 'submenu',
             id: 'menu:openRecent',
             label: 'Open recent',
             enabled: true,
-            children: [{ kind: 'item', id: 'recent:0', label: '/tmp/one', enabled: true }],
+            children: [
+              { kind: 'item', id: 'recent:0', label: '/tmp/one', enabled: true },
+            ],
           },
           { kind: 'item', id: 'role:quit', label: 'Exit', enabled: true },
         ],
@@ -94,22 +136,62 @@ describe('toMenuModel', () => {
         label: 'Edit',
         enabled: true,
         children: [
-          { kind: 'item', id: 'role:cut', label: 'Cut', enabled: true, accelerator: 'Ctrl+X' },
-          { kind: 'item', id: 'role:zoomIn', label: 'Zoom in', enabled: true, accelerator: 'Ctrl++' },
-          { kind: 'item', id: 'role:togglefullscreen', label: 'Enter full screen', enabled: true, accelerator: 'F11' },
-          { kind: 'item', id: 'role:minimize', label: 'Minimize', enabled: true, accelerator: 'Ctrl+M' },
-          { kind: 'item', id: 'example:Menu', label: 'Menu', enabled: true, checked: true },
+          {
+            kind: 'item',
+            id: 'role:cut',
+            label: 'Cut',
+            enabled: true,
+            accelerator: 'Ctrl+X',
+          },
+          {
+            kind: 'item',
+            id: 'role:zoomIn',
+            label: 'Zoom in',
+            enabled: true,
+            accelerator: 'Ctrl++',
+          },
+          {
+            kind: 'item',
+            id: 'role:togglefullscreen',
+            label: 'Enter full screen',
+            enabled: true,
+            accelerator: 'F11',
+          },
+          {
+            kind: 'item',
+            id: 'role:minimize',
+            label: 'Minimize',
+            enabled: true,
+            accelerator: 'Ctrl+M',
+          },
+          {
+            kind: 'item',
+            id: 'example:Menu',
+            label: 'Menu',
+            enabled: true,
+            checked: true,
+            radio: true,
+          },
           { kind: 'item', id: 'role:help', label: 'Help', enabled: true },
         ],
       },
     ]);
     // Linux says Ctrl+Q for Quit; macOS writes symbols.
-    expect(toMenuModel([{ id: 'role:quit', role: 'quit', label: 'Quit' }], 'linux')[0]).toMatchObject({ accelerator: 'Ctrl+Q' });
-    expect(toMenuModel([{ id: 'x', label: 'X', accelerator: 'CmdOrCtrl+Shift+P' }], 'darwin')[0]).toMatchObject({ accelerator: '⌘⇧P' });
+    expect(
+      toMenuModel([{ id: 'role:quit', role: 'quit', label: 'Quit' }], 'linux')[0],
+    ).toMatchObject({ accelerator: 'Ctrl+Q' });
+    expect(
+      toMenuModel(
+        [{ id: 'x', label: 'X', accelerator: 'CmdOrCtrl+Shift+P' }],
+        'darwin',
+      )[0],
+    ).toMatchObject({ accelerator: '⌘⇧P' });
   });
 
   it('refuses an item without an id', () => {
-    expect(() => toMenuModel([{ label: 'Nameless', click: vi.fn() }], 'win32')).toThrow(FiddleError);
+    expect(() => toMenuModel([{ label: 'Nameless', click: vi.fn() }], 'win32')).toThrow(
+      FiddleError,
+    );
   });
 });
 
@@ -121,7 +203,6 @@ describe('findMenuItem', () => {
   });
 });
 
-// @feature workspace.menubar
 describe('activateMenuItem', () => {
   it('runs a command item with the window, like a click in the native menu', () => {
     const win = fakeWindow();
@@ -148,23 +229,32 @@ describe('activateMenuItem', () => {
   it("falls back to the native item's click for a role it doesn't know", () => {
     const win = fakeWindow();
     const click = vi.fn();
-    electron.Menu.getApplicationMenu.mockReturnValueOnce({ getMenuItemById: (id: string) => (id === 'role:help' ? { click } : null) });
+    electron.Menu.getApplicationMenu.mockReturnValueOnce({
+      getMenuItemById: (id: string) => (id === 'role:help' ? { click } : null),
+    });
     activateMenuItem(template, 'role:help', win);
     expect(click).toHaveBeenCalledWith(undefined, win, win.webContents);
-    expect(() => activateMenuItem(template, 'role:help', win)).toThrow(expect.objectContaining({ code: 'unavailable' }));
+    expect(() => activateMenuItem(template, 'role:help', win)).toThrow(
+      expect.objectContaining({ code: 'unavailable' }),
+    );
   });
 
   it('rejects unknown ids, disabled items and submenus with stable codes', () => {
     const win = fakeWindow();
-    expect(() => activateMenuItem(template, 'role:about', win)).toThrow(expect.objectContaining({ code: 'not-found' }));
-    expect(() => activateMenuItem(template, 'file.save', win)).toThrow(expect.objectContaining({ code: 'forbidden' }));
-    expect(() => activateMenuItem(template, 'menu:openRecent', win)).toThrow(expect.objectContaining({ code: 'forbidden' }));
+    expect(() => activateMenuItem(template, 'role:about', win)).toThrow(
+      expect.objectContaining({ code: 'not-found' }),
+    );
+    expect(() => activateMenuItem(template, 'file.save', win)).toThrow(
+      expect.objectContaining({ code: 'forbidden' }),
+    );
+    expect(() => activateMenuItem(template, 'menu:openRecent', win)).toThrow(
+      expect.objectContaining({ code: 'forbidden' }),
+    );
     // Hidden items aren't in the model, but choosing one by id still just runs it: main decides visibility, not trust.
     expect(() => activateMenuItem(template, 'separator', win)).toThrow(FiddleError);
   });
 });
 
-// @feature workspace.menubar
 describe('hasWindowMenuBar', () => {
   it('is on for Windows and Linux, and on macOS only when a test or dev run forces it', () => {
     expect(hasWindowMenuBar('win32')).toBe(true);

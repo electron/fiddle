@@ -1,5 +1,8 @@
 import type { CSSProperties, ReactNode, Ref } from 'react';
-import { Button as AriaButton, type ButtonProps as AriaButtonProps } from 'react-aria-components';
+import {
+  Button as AriaButton,
+  type ButtonProps as AriaButtonProps,
+} from 'react-aria-components';
 import { cx } from '../cx';
 import { Icon, type IconName } from '../icons/Icon';
 import { CapsuleContext } from './capsule';
@@ -14,20 +17,33 @@ export interface ToolbarCapsuleProps {
   ref?: Ref<HTMLDivElement>;
 }
 
-/** A glass capsule that gathers toolbar controls: 36 tall, 3px inset, 2px gap.
- *  Buttons and selects inside it become 30px capsules. */
-export function ToolbarCapsule({ children, label, className, style, ref }: ToolbarCapsuleProps) {
+/** A glass capsule that gathers toolbar controls. Buttons and selects inside it become 30px capsules. */
+export function ToolbarCapsule({
+  children,
+  label,
+  className,
+  style,
+  ref,
+}: ToolbarCapsuleProps) {
   return (
     <CapsuleContext.Provider value={true}>
-      <div ref={ref} role="group" aria-label={label} className={cx(styles.capsule, className)} style={style}>
+      <div
+        ref={ref}
+        role="group"
+        aria-label={label}
+        className={cx(styles.capsule, className)}
+        style={style}
+      >
         {children}
       </div>
     </CapsuleContext.Provider>
   );
 }
 
-export interface ToolbarButtonProps
-  extends Omit<AriaButtonProps, 'children' | 'className' | 'style' | 'aria-label'> {
+export interface ToolbarButtonProps extends Omit<
+  AriaButtonProps,
+  'children' | 'className' | 'style' | 'aria-label'
+> {
   icon?: IconName;
   /** Visible label. Leave out for a 36 × 36 icon button. */
   children?: ReactNode;
@@ -39,7 +55,15 @@ export interface ToolbarButtonProps
 }
 
 /** A standalone 36px glass capsule button on the chrome, such as Publish and Settings. */
-export function ToolbarButton({ icon, children, label, isPressed, className, style, ...rest }: ToolbarButtonProps) {
+export function ToolbarButton({
+  icon,
+  children,
+  label,
+  isPressed,
+  className,
+  style,
+  ...rest
+}: ToolbarButtonProps) {
   const iconOnly = children == null;
   return (
     <AriaButton

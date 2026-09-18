@@ -9,35 +9,35 @@
   -webkit-app-region: no-drag;
 }
 
-.handle[data-orientation="vertical"] {
+.handle[data-orientation='vertical'] {
   align-self: stretch;
   width: 8px;
   margin: 0 -4px;
   cursor: col-resize;
 }
 
-.handle[data-orientation="horizontal"] {
+.handle[data-orientation='horizontal'] {
   height: 8px;
   margin: -4px 0;
   cursor: row-resize;
 }
 
 .handle::after {
-  content: "";
+  content: '';
   position: absolute;
   background: var(--lu-accent);
   opacity: 0;
   transition: opacity var(--lu-dur-fast) var(--lu-ease);
 }
 
-.handle[data-orientation="vertical"]::after {
+.handle[data-orientation='vertical']::after {
   top: 0;
   bottom: 0;
   left: 3px;
   width: 2px;
 }
 
-.handle[data-orientation="horizontal"]::after {
+.handle[data-orientation='horizontal']::after {
   left: 0;
   right: 0;
   top: 3px;

@@ -1,7 +1,6 @@
 /**
- * IntelliSense for the window's Electron version (REQUIREMENTS §17.2): the
- * type definitions come from `Versions.GetTypes` and are fetched again on
- * `Versions.TypesChanged`.
+ * IntelliSense for the window's Electron version: the type definitions come
+ * from `Versions.GetTypes` and are fetched again on `Versions.TypesChanged`.
  */
 import { useEffect } from 'react';
 
@@ -11,7 +10,11 @@ import { monaco } from './monaco';
 
 export function applyEditorTypes(types: EditorTypes | null): void {
   const libs: { content: string; filePath: string }[] = [];
-  if (types?.electron) libs.push({ content: types.electron, filePath: 'file:///node_modules/electron/index.d.ts' });
+  if (types?.electron)
+    libs.push({
+      content: types.electron,
+      filePath: 'file:///node_modules/electron/index.d.ts',
+    });
   for (const [path, content] of Object.entries(types?.node ?? {})) {
     libs.push({ content, filePath: `file:///node_modules/@types/node/${path}` });
   }

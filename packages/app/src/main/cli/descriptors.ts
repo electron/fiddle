@@ -1,8 +1,8 @@
 /**
- * Operation descriptors for the headless CLI (REQUIREMENTS §3 "Operation
- * descriptors", §7): one per command, with its zod input schema, its
- * description, its output shape and its error codes. `argv.ts` parses the
- * command line and writes `--help` from these. No Electron imports.
+ * Operation descriptors for the headless CLI: one per command, with its zod
+ * input schema, its description, its output shape and its error codes.
+ * `argv.ts` parses the command line and writes `--help` from these. No
+ * Electron imports.
  *
  * - Input fields named in `positionals` come from positional arguments, in
  *   order. Every other field is a flag: `electronPath` is `--electron-path`.
@@ -20,7 +20,10 @@ import { CliErrorCode } from './output';
 
 export type CliKey = keyof typeof mainCli;
 
-export interface Descriptor<I extends z.ZodObject = z.ZodObject, O extends z.ZodType = z.ZodType> {
+export interface Descriptor<
+  I extends z.ZodObject = z.ZodObject,
+  O extends z.ZodType = z.ZodType,
+> {
   description: CliKey;
   positionals: readonly (keyof I['shape'] & string)[];
   input: I;
@@ -30,7 +33,9 @@ export interface Descriptor<I extends z.ZodObject = z.ZodObject, O extends z.Zod
   errors: readonly string[];
 }
 
-function command<I extends z.ZodObject, O extends z.ZodType>(descriptor: Descriptor<I, O>): Descriptor<I, O> {
+function command<I extends z.ZodObject, O extends z.ZodType>(
+  descriptor: Descriptor<I, O>,
+): Descriptor<I, O> {
   return descriptor;
 }
 
@@ -61,10 +66,36 @@ const channels = {
 
 const common = [ErrorCode.invalidArgument, ErrorCode.internal];
 const loading = [...common, ErrorCode.notFound, ErrorCode.network, ErrorCode.unavailable];
-const executing = [...loading, CliErrorCode.untrusted, ErrorCode.installFailed, ErrorCode.cancelled];
+const executing = [
+  ...loading,
+  CliErrorCode.untrusted,
+  ErrorCode.installFailed,
+  ErrorCode.cancelled,
+];
 const github = [...loading, ErrorCode.unauthorized, ErrorCode.forbidden];
 
-const gistWrite = z.object({ id: z.string(), url: z.string(), revision: z.string().nullable() });
+/** `package` and `make`: the same inputs and output. */
+function forgeTask(description: CliKey) {
+  return command({
+    description,
+    positionals: ['fiddle'],
+    input: z.object({
+      fiddle,
+      ...electron,
+      module: execution.module,
+      pm: execution.pm,
+      trust: execution.trust,
+    }),
+    output: packaged,
+    errors: [...executing, CliErrorCode.taskFailed],
+  });
+}
+
+const gistWrite = z.object({
+  id: z.string(),
+  url: z.string(),
+  revision: z.string().nullable(),
+});
 const packaged = z.object({ dir: z.string(), out: z.string() });
 
 export const descriptors = {
@@ -189,25 +220,17 @@ export const descriptors = {
     output: z.object({ name: z.string(), dir: z.string(), files: z.array(z.string()) }),
     errors: loading,
   }),
-  package: command({
-    description: 'cmdPackage',
-    positionals: ['fiddle'],
-    input: z.object({ fiddle, ...electron, module: execution.module, pm: execution.pm, trust: execution.trust }),
-    output: packaged,
-    errors: [...executing, CliErrorCode.taskFailed],
-  }),
-  make: command({
-    description: 'cmdMake',
-    positionals: ['fiddle'],
-    input: z.object({ fiddle, ...electron, module: execution.module, pm: execution.pm, trust: execution.trust }),
-    output: packaged,
-    errors: [...executing, CliErrorCode.taskFailed],
-  }),
+  package: forgeTask('cmdPackage'),
+  make: forgeTask('cmdMake'),
 };
 
 export type CommandId = keyof typeof descriptors;
-export type CommandInput<K extends CommandId> = z.output<(typeof descriptors)[K]['input']>;
-export type CommandOutput<K extends CommandId> = z.input<(typeof descriptors)[K]['output']>;
+export type CommandInput<K extends CommandId> = z.output<
+  (typeof descriptors)[K]['input']
+>;
+export type CommandOutput<K extends CommandId> = z.input<
+  (typeof descriptors)[K]['output']
+>;
 
 export const commandIds = Object.keys(descriptors) as CommandId[];
 

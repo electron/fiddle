@@ -64,7 +64,6 @@ export interface IDocumentsImpl {
   SetView(view: WindowView): Promise<number> | number;
   LoadGist(idOrUrl: ShortText, revision: string | null): Promise<number> | number;
   LoadExample(name: ShortText): Promise<number> | number;
-  LoadDocsExample(tag: ShortText, path: ShortText): Promise<number> | number;
   OpenDropped(text: ShortText): Promise<void> | void;
 }
 export interface IDocumentsRenderer {
@@ -80,7 +79,6 @@ export interface IDocumentsRenderer {
   SetView(view: WindowView): Promise<number>;
   LoadGist(idOrUrl: ShortText, revision: string | null): Promise<number>;
   LoadExample(name: ShortText): Promise<number>;
-  LoadDocsExample(tag: ShortText, path: ShortText): Promise<number>;
   OpenDropped(text: ShortText): Promise<void>;
 }
 import type { SettingKey } from "../../../../shared/settings.js";

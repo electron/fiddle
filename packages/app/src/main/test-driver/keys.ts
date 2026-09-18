@@ -8,7 +8,12 @@
 export type Modifier = 'shift' | 'control' | 'alt' | 'meta';
 
 /** `Input.dispatchKeyEvent` modifier bits. */
-export const MODIFIER_BIT: Record<Modifier, number> = { alt: 1, control: 2, meta: 4, shift: 8 };
+export const MODIFIER_BIT: Record<Modifier, number> = {
+  alt: 1,
+  control: 2,
+  meta: 4,
+  shift: 8,
+};
 
 /** One key, as a DOM KeyboardEvent describes it. */
 export interface KeyDefinition {
@@ -61,14 +66,73 @@ const MODIFIERS: Record<string, Modifier | 'cmdOrCtrl'> = {
 const PLAIN = "`1234567890-=qwertyuiop[]\\asdfghjkl;'zxcvbnm,./ ";
 const SHIFTED = '~!@#$%^&*()_+QWERTYUIOP{}|ASDFGHJKL:"ZXCVBNM<>? ';
 const CODES = [
-  ...['Backquote', 'Digit1', 'Digit2', 'Digit3', 'Digit4', 'Digit5', 'Digit6', 'Digit7', 'Digit8', 'Digit9', 'Digit0', 'Minus', 'Equal'],
-  ...['KeyQ', 'KeyW', 'KeyE', 'KeyR', 'KeyT', 'KeyY', 'KeyU', 'KeyI', 'KeyO', 'KeyP', 'BracketLeft', 'BracketRight', 'Backslash'],
-  ...['KeyA', 'KeyS', 'KeyD', 'KeyF', 'KeyG', 'KeyH', 'KeyJ', 'KeyK', 'KeyL', 'Semicolon', 'Quote'],
-  ...['KeyZ', 'KeyX', 'KeyC', 'KeyV', 'KeyB', 'KeyN', 'KeyM', 'Comma', 'Period', 'Slash', 'Space'],
+  ...[
+    'Backquote',
+    'Digit1',
+    'Digit2',
+    'Digit3',
+    'Digit4',
+    'Digit5',
+    'Digit6',
+    'Digit7',
+    'Digit8',
+    'Digit9',
+    'Digit0',
+    'Minus',
+    'Equal',
+  ],
+  ...[
+    'KeyQ',
+    'KeyW',
+    'KeyE',
+    'KeyR',
+    'KeyT',
+    'KeyY',
+    'KeyU',
+    'KeyI',
+    'KeyO',
+    'KeyP',
+    'BracketLeft',
+    'BracketRight',
+    'Backslash',
+  ],
+  ...[
+    'KeyA',
+    'KeyS',
+    'KeyD',
+    'KeyF',
+    'KeyG',
+    'KeyH',
+    'KeyJ',
+    'KeyK',
+    'KeyL',
+    'Semicolon',
+    'Quote',
+  ],
+  ...[
+    'KeyZ',
+    'KeyX',
+    'KeyC',
+    'KeyV',
+    'KeyB',
+    'KeyN',
+    'KeyM',
+    'Comma',
+    'Period',
+    'Slash',
+    'Space',
+  ],
 ];
 /** keyCodes of the keys that are neither letters (the upper-case letter's code) nor digits (the digit's code). */
 const OTHER_KEY_CODES: Record<string, number> = {
-  ...{ Backquote: 192, Minus: 189, Equal: 187, BracketLeft: 219, BracketRight: 221, Backslash: 220 },
+  ...{
+    Backquote: 192,
+    Minus: 189,
+    Equal: 187,
+    BracketLeft: 219,
+    BracketRight: 221,
+    Backslash: 220,
+  },
   ...{ Semicolon: 186, Quote: 222, Comma: 188, Period: 190, Slash: 191, Space: 32 },
 };
 
@@ -77,7 +141,8 @@ const PRINTABLE = new Map<string, KeyDefinition>();
 CODES.forEach((code, index) => {
   const text = PLAIN[index] ?? '';
   const shiftText = SHIFTED[index] ?? '';
-  const keyCode = OTHER_KEY_CODES[code] ?? (code.startsWith('Key') ? shiftText : text).charCodeAt(0);
+  const keyCode =
+    OTHER_KEY_CODES[code] ?? (code.startsWith('Key') ? shiftText : text).charCodeAt(0);
   const definition: KeyDefinition = { key: text, code, keyCode, text, shiftText };
   PRINTABLE.set(text, definition);
   if (!PRINTABLE.has(shiftText)) PRINTABLE.set(shiftText, definition);
@@ -86,9 +151,16 @@ CODES.forEach((code, index) => {
 /** The keys `press` accepts by name: DOM `key` and `code` names plus Electron's accelerator names, lower-cased. */
 const NAMED = new Map<string, KeyDefinition>();
 const name = (aliases: string[], definition: KeyDefinition) => {
-  for (const alias of [definition.key, definition.code, ...aliases]) NAMED.set(alias.toLowerCase(), definition);
+  for (const alias of [definition.key, definition.code, ...aliases])
+    NAMED.set(alias.toLowerCase(), definition);
 };
-name(['Return'], { key: 'Enter', code: 'Enter', keyCode: 13, text: '\r', shiftText: '\r' });
+name(['Return'], {
+  key: 'Enter',
+  code: 'Enter',
+  keyCode: 13,
+  text: '\r',
+  shiftText: '\r',
+});
 name([], { key: 'Tab', code: 'Tab', keyCode: 9 });
 name([], { key: 'Backspace', code: 'Backspace', keyCode: 8 });
 name([], { key: 'Delete', code: 'Delete', keyCode: 46 });
@@ -143,13 +215,23 @@ export function parseKeyCombo(combo: string, platform: NodeJS.Platform): KeyPres
   const held = new Set<Modifier>();
   for (const part of parts) {
     const modifier = MODIFIERS[part.toLowerCase()];
-    if (!modifier) throw new Error(`Unknown modifier ${JSON.stringify(part)} in ${combo}`);
-    held.add(modifier === 'cmdOrCtrl' ? (platform === 'darwin' ? 'meta' : 'control') : modifier);
+    if (!modifier)
+      throw new Error(`Unknown modifier ${JSON.stringify(part)} in ${combo}`);
+    held.add(
+      modifier === 'cmdOrCtrl' ? (platform === 'darwin' ? 'meta' : 'control') : modifier,
+    );
   }
 
-  let definition = NAMED.get(keyName.toLowerCase()) ?? (keyName.length === 1 ? PRINTABLE.get(keyName) : undefined);
+  let definition =
+    NAMED.get(keyName.toLowerCase()) ??
+    (keyName.length === 1 ? PRINTABLE.get(keyName) : undefined);
   if (!definition) throw new Error(`Unknown key ${JSON.stringify(keyName)} in ${combo}`);
-  if (platform === 'darwin' && definition.code === 'F10' && held.size === 1 && held.has('shift')) {
+  if (
+    platform === 'darwin' &&
+    definition.code === 'F10' &&
+    held.size === 1 &&
+    held.has('shift')
+  ) {
     definition = NAMED.get('contextmenu')!;
     held.clear();
   }
@@ -160,19 +242,35 @@ export function parseKeyCombo(combo: string, platform: NodeJS.Platform): KeyPres
   const letter = definition.code.startsWith('Key');
   // A character written in its shifted form (`?`, `A`) is typed that way, except a letter in a shortcut.
   const writtenShifted =
-    keyName.length === 1 && keyName !== definition.text && keyName === definition.shiftText && !(letter && shortcut);
+    keyName.length === 1 &&
+    keyName !== definition.text &&
+    keyName === definition.shiftText &&
+    !(letter && shortcut);
   const typed = shift || writtenShifted ? definition.shiftText : definition.text;
   const text = shortcut ? undefined : typed;
   const key = definition.key.length === 1 ? (typed ?? definition.key) : definition.key;
 
   const commands: string[] = [];
   const editing = MAC_EDITING_COMMANDS[definition.code];
-  if (platform === 'darwin' && editing && held.has('meta') && !held.has('control') && !held.has('alt')) {
+  if (
+    platform === 'darwin' &&
+    editing &&
+    held.has('meta') &&
+    !held.has('control') &&
+    !held.has('alt')
+  ) {
     const command = shift ? editing.shift : editing.plain;
     if (command) commands.push(command);
   }
 
   let modifiers = 0;
   for (const modifier of held) modifiers |= MODIFIER_BIT[modifier];
-  return { key, code: definition.code, keyCode: definition.keyCode, modifiers, text, commands };
+  return {
+    key,
+    code: definition.code,
+    keyCode: definition.keyCode,
+    modifiers,
+    text,
+    commands,
+  };
 }

@@ -1,7 +1,6 @@
 /**
- * App windows, built to Lucent's "Glass on real windows"
- * (docs/design/lucent-handover.txt, docs/design/window-options.js): the OS
- * material shows through a transparent page, and Lucent paints a thin tint.
+ * App windows: the OS material shows through a transparent page, and Lucent
+ * paints a thin tint.
  */
 import { randomUUID } from 'node:crypto';
 import fs from 'node:fs/promises';
@@ -30,6 +29,8 @@ import { trackWindow, untrackWindow } from './windows';
 /** Matches the renderer name in forge.config.ts and vite.renderer.config.ts. */
 const RENDERER_NAME = 'main_window';
 const TITLE_BAR_HEIGHT = 56;
+/** How long a loaded page may take to report ready before the window is shown anyway. */
+const READY_TIMEOUT_MS = 5000;
 /** Lucent --lu-ink, for the Windows caption buttons. */
 const INK = { light: '#1b1c26', dark: '#eef1f8' } as const;
 
@@ -47,17 +48,7 @@ export function detectMaterial(platform: Platform): Material {
   return 'none';
 }
 
-type Vibrancy = NonNullable<Electron.BrowserWindowConstructorOptions['vibrancy']>;
-const VIBRANCIES: readonly Vibrancy[] = ['appearance-based', 'titlebar', 'selection', 'menu', 'popover', 'sidebar', 'header', 'sheet', 'window', 'hud', 'fullscreen-ui', 'tooltip', 'content', 'under-window', 'under-page'];
-
-/** `FIDDLE_VIBRANCY=fullscreen-ui yarn start`: try another macOS material in an unpackaged app. */
-function devVibrancy(): Vibrancy | undefined {
-  const value = process.env.FIDDLE_VIBRANCY as Vibrancy | undefined;
-  return !app.isPackaged && value && VIBRANCIES.includes(value) ? value : undefined;
-}
-
 interface RendererEntry {
-  /** What windows load. */
   url: string;
   /** Built renderer served over app://. */
   rendererDir: string;
@@ -79,14 +70,14 @@ export function rendererEntry(): RendererEntry {
 
 const inkColor = () => (nativeTheme.shouldUseDarkColors ? INK.dark : INK.light);
 
-function windowOptions(
+export function windowOptions(
   platform: Platform,
   material: Material,
 ): BrowserWindowConstructorOptions {
   const common: BrowserWindowConstructorOptions = {
     width: 1280,
     height: 820,
-    // REQUIREMENTS §14: fully usable at 600×600 (Lucent's sample uses 880×560).
+    // The layout stays usable down to 600×600.
     minWidth: 600,
     minHeight: 600,
     show: false,
@@ -107,8 +98,8 @@ function windowOptions(
       titleBarStyle: 'hiddenInset',
       // Traffic lights centred in the 56px title bar.
       trafficLightPosition: { x: 20, y: 22 },
-      // The handover says 'under-window'; 'sidebar' is more translucent and reads closer to the design (owner's call, 2026-09-16).
-      vibrancy: devVibrancy() ?? 'sidebar',
+      // 'sidebar' is more translucent than 'under-window' and reads closer to the design.
+      vibrancy: 'sidebar',
       visualEffectState: 'followWindow',
     };
   }
@@ -125,7 +116,7 @@ function windowOptions(
     };
   }
   // Linux: native frame and no material; the renderer adds `lu-no-material`.
-  // The menu bar is drawn in the title bar (§17.14), so the native one stays
+  // The menu bar is drawn in the title bar, so the native one stays
   // hidden: auto-hide keeps `Menu.setApplicationMenu` from showing it, while
   // the menu it sets still gives the window its accelerators.
   return { ...common, autoHideMenuBar: true };
@@ -154,39 +145,63 @@ export async function createAppWindow({
   // `destroyed` handler runs before the one below, while the window is registered.
   attachWindow(windowId, contents);
   attachContextMenu(windowId, contents, services);
-
-  let shown = false;
-  const initial = init ?? { title: app.getName(), view: 'editor', fiddle: emptyFiddleState(), layout: DEFAULT_LAYOUT };
-  // Also called after every reload; only the first one shows the window.
-  bindWindowIpc({ contents, windowId, services }, initial, () => {
-    if (shown || win.isDestroyed()) return;
-    shown = true;
-    win.show();
-    log.info('window ready', windowId, contents.getURL());
-    devScreenshot(win).catch((error: unknown) => log.error('dev screenshot failed', error));
-  });
-
   contents.once('destroyed', () => {
     hub.unregisterWindow(windowId);
     untrackWindow(windowId);
   });
-  contents.on('did-fail-load', (_event, code, description, failedUrl) => {
-    log.error('window failed to load', failedUrl, code, description);
-  });
-  contents.on('render-process-gone', (_event, details) => {
-    log.error('renderer process gone', windowId, details.reason);
-  });
 
-  if (platform === 'win32') {
-    const updateOverlay = () => {
-      if (!win.isDestroyed()) win.setTitleBarOverlay({ symbolColor: inkColor() });
+  try {
+    let shown = false;
+    let readyTimer: NodeJS.Timeout | undefined;
+    const show = () => {
+      clearTimeout(readyTimer);
+      if (shown || win.isDestroyed()) return;
+      shown = true;
+      win.show();
+      log.info('window ready', windowId, contents.getURL());
+      devScreenshot(win).catch((error: unknown) =>
+        log.error('dev screenshot failed', error),
+      );
     };
-    nativeTheme.on('updated', updateOverlay);
-    win.once('closed', () => nativeTheme.off('updated', updateOverlay));
-  }
+    const initial = init ?? {
+      title: app.getName(),
+      view: 'editor',
+      fiddle: emptyFiddleState(),
+      layout: DEFAULT_LAYOUT,
+    };
+    // Also called after every reload; only the first one shows the window.
+    bindWindowIpc({ contents, windowId, services }, initial, show);
 
-  await win.loadURL(url);
-  return win;
+    // A page that loads but never reports ready (its script failed) would stay hidden for good.
+    contents.on('did-finish-load', () => {
+      if (shown) return;
+      readyTimer ??= setTimeout(() => {
+        log.error('the page did not report ready; showing the window anyway', windowId);
+        show();
+      }, READY_TIMEOUT_MS);
+    });
+    contents.on('did-fail-load', (_event, code, description, failedUrl) => {
+      log.error('window failed to load', failedUrl, code, description);
+    });
+    contents.on('render-process-gone', (_event, details) => {
+      log.error('renderer process gone', windowId, details.reason);
+    });
+
+    if (platform === 'win32') {
+      const updateOverlay = () => {
+        if (!win.isDestroyed()) win.setTitleBarOverlay({ symbolColor: inkColor() });
+      };
+      nativeTheme.on('updated', updateOverlay);
+      win.once('closed', () => nativeTheme.off('updated', updateOverlay));
+    }
+
+    await win.loadURL(url);
+    return win;
+  } catch (error) {
+    // Not shown yet: without this an invisible window would keep the app alive.
+    win.destroy();
+    throw error;
+  }
 }
 
 /**

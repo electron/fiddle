@@ -17,11 +17,20 @@ describe('gistUrlToDeepLink', () => {
   const sha = 'a'.repeat(40);
 
   it('turns a gist page URL (dropped on the dock) into the matching gist link', () => {
-    expect(gistUrlToDeepLink(`https://gist.github.com/${id}`)).toBe(`electron-fiddle://gist/${id}`);
-    expect(gistUrlToDeepLink(`https://GIST.github.com/octocat/${id}/`)).toBe(`electron-fiddle://gist/octocat/${id}`);
-    const withRevision = gistUrlToDeepLink(`https://gist.github.com/octocat/${id}/${sha}`);
+    expect(gistUrlToDeepLink(`https://gist.github.com/${id}`)).toBe(
+      `electron-fiddle://gist/${id}`,
+    );
+    expect(gistUrlToDeepLink(`https://GIST.github.com/octocat/${id}/`)).toBe(
+      `electron-fiddle://gist/octocat/${id}`,
+    );
+    const withRevision = gistUrlToDeepLink(
+      `https://gist.github.com/octocat/${id}/${sha}`,
+    );
     expect(withRevision).toBe(`electron-fiddle://gist/octocat/${id}?revision=${sha}`);
-    expect(parseDeepLink(withRevision!)).toMatchObject({ ok: true, link: { kind: 'gist', id, owner: 'octocat', revision: sha } });
+    expect(parseDeepLink(withRevision!)).toMatchObject({
+      ok: true,
+      link: { kind: 'gist', id, owner: 'octocat', revision: sha },
+    });
   });
 
   it('accepts nothing else', () => {
@@ -77,7 +86,10 @@ describe('DeepLinkQueue', () => {
   });
 
   it('keeps going after a handler fails', async () => {
-    const handle = vi.fn().mockRejectedValueOnce(new Error('boom')).mockResolvedValue(undefined);
+    const handle = vi
+      .fn()
+      .mockRejectedValueOnce(new Error('boom'))
+      .mockResolvedValue(undefined);
     const queue = new DeepLinkQueue(handle);
     queue.push('electron-fiddle://gist/a');
     queue.push('electron-fiddle://gist/b');
@@ -87,14 +99,18 @@ describe('DeepLinkQueue', () => {
   });
 
   it('finds links in argv on every platform', () => {
-    expect(findDeepLinkInArgv(['/app', '--flag', 'ELECTRON-FIDDLE://gist/abc'])).toBe('ELECTRON-FIDDLE://gist/abc');
+    expect(findDeepLinkInArgv(['/app', '--flag', 'ELECTRON-FIDDLE://gist/abc'])).toBe(
+      'ELECTRON-FIDDLE://gist/abc',
+    );
     expect(findDeepLinkInArgv(['/app', '.'])).toBeUndefined();
   });
 });
 
 describe('gistLinkDetail', () => {
   const t = ((key: string, options?: Record<string, string>) =>
-    options ? `${key}:${Object.values(options).join('|')}` : key) as unknown as TFunction<'mainDocuments'>;
+    options
+      ? `${key}:${Object.values(options).join('|')}`
+      : key) as unknown as TFunction<'mainDocuments'>;
   const gist = {
     owner: 'octocat',
     description: 'demo',
@@ -102,7 +118,6 @@ describe('gistLinkDetail', () => {
     files: { 'main.js': '', 'package.json': '{}' },
   };
 
-  // @feature load.deep-link-confirm
   it('shows the owner, revision, files, dependencies, and the description last', () => {
     const detail = gistLinkDetail({}, gist, { lodash: '^4.0.0' }, t);
     expect(detail.split('\n')).toEqual([
@@ -134,8 +149,12 @@ describe('gistLinkDetail', () => {
   });
 
   it('warns when the owner in the link does not match', () => {
-    expect(gistLinkDetail({ owner: 'someone' }, gist, {}, t)).toContain('linkOwnerMismatch:someone|octocat');
-    expect(gistLinkDetail({ owner: 'OctoCat' }, gist, {}, t)).not.toContain('linkOwnerMismatch');
+    expect(gistLinkDetail({ owner: 'someone' }, gist, {}, t)).toContain(
+      'linkOwnerMismatch:someone|octocat',
+    );
+    expect(gistLinkDetail({ owner: 'OctoCat' }, gist, {}, t)).not.toContain(
+      'linkOwnerMismatch',
+    );
   });
 });
 
@@ -150,14 +169,15 @@ describe('dialogText', () => {
 });
 
 describe('shouldOfferSignIn', () => {
-  // @feature load.deep-link-private
   it('offers sign-in for a gist that is missing or unauthorized while signed out', () => {
     const notFound = new FiddleError(ErrorCode.notFound, 'GitHub responded 404');
     const unauthorized = new FiddleError(ErrorCode.unauthorized, 'GitHub responded 401');
     expect(shouldOfferSignIn(notFound, false)).toBe(true);
     expect(shouldOfferSignIn(unauthorized.toJSON(), false)).toBe(true);
     expect(shouldOfferSignIn(notFound, true)).toBe(false);
-    expect(shouldOfferSignIn(new FiddleError(ErrorCode.network, 'offline'), false)).toBe(false);
+    expect(shouldOfferSignIn(new FiddleError(ErrorCode.network, 'offline'), false)).toBe(
+      false,
+    );
     expect(shouldOfferSignIn(new Error('boom'), false)).toBe(false);
   });
 });

@@ -14,7 +14,14 @@ import path from 'node:path';
 
 import { generateWiring } from '@marshallofsound/ipc';
 
-import { pseudoLocales, pseudoMessages } from './i18n-shared.mjs';
+import {
+  namespacesOf,
+  pseudoLocales,
+  pseudoMessages,
+  readJsonFile,
+  translatedLocales,
+  visibleLength,
+} from './i18n-shared.mjs';
 
 const appDir = path.resolve(import.meta.dirname, '..');
 const HEADER =
@@ -115,14 +122,6 @@ async function generateIpc() {
   }
 }
 
-async function readJson(file) {
-  try {
-    return JSON.parse(await fs.readFile(file, 'utf8'));
-  } catch (error) {
-    throw new Error(`${path.relative(appDir, file)}: ${error.message}`, { cause: error });
-  }
-}
-
 // English is the source catalog: every key is `{ message, description,
 // maxLength? }`. Other locales are plain i18next JSON v4 (`key: message`).
 function compileMessages(locale, file, raw) {
@@ -136,9 +135,7 @@ function compileMessages(locale, file, raw) {
         problems.push(`${key}: every key needs a "description"`);
       } else if (
         typeof value.maxLength === 'number' &&
-        // Measure what people see: an interpolation like {{percent}} renders
-        // as a few characters, not its placeholder text.
-        value.message.replace(/\{\{[^}]*\}\}/g, 'xxx').length > value.maxLength
+        visibleLength(value.message) > value.maxLength
       ) {
         problems.push(`${key}: longer than maxLength ${value.maxLength}`);
       } else messages[key] = value.message;
@@ -165,26 +162,19 @@ function catalogModule(messages) {
 async function compileI18n() {
   const localesDir = path.join(appDir, 'src/i18n/locales');
   const outDir = path.join(appDir, 'src/i18n/generated');
-  const shipped = (await fs.readdir(localesDir, { withFileTypes: true }))
-    .filter((entry) => entry.isDirectory())
-    .map((entry) => entry.name)
-    .sort((a, b) => (a === 'en' ? -1 : b === 'en' ? 1 : a.localeCompare(b)));
-  if (shipped[0] !== 'en')
+  const namespaces = namespacesOf('en', localesDir);
+  if (namespaces.length === 0)
     throw new Error('src/i18n/locales/en is the source catalog and must exist');
+  const shipped = ['en', ...translatedLocales(localesDir)];
   for (const locale of shipped) {
     if (pseudoLocales.includes(locale))
-      throw new Error(`src/i18n/locales/${locale}: pseudo-locales are generated from English`);
+      throw new Error(
+        `src/i18n/locales/${locale}: pseudo-locales are generated from English`,
+      );
   }
   // Pseudo-locales (en-XA, ar-XB) come last, generated from English
   // (tools/i18n-shared.mjs), so every build can run in them.
   const locales = [...shipped, ...pseudoLocales];
-
-  const namespacesOf = async (locale) =>
-    (await fs.readdir(path.join(localesDir, locale)))
-      .filter((name) => name.endsWith('.json'))
-      .map((name) => name.slice(0, -'.json'.length))
-      .sort();
-  const namespaces = await namespacesOf('en');
 
   const wanted = new Map();
   const loaderLines = [];
@@ -192,14 +182,14 @@ async function compileI18n() {
   for (const locale of locales) {
     const entries = [];
     const pseudo = pseudoLocales.includes(locale);
-    for (const ns of pseudo ? namespaces : await namespacesOf(locale)) {
+    for (const ns of pseudo ? namespaces : namespacesOf(locale, localesDir)) {
       let messages;
       if (pseudo) messages = pseudoMessages(locale, english[ns]);
       else {
         if (!namespaces.includes(ns))
           throw new Error(`${locale}/${ns}.json has no English source`);
         const file = path.join(localesDir, locale, `${ns}.json`);
-        const raw = await readJson(file);
+        const raw = readJsonFile(file);
         messages = compileMessages(locale, file, raw);
         if (locale === 'en') english[ns] = raw;
       }
@@ -238,7 +228,7 @@ ${loaderLines.join('\n')}
 
 declare module 'i18next' {
   interface CustomTypeOptions {
-    defaultNS: 'common';
+    defaultNS: 'shell';
     keySeparator: false;
     resources: {
 ${namespaces.map((ns) => `      ${ns}: typeof ${ns};`).join('\n')}

@@ -3,12 +3,17 @@
  * button when the value differs from its default, and hides itself when the
  * settings search doesn't match its title, description or key.
  *
- * Text fields keep typing local and commit on blur or Enter (REQUIREMENTS §3).
+ * Text fields keep typing local and commit on blur or Enter.
  */
 import { createContext, useContext, useState, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { isModified, parseSetting, type SettingKey, type Settings } from '../../../shared/settings';
+import {
+  isModified,
+  parseSetting,
+  type SettingKey,
+  type Settings,
+} from '../../../shared/settings';
 import { Button, IconButton, Switch, TextField } from '../../../ui';
 import styles from './SettingsPage.module.css';
 import { useSettings } from './use-settings';
@@ -45,7 +50,8 @@ export function Row({ setting, inline, note, children }: RowProps) {
   const { settings, reset } = useSettings();
   const { title, description } = useSettingText(setting);
   const search = useContext(SearchContext);
-  if (!search.showAll && !matchesQuery(search.query, title, description, setting)) return null;
+  if (!search.showAll && !matchesQuery(search.query, title, description, setting))
+    return null;
 
   const modified = isModified(settings, setting);
   return (
@@ -57,7 +63,12 @@ export function Row({ setting, inline, note, children }: RowProps) {
           </span>
           {modified && (
             <>
-              <span className={styles.modified} role="img" aria-label={t('modified')} title={t('modified')} />
+              <span
+                className={styles.modified}
+                role="img"
+                aria-label={t('modified')}
+                title={t('modified')}
+              />
               <Button size="sm" variant="ghost" onPress={() => reset(setting)}>
                 {t('reset')}
               </Button>
@@ -79,7 +90,11 @@ export function SwitchRow({ setting }: { setting: KeysOf<boolean> }) {
   const { title } = useSettingText(setting);
   return (
     <Row setting={setting} inline>
-      <Switch aria-label={title} isSelected={settings[setting]} onChange={(on) => set(setting, on)} />
+      <Switch
+        aria-label={title}
+        isSelected={settings[setting]}
+        onChange={(on) => set(setting, on)}
+      />
     </Row>
   );
 }
@@ -131,7 +146,7 @@ export function TextRow({ setting, invalidMessage, placeholder, mono }: TextRowP
         onChange={setDraft}
         onBlur={commit}
         onKeyDown={(event) => {
-          if (event.key === 'Enter') commit();
+          if (event.key === 'Enter' && !event.nativeEvent.isComposing) commit();
         }}
       />
     </Row>
@@ -182,10 +197,12 @@ export function ListRow({ setting, invalidMessage }: ListRowProps) {
               mono
               isInvalid={invalid.has(index)}
               errorMessage={invalid.has(index) ? invalidMessage : undefined}
-              onChange={(text) => setRows(rows.map((old, i) => (i === index ? text : old)))}
+              onChange={(text) =>
+                setRows(rows.map((old, i) => (i === index ? text : old)))
+              }
               onBlur={() => commit(rows)}
               onKeyDown={(event) => {
-                if (event.key === 'Enter') commit(rows);
+                if (event.key === 'Enter' && !event.nativeEvent.isComposing) commit(rows);
               }}
             />
             <IconButton
@@ -201,7 +218,12 @@ export function ListRow({ setting, invalidMessage }: ListRowProps) {
             />
           </div>
         ))}
-        <Button size="sm" variant="ghost" icon="plus" onPress={() => setRows([...rows, ''])}>
+        <Button
+          size="sm"
+          variant="ghost"
+          icon="plus"
+          onPress={() => setRows([...rows, ''])}
+        >
           {t('list.add')}
         </Button>
       </div>

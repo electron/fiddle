@@ -1,5 +1,4 @@
-/* The sheet: surface fill, radius-sheet, shadow-island (plus the dark top rim).
-   It clips its content, so the console follows the bottom corners. */
+/* It clips its content, so the console follows the bottom corners. */
 .sheet {
   position: relative;
   flex: 1;
@@ -14,15 +13,15 @@
   overflow: hidden;
 }
 
-/* Tab row: 46 + a 0.5 hairline, padding 0 8 0 9, 10px gap. The hairline is an
-   inset shadow, like the console's: a border under 1px snaps to a whole pixel. */
+/* The hairline is an inset shadow, like the console's: a border under 1px snaps
+   to a whole pixel. */
 .tabrow {
   flex: none;
   display: flex;
   align-items: center;
   gap: 10px;
   height: calc(var(--lu-size-tabrow) + var(--lu-size-hairline));
-  padding: 0 8px 0 9px;
+  padding-inline: 9px 8px;
   box-shadow: inset 0 calc(-1 * var(--lu-size-hairline)) 0 var(--lu-line);
 }
 
@@ -33,7 +32,6 @@
   scrollbar-width: none;
 }
 
-/* Process label: 11.5/14 500 in ink-faint. */
 .process {
   flex: none;
   color: var(--lu-ink-faint);
@@ -71,8 +69,8 @@
   flex: 1 1 0;
 }
 
-.dropZone[data-drop-zone="before"],
-.dropZone[data-drop-zone="after"] {
+.dropZone[data-drop-zone='before'],
+.dropZone[data-drop-zone='after'] {
   flex: 0 0 25%;
 }
 
@@ -97,18 +95,18 @@
   opacity: 1;
 }
 
-.dropZones[data-over="before"] .dropHint {
+.dropZones[data-over='before'] .dropHint {
   inset-inline-end: 50%;
 }
 
-.dropZones[data-over="after"] .dropHint {
+.dropZones[data-over='after'] .dropHint {
   inset-inline-start: 50%;
 }
 
 /* Split panes are separated by a 0.5px line, drawn on the resize handle
    (whose own 2px accent line shows on hover, drag and focus). */
 .divider::before {
-  content: "";
+  content: '';
   position: absolute;
   top: 0;
   bottom: 0;
@@ -117,14 +115,13 @@
   background: var(--lu-line);
 }
 
-/* Pane header in split view: grip, filename, process label, then actions. */
 .paneHeader {
   flex: none;
   display: flex;
   align-items: center;
   gap: 8px;
   height: var(--lu-size-toolbar);
-  padding: 0 8px 0 10px;
+  padding-inline: 10px 8px;
   box-shadow: inset 0 calc(-1 * var(--lu-size-hairline)) 0 var(--lu-line);
   font: var(--lu-type-label);
   white-space: nowrap;
@@ -144,17 +141,13 @@
   text-overflow: ellipsis;
 }
 
-.paneName[data-error] {
-  color: var(--lu-spark);
-}
-
 .paneErrors {
   color: var(--lu-spark);
   font-weight: 500;
 }
 
 .paneProcess {
-  margin-left: auto;
+  margin-inline-start: auto;
   color: var(--lu-ink-faint);
   font: var(--lu-type-status);
 }
@@ -165,7 +158,6 @@
   gap: 2px;
 }
 
-/* Console: 160 by default, surface-sunken with a 0.5px hairline on top. */
 .console {
   flex: none;
   display: flex;
@@ -184,7 +176,6 @@
   padding: var(--lu-space-8);
 }
 
-/* Drop affordance: the sheet dims and takes an accent ring while a link or folder is over it. */
 .drop {
   position: absolute;
   inset: 0;
@@ -195,6 +186,19 @@
   background: color-mix(in srgb, var(--lu-surface) 88%, transparent);
   box-shadow: inset 0 0 0 2px var(--lu-accent);
   pointer-events: none;
+}
+
+/* Holds the tab row, panes and console. */
+.editor {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+}
+
+.editor[data-covered] {
+  display: none;
 }
 
 .settings {

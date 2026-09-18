@@ -9,14 +9,21 @@ import { CredentialStore, type SafeStorageLike } from './credentials';
 const CREDS = { token: `ghp_${'a'.repeat(36)}`, login: 'octocat' };
 
 /** A reversible fake: "enc:" + base64. Decrypting anything else throws, like a wrong key. */
-function fakeSafeStorage(overrides: Partial<SafeStorageLike> & { backend?: string } = {}): SafeStorageLike {
+function fakeSafeStorage(
+  overrides: Partial<SafeStorageLike> & { backend?: string } = {},
+): SafeStorageLike {
   return {
     isAsyncEncryptionAvailable: async () => true,
-    encryptStringAsync: async (text) => Buffer.from(`enc:${Buffer.from(text).toString('base64')}`),
+    encryptStringAsync: async (text) =>
+      Buffer.from(`enc:${Buffer.from(text).toString('base64')}`),
     decryptStringAsync: async (data) => {
       const text = data.toString();
-      if (!text.startsWith('enc:')) throw new Error('Error while decrypting the ciphertext');
-      return { result: Buffer.from(text.slice(4), 'base64').toString(), shouldReEncrypt: false };
+      if (!text.startsWith('enc:'))
+        throw new Error('Error while decrypting the ciphertext');
+      return {
+        result: Buffer.from(text.slice(4), 'base64').toString(),
+        shouldReEncrypt: false,
+      };
     },
     getSelectedStorageBackend: () => overrides.backend ?? 'gnome_libsecret',
     ...overrides,
@@ -43,7 +50,6 @@ describe('CredentialStore', () => {
     expect(await open().load()).toEqual({ kind: 'none' });
   });
 
-  // @feature gist.token-encrypted
   it('round-trips encrypted credentials, never as plain text on disk', async () => {
     const store = open();
     expect(await store.save(CREDS, { allowPlaintext: false })).toBe(true);
@@ -51,12 +57,14 @@ describe('CredentialStore', () => {
     expect((await readFile(file)).toString()).not.toContain(CREDS.token);
   });
 
-  // @feature gist.token-encrypted
-  it.skipIf(process.platform === 'win32')('writes the file with mode 0600 in a 0700 folder', async () => {
-    await open().save(CREDS, { allowPlaintext: false });
-    expect((await stat(file)).mode & 0o777).toBe(0o600);
-    expect((await stat(path.dirname(file))).mode & 0o777).toBe(0o700);
-  });
+  it.skipIf(process.platform === 'win32')(
+    'writes the file with mode 0600 in a 0700 folder',
+    async () => {
+      await open().save(CREDS, { allowPlaintext: false });
+      expect((await stat(file)).mode & 0o777).toBe(0o600);
+      expect((await stat(path.dirname(file))).mode & 0o777).toBe(0o700);
+    },
+  );
 
   it('keeps the token for the session only on Linux with a basic_text or unknown backend', async () => {
     for (const backend of ['basic_text', 'unknown']) {
@@ -74,13 +82,16 @@ describe('CredentialStore', () => {
   });
 
   it('treats basic_text as weak only on Linux', async () => {
-    expect(await open(fakeSafeStorage({ backend: 'basic_text' }), 'darwin').kind()).toBe('encrypted');
+    expect(await open(fakeSafeStorage({ backend: 'basic_text' }), 'darwin').kind()).toBe(
+      'encrypted',
+    );
   });
 
-  // @feature gist.token-encrypted
   it('never persists when encryption is unavailable, and removes an older file', async () => {
     await open().save(CREDS, { allowPlaintext: false });
-    const store = open(fakeSafeStorage({ isAsyncEncryptionAvailable: async () => false }));
+    const store = open(
+      fakeSafeStorage({ isAsyncEncryptionAvailable: async () => false }),
+    );
     expect(await store.kind()).toBe('unavailable');
     expect(await store.save(CREDS, { allowPlaintext: true })).toBe(false);
     expect(await open().load()).toEqual({ kind: 'none' });
@@ -109,7 +120,10 @@ describe('CredentialStore', () => {
     let encrypts = 0;
     const base = fakeSafeStorage();
     const rotating = fakeSafeStorage({
-      decryptStringAsync: async (data) => ({ ...(await base.decryptStringAsync(data)), shouldReEncrypt: true }),
+      decryptStringAsync: async (data) => ({
+        ...(await base.decryptStringAsync(data)),
+        shouldReEncrypt: true,
+      }),
       encryptStringAsync: async (text) => {
         encrypts++;
         return base.encryptStringAsync(text);
@@ -119,7 +133,6 @@ describe('CredentialStore', () => {
     expect(encrypts).toBe(1);
   });
 
-  // @feature gist.sign-out
   it('deletes the file on sign-out', async () => {
     const store = open();
     await store.save(CREDS, { allowPlaintext: false });

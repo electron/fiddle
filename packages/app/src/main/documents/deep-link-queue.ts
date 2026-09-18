@@ -1,7 +1,7 @@
 /**
- * Delivery of `electron-fiddle://` links (§8): links that arrive before the
- * app is ready are queued, and only one link is handled (one prompt pending)
- * at a time. Also the text of the gist confirmation. No Electron imports.
+ * Delivery of `electron-fiddle://` links: links that arrive before the app is
+ * ready are queued, and only one link is handled (one prompt pending) at a
+ * time. Also the text of the gist confirmation. No Electron imports.
  */
 import type { TFunction } from 'i18next';
 
@@ -28,7 +28,7 @@ export function dialogText(text: string, max = DIALOG_TEXT_MAX): string {
 }
 
 /**
- * The deep-link confirmation for a gist (§8): owner (with a warning when the
+ * The deep-link confirmation for a gist: owner (with a warning when the
  * link names someone else), revision SHA, files, dependencies, and last the
  * free-text description. Every gist-controlled value is one sanitized line.
  */
@@ -38,8 +38,10 @@ export function gistLinkDetail(
   dependencies: Readonly<Record<string, string>>,
   t: TFunction<'mainDocuments'>,
 ): string {
-  const list = (items: string[]) => (items.length > 0 ? items.map((item) => dialogText(item)).join(', ') : t('none'));
-  const owner = gist.owner === null || gist.owner === undefined ? undefined : dialogText(gist.owner);
+  const list = (items: string[]) =>
+    items.length > 0 ? items.map((item) => dialogText(item)).join(', ') : t('none');
+  const owner =
+    gist.owner === null || gist.owner === undefined ? undefined : dialogText(gist.owner);
   const lines: string[] = [t('detailOwner', { owner: owner ?? t('unknownOwner') })];
   if (link.owner && owner && link.owner.toLowerCase() !== owner.toLowerCase()) {
     lines.push(t('linkOwnerMismatch', { linkOwner: dialogText(link.owner), owner }));
@@ -48,9 +50,13 @@ export function gistLinkDetail(
     t('detailRevision', { sha: dialogText(gist.revision) }),
     t('detailFiles', { files: list(Object.keys(gist.files)) }),
     t('detailDependencies', {
-      dependencies: list(Object.entries(dependencies).map(([name, spec]) => `${name}@${spec}`)),
+      dependencies: list(
+        Object.entries(dependencies).map(([name, spec]) => `${name}@${spec}`),
+      ),
     }),
-    t('detailDescription', { description: dialogText(gist.description ?? '') || t('none') }),
+    t('detailDescription', {
+      description: dialogText(gist.description ?? '') || t('none'),
+    }),
     '',
     t('linkUntrusted'),
   );
@@ -59,7 +65,7 @@ export function gistLinkDetail(
 
 /**
  * A gist link that fails with "not found" or "unauthorized" while signed out
- * may be a private gist (§17.4): offer to sign in, then try again.
+ * may be a private gist: offer to sign in, then try again.
  */
 export function shouldOfferSignIn(error: unknown, signedIn: boolean): boolean {
   if (signedIn) return false;
@@ -80,10 +86,18 @@ export function gistUrlToDeepLink(text: string): string | undefined {
   } catch {
     return undefined;
   }
-  if (url.protocol !== 'https:' || url.hostname !== 'gist.github.com' || url.port || url.username || url.password) {
+  if (
+    url.protocol !== 'https:' ||
+    url.hostname !== 'gist.github.com' ||
+    url.port ||
+    url.username ||
+    url.password
+  ) {
     return undefined;
   }
-  const match = /^\/(?:([^/]+)\/)?([0-9a-f]{32})(?:\/([0-9a-f]{40}))?\/?$/i.exec(url.pathname);
+  const match = /^\/(?:([^/]+)\/)?([0-9a-f]{32})(?:\/([0-9a-f]{40}))?\/?$/i.exec(
+    url.pathname,
+  );
   if (!match) return undefined;
   const [, owner, id, sha] = match;
   return `electron-fiddle://gist/${owner ? `${owner}/` : ''}${id}${sha ? `?revision=${sha}` : ''}`;
@@ -100,7 +114,10 @@ export class DeepLinkQueue {
    * @param handle Parses, confirms and loads one link. Errors are its to show.
    * @param onBusy Called for a link that arrives while another is pending; it waits its turn.
    */
-  constructor(handle: (url: string) => Promise<void>, onBusy: (url: string) => void = () => {}) {
+  constructor(
+    handle: (url: string) => Promise<void>,
+    onBusy: (url: string) => void = () => {},
+  ) {
     this.#handle = handle;
     this.#onBusy = onBusy;
   }

@@ -1,12 +1,10 @@
-/* Coachmark: a tour step with a cut-out. The card uses Popover styling (overlay material,
-   blur, shadow and rims, radius-panel, padding 14 16); the hole rings the target in accent
-   and dims everything else with the scrim. */
 .layer {
   position: fixed;
   inset: 0;
   z-index: var(--lu-z-dialog);
 }
 
+/* The outer shadow is the scrim: it dims everything except the ringed target. */
 .hole {
   position: fixed;
   border-radius: var(--lu-radius-control);
@@ -28,7 +26,6 @@
   background: var(--lu-scrim);
 }
 
-/* The step card (a Modal) and the offer card. */
 .card {
   position: fixed;
   z-index: var(--lu-z-dialog);

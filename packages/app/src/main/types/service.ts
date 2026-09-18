@@ -1,5 +1,5 @@
 /**
- * Editor type definitions (REQUIREMENTS §17.2), for the shell's Monaco:
+ * Editor type definitions for the shell's Monaco:
  *
  * - `electron.d.ts` from unpkg (`electron` or `electron-nightly`), cached per
  *   version in `<cache>/types/electron/<version>.d.ts` and dropped when the
@@ -41,8 +41,10 @@ interface MetaEntry {
 function typeFilesFromMeta(meta: unknown): string[] {
   const out: string[] = [];
   const walk = (entry: MetaEntry) => {
-    if (Array.isArray(entry.files)) for (const child of entry.files as MetaEntry[]) walk(child);
-    else if (typeof entry.path === 'string' && entry.path.endsWith('.d.ts')) out.push(entry.path);
+    if (Array.isArray(entry.files))
+      for (const child of entry.files as MetaEntry[]) walk(child);
+    else if (typeof entry.path === 'string' && entry.path.endsWith('.d.ts'))
+      out.push(entry.path);
   };
   if (typeof meta === 'object' && meta !== null) walk(meta as MetaEntry);
   // Skip typesVersions copies for older TypeScript (`/ts5.6/…`).
@@ -62,13 +64,22 @@ export class TypesService {
     const nodeVersion = this.#options.nodeVersionOf(version);
     const [electron, node] = await Promise.all([
       this.#once(`electron:${version}`, () => this.#electron(version)),
-      nodeVersion ? this.#once(`node:${nodeVersion}`, () => this.#node(nodeVersion)) : Promise.resolve({}),
+      nodeVersion
+        ? this.#once(`node:${nodeVersion}`, () => this.#node(nodeVersion))
+        : Promise.resolve({}),
     ]);
     return { version, electron, node };
   }
 
   async forLocal(build: LocalBuild): Promise<EditorTypes> {
-    const file = path.join(build.path, 'gen', 'electron', 'tsc', 'typings', 'electron.d.ts');
+    const file = path.join(
+      build.path,
+      'gen',
+      'electron',
+      'tsc',
+      'typings',
+      'electron.d.ts',
+    );
     this.#watch(build.id, file);
     const electron = await fsp.readFile(file, 'utf8').catch(() => null);
     return { version: build.name, electron, node: {} };
@@ -76,12 +87,9 @@ export class TypesService {
 
   /** Drops a removed version's cached `electron.d.ts`. */
   async removeVersion(version: string): Promise<void> {
-    await fsp.rm(path.join(this.#options.dir, 'electron', `${version}.d.ts`), { force: true });
-  }
-
-  dispose(): void {
-    for (const watcher of this.#watchers.values()) watcher.close();
-    this.#watchers.clear();
+    await fsp.rm(path.join(this.#options.dir, 'electron', `${version}.d.ts`), {
+      force: true,
+    });
   }
 
   #once<T>(key: string, load: () => Promise<T>): Promise<T> {
@@ -98,7 +106,9 @@ export class TypesService {
     const cached = await fsp.readFile(file, 'utf8').catch(() => undefined);
     if (cached !== undefined) return cached;
     const pkg = version.includes('nightly') ? 'electron-nightly' : 'electron';
-    const text = await this.#text(`${getEndpoints().unpkg}/${pkg}@${version}/electron.d.ts`);
+    const text = await this.#text(
+      `${getEndpoints().unpkg}/${pkg}@${version}/electron.d.ts`,
+    );
     if (text !== undefined) await writeCache(file, text);
     return text ?? null;
   }
@@ -123,15 +133,20 @@ export class TypesService {
 
     const paths = typeFilesFromMeta(meta);
     const files: Record<string, string> = {};
-    for (let i = 0; i < paths.length; i += FETCH_CONCURRENCY) {
-      await Promise.all(
-        paths.slice(i, i + FETCH_CONCURRENCY).map(async (p) => {
-          const text = await this.#text(`${getEndpoints().unpkg}/@types/node@${spec}${p}`);
-          if (text !== undefined) files[p.slice(1)] = text;
-        }),
-      );
-    }
-    if (Object.keys(files).length > 0) await writeCache(file, JSON.stringify(files));
+    let next = 0;
+    const worker = async () => {
+      while (next < paths.length) {
+        const p = paths[next++]!;
+        const text = await this.#text(`${getEndpoints().unpkg}/@types/node@${spec}${p}`);
+        if (text !== undefined) files[p.slice(1)] = text;
+      }
+    };
+    await Promise.all(
+      Array.from({ length: Math.min(FETCH_CONCURRENCY, paths.length) }, worker),
+    );
+    // A set with files missing is used this time but not cached, so a later launch fetches it again.
+    if (paths.length > 0 && Object.keys(files).length === paths.length)
+      await writeCache(file, JSON.stringify(files));
     return files;
   }
 

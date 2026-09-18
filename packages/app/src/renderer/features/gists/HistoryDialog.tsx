@@ -7,7 +7,10 @@ import { Button, Dialog, List, ListRow, showToast, Spinner, Tag } from '../../..
 import styles from './gists.module.css';
 
 type History = Awaited<ReturnType<typeof githubApi.GetHistory>>;
-type State = { status: 'loading' } | { status: 'error'; message: string } | { status: 'ready'; history: History };
+type State =
+  | { status: 'loading' }
+  | { status: 'error'; message: string }
+  | { status: 'ready'; history: History };
 
 /** The gist's revisions, newest first. Choosing one loads it. Mount it only while it's open. */
 export function HistoryDialog({ onClose }: { onClose: () => void }) {
@@ -32,11 +35,17 @@ export function HistoryDialog({ onClose }: { onClose: () => void }) {
   const load = (history: History, sha: string) => {
     if (sha === history.activeSha) return;
     documentsApi.LoadGist(history.id, sha).then(onClose, (error: unknown) =>
-      showToast({ tone: 'error', title: t('loadFailed', { message: FiddleError.from(error).message }) }),
+      showToast({
+        tone: 'error',
+        title: t('loadFailed', { message: FiddleError.from(error).message }),
+      }),
     );
   };
 
-  const date = new Intl.DateTimeFormat(i18n.language, { dateStyle: 'medium', timeStyle: 'short' });
+  const date = new Intl.DateTimeFormat(i18n.language, {
+    dateStyle: 'medium',
+    timeStyle: 'short',
+  });
 
   return (
     <Dialog
@@ -60,7 +69,9 @@ export function HistoryDialog({ onClose }: { onClose: () => void }) {
           <Spinner />
         </div>
       )}
-      {state.status === 'error' && <p className={styles.help}>{t('historyFailed', { message: state.message })}</p>}
+      {state.status === 'error' && (
+        <p className={styles.help}>{t('historyFailed', { message: state.message })}</p>
+      )}
       {state.status === 'ready' && state.history.revisions.length === 0 && (
         <p className={styles.help}>{t('historyEmpty')}</p>
       )}
@@ -76,12 +87,26 @@ export function HistoryDialog({ onClose }: { onClose: () => void }) {
               key={revision.sha}
               id={revision.sha}
               icon="git-branch"
-              title={revision.n === 0 ? t('historyCreated') : t('historyRevision', { n: revision.n })}
-              meta={t('historyMeta', { sha: revision.sha.slice(0, 7), date: date.format(new Date(revision.date)) })}
+              title={
+                revision.n === 0
+                  ? t('historyCreated')
+                  : t('historyRevision', { n: revision.n })
+              }
+              meta={t('historyMeta', {
+                sha: revision.sha.slice(0, 7),
+                date: date.format(new Date(revision.date)),
+              })}
               tags={
                 <>
-                  {revision.sha === state.history.activeSha && <Tag tone="accent">{t('historyActive')}</Tag>}
-                  <Tag>{t('historyChanges', { additions: revision.additions, deletions: revision.deletions })}</Tag>
+                  {revision.sha === state.history.activeSha && (
+                    <Tag tone="accent">{t('historyActive')}</Tag>
+                  )}
+                  <Tag>
+                    {t('historyChanges', {
+                      additions: revision.additions,
+                      deletions: revision.deletions,
+                    })}
+                  </Tag>
                 </>
               }
             />

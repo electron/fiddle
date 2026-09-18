@@ -13,15 +13,19 @@ describe('osCacheDir', () => {
   });
 
   it('uses %LOCALAPPDATA% on Windows, with a fallback', () => {
-    expect(osCacheDir('win32', { LOCALAPPDATA: 'C:\\Users\\ada\\AppData\\Local' }, home)).toBe(
-      'C:\\Users\\ada\\AppData\\Local',
-    );
+    expect(
+      osCacheDir('win32', { LOCALAPPDATA: 'C:\\Users\\ada\\AppData\\Local' }, home),
+    ).toBe('C:\\Users\\ada\\AppData\\Local');
     expect(osCacheDir('win32', {}, home)).toBe(path.join(home, 'AppData', 'Local'));
   });
 
   it('uses $XDG_CACHE_HOME or ~/.cache on Linux', () => {
-    expect(osCacheDir('linux', { XDG_CACHE_HOME: '/var/cache/ada' }, home)).toBe('/var/cache/ada');
-    expect(osCacheDir('linux', { XDG_CACHE_HOME: '' }, home)).toBe(path.join(home, '.cache'));
+    expect(osCacheDir('linux', { XDG_CACHE_HOME: '/var/cache/ada' }, home)).toBe(
+      '/var/cache/ada',
+    );
+    expect(osCacheDir('linux', { XDG_CACHE_HOME: '' }, home)).toBe(
+      path.join(home, '.cache'),
+    );
   });
 });
 
@@ -53,7 +57,9 @@ describe('in a test build with FIDDLE_TEST_MODE=1', () => {
     const testMode = await import('./test-mode');
     expect(testMode.isTestMode()).toBe(true);
     expect(testMode.getCacheRoot()).toBe(path.join('/tmp/fiddle-test', 'cache'));
-    expect(testMode.getEndpoints().releasesJson).toBe('http://127.0.0.1:4000/releases.json');
+    expect(testMode.getEndpoints().releasesJson).toBe(
+      'http://127.0.0.1:4000/releases.json',
+    );
     expect(testMode.testFlags().updates).toBe(false);
   });
 });

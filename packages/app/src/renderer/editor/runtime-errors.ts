@@ -1,14 +1,13 @@
 /**
- * Runtime errors thrown by the running fiddle, shown as the design's error
- * markers: tab badges, sidebar pills, the error line and the error lens.
+ * Runtime errors thrown by the running fiddle, shown as tab badges, sidebar
+ * pills, the error line and the error lens.
  *
  * A tiny external store. Versions and run calls `setRuntimeErrors` (and
  * `revealLocation` for the console's location links); the shell reads it with
  * `useRuntimeErrors`.
  */
-import { useSyncExternalStore } from 'react';
-
 import type { RuntimeErrorValue } from '../../shared/stores';
+import { createStore, useStore } from '../store';
 
 export interface RuntimeError {
   /** A fiddle file name, such as `renderer.js`. */
@@ -32,52 +31,60 @@ export interface RevealRequest {
 }
 
 const EMPTY: readonly RuntimeError[] = [];
-let errors: readonly RuntimeError[] = EMPTY;
-let reveal: RevealRequest | null = null;
-const listeners = new Set<() => void>();
+const errors = createStore(EMPTY);
+const reveal = createStore<RevealRequest | null>(null);
+let claimedSeq = 0;
 
-function emit() {
-  for (const listener of listeners) listener();
-}
+const sameError = (a: RuntimeError, b: RuntimeError) =>
+  a.file === b.file &&
+  a.line === b.line &&
+  a.column === b.column &&
+  a.message === b.message &&
+  a.process === b.process;
 
-function subscribe(listener: () => void): () => void {
-  listeners.add(listener);
-  return () => listeners.delete(listener);
-}
-
-/** Replaces the current errors. Pass `[]` to clear them (for example on the next run). */
+/**
+ * Replaces the current errors. Pass `[]` to clear them (for example on the
+ * next run). A list equal to the current one changes nothing, so the error
+ * lenses aren't rebuilt by every store push.
+ */
 export function setRuntimeErrors(next: readonly RuntimeError[]): void {
-  errors = next.length ? [...next] : EMPTY;
-  emit();
+  const current = errors.get();
+  if (
+    next.length === current.length &&
+    next.every((error, i) => sameError(error, current[i]!))
+  )
+    return;
+  errors.set(next.length ? [...next] : EMPTY);
 }
 
-export function getRuntimeErrors(): readonly RuntimeError[] {
-  return errors;
-}
+export const getRuntimeErrors = errors.get;
 
-export function useRuntimeErrors(): readonly RuntimeError[] {
-  return useSyncExternalStore(subscribe, getRuntimeErrors);
-}
+export const useRuntimeErrors = (): readonly RuntimeError[] => useStore(errors);
 
 /** Opens the file's editor and moves the cursor to the location. */
 export function revealLocation(file: string, line: number, column: number): void {
-  reveal = { file, line, column, seq: (reveal?.seq ?? 0) + 1 };
-  emit();
+  reveal.set({ file, line, column, seq: (reveal.get()?.seq ?? 0) + 1 });
 }
 
-export function useRevealRequest(): RevealRequest | null {
-  return useSyncExternalStore(subscribe, () => reveal);
-}
+export const useRevealRequest = (): RevealRequest | null => useStore(reveal);
 
-/** Error counts by file name. */
-export function countByFile(list: readonly RuntimeError[]): ReadonlyMap<string, number> {
-  const counts = new Map<string, number>();
-  for (const error of list) counts.set(error.file, (counts.get(error.file) ?? 0) + 1);
-  return counts;
+/** True the first time a request is claimed, so one pane acts on it and a pane mounted later doesn't replay it. */
+export function claimReveal(seq: number): boolean {
+  if (seq <= claimedSeq) return false;
+  claimedSeq = seq;
+  return true;
 }
 
 /** Splits "TypeError: message" into its type name and the rest. */
-export function splitErrorMessage(message: string): { title: string | null; text: string } {
-  const match = /^(?:Uncaught\s+)?([A-Za-z_$][\w$]*(?:Error|Exception)):\s*([\s\S]*)$/.exec(message.trim());
-  return match ? { title: match[1] ?? null, text: match[2] ?? '' } : { title: null, text: message.trim() };
+export function splitErrorMessage(message: string): {
+  title: string | null;
+  text: string;
+} {
+  const match =
+    /^(?:Uncaught\s+)?([A-Za-z_$][\w$]*(?:Error|Exception)):\s*([\s\S]*)$/.exec(
+      message.trim(),
+    );
+  return match
+    ? { title: match[1] ?? null, text: match[2] ?? '' }
+    : { title: null, text: message.trim() };
 }

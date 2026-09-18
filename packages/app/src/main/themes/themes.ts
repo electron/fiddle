@@ -1,6 +1,6 @@
 /**
- * Themes (REQUIREMENTS §17.12, §10). Built in: Lucent, dark or light, and its
- * high-contrast dark and light variants. Custom themes are JSON files in
+ * Themes. Built in: Lucent, dark or light, and its high-contrast dark and
+ * light variants. Custom themes are JSON files in
  * `<userData>/themes/<id>.json` holding a `schemaVersion`, a name, `isDark`,
  * Monaco `editor` data and Lucent `common` tokens. Every file is validated
  * with the shared schema: token values must be colours or font names, and
@@ -11,6 +11,7 @@
 import fsp from 'node:fs/promises';
 import path from 'node:path';
 
+import { isWindowsReservedName } from '../../fiddle/files';
 import { ErrorCode, FiddleError } from '../../shared/errors';
 import {
   BUILTIN_THEME,
@@ -46,7 +47,8 @@ export function parseTheme(id: string, text: string): ThemeData | undefined {
     log.warn('invalid theme', id, result.error.message);
     return undefined;
   }
-  if ((result.data.schemaVersion ?? 1) > THEME_SCHEMA_VERSION) log.warn('theme is from a newer version', id);
+  if ((result.data.schemaVersion ?? 1) > THEME_SCHEMA_VERSION)
+    log.warn('theme is from a newer version', id);
   return { ...result.data, id };
 }
 
@@ -56,7 +58,8 @@ export async function loadThemes(dir: string, locale?: string): Promise<ThemeDat
   try {
     names = await fsp.readdir(dir);
   } catch (error) {
-    if ((error as NodeJS.ErrnoException).code !== 'ENOENT') log.error('failed to list themes', error);
+    if ((error as NodeJS.ErrnoException).code !== 'ENOENT')
+      log.error('failed to list themes', error);
     return [];
   }
   const themes: ThemeData[] = [];
@@ -103,7 +106,11 @@ function isDarkColor(hex: string | undefined): boolean | undefined {
 export function themeFromMonaco(name: string, data: unknown): ThemeFile {
   const result = monacoThemeSchema.safeParse(data);
   if (!result.success) {
-    throw new FiddleError(ErrorCode.invalidArgument, 'Not a Monaco theme', result.error.message);
+    throw new FiddleError(
+      ErrorCode.invalidArgument,
+      'Not a Monaco theme',
+      result.error.message,
+    );
   }
   const editor = result.data;
   const isDark =
@@ -121,7 +128,11 @@ export function themeId(name: string, taken: ReadonlySet<string>): string {
       .replace(/[^a-z0-9]+/g, '-')
       .replace(/^-+|-+$/g, '')
       .slice(0, 60) || 'theme';
-  let id = isBuiltinTheme(base) ? `${base}-custom` : base;
+  // `con.json` is a device on Windows.
+  let id =
+    isBuiltinTheme(base) || isWindowsReservedName(`${base}.json`)
+      ? `${base}-custom`
+      : base;
   for (let n = 2; taken.has(id); n++) id = `${base}-${n}`;
   return id;
 }
@@ -131,14 +142,22 @@ export function themeId(name: string, taken: ReadonlySet<string>): string {
  * (`writeAtomic`), and returns its path. Never overwrites: an existing file
  * fails with `EEXIST`.
  */
-export async function writeTheme(dir: string, id: string, theme: ThemeFile): Promise<string> {
+export async function writeTheme(
+  dir: string,
+  id: string,
+  theme: ThemeFile,
+): Promise<string> {
   const file = path.join(dir, `${id}.json`);
   const exists = await fsp.stat(file).then(
     () => true,
     () => false,
   );
-  if (exists) throw Object.assign(new Error(`${file} already exists`), { code: 'EEXIST' });
+  if (exists)
+    throw Object.assign(new Error(`${file} already exists`), { code: 'EEXIST' });
   const { schemaVersion: _ignored, ...data } = theme;
-  await writeAtomic(file, `${JSON.stringify({ schemaVersion: THEME_SCHEMA_VERSION, ...data }, null, 2)}\n`);
+  await writeAtomic(
+    file,
+    `${JSON.stringify({ schemaVersion: THEME_SCHEMA_VERSION, ...data }, null, 2)}\n`,
+  );
   return file;
 }

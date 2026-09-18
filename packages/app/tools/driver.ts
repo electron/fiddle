@@ -31,8 +31,11 @@ import { fileURLToPath } from 'node:url';
 import { parseArgs } from 'node:util';
 
 import { DriverError, FiddleApp, launchApp, type AppQuery } from '../e2e/driver.ts';
-import type { DialogKind, DriverMethod, WindowRef } from '../src/main/test-driver/protocol.ts';
-import { buildTestApp } from './driver-build.ts';
+import type {
+  DialogKind,
+  DriverMethod,
+  WindowRef,
+} from '../src/main/test-driver/protocol.ts';
 
 interface Session {
   status: 'starting' | 'ready' | 'error';
@@ -62,7 +65,9 @@ const sessionFile = path.join(os.tmpdir(), 'fiddle-driver', `${values.session}.j
 const cwd = process.env.INIT_CWD ?? process.cwd();
 
 function print(value: unknown, ok = true): never {
-  process.stdout.write(`${JSON.stringify(ok ? { ok, result: value } : { ok, error: value }, null, 2)}\n`);
+  process.stdout.write(
+    `${JSON.stringify(ok ? { ok, result: value } : { ok, error: value }, null, 2)}\n`,
+  );
   process.exit(ok ? 0 : 1);
 }
 
@@ -95,7 +100,11 @@ const matcher = (value: string): string | RegExp => {
 };
 
 const windowRef = (): WindowRef | undefined =>
-  values.window === undefined ? undefined : /^\d+$/.test(values.window) ? Number(values.window) : values.window;
+  values.window === undefined
+    ? undefined
+    : /^\d+$/.test(values.window)
+      ? Number(values.window)
+      : values.window;
 
 function queryFrom(args: string[]): AppQuery {
   const query: AppQuery = {};
@@ -109,7 +118,8 @@ function queryFrom(args: string[]): AppQuery {
   return query;
 }
 
-const json = (value: string | undefined): unknown => (value === undefined ? undefined : JSON.parse(value));
+const json = (value: string | undefined): unknown =>
+  value === undefined ? undefined : JSON.parse(value);
 
 /** Runs in the background: owns the app until it exits. */
 async function serve(): Promise<void> {
@@ -122,7 +132,10 @@ async function serve(): Promise<void> {
       locale: values.locale,
     });
   } catch (error) {
-    writeSession({ status: 'error', message: error instanceof Error ? error.message : String(error) });
+    writeSession({
+      status: 'error',
+      message: error instanceof Error ? error.message : String(error),
+    });
     process.exit(1);
   }
   writeSession({
@@ -146,13 +159,21 @@ async function launch(): Promise<void> {
   if (existing?.status === 'ready' && alive(existing.daemonPid)) {
     print({ ...existing, alreadyRunning: true });
   }
-  if (!values['no-build']) await buildTestApp();
+  if (!values['no-build']) await (await import('./driver-build.ts')).buildTestApp();
   fs.rmSync(sessionFile, { force: true });
   fs.mkdirSync(path.dirname(sessionFile), { recursive: true });
-  const log = fs.openSync(path.join(path.dirname(sessionFile), `${values.session}.log`), 'w');
+  const log = fs.openSync(
+    path.join(path.dirname(sessionFile), `${values.session}.log`),
+    'w',
+  );
   const daemon = spawn(
     process.execPath,
-    [...process.execArgv, fileURLToPath(import.meta.url), '__serve', ...process.argv.slice(3)],
+    [
+      ...process.execArgv,
+      fileURLToPath(import.meta.url),
+      '__serve',
+      ...process.argv.slice(3),
+    ],
     { detached: true, stdio: ['ignore', log, log], cwd },
   );
   daemon.unref();
@@ -162,7 +183,12 @@ async function launch(): Promise<void> {
     if (session?.status === 'ready') print(session);
     if (session?.status === 'error') print({ message: session.message }, false);
     if (Date.now() > deadline || (daemon.exitCode !== null && !session)) {
-      print({ message: `The app didn't start; see ${path.dirname(sessionFile)}/${values.session}.log` }, false);
+      print(
+        {
+          message: `The app didn't start; see ${path.dirname(sessionFile)}/${values.session}.log`,
+        },
+        false,
+      );
     }
     await new Promise((resolve) => setTimeout(resolve, 100));
   }
@@ -171,7 +197,9 @@ async function launch(): Promise<void> {
 async function command(name: string, args: string[]): Promise<unknown> {
   const session = readSession();
   if (session?.status !== 'ready' || !session.socketPath || !alive(session.daemonPid)) {
-    throw new Error(`No app is running for session "${values.session}". Run: yarn driver launch`);
+    throw new Error(
+      `No app is running for session "${values.session}". Run: yarn driver launch`,
+    );
   }
   const app = await FiddleApp.connect(session.socketPath);
   const window = windowRef();
@@ -185,20 +213,31 @@ async function command(name: string, args: string[]): Promise<unknown> {
         return await app.click(queryFrom(args));
       case 'type': {
         const [value = '', ...rest] = args;
-        const hasTarget = values.role !== undefined || values.text !== undefined || rest.length > 0;
+        const hasTarget =
+          values.role !== undefined || values.text !== undefined || rest.length > 0;
         await app.type(value, hasTarget ? queryFrom(rest) : undefined);
         return null;
       }
       case 'press':
-        await app.press(args[0] ?? '', values.role || values.text ? queryFrom([]) : undefined);
+        await app.press(
+          args[0] ?? '',
+          values.role || values.text ? queryFrom([]) : undefined,
+        );
         return null;
       case 'run-command':
         await app.runCommand(args[0] ?? '', window);
         return null;
       case 'screenshot':
-        return await app.screenshot(args[0] ? path.resolve(cwd, args[0]) : undefined, window);
+        return await app.screenshot(
+          args[0] ? path.resolve(cwd, args[0]) : undefined,
+          window,
+        );
       case 'eval-hook':
-        return await app.call('evalHook', { name: args[0] ?? '', args: args.slice(1).map((a) => json(a)), window });
+        return await app.call('evalHook', {
+          name: args[0] ?? '',
+          args: args.slice(1).map((a) => json(a)),
+          window,
+        });
       case 'eval':
         return await app.evaluate(args.join(' '), window);
       case 'windows':
@@ -233,7 +272,9 @@ async function command(name: string, args: string[]): Promise<unknown> {
         return { quit: true, testDir: session.testDir };
       }
       default:
-        throw new Error(`Unknown command ${JSON.stringify(name)}; see the header of tools/driver.ts`);
+        throw new Error(
+          `Unknown command ${JSON.stringify(name)}; see the header of tools/driver.ts`,
+        );
     }
   } finally {
     app.client.close();
@@ -244,8 +285,16 @@ const [name, ...args] = positionals;
 try {
   if (name === '__serve') await serve();
   else if (name === 'launch') await launch();
-  else if (!name) throw new Error('Usage: yarn driver <launch|snapshot|click|type|press|screenshot|logs|eval-hook|quit|...>');
+  else if (!name)
+    throw new Error(
+      'Usage: yarn driver <launch|snapshot|click|type|press|screenshot|logs|eval-hook|quit|...>',
+    );
   else print(await command(name, args));
 } catch (error) {
-  print(error instanceof DriverError ? error.report : { message: error instanceof Error ? error.message : String(error) }, false);
+  print(
+    error instanceof DriverError
+      ? error.report
+      : { message: error instanceof Error ? error.message : String(error) },
+    false,
+  );
 }

@@ -12,8 +12,8 @@ import {
   corruptName,
   createJsonStore,
   flushAll,
+  hasPendingWrites,
   onJsonStoreNotice,
-  renameWithRetry,
   type JsonStoreNotice,
 } from './json-store';
 
@@ -67,20 +67,37 @@ describe('reading', () => {
   });
 
   it('keeps unknown keys through a round trip', async () => {
-    await writeFile(file, JSON.stringify({ schemaVersion: 2, name: 'a', count: 1, extra: { x: 1 } }));
+    await writeFile(
+      file,
+      JSON.stringify({ schemaVersion: 2, name: 'a', count: 1, extra: { x: 1 } }),
+    );
     const store = open();
     expect(store.get()).toMatchObject({ extra: { x: 1 } });
     store.set((prev) => ({ ...prev, count: 2 }));
     await store.flush();
-    expect(await readJson()).toEqual({ schemaVersion: 2, name: 'a', count: 2, extra: { x: 1 } });
+    expect(await readJson()).toEqual({
+      schemaVersion: 2,
+      name: 'a',
+      count: 2,
+      extra: { x: 1 },
+    });
   });
 
   it('drops an invalid key in memory, logs it and leaves it on disk', async () => {
     const text = JSON.stringify({ schemaVersion: 2, name: 42, count: 5 });
     await writeFile(file, text);
-    const store = createJsonStore<Partial<Data>>({ file, schema, defaults: {}, version: 2 });
+    const store = createJsonStore<Partial<Data>>({
+      file,
+      schema,
+      defaults: {},
+      version: 2,
+    });
     expect(store.get()).toEqual({ count: 5 });
-    expect(log.warn).toHaveBeenCalledWith(expect.stringContaining('"name"'), file, expect.anything());
+    expect(log.warn).toHaveBeenCalledWith(
+      expect.stringContaining('"name"'),
+      file,
+      expect.anything(),
+    );
     expect(await readFile(file, 'utf8')).toBe(text);
 
     store.set((prev) => ({ ...prev, count: 6 }));
@@ -92,28 +109,42 @@ describe('reading', () => {
     expect(await readJson()).toEqual({ schemaVersion: 2, name: 'fixed', count: 6 });
   });
 
-  it('drops invalid values passed to set', () => {
+  it('drops invalid values passed to set', async () => {
     const store = open();
     store.set({ name: 'ok', count: 1.5 } as Data);
     expect(store.get()).toEqual({ name: 'ok' });
+    await store.flush();
   });
 });
 
 describe('corruption', () => {
   it('moves a corrupt file aside, tells the user and recovers from .bak', async () => {
-    await writeFile(`${file}.bak`, JSON.stringify({ schemaVersion: 2, name: 'backup', count: 1 }));
+    await writeFile(
+      `${file}.bak`,
+      JSON.stringify({ schemaVersion: 2, name: 'backup', count: 1 }),
+    );
     await writeFile(file, '{ not json');
     const store = open();
     expect(store.get()).toEqual({ name: 'backup', count: 1 });
     expect(notices).toEqual([
-      { kind: 'corrupt', file, movedTo: expect.stringMatching(/data\.corrupt-[\dTZ-]+\.json$/) },
+      {
+        kind: 'corrupt',
+        file,
+        movedTo: expect.stringMatching(/data\.corrupt-[\dTZ-]+\.json$/),
+      },
     ]);
     const files = await readdir(dir);
     expect(files).not.toContain('data.json');
     expect(files.filter((name) => /^data\.corrupt-.*\.json$/.test(name))).toHaveLength(1);
-    expect(await readFile(path.join(dir, files.find((n) => n.includes('corrupt'))!), 'utf8')).toBe(
-      '{ not json',
-    );
+    expect(
+      await readFile(
+        path.join(
+          dir,
+          files.find((n) => n.includes('corrupt'))!,
+        ),
+        'utf8',
+      ),
+    ).toBe('{ not json');
   });
 
   it('treats JSON that is not an object as corrupt', async () => {
@@ -130,7 +161,10 @@ describe('corruption', () => {
   });
 
   it('does not restore .bak when the file was deleted', async () => {
-    await writeFile(`${file}.bak`, JSON.stringify({ schemaVersion: 2, name: 'backup', count: 1 }));
+    await writeFile(
+      `${file}.bak`,
+      JSON.stringify({ schemaVersion: 2, name: 'backup', count: 1 }),
+    );
     expect(open().get()).toEqual(defaults);
   });
 
@@ -220,6 +254,18 @@ describe('writing', () => {
     expect(await readJson(other)).toMatchObject({ count: 2, schemaVersion: 1 });
   });
 
+  it("lets go of a store once it has written, so a closed window's draft can be collected", async () => {
+    const store = open();
+    store.set((prev) => ({ ...prev, count: 1 }));
+    expect(hasPendingWrites()).toBe(true);
+    await store.flush();
+    expect(hasPendingWrites()).toBe(false);
+
+    const flush = vi.spyOn(store, 'flush');
+    await flushAll();
+    expect(flush).not.toHaveBeenCalled();
+  });
+
   it('creates the directory if needed', async () => {
     const nested = path.join(dir, 'a', 'b', 'data.json');
     const store = createJsonStore<Data>({ file: nested, schema, defaults, version: 1 });
@@ -229,53 +275,11 @@ describe('writing', () => {
   });
 });
 
-describe('renameWithRetry', () => {
-  const errno = (code: string) => Object.assign(new Error(code), { code });
-
-  it('retries EPERM, EACCES and EBUSY on Windows with backoff', async () => {
-    const rename = vi
-      .fn<(from: string, to: string) => Promise<void>>()
-      .mockRejectedValueOnce(errno('EPERM'))
-      .mockRejectedValueOnce(errno('EACCES'))
-      .mockRejectedValueOnce(errno('EBUSY'))
-      .mockResolvedValueOnce(undefined);
-    const sleeps: number[] = [];
-    await renameWithRetry('a', 'b', {
-      platform: 'win32',
-      rename,
-      sleep: async (ms) => void sleeps.push(ms),
-    });
-    expect(rename).toHaveBeenCalledTimes(4);
-    expect(sleeps).toEqual([20, 40, 80]);
-  });
-
-  it('gives up after the time budget', async () => {
-    const rename = vi.fn(() => Promise.reject(errno('EBUSY')));
-    const sleeps: number[] = [];
-    await expect(
-      renameWithRetry('a', 'b', {
-        platform: 'win32',
-        rename,
-        sleep: async (ms) => void sleeps.push(ms),
-      }),
-    ).rejects.toMatchObject({ code: 'EBUSY' });
-    expect(sleeps.reduce((sum, ms) => sum + ms, 0)).toBe(10_000);
-  });
-
-  it('does not retry on POSIX or for other errors', async () => {
-    const posix = vi.fn(() => Promise.reject(errno('EPERM')));
-    await expect(renameWithRetry('a', 'b', { platform: 'linux', rename: posix })).rejects.toThrow();
-    expect(posix).toHaveBeenCalledTimes(1);
-
-    const other = vi.fn(() => Promise.reject(errno('ENOENT')));
-    await expect(renameWithRetry('a', 'b', { platform: 'win32', rename: other })).rejects.toThrow();
-    expect(other).toHaveBeenCalledTimes(1);
-  });
-});
-
 it('names corrupt files with a timestamp', () => {
   const now = new Date('2026-01-02T03:04:05.678Z');
-  expect(corruptName('/x/settings.json', now)).toBe('/x/settings.corrupt-2026-01-02T03-04-05-678Z.json');
+  expect(corruptName('/x/settings.json', now)).toBe(
+    '/x/settings.corrupt-2026-01-02T03-04-05-678Z.json',
+  );
   expect(corruptName('/x/settings.json.bak', now)).toBe(
     '/x/settings.bak.corrupt-2026-01-02T03-04-05-678Z.json',
   );

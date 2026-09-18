@@ -24,7 +24,6 @@ export default {
   "noBinaryTitle": "[Ţĥéŕé'š ñö Éļéçţŕöñ ƀûîļð îñ ţĥîš ƒöļðéŕ one two three four]",
   "noBinaryDetail": "[Ƒîððļé ļööķéð ƒöŕ {{file}} îñ {{path}}. one two three]",
   "cannotRemoveActive": "[Éļéçţŕöñ {{version}} îš îñ ûšé, šö îţ çáñ'ţ ƀé ŕéɱöṽéð. one two three four]",
-  "cannotChangeWhileRunning": "[Šţöþ ţĥé ƒîððļé ƀéƒöŕé ýöû çĥáñĝé ţĥé Éļéçţŕöñ ṽéŕšîöñ. one two three four five]",
   "packaging": "[Þáçķáĝîñĝ ŵîţĥ Éļéçţŕöñ Ƒöŕĝé îñ {{path}}… one two three four]",
   "making": "[Ṁáķîñĝ îñšţáļļéŕš ŵîţĥ Éļéçţŕöñ Ƒöŕĝé îñ {{path}}… one two three four]",
   "packageDone": "[Ðöñé. Ţĥé öûţþûţ îš îñ {{path}} one two three]",

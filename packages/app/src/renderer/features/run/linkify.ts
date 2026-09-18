@@ -1,4 +1,4 @@
-/** Splits a console line into text and http(s) URLs, so the URLs can be links (§17.2). */
+/** Splits a console line into text and http(s) URLs, so the URLs can be links. */
 export interface Segment {
   text: string;
   /** Set when this segment is a URL. */

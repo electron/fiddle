@@ -1,6 +1,5 @@
 /* Lucent extensions. Values the component library needs that lucent-tokens.css doesn't name.
-   lucent-tokens.css stays verbatim; add missing values here, never there.
-   Every value is derived from the handover's tables, States section or prototype. */
+   lucent-tokens.css stays verbatim; add missing values here, never there. */
 
 :root {
   /* states */
@@ -11,32 +10,59 @@
   --lu-ring-invalid: 0 0 0 3.5px color-mix(in srgb, var(--lu-spark) 22%, transparent);
 
   /* the primary sheen: white, 20% to 0 over the top 55%; 28% on hover */
-  --lu-sheen: linear-gradient(180deg, rgba(255,255,255,0.20), rgba(255,255,255,0) 55%);
-  --lu-sheen-hover: linear-gradient(180deg, rgba(255,255,255,0.28), rgba(255,255,255,0.04) 55%);
-  --lu-sheen-check: linear-gradient(180deg, rgba(255,255,255,0.20), rgba(255,255,255,0));
+  --lu-sheen: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.2),
+    rgba(255, 255, 255, 0) 55%
+  );
+  --lu-sheen-hover: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.28),
+    rgba(255, 255, 255, 0.04) 55%
+  );
+  --lu-sheen-check: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.2),
+    rgba(255, 255, 255, 0)
+  );
   /* pressed primary: action mixed 14% toward black, sheen removed */
   --lu-action-pressed: color-mix(in srgb, var(--lu-action) 86%, #000000);
 
   /* selection controls */
   --lu-knob: #ffffff;
-  --lu-shadow-knob: 0 0 0 0.5px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.2), 0 2px 5px -1px rgba(0,0,0,0.15);
-  --lu-shadow-track: inset 0 0.5px 1px rgba(0,0,0,0.12);
-  --lu-shadow-check: inset 0 0.5px 0 rgba(255,255,255,0.4), 0 1px 2px color-mix(in srgb, var(--lu-action) 35%, transparent);
+  --lu-shadow-knob:
+    0 0 0 0.5px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.2),
+    0 2px 5px -1px rgba(0, 0, 0, 0.15);
+  --lu-shadow-track: inset 0 0.5px 1px rgba(0, 0, 0, 0.12);
+  --lu-shadow-check:
+    inset 0 0.5px 0 rgba(255, 255, 255, 0.4),
+    0 1px 2px color-mix(in srgb, var(--lu-action) 35%, transparent);
 
   /* key caps: 0.5px line-strong ring with a 1px bottom lip */
-  --lu-shadow-kbd: 0 0 0 0.5px var(--lu-line-strong), 0 1px 0 0.5px color-mix(in srgb, var(--lu-line-strong) 60%, transparent);
+  --lu-shadow-kbd:
+    0 0 0 0.5px var(--lu-line-strong),
+    0 1px 0 0.5px color-mix(in srgb, var(--lu-line-strong) 60%, transparent);
 
   /* cards: 0.5px button-edge ring; hover adds a soft 10/24 shadow */
-  --lu-shadow-card: inset 0 0 0 0.5px var(--lu-button-edge), 0 1px 2px rgba(0,0,0,0.04);
-  --lu-shadow-card-hover: inset 0 0 0 0.5px var(--lu-button-edge), 0 2px 4px rgba(0,0,0,0.04), 0 10px 24px -12px rgba(20,24,48,0.28);
+  --lu-shadow-card:
+    inset 0 0 0 0.5px var(--lu-button-edge), 0 1px 2px rgba(0, 0, 0, 0.04);
+  --lu-shadow-card-hover:
+    inset 0 0 0 0.5px var(--lu-button-edge), 0 2px 4px rgba(0, 0, 0, 0.04),
+    0 10px 24px -12px rgba(20, 24, 48, 0.28);
 
   /* overlays: shadow-popover plus the two rims */
-  --lu-shadow-overlay: var(--lu-shadow-popover), inset 0 0.5px 0 var(--lu-rim), inset 0 0 0 0.5px var(--lu-rim-soft);
+  --lu-shadow-overlay:
+    var(--lu-shadow-popover), inset 0 0.5px 0 var(--lu-rim),
+    inset 0 0 0 0.5px var(--lu-rim-soft);
   /* tooltips: 0.5px white rim at 14% */
-  --lu-tooltip-rim: rgba(255,255,255,0.14);
+  --lu-tooltip-rim: rgba(255, 255, 255, 0.14);
 
   /* progress bar: accent with a lighter start (accent 75% into white) */
-  --lu-progress-bar: linear-gradient(90deg, color-mix(in srgb, var(--lu-accent) 75%, #ffffff), var(--lu-accent));
+  --lu-progress-bar: linear-gradient(
+    90deg,
+    color-mix(in srgb, var(--lu-accent) 75%, #ffffff),
+    var(--lu-accent)
+  );
 
   /* the running pill's dot halo, and the badge dot's halo in its own colour */
   --lu-halo-spark: 0 0 0 2.5px color-mix(in srgb, var(--lu-spark) 22%, transparent);
@@ -51,17 +77,18 @@
   /* a hairline on the inside right edge (settings nav) */
   --lu-hairline-end: inset calc(-1 * var(--lu-size-hairline)) 0 0 var(--lu-line);
 
-  /* type the scale doesn't name, from the window anatomy and the handover's close-ups */
-  --lu-type-window-title: 650 13px/16px var(--lu-font-sans); --lu-type-window-title-tracking: -0.01em;
-  --lu-type-tab: 500 12.5px/16px var(--lu-font-sans);             /* tabs */
-  --lu-type-console-title: 600 12.5px/16px var(--lu-font-sans);   /* "Console" in its bar */
-  --lu-type-status: 500 11.5px/14px var(--lu-font-sans);          /* status bar, process labels */
-  --lu-type-hint: 400 12px/16px var(--lu-font-sans);              /* "Edited", key-cap hints */
-  --lu-type-lens: 400 12.5px/18px var(--lu-font-sans);            /* the error lens */
-  --lu-type-console: 400 12px/18px var(--lu-font-mono);           /* console rows */
-  --lu-type-console-process: 500 11px/18px var(--lu-font-sans);   /* the console's process column */
-  --lu-type-count: 600 10px/16px var(--lu-font-sans);             /* a tab's error count */
-  --lu-type-pill: 600 10.5px/16px var(--lu-font-sans);            /* a sidebar row's "1 error" */
+  /* type the scale doesn't name */
+  --lu-type-window-title: 650 13px/16px var(--lu-font-sans);
+  --lu-type-window-title-tracking: -0.01em;
+  --lu-type-tab: 500 12.5px/16px var(--lu-font-sans); /* tabs */
+  --lu-type-console-title: 600 12.5px/16px var(--lu-font-sans); /* "Console" in its bar */
+  --lu-type-status: 500 11.5px/14px var(--lu-font-sans); /* status bar, process labels */
+  --lu-type-hint: 400 12px/16px var(--lu-font-sans); /* "Edited", key-cap hints */
+  --lu-type-lens: 400 12.5px/18px var(--lu-font-sans); /* the error lens */
+  --lu-type-console: 400 12px/18px var(--lu-font-mono); /* console rows */
+  --lu-type-console-process: 500 11px/18px var(--lu-font-sans); /* the console's process column */
+  --lu-type-count: 600 10px/16px var(--lu-font-sans); /* a tab's error count */
+  --lu-type-pill: 600 10.5px/16px var(--lu-font-sans); /* a sidebar row's "1 error" */
 
   /* radii the scale doesn't name */
   --lu-radius-tooltip: 8px;
@@ -87,17 +114,29 @@
    specimens only. The app itself never paints it; the OS material shows through instead. */
 :root {
   --lu-shadow-sheet: var(--lu-shadow-island);
-  --lu-specimen-stage: radial-gradient(70% 90% at 6% 0%, #a9d8ff, rgba(169,216,255,0) 70%), radial-gradient(60% 90% at 96% 8%, #bff3fb, rgba(191,243,251,0) 70%), radial-gradient(70% 90% at 92% 104%, #c7d3ff, rgba(199,211,255,0) 70%), radial-gradient(60% 80% at 8% 100%, #9feaf9, rgba(159,234,249,0) 70%), #eaf3fb;
+  --lu-specimen-stage:
+    radial-gradient(70% 90% at 6% 0%, #a9d8ff, rgba(169, 216, 255, 0) 70%),
+    radial-gradient(60% 90% at 96% 8%, #bff3fb, rgba(191, 243, 251, 0) 70%),
+    radial-gradient(70% 90% at 92% 104%, #c7d3ff, rgba(199, 211, 255, 0) 70%),
+    radial-gradient(60% 80% at 8% 100%, #9feaf9, rgba(159, 234, 249, 0) 70%), #eaf3fb;
 }
 @media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) {
-    --lu-shadow-sheet: var(--lu-shadow-island), inset 0 0.5px 0 rgba(255,255,255,0.08);
-    --lu-specimen-stage: radial-gradient(70% 90% at 6% 0%, #1f4fd6, rgba(31,79,214,0) 70%), radial-gradient(60% 90% at 96% 8%, #16566a, rgba(22,86,106,0) 70%), radial-gradient(70% 90% at 92% 104%, #243a9e, rgba(36,58,158,0) 70%), radial-gradient(60% 80% at 8% 100%, #0f5a6b, rgba(15,90,107,0) 70%), #10121b;
+  :root:not([data-theme='light']) {
+    --lu-shadow-sheet: var(--lu-shadow-island), inset 0 0.5px 0 rgba(255, 255, 255, 0.08);
+    --lu-specimen-stage:
+      radial-gradient(70% 90% at 6% 0%, #1f4fd6, rgba(31, 79, 214, 0) 70%),
+      radial-gradient(60% 90% at 96% 8%, #16566a, rgba(22, 86, 106, 0) 70%),
+      radial-gradient(70% 90% at 92% 104%, #243a9e, rgba(36, 58, 158, 0) 70%),
+      radial-gradient(60% 80% at 8% 100%, #0f5a6b, rgba(15, 90, 107, 0) 70%), #10121b;
   }
 }
-:root[data-theme="dark"] {
-  --lu-shadow-sheet: var(--lu-shadow-island), inset 0 0.5px 0 rgba(255,255,255,0.08);
-  --lu-specimen-stage: radial-gradient(70% 90% at 6% 0%, #1f4fd6, rgba(31,79,214,0) 70%), radial-gradient(60% 90% at 96% 8%, #16566a, rgba(22,86,106,0) 70%), radial-gradient(70% 90% at 92% 104%, #243a9e, rgba(36,58,158,0) 70%), radial-gradient(60% 80% at 8% 100%, #0f5a6b, rgba(15,90,107,0) 70%), #10121b;
+:root[data-theme='dark'] {
+  --lu-shadow-sheet: var(--lu-shadow-island), inset 0 0.5px 0 rgba(255, 255, 255, 0.08);
+  --lu-specimen-stage:
+    radial-gradient(70% 90% at 6% 0%, #1f4fd6, rgba(31, 79, 214, 0) 70%),
+    radial-gradient(60% 90% at 96% 8%, #16566a, rgba(22, 86, 106, 0) 70%),
+    radial-gradient(70% 90% at 92% 104%, #243a9e, rgba(36, 58, 158, 0) 70%),
+    radial-gradient(60% 80% at 8% 100%, #0f5a6b, rgba(15, 90, 107, 0) 70%), #10121b;
 }
 
 /* Materials that went opaque don't need a blur. */
@@ -122,16 +161,19 @@
    contrast and high contrast keep their own values: this only applies with no
    such preference, and `:where()` keeps it below the high-contrast rules. */
 @media (prefers-reduced-transparency: no-preference) and (prefers-contrast: no-preference) {
-  :root:where([data-material="vibrancy"], [data-material="acrylic"]) {
-    --lu-material-chrome: rgba(250,250,253,0.36);
+  :root:where([data-material='vibrancy'], [data-material='acrylic']) {
+    --lu-material-chrome: rgba(250, 250, 253, 0.36);
   }
-  :root[data-theme="dark"]:where([data-material="vibrancy"], [data-material="acrylic"]) {
-    --lu-material-chrome: rgba(22,24,36,0.42);
+  :root[data-theme='dark']:where([data-material='vibrancy'], [data-material='acrylic']) {
+    --lu-material-chrome: rgba(22, 24, 36, 0.42);
   }
 }
 @media (prefers-reduced-transparency: no-preference) and (prefers-contrast: no-preference) and (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]):where([data-material="vibrancy"], [data-material="acrylic"]) {
-    --lu-material-chrome: rgba(22,24,36,0.42);
+  :root:not([data-theme='light']):where(
+      [data-material='vibrancy'],
+      [data-material='acrylic']
+    ) {
+    --lu-material-chrome: rgba(22, 24, 36, 0.42);
   }
 }
 
@@ -140,172 +182,74 @@
   :root {
     --lu-size-hairline: 1px;
     --lu-line: var(--lu-line-strong);
-    --lu-material-chrome: rgba(250,250,253,0.9);
+    --lu-material-chrome: rgba(250, 250, 253, 0.9);
   }
-  :root[data-theme="dark"] {
-    --lu-material-chrome: rgba(22,24,36,0.9);
+  :root[data-theme='dark'] {
+    --lu-material-chrome: rgba(22, 24, 36, 0.9);
   }
 }
 @media (prefers-contrast: more) and (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) {
-    --lu-material-chrome: rgba(22,24,36,0.9);
+  :root:not([data-theme='light']) {
+    --lu-material-chrome: rgba(22, 24, 36, 0.9);
   }
 }
 
-/* High contrast (REQUIREMENTS §10). The built-in high-contrast themes and OS high
+/* High contrast. The built-in high-contrast themes and OS high
    contrast (nativeTheme.shouldUseHighContrastColors) set data-contrast="high" on <html>.
    Glass goes opaque, hairlines go 1px, text reaches 7:1 and UI lines 3:1. */
-:root[data-contrast="high"] {
+:root[data-contrast='high'] {
   --lu-size-hairline: 1px;
   --lu-blur-chrome: none;
   --lu-blur-overlay: none;
   --lu-blur-thin: none;
   --lu-blur-tooltip: none;
   --lu-blur-scrim: none;
-  --lu-window: #ffffff;
-  --lu-surface: #ffffff;
-  --lu-surface-raised: #ffffff;
-  --lu-surface-sunken: #f0f0f0;
-  --lu-hover: rgba(0,0,0,0.10);
-  --lu-fill: rgba(0,0,0,0.10);
-  --lu-fill-strong: rgba(0,0,0,0.18);
-  --lu-line: #6e6e6e;
-  --lu-line-strong: #000000;
-  --lu-material-chrome: #ffffff;
-  --lu-material-thin: #ffffff;
-  --lu-material-overlay: #ffffff;
-  --lu-capsule: #ffffff;
-  --lu-capsule-hover: #e8e8e8;
-  --lu-chip: #e8e8e8;
-  --lu-rim: #000000;
-  --lu-rim-soft: #6e6e6e;
-  --lu-scrim: rgba(0,0,0,0.6);
-  --lu-ink: #000000;
-  --lu-ink-muted: #262626;
-  --lu-ink-faint: #3d3d3d;
-  --lu-accent: #0f4a85;
-  --lu-accent-soft: #d6e6f5;
-  --lu-action: #0f4a85;
-  --lu-on-action: #ffffff;
-  --lu-focus-ring: #b83b00;
-  --lu-spark: #a1150a;
-  --lu-spark-soft: #fbe3e1;
-  --lu-success: #0e6b2c;
-  --lu-warning: #7a4a00;
-  --lu-field: #ffffff;
-  --lu-field-on-glass: #ffffff;
-  --lu-field-edge-on-glass: #000000;
-  --lu-button: #ffffff;
-  --lu-button-hover: #e8e8e8;
-  --lu-button-edge: #000000;
-  --lu-thumb: #6e6e6e;
-  --lu-kbd: #ffffff;
-  --lu-tooltip: #000000;
-  --lu-tooltip-ink: #ffffff;
-  --lu-syntax-keyword: #0f4a85;
-  --lu-syntax-string: #8b2500;
-  --lu-syntax-function: #5c2699;
-  --lu-syntax-number: #0e6b2c;
-  --lu-syntax-comment: #4d4d4d;
-  --lu-cursor-line: #ececec;
-}
-@media (prefers-color-scheme: dark) {
-  :root[data-contrast="high"]:not([data-theme="light"]) {
-    --lu-window: #000000;
-    --lu-surface: #000000;
-    --lu-surface-raised: #0d0d0d;
-    --lu-surface-sunken: #000000;
-    --lu-hover: rgba(255,255,255,0.16);
-    --lu-fill: rgba(255,255,255,0.14);
-    --lu-fill-strong: rgba(255,255,255,0.24);
-    --lu-line: #8c8c8c;
-    --lu-line-strong: #ffffff;
-    --lu-material-chrome: #000000;
-    --lu-material-thin: #000000;
-    --lu-material-overlay: #000000;
-    --lu-capsule: #000000;
-    --lu-capsule-hover: #1f1f1f;
-    --lu-chip: #262626;
-    --lu-rim: #ffffff;
-    --lu-rim-soft: #8c8c8c;
-    --lu-scrim: rgba(0,0,0,0.7);
-    --lu-ink: #ffffff;
-    --lu-ink-muted: #e0e0e0;
-    --lu-ink-faint: #c7c7c7;
-    --lu-accent: #9feaf9;
-    --lu-accent-soft: #0a3c4a;
-    --lu-action: #9feaf9;
-    --lu-on-action: #000000;
-    --lu-focus-ring: #f38518;
-    --lu-spark: #ff8a8a;
-    --lu-spark-soft: #3d0a0a;
-    --lu-success: #7ee8a4;
-    --lu-warning: #ffd479;
-    --lu-field: #000000;
-    --lu-field-on-glass: #000000;
-    --lu-field-edge-on-glass: #ffffff;
-    --lu-button: #000000;
-    --lu-button-hover: #1f1f1f;
-    --lu-button-edge: #ffffff;
-    --lu-thumb: #8c8c8c;
-    --lu-kbd: #000000;
-    --lu-tooltip: #ffffff;
-    --lu-tooltip-ink: #000000;
-    --lu-syntax-keyword: #9feaf9;
-    --lu-syntax-string: #ffc799;
-    --lu-syntax-function: #a8c8ff;
-    --lu-syntax-number: #ffb0b0;
-    --lu-syntax-comment: #b3b3b3;
-    --lu-cursor-line: #1a1a1a;
-  }
-}
-:root[data-contrast="high"][data-theme="dark"] {
-  --lu-window: #000000;
-  --lu-surface: #000000;
-  --lu-surface-raised: #0d0d0d;
-  --lu-surface-sunken: #000000;
-  --lu-hover: rgba(255,255,255,0.16);
-  --lu-fill: rgba(255,255,255,0.14);
-  --lu-fill-strong: rgba(255,255,255,0.24);
-  --lu-line: #8c8c8c;
-  --lu-line-strong: #ffffff;
-  --lu-material-chrome: #000000;
-  --lu-material-thin: #000000;
-  --lu-material-overlay: #000000;
-  --lu-capsule: #000000;
-  --lu-capsule-hover: #1f1f1f;
-  --lu-chip: #262626;
-  --lu-rim: #ffffff;
-  --lu-rim-soft: #8c8c8c;
-  --lu-scrim: rgba(0,0,0,0.7);
-  --lu-ink: #ffffff;
-  --lu-ink-muted: #e0e0e0;
-  --lu-ink-faint: #c7c7c7;
-  --lu-accent: #9feaf9;
-  --lu-accent-soft: #0a3c4a;
-  --lu-action: #9feaf9;
-  --lu-on-action: #000000;
-  --lu-focus-ring: #f38518;
-  --lu-spark: #ff8a8a;
-  --lu-spark-soft: #3d0a0a;
-  --lu-success: #7ee8a4;
-  --lu-warning: #ffd479;
-  --lu-field: #000000;
-  --lu-field-on-glass: #000000;
-  --lu-field-edge-on-glass: #ffffff;
-  --lu-button: #000000;
-  --lu-button-hover: #1f1f1f;
-  --lu-button-edge: #ffffff;
-  --lu-thumb: #8c8c8c;
-  --lu-kbd: #000000;
-  --lu-tooltip: #ffffff;
-  --lu-tooltip-ink: #000000;
-  --lu-syntax-keyword: #9feaf9;
-  --lu-syntax-string: #ffc799;
-  --lu-syntax-function: #a8c8ff;
-  --lu-syntax-number: #ffb0b0;
-  --lu-syntax-comment: #b3b3b3;
-  --lu-cursor-line: #1a1a1a;
+  --lu-window: light-dark(#ffffff, #000000);
+  --lu-surface: light-dark(#ffffff, #000000);
+  --lu-surface-raised: light-dark(#ffffff, #0d0d0d);
+  --lu-surface-sunken: light-dark(#f0f0f0, #000000);
+  --lu-hover: light-dark(rgba(0, 0, 0, 0.1), rgba(255, 255, 255, 0.16));
+  --lu-fill: light-dark(rgba(0, 0, 0, 0.1), rgba(255, 255, 255, 0.14));
+  --lu-fill-strong: light-dark(rgba(0, 0, 0, 0.18), rgba(255, 255, 255, 0.24));
+  --lu-line: light-dark(#6e6e6e, #8c8c8c);
+  --lu-line-strong: light-dark(#000000, #ffffff);
+  --lu-material-chrome: light-dark(#ffffff, #000000);
+  --lu-material-thin: light-dark(#ffffff, #000000);
+  --lu-material-overlay: light-dark(#ffffff, #000000);
+  --lu-capsule: light-dark(#ffffff, #000000);
+  --lu-capsule-hover: light-dark(#e8e8e8, #1f1f1f);
+  --lu-chip: light-dark(#e8e8e8, #262626);
+  --lu-rim: light-dark(#000000, #ffffff);
+  --lu-rim-soft: light-dark(#6e6e6e, #8c8c8c);
+  --lu-scrim: light-dark(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.7));
+  --lu-ink: light-dark(#000000, #ffffff);
+  --lu-ink-muted: light-dark(#262626, #e0e0e0);
+  --lu-ink-faint: light-dark(#3d3d3d, #c7c7c7);
+  --lu-accent: light-dark(#0f4a85, #9feaf9);
+  --lu-accent-soft: light-dark(#d6e6f5, #0a3c4a);
+  --lu-action: light-dark(#0f4a85, #9feaf9);
+  --lu-on-action: light-dark(#ffffff, #000000);
+  --lu-focus-ring: light-dark(#b83b00, #f38518);
+  --lu-spark: light-dark(#a1150a, #ff8a8a);
+  --lu-spark-soft: light-dark(#fbe3e1, #3d0a0a);
+  --lu-success: light-dark(#0e6b2c, #7ee8a4);
+  --lu-warning: light-dark(#7a4a00, #ffd479);
+  --lu-field: light-dark(#ffffff, #000000);
+  --lu-field-on-glass: light-dark(#ffffff, #000000);
+  --lu-field-edge-on-glass: light-dark(#000000, #ffffff);
+  --lu-button: light-dark(#ffffff, #000000);
+  --lu-button-hover: light-dark(#e8e8e8, #1f1f1f);
+  --lu-button-edge: light-dark(#000000, #ffffff);
+  --lu-thumb: light-dark(#6e6e6e, #8c8c8c);
+  --lu-kbd: light-dark(#ffffff, #000000);
+  --lu-tooltip: light-dark(#000000, #ffffff);
+  --lu-tooltip-ink: light-dark(#ffffff, #000000);
+  --lu-syntax-keyword: light-dark(#0f4a85, #9feaf9);
+  --lu-syntax-string: light-dark(#8b2500, #ffc799);
+  --lu-syntax-function: light-dark(#5c2699, #a8c8ff);
+  --lu-syntax-number: light-dark(#0e6b2c, #ffb0b0);
+  --lu-syntax-comment: light-dark(#4d4d4d, #b3b3b3);
+  --lu-cursor-line: light-dark(#ececec, #1a1a1a);
 }
 
 /* Forced colours (Windows high contrast): glass and tints drop to system colours.

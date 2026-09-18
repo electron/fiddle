@@ -1,9 +1,9 @@
 /**
- * Editor panes (REQUIREMENTS §17.2): one row of side-by-side panes, each
- * showing one visible file, no file in two panes. `Window.layout.panes` lists
- * their files from the start; fewer than two entries means the editor isn't
- * split. `fiddle.activeFile` is the focused pane's file. Pure; shared by main
- * (which keeps the panes in step with the active file) and the renderer.
+ * Editor panes: one row of side-by-side panes, each showing one visible file,
+ * no file in two panes. `Window.layout.panes` lists their files from the
+ * start; fewer than two entries means the editor isn't split.
+ * `fiddle.activeFile` is the focused pane's file. Pure; shared by main (which
+ * keeps the panes in step with the active file) and the renderer.
  */
 
 /** At most this many editor panes side by side. */
@@ -26,7 +26,11 @@ function stored(panes: readonly string[]): string[] {
  * at most `MAX_PANES`, always including `active` (the focused pane). One entry
  * means the editor isn't split; none, that no file is open.
  */
-export function shownPanes(panes: readonly string[], visible: readonly string[], active: string | null): string[] {
+export function shownPanes(
+  panes: readonly string[],
+  visible: readonly string[],
+  active: string | null,
+): string[] {
   if (active === null) return [];
   const shown = unique(panes)
     .filter((name) => visible.includes(name))
@@ -49,11 +53,18 @@ export function followActiveFile(
 ): readonly string[] {
   if (panes.length === 0) return panes;
   let result = [...panes];
-  if (next !== null && !result.includes(next) && previous !== null && result.includes(previous)) {
+  if (
+    next !== null &&
+    !result.includes(next) &&
+    previous !== null &&
+    result.includes(previous)
+  ) {
     result = result.map((name) => (name === previous ? next : name));
   }
   result = stored(unique(result).filter((name) => visible.includes(name)));
-  return result.length === panes.length && result.every((name, i) => name === panes[i]) ? panes : result;
+  return result.length === panes.length && result.every((name, i) => name === panes[i])
+    ? panes
+    : result;
 }
 
 /**

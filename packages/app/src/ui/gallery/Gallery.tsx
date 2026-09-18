@@ -137,7 +137,15 @@ function Section({ title, children }: { title: string; children: ReactNode }) {
   );
 }
 
-function Specimen({ label, wide, children }: { label: string; wide?: boolean; children: ReactNode }) {
+function Specimen({
+  label,
+  wide,
+  children,
+}: {
+  label: string;
+  wide?: boolean;
+  children: ReactNode;
+}) {
   return (
     <div className={styles.specimen} data-wide={wide || undefined}>
       <div className={styles.specimenLabel}>{label}</div>
@@ -168,10 +176,19 @@ function StageWell({ children }: { children: ReactNode }) {
   return <div className={styles.stageWell}>{children}</div>;
 }
 
-function RunCapsule({ state }: { state: 'ready' | 'downloading' | 'starting' | 'running' }) {
+function RunCapsule({
+  state,
+}: {
+  state: 'ready' | 'downloading' | 'starting' | 'running';
+}) {
   return (
     <ToolbarCapsule label="Run controls">
-      <Select aria-label="Electron version" items={VERSIONS} defaultValue="43.0.0" style={{ width: 180 }} />
+      <Select
+        aria-label="Electron version"
+        items={VERSIONS}
+        defaultValue="43.0.0"
+        style={{ width: 180 }}
+      />
       {state === 'ready' && (
         <Button variant="primary" icon="play" kbd="⌘R" style={{ minWidth: 108 }}>
           Run
@@ -188,7 +205,13 @@ function RunCapsule({ state }: { state: 'ready' | 'downloading' | 'starting' | '
         </Button>
       )}
       {state === 'running' && (
-        <Button variant="stop" icon="stop" kbd="⌘R" isPressed={false} style={{ minWidth: 108 }}>
+        <Button
+          variant="stop"
+          icon="stop"
+          kbd="⌘R"
+          isPressed={false}
+          style={{ minWidth: 108 }}
+        >
           Stop
         </Button>
       )}
@@ -205,7 +228,14 @@ function SplitDemo() {
         <div className={styles.pane} style={{ width }}>
           Sidebar · {width}px
         </div>
-        <SplitHandle value={width} min={100} max={260} onChange={setWidth} onReset={() => setWidth(160)} label="Resize sidebar" />
+        <SplitHandle
+          value={width}
+          min={100}
+          max={260}
+          onChange={setWidth}
+          onReset={() => setWidth(160)}
+          label="Resize sidebar"
+        />
         <div className={styles.pane} style={{ flex: 1 }}>
           Editor
         </div>
@@ -240,7 +270,8 @@ function LiveOverlays() {
           onPress={async () => {
             const ok = await confirmDialog({
               title: 'Delete this fiddle?',
-              message: 'It will be removed from this computer. Published gists stay online.',
+              message:
+                'It will be removed from this computer. Published gists stay online.',
               confirmLabel: 'Delete',
               cancelLabel: 'Cancel',
               tone: 'danger',
@@ -269,13 +300,24 @@ function LiveOverlays() {
       </Row>
       <Row>
         <Button
-          onPress={() => showToast({ tone: 'success', title: 'Copied', description: 'The gist link is on your clipboard.' })}
+          onPress={() =>
+            showToast({
+              tone: 'success',
+              title: 'Copied',
+              description: 'The gist link is on your clipboard.',
+            })
+          }
         >
           Show a toast
         </Button>
         <Button
           onPress={() =>
-            showToast({ tone: 'info', title: 'Electron 44.0.0-beta.3 is ready', actionLabel: 'Switch', onAction: () => {} })
+            showToast({
+              tone: 'info',
+              title: 'Electron 44.0.0-beta.3 is ready',
+              actionLabel: 'Switch',
+              onAction: () => {},
+            })
           }
         >
           Toast with an action
@@ -311,7 +353,10 @@ export interface GalleryProps {
   initialNoMaterial?: boolean;
 }
 
-export function Gallery({ initialAppearance = 'dark', initialNoMaterial = false }: GalleryProps) {
+export function Gallery({
+  initialAppearance = 'dark',
+  initialNoMaterial = false,
+}: GalleryProps) {
   const [appearance, setAppearance] = useState<Appearance>(initialAppearance);
   const [noMaterial, setNoMaterial] = useState(initialNoMaterial);
   const [file, setFile] = useState('renderer');
@@ -361,21 +406,48 @@ export function Gallery({ initialAppearance = 'dark', initialNoMaterial = false 
         <div className={styles.body}>
           <aside className={styles.sidebar}>
             <div className={styles.sideHead}>Main process</div>
-            <Tree aria-label="Main process files" variant="sidebar" value={file} onChange={setFile}>
+            <Tree
+              aria-label="Main process files"
+              variant="sidebar"
+              value={file}
+              onChange={setFile}
+            >
               <TreeRow id="main" label="main.js" />
             </Tree>
             <div className={styles.sideHead}>Preload</div>
-            <Tree aria-label="Preload files" variant="sidebar" value={file} onChange={setFile}>
+            <Tree
+              aria-label="Preload files"
+              variant="sidebar"
+              value={file}
+              onChange={setFile}
+            >
               <TreeRow id="preload" label="preload.js" />
             </Tree>
             <div className={styles.sideHead}>Renderer</div>
-            <Tree aria-label="Renderer files" variant="sidebar" value={file} onChange={setFile}>
+            <Tree
+              aria-label="Renderer files"
+              variant="sidebar"
+              value={file}
+              onChange={setFile}
+            >
               <TreeRow id="html" label="index.html" />
-              <TreeRow id="renderer" label="renderer.js" pill="1 error" unsaved unsavedLabel="Unsaved changes" />
+              <TreeRow
+                id="renderer"
+                label="renderer.js"
+                pill="1 error"
+                unsaved
+                unsavedLabel="Unsaved changes"
+              />
               <TreeRow id="css" label="styles.css" />
             </Tree>
             <div className={styles.sideHead}>Packages</div>
-            <TextField aria-label="Add a package" placeholder="Add a package" size="sm" icon="search" onGlass />
+            <TextField
+              aria-label="Add a package"
+              placeholder="Add a package"
+              size="sm"
+              icon="search"
+              onGlass
+            />
           </aside>
 
           <main className={styles.sheet}>
@@ -497,7 +569,12 @@ export function Gallery({ initialAppearance = 'dark', initialNoMaterial = false 
               <Section title="Inputs">
                 <Specimen label="Text field · label, icon, description, invalid, disabled">
                   <Col>
-                    <TextField label="Gist URL" icon="link" placeholder="https://gist.github.com/…" style={{ width: 300 }} />
+                    <TextField
+                      label="Gist URL"
+                      icon="link"
+                      placeholder="https://gist.github.com/…"
+                      style={{ width: 300 }}
+                    />
                     <TextField
                       label="Fiddle name"
                       defaultValue="window-vibrancy"
@@ -522,7 +599,13 @@ export function Gallery({ initialAppearance = 'dark', initialNoMaterial = false 
                 </Specimen>
                 <Specimen label="Text field · small, suffix, on glass">
                   <Col>
-                    <TextField aria-label="Filter output" size="sm" icon="search" placeholder="Filter output" style={{ width: 220 }} />
+                    <TextField
+                      aria-label="Filter output"
+                      size="sm"
+                      icon="search"
+                      placeholder="Filter output"
+                      style={{ width: 220 }}
+                    />
                     <TextField
                       label="Add module"
                       icon="search"
@@ -531,26 +614,54 @@ export function Gallery({ initialAppearance = 'dark', initialNoMaterial = false 
                       style={{ width: 300 }}
                     />
                     <GlassWell>
-                      <TextField aria-label="Add a package" placeholder="Add a package" size="sm" icon="search" onGlass style={{ width: 204 }} />
+                      <TextField
+                        aria-label="Add a package"
+                        placeholder="Add a package"
+                        size="sm"
+                        icon="search"
+                        onGlass
+                        style={{ width: 204 }}
+                      />
                     </GlassWell>
                   </Col>
                 </Specimen>
                 <Specimen label="Form field · stacked, inline, disabled">
                   <Col>
-                    <FormField label="Electron flags" helper="Passed to Electron when a fiddle runs.">
-                      <TextField aria-label="Electron flags" defaultValue="--enable-logging" mono style={{ width: 260 }} />
+                    <FormField
+                      label="Electron flags"
+                      helper="Passed to Electron when a fiddle runs."
+                    >
+                      <TextField
+                        aria-label="Electron flags"
+                        defaultValue="--enable-logging"
+                        mono
+                        style={{ width: 260 }}
+                      />
                     </FormField>
-                    <FormField label="Autosave" inline helper="Saves to disk after 2 seconds without typing.">
+                    <FormField
+                      label="Autosave"
+                      inline
+                      helper="Saves to disk after 2 seconds without typing."
+                    >
                       <Switch defaultSelected>On</Switch>
                     </FormField>
-                    <FormField label="Telemetry" isDisabled helper="Managed by your organization.">
+                    <FormField
+                      label="Telemetry"
+                      isDisabled
+                      helper="Managed by your organization."
+                    >
                       <Switch>Off</Switch>
                     </FormField>
                   </Col>
                 </Specimen>
                 <Specimen label="Select · md, small, placeholder, invalid, disabled">
                   <Col>
-                    <Select label="Electron version" items={VERSIONS} defaultValue="43.0.0" style={{ width: 240 }} />
+                    <Select
+                      label="Electron version"
+                      items={VERSIONS}
+                      defaultValue="43.0.0"
+                      style={{ width: 240 }}
+                    />
                     <Select
                       label="Architecture"
                       size="sm"
@@ -561,7 +672,12 @@ export function Gallery({ initialAppearance = 'dark', initialNoMaterial = false 
                       defaultValue="arm64"
                       style={{ width: 140 }}
                     />
-                    <Select label="Example" placeholder="Choose an example" items={[{ id: 'a', label: 'Tray icon' }]} style={{ width: 240 }} />
+                    <Select
+                      label="Example"
+                      placeholder="Choose an example"
+                      items={[{ id: 'a', label: 'Tray icon' }]}
+                      style={{ width: 240 }}
+                    />
                     <Select
                       label="Theme"
                       items={[{ id: 'x', label: 'Solarized' }]}
@@ -570,11 +686,21 @@ export function Gallery({ initialAppearance = 'dark', initialNoMaterial = false 
                       errorMessage="This theme failed to load."
                       style={{ width: 240 }}
                     />
-                    <Select label="Mirror" items={[{ id: 'd', label: 'Default' }]} defaultValue="d" isDisabled style={{ width: 240 }} />
+                    <Select
+                      label="Mirror"
+                      items={[{ id: 'd', label: 'Default' }]}
+                      defaultValue="d"
+                      isDisabled
+                      style={{ width: 240 }}
+                    />
                   </Col>
                 </Specimen>
                 <Specimen label="Select · open menu, groups and right-aligned hints">
-                  <Menu aria-label="Electron version" selectionMode="single" defaultSelectedKeys={['43.0.0']}>
+                  <Menu
+                    aria-label="Electron version"
+                    selectionMode="single"
+                    defaultSelectedKeys={['43.0.0']}
+                  >
                     <MenuSection title="Stable">
                       <MenuItem id="43.0.0" hint="latest">
                         Electron 43.0.0
@@ -602,7 +728,11 @@ export function Gallery({ initialAppearance = 'dark', initialNoMaterial = false 
                         Bisect
                       </MenuItem>
                       <MenuSeparator />
-                      <MenuSection title="Layout" selectionMode="single" defaultSelectedKeys={['split']}>
+                      <MenuSection
+                        title="Layout"
+                        selectionMode="single"
+                        defaultSelectedKeys={['split']}
+                      >
                         <MenuItem id="split">Split</MenuItem>
                         <MenuItem id="tabs">Tabs</MenuItem>
                       </MenuSection>
@@ -648,7 +778,11 @@ export function Gallery({ initialAppearance = 'dark', initialNoMaterial = false 
                       <Radio value="dark">Dark</Radio>
                       <Radio value="light">Light</Radio>
                     </RadioGroup>
-                    <RadioGroup label="Architecture" orientation="horizontal" defaultValue="arm64">
+                    <RadioGroup
+                      label="Architecture"
+                      orientation="horizontal"
+                      defaultValue="arm64"
+                    >
                       <Radio value="arm64">arm64</Radio>
                       <Radio value="x64">x64</Radio>
                       <Radio value="ia32" isDisabled>
@@ -744,17 +878,31 @@ export function Gallery({ initialAppearance = 'dark', initialNoMaterial = false 
                 </Specimen>
                 <Specimen label="Tree · on the sheet, nested, pill, unsaved">
                   <div style={{ width: 240 }}>
-                    <Tree aria-label="Fiddle files" defaultValue="renderer-2" defaultExpandedKeys={['root']}>
+                    <Tree
+                      aria-label="Fiddle files"
+                      defaultValue="renderer-2"
+                      defaultExpandedKeys={['root']}
+                    >
                       <TreeRow id="root" label="my-first-fiddle" icon="folder">
                         <TreeRow id="main-2" label="main.js" />
-                        <TreeRow id="preload-2" label="preload.js" unsaved unsavedLabel="Unsaved changes" />
+                        <TreeRow
+                          id="preload-2"
+                          label="preload.js"
+                          unsaved
+                          unsavedLabel="Unsaved changes"
+                        />
                         <TreeRow id="renderer-2" label="renderer.js" pill="1 error" />
                         <TreeRow id="html-2" label="index.html" />
                       </TreeRow>
                       <TreeRow id="modules" label="node_modules" icon="folder">
                         <TreeRow id="lodash" label="lodash" icon="package" />
                       </TreeRow>
-                      <TreeRow id="locked" label="package-lock.json" icon="lock" isDisabled />
+                      <TreeRow
+                        id="locked"
+                        label="package-lock.json"
+                        icon="lock"
+                        isDisabled
+                      />
                     </Tree>
                   </div>
                 </Specimen>
@@ -776,7 +924,12 @@ export function Gallery({ initialAppearance = 'dark', initialNoMaterial = false 
                             { id: 'general', label: 'General', icon: 'settings' },
                             { id: 'appearance', label: 'Appearance', icon: 'palette' },
                             { id: 'exec', label: 'Execution', icon: 'play' },
-                            { id: 'versions', label: 'Electron versions', icon: 'download', badge: '3' },
+                            {
+                              id: 'versions',
+                              label: 'Electron versions',
+                              icon: 'download',
+                              badge: '3',
+                            },
                             { heading: 'Account' },
                             { id: 'accounts', label: 'GitHub', icon: 'user' },
                             { id: 'keys', label: 'Keyboard', icon: 'keyboard' },
@@ -785,10 +938,22 @@ export function Gallery({ initialAppearance = 'dark', initialNoMaterial = false 
                       }
                     >
                       <h2 className={styles.pageTitle}>Execution</h2>
-                      <FormField label="Electron flags" helper="Passed to Electron when a fiddle runs.">
-                        <TextField aria-label="Electron flags" defaultValue="--js-flags=--expose-gc" mono style={{ width: 320 }} />
+                      <FormField
+                        label="Electron flags"
+                        helper="Passed to Electron when a fiddle runs."
+                      >
+                        <TextField
+                          aria-label="Electron flags"
+                          defaultValue="--js-flags=--expose-gc"
+                          mono
+                          style={{ width: 320 }}
+                        />
                       </FormField>
-                      <RadioGroup label="Clear the console" orientation="horizontal" defaultValue="run">
+                      <RadioGroup
+                        label="Clear the console"
+                        orientation="horizontal"
+                        defaultValue="run"
+                      >
                         <Radio value="run">On every run</Radio>
                         <Radio value="never">Never</Radio>
                       </RadioGroup>
@@ -816,7 +981,11 @@ export function Gallery({ initialAppearance = 'dark', initialNoMaterial = false 
                     <Tag tone="success">stable</Tag>
                     <Tag tone="warning">draft</Tag>
                     <Tag tone="danger">unsupported</Tag>
-                    <Tag tone="accent" onRemove={() => {}} removeLabel="Remove electron-store">
+                    <Tag
+                      tone="accent"
+                      onRemove={() => {}}
+                      removeLabel="Remove electron-store"
+                    >
                       electron-store
                     </Tag>
                   </Row>
@@ -839,7 +1008,8 @@ export function Gallery({ initialAppearance = 'dark', initialNoMaterial = false 
                 </Specimen>
                 <Specimen label="Inline code and status pill">
                   <p className={styles.prose}>
-                    Expose APIs with <InlineCode>contextBridge.exposeInMainWorld</InlineCode> from{' '}
+                    Expose APIs with{' '}
+                    <InlineCode>contextBridge.exposeInMainWorld</InlineCode> from{' '}
                     <InlineCode>preload.js</InlineCode>.
                   </p>
                   <Row>
@@ -864,7 +1034,11 @@ export function Gallery({ initialAppearance = 'dark', initialNoMaterial = false 
                 <Specimen label="Progress bar · determinate, indeterminate, done">
                   <Col>
                     <div className={styles.fullWidth}>
-                      <ProgressBar label="Downloading 44.0.0-beta.3" detail="62 / 104 MB" value={60} />
+                      <ProgressBar
+                        label="Downloading 44.0.0-beta.3"
+                        detail="62 / 104 MB"
+                        value={60}
+                      />
                     </div>
                     <div className={styles.fullWidth}>
                       <ProgressBar label="Installing modules" />
@@ -885,7 +1059,8 @@ export function Gallery({ initialAppearance = 'dark', initialNoMaterial = false 
                 <Specimen label="Callout · default, primary, danger">
                   <Col>
                     <Callout title="Sandboxed by default">
-                      Renderers have no Node.js access. Use preload.js to expose what they need.
+                      Renderers have no Node.js access. Use preload.js to expose what they
+                      need.
                     </Callout>
                     <Callout
                       intent="primary"
@@ -899,14 +1074,21 @@ export function Gallery({ initialAppearance = 'dark', initialNoMaterial = false 
                       The Tray API supports template images on Windows.
                     </Callout>
                     <Callout intent="danger" title="Electron 40 is no longer supported">
-                      It stops receiving security fixes. Pick a newer version to keep testing.
+                      It stops receiving security fixes. Pick a newer version to keep
+                      testing.
                     </Callout>
                   </Col>
                 </Specimen>
                 <Specimen label="Toast · success, error, info, warning" wide>
                   <StageWell>
                     <div className={styles.toastStack}>
-                      <Toast tone="success" title="Published" actionLabel="Copy link" closeLabel="Dismiss" onClose={() => {}}>
+                      <Toast
+                        tone="success"
+                        title="Published"
+                        actionLabel="Copy link"
+                        closeLabel="Dismiss"
+                        onClose={() => {}}
+                      >
                         gist.github.com/8f3a2c
                       </Toast>
                       <Toast tone="error" title="Fiddle crashed" actionLabel="Logs">
@@ -914,8 +1096,17 @@ export function Gallery({ initialAppearance = 'dark', initialNoMaterial = false 
                       </Toast>
                     </div>
                     <div className={styles.toastStack}>
-                      <Toast tone="info" title="Electron 44.0.0-beta.3 is ready" actionLabel="Switch" />
-                      <Toast tone="warning" title="Package not found" closeLabel="Dismiss" onClose={() => {}}>
+                      <Toast
+                        tone="info"
+                        title="Electron 44.0.0-beta.3 is ready"
+                        actionLabel="Switch"
+                      />
+                      <Toast
+                        tone="warning"
+                        title="Package not found"
+                        closeLabel="Dismiss"
+                        onClose={() => {}}
+                      >
                         lodahs is not on npm.
                       </Toast>
                     </div>
@@ -962,7 +1153,9 @@ export function Gallery({ initialAppearance = 'dark', initialNoMaterial = false 
                       <Popover isNonModal width={240} aria-label="Version info">
                         <div className={styles.popoverBody}>
                           <strong>Electron 43.0.0</strong>
-                          <span className={styles.muted}>Chromium, Node and V8 versions ship with each release.</span>
+                          <span className={styles.muted}>
+                            Chromium, Node and V8 versions ship with each release.
+                          </span>
                         </div>
                       </Popover>
                     </PopoverTrigger>
@@ -990,22 +1183,69 @@ export function Gallery({ initialAppearance = 'dark', initialNoMaterial = false 
               <Section title="Content">
                 <Specimen label="Card · clickable with icon, avatar, static" wide>
                   <div className={styles.cards}>
-                    <Card icon="window" title="Hello World" description="A window with a preload script" onPress={() => {}} />
-                    <Card icon="bell" title="Notifications" description="Native notifications from the renderer" onPress={() => {}} />
-                    <Card avatar="Felix Rieseberg" title="Felix Rieseberg" description="Signed in to GitHub" onPress={() => {}} />
+                    <Card
+                      icon="window"
+                      title="Hello World"
+                      description="A window with a preload script"
+                      onPress={() => {}}
+                    />
+                    <Card
+                      icon="bell"
+                      title="Notifications"
+                      description="Native notifications from the renderer"
+                      onPress={() => {}}
+                    />
+                    <Card
+                      avatar="Felix Rieseberg"
+                      title="Felix Rieseberg"
+                      description="Signed in to GitHub"
+                      onPress={() => {}}
+                    />
                     <Card icon="book" title="Tray" description="From the Electron docs" />
                   </div>
                 </Specimen>
                 <Specimen label="List row · selected, meta, tags, disabled">
                   <List aria-label="Fiddles" defaultValue="vib">
-                    <ListRow id="vib" icon="window" title="window-vibrancy" meta="gist 8f3a2c · edited 2 min ago" tags={<Tag>secret</Tag>} />
-                    <ListRow id="tray" icon="window" title="tray-menu" meta="gist 1b7e40 · edited yesterday" tags={<Tag tone="accent">public</Tag>} />
-                    <ListRow id="untitled" icon="file" title="untitled-3" meta="not saved" tags={<Tag tone="warning">draft</Tag>} />
-                    <ListRow id="old" icon="file" title="archived-demo" meta="read only" isDisabled />
+                    <ListRow
+                      id="vib"
+                      icon="window"
+                      title="window-vibrancy"
+                      meta="gist 8f3a2c · edited 2 min ago"
+                      tags={<Tag>secret</Tag>}
+                    />
+                    <ListRow
+                      id="tray"
+                      icon="window"
+                      title="tray-menu"
+                      meta="gist 1b7e40 · edited yesterday"
+                      tags={<Tag tone="accent">public</Tag>}
+                    />
+                    <ListRow
+                      id="untitled"
+                      icon="file"
+                      title="untitled-3"
+                      meta="not saved"
+                      tags={<Tag tone="warning">draft</Tag>}
+                    />
+                    <ListRow
+                      id="old"
+                      icon="file"
+                      title="archived-demo"
+                      meta="read only"
+                      isDisabled
+                    />
                   </List>
                 </Specimen>
-                <Specimen label="Table · sections, mono, right-aligned, selected row, empty" wide>
-                  <Table aria-label="Electron versions" columns={TABLE_COLUMNS} rows={TABLE_ROWS} selectedIds={['42.4.1']} />
+                <Specimen
+                  label="Table · sections, mono, right-aligned, selected row, empty"
+                  wide
+                >
+                  <Table
+                    aria-label="Electron versions"
+                    columns={TABLE_COLUMNS}
+                    rows={TABLE_ROWS}
+                    selectedIds={['42.4.1']}
+                  />
                   <Table
                     aria-label="Filtered versions"
                     columns={TABLE_COLUMNS}
@@ -1031,7 +1271,9 @@ export function Gallery({ initialAppearance = 'dark', initialNoMaterial = false 
                   <div className={styles.typeDisplay}>Build it in a fiddle</div>
                   <div className={styles.typeTitle}>Electron versions</div>
                   <div className={styles.typeHeadline}>Installed versions</div>
-                  <div className={styles.typeBody}>Choose which Electron version runs your fiddle.</div>
+                  <div className={styles.typeBody}>
+                    Choose which Electron version runs your fiddle.
+                  </div>
                   <div className={styles.typeLabel}>Run fiddle</div>
                   <div className={styles.typeCaption}>Renderer process</div>
                   <div className={styles.typeCode}>win.loadFile('index.html')</div>

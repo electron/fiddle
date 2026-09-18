@@ -1,6 +1,6 @@
 /**
  * A select whose menu starts with a search field: the version picker
- * (§17.8) and module versions (§17.10). The trigger, value and menu look
+ * and module versions. The trigger, value and menu look
  * like the design system's Select. Typing filters the list, and the caller
  * does the filtering, so it controls matching and order. Actions (such as
  * "Copy version number") end the menu while nothing is typed; choosing one
@@ -66,7 +66,6 @@ export interface SearchSelectProps {
   onQueryChange: (query: string) => void;
   /** The search field's placeholder and accessible name. */
   searchLabel: string;
-  /** Shown when nothing matches. */
   emptyLabel: string;
   /** The trigger's text while the value isn't in the list. */
   placeholder?: string;

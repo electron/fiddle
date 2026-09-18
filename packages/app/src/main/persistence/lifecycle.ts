@@ -1,27 +1,48 @@
 /**
- * Flushes every JSON store before the app goes away (REQUIREMENTS §5):
- * quit is held until the flush finishes, and a window's `session-end`
- * (Windows log-off) and `powerMonitor` `shutdown` flush too. Call once,
- * after `app.whenReady()`.
+ * Flushes every JSON store before the app goes away: quit is held until the
+ * flush finishes, and a window's `session-end` (Windows log-off) and
+ * `powerMonitor` `shutdown` flush too. Call once, after `app.whenReady()`.
  */
 import { app, powerMonitor } from 'electron';
 
-import { log } from '../log';
+import { flushLog, log } from '../log';
 import { flushAll, hasPendingWrites } from './json-store';
 
+/** A write that hangs (a network drive, say) must not keep the app from quitting. */
+const FLUSH_TIMEOUT_MS = 5000;
+
 export function installFlushOnExit(): void {
+  let gaveUp = false;
+
+  const flushWithinLimit = async (): Promise<void> => {
+    let timer: NodeJS.Timeout | undefined;
+    const timeout = new Promise<void>((resolve) => {
+      timer = setTimeout(() => {
+        gaveUp = true;
+        log.error('flush on exit timed out');
+        resolve();
+      }, FLUSH_TIMEOUT_MS);
+    });
+    try {
+      await Promise.race([flushAll(), timeout]);
+    } catch (error) {
+      log.error('flush on exit failed', error);
+    } finally {
+      clearTimeout(timer);
+    }
+    await flushLog();
+  };
+
   // `app.quit()` runs on a later turn, never inside a quit event's own
   // dispatch, where Electron would drop it.
   const flushThenQuit = () => {
-    flushAll()
-      .catch((error: unknown) => log.error('flush on exit failed', error))
-      .finally(() => setImmediate(() => app.quit()));
+    void flushWithinLimit().finally(() => setImmediate(() => app.quit()));
   };
 
   // `will-quit` comes after every window has closed, so state written while
   // windows close is included. Once nothing is pending, the quit goes ahead.
   app.on('will-quit', (event) => {
-    if (!hasPendingWrites()) return;
+    if (gaveUp || !hasPendingWrites()) return;
     event.preventDefault();
     flushThenQuit();
   });
@@ -30,5 +51,11 @@ export function installFlushOnExit(): void {
       void flushAll();
     });
   });
-  powerMonitor.on('shutdown', flushThenQuit);
+  // The system waits for the flush only if the handler calls `preventDefault`,
+  // which Electron's typings leave out.
+  const onShutdown = (event: { preventDefault(): void }) => {
+    event.preventDefault();
+    flushThenQuit();
+  };
+  powerMonitor.on('shutdown', onShutdown as () => void);
 }

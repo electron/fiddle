@@ -1,7 +1,6 @@
 /**
- * Binds the `Versions` interface for one window (§17.8), and falls back when
- * the window loads or restores a version it can't use. Every version choice
- * goes through `services.versionSelector`.
+ * Also falls back when the window loads or restores a version it can't use.
+ * Every version choice goes through `services.versionSelector`.
  */
 import { clipboard } from 'electron';
 
@@ -17,17 +16,22 @@ export function bindVersionsIpc(ctx: IpcContext): void {
   const { contents, windowId, services } = ctx;
   const { hub, versions, types, versionSelector: selector } = services;
   const known = (version: string) => {
-    if (!versions.release(version)) throw new FiddleError(ErrorCode.notFound, `Unknown version ${version}`);
+    if (!versions.release(version))
+      throw new FiddleError(ErrorCode.notFound, `Unknown version ${version}`);
   };
 
   implement(Versions, contents, {
     GetReleases: () => versions.releases(),
     RefreshReleases: () => versions.refresh(),
     SetVersion: async (ref) =>
-      (await selector.select(windowId, ref, { remember: true })) ?? hub.getWindow(windowId)?.rev ?? 0,
+      (await selector.select(windowId, ref, { remember: true })) ??
+      hub.getWindow(windowId)?.rev ??
+      0,
     Download: (version) => {
       known(version);
-      void versions.install(version).catch((error: unknown) => log.warn(`downloading ${version} failed`, error));
+      void versions
+        .install(version)
+        .catch((error: unknown) => log.warn(`downloading ${version} failed`, error));
     },
     Remove: (version) => versions.remove(version),
     DownloadAll: (list) => {
@@ -43,7 +47,6 @@ export function bindVersionsIpc(ctx: IpcContext): void {
       return true;
     },
     RemoveLocalBuild: (id) => versions.removeLocalBuild(id),
-    // Types for the window's version, or null.
     GetTypes: async () => {
       const ref = documents.getFiddle(windowId).version;
       if (ref.kind === 'release') return types.forRelease(ref.version);
@@ -52,11 +55,11 @@ export function bindVersionsIpc(ctx: IpcContext): void {
     },
     RetryDownload: () => selector.retry(windowId),
     CopyVersion: () => {
-      const ref = documents.getFiddle(windowId).version;
-      clipboard.writeText(ref.kind === 'release' ? ref.version : (versions.localBuild(ref.id)?.name ?? ref.id));
+      clipboard.writeText(versions.label(documents.getFiddle(windowId).version));
     },
     DismissNotice: (id) => {
-      if (hub.getWindow(windowId)?.versionNotice?.id === id) hub.updateWindow(windowId, { versionNotice: null });
+      if (hub.getWindow(windowId)?.versionNotice?.id === id)
+        hub.updateWindow(windowId, { versionNotice: null });
     },
   });
 
@@ -68,7 +71,9 @@ export function bindVersionsIpc(ctx: IpcContext): void {
     const ref = hub.getWindow(windowId)?.fiddle.versionRef;
     if (!ref || (seen && sameVersion(seen, ref))) return;
     seen = ref;
-    selector.validate(windowId).catch((error: unknown) => log.warn('checking the window version failed', error));
+    selector
+      .validate(windowId)
+      .catch((error: unknown) => log.warn('checking the window version failed', error));
   });
   contents.once('destroyed', () => {
     stop();

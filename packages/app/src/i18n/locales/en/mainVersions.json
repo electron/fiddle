@@ -1,18 +1,76 @@
 {
-  "cannotChange": { "message": "Stop the fiddle before you change the Electron version.", "description": "Error when the user picks another Electron version while the fiddle runs or bisects." },
-  "versionUnknown": { "message": "Electron {{version}} isn't a known release.", "description": "Toast when a window loads or restores an Electron version that isn't in the release list. Often followed by the 'fallback' sentence." },
-  "versionUnsupported": { "message": "Electron {{version}} can't run on this computer.", "description": "Toast when a window loads a version this OS or processor can't run." },
-  "localBuildUnknown": { "message": "That local build isn't added anymore.", "description": "Toast when a window restores a local Electron build that was removed from the list." },
-  "localBuildMissing": { "message": "The local build “{{name}}” is missing its Electron binary.", "description": "Toast when the chosen local Electron build's folder no longer has Electron in it. {{name}} is the build's name." },
-  "downloadFailed": { "message": "Couldn't download Electron {{version}} ({{message}}).", "description": "Toast when downloading the chosen version fails. {{message}} is the error, in English." },
-  "fallback": { "message": "{{problem}} This fiddle now uses {{fallback}}.", "description": "Toast after Fiddle switched the window to another version. {{problem}} is one of the sentences above; {{fallback}} is e.g. 'Electron 43.0.0' or a local build's name." },
-  "electronVersion": { "message": "Electron {{version}}", "description": "A release in the messages above, e.g. 'Electron 43.0.0'." },
-  "showStableTitle": { "message": "Show stable releases?", "description": "Confirmation after loading an Electron docs example whose version is a stable release, while stable releases are hidden in Settings." },
-  "showBetaTitle": { "message": "Show beta releases?", "description": "Confirmation after loading an Electron docs example whose version is a beta or alpha, while beta releases are hidden in Settings." },
-  "showNightlyTitle": { "message": "Show nightly releases?", "description": "Confirmation after loading an Electron docs example whose version is a nightly, while nightly releases are hidden in Settings." },
-  "showChannelDetail": { "message": "This example uses Electron {{version}}, and the version list hides releases like it. Show them, so you can pick this version again later?", "description": "Detail of the show-releases confirmation. Saying no keeps the version but leaves the list as it is." },
-  "showChannelOk": { "message": "Show them", "description": "Confirm button: turns the release channel on in Settings.", "maxLength": 20 },
-  "switchToBuild": { "message": "Switch to {{name}}?", "description": "Confirmation when the folder picked for a new local build is already added. {{name}} is that build's name." },
-  "switchToBuildDetail": { "message": "This folder is already added as a local build.", "description": "Detail of the switch-to-build confirmation." },
-  "switchButton": { "message": "Switch", "description": "Confirm button: uses the already-added local build.", "maxLength": 16 }
+  "cannotChange": {
+    "message": "Stop the fiddle before you change the Electron version.",
+    "description": "Error when the user picks another Electron version while the fiddle runs or bisects."
+  },
+  "versionUnknown": {
+    "message": "Electron {{version}} isn't a known release.",
+    "description": "Toast when a window loads or restores an Electron version that isn't in the release list. Often followed by the 'fallback' sentence."
+  },
+  "versionUnsupported": {
+    "message": "Electron {{version}} can't run on this computer.",
+    "description": "Toast when a window loads a version this OS or processor can't run."
+  },
+  "localBuildUnknown": {
+    "message": "That local build isn't added anymore.",
+    "description": "Toast when a window restores a local Electron build that was removed from the list."
+  },
+  "localBuildMissing": {
+    "message": "The local build “{{name}}” is missing its Electron binary.",
+    "description": "Toast when the chosen local Electron build's folder no longer has Electron in it. {{name}} is the build's name."
+  },
+  "downloadFailed": {
+    "message": "Couldn't download Electron {{version}} ({{message}}).",
+    "description": "Toast when downloading the chosen version fails. {{message}} is the error, in English."
+  },
+  "fallback": {
+    "message": "{{problem}} This fiddle now uses {{fallback}}.",
+    "description": "Toast after Fiddle switched the window to another version. {{problem}} is one of the sentences above; {{fallback}} is e.g. 'Electron 43.0.0' or a local build's name."
+  },
+  "electronVersion": {
+    "message": "Electron {{version}}",
+    "description": "A release in the messages above, e.g. 'Electron 43.0.0'."
+  },
+  "showStableTitle": {
+    "message": "Show stable releases?",
+    "description": "Confirmation after loading an Electron docs example whose version is a stable release, while stable releases are hidden in Settings."
+  },
+  "showBetaTitle": {
+    "message": "Show beta releases?",
+    "description": "Confirmation after loading an Electron docs example whose version is a beta or alpha, while beta releases are hidden in Settings."
+  },
+  "showNightlyTitle": {
+    "message": "Show nightly releases?",
+    "description": "Confirmation after loading an Electron docs example whose version is a nightly, while nightly releases are hidden in Settings."
+  },
+  "showChannelDetail": {
+    "message": "This example uses Electron {{version}}, and the version list hides releases like it. Show them, so you can pick this version again later?",
+    "description": "Detail of the show-releases confirmation. Saying no keeps the version but leaves the list as it is."
+  },
+  "showChannelOk": {
+    "message": "Show them",
+    "description": "Confirm button: turns the release channel on in Settings.",
+    "maxLength": 20
+  },
+  "switchToBuild": {
+    "message": "Switch to {{name}}?",
+    "description": "Confirmation when the folder picked for a new local build is already added. {{name}} is that build's name."
+  },
+  "switchToBuildDetail": {
+    "message": "This folder is already added as a local build.",
+    "description": "Detail of the switch-to-build confirmation."
+  },
+  "switchButton": {
+    "message": "Switch",
+    "description": "Confirm button: uses the already-added local build.",
+    "maxLength": 16
+  },
+  "refreshFailed": {
+    "message": "Couldn't refresh the list of Electron releases. Check your connection and try again.",
+    "description": "Toast when refreshing the release list from the Versions page fails, usually because the computer is offline."
+  },
+  "removeFailed": {
+    "message": "Couldn't remove Electron {{version}}. A file may be in use.",
+    "description": "Toast when removing a downloaded Electron version fails. {{version}} is the version, e.g. 43.0.0."
+  }
 }

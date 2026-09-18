@@ -11,10 +11,10 @@ const ipcRendererBan = {
     'ipcRenderer is never used or exposed. Use the EIPC bindings in src/ipc/renderer.ts.',
 };
 
-// REQUIREMENTS §9: native menu and dialog text comes from the catalog.
 const MENU_DIALOG_TEXT =
   '/^(label|sublabel|toolTip|title|message|detail|checkboxLabel|buttonLabel|nameFieldLabel|placeholder)$/';
-const catalogTextMessage = 'Menu and dialog text comes from the i18n catalog: use t() or tm().';
+const catalogTextMessage =
+  'Menu and dialog text comes from the i18n catalog: use t() or tm().';
 const menuDialogLiterals = [
   {
     selector: `Property[key.name=${MENU_DIALOG_TEXT}] > Literal[value=/[A-Za-z]/]`,
@@ -25,7 +25,8 @@ const menuDialogLiterals = [
     message: catalogTextMessage,
   },
   {
-    selector: "Property[key.name='buttons'] > ArrayExpression > Literal[value=/[A-Za-z]/]",
+    selector:
+      "Property[key.name='buttons'] > ArrayExpression > Literal[value=/[A-Za-z]/]",
     message: catalogTextMessage,
   },
 ];
@@ -119,14 +120,14 @@ export default defineConfig(
     files: ['packages/app/src/preload/**'],
     rules: { 'no-restricted-syntax': ['error', ipcRendererBan] },
   },
-  // REQUIREMENTS §9: no string literals in JSX text or in menu and dialog
-  // definitions.
+  // No string literals in JSX text.
   {
     files: ['packages/app/src/{renderer,ui}/**/*.tsx'],
     ignores: ['**/*.test.tsx', 'packages/app/src/ui/gallery/**'],
     plugins: { i18next },
     rules: { 'i18next/no-literal-string': ['error', { mode: 'jsx-text-only' }] },
   },
+  // Menu and dialog text in main comes from the catalog.
   {
     files: ['packages/app/src/main/**/*.ts'],
     ignores: ['**/*.test.ts', 'packages/app/src/main/test-driver/**'],

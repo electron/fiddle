@@ -37,7 +37,7 @@ export interface TabListProps {
   className?: string;
 }
 
-/** Tabs 2px apart. Arrow keys move between tabs; one Tab stop. */
+/** Arrow keys move between tabs; one Tab stop. */
 export function TabList({ children, className, ...rest }: TabListProps) {
   return (
     <AriaTabList aria-label={rest['aria-label']} className={cx(styles.list, className)}>
@@ -74,7 +74,6 @@ export interface TabProps {
   className?: string;
 }
 
-/** 28 tall, padding 0 11, 12.5/16 at 500. Selected: hover fill, ink. */
 export function Tab({
   id,
   children,
@@ -152,9 +151,13 @@ export function Tab({
           {errorCount}
         </span>
       ) : null}
-      {errorCount && errorLabel ? <VisuallyHidden>{`, ${errorLabel}`}</VisuallyHidden> : null}
+      {errorCount && errorLabel ? (
+        <VisuallyHidden>{`, ${errorLabel}`}</VisuallyHidden>
+      ) : null}
       {unsaved ? <span className={styles.dot} aria-hidden="true" /> : null}
-      {unsaved && unsavedLabel ? <VisuallyHidden>{`, ${unsavedLabel}`}</VisuallyHidden> : null}
+      {unsaved && unsavedLabel ? (
+        <VisuallyHidden>{`, ${unsavedLabel}`}</VisuallyHidden>
+      ) : null}
       {onClose && (
         // Hidden from assistive tech: a tab's content is presentational, so
         // keyboard and screen reader users close it with Delete instead.

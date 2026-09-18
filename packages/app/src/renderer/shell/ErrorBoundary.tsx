@@ -26,11 +26,19 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, { failed: boole
   }
 
   override componentDidCatch(error: unknown, info: ErrorInfo): void {
-    console.error(`[fiddle] the ${this.props.region} failed to render`, error, info.componentStack);
+    console.error(
+      `[fiddle] the ${this.props.region} failed to render`,
+      error,
+      info.componentStack,
+    );
   }
 
   override render(): ReactNode {
-    return this.state.failed ? <RegionError fill={this.props.fill ?? false} /> : this.props.children;
+    return this.state.failed ? (
+      <RegionError fill={this.props.fill ?? false} />
+    ) : (
+      this.props.children
+    );
   }
 }
 
@@ -38,7 +46,7 @@ function reload(): void {
   windowApi.RunCommand('view.reload').catch(() => window.location.reload());
 }
 
-function RegionError({ fill }: { fill: boolean }) {
+export function RegionError({ fill }: { fill: boolean }) {
   const { t } = useTranslation('shell');
   return (
     <div role="alert" className={styles.error} data-fill={fill || undefined}>

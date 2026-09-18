@@ -19,7 +19,12 @@ const row = (version: string, extra: Partial<ReleaseRow> = {}): ReleaseRow => ({
   ...extra,
 });
 
-const rows = [row('44.0.0-beta.3'), row('43.0.0'), row('42.4.1'), row('10.0.0', { supported: false })];
+const rows = [
+  row('44.0.0-beta.3'),
+  row('43.0.0'),
+  row('42.4.1'),
+  row('10.0.0', { supported: false }),
+];
 const builds: LocalBuild[] = [
   { id: 'gone', name: 'gone', path: '/gone', available: false },
   { id: 'ok', name: 'ok', path: '/ok', available: true },
@@ -35,7 +40,11 @@ function catalog(extra: Partial<VersionCatalog> = {}): VersionCatalog {
   return {
     rows,
     localBuilds: [],
-    settings: { channels: ['stable', 'beta'], showObsolete: false, showNotDownloaded: true },
+    settings: {
+      channels: ['stable', 'beta'],
+      showObsolete: false,
+      showNotDownloaded: true,
+    },
     isInstalled: () => false,
     ...extra,
   };
@@ -59,7 +68,15 @@ describe('firstUsableVersion', () => {
   it('takes the newest visible release', () => {
     expect(firstUsableVersion(catalog())).toEqual(release('44.0.0-beta.3'));
     expect(
-      firstUsableVersion(catalog({ settings: { channels: ['stable'], showObsolete: false, showNotDownloaded: true } })),
+      firstUsableVersion(
+        catalog({
+          settings: {
+            channels: ['stable'],
+            showObsolete: false,
+            showNotDownloaded: true,
+          },
+        }),
+      ),
     ).toEqual(release('43.0.0'));
   });
 
@@ -68,17 +85,25 @@ describe('firstUsableVersion', () => {
   });
 
   it('skips the version it replaces', () => {
-    expect(firstUsableVersion(catalog(), { exclude: release('44.0.0-beta.3') })).toEqual(release('43.0.0'));
+    expect(firstUsableVersion(catalog(), { exclude: release('44.0.0-beta.3') })).toEqual(
+      release('43.0.0'),
+    );
   });
 
   it('can insist on a downloaded release', () => {
     const isInstalled = (version: string) => version === '42.4.1';
-    expect(firstUsableVersion(catalog({ isInstalled }), { installedOnly: true })).toEqual(release('42.4.1'));
+    expect(firstUsableVersion(catalog({ isInstalled }), { installedOnly: true })).toEqual(
+      release('42.4.1'),
+    );
     expect(firstUsableVersion(catalog(), { installedOnly: true })).toBeUndefined();
   });
 
   it('uses a hidden release when nothing is visible', () => {
-    const settings = { channels: ['nightly' as const], showObsolete: false, showNotDownloaded: true };
+    const settings = {
+      channels: ['nightly' as const],
+      showObsolete: false,
+      showNotDownloaded: true,
+    };
     expect(firstUsableVersion(catalog({ settings }))).toEqual(release('44.0.0-beta.3'));
     expect(firstUsableVersion(catalog({ rows: [] }))).toBeUndefined();
   });
@@ -86,7 +111,9 @@ describe('firstUsableVersion', () => {
 
 describe('defaultVersionFor', () => {
   it('uses the last version the user picked', () => {
-    expect(defaultVersionFor(rows, release('42.4.1'), lookup())).toEqual(release('42.4.1'));
+    expect(defaultVersionFor(rows, release('42.4.1'), lookup())).toEqual(
+      release('42.4.1'),
+    );
     expect(defaultVersionFor(rows, local('ok'), lookup())).toEqual(local('ok'));
   });
 
@@ -95,7 +122,9 @@ describe('defaultVersionFor', () => {
   });
 
   it('ignores a last version that is no longer usable', () => {
-    expect(defaultVersionFor(rows, release('99.0.0'), lookup())).toEqual(release('43.0.0'));
+    expect(defaultVersionFor(rows, release('99.0.0'), lookup())).toEqual(
+      release('43.0.0'),
+    );
     expect(defaultVersionFor(rows, local('gone'), lookup())).toEqual(release('43.0.0'));
     expect(defaultVersionFor(rows, local('ok'), lookup([]))).toEqual(release('43.0.0'));
   });

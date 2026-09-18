@@ -3,23 +3,28 @@
  * as the `app.commandPalette` Window.Command). It searches commands with
  * their current shortcuts, the fiddle's files, Electron versions and Show Me
  * examples, with recently used items first.
- *
- * This slot also hosts the onboarding tour, so the shell mounts both at once.
  */
 import { useEffect, useId, useMemo, useRef, useState, type KeyboardEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Dialog, Modal, ModalOverlay } from 'react-aria-components';
 
 import { documentsApi, versionsApi, windowApi } from '../../../ipc/renderer';
-import { commandIds, commands, isCommandEnabled, isCommandListed } from '../../../shared/commands';
+import {
+  commandIds,
+  commands,
+  isCommandEnabled,
+  isCommandListed,
+} from '../../../shared/commands';
+import { FiddleError } from '../../../shared/errors';
 import { SHOW_ME_EXAMPLES } from '../../../shared/examples';
 import { effectiveAccelerator } from '../../../shared/settings';
 import { acceleratorKeys } from '../../../shared/accelerators';
-import type { AppState, ReleaseList, WindowState } from '../../../shared/stores';
+import type { AppState, ReleaseRow, WindowState } from '../../../shared/stores';
 import { cx, Icon, Kbd, showToast, type IconName } from '../../../ui';
 import menu from '../../../ui/components/Menu.module.css';
 import { useAppState, useWindowState } from '../../state';
 import { OnboardingTour } from '../onboarding/OnboardingTour';
+import { useReleases } from '../run/use-run';
 import styles from './CommandPalette.module.css';
 import { getEditorActions } from './editor-actions';
 import { pushRecent, rankItems, type PaletteItem, type PaletteKind } from './rank';
@@ -41,33 +46,47 @@ const KIND_ICONS: Record<PaletteKind, IconName> = {
 function readRecent(): string[] {
   try {
     const value: unknown = JSON.parse(localStorage.getItem(RECENT_KEY) ?? '[]');
-    return Array.isArray(value) ? value.filter((id): id is string => typeof id === 'string') : [];
+    return Array.isArray(value)
+      ? value.filter((id): id is string => typeof id === 'string')
+      : [];
   } catch {
     return [];
   }
 }
 
-/** Releases are fetched once per window, the first time the palette opens. */
-function useRemoteLists(open: boolean) {
-  const [releases, setReleases] = useState<ReleaseList>([]);
-  const loaded = useRef(false);
-  useEffect(() => {
-    if (!open || loaded.current) return;
-    loaded.current = true;
-    versionsApi.GetReleases().then(setReleases, () => {});
-  }, [open]);
-  return { releases, examples: SHOW_ME_EXAMPLES };
+function writeRecent(ids: string[]): void {
+  try {
+    localStorage.setItem(RECENT_KEY, JSON.stringify(ids));
+  } catch {
+    // Storage disabled or full: the list just isn't remembered.
+  }
 }
 
 function useEntries(
   app: AppState | undefined,
   win: WindowState | undefined,
-  releases: ReleaseList,
-  examples: readonly string[],
+  releases: readonly ReleaseRow[],
   open: boolean,
 ): Entry[] {
   const { t } = useTranslation('palette');
   const { t: tMain } = useTranslation('main');
+  // Separate from the rest so a store push while the palette is open doesn't translate every release again.
+  const releaseEntries = useMemo<Entry[]>(
+    () =>
+      !open
+        ? []
+        : releases
+            .filter((release) => release.supported)
+            .map((release): Entry => ({
+              id: `version:${release.version}`,
+              kind: 'version',
+              label: t('electronVersion', { version: release.version }),
+              keywords: [release.version],
+              run: () =>
+                versionsApi.SetVersion({ kind: 'release', version: release.version }),
+            })),
+    [open, releases, t],
+  );
   return useMemo(() => {
     if (!open || !app) return [];
     const entries: Entry[] = [];
@@ -80,13 +99,21 @@ function useEntries(
         kind: 'command',
         label: tMain(commands[id].label),
         keywords: [id],
-        keys: acceleratorKeys(effectiveAccelerator(id, app.platform, app.settings.keybindings), app.platform),
+        keys: acceleratorKeys(
+          effectiveAccelerator(id, app.platform, app.settings.keybindings),
+          app.platform,
+        ),
         isDisabled: !isCommandEnabled(id, app, win),
         run: () => windowApi.RunCommand(id),
       });
     }
     for (const action of getEditorActions()) {
-      entries.push({ id: `editor:${action.id}`, kind: 'editor', label: action.label, run: () => action.run() });
+      entries.push({
+        id: `editor:${action.id}`,
+        kind: 'editor',
+        label: action.label,
+        run: () => action.run(),
+      });
     }
     for (const file of win?.fiddle.files ?? []) {
       entries.push({
@@ -105,21 +132,17 @@ function useEntries(
         run: () => versionsApi.SetVersion({ kind: 'local', id: build.id }),
       });
     }
-    for (const release of releases) {
-      if (!release.supported) continue;
+    entries.push(...releaseEntries);
+    for (const name of SHOW_ME_EXAMPLES) {
       entries.push({
-        id: `version:${release.version}`,
-        kind: 'version',
-        label: t('electronVersion', { version: release.version }),
-        keywords: [release.version],
-        run: () => versionsApi.SetVersion({ kind: 'release', version: release.version }),
+        id: `example:${name}`,
+        kind: 'example',
+        label: name,
+        run: () => documentsApi.LoadExample(name),
       });
     }
-    for (const name of examples) {
-      entries.push({ id: `example:${name}`, kind: 'example', label: name, run: () => documentsApi.LoadExample(name) });
-    }
     return entries;
-  }, [open, app, win, releases, examples, t, tMain]);
+  }, [open, app, win, releaseEntries, tMain]);
 }
 
 export function CommandPalette() {
@@ -145,9 +168,12 @@ export function CommandPalette() {
     [],
   );
 
-  const { releases, examples } = useRemoteLists(open);
-  const entries = useEntries(app, win, releases, examples, open);
-  const shown = useMemo(() => rankItems(entries, query, recent), [entries, query, recent]);
+  const releases = useReleases();
+  const entries = useEntries(app, win, releases, open);
+  const shown = useMemo(
+    () => rankItems(entries, query, recent),
+    [entries, query, recent],
+  );
   const current = Math.min(active, Math.max(0, shown.length - 1));
 
   useEffect(() => {
@@ -167,22 +193,27 @@ export function CommandPalette() {
     setOpen(false);
     const next = pushRecent(recent, entry.id);
     setRecent(next);
-    localStorage.setItem(RECENT_KEY, JSON.stringify(next));
-    // After the overlay has closed and focus is back where it was (the editor, for its actions).
+    writeRecent(next);
+    // The overlay gives focus back in a frame of its own, queued after this one. Wait for it, so
+    // the entry runs with focus where it was (the editor, for its actions).
     requestAnimationFrame(() => {
-      Promise.resolve()
-        .then(() => entry.run())
-        .catch((error: unknown) => {
-          showToast({
-            title: t('runFailed', { label: entry.label }),
-            description: error instanceof Error ? error.message : String(error),
-            tone: 'error',
+      requestAnimationFrame(() => {
+        Promise.resolve()
+          .then(() => entry.run())
+          .catch((error: unknown) => {
+            showToast({
+              title: t('runFailed', { label: entry.label }),
+              description: FiddleError.from(error).message,
+              tone: 'error',
+            });
           });
-        });
+      });
     });
   };
 
   const onKeyDown = (event: KeyboardEvent) => {
+    // Enter and the arrows belong to the input method while it composes.
+    if (event.nativeEvent.isComposing) return;
     const moveTo = (index: number) => {
       event.preventDefault();
       if (shown.length > 0) setActive((index + shown.length) % shown.length);
@@ -199,7 +230,12 @@ export function CommandPalette() {
 
   return (
     <>
-      <ModalOverlay isOpen={open} onOpenChange={setOpen} isDismissable className={styles.overlay}>
+      <ModalOverlay
+        isOpen={open}
+        onOpenChange={setOpen}
+        isDismissable
+        className={styles.overlay}
+      >
         <Modal className={styles.modal}>
           <Dialog aria-label={t('label')} className={cx(menu.surface, styles.surface)}>
             <div className={styles.search}>
@@ -211,7 +247,9 @@ export function CommandPalette() {
                 aria-expanded="true"
                 aria-controls={listId}
                 aria-autocomplete="list"
-                aria-activedescendant={shown[current] ? `${listId}-${current}` : undefined}
+                aria-activedescendant={
+                  shown[current] ? `${listId}-${current}` : undefined
+                }
                 placeholder={t('placeholder')}
                 value={query}
                 autoFocus
@@ -223,7 +261,13 @@ export function CommandPalette() {
                 onKeyDown={onKeyDown}
               />
             </div>
-            <ul ref={list} id={listId} role="listbox" aria-label={t('label')} className={styles.list}>
+            <ul
+              ref={list}
+              id={listId}
+              role="listbox"
+              aria-label={t('label')}
+              className={styles.list}
+            >
               {shown.length === 0 && <li className={styles.empty}>{t('empty')}</li>}
               {shown.map((entry, index) => (
                 <li
@@ -245,7 +289,9 @@ export function CommandPalette() {
                   {entry.keys && entry.keys.length > 0 ? (
                     <Kbd keys={entry.keys} className={styles.keys} />
                   ) : (
-                    entry.kind !== 'command' && <span className={menu.hint}>{kindLabel[entry.kind]}</span>
+                    entry.kind !== 'command' && (
+                      <span className={menu.hint}>{kindLabel[entry.kind]}</span>
+                    )
                   )}
                 </li>
               ))}

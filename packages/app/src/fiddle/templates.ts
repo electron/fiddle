@@ -1,13 +1,24 @@
-import { access, mkdir, mkdtemp, readdir, rename, rm, stat, writeFile } from 'node:fs/promises';
+import {
+  access,
+  mkdir,
+  mkdtemp,
+  readdir,
+  rename,
+  rm,
+  stat,
+  writeFile,
+} from 'node:fs/promises';
 import * as path from 'node:path';
 
+import { extractZip } from '@electron/fiddle-core';
 import * as semver from 'semver';
 
 import { ErrorCode, FiddleError } from '../shared/errors';
 import type { FileMap } from './files';
 import { readFiddleFolder } from './folder';
 
-export const MINIMAL_REPRO_ARCHIVE_URL = 'https://github.com/electron/minimal-repro/archive';
+export const MINIMAL_REPRO_ARCHIVE_URL =
+  'https://github.com/electron/minimal-repro/archive';
 export const TEST_TEMPLATE_BRANCH = 'test-template';
 export const QUICK_START_DIR = 'electron-quick-start';
 export const TEMPLATE_TIMEOUT_MS = 60_000;
@@ -24,6 +35,12 @@ export interface TemplateLoaderOptions {
   archiveBaseUrl?: string;
   /** Per-download timeout. Default {@link TEMPLATE_TIMEOUT_MS}. */
   timeoutMs?: number;
+  /**
+   * How long a call waits for a download before it returns the bundled
+   * template. The download goes on, so a later call finds it. Default: wait
+   * for the download.
+   */
+  waitMs?: number;
   /** Aborts downloads in flight, e.g. on quit. */
   signal?: AbortSignal;
   /**
@@ -43,7 +60,10 @@ export interface TemplateLoader {
 }
 
 /** The minimal-repro branch for a version (`30-x-y`), or null for unreleased majors and non-releases. */
-export function templateBranch(version: string, isReleasedMajor: (major: number) => boolean): string | null {
+export function templateBranch(
+  version: string,
+  isReleasedMajor: (major: number) => boolean,
+): string | null {
   const parsed = semver.parse(version);
   if (!parsed || parsed.major === 0 || !isReleasedMajor(parsed.major)) return null;
   return `${parsed.major}-x-y`;
@@ -76,7 +96,10 @@ async function writtenWithin(file: string, ttlMs: number): Promise<boolean> {
   }
 }
 
-async function fetchArchive(options: TemplateLoaderOptions, url: string): Promise<Uint8Array> {
+async function fetchArchive(
+  options: TemplateLoaderOptions,
+  url: string,
+): Promise<Uint8Array> {
   const timeout = AbortSignal.timeout(options.timeoutMs ?? TEMPLATE_TIMEOUT_MS);
   const signal = options.signal ? AbortSignal.any([options.signal, timeout]) : timeout;
   try {
@@ -84,12 +107,15 @@ async function fetchArchive(options: TemplateLoaderOptions, url: string): Promis
     if (!res.ok) {
       // A 404 is a branch minimal-repro doesn't have (yet), not a failed download.
       const code = res.status === 404 ? ErrorCode.notFound : ErrorCode.network;
-      throw new FiddleError(code, `${url} responded ${res.status}`, { status: res.status });
+      throw new FiddleError(code, `${url} responded ${res.status}`, {
+        status: res.status,
+      });
     }
     return new Uint8Array(await res.arrayBuffer());
   } catch (error) {
     if (error instanceof FiddleError) throw error;
-    if (options.signal?.aborted) throw new FiddleError(ErrorCode.cancelled, 'The template download was cancelled');
+    if (options.signal?.aborted)
+      throw new FiddleError(ErrorCode.cancelled, 'The template download was cancelled');
     throw new FiddleError(ErrorCode.network, `Could not download ${url}`, {
       cause: error instanceof Error ? error.message : String(error),
     });
@@ -99,23 +125,29 @@ async function fetchArchive(options: TemplateLoaderOptions, url: string): Promis
 /** The archive's single top-level folder, or `dir` itself if there isn't exactly one. */
 async function archiveRoot(dir: string): Promise<string> {
   const entries = await readdir(dir, { withFileTypes: true });
-  return entries.length === 1 && entries[0]!.isDirectory() ? path.join(dir, entries[0]!.name) : dir;
+  return entries.length === 1 && entries[0]!.isDirectory()
+    ? path.join(dir, entries[0]!.name)
+    : dir;
 }
 
 /**
- * The template's files, from `<cacheDir>/minimal-repro-<branch>/`. On a miss,
- * `<branch>.zip` is downloaded to a temp file and extracted into a temp dir,
- * whose root folder is read and then renamed into place. A 404 leaves a
- * `minimal-repro-<branch>.missing` marker instead, which fails as `not-found`
+ * The template's files, from `<cacheDir>/minimal-repro-<branch>/`, downloaded
+ * on a miss. A 404 leaves a `.missing` marker that fails as `not-found`
  * without a request for {@link MISSING_TEMPLATE_TTL_MS}, so launches don't
  * keep asking for a branch minimal-repro doesn't have.
  */
-async function downloadTemplate(options: TemplateLoaderOptions, branch: string): Promise<FileMap> {
+async function downloadTemplate(
+  options: TemplateLoaderOptions,
+  branch: string,
+): Promise<FileMap> {
   const target = path.join(options.cacheDir, `minimal-repro-${branch}`);
   if (await exists(target)) return (await readFiddleFolder(target)).files;
   const marker = `${target}.missing`;
   if (await writtenWithin(marker, MISSING_TEMPLATE_TTL_MS)) {
-    throw new FiddleError(ErrorCode.notFound, `minimal-repro had no ${branch} branch within the last day`);
+    throw new FiddleError(
+      ErrorCode.notFound,
+      `minimal-repro had no ${branch} branch within the last day`,
+    );
   }
 
   const url = `${options.archiveBaseUrl ?? MINIMAL_REPRO_ARCHIVE_URL}/${branch}.zip`;
@@ -141,9 +173,7 @@ async function downloadTemplate(options: TemplateLoaderOptions, branch: string):
     const out = path.join(work, 'out');
     await writeFile(zipPath, archive);
     await mkdir(out);
-    // Native addon: loaded on first use, never at import time.
-    const { default: extract } = await import('@electron-internal/extract-zip');
-    await extract(zipPath, { dir: out });
+    await extractZip(zipPath, out);
     const root = await archiveRoot(out);
     const { files } = await readFiddleFolder(root);
     try {
@@ -156,6 +186,27 @@ async function downloadTemplate(options: TemplateLoaderOptions, branch: string):
   } finally {
     await rm(work, { recursive: true, force: true });
   }
+}
+
+/** `promise`'s value, or undefined if it takes longer than `ms`. Never rejects on its own. */
+function withinWait<T>(
+  promise: Promise<T>,
+  ms: number | undefined,
+): Promise<T | undefined> {
+  if (ms === undefined) return promise;
+  return new Promise((resolve, reject) => {
+    const timer = setTimeout(resolve, ms, undefined);
+    promise.then(
+      (value) => {
+        clearTimeout(timer);
+        resolve(value);
+      },
+      (error: unknown) => {
+        clearTimeout(timer);
+        reject(error);
+      },
+    );
+  });
 }
 
 export function createTemplateLoader(options: TemplateLoaderOptions): TemplateLoader {
@@ -173,12 +224,15 @@ export function createTemplateLoader(options: TemplateLoaderOptions): TemplateLo
       });
       pending.set(branch, promise);
     }
-    return { ...(await promise) };
+    return {
+      ...((await withinWait(promise, options.waitMs)) ?? (await getQuickStart())),
+    };
   };
 
   return {
     getTemplate(version) {
-      const branch = version === undefined ? null : templateBranch(version, options.isReleasedMajor);
+      const branch =
+        version === undefined ? null : templateBranch(version, options.isReleasedMajor);
       return branch ? load(branch) : getQuickStart();
     },
     getTestTemplate: () => load(TEST_TEMPLATE_BRANCH),

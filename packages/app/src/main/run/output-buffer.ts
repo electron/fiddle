@@ -1,5 +1,5 @@
 /**
- * One window's console output (§3 "Operations"): every line gets a sequence
+ * One window's console output: every line gets a sequence
  * number, new lines go out in batches every 16 ms, and the last 1000 lines are
  * kept for `Run.GetOutput()`. No Electron imports.
  */
@@ -23,11 +23,14 @@ export class OutputBuffer {
 
   push(line: Omit<OutputLine, 'seq' | 'time'>): OutputLine {
     const full: OutputLine = { ...line, seq: ++this.#seq, time: this.#now() };
+    // Both arrays are trimmed in bulk, at twice the limit, so a chatty fiddle
+    // doesn't pay for a front splice on every line. Readers cap them.
     this.#lines.push(full);
-    if (this.#lines.length > OUTPUT_LIMIT) this.#lines.splice(0, this.#lines.length - OUTPUT_LIMIT);
-    // Capped at the source: a batch never carries more than the backlog holds.
+    if (this.#lines.length >= 2 * OUTPUT_LIMIT)
+      this.#lines = this.#lines.slice(-OUTPUT_LIMIT);
     this.#pending.push(full);
-    if (this.#pending.length > OUTPUT_LIMIT) this.#pending.splice(0, this.#pending.length - OUTPUT_LIMIT);
+    if (this.#pending.length >= 2 * OUTPUT_LIMIT)
+      this.#pending = this.#pending.slice(-OUTPUT_LIMIT);
     this.#timer ??= setTimeout(() => this.flush(), OUTPUT_BATCH_MS);
     return full;
   }
@@ -37,18 +40,17 @@ export class OutputBuffer {
     if (this.#timer) clearTimeout(this.#timer);
     this.#timer = undefined;
     if (this.#pending.length === 0) return;
-    const batch = this.#pending;
+    // A batch never carries more than the backlog holds.
+    const batch = this.#pending.slice(-OUTPUT_LIMIT);
     this.#pending = [];
     this.#send(batch);
   }
 
   /** The backlog, oldest first. */
   get lines(): readonly OutputLine[] {
-    return this.#lines;
-  }
-
-  get lastSeq(): number {
-    return this.#seq;
+    return this.#lines.length > OUTPUT_LIMIT
+      ? this.#lines.slice(-OUTPUT_LIMIT)
+      : this.#lines;
   }
 
   /** Empties the backlog. Returns the last sequence number, for `Window.run.clearedSeq`. */

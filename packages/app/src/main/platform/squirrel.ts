@@ -1,5 +1,5 @@
 /**
- * Squirrel.Windows startup events (REQUIREMENTS §12), in-house instead of
+ * Squirrel.Windows startup events, handled here rather than by
  * electron-squirrel-startup. main/index.ts calls `handleSquirrelStartup()`
  * before anything else; when it returns true, the app does nothing but this
  * and quits.

@@ -1,10 +1,10 @@
 /**
- * The CLI's trust check (REQUIREMENTS §4 "Trust model"). run, bisect, package
- * and make execute a fiddle's code, so a remote fiddle (a gist, or
- * `electron:<tag>/<path>`) needs --trust, or a "y" at a terminal prompt that
- * shows its origin, files and dependencies. With neither, and no terminal to
- * ask in, it fails closed with `untrusted` before anything is written, installed
- * or run. No Electron imports.
+ * The CLI's trust check. run, bisect, package and make execute a fiddle's
+ * code, so a remote fiddle (a gist, or `electron:<tag>/<path>`) needs
+ * --trust, or a "y" at a terminal prompt that shows its origin, files and
+ * dependencies. With neither, and no terminal to ask in, it fails closed with
+ * `untrusted` before anything is written, installed or run. No Electron
+ * imports.
  */
 import type { FileMap } from '../../fiddle/files';
 import { formatOrigin, isUntrustedOrigin, type FiddleOrigin } from '../../fiddle/trust';
@@ -28,7 +28,8 @@ export async function ensureTrusted(
 ): Promise<void> {
   if (!isUntrustedOrigin(fiddle.origin) || trust) return;
   const origin = formatOrigin(fiddle.origin);
-  if (!prompt.interactive) throw new FiddleError(CliErrorCode.untrusted, t('errorUntrusted', { origin }));
+  if (!prompt.interactive)
+    throw new FiddleError(CliErrorCode.untrusted, t('errorUntrusted', { origin }));
 
   const td = tm('mainDocuments');
   const list = (items: string[]) => (items.length > 0 ? items.join(', ') : td('none'));
@@ -42,5 +43,6 @@ export async function ensureTrusted(
     td('detailDependencies', { dependencies: list(dependencies) }),
   ].join('\n');
   const answer = await prompt.ask(detail, t('trustQuestion'));
-  if (!/^y(es)?$/i.test(answer.trim())) throw new FiddleError(CliErrorCode.untrusted, tm('mainRun')('untrusted'));
+  if (!/^y(es)?$/i.test(answer.trim()))
+    throw new FiddleError(CliErrorCode.untrusted, tm('mainRun')('untrusted'));
 }

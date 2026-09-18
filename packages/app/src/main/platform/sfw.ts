@@ -1,5 +1,5 @@
 /**
- * Socket Firewall (REQUIREMENTS §2, §4). Module installs run as
+ * Socket Firewall. Module installs run as
  * `node sfw.mjs npm|yarn …` (`buildInstallCommand` in src/fiddle/modules.ts),
  * so the `sfw` package's entry is spawned from disk and never bundled.
  * Packaged builds ship it at `<resources>/sfw.mjs` (forge.config.ts
@@ -25,7 +25,12 @@ export interface SfwLocation {
 }
 
 /** Where `sfw.mjs` is, or undefined when it's missing. */
-export function resolveSfwEntry({ packaged, resourcesPath, resolve, exists = fs.existsSync }: SfwLocation): string | undefined {
+export function resolveSfwEntry({
+  packaged,
+  resourcesPath,
+  resolve,
+  exists = fs.existsSync,
+}: SfwLocation): string | undefined {
   let file: string | undefined;
   if (packaged) {
     file = path.join(resourcesPath, SFW_ENTRY);

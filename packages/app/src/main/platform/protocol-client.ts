@@ -1,6 +1,5 @@
 /**
- * Registers the app as the `electron-fiddle://` handler (REQUIREMENTS §17.16),
- * following the old app's logic for the new layout:
+ * Registers the app as the `electron-fiddle://` handler:
  *
  * - macOS: declared in the bundle (forge.config.ts `protocols`); this makes
  *   sure it's the default handler.
@@ -27,7 +26,8 @@ export function registerProtocolClient(): void {
       if (process.windowsStore) return;
       const stub = squirrelStubPath();
       if (!fs.existsSync(stub)) return;
-      if (!app.isDefaultProtocolClient(PROTOCOL, stub)) app.setAsDefaultProtocolClient(PROTOCOL, stub);
+      if (!app.isDefaultProtocolClient(PROTOCOL, stub))
+        app.setAsDefaultProtocolClient(PROTOCOL, stub);
       return;
     }
     if (!app.isDefaultProtocolClient(PROTOCOL)) app.setAsDefaultProtocolClient(PROTOCOL);

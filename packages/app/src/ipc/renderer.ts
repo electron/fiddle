@@ -24,9 +24,18 @@ import {
   type IOnboardingRenderer,
   type IWindowRenderer,
 } from './generated/renderer/fiddle';
-import { Settings as GeneratedSettings, type ISettingsRenderer } from './generated/renderer/fiddle';
-import { GitHub as GeneratedGitHub, type IGitHubRenderer } from './generated/renderer/fiddle';
-import { AppPlatform as GeneratedAppPlatform, type IAppPlatformRenderer } from './generated/renderer/fiddle';
+import {
+  Settings as GeneratedSettings,
+  type ISettingsRenderer,
+} from './generated/renderer/fiddle';
+import {
+  GitHub as GeneratedGitHub,
+  type IGitHubRenderer,
+} from './generated/renderer/fiddle';
+import {
+  AppPlatform as GeneratedAppPlatform,
+  type IAppPlatformRenderer,
+} from './generated/renderer/fiddle';
 
 export type { AppInfo, IAppRenderer, IWindowRenderer } from './generated/renderer/fiddle';
 export {
@@ -55,13 +64,12 @@ export const documentsApi = bind<IDocumentsRenderer>(GeneratedDocuments, 'Docume
 export type { IDocumentsRenderer } from './generated/renderer/fiddle';
 export const modulesApi = bind<IModulesRenderer>(GeneratedModules, 'Modules');
 export const onboardingApi = bind<IOnboardingRenderer>(GeneratedOnboarding, 'Onboarding');
-// Versions and run slice.
 export const versionsApi = bind<IVersionsRenderer>(GeneratedVersions, 'Versions');
 export const runApi = bind<IRunRenderer>(GeneratedRun, 'Run');
-// Settings slice.
 export const settingsApi = bind<ISettingsRenderer>(GeneratedSettings, 'Settings');
 export type { ISettingsRenderer };
-// Gists slice.
 export const githubApi = bind<IGitHubRenderer>(GeneratedGitHub, 'GitHub');
-// Platform slice: renderer logs, crash reporting and the update toast.
-export const appPlatformApi = bind<IAppPlatformRenderer>(GeneratedAppPlatform, 'AppPlatform');
+export const appPlatformApi = bind<IAppPlatformRenderer>(
+  GeneratedAppPlatform,
+  'AppPlatform',
+);

@@ -21,8 +21,18 @@ const node = (
 const tree: AXNode[] = [
   node('1', 'RootWebArea', 'Electron Fiddle', ['2']),
   { ...node('2', 'generic', '', ['3', '4', '6', '8']), parentId: '1' },
-  { ...node('3', 'heading', 'Welcome', [], { properties: [{ name: 'level', value: { value: 1 } }] }), parentId: '2' },
-  { ...node('4', 'button', 'Run', ['5'], { properties: [{ name: 'disabled', value: { value: true } }] }), parentId: '2' },
+  {
+    ...node('3', 'heading', 'Welcome', [], {
+      properties: [{ name: 'level', value: { value: 1 } }],
+    }),
+    parentId: '2',
+  },
+  {
+    ...node('4', 'button', 'Run', ['5'], {
+      properties: [{ name: 'disabled', value: { value: true } }],
+    }),
+    parentId: '2',
+  },
   { ...node('5', 'StaticText', 'Run'), parentId: '4' },
   { ...node('6', 'button', 'Settings', ['7']), parentId: '2' },
   { ...node('7', 'StaticText', 'Gear'), parentId: '6' },
@@ -45,11 +55,16 @@ describe('formatSnapshot', () => {
 
 describe('matchNodes', () => {
   it('matches role and exact name', () => {
-    expect(matchNodes(tree, { role: 'button', name: 'Run' }).map((n) => n.nodeId)).toEqual(['4']);
+    expect(
+      matchNodes(tree, { role: 'button', name: 'Run' }).map((n) => n.nodeId),
+    ).toEqual(['4']);
   });
 
   it('matches names by regex and skips ignored nodes', () => {
-    const ids = matchNodes(tree, { role: 'button', name: { regex: '^(run|hidden)$', flags: 'i' } });
+    const ids = matchNodes(tree, {
+      role: 'button',
+      name: { regex: '^(run|hidden)$', flags: 'i' },
+    });
     expect(ids.map((n) => n.nodeId)).toEqual(['4']);
   });
 
@@ -60,8 +75,8 @@ describe('matchNodes', () => {
 
 describe('describeQuery', () => {
   it('describes each part', () => {
-    expect(describeQuery({ role: 'button', name: { regex: 'run', flags: 'i' }, nth: 1 })).toBe(
-      'role=button name=/run/i nth=1',
-    );
+    expect(
+      describeQuery({ role: 'button', name: { regex: 'run', flags: 'i' }, nth: 1 }),
+    ).toBe('role=button name=/run/i nth=1');
   });
 });

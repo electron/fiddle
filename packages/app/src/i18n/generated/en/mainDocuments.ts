@@ -54,6 +54,8 @@ export default {
   "trustAllowScripts": "Allow install scripts for {{packages}}",
   "restoreMessage": "Restore unsaved changes?",
   "restoreDetail": "Electron Fiddle found unsaved changes from an earlier session: {{names}}.",
+  "restoreFailedMessage": "Some windows could not be reopened",
+  "restoreFailedDetail": "Could not load the folder or gist of: {{names}}. Check that the folder is available and that you're online.",
   "restore": "Restore",
   "discardDrafts": "Discard",
   "noRecent": "No recent folders",

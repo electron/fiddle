@@ -1,12 +1,18 @@
 /**
  * Every command in the registry with its shortcut. Record a new shortcut,
  * remove it (a `null` override) or reset it. Shared shortcuts are flagged.
- * Only overrides are stored, under `keybindings` (REQUIREMENTS §3).
+ * Only overrides are stored, under `keybindings`.
  */
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { acceleratorFor, commandIds, commands, isCommandListed, type CommandId } from '../../../shared/commands';
+import {
+  acceleratorFor,
+  commandIds,
+  commands,
+  isCommandListed,
+  type CommandId,
+} from '../../../shared/commands';
 import {
   acceleratorFromKey,
   effectiveAccelerators,
@@ -29,9 +35,24 @@ export function KeybindingsSection() {
   const overrides = settings.keybindings;
   const [filter, setFilter] = useState('');
   const [recording, setRecording] = useState<CommandId | null>(null);
+  // The row whose Change button gets focus back once its recorder is gone.
+  const refocus = useRef<CommandId | null>(null);
+  useEffect(() => {
+    if (recording !== null || refocus.current === null) return;
+    document
+      .querySelector<HTMLElement>(`[data-command="${refocus.current}"] button`)
+      ?.focus();
+    refocus.current = null;
+  }, [recording]);
 
-  const conflicts = useMemo(() => findConflicts(platform, overrides), [platform, overrides]);
-  const list = useMemo(() => new Intl.ListFormat(locale, { type: 'conjunction' }), [locale]);
+  const conflicts = useMemo(
+    () => findConflicts(platform, overrides),
+    [platform, overrides],
+  );
+  const list = useMemo(
+    () => new Intl.ListFormat(locale, { type: 'conjunction' }),
+    [locale],
+  );
   const label = (id: CommandId) => tMain(commands[id].label);
 
   // Dev-only commands (the Develop menu's) only in development builds.
@@ -43,7 +64,11 @@ export function KeybindingsSection() {
 
   const save = (id: CommandId, accelerator: string | null | undefined) => {
     const next = { ...overrides };
-    if (accelerator === undefined || accelerator === (acceleratorFor(id, platform) ?? null)) delete next[id];
+    if (
+      accelerator === undefined ||
+      accelerator === (acceleratorFor(id, platform) ?? null)
+    )
+      delete next[id];
     else next[id] = accelerator;
     set('keybindings', next);
   };
@@ -67,7 +92,10 @@ export function KeybindingsSection() {
             const overridden = Object.hasOwn(overrides, id);
             const others = [
               ...new Set(
-                accelerators.flatMap((accelerator) => conflicts.get(normalizeAccelerator(accelerator, platform)) ?? []),
+                accelerators.flatMap(
+                  (accelerator) =>
+                    conflicts.get(normalizeAccelerator(accelerator, platform)) ?? [],
+                ),
               ),
             ].filter((other) => other !== id);
             return (
@@ -75,12 +103,20 @@ export function KeybindingsSection() {
                 <div className={styles.shortcutText}>
                   <span className={styles.shortcutLabel}>
                     {name}
-                    {overridden && <span className={styles.modified} role="img" aria-label={t('modified')} />}
+                    {overridden && (
+                      <span
+                        className={styles.modified}
+                        role="img"
+                        aria-label={t('modified')}
+                      />
+                    )}
                   </span>
                   {others.length > 0 && (
                     <span className={styles.conflict}>
                       <Icon name="warning" size={12} />
-                      {t('keybindings.conflict', { commands: list.format(others.map(label)) })}
+                      {t('keybindings.conflict', {
+                        commands: list.format(others.map(label)),
+                      })}
                     </span>
                   )}
                 </div>
@@ -89,7 +125,8 @@ export function KeybindingsSection() {
                     label={t('keybindings.recordLabel', { command: name })}
                     placeholder={t('keybindings.record')}
                     platform={platform}
-                    onDone={(value) => {
+                    onDone={(value, byKey) => {
+                      if (byKey) refocus.current = id;
                       setRecording(null);
                       if (value) save(id, value);
                     }}
@@ -97,7 +134,10 @@ export function KeybindingsSection() {
                 ) : accelerators.length > 0 ? (
                   <span className={styles.shortcutKeys}>
                     {accelerators.map((accelerator) => (
-                      <Kbd key={accelerator} keys={acceleratorKeys(accelerator, platform)} />
+                      <Kbd
+                        key={accelerator}
+                        keys={acceleratorKeys(accelerator, platform)}
+                      />
                     ))}
                   </span>
                 ) : (
@@ -137,11 +177,17 @@ interface RecorderProps {
   label: string;
   placeholder: string;
   platform: Platform;
-  /** Called with the new accelerator, or nothing when cancelled. */
-  onDone(accelerator?: string): void;
+  /** Called with the new accelerator, or nothing when cancelled. `byKey`: ended by a key press, not by focus leaving. */
+  onDone(accelerator?: string, byKey?: boolean): void;
 }
 
-/** Captures the next key combination. Escape or leaving the field cancels; plain Tab moves on. */
+const FUNCTION_KEY = /^F([1-9]|1\d|2[0-4])$/;
+
+/**
+ * Captures the next key combination. Escape or leaving the field cancels; Tab
+ * and Shift+Tab move on. A key with no Ctrl, Cmd or Alt would be taken from
+ * every text field, so only function keys are recorded without one.
+ */
 function Recorder({ label, placeholder, platform, onDone }: RecorderProps) {
   const ref = useRef<HTMLInputElement>(null);
   useEffect(() => ref.current?.focus(), []);
@@ -156,17 +202,18 @@ function Recorder({ label, placeholder, platform, onDone }: RecorderProps) {
       placeholder={placeholder}
       onBlur={() => onDone()}
       onKeyDown={(event) => {
-        const plain = !event.metaKey && !event.ctrlKey && !event.altKey && !event.shiftKey;
-        if (event.key === 'Tab' && plain) return;
+        const chord = event.metaKey || event.ctrlKey || event.altKey;
+        if (event.key === 'Tab' && !chord) return;
         event.preventDefault();
         // Keep Escape from closing the settings page.
         event.stopPropagation();
-        if (event.key === 'Escape' && plain) {
-          onDone();
+        if (event.key === 'Escape' && !chord && !event.shiftKey) {
+          onDone(undefined, true);
           return;
         }
+        if (!chord && !FUNCTION_KEY.test(event.key)) return;
         const accelerator = acceleratorFromKey(event.nativeEvent, platform);
-        if (accelerator) onDone(accelerator);
+        if (accelerator) onDone(accelerator, true);
       }}
     />
   );

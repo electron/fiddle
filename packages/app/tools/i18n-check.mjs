@@ -1,13 +1,13 @@
 #!/usr/bin/env node
-// `yarn i18n:check`: catalog checks CI runs (REQUIREMENTS §9). Fails on:
+// `yarn i18n:check`: catalog checks CI runs. Fails on:
 //   - missing keys in a shipped locale, and keys English doesn't have;
 //   - placeholder or tag mismatches between English and a translation;
 //   - invalid plural forms, in English or a translation;
 //   - translations longer than the key's maxLength.
-// Warns (without failing) about reviewed translations whose English changed,
-// and about English keys that no source file seems to use. That scan is a
-// heuristic: a key counts as used if its text appears as a string literal, or
-// matches a template literal such as `notice.${kind}.title`, anywhere in src/.
+//   - English keys that no source file seems to use. That scan is a heuristic:
+//     a key counts as used if its text appears as a string literal, or matches
+//     a template literal such as `notice.${kind}.title`, anywhere in src/.
+// Warns (without failing) about reviewed translations whose English changed.
 import fs from 'node:fs';
 import path from 'node:path';
 import { pathToFileURL } from 'node:url';
@@ -17,8 +17,8 @@ import {
   keysFor,
   loadEnglish,
   loadMessages,
-  localesDir,
   metaDir,
+  PLURAL_KEY,
   pluralCategories,
   pseudoLocales,
   readJsonFile,
@@ -28,8 +28,6 @@ import {
   unitsOf,
   validateUnit,
 } from './i18n-shared.mjs';
-
-const PLURAL_KEY = /^(.+)_(zero|one|two|few|many|other)$/;
 
 /** Problems in the English catalog itself: plural groups and their forms. */
 export function checkEnglish(english) {
@@ -42,7 +40,9 @@ export function checkEnglish(english) {
       if (!Object.hasOwn(entries, `${match[1]}_other`)) {
         errors.push(`en/${ns}.json: ${key}: plural key without ${match[1]}_other`);
       } else if (!allowed.has(match[2])) {
-        errors.push(`en/${ns}.json: ${key}: invalid plural form for English (use one, other or zero)`);
+        errors.push(
+          `en/${ns}.json: ${key}: invalid plural form for English (use one, other or zero)`,
+        );
       }
     }
   }
@@ -54,7 +54,8 @@ export function checkLocale(english, locale, messages, meta = {}) {
   const errors = [];
   const warnings = [];
   for (const ns of Object.keys(messages)) {
-    if (!(ns in english)) errors.push(`${locale}/${ns}.json: no English source; remove it`);
+    if (!(ns in english))
+      errors.push(`${locale}/${ns}.json: no English source; remove it`);
   }
   for (const [ns, entries] of Object.entries(english)) {
     const where = `${locale}/${ns}.json`;
@@ -100,8 +101,10 @@ function sourceFiles(dir) {
   for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
     const file = path.join(dir, entry.name);
     if (entry.isDirectory()) {
-      if (entry.name !== 'generated' && entry.name !== 'locales') files.push(...sourceFiles(file));
-    } else if (/\.tsx?$/.test(entry.name) && !/\.test\.tsx?$/.test(entry.name)) files.push(file);
+      if (entry.name !== 'generated' && entry.name !== 'locales')
+        files.push(...sourceFiles(file));
+    } else if (/\.tsx?$/.test(entry.name) && !/\.test\.tsx?$/.test(entry.name))
+      files.push(file);
   }
   return files;
 }
@@ -111,7 +114,9 @@ export function findUnusedEnglish(english, texts) {
   const literals = new Set();
   const patterns = [];
   for (const text of texts) {
-    for (const match of text.matchAll(/'([^'\\\n]*)'|"([^"\\\n]*)"/g)) literals.add(match[1] ?? match[2]);
+    for (const match of text.matchAll(/'((?:[^'\\\n]|\\.)*)'|"((?:[^"\\\n]|\\.)*)"/g)) {
+      literals.add(match[1] ?? match[2]);
+    }
     for (const match of text.matchAll(/`([^`]*)`/g)) {
       const parts = match[1].split(/\$\{[^}]*\}/);
       if (parts.length < 2 || parts.join('').length < 2) continue;
@@ -136,11 +141,6 @@ function main() {
   const english = loadEnglish();
   const errors = checkEnglish(english);
   const warnings = [];
-  for (const locale of pseudoLocales) {
-    if (fs.existsSync(path.join(localesDir, locale))) {
-      errors.push(`${locale}/: pseudo-locales are generated from English; remove the folder`);
-    }
-  }
   const locales = translatedLocales().filter((locale) => !pseudoLocales.includes(locale));
   for (const locale of locales) {
     const meta = readJsonFile(path.join(metaDir, `${locale}.json`)) ?? {};
@@ -148,10 +148,14 @@ function main() {
     errors.push(...result.errors);
     warnings.push(...result.warnings);
   }
-  const texts = sourceFiles(path.join(appDir, 'src')).map((file) => fs.readFileSync(file, 'utf8'));
+  const texts = sourceFiles(path.join(appDir, 'src')).map((file) =>
+    fs.readFileSync(file, 'utf8'),
+  );
   const unused = findUnusedEnglish(english, texts);
   if (unused.length) {
-    warnings.push(`English keys no source file seems to use (heuristic): ${unused.join(', ')}`);
+    errors.push(
+      `English keys no source file seems to use (heuristic): ${unused.join(', ')}`,
+    );
   }
 
   for (const warning of warnings) console.warn(`warning: ${warning}`);

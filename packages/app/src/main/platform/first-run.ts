@@ -1,7 +1,7 @@
 /**
- * macOS first run (REQUIREMENTS §17.16): offers to move the app to
- * /Applications. Only on the first launch (no `importedFrom` yet), only for a
- * packaged app outside /Applications, and never in test mode.
+ * macOS first run: offers to move the app to /Applications. Only on the first
+ * launch (no `importedFrom` yet), only for a packaged app outside
+ * /Applications, and never in test mode.
  */
 import { app, dialog } from 'electron';
 
@@ -11,7 +11,8 @@ import { testFlags } from '../test-mode';
 
 export async function offerMoveToApplications(firstLaunch: boolean): Promise<void> {
   if (process.platform !== 'darwin' || !firstLaunch) return;
-  if (!app.isPackaged || !testFlags().firstRunPrompts || app.isInApplicationsFolder()) return;
+  if (!app.isPackaged || !testFlags().firstRunPrompts || app.isInApplicationsFolder())
+    return;
   const tp = tm('mainPlatform');
   const { response } = await dialog.showMessageBox({
     type: 'question',

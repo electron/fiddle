@@ -1,23 +1,19 @@
 /**
- * The status bar's bell (REQUIREMENTS §10 "A notification list keeps past
- * toasts"): a count of toasts not seen in the list yet, and a popover with
- * every toast this window showed, newest first. Actions stay usable there.
+ * The status bar's bell: a count of toasts not seen in the list yet, and a
+ * popover with every toast this window showed, newest first. Actions stay usable there.
  */
 import { useTranslation } from 'react-i18next';
 
 import { useFormat } from '../../i18n/renderer';
-import { Button, Icon, IconButton, Popover, PopoverTrigger, toastQueue, type IconName, type ToastTone } from '../../ui';
+import { Button, Icon, IconButton, Popover, PopoverTrigger, toastQueue } from '../../ui';
 import styles from './Notifications.module.css';
 import { toastHistory, useToastHistory, type NotificationEntry } from './notifications';
 
-const toneIcon = {
-  info: 'info',
-  success: 'success',
-  warning: 'warning',
-  error: 'error',
-} as const satisfies Record<ToastTone, IconName>;
-
-const TIME: Intl.DateTimeFormatOptions = { hour: '2-digit', minute: '2-digit', hourCycle: 'h23' };
+const TIME: Intl.DateTimeFormatOptions = {
+  hour: '2-digit',
+  minute: '2-digit',
+  hourCycle: 'h23',
+};
 
 export function NotificationsButton() {
   const { t } = useTranslation('shell');
@@ -66,12 +62,14 @@ function Entry({ entry }: { entry: NotificationEntry }) {
   const tone = content.tone ?? 'info';
   return (
     <li className={styles.entry} data-tone={tone}>
-      <Icon name={toneIcon[tone]} className={styles.icon} />
+      <Icon name={tone} className={styles.icon} />
       <div className={styles.body}>
         <div className={styles.entryTitle}>{content.title}</div>
         {content.description && <div className={styles.text}>{content.description}</div>}
         <div className={styles.meta}>
-          <time dateTime={new Date(entry.time).toISOString()}>{formatDate(entry.time, TIME)}</time>
+          <time dateTime={new Date(entry.time).toISOString()}>
+            {formatDate(entry.time, TIME)}
+          </time>
           {content.actionLabel && content.onAction && (
             <Button
               variant="link"

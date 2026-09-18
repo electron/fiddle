@@ -1,3 +1,5 @@
+import os from 'node:os';
+
 import * as semver from 'semver';
 
 import { ErrorCode, FiddleError } from '../shared/errors';
@@ -43,11 +45,31 @@ export function electronPackageName(version: string): ElectronPackageName {
  */
 export const DEFAULT_DESCRIPTION = 'My Electron application description';
 
-/** Field order follows the original Fiddle's (and `npm init`'s). */
+/** The OS user name, or '' for an account without one (some containers and service accounts). */
+export function osUserName(): string {
+  try {
+    return os.userInfo().username;
+  } catch {
+    return '';
+  }
+}
+
+/** A valid npm package name from a fiddle's display name, e.g. "Sparkling Pony" → "sparkling-pony". */
+export function toPackageName(name: string): string {
+  const cleaned = name
+    .toLowerCase()
+    .replace(/[^a-z0-9._-]+/g, '-')
+    .replace(/^[-._]+|[-._]+$/g, '')
+    .slice(0, 214);
+  return cleaned || 'fiddle';
+}
+
+/** Field order follows `npm init`'s. The name goes through `toPackageName`. */
 export function generatePackageJson(input: PackageJsonInput): string {
+  const name = toPackageName(input.name);
   const pkg: Record<string, unknown> = {
-    name: input.name,
-    productName: input.name,
+    name,
+    productName: name,
     description: DEFAULT_DESCRIPTION,
     keywords: [],
     main: `./${input.main ?? DEFAULT_MAIN_ENTRY}`,
@@ -57,7 +79,9 @@ export function generatePackageJson(input: PackageJsonInput): string {
   pkg.scripts = { start: 'electron .' };
   if (input.modules) pkg.dependencies = Object.fromEntries(Object.entries(input.modules));
   if (input.electronVersion) {
-    pkg.devDependencies = Object.fromEntries([[electronPackageName(input.electronVersion), input.electronVersion]]);
+    pkg.devDependencies = Object.fromEntries([
+      [electronPackageName(input.electronVersion), input.electronVersion],
+    ]);
   }
   return JSON.stringify(pkg, null, 2);
 }
@@ -68,7 +92,9 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 
 function stringEntries(value: unknown): [string, string][] {
   if (!isRecord(value)) return [];
-  return Object.entries(value).filter((e): e is [string, string] => typeof e[1] === 'string');
+  return Object.entries(value).filter(
+    (e): e is [string, string] => typeof e[1] === 'string',
+  );
 }
 
 /** Strips range prefixes: `^1.2.0` → `1.2.0`, `~2.3.4` → `2.3.4`. */
@@ -81,20 +107,28 @@ export function stripRangePrefix(spec: string): string {
 export function parsePackageJson(text: string): ParsedPackageJson {
   let data: unknown;
   try {
-    data = JSON.parse(text);
+    // Windows editors add a byte order mark, which JSON.parse refuses.
+    data = JSON.parse(text.replace(/^\uFEFF/, ''));
   } catch {
     data = undefined;
   }
   if (!isRecord(data)) {
-    throw new FiddleError(ErrorCode.invalidArgument, 'Invalid JSON found in package.json', {
-      reason: 'invalid-json',
-      file: 'package.json',
-    });
+    throw new FiddleError(
+      ErrorCode.invalidArgument,
+      'Invalid JSON found in package.json',
+      {
+        reason: 'invalid-json',
+        file: 'package.json',
+      },
+    );
   }
 
   const result: ParsedPackageJson = { modules: {}, rejectedModules: [] };
   const modules: [string, string][] = [];
-  for (const [name, spec] of [...stringEntries(data.dependencies), ...stringEntries(data.devDependencies)]) {
+  for (const [name, spec] of [
+    ...stringEntries(data.dependencies),
+    ...stringEntries(data.devDependencies),
+  ]) {
     if (name === 'electron' || name === 'electron-nightly') {
       const version = stripRangePrefix(spec);
       if (semver.valid(version)) {

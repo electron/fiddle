@@ -1,6 +1,5 @@
 /**
- * "Closing the last window quits the app, except on macOS" (REQUIREMENTS
- * §17.16).
+ * Closing the last window quits the app, except on macOS.
  *
  * The handler is installed right after `ready`, before the one-time import.
  * The import's hidden reader window (../migration/local-storage.ts) is the
@@ -13,7 +12,9 @@ import { app } from 'electron';
 
 let starting = true;
 
-export function installQuitOnLastWindowClosed(platform: NodeJS.Platform = process.platform): void {
+export function installQuitOnLastWindowClosed(
+  platform: NodeJS.Platform = process.platform,
+): void {
   app.on('window-all-closed', () => {
     if (platform !== 'darwin' && !starting) app.quit();
   });

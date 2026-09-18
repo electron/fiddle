@@ -39,11 +39,19 @@ export function pickFiddleFiles(map: FileMap, options: PickOptions = {}): Picked
   let packageJsonText: string | undefined;
   for (const name of Object.keys(map)) {
     if (name === PACKAGE_JSON) packageJsonText = map[name];
-    else if (!isSupportedFileName(name) || isReservedFileName(name) || hasName(kept, name)) skipped.push(name);
+    else if (
+      !isSupportedFileName(name) ||
+      isReservedFileName(name) ||
+      hasName(kept, name)
+    )
+      skipped.push(name);
     else kept.push(name);
   }
   if (kept.length === 0) {
-    throw new FiddleError(ErrorCode.invalidArgument, 'No supported files found', { reason: 'no-supported-files', skipped });
+    throw new FiddleError(ErrorCode.invalidArgument, 'No supported files found', {
+      reason: 'no-supported-files',
+      skipped,
+    });
   }
 
   const result: PickedFiles = {

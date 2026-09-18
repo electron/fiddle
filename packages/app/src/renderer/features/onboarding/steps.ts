@@ -5,7 +5,8 @@
  */
 import type onboarding from '../../../i18n/generated/en/onboarding';
 
-export type TourTarget = 'editor' | 'version-picker' | 'run' | 'publish' | 'console' | 'sidebar';
+export type TourTarget =
+  'editor' | 'version-picker' | 'run' | 'publish' | 'console' | 'sidebar';
 type TourKey = keyof typeof onboarding;
 
 export interface TourStep {
@@ -66,6 +67,7 @@ export function placeCard(
   if (below + card.height + MARGIN <= viewport.height) return { top: below, left };
   const above = target.top - GAP - card.height;
   if (above >= MARGIN) return { top: above, left };
-  const inside = Math.min(target.top + target.height, viewport.height) - card.height - GAP * 2;
+  const inside =
+    Math.min(target.top + target.height, viewport.height) - card.height - GAP * 2;
   return { top: Math.max(MARGIN, inside), left: clampLeft(target.left + GAP * 2) };
 }

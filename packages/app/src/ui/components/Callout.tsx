@@ -15,7 +15,14 @@ export interface CalloutProps {
 }
 
 /** An inline note. No border. */
-export function Callout({ intent = 'default', title, icon, children, action, className }: CalloutProps) {
+export function Callout({
+  intent = 'default',
+  title,
+  icon,
+  children,
+  action,
+  className,
+}: CalloutProps) {
   const iconName = icon ?? (intent === 'danger' ? 'warning' : 'info');
   return (
     <div className={cx(styles.callout, className)} data-intent={intent}>
@@ -38,7 +45,13 @@ export interface EmptyStateProps {
 }
 
 /** What a panel shows when it has nothing yet: an icon, a title, a sentence and one action. */
-export function EmptyState({ icon = 'code', title, children, action, className }: EmptyStateProps) {
+export function EmptyState({
+  icon = 'code',
+  title,
+  children,
+  action,
+  className,
+}: EmptyStateProps) {
   return (
     <div className={cx(styles.empty, className)}>
       <span className={styles.emptyIcon}>

@@ -55,9 +55,8 @@ afterEach(() => {
   vi.unstubAllEnvs();
 });
 
-describe('Runner options added in 3.0', () => {
+describe('Runner options', () => {
   describe('inspect', () => {
-    // @feature run.spawn
     it('passes --inspect=127.0.0.1:0 by default', async () => {
       const { runner } = await createRunner();
       fakeChild();
@@ -65,7 +64,6 @@ describe('Runner options added in 3.0', () => {
       expect(spawnCall().args).toStrictEqual(['--inspect=127.0.0.1:0', mainPath]);
     });
 
-    // @feature run.spawn
     it('puts the inspector flag before user args and the fiddle', async () => {
       const { runner } = await createRunner();
       fakeChild();
@@ -178,7 +176,7 @@ describe('Runner options added in 3.0', () => {
       });
     });
 
-    describe('by default, as in 2.x', () => {
+    describe('by default', () => {
       it('makes run() resolve system_error when already aborted', async () => {
         const { runner } = await createRunner();
         const run = runner.run('12.0.1', 'fiddle', {

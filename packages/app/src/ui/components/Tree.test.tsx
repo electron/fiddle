@@ -1,9 +1,6 @@
-// @vitest-environment jsdom
-import { act, cleanup, fireEvent, render, screen } from '@testing-library/react';
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { act, fireEvent, render, screen } from '@testing-library/react';
+import { describe, expect, it, vi } from 'vitest';
 import { Tree, TreeRow } from './Tree';
-
-afterEach(cleanup);
 
 function row(name: RegExp) {
   return screen.getByRole('row', { name });

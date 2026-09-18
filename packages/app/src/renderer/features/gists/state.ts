@@ -2,9 +2,8 @@
  * Gist UI state: which gist dialog is open (one at a time, shared by the
  * Publish button, its menu and the gist commands) plus hooks over the stores.
  */
-import { useSyncExternalStore } from 'react';
-
 import { useAppState, useWindowState } from '../../state';
+import { createStore, useStore } from '../../store';
 
 export type GistDialog =
   | { kind: 'sign-in'; then?: () => void }
@@ -12,22 +11,16 @@ export type GistDialog =
   | { kind: 'history' }
   | { kind: 'open' };
 
-let current: GistDialog | null = null;
-const listeners = new Set<() => void>();
+const dialogStore = createStore<GistDialog | null>(null);
 
-export function showGistDialog(dialog: GistDialog | null): void {
-  current = dialog;
-  for (const listener of listeners) listener();
+export const showGistDialog = dialogStore.set;
+
+/** Closes `dialog` only if it is still the open one, so a late close can't dismiss its replacement. */
+export function closeGistDialog(dialog: GistDialog): void {
+  if (dialogStore.get() === dialog) showGistDialog(null);
 }
 
-function subscribe(listener: () => void): () => void {
-  listeners.add(listener);
-  return () => listeners.delete(listener);
-}
-
-export function useGistDialog(): GistDialog | null {
-  return useSyncExternalStore(subscribe, () => current);
-}
+export const useGistDialog = (): GistDialog | null => useStore(dialogStore);
 
 /** Runs `action` now when signed in, otherwise once the sign-in dialog succeeds. */
 export function withSignIn(login: string | undefined, action: () => void): void {
@@ -44,17 +37,10 @@ export function useGitHubLogin(): string | undefined {
   return useAppState()?.githubLogin;
 }
 
-/** Open gist's default shortcut as people read it: ⌘⇧O on macOS, Ctrl+Shift+O elsewhere. */
-export function useOpenGistKbd(): string {
-  return useAppState()?.platform === 'darwin' ? '⌘⇧O' : 'Ctrl+Shift+O';
-}
-
-/** `gistVisibility`, `gistPublishAsRevision` and `gistShowHistory` from the effective settings. */
-export function useGistSettings(): { isPublic: boolean; asRevision: boolean; showHistory: boolean } {
+export function useGistSettings(): { isPublic: boolean; showHistory: boolean } {
   const settings = useAppState()?.settings;
   return {
     isPublic: settings?.gistVisibility === 'public',
-    asRevision: settings?.gistPublishAsRevision ?? true,
     showHistory: settings?.gistShowHistory ?? true,
   };
 }
@@ -65,7 +51,6 @@ export interface LoadedGist {
   owner?: string;
 }
 
-/** The gist this window's fiddle is linked to, if any. */
 export function useLoadedGist(): LoadedGist | undefined {
   const win = useWindowState();
   if (!win) return undefined;

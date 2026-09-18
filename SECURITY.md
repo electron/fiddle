@@ -20,4 +20,4 @@ For context on Electron's security notification process, please see the [Notific
 
 ## Learning More About Security
 
-To learn more about securing an Electron application, please see the [security tutorial](https://www.electronjs.org/docs/latest/tutorial/security). Electron Fiddle's own security model (sandboxing, CSP, trust approval for remote fiddles, credentials and release integrity) is described in §4 of [REQUIREMENTS.md](REQUIREMENTS.md).
+To learn more about securing an Electron application, please see the [security tutorial](https://www.electronjs.org/docs/latest/tutorial/security).

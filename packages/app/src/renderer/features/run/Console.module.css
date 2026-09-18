@@ -1,6 +1,3 @@
-/* Console (Lucent window anatomy): the sheet's console area paints
-   surface-sunken and the hairline; this fills it. Bar 46 tall, padding 0 10 0 16.
-   Rows are inset pills: margin 0 8, padding 2 8, radius 8, columns 60 / 70 / rest. */
 .pane {
   display: flex;
   flex-direction: column;
@@ -14,11 +11,12 @@
   align-items: center;
   gap: 10px;
   height: var(--lu-size-console-bar);
-  padding: 0 10px 0 16px;
+  padding-inline: 16px 10px;
 }
 
 .title {
-  margin: 0 4px 0 0;
+  margin: 0;
+  margin-inline-end: 4px;
   font: var(--lu-type-console-title);
   color: var(--lu-ink);
 }
@@ -53,6 +51,9 @@
   corner-shape: squircle;
   font: var(--lu-type-console);
   color: var(--lu-ink);
+  /* A full console has a thousand rows: only the ones on screen are laid out. */
+  content-visibility: auto;
+  contain-intrinsic-size: auto 20px;
 }
 
 .time {
@@ -73,29 +74,27 @@
   overflow-wrap: anywhere;
 }
 
-.row[data-kind="system"] .message,
-.row[data-kind="system"] .process {
+.row[data-kind='system'] .message,
+.row[data-kind='system'] .process {
   color: var(--lu-ink-faint);
 }
 
-.row[data-kind="warn"] .message {
+.row[data-kind='warn'] .message {
   color: var(--lu-warning);
 }
 
-/* Errors: a spark-soft pill with all three columns in spark. */
-.row[data-kind="error"] {
+.row[data-kind='error'] {
   background: var(--lu-spark-soft);
 }
-.row[data-kind="error"] .time,
-.row[data-kind="error"] .process,
-.row[data-kind="error"] .message {
+.row[data-kind='error'] .time,
+.row[data-kind='error'] .process,
+.row[data-kind='error'] .message {
   color: var(--lu-spark);
 }
-.row[data-kind="error"] .process {
+.row[data-kind='error'] .process {
   font-weight: 600;
 }
 
-/* http(s) URLs in a line: they ask before opening in the browser. */
 .link {
   color: var(--lu-accent);
   text-decoration: underline;

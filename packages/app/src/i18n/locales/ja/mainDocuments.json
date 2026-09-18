@@ -53,6 +53,8 @@
   "trustAllowScripts": "{{packages}} のインストールスクリプトを許可する",
   "restoreMessage": "保存されていない変更を復元しますか？",
   "restoreDetail": "以前のセッションで保存されていない変更が見つかりました：{{names}}。",
+  "restoreFailedMessage": "一部のウィンドウを再度開けませんでした",
+  "restoreFailedDetail": "フォルダーまたは Gist を読み込めませんでした：{{names}}。フォルダーが利用可能か、オンラインになっているかを確認してください。",
   "restore": "復元",
   "discardDrafts": "破棄",
   "noRecent": "最近使用したフォルダーはありません",

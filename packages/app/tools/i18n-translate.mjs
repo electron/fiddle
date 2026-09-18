@@ -89,11 +89,13 @@ export function planLocale(english, locale, messages, meta) {
       }
       nextMeta[id] = entry;
     }
-    for (const key of Object.keys(current)) if (!(key in out)) plan.removed.push(`${ns}:${key}`);
+    for (const key of Object.keys(current))
+      if (!(key in out)) plan.removed.push(`${ns}:${key}`);
     nextMessages[ns] = out;
   }
   for (const [ns, current] of Object.entries(messages)) {
-    if (!(ns in english)) for (const key of Object.keys(current)) plan.removed.push(`${ns}:${key}`);
+    if (!(ns in english))
+      for (const key of Object.keys(current)) plan.removed.push(`${ns}:${key}`);
   }
   return { plan, messages: nextMessages, meta: nextMeta };
 }
@@ -126,7 +128,8 @@ function requestUnit({ unit, previous }, locale) {
 function ordered(entries, locale, messages) {
   const out = {};
   for (const unit of unitsOf(entries)) {
-    for (const key of keysFor(unit, locale)) if (key in messages) out[key] = messages[key];
+    for (const key of keysFor(unit, locale))
+      if (key in messages) out[key] = messages[key];
   }
   return out;
 }
@@ -135,8 +138,20 @@ function ordered(entries, locale, messages) {
  * Plans a locale and, unless `dryRun`, sends the work to `translate` in
  * batches: `translate(request) -> { [unitKey]: string | { category: string } }`.
  */
-export async function translateLocale({ english, locale, messages, meta, glossary, translate, dryRun }) {
-  const { plan, messages: out, meta: nextMeta } = planLocale(english, locale, messages, meta);
+export async function translateLocale({
+  english,
+  locale,
+  messages,
+  meta,
+  glossary,
+  translate,
+  dryRun,
+}) {
+  const {
+    plan,
+    messages: out,
+    meta: nextMeta,
+  } = planLocale(english, locale, messages, meta);
   const requests = [];
   const failed = [];
   const byNamespace = Map.groupBy(plan.todo, (item) => item.ns);
@@ -155,20 +170,27 @@ export async function translateLocale({ english, locale, messages, meta, glossar
       try {
         result = (await translate(request)) ?? {};
       } catch (error) {
-        for (const { unit } of batch) failed.push({ id: `${ns}:${unit.key}`, problems: [error.message] });
+        for (const { unit } of batch)
+          failed.push({ id: `${ns}:${unit.key}`, problems: [error.message] });
         continue;
       }
       for (const { unit } of batch) {
         const id = `${ns}:${unit.key}`;
         const value = result[unit.key];
         const problems =
-          value === undefined ? ['no translation returned'] : validateUnit(unit, locale, value);
+          value === undefined
+            ? ['no translation returned']
+            : validateUnit(unit, locale, value);
         if (problems.length) {
           failed.push({ id, problems });
           continue;
         }
         writeUnit(unit, locale, out[ns], value);
-        nextMeta[id] = { source: sourceHash(unit), translation: hashValue(value), reviewed: false };
+        nextMeta[id] = {
+          source: sourceHash(unit),
+          translation: hashValue(value),
+          reviewed: false,
+        };
       }
     }
   }
@@ -176,7 +198,9 @@ export async function translateLocale({ english, locale, messages, meta, glossar
   for (const [ns, entries] of Object.entries(english)) {
     sortedMessages[ns] = ordered(entries, locale, out[ns] ?? {});
   }
-  const sortedMeta = Object.fromEntries(Object.entries(nextMeta).sort(([a], [b]) => a.localeCompare(b, 'en')));
+  const sortedMeta = Object.fromEntries(
+    Object.entries(nextMeta).sort(([a], [b]) => a.localeCompare(b, 'en')),
+  );
   return { plan, requests, failed, messages: sortedMessages, meta: sortedMeta };
 }
 
@@ -207,7 +231,11 @@ export function parseReply(text) {
 }
 
 /** A `translate` function backed by the Anthropic Messages API. */
-export function anthropicTranslator({ apiKey, model = DEFAULT_MODEL, fetchImpl = globalThis.fetch }) {
+export function anthropicTranslator({
+  apiKey,
+  model = DEFAULT_MODEL,
+  fetchImpl = globalThis.fetch,
+}) {
   // Claude Opus 5 and Fable 5.1 retry on a fallback model when a request is declined.
   const fallback = /^claude-(opus-5|fable-5-1)\b/.test(model);
   return async (request) => {
@@ -228,11 +256,14 @@ export function anthropicTranslator({ apiKey, model = DEFAULT_MODEL, fetchImpl =
       }),
     });
     if (!response.ok) {
-      throw new Error(`Anthropic API ${response.status}: ${(await response.text()).slice(0, 500)}`);
+      throw new Error(
+        `Anthropic API ${response.status}: ${(await response.text()).slice(0, 500)}`,
+      );
     }
     const body = await response.json();
     if (body.stop_reason === 'refusal') throw new Error('the model declined the request');
-    if (body.stop_reason === 'max_tokens') throw new Error('the reply was cut off (max_tokens)');
+    if (body.stop_reason === 'max_tokens')
+      throw new Error('the reply was cut off (max_tokens)');
     const text = body.content
       .filter((block) => block.type === 'text')
       .map((block) => block.text)
@@ -264,18 +295,27 @@ function describe(locale, { plan, failed }, dryRun) {
       (dryRun ? '' : `, ${failed.length} failed`),
   ];
   if (dryRun) {
-    for (const item of plan.todo) lines.push(`  ${item.reason.padEnd(8)} ${item.ns}:${item.unit.key}`);
+    for (const item of plan.todo)
+      lines.push(`  ${item.reason.padEnd(8)} ${item.ns}:${item.unit.key}`);
   }
   for (const item of plan.review) {
-    lines.push(`  review   ${item.ns}:${item.unit.key} (English changed; source is now ${item.source})`);
+    lines.push(
+      `  review   ${item.ns}:${item.unit.key} (English changed; source is now ${item.source})`,
+    );
   }
   if (dryRun) for (const id of plan.removed) lines.push(`  remove   ${id}`);
-  for (const { id, problems } of failed) lines.push(`  failed   ${id}: ${problems.join('; ')}`);
+  for (const { id, problems } of failed)
+    lines.push(`  failed   ${id}: ${problems.join('; ')}`);
   return lines.join('\n');
 }
 
 /** Writes a locale's namespaces and state. Empty namespaces have no file. */
-export function writeLocale(locale, messages, meta, { dir = localesDir, stateDir = metaDir } = {}) {
+export function writeLocale(
+  locale,
+  messages,
+  meta,
+  { dir = localesDir, stateDir = metaDir } = {},
+) {
   const localeDir = path.join(dir, locale);
   for (const name of fs.existsSync(localeDir) ? fs.readdirSync(localeDir) : []) {
     const ns = name.replace(/\.json$/, '');
@@ -303,7 +343,9 @@ async function main(argv) {
   const locales = values.locale ?? translatedLocales();
   for (const locale of locales) {
     if (locale === 'en' || pseudoLocales.includes(locale)) {
-      throw new Error(`${locale} isn't translated: English is the source and pseudo-locales are generated`);
+      throw new Error(
+        `${locale} isn't translated: English is the source and pseudo-locales are generated`,
+      );
     }
     Intl.getCanonicalLocales(locale);
   }
@@ -316,8 +358,12 @@ async function main(argv) {
   if (values.from) translate = fileTranslator(values.from);
   else if (!dryRun) {
     const apiKey = process.env.ANTHROPIC_API_KEY;
-    if (!apiKey) throw new Error('Set ANTHROPIC_API_KEY, or use --dry-run or --from <file>.');
-    translate = anthropicTranslator({ apiKey, model: process.env.FIDDLE_TRANSLATE_MODEL || DEFAULT_MODEL });
+    if (!apiKey)
+      throw new Error('Set ANTHROPIC_API_KEY, or use --dry-run or --from <file>.');
+    translate = anthropicTranslator({
+      apiKey,
+      model: process.env.FIDDLE_TRANSLATE_MODEL || DEFAULT_MODEL,
+    });
   }
 
   const english = loadEnglish();
@@ -342,7 +388,9 @@ async function main(argv) {
   }
   if (values.json) console.log(JSON.stringify(json, null, 2));
   if (!dryRun) {
-    console.log(`Updated src/i18n/locales and ${path.relative(appDir, metaDir)}. Run \`yarn generate\`.`);
+    console.log(
+      `Updated src/i18n/locales and ${path.relative(appDir, metaDir)}. Run \`yarn generate\`.`,
+    );
   }
   return failures ? 1 : 0;
 }

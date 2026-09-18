@@ -6,12 +6,12 @@ import {
   assertCanRemoveFile,
   assertCanRenameFile,
   assertValidFileName,
-  assertValidFileSet,
   ensureMainEntry,
   findMainEntry,
   getEditorLanguage,
   getExtension,
   getPlaceholder,
+  hasName,
   isEmptyOrPlaceholder,
   isKnownFile,
   isMainEntry,
@@ -24,29 +24,79 @@ import {
 } from './files';
 import { thrownReason } from './test-helpers/errors';
 
-// @feature files.extensions
 describe('isSupportedFileName', () => {
-  it.each(['main.js', 'a.cjs', 'b.mjs', 'index.html', 'styles.css', 'data.json', 'STYLE.CSS', 'App.MJS', 'a.b.js'])(
-    'accepts %s',
-    (name) => expect(isSupportedFileName(name)).toBe(true),
-  );
+  it.each([
+    'main.js',
+    'a.cjs',
+    'b.mjs',
+    'index.html',
+    'styles.css',
+    'data.json',
+    'STYLE.CSS',
+    'App.MJS',
+    'a.b.js',
+  ])('accepts %s', (name) => expect(isSupportedFileName(name)).toBe(true));
 
-  it.each(['readme.md', 'a.ts', 'a/b.js', 'a\\b.js', '.js', '', 'noext', 'main.js\0', 'C:x.js', 'a?.js', 'a*.js', 'a|b.js', 'a<b.js', 'a"b.js', 'tab\t.js'])('rejects %j', (name) =>
-    expect(isSupportedFileName(name)).toBe(false),
-  );
+  it.each([
+    'readme.md',
+    'a.ts',
+    'a/b.js',
+    'a\\b.js',
+    '.js',
+    '',
+    'noext',
+    'main.js\0',
+    'C:x.js',
+    'a?.js',
+    'a*.js',
+    'a|b.js',
+    'a<b.js',
+    'a"b.js',
+    'tab\t.js',
+    'a\u0085b.js',
+    '\u202emain.js',
+    'a\u200f.js',
+    'a\u007f.js',
+  ])('rejects %j', (name) => expect(isSupportedFileName(name)).toBe(false));
+});
+
+describe('hasName', () => {
+  it('ignores case and Unicode normalization', () => {
+    expect(hasName(['Main.js'], 'main.JS')).toBe(true);
+    expect(hasName(['\u00e9.js'], 'e\u0301.js')).toBe(true);
+    expect(hasName(['main.js'], 'renderer.js')).toBe(false);
+  });
 });
 
 describe('Windows reserved names', () => {
-  it.each(['con.js', 'CON.JS', 'nul.html', 'Aux.css', 'prn.json', 'com1.js', 'LPT9.mjs', 'con', 'con.min.js', 'main.js.', 'main.js ', 'x.'])(
-    'refuses %j on every platform',
-    (name) => {
-      expect(isWindowsReservedName(name)).toBe(true);
-      expect(isReservedFileName(name)).toBe(true);
-      expect(() => assertValidFileName(name)).toThrowError(/reserved-name/);
-    },
-  );
+  it.each([
+    'con.js',
+    'CON.JS',
+    'nul.html',
+    'Aux.css',
+    'prn.json',
+    'com1.js',
+    'LPT9.mjs',
+    'con',
+    'con.min.js',
+    'main.js.',
+    'main.js ',
+    'x.',
+  ])('refuses %j on every platform', (name) => {
+    expect(isWindowsReservedName(name)).toBe(true);
+    expect(isReservedFileName(name)).toBe(true);
+    expect(() => assertValidFileName(name)).toThrowError(/reserved-name/);
+  });
 
-  it.each(['console.js', 'icon.js', 'com.js', 'lpt.js', 'aux1.js', 'nul-x.js', 'main.js'])('allows %j', (name) => {
+  it.each([
+    'console.js',
+    'icon.js',
+    'com.js',
+    'lpt.js',
+    'aux1.js',
+    'nul-x.js',
+    'main.js',
+  ])('allows %j', (name) => {
     expect(isWindowsReservedName(name)).toBe(false);
   });
 });
@@ -58,14 +108,12 @@ describe('names', () => {
     expect(getExtension('none')).toBe('');
   });
 
-  // @feature files.reserved-names
   it('knows reserved names in any case', () => {
     expect(isReservedFileName('package.json')).toBe(true);
     expect(isReservedFileName('Package-Lock.json')).toBe(true);
     expect(isReservedFileName('packages.json')).toBe(false);
   });
 
-  // @feature files.one-main
   it('knows the main entries', () => {
     expect(isMainEntry('main.js')).toBe(true);
     expect(isMainEntry('main.cjs')).toBe(true);
@@ -99,7 +147,6 @@ describe('languages and placeholders', () => {
     expect(getEditorLanguage('a.json')).toBe('json');
   });
 
-  // @feature files.placeholder
   it('has a placeholder per language', () => {
     expect(getPlaceholder('a.js')).toBe('// Empty');
     expect(getPlaceholder('a.cjs')).toBe('// Empty');
@@ -110,7 +157,6 @@ describe('languages and placeholders', () => {
     expect(getPlaceholder('a.txt')).toBe('');
   });
 
-  // @feature files.placeholder
   it('detects empty and placeholder-only files', () => {
     expect(isEmptyOrPlaceholder('a.js', '')).toBe(true);
     expect(isEmptyOrPlaceholder('a.js', '  \n')).toBe(true);
@@ -125,7 +171,17 @@ describe('languages and placeholders', () => {
 
 describe('sortFileNames', () => {
   it('puts known files first, in order, then the rest alphabetically', () => {
-    expect(sortFileNames(['z.js', 'index.html', 'a.css', 'main.js', 'preload.js', 'renderer.js', 'styles.css'])).toEqual([
+    expect(
+      sortFileNames([
+        'z.js',
+        'index.html',
+        'a.css',
+        'main.js',
+        'preload.js',
+        'renderer.js',
+        'styles.css',
+      ]),
+    ).toEqual([
       'main.js',
       'renderer.js',
       'index.html',
@@ -137,14 +193,28 @@ describe('sortFileNames', () => {
   });
 });
 
-// @feature editor.tab-reorder
 describe('moveName and orderFiles', () => {
   const names = ['main.js', 'renderer.js', 'index.html', 'styles.css'];
 
   it('moves a name in front of another, or to the end', () => {
-    expect(moveName(names, 'styles.css', 'main.js')).toEqual(['styles.css', 'main.js', 'renderer.js', 'index.html']);
-    expect(moveName(names, 'main.js', 'styles.css')).toEqual(['renderer.js', 'index.html', 'main.js', 'styles.css']);
-    expect(moveName(names, 'renderer.js', null)).toEqual(['main.js', 'index.html', 'styles.css', 'renderer.js']);
+    expect(moveName(names, 'styles.css', 'main.js')).toEqual([
+      'styles.css',
+      'main.js',
+      'renderer.js',
+      'index.html',
+    ]);
+    expect(moveName(names, 'main.js', 'styles.css')).toEqual([
+      'renderer.js',
+      'index.html',
+      'main.js',
+      'styles.css',
+    ]);
+    expect(moveName(names, 'renderer.js', null)).toEqual([
+      'main.js',
+      'index.html',
+      'styles.css',
+      'renderer.js',
+    ]);
   });
 
   it('changes nothing for a name moved onto itself, an unknown name, or an unknown target (end)', () => {
@@ -166,14 +236,17 @@ describe('moveName and orderFiles', () => {
 });
 
 describe('validation', () => {
-  // @feature files.extensions files.reserved-names
   it('checks single names', () => {
     expect(thrownReason(() => assertValidFileName(''))).toBe('empty-name');
     expect(thrownReason(() => assertValidFileName('a/b.js'))).toBe('path-separator');
     expect(thrownReason(() => assertValidFileName('a\\b.js'))).toBe('path-separator');
     expect(thrownReason(() => assertValidFileName('package.json'))).toBe('reserved-name');
-    expect(thrownReason(() => assertValidFileName('package-lock.json'))).toBe('reserved-name');
-    expect(thrownReason(() => assertValidFileName('notes.md'))).toBe('unsupported-extension');
+    expect(thrownReason(() => assertValidFileName('package-lock.json'))).toBe(
+      'reserved-name',
+    );
+    expect(thrownReason(() => assertValidFileName('notes.md'))).toBe(
+      'unsupported-extension',
+    );
     expect(thrownReason(() => assertValidFileName('C:x.js'))).toBe('invalid-character');
     expect(thrownReason(() => assertValidFileName('ok.js'))).toBeNull();
   });
@@ -185,52 +258,71 @@ describe('validation', () => {
     } catch (error) {
       expect(error).toBeInstanceOf(FiddleError);
       expect((error as FiddleError).code).toBe(ErrorCode.invalidArgument);
-      expect((error as FiddleError).details).toEqual({ reason: 'unsupported-extension', name: 'x.md' });
+      expect((error as FiddleError).details).toEqual({
+        reason: 'unsupported-extension',
+        name: 'x.md',
+      });
     }
   });
 
-  // @feature files.no-duplicates files.one-main files.reserved-names
   it('checks adds', () => {
     const existing = ['main.js', 'index.html'];
-    expect(thrownReason(() => assertCanAddFile(existing, 'index.html'))).toBe('duplicate-name');
-    expect(thrownReason(() => assertCanAddFile(existing, 'INDEX.html'))).toBe('duplicate-name');
-    expect(thrownReason(() => assertCanAddFile(existing, 'main.mjs'))).toBe('second-main-entry');
-    expect(thrownReason(() => assertCanAddFile(existing, 'package.json'))).toBe('reserved-name');
+    expect(thrownReason(() => assertCanAddFile(existing, 'index.html'))).toBe(
+      'duplicate-name',
+    );
+    expect(thrownReason(() => assertCanAddFile(existing, 'INDEX.html'))).toBe(
+      'duplicate-name',
+    );
+    expect(thrownReason(() => assertCanAddFile(existing, 'main.mjs'))).toBe(
+      'second-main-entry',
+    );
+    expect(thrownReason(() => assertCanAddFile(existing, 'package.json'))).toBe(
+      'reserved-name',
+    );
     expect(thrownReason(() => assertCanAddFile(existing, 'extra.js'))).toBeNull();
     expect(thrownReason(() => assertCanAddFile(['index.html'], 'main.cjs'))).toBeNull();
   });
 
-  // @feature files.no-duplicates files.one-main
   it('checks renames', () => {
     const existing = ['main.js', 'index.html', 'a.js'];
-    expect(thrownReason(() => assertCanRenameFile(existing, 'main.js', 'main.mjs'))).toBeNull();
+    expect(
+      thrownReason(() => assertCanRenameFile(existing, 'main.js', 'main.mjs')),
+    ).toBeNull();
     expect(thrownReason(() => assertCanRenameFile(existing, 'a.js', 'A.js'))).toBeNull();
-    expect(thrownReason(() => assertCanRenameFile(existing, 'main.js', 'app.js'))).toBe('no-main-entry');
-    expect(thrownReason(() => assertCanRenameFile(existing, 'a.js', 'main.cjs'))).toBe('second-main-entry');
-    expect(thrownReason(() => assertCanRenameFile(existing, 'a.js', 'index.html'))).toBe('duplicate-name');
-    expect(thrownReason(() => assertCanRenameFile(existing, 'a.js', 'sub/a.js'))).toBe('path-separator');
-    expect(thrownReason(() => assertCanRenameFile(existing, 'a.js', 'package.json'))).toBe('reserved-name');
-    expect(thrownReason(() => assertCanRenameFile(existing, 'nope.js', 'b.js'))).toBe('file-not-found');
+    expect(thrownReason(() => assertCanRenameFile(existing, 'main.js', 'app.js'))).toBe(
+      'no-main-entry',
+    );
+    expect(thrownReason(() => assertCanRenameFile(existing, 'a.js', 'main.cjs'))).toBe(
+      'second-main-entry',
+    );
+    expect(thrownReason(() => assertCanRenameFile(existing, 'a.js', 'index.html'))).toBe(
+      'duplicate-name',
+    );
+    expect(thrownReason(() => assertCanRenameFile(existing, 'a.js', 'sub/a.js'))).toBe(
+      'path-separator',
+    );
+    expect(
+      thrownReason(() => assertCanRenameFile(existing, 'a.js', 'package.json')),
+    ).toBe('reserved-name');
+    expect(thrownReason(() => assertCanRenameFile(existing, 'nope.js', 'b.js'))).toBe(
+      'file-not-found',
+    );
   });
 
-  // @feature files.main-undeletable
   it('refuses to remove the main entry', () => {
-    expect(thrownReason(() => assertCanRemoveFile(['main.mjs', 'a.js'], 'main.mjs'))).toBe('remove-main-entry');
-    expect(thrownReason(() => assertCanRemoveFile(['main.mjs', 'a.js'], 'a.js'))).toBeNull();
-    expect(thrownReason(() => assertCanRemoveFile(['main.mjs'], 'b.js'))).toBe('file-not-found');
-  });
-
-  // @feature files.one-main files.no-duplicates
-  it('needs exactly one main entry in a set', () => {
-    expect(thrownReason(() => assertValidFileSet(['main.js', 'index.html']))).toBeNull();
-    expect(thrownReason(() => assertValidFileSet(['index.html']))).toBe('no-main-entry');
-    expect(thrownReason(() => assertValidFileSet(['main.js', 'main.mjs']))).toBe('second-main-entry');
-    expect(thrownReason(() => assertValidFileSet(['main.js', 'a.js', 'A.JS']))).toBe('duplicate-name');
+    expect(
+      thrownReason(() => assertCanRemoveFile(['main.mjs', 'a.js'], 'main.mjs')),
+    ).toBe('remove-main-entry');
+    expect(
+      thrownReason(() => assertCanRemoveFile(['main.mjs', 'a.js'], 'a.js')),
+    ).toBeNull();
+    expect(thrownReason(() => assertCanRemoveFile(['main.mjs'], 'b.js'))).toBe(
+      'file-not-found',
+    );
   });
 });
 
 describe('ensureMainEntry', () => {
-  // @feature files.add-main
   it('adds an empty main.js when there is no main entry', () => {
     const input = { 'index.html': '<p/>' };
     const result = ensureMainEntry(input);

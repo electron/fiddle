@@ -1,26 +1,14 @@
-import fs from 'node:fs/promises';
+import nodeFs from 'node:fs/promises';
 import os from 'node:os';
 import { setTimeout as sleep } from 'node:timers/promises';
 
-let noAsarDepth = 0;
-let savedNoAsar: boolean | undefined;
-
-/**
- * Runs `fn` with `process.noAsar` set, so Electron's patched `fs` treats
- * `.asar` files as plain files. Safe to nest and to run concurrently.
- */
-export async function withNoAsar<T>(fn: () => Promise<T>): Promise<T> {
-  if (noAsarDepth++ === 0) {
-    savedNoAsar = process.noAsar;
-    process.noAsar = true;
-  }
-  try {
-    return await fn();
-  } finally {
-    // Restore exactly, including `undefined` (Electron's type says boolean).
-    if (--noAsarDepth === 0) (process as { noAsar?: boolean }).noAsar = savedNoAsar;
-  }
-}
+// In Electron, `fs` reads `.asar` files as folders, so the asar files inside an
+// Electron build can't be copied or deleted through it. `process.noAsar` turns
+// that off, but for the whole app until the awaited work ends, which breaks
+// reads of the app's own asar. `original-fs` has no asar support at all.
+const fs: typeof nodeFs =
+  (process.getBuiltinModule('original-fs') as { promises: typeof nodeFs } | undefined)
+    ?.promises ?? nodeFs;
 
 function errorCode(err: unknown): string | undefined {
   return (err as NodeJS.ErrnoException | undefined)?.code;
@@ -35,13 +23,12 @@ async function exists(p: string): Promise<boolean> {
   }
 }
 
-/** How long {@link rename} retries a transient error. */
-export const RENAME_RETRY_MS = 10_000;
+const RENAME_RETRY_MS = 10_000;
 
 /**
- * `fs.rename`, retried with backoff for up to 10 seconds on EPERM, EACCES and
- * EBUSY. On Windows, those come and go while a virus scanner or indexer has a
- * file open.
+ * `fs.rename`. On Windows, EPERM, EACCES and EBUSY come and go while a virus
+ * scanner or indexer has a file open, so those are retried with backoff for up
+ * to 10 seconds.
  */
 export async function rename(from: string, to: string): Promise<void> {
   const start = Date.now();
@@ -51,7 +38,9 @@ export async function rename(from: string, to: string): Promise<void> {
       return;
     } catch (err) {
       const code = errorCode(err);
-      const transient = code === 'EPERM' || code === 'EACCES' || code === 'EBUSY';
+      const transient =
+        process.platform === 'win32' &&
+        (code === 'EPERM' || code === 'EACCES' || code === 'EBUSY');
       if (!transient || Date.now() - start + delay > RENAME_RETRY_MS) throw err;
       await sleep(delay);
     }
@@ -71,16 +60,29 @@ export async function renameIntoPlace(tmp: string, dest: string): Promise<void> 
   }
 }
 
-/** Deletes a folder, retrying busy files a few times, and ignores failures. */
-export async function removeBestEffort(dir: string): Promise<void> {
+/** Copies a folder, treating `.asar` files inside it as plain files. */
+export function copyFolder(
+  source: string,
+  dest: string,
+  options: { verbatimSymlinks?: boolean } = {},
+): Promise<void> {
+  return fs.cp(source, dest, { recursive: true, ...options });
+}
+
+/** Deletes a file or folder, retrying busy files a few times. Nothing there is not an error. */
+export function remove(target: string): Promise<void> {
+  return fs.rm(target, { recursive: true, force: true, maxRetries: 3 });
+}
+
+/** {@link remove}, but failures are ignored. */
+export async function removeBestEffort(target: string): Promise<void> {
   try {
-    await withNoAsar(() => fs.rm(dir, { recursive: true, force: true, maxRetries: 3 }));
+    await remove(target);
   } catch {
     // a later sweep gets another try
   }
 }
 
-/** Writes `data` to `file` through a temp file and a rename. */
 export async function writeFileAtomic(file: string, data: string): Promise<void> {
   const tmp = `${file}.${process.pid}.${Date.now()}.tmp`;
   try {

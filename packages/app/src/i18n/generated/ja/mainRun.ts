@@ -24,7 +24,6 @@ export default {
   "noBinaryTitle": "このフォルダーには Electron のビルドがありません",
   "noBinaryDetail": "Fiddle は {{path}} で {{file}} を探しました。",
   "cannotRemoveActive": "Electron {{version}} は使用中のため削除できません。",
-  "cannotChangeWhileRunning": "Electron のバージョンを変更する前に、Fiddle を停止してください。",
   "packaging": "{{path}} で Electron Forge を使ってパッケージ化しています…",
   "making": "{{path}} で Electron Forge を使ってインストーラーを作成しています…",
   "packageDone": "完了しました。出力先：{{path}}",

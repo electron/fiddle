@@ -1,5 +1,5 @@
 /**
- * Redaction shared by the log file and Sentry (REQUIREMENTS §14).
+ * Redaction shared by the log file and Sentry.
  *
  * - `redactSecrets`: token patterns, and the home directory becomes `~`.
  *   Used for every log entry.
@@ -24,6 +24,8 @@ export function isSecretKey(key: string): boolean {
   return SECRET_KEY.test(key);
 }
 
+// The unbounded parts are capped (`{0,100}`, `{0,31}`): a long run of word characters
+// and hyphens or dots would otherwise cost quadratic time.
 const TOKEN_PATTERNS: readonly [RegExp, string][] = [
   // GitHub: classic, OAuth, user-to-server, server-to-server and refresh tokens; fine-grained PATs.
   [/\bgh[pousr]_[A-Za-z0-9]{36,251}\b/g, REDACTED],
@@ -34,11 +36,11 @@ const TOKEN_PATTERNS: readonly [RegExp, string][] = [
   [/\b(Bearer|token|Basic)\s+[A-Za-z0-9._~+/-]{16,}=*/g, `$1 ${REDACTED}`],
   // key=value and "key": "value" pairs that name a secret.
   [
-    /\b([\w-]*(?:token|secret|passw(?:or)?d|api[_-]?key|auth(?!or))[\w-]*)(["']?\s*[:=]\s*["']?)(?!\[redacted\])[^\s"'&,;#]+/gi,
+    /\b([\w-]{0,100}(?:token|secret|passw(?:or)?d|api[_-]?key|auth(?!or))[\w-]{0,100})(["']?\s*[:=]\s*["']?)(?!\[redacted\])[^\s"'&,;#]+/gi,
     `$1$2${REDACTED}`,
   ],
   // user:password@ in URLs.
-  [/(\b[a-z][a-z0-9+.-]*:\/\/)[^\s/@:]+:[^\s/@]+@/gi, `$1${REDACTED}@`],
+  [/(\b[a-z][a-z0-9+.-]{0,31}:\/\/)[^\s/@:]+:[^\s/@]+@/gi, `$1${REDACTED}@`],
 ];
 
 function escapeRegExp(text: string): string {
@@ -52,7 +54,11 @@ function homePattern(home: string): RegExp | undefined {
   let pattern = homePatterns.get(home);
   if (!pattern) {
     // The home directory as written, with forward slashes, and with JSON-escaped backslashes.
-    const variants = new Set([home, home.replace(/\\/g, '/'), home.replace(/\\/g, '\\\\')]);
+    const variants = new Set([
+      home,
+      home.replace(/\\/g, '/'),
+      home.replace(/\\/g, '\\\\'),
+    ]);
     const flags = /^[a-z]:\\/i.test(home) ? 'gi' : 'g';
     pattern = new RegExp(
       [...variants]
@@ -71,13 +77,14 @@ export function redactSecrets(text: string, home: string): string {
   let out = text;
   const pattern = homePattern(home);
   if (pattern) out = out.replace(pattern, '~');
-  for (const [regex, replacement] of TOKEN_PATTERNS) out = out.replace(regex, replacement);
+  for (const [regex, replacement] of TOKEN_PATTERNS)
+    out = out.replace(regex, replacement);
   return out;
 }
 
 /** Gist IDs are 20 or 32 hex characters (40-character commit SHAs are left alone). */
 const GIST_ID = /\b(?:[0-9a-f]{32}|[0-9a-f]{20})\b/gi;
-const URL_QUERY = /(\b[a-z][a-z0-9+.-]*:\/\/[^\s?#"'<>]*)\?[^\s#"'<>]*/gi;
+const URL_QUERY = /(\b[a-z][a-z0-9+.-]{0,31}:\/\/[^\s?#"'<>]*)\?[^\s#"'<>]*/gi;
 
 /** `redactSecrets`, plus URL query strings and gist IDs removed. */
 export function scrubText(text: string, home: string): string {
@@ -118,7 +125,14 @@ const ALLOWED_CONTEXTS = new Set([
 ]);
 
 /** Breadcrumb categories that would carry console output or request URLs. */
-const DROPPED_BREADCRUMBS = new Set(['console', 'fetch', 'xhr', 'http', 'electron.net', 'net']);
+const DROPPED_BREADCRUMBS = new Set([
+  'console',
+  'fetch',
+  'xhr',
+  'http',
+  'electron.net',
+  'net',
+]);
 
 function scrubValue(value: unknown, home: string, depth = 0): unknown {
   if (typeof value === 'string') return scrubText(value, home);
@@ -127,13 +141,19 @@ function scrubValue(value: unknown, home: string, depth = 0): unknown {
   const out: Record<string, unknown> = {};
   for (const [key, item] of Object.entries(value)) {
     if (key === 'vars') continue; // stack-frame local variables
-    out[key] = typeof item === 'string' && isSecretKey(key) ? REDACTED : scrubValue(item, home, depth + 1);
+    out[key] =
+      typeof item === 'string' && isSecretKey(key)
+        ? REDACTED
+        : scrubValue(item, home, depth + 1);
   }
   return out;
 }
 
 /** `beforeBreadcrumb`: drops console and network breadcrumbs, scrubs the rest. */
-export function scrubBreadcrumb<B extends { category?: string }>(crumb: B, home: string): B | null {
+export function scrubBreadcrumb<B extends { category?: string }>(
+  crumb: B,
+  home: string,
+): B | null {
   if (crumb.category && DROPPED_BREADCRUMBS.has(crumb.category)) return null;
   return scrubValue(crumb, home) as B;
 }

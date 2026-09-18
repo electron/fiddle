@@ -15,29 +15,33 @@ function run(bisector: Bisector, firstBad: number): BisectStep {
 }
 
 describe('Bisector', () => {
-  // @feature bisect.manual-step
   it('starts at the midpoint', () => {
     expect(new Bisector(versions).current()).toEqual({ done: false, version: '5.0.0' });
   });
 
-  // @feature bisect.manual-step
-  it.each(Array.from({ length: 9 }, (_, i) => i + 1))('finds the first bad version at index %i', (firstBad) => {
-    expect(run(new Bisector(versions), firstBad)).toEqual({
-      done: true,
-      good: versions[firstBad - 1],
-      bad: versions[firstBad],
-    });
-  });
+  it.each(Array.from({ length: 9 }, (_, i) => i + 1))(
+    'finds the first bad version at index %i',
+    (firstBad) => {
+      expect(run(new Bisector(versions), firstBad)).toEqual({
+        done: true,
+        good: versions[firstBad - 1],
+        bad: versions[firstBad],
+      });
+    },
+  );
 
   it('is done at once with two versions', () => {
-    expect(new Bisector(['1.0.0', '2.0.0']).current()).toEqual({ done: true, good: '1.0.0', bad: '2.0.0' });
+    expect(new Bisector(['1.0.0', '2.0.0']).current()).toEqual({
+      done: true,
+      good: '1.0.0',
+      bad: '2.0.0',
+    });
   });
 
   it('needs at least two versions', () => {
     expect(() => new Bisector(['1.0.0'])).toThrow(FiddleError);
   });
 
-  // @feature bisect.manual-step
   it('skips to a weighted-random version and never revisits it', () => {
     const bisector = new Bisector(versions, () => 0);
     expect(bisector.current()).toEqual({ done: false, version: '5.0.0' });
@@ -73,8 +77,9 @@ describe('Bisector', () => {
 });
 
 describe('bisectCompareUrl', () => {
-  // @feature bisect.manual-result
   it('links the electron compare view', () => {
-    expect(bisectCompareUrl('30.0.0', '30.0.1')).toBe('https://github.com/electron/electron/compare/v30.0.0...v30.0.1');
+    expect(bisectCompareUrl('30.0.0', '30.0.1')).toBe(
+      'https://github.com/electron/electron/compare/v30.0.0...v30.0.1',
+    );
   });
 });

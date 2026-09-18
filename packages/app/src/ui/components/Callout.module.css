@@ -1,5 +1,3 @@
-/* Callout: padding 10 12, radius-control squircle. fill by default; accent-soft for primary,
-   spark-soft for danger. No border. */
 .callout {
   display: flex;
   gap: 10px;
@@ -12,11 +10,11 @@
   letter-spacing: var(--lu-type-body-tracking);
 }
 
-.callout[data-intent="primary"] {
+.callout[data-intent='primary'] {
   background: var(--lu-accent-soft);
 }
 
-.callout[data-intent="danger"] {
+.callout[data-intent='danger'] {
   background: var(--lu-spark-soft);
 }
 
@@ -25,12 +23,12 @@
   color: var(--lu-ink-muted);
 }
 
-.callout[data-intent="primary"] .icon {
+.callout[data-intent='primary'] .icon {
   color: var(--lu-accent);
 }
 
-.callout[data-intent="danger"] .icon,
-.callout[data-intent="danger"] .title {
+.callout[data-intent='danger'] .icon,
+.callout[data-intent='danger'] .title {
   color: var(--lu-spark);
 }
 
@@ -54,7 +52,6 @@
   margin-top: 6px;
 }
 
-/* Empty state */
 .empty {
   display: flex;
   flex-direction: column;
