@@ -159,33 +159,40 @@ export async function loadReleases(
 /** `@electron/get` appends the version folder to a mirror as is, so it needs its trailing slash. */
 const withSlash = (url: string) => (url.endsWith('/') ? url : `${url}/`);
 
-/** Download mirrors for the mirror settings. `auto` picks China's for a zh-CN system locale. */
+/**
+ * Download mirrors for the mirror settings. `auto` picks China's for a zh-CN
+ * system locale. A mirror the user chose (China, or a custom one) overrides
+ * `ELECTRON_MIRROR` and the like; `auto` and `default` leave those in charge.
+ */
 export function mirrorsFor(
   settings: Pick<Settings, 'mirror' | 'customMirrorElectron' | 'customMirrorNightly'>,
   systemLocale: string,
 ): Mirrors {
-  const kind =
-    settings.mirror === 'auto'
-      ? systemLocale.toLowerCase() === 'zh-cn'
-        ? 'china'
-        : 'default'
-      : settings.mirror;
+  const auto = settings.mirror === 'auto';
+  const kind = auto
+    ? systemLocale.toLowerCase() === 'zh-cn'
+      ? 'china'
+      : 'default'
+    : settings.mirror;
   // The default mirror comes from the injected endpoints, so test mode uses the fixture server.
   const { electronMirror, electronNightlyMirror } = getEndpoints();
   if (kind === 'custom') {
     // A mirror serves the binaries every run executes, so only https. The
     // schema refuses others too; this also covers a hand-edited settings.json.
-    const httpsOr = (url: string, fallback: string) =>
-      isHttpsUrl(url) ? withSlash(url) : fallback;
+    const custom = (url: string) => (isHttpsUrl(url) ? withSlash(url) : undefined);
+    const release = custom(settings.customMirrorElectron);
+    const nightly = custom(settings.customMirrorNightly);
     return {
-      electronMirror: httpsOr(settings.customMirrorElectron, electronMirror),
-      electronNightlyMirror: httpsOr(settings.customMirrorNightly, electronNightlyMirror),
+      electronMirror: release ?? electronMirror,
+      electronNightlyMirror: nightly ?? electronNightlyMirror,
+      ...(release || nightly ? { override: true } : {}),
     };
   }
   if (kind === 'china') {
     return {
       electronMirror: MIRRORS.china.electron,
       electronNightlyMirror: MIRRORS.china.nightly,
+      ...(auto ? {} : { override: true }),
     };
   }
   return { electronMirror, electronNightlyMirror };
@@ -248,6 +255,7 @@ export class VersionsService {
   #releasesText: string | undefined;
   #installs: VersionsState['installs'] = {};
   #downloadAll: AbortController | undefined;
+  #downloadAllFailed = false;
   #progressTimer: ReturnType<typeof setTimeout> | undefined;
 
   constructor(options: VersionsServiceOptions) {
@@ -336,6 +344,7 @@ export class VersionsService {
     if (this.#downloadAll) return;
     const controller = new AbortController();
     this.#downloadAll = controller;
+    this.#downloadAllFailed = false;
     this.#publish();
     try {
       for (const version of versions) {
@@ -349,6 +358,7 @@ export class VersionsService {
           await this.install(version, controller.signal);
         } catch (error) {
           if (controller.signal.aborted) break;
+          this.#downloadAllFailed = true;
           log.warn(`downloading ${version} failed`, error);
         }
       }
@@ -527,6 +537,7 @@ export class VersionsService {
         installs: { ...this.#installs },
         localBuilds: this.localBuilds(),
         downloadingAll: this.#downloadAll !== undefined,
+        downloadAllFailed: this.#downloadAllFailed,
         arch: process.arch,
       },
     });

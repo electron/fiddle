@@ -14,6 +14,8 @@ import { useAppState } from '../state';
 import { setEditorActionProvider } from '../features/palette/editor-actions';
 import {
   clearFocusedEditor,
+  getViewState,
+  saveViewState,
   setCursor,
   setFocusedEditor,
   useEditorViewState,
@@ -69,7 +71,6 @@ export function EditorPane({ file, primary = false, onFocus }: EditorPaneProps) 
     primaryRef.current = primary;
     onFocusRef.current = onFocus;
   });
-  const viewStates = useRef(new Map<string, monaco.editor.ICodeEditorViewState | null>());
   const shown = useRef<string | null>(null);
 
   useEffect(() => {
@@ -154,10 +155,10 @@ export function EditorPane({ file, primary = false, onFocus }: EditorPaneProps) 
     const next = model ?? null;
     if (editor.getModel() === next) return;
     if (shown.current && editor.getModel())
-      viewStates.current.set(shown.current, editor.saveViewState());
+      saveViewState(shown.current, editor.saveViewState());
     editor.setModel(next);
     shown.current = next ? file : null;
-    const saved = viewStates.current.get(file);
+    const saved = getViewState(file);
     if (next && saved) editor.restoreViewState(saved);
   }, [editor, model, file]);
 

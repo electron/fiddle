@@ -29,6 +29,7 @@ import {
   TreeRow,
 } from '../../../ui';
 import { badgeOf, useDiagnostics } from '../../editor/diagnostics';
+import { renameFile as renameFileInEditor } from '../../editor/editor-state';
 import { toastError } from '../../toast-error';
 import { PackagesSection } from '../packages/PackagesSection';
 import {
@@ -141,7 +142,7 @@ export function Sidebar({
     if (!next || next === name) return;
     try {
       assertCanRenameFile(names, name, next);
-      await documentsApi.RenameFile(name, next);
+      await renameFileInEditor(name, next);
     } catch (error) {
       fail(error);
     }

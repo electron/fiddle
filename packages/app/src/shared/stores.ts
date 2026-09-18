@@ -246,6 +246,8 @@ export const versionsStateSchema = z.object({
   localBuilds: z.array(localBuildSchema),
   /** "Download all" is in progress. */
   downloadingAll: z.boolean(),
+  /** The last "Download all" left at least one version undownloaded. */
+  downloadAllFailed: z.boolean().optional(),
   /** The processor architecture, e.g. `arm64`. */
   arch: z.string(),
 });
@@ -311,8 +313,6 @@ export const runStateSchema = z.object({
   ]),
   /** What the status is about: the fiddle, or Forge package or make. */
   task: z.enum(['run', 'package', 'make']),
-  /** Download progress, 0–100, while `downloading`. */
-  percent: z.number().min(0).max(100).optional(),
   /** The Electron version of the current or last run, e.g. `43.0.0` or a local build's name. */
   version: z.string().optional(),
   result: z.enum(['success', 'failure', 'invalid']).optional(),

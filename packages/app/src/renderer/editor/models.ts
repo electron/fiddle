@@ -3,7 +3,9 @@
  * step with `Window.fiddle.files`:
  *
  * - New names and every new `fiddleRev` fetch text with `Documents.GetFiles`.
- * - Models whose names are gone are disposed.
+ * - Models whose names are gone are disposed. A renamed file gets a new model,
+ *   so its undo history starts over: Monaco can't move a model's edit stack to
+ *   another URI through its public API.
  * - Local changes go to main with `EditFile(name, text, fiddleRev)`, at most
  *   once per animation frame.
  *
@@ -15,6 +17,7 @@ import { getEditorLanguage } from '../../fiddle/files';
 import { documentsApi } from '../../ipc/renderer';
 import { createStore, useStore } from '../store';
 import { setEditorMarkers, type EditorMarker } from './diagnostics';
+import { releaseViewState } from './editor-state';
 import { monaco } from './monaco';
 import { getRuntimeErrors, type RuntimeError } from './runtime-errors';
 
@@ -124,6 +127,7 @@ export async function syncModels(names: readonly string[], rev: number): Promise
     if (names.includes(name)) continue;
     model.dispose();
     models.delete(name);
+    releaseViewState(name);
     errorDecorations.delete(name);
     pendingEdits.delete(name);
     changed = true;

@@ -100,6 +100,14 @@ describe('panes follow the fiddle', () => {
     expect(panes()).toEqual([]);
   });
 
+  it('keeps the pane of a renamed file, focused or not', async () => {
+    const { documents, panes } = await setup(['main.js', 'renderer.js']);
+    documents.renameFile('w', 'renderer.js', 'view.js');
+    expect(panes()).toEqual(['main.js', 'view.js']);
+    documents.renameFile('w', 'main.js', 'main.mjs');
+    expect(panes()).toEqual(['main.mjs', 'view.js']);
+  });
+
   it('leaves an unsplit window and plain edits alone', async () => {
     const { documents, model, panes } = await setup([]);
     documents.updateDoc('w', (doc) => model.docSetActiveFile(doc, 'renderer.js'));

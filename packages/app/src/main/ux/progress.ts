@@ -31,12 +31,13 @@ export function taskbarProgress(
   versions: VersionsState | undefined,
   run: RunState | undefined,
 ): TaskbarProgress {
-  if (run?.status === 'downloading' && run.percent !== undefined) {
-    return { mode: 'normal', progress: run.percent / 100 };
+  if (run?.status === 'downloading') {
+    const percent = run.version ? versions?.installs[run.version]?.percent : undefined;
+    return percent === undefined
+      ? { mode: 'indeterminate' }
+      : { mode: 'normal', progress: percent / 100 };
   }
-  if (isPackaging(run) || isAutoBisecting(run) || run?.status === 'downloading') {
-    return { mode: 'indeterminate' };
-  }
+  if (isPackaging(run) || isAutoBisecting(run)) return { mode: 'indeterminate' };
 
   const installs = Object.values(versions?.installs ?? {});
   const downloading = installs.filter((install) => install.state === 'downloading');
@@ -98,8 +99,5 @@ export function downloadsFinished(
   next: VersionsState | undefined,
 ): FinishedOperation | undefined {
   if (!prev?.downloadingAll || next?.downloadingAll) return undefined;
-  const failed = Object.values(next?.installs ?? {}).some(
-    (install) => install.state === 'missing',
-  );
-  return { kind: 'downloads', ok: !failed };
+  return { kind: 'downloads', ok: !next?.downloadAllFailed };
 }

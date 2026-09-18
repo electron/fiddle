@@ -224,7 +224,7 @@ describe('MenuBar', () => {
   it('turns the window no-drag while the bar has the keyboard or a menu is open, so a title bar click reaches the page', () => {
     setup();
     const noDrag = () =>
-      screen.getByRole('menubar').querySelector(':scope > [aria-hidden="true"]:empty');
+      document.body.querySelector(':scope > [aria-hidden="true"]:empty');
     expect(noDrag()).toBeNull();
     fireEvent.mouseDown(title('File'), { button: 0 });
     expect(noDrag()).not.toBeNull();

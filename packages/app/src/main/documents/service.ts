@@ -37,7 +37,7 @@ import {
   type FiddleOrigin,
 } from '../../fiddle/trust';
 import { ErrorCode, FiddleError } from '../../shared/errors';
-import { followActiveFile } from '../../shared/panes';
+import { followActiveFile, renamePane } from '../../shared/panes';
 import {
   DEFAULT_LAYOUT,
   windowLayoutSchema,
@@ -92,6 +92,7 @@ import {
   applyEdit,
   createDoc,
   dirtyFileNames,
+  docRenameFile,
   docSetModules,
   isDirty,
   isTrusted,
@@ -611,7 +612,11 @@ function requireDoc(windowId: string | undefined): Doc {
 }
 
 /** Stores `doc` as the window's fiddle, pushes the store, and keeps title, panes, draft and session in step. */
-function commit(windowId: string, doc: Doc): number {
+function commit(
+  windowId: string,
+  doc: Doc,
+  renamed?: { from: string; to: string },
+): number {
   const previous = docs.get(windowId);
   docs.set(windowId, doc);
   const title = titleOf(doc);
@@ -623,7 +628,7 @@ function commit(windowId: string, doc: Doc): number {
   const layout = hub().getWindow(windowId)?.layout;
   if (layout) {
     const panes = followActiveFile(
-      layout.panes,
+      renamed ? renamePane(layout.panes, renamed.from, renamed.to) : layout.panes,
       previous?.activeFile ?? null,
       doc.activeFile,
       visibleFileNames(doc.fiddle),
@@ -652,6 +657,11 @@ function syncDraft(windowId: string, doc: Doc): void {
 
 export function updateDoc(windowId: string, change: (doc: Doc) => Doc): number {
   return commit(windowId, change(requireDoc(windowId)));
+}
+
+/** A renamed file keeps its pane, focused or not. */
+export function renameFile(windowId: string, from: string, to: string): number {
+  return commit(windowId, docRenameFile(requireDoc(windowId), from, to), { from, to });
 }
 
 /** `EditFile`: most edits change only the mirror, so the store is pushed only when the dirty files change. */

@@ -85,6 +85,40 @@ export interface InstallStateEvent {
 export interface Mirrors {
   electronMirror: string;
   electronNightlyMirror: string;
+  /**
+   * Download from exactly these mirrors. `@electron/get` otherwise lets
+   * `ELECTRON_MIRROR`, `ELECTRON_CUSTOM_DIR`, `ELECTRON_CUSTOM_FILENAME` and
+   * the `npm_config_electron_*` variables take precedence over them.
+   */
+  override?: boolean;
+}
+
+/** What `@electron/get` passes to `resolveAssetURL`. */
+interface AssetDetails {
+  version: string;
+  artifactName: string;
+  isGeneric?: boolean;
+  platform?: string;
+  arch?: string;
+  artifactSuffix?: string;
+}
+
+/** The URL `@electron/get` builds from a mirror, with no part of it read from the environment. */
+function mirrorAssetUrl(mirror: Partial<Mirrors>, asset: AssetDetails): string {
+  const base = asset.version.includes('nightly')
+    ? mirror.electronNightlyMirror
+    : mirror.electronMirror;
+  if (!base) throw new Error(`No mirror is set for Electron ${asset.version}`);
+  const file = asset.isGeneric
+    ? asset.artifactName
+    : `${[
+        asset.artifactName,
+        asset.version,
+        asset.platform,
+        asset.arch,
+        ...(asset.artifactSuffix ? [asset.artifactSuffix] : []),
+      ].join('-')}.zip`;
+  return `${base}${asset.version}/${file}`;
 }
 
 export interface ElectronBinary {
@@ -488,6 +522,12 @@ export class Installer extends EventEmitter {
         mirrorOptions: {
           mirror: mirror.electronMirror,
           nightlyMirror: mirror.electronNightlyMirror,
+          ...(mirror.override
+            ? {
+                resolveAssetURL: async (asset: AssetDetails) =>
+                  mirrorAssetUrl(mirror, asset),
+              }
+            : {}),
         },
         downloadOptions: {
           quiet: true,

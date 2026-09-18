@@ -4,7 +4,6 @@ import {
   docAddFile,
   docMoveFile,
   docRemoveFile,
-  docRenameFile,
   docSetActiveFile,
   docSetFileVisible,
 } from './model';
@@ -13,6 +12,7 @@ import {
   getFiddleFiles,
   loadGistIn,
   openDropped,
+  renameFile,
   setLayout,
   setView,
   showMeIn,
@@ -24,8 +24,7 @@ export function bindDocumentsIpc({ contents, windowId }: IpcContext): void {
     GetFiles: () => getFiddleFiles(windowId),
     EditFile: (name, text, fiddleRev) => editFile(windowId, name, text, fiddleRev),
     AddFile: (name) => updateDoc(windowId, (doc) => docAddFile(doc, name)),
-    RenameFile: (oldName, newName) =>
-      updateDoc(windowId, (doc) => docRenameFile(doc, oldName, newName)),
+    RenameFile: (oldName, newName) => renameFile(windowId, oldName, newName),
     RemoveFile: (name) => updateDoc(windowId, (doc) => docRemoveFile(doc, name)),
     SetFileVisible: (name, visible) =>
       updateDoc(windowId, (doc) => docSetFileVisible(doc, name, visible)),

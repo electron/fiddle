@@ -625,6 +625,47 @@ describe('Installer and ElectronVersions options', () => {
       expect(zipHits()).toStrictEqual([`/v13.1.7/${zipName('13.1.7')}`]);
     });
 
+    describe('mirror environment variables', () => {
+      const names = [
+        'ELECTRON_MIRROR',
+        'ELECTRON_CUSTOM_DIR',
+        'ELECTRON_CUSTOM_FILENAME',
+      ];
+      const saved = names.map((name) => process.env[name]);
+      beforeEach(() => {
+        process.env.ELECTRON_MIRROR = 'http://127.0.0.1:1/';
+        process.env.ELECTRON_CUSTOM_DIR = 'env-dir';
+        process.env.ELECTRON_CUSTOM_FILENAME = 'env-file.zip';
+      });
+      afterEach(() => {
+        names.forEach((name, i) => {
+          if (saved[i] === undefined) delete process.env[name];
+          else process.env[name] = saved[i];
+        });
+      });
+
+      it('take precedence over the mirror by default', async () => {
+        const installer = new Installer(paths, { mirror: { electronMirror: mirror } });
+        await expect(installer.ensureDownloaded('13.1.7')).rejects.toThrow();
+        expect(hits).toStrictEqual([]);
+      });
+
+      it('are ignored with `override`, for the zip and its checksums', async () => {
+        const installer = new Installer(paths, {
+          mirror: {
+            electronMirror: mirror,
+            electronNightlyMirror: mirror,
+            override: true,
+          },
+        });
+        await installer.ensureDownloaded('13.1.7');
+        expect(hits).toStrictEqual([
+          `/v13.1.7/${zipName('13.1.7')}`,
+          '/v13.1.7/SHASUMS256.txt',
+        ]);
+      });
+    });
+
     it('fetches the releases list from releasesUrl', async () => {
       const versionsCache = path.join(tmpdir, 'releases.json');
       const versions = await ElectronVersions.create({

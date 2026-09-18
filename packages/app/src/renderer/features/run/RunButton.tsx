@@ -33,9 +33,7 @@ export function RunButton({ compact = false }: { compact?: boolean } = {}) {
   const status: Status = pending && run.status === 'ready' ? 'checking' : run.status;
   const version = run.version ?? versionLabel(win?.fiddle.versionRef, app) ?? '';
   const percent = Math.round(
-    (run.version ? app?.versions?.installs[run.version]?.percent : undefined) ??
-      run.percent ??
-      0,
+    (run.version ? app?.versions?.installs[run.version]?.percent : undefined) ?? 0,
   );
 
   const toggle = () => {

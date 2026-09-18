@@ -40,6 +40,15 @@ export function shownPanes(
   return shown.includes(active) ? shown : [active, ...shown.slice(1)];
 }
 
+/** `panes` with the file `from` renamed to `to`; `panes` itself when it doesn't show `from`. */
+export function renamePane(
+  panes: readonly string[],
+  from: string,
+  to: string,
+): readonly string[] {
+  return panes.includes(from) ? panes.map((name) => (name === from ? to : name)) : panes;
+}
+
 /**
  * `panes` after the active file changed from `previous` to `next`: a file with
  * no pane takes over the focused pane (the one showing `previous`), and files

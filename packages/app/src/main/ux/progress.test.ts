@@ -46,14 +46,14 @@ describe('taskbarProgress', () => {
 
   it("prefers the window's own download", () => {
     const downloading = versions({
-      installs: { '1.0.0': { state: 'downloading', percent: 10 } },
+      installs: {
+        '1.0.0': { state: 'downloading', percent: 42 },
+        '2.0.0': { state: 'downloading', percent: 10 },
+      },
     });
-    expect(
-      taskbarProgress(downloading, run({ status: 'downloading', percent: 42 })),
-    ).toEqual({
-      mode: 'normal',
-      progress: 0.42,
-    });
+    const own = run({ status: 'downloading', version: '1.0.0' });
+    expect(taskbarProgress(downloading, own)).toEqual({ mode: 'normal', progress: 0.42 });
+    expect(taskbarProgress(versions(), own)).toEqual({ mode: 'indeterminate' });
   });
 
   it('is indeterminate while packaging or auto-bisecting', () => {
@@ -157,5 +157,14 @@ describe('downloadsFinished', () => {
         versions({ downloadingAll: true }),
       ),
     ).toBeUndefined();
+  });
+
+  it('reports a failure when a version could not be downloaded', () => {
+    expect(
+      downloadsFinished(
+        versions({ downloadingAll: true }),
+        versions({ downloadAllFailed: true }),
+      ),
+    ).toEqual({ kind: 'downloads', ok: false });
   });
 });

@@ -227,7 +227,6 @@ export class RunService {
       status: 'checking',
       task: 'run',
       errors: [],
-      percent: undefined,
       result: undefined,
     });
     this.openConsole(windowId);
@@ -265,7 +264,6 @@ export class RunService {
     if (entry.stopRequested) outcome = { ...outcome, stopped: true };
     this.setState(windowId, {
       status: 'ready',
-      percent: undefined,
       result: outcome.stopped ? undefined : classifyRun(outcome),
     });
     if (dir) this.#removeRunDir(dir);
@@ -429,7 +427,7 @@ export class RunService {
       versionRef,
       signal,
     );
-    this.setState(windowId, { status: 'checking', version: label, percent: undefined });
+    this.setState(windowId, { status: 'checking', version: label });
     const mainEntry = findMainEntry(Object.keys(files)) ?? 'main.js';
     if (esmNeedsNewerElectron(mainEntry, release)) throw new Refused(t('esmNeeds28'));
 

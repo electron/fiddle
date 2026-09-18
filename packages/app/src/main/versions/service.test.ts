@@ -75,7 +75,21 @@ describe('mirrorsFor', () => {
     ).toEqual({
       electronMirror: 'https://mirror.example.com/electron/',
       electronNightlyMirror: 'https://n.example.com/',
+      override: true,
     });
+  });
+
+  it('overrides the environment only for a mirror the user chose', () => {
+    const custom = { ...base, mirror: 'custom' as const };
+    expect(mirrorsFor(base, 'zh-CN').override).toBeUndefined();
+    expect(mirrorsFor(base, 'en-US').override).toBeUndefined();
+    expect(mirrorsFor({ ...base, mirror: 'default' }, 'zh-CN').override).toBeUndefined();
+    expect(mirrorsFor({ ...base, mirror: 'china' }, 'en-US').override).toBe(true);
+    expect(mirrorsFor(custom, 'en-US').override).toBeUndefined();
+    expect(
+      mirrorsFor({ ...custom, customMirrorNightly: 'https://n.example.com/' }, 'en-US')
+        .override,
+    ).toBe(true);
   });
 
   it('falls back to the default for an empty or non-https custom mirror', () => {

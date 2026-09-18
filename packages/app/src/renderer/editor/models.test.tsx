@@ -28,6 +28,7 @@ class FakeModel {
 const mocks = vi.hoisted(() => ({
   GetFiles: vi.fn(),
   EditFile: vi.fn((_name: string, _text: string, _rev: number) => Promise.resolve(0)),
+  RenameFile: vi.fn(() => Promise.resolve(0)),
 }));
 
 vi.mock('../../ipc/renderer', () => ({ documentsApi: mocks }));
@@ -49,6 +50,7 @@ vi.mock('./monaco', () => ({
 type Models = typeof import('./models');
 
 let models: Models;
+let editorState: typeof import('./editor-state');
 let frames: Array<() => void> = [];
 const nextFrame = () => {
   const run = frames;
@@ -63,6 +65,7 @@ beforeEach(async () => {
   frames = [];
   vi.stubGlobal('requestAnimationFrame', (frame: () => void) => frames.push(frame));
   models = await import('./models');
+  editorState = await import('./editor-state');
 });
 
 describe('editor models', () => {
@@ -114,5 +117,23 @@ describe('editor models', () => {
     await models.syncModels(['main.js'], 1);
     expect(old.disposed).toBe(true);
     expect(models.getModel('old.js')).toBeUndefined();
+  });
+
+  it("carries a renamed file's view state to its new name and drops it for a removed file", async () => {
+    const state = (name: string) => ({ name }) as never;
+    mocks.GetFiles.mockReturnValueOnce(
+      files({ 'main.js': '', 'old.js': '', 'gone.js': '' }),
+    );
+    await models.syncModels(['main.js', 'old.js', 'gone.js'], 1);
+    editorState.saveViewState('old.js', state('old'));
+    editorState.saveViewState('gone.js', state('gone'));
+
+    await editorState.renameFile('old.js', 'new.js');
+    mocks.GetFiles.mockReturnValueOnce(files({ 'main.js': '', 'new.js': '' }));
+    await models.syncModels(['main.js', 'new.js'], 2);
+
+    expect(editorState.getViewState('new.js')).toEqual(state('old'));
+    expect(editorState.getViewState('old.js')).toBeUndefined();
+    expect(editorState.getViewState('gone.js')).toBeUndefined();
   });
 });

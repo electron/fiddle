@@ -710,10 +710,9 @@ export function MenuBar({
           <Icon name="more" />
         </span>
       </div>
-      {/* The title bar is a drag region, which no click on reaches the page: while the bar is engaged the window is no-drag, so one closes it like any outside click. */}
-      {(engaged || open.length > 0) && (
-        <div className={styles.noDrag} aria-hidden="true" />
-      )}
+      {/* The title bar is a drag region, which no click on reaches the page: while the bar is engaged the window is no-drag, so one closes it like any outside click. On <body> because a later drag region overrides an earlier no-drag one, and the title bar's own come after this bar. */}
+      {(engaged || open.length > 0) &&
+        createPortal(<div className={styles.noDrag} aria-hidden="true" />, document.body)}
       {panels.length > 0 &&
         createPortal(
           <div ref={layerRef} className={styles.layer}>
