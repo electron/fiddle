@@ -2970,6 +2970,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/pidusage@npm:^2.0.5":
+  version: 2.0.5
+  resolution: "@types/pidusage@npm:2.0.5"
+  checksum: 10c0/f4add16388280410604254c91499b873f95c98146c0a8016e09733d3d5c4362b7a5f56e2f1a5e9677772ab97ac37ffb1194d3ad43f872364d9d86856d4db414c
+  languageName: node
+  linkType: hard
+
 "@types/prop-types@npm:*":
   version: 15.7.3
   resolution: "@types/prop-types@npm:15.7.3"
@@ -5181,6 +5188,7 @@ __metadata:
     "@types/fs-extra": "npm:^9.0.7"
     "@types/node": "npm:^22.19.1"
     "@types/parse-env-string": "npm:^1.0.2"
+    "@types/pidusage": "npm:^2.0.5"
     "@types/react": "npm:^16.14.0"
     "@types/react-dom": "npm:^16.9.11"
     "@types/react-window": "npm:^1.8.8"
@@ -5214,6 +5222,8 @@ __metadata:
     oxlint: "npm:^1.81.0"
     p-debounce: "npm:^2.0.0"
     parse-env-string: "npm:^1.0.1"
+    pidtree: "npm:^1.0.0"
+    pidusage: "npm:^4.0.1"
     postcss: "npm:^8.5.23"
     postcss-less: "npm:^6.0.0"
     prettier: "npm:^3.6.2"
@@ -10115,6 +10125,24 @@ __metadata:
   languageName: node
   linkType: hard
 
+"pidtree@npm:^1.0.0":
+  version: 1.0.0
+  resolution: "pidtree@npm:1.0.0"
+  bin:
+    pidtree: bin/pidtree.js
+  checksum: 10c0/0cd0bd222ffba553ad4807c6795988bd18b587e9c063149139fb8db78c3b747f43d3b1511372eeda6b29a1c96670d2ee17d65a33f3c54e15d98f800512e613cd
+  languageName: node
+  linkType: hard
+
+"pidusage@npm:^4.0.1":
+  version: 4.0.1
+  resolution: "pidusage@npm:4.0.1"
+  dependencies:
+    safe-buffer: "npm:^5.2.1"
+  checksum: 10c0/d80984af6818d7f53c34dcb1e6d16de26230409e41b1a6ae01391a5b15e69b6c7b21d76b1362709e0ee1b5fb65744969c0c45d0a836571e1d059299b5776ab08
+  languageName: node
+  linkType: hard
+
 "pify@npm:^4.0.1":
   version: 4.0.1
   resolution: "pify@npm:4.0.1"
@@ -11162,7 +11190,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"safe-buffer@npm:5.2.1, safe-buffer@npm:>=5.1.0, safe-buffer@npm:~5.2.0":
+"safe-buffer@npm:5.2.1, safe-buffer@npm:>=5.1.0, safe-buffer@npm:^5.2.1, safe-buffer@npm:~5.2.0":
   version: 5.2.1
   resolution: "safe-buffer@npm:5.2.1"
   checksum: 10c0/6501914237c0a86e9675d4e51d89ca3c21ffd6a31642efeba25ad65720bce6921c9e7e974e5be91a786b25aa058b5303285d3c15dbabf983a919f5f630d349f3

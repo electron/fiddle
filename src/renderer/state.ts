@@ -175,6 +175,9 @@ export class AppState {
   public isUpdatingElectronVersions = false;
   public isDownloadingAll = false;
   public isDeletingAll = false;
+  public isProcessMonitorEnabled = !!(
+    this.retrieve(GlobalSetting.isProcessMonitorEnabled) ?? false
+  );
 
   // -- Editor Values stored when we close the editor ------------------
   private outputBuffer = '';
@@ -249,6 +252,7 @@ export class AppState {
       isDownloadingAll: observable,
       isShowingGistHistory: observable,
       isUsingSystemTheme: observable,
+      isProcessMonitorEnabled: observable,
       localPath: observable,
       modules: observable,
       output: observable,
@@ -413,6 +417,7 @@ export class AppState {
           case GlobalSetting.isKeepingUserDataDirs:
           case GlobalSetting.isPublishingGistAsRevision:
           case GlobalSetting.isShowingGistHistory:
+          case GlobalSetting.isProcessMonitorEnabled:
           case GlobalSetting.isUsingSocketFirewall:
           case GlobalSetting.isUsingSystemTheme:
           case GlobalSetting.packageAuthor:
@@ -542,6 +547,12 @@ export class AppState {
     autorun(() => this.save(GlobalSetting.electronMirror, this.electronMirror));
     autorun(() => this.save(GlobalSetting.fontFamily, this.fontFamily));
     autorun(() => this.save(GlobalSetting.fontSize, this.fontSize));
+    autorun(() =>
+      this.save(
+        GlobalSetting.isProcessMonitorEnabled,
+        this.isProcessMonitorEnabled,
+      ),
+    );
 
     // Update our known versions
     this.updateElectronVersions();

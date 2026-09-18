@@ -1,0 +1,173 @@
+@import '../variables.less';
+
+// ─── Body reset ────────────────────────────────────────────────────────────
+body {
+  margin: 0;
+  padding: 0;
+  background: @background-2;
+  overflow: hidden;
+  font-family: @fonts-common;
+  color: @text-color-1;
+}
+
+// ─── Root container ────────────────────────────────────────────────────────
+.process-monitor {
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: @background-2;
+  color: @text-color-1;
+  overflow: hidden;
+
+  // ─── Header bar ──────────────────────────────────────────────────────
+  &__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 14px;
+    background: @background-4;
+    border-bottom: @border;
+    user-select: none;
+    -webkit-app-region: drag;
+    flex-shrink: 0;
+    min-height: 36px;
+  }
+
+  &__title {
+    font-size: 12px;
+    font-weight: 600;
+    color: @foreground-1;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    display: flex;
+    align-items: center;
+    gap: 7px;
+  }
+
+  &__icon {
+    font-size: 14px;
+    opacity: 0.75;
+    color: @foreground-2;
+  }
+
+  &__live-badge {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    color: #4caf7d;
+    animation: live-pulse 1.6s ease-in-out infinite;
+    text-transform: uppercase;
+  }
+
+  // ─── Table area ──────────────────────────────────────────────────────
+  &__table-container {
+    flex: 1;
+    overflow-y: auto;
+
+    &::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    &::-webkit-scrollbar-track {
+      background: @background-2;
+    }
+
+    &::-webkit-scrollbar-thumb {
+      background: @border-color-1;
+      border-radius: 3px;
+    }
+  }
+
+  &__table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12px;
+
+    thead tr {
+      background: @background-3;
+    }
+
+    th {
+      padding: 6px 14px;
+      text-align: left;
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.07em;
+      text-transform: uppercase;
+      color: @foreground-3;
+      border-bottom: @border;
+    }
+
+    td {
+      padding: 7px 14px;
+      border-bottom: 1px solid @border-color-2;
+      color: @text-color-3;
+      white-space: nowrap;
+    }
+
+    tbody tr:last-child td {
+      border-bottom: none;
+    }
+  }
+
+  // ─── Rows ─────────────────────────────────────────────────────────────
+  &__row {
+    transition: background 0.1s ease;
+
+    &:hover {
+      background: @background-1;
+    }
+  }
+
+  // ─── Cell accents ─────────────────────────────────────────────────────
+  &__name {
+    color: @foreground-1;
+    font-weight: 500;
+    max-width: 150px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  &__pid {
+    color: @foreground-3;
+    font-size: 11px;
+    font-family: 'Cascadia Code', 'Fira Code', monospace;
+  }
+
+  &__cpu {
+    color: #4caf7d;
+    font-weight: 600;
+    font-family: 'Cascadia Code', 'Fira Code', monospace;
+
+    &--high {
+      color: var(--error-color);
+    }
+  }
+
+  &__memory {
+    color: @foreground-2;
+    font-family: 'Cascadia Code', 'Fira Code', monospace;
+  }
+
+  // ─── Empty state ──────────────────────────────────────────────────────
+  &__empty {
+    text-align: center;
+    padding: 24px 14px !important;
+    color: @foreground-3;
+    font-style: italic;
+    font-size: 12px;
+  }
+}
+
+// ─── Animations ─────────────────────────────────────────────────────────────
+@keyframes live-pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0.35;
+  }
+}
