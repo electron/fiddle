@@ -101,13 +101,17 @@
 /* The toolbar capsule: whole while the groups leave it room, then its picker narrows. */
 .titlebar .capsule {
   flex: 0 1 auto;
+  /* Let it be squeezed below its content (the picker then narrows); a flex
+     item's automatic minimum would otherwise pin it at the picker's 180px. */
+  min-width: 0;
 }
 
 .capsule .picker {
-  flex: 1 1 180px;
-  width: auto;
+  /* A definite 180px (the design's width) sizes the capsule; it only shrinks,
+     down to 112px, once the groups have nothing left to give. */
+  flex: 0 1 180px;
+  width: 180px;
   min-width: 112px;
-  max-width: 180px;
 }
 
 /* Windows and Linux: the menu bar, right after the sidebar button. */

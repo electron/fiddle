@@ -133,8 +133,10 @@ export function TitleBar({
     if (!header || !menuBox || !capsule) return Number.MAX_SAFE_INTEGER;
     const bar = header.getBoundingClientRect();
     const box = menuBox.getBoundingClientRect();
-    const pickerWidth =
-      capsule.firstElementChild?.getBoundingClientRect().width ?? PICKER;
+    // The picker element itself: the capsule's first child is react-aria's
+    // collection <template>.
+    const picker = capsule.querySelector<HTMLElement>('[data-tour="version-picker"]');
+    const pickerWidth = picker?.getBoundingClientRect().width ?? PICKER;
     const fullCapsule =
       capsule.getBoundingClientRect().width + Math.max(0, PICKER - pickerWidth);
     const free = (bar.width - 2 * PADDING - fullCapsule) / 2;
