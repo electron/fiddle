@@ -11,7 +11,10 @@ app.whenReady().then(() => {
 
   if (process.platform === 'darwin') {
     // Let's get the recent places
-    const places = systemPreferences.getUserDefault('NSNavRecentPlaces', 'array')
+    const places = systemPreferences.getUserDefault(
+      'NSNavRecentPlaces',
+      'array'
+    )
     console.log(places)
   }
 

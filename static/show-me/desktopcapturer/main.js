@@ -18,13 +18,15 @@ app.whenReady().then(() => {
 
   mainWindow.loadFile('index.html')
   if (parseInt(process.versions.electron) >= 17) {
-    desktopCapturer.getSources({ types: ['window', 'screen'] }).then(async sources => {
-      for (const source of sources) {
-        if (source.id.startsWith('screen')) {
-          mainWindow.webContents.send('SET_SOURCE', source.id)
-          return
+    desktopCapturer
+      .getSources({ types: ['window', 'screen'] })
+      .then(async (sources) => {
+        for (const source of sources) {
+          if (source.id.startsWith('screen')) {
+            mainWindow.webContents.send('SET_SOURCE', source.id)
+            return
+          }
         }
-      }
-    })
+      })
   }
 })

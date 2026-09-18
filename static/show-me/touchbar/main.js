@@ -43,7 +43,7 @@ app.whenReady().then(() => {
       const spinReels = () => {
         updateReels()
 
-        if ((Date.now() - startTime) >= spinLength) {
+        if (Date.now() - startTime >= spinLength) {
           finishSpin()
         } else {
           // Slow down a bit on each spin

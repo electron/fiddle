@@ -24,7 +24,9 @@ app.whenReady().then(() => {
 
     // Query all cookies associated with a specific url.
     try {
-      const cookies = await session.defaultSession.cookies.get({ url: 'http://www.github.com' })
+      const cookies = await session.defaultSession.cookies.get({
+        url: 'http://www.github.com'
+      })
       console.log(cookies)
     } catch (error) {
       console.error(error)
@@ -33,7 +35,11 @@ app.whenReady().then(() => {
     // Set a cookie with the given cookie data;
     // may overwrite equivalent cookies if they exist.
     try {
-      const cookie = { url: 'http://www.github.com', name: 'dummy_name', value: 'dummy' }
+      const cookie = {
+        url: 'http://www.github.com',
+        name: 'dummy_name',
+        value: 'dummy'
+      }
       await session.defaultSession.cookies.set(cookie)
     } catch (error) {
       console.error(error)

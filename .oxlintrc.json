@@ -54,7 +54,6 @@
     "/.webpack",
     "/coverage",
     "/node_modules",
-    "/.yarn",
-    "/static"
+    "/.yarn"
   ]
 }

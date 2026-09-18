@@ -26,7 +26,7 @@ app.whenReady().then(() => {
       submenu: [
         {
           label: 'I have a custom handler',
-          click () {
+          click() {
             console.log('👋')
           }
         },
