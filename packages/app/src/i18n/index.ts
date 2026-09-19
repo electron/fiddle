@@ -38,15 +38,25 @@ export function localeDirection(locale: string): 'ltr' | 'rtl' {
   return RTL_LANGUAGES.includes(language) ? 'rtl' : 'ltr';
 }
 
-/** Picks the best shipped locale for a list of BCP 47 tags, most preferred first. */
-export function pickLocale(preferred: readonly string[]): Locale {
+/** The locale for a language when the tag itself isn't one: `pt-PT` is `pt-BR`, and Chinese is `zh-TW` by Traditional script or region, else `zh-CN`. */
+function languageLocale(language: string, subtags: readonly string[]): string {
+  if (language === 'pt') return 'pt-br';
+  if (language !== 'zh') return language;
+  if (subtags.includes('hans')) return 'zh-cn';
+  return subtags.some((s) => ['hant', 'tw', 'hk', 'mo'].includes(s)) ? 'zh-tw' : 'zh-cn';
+}
+
+/** Picks the best locale of `available` for a list of BCP 47 tags, most preferred first. */
+export function pickLocale(
+  preferred: readonly string[],
+  available: readonly string[] = locales,
+): Locale {
+  const find = (code: string) => available.find((l) => l.toLowerCase() === code);
   for (const tag of preferred) {
     const lower = tag.toLowerCase();
-    const exact = locales.find((locale) => locale.toLowerCase() === lower);
-    if (exact) return exact;
-    const language = lower.split('-')[0];
-    const base = locales.find((locale) => locale.toLowerCase() === language);
-    if (base) return base;
+    const [language = '', ...subtags] = lower.split('-');
+    const match = find(lower) ?? find(languageLocale(language, subtags));
+    if (match) return match as Locale;
   }
   return fallbackLocale;
 }

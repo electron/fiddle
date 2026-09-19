@@ -227,6 +227,16 @@ export function SettingsPage() {
   );
 }
 
+/** A language by its own name, so it can be found from any UI language. A tag that isn't well formed (a hand-edited settings.json can hold one) shows as it is. */
+function languageName(code: string): string {
+  try {
+    const name = new Intl.DisplayNames([code], { type: 'language' }).of(code) ?? code;
+    return name.charAt(0).toLocaleUpperCase(code) + name.slice(1);
+  } catch {
+    return code;
+  }
+}
+
 function GeneralSection() {
   const { t } = useTranslation('settings');
   const { app, settings, set } = useSettings();
@@ -265,15 +275,6 @@ function GeneralSection() {
     themeItems.push({ id: settings.theme, label: settings.theme });
   }
 
-  const names = new Intl.DisplayNames([app?.locale ?? 'en'], { type: 'language' });
-  // `of` throws for a tag that isn't well formed, which a hand-edited settings.json can hold.
-  const languageName = (code: string) => {
-    try {
-      return names.of(code) ?? code;
-    } catch {
-      return code;
-    }
-  };
   const localeItems: SelectOption[] = [
     { id: 'system', label: t('locale.system') },
     ...shippedLocales.map((code) => ({ id: code, label: languageName(code) })),

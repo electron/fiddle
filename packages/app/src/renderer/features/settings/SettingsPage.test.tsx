@@ -163,15 +163,18 @@ describe('General settings', () => {
 
   const pickLanguage = () => {
     fireEvent.click(screen.getByRole('button', { name: /^(?!reset).*locale\.title/ }));
-    fireEvent.click(screen.getByRole('option', { name: /Deutsch|German/ }));
+    fireEvent.click(screen.getByRole('option', { name: 'Deutsch' }));
   };
 
-  it('offers real languages only, not the pseudo-locales', () => {
+  it('names each real language in itself, and offers no pseudo-locales', () => {
+    mocks.app = { ...mocks.app, locale: 'ja' };
     render(<SettingsPage />);
     fireEvent.click(screen.getByRole('button', { name: /^(?!reset).*locale\.title/ }));
     const names = screen.getAllByRole('option').map((option) => option.textContent);
-    expect(names.some((name) => /German|Deutsch/.test(name ?? ''))).toBe(true);
-    expect(names.some((name) => /Pseudo/.test(name ?? ''))).toBe(false);
+    expect(names).toEqual(
+      expect.arrayContaining(['locale.system', 'English', 'Deutsch', '日本語']),
+    );
+    expect(names.some((name) => /Pseudo|XA|XB/.test(name ?? ''))).toBe(false);
   });
 
   it('offers the relaunch once main has accepted the language', async () => {

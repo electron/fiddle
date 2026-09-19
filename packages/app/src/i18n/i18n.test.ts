@@ -13,12 +13,62 @@ import {
 } from './index';
 
 describe('pickLocale', () => {
-  it('prefers an exact tag, then the base language, then English', () => {
-    expect(pickLocale(['de-AT', 'ja'])).toBe('de');
+  const available = [
+    'en',
+    'de',
+    'ja',
+    'zh-CN',
+    'zh-TW',
+    'pt-BR',
+    'es',
+    'ru',
+    'ko',
+    'fr',
+    'tr',
+    'en-XA',
+  ];
+  const cases: [string[], string][] = [
+    [['de-AT', 'ja'], 'de'],
+    [['fr-FR', 'ja-JP'], 'fr'],
+    [['es-MX'], 'es'],
+    [['ko-KR'], 'ko'],
+    [['tr-TR'], 'tr'],
+    [['ru-RU'], 'ru'],
+    [['zh'], 'zh-CN'],
+    [['zh-CN'], 'zh-CN'],
+    [['zh-SG'], 'zh-CN'],
+    [['zh-Hans'], 'zh-CN'],
+    [['zh-Hans-CN'], 'zh-CN'],
+    [['zh-Hans-HK'], 'zh-CN'],
+    [['zh-TW'], 'zh-TW'],
+    [['zh-HK'], 'zh-TW'],
+    [['zh-MO'], 'zh-TW'],
+    [['zh-Hant'], 'zh-TW'],
+    [['zh-Hant-TW'], 'zh-TW'],
+    [['zh-Hant-CN'], 'zh-TW'],
+    [['pt'], 'pt-BR'],
+    [['pt-BR'], 'pt-BR'],
+    [['pt-PT'], 'pt-BR'],
+    [['it-IT', 'pt-PT', 'ja'], 'pt-BR'],
+    [['it-IT', 'en-GB'], 'en'],
+    [['en-XA'], 'en-XA'],
+    [[], 'en'],
+  ];
+
+  it.each(cases)('maps %j to %s', (tags, expected) => {
+    expect(pickLocale(tags, available)).toBe(expected);
+  });
+
+  it('only picks locales that exist', () => {
+    expect(pickLocale(['zh-TW', 'pt-PT', 'ja'], ['en', 'ja', 'zh-CN'])).toBe('ja');
+    expect(pickLocale(['zh-Hant', 'zh'], ['en', 'zh-CN'])).toBe('zh-CN');
+    expect(pickLocale(['pt-PT'], ['en', 'de'])).toBe('en');
+  });
+
+  it('defaults to the real locales', () => {
+    expect(pickLocale(['de-AT'])).toBe('de');
     expect(pickLocale(['ja-JP'])).toBe('ja');
-    expect(pickLocale(['fr-FR', 'ja-JP'])).toBe('ja');
-    expect(pickLocale(['fr-FR', 'en-GB'])).toBe('en');
-    expect(pickLocale([])).toBe('en');
+    expect(pickLocale(['xx-YY'])).toBe('en');
   });
 
   it('picks pseudo-locales only by their exact tag', () => {

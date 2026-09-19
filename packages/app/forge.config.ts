@@ -28,6 +28,9 @@ const shippedLocales = fs
   .readdirSync(path.join(appDir, 'src/i18n/locales'), { withFileTypes: true })
   .filter((entry) => entry.isDirectory())
   .map((entry) => entry.name);
+// macOS names Chinese by script, not region.
+const macScripts: Record<string, string> = { 'zh-CN': 'zh-Hans', 'zh-TW': 'zh-Hant' };
+const macLocales = shippedLocales.map((locale) => macScripts[locale] ?? locale);
 const iconDir = path.join(appDir, 'assets', 'icons');
 const buildDir = path.join(appDir, 'build');
 const entitlements = path.join(buildDir, 'entitlements.plist');
@@ -233,7 +236,7 @@ const config: ForgeConfig = {
     asar: { unpack: '**/*.node' },
     icon: path.join(iconDir, 'fiddle'),
     appBundleId: 'com.electron.fiddle',
-    extendInfo: { CFBundleLocalizations: shippedLocales },
+    extendInfo: { CFBundleLocalizations: macLocales },
     appCategoryType: 'public.app-category.developer-tools',
     protocols: [
       { name: 'Electron Fiddle Launch Protocol', schemes: ['electron-fiddle'] },
