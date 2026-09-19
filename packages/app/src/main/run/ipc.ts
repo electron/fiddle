@@ -1,4 +1,3 @@
-/** Binds the `Versions` (see ../versions/ipc.ts) and `Run` interfaces for one window. */
 import { shell } from 'electron';
 
 import { implement, Run } from '../../ipc/main';
@@ -23,7 +22,6 @@ export function bindRunIpc(ctx: IpcContext): void {
     BisectBad: () => bisect.mark(windowId, 'bad'),
     BisectSkip: () => bisect.mark(windowId, 'skip'),
     StopBisect: () => bisect.stop(windowId),
-    // Asks, then opens the bisect result on GitHub.
     OpenBisectCompare: async () => {
       const url = bisect.compareUrl(windowId);
       if (!url) return;

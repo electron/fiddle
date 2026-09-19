@@ -1,15 +1,7 @@
-/**
- * The fiddle's npm modules (`Window.fiddle.modules`): add, change version,
- * remove. New modules get their latest version, and non-semver versions such
- * as `*` (from gists or old fiddles) are normalized to the latest.
- * No Electron imports.
- */
-import * as semver from 'semver';
-
 import {
   assertModuleSpec,
+  isFloatingVersion,
   isValidPackageName,
-  normalizeModuleVersion,
 } from '../../fiddle/modules';
 import { ErrorCode, FiddleError } from '../../shared/errors';
 import type { FiddleState } from '../../shared/stores';
@@ -21,7 +13,7 @@ export interface ModulesHub {
   onChange(listener: ChangeListener): () => void;
   /**
    * Documents' `setFiddleModules`, so a change marks the fiddle dirty.
-   * `normalized` (`*` resolved to the latest) doesn't. Returns the Window rev.
+   * `normalized` (a floating version pinned to the latest) doesn't. Returns the Window rev.
    */
   setModules(
     windowId: string,
@@ -38,7 +30,7 @@ export class ModulesService {
   readonly #hub: ModulesHub;
   readonly #npm: LatestVersionSource;
   readonly #log: (message: string, error: unknown) => void;
-  /** `windowId name spec` keys being normalized, or that failed to (not retried). */
+  /** `windowId name spec` keys being pinned, or that failed to be (not retried). */
   readonly #seen = new Set<string>();
 
   constructor(
@@ -72,19 +64,19 @@ export class ModulesService {
     return this.#write(windowId, rest);
   }
 
-  /** Normalizes non-semver versions whenever a window's modules change. */
+  /** Pins floating versions whenever a window's modules change. */
   watch(): () => void {
     return this.#hub.onChange((change) => {
       if (change.store === 'window') void this.normalize(change.windowId);
     });
   }
 
-  /** Replaces every non-semver version in the window with the package's latest. */
+  /** Replaces every floating version (`*`, `latest`) in the window with the package's latest. Ranges and other tags stay as declared. */
   async normalize(windowId: string): Promise<void> {
     const modules = this.#hub.getWindow(windowId)?.fiddle.modules ?? {};
     const pending = Object.entries(modules).filter(([name, spec]) => {
       const key = `${windowId} ${name} ${spec}`;
-      if (semver.valid(spec) || this.#seen.has(key)) return false;
+      if (!isFloatingVersion(spec) || this.#seen.has(key)) return false;
       this.#seen.add(key);
       return true;
     });
@@ -95,11 +87,7 @@ export class ModulesService {
           const current = this.#hub.getWindow(windowId)?.fiddle.modules;
           // Only if nobody changed it meanwhile.
           if (current?.[name] !== spec) return;
-          this.#write(
-            windowId,
-            { ...current, [name]: normalizeModuleVersion(spec, latest) },
-            true,
-          );
+          this.#write(windowId, { ...current, [name]: latest }, true);
           this.#seen.delete(`${windowId} ${name} ${spec}`);
         } catch (error) {
           this.#log(`could not normalize ${name}@${spec}`, error);
@@ -115,8 +103,8 @@ export class ModulesService {
       });
     }
     if (version !== undefined) assertModuleSpec(name, version);
-    if (version !== undefined && semver.valid(version)) return version;
-    return normalizeModuleVersion(version ?? '*', await this.#npm.latestVersion(name));
+    if (version !== undefined && !isFloatingVersion(version)) return version;
+    return this.#npm.latestVersion(name);
   }
 
   #modules(windowId: string): Record<string, string> {

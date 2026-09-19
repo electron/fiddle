@@ -1,7 +1,4 @@
-/**
- * Native dialogs, modal to a window when there is one. Always through
- * Electron's `dialog`, so the e2e driver can answer them.
- */
+/** Native dialogs go through Electron's `dialog` only, so the e2e driver can answer them. */
 import {
   dialog,
   type BrowserWindow,
@@ -29,7 +26,7 @@ export function messageBox(
   return win ? dialog.showMessageBox(win, options) : dialog.showMessageBox(options);
 }
 
-/** Two buttons, `ok` and Cancel. Resolves true for `ok`. */
+/** Two buttons, `ok` and Cancel. Resolves true for `ok`. Enter chooses `ok`; pass `defaultId: 1` when it loses data or is hard to undo. */
 export async function confirm(
   parent: DialogParent,
   { ok, ...options }: Omit<MessageBoxOptions, 'buttons'> & { ok: string },

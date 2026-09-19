@@ -1,4 +1,3 @@
-/** `AppPlatform` binding. The `UpdateAvailable` event is dispatched from ../updates. */
 import { AppPlatform, implement } from '../../ipc/main';
 import { isCrashReportingEnabled } from '../crash/sentry';
 import type { IpcContext } from '../ipc';

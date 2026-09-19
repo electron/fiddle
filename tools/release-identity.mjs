@@ -1,10 +1,6 @@
 #!/usr/bin/env node
-// Asserts the app identity against the committed expected values in
-// packages/app/build/identity.json. The previous release's userData, safeStorage
-// credentials and installs (Squirrel, MSIX, deb, rpm, AppImage) are only found
-// if these never change.
-//
-//   node tools/release-identity.mjs
+// Asserts the app identity against packages/app/build/identity.json. The previous
+// release's userData, credentials and installs are only found if it never changes.
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';

@@ -1,9 +1,3 @@
-/**
- * The output console: a bar with the title, a process filter, a text filter,
- * the Running badge and a clear button, then the lines. An error row's location
- * is a link that reveals it in the editor. http(s) URLs are links that ask
- * before they open in the browser. Auto-scrolls while at the bottom.
- */
 import { Fragment, memo, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -19,6 +13,7 @@ import {
   Tooltip,
 } from '../../../ui';
 import { revealLocation } from '../../editor/runtime-errors';
+import { toastError } from '../../toast-error';
 import styles from './Console.module.css';
 import { linkify } from './linkify';
 import { useConsoleLines, useRunState } from './use-run';
@@ -39,14 +34,10 @@ const TIME: Intl.DateTimeFormatOptions = {
 };
 
 const clear = () => {
-  runApi
-    .ClearOutput()
-    .catch((error: unknown) =>
-      console.error('[fiddle] clearing the console failed', error),
-    );
+  runApi.ClearOutput().catch(toastError);
 };
 
-/** Memoized: the splitters and the window's size re-render its parents, and a full console has a thousand rows. */
+/** Memoized: the splitters and the window size re-render its parents, and a full console has a thousand rows. */
 export const ConsolePane = memo(function ConsolePane() {
   const { t } = useTranslation('run');
   const lines = useConsoleLines();
@@ -80,7 +71,12 @@ export const ConsolePane = memo(function ConsolePane() {
   }, [shown.length, lines]);
 
   return (
-    <section className={styles.pane} aria-label={t('console')} data-tour="console">
+    <section
+      className={styles.pane}
+      aria-label={t('console')}
+      data-tour="console"
+      data-region="console"
+    >
       <div className={styles.bar}>
         <h2 className={styles.title}>{t('console')}</h2>
         <SegmentedControl
@@ -154,10 +150,7 @@ const ConsoleRow = memo(function ConsoleRow({
   );
 });
 
-/**
- * A line with its http(s) URLs as links. A link opens as a new window, which
- * main turns into "Open this link in your browser?" (`openExternalLink`).
- */
+/** A link opens as a new window, which main turns into an "Open this link in your browser?" prompt. */
 function LinkedText({ text }: { text: string }) {
   if (!text.includes('://')) return text;
   return linkify(text).map((segment, index) =>

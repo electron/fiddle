@@ -1,7 +1,3 @@
-/**
- * Release list rows: newest first, with obsolete and platform flags,
- * and the version picker's list. Pure; no Electron imports.
- */
 import {
   getOldestSupportedMajor,
   getReleaseChannel,
@@ -22,11 +18,7 @@ export type VersionFilterSettings = Pick<
   'channels' | 'showObsolete' | 'showNotDownloaded'
 >;
 
-/**
- * The versions the user sees: runnable here, in a chosen channel, not
- * obsolete unless asked, and downloaded if "not downloaded" versions are hidden.
- * `keep` (the current version) always stays.
- */
+/** Runnable here, in a chosen channel, not obsolete unless asked, and downloaded unless "not downloaded" ones are shown. `keep` always stays. */
 export function visibleVersions(
   rows: readonly ReleaseRow[],
   settings: VersionFilterSettings,
@@ -59,7 +51,7 @@ function isRawRelease(value: unknown): value is RawRelease {
   );
 }
 
-/** True if `data` looks like releases.json: a non-empty array of `{ version }`. */
+/** A non-empty array of `{ version }`. */
 export function isReleaseList(data: unknown): data is RawRelease[] {
   return Array.isArray(data) && data.length > 0 && data.every(isRawRelease);
 }
@@ -79,7 +71,7 @@ export function toReleaseRows(
 ): ReleaseRow[] {
   const oldest = getOldestSupportedMajor(options);
   const rows = data
-    // The 0.2x releases (atom-shell) can't be downloaded, as in core's list.
+    // The 0.2x releases (atom-shell) can't be downloaded.
     .filter((entry) => !entry.version.replace(/^v/, '').startsWith('0.2'))
     .map((entry) => ({
       version: entry.version.replace(/^v/, ''),
@@ -176,13 +168,9 @@ function localEntry(build: LocalBuild): PickerEntry {
 }
 
 /**
- * The picker's list: local builds first, then releases newest first (within
- * one x.y.z, nightly < alpha < beta < stable), as `rows` arrive from main
- * (`toReleaseRows`), sorted. Releases follow the version
- * settings as elsewhere, but ones this computer can't run stay listed,
- * disabled. Without a search the groups stay (local builds, Stable,
- * Pre-release), each newest first; a search drops them for one flat list, so
- * the newest match is always on top.
+ * Local builds first, then releases newest first, following the version
+ * settings, except that releases this computer can't run stay listed, disabled.
+ * A search replaces the groups with one flat list, so the newest match is on top.
  */
 export function pickerGroups({
   rows,

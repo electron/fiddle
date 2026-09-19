@@ -9,10 +9,8 @@ function Example({ onChange }: { onChange?: (id: string) => void }) {
         <Tab id="main">main.js</Tab>
         <Tab
           id="renderer"
-          errorCount={2}
-          errorLabel="2 errors"
-          unsaved
-          unsavedLabel="Unsaved changes"
+          error={{ count: 2, label: '2 errors' }}
+          unsaved="Unsaved changes"
         >
           renderer.js
         </Tab>

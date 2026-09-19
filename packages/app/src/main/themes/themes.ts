@@ -1,13 +1,4 @@
-/**
- * Themes. Built in: Lucent, dark or light, and its high-contrast dark and
- * light variants. Custom themes are JSON files in
- * `<userData>/themes/<id>.json` holding a `schemaVersion`, a name, `isDark`,
- * Monaco `editor` data and Lucent `common` tokens. Every file is validated
- * with the shared schema: token values must be colours or font names, and
- * `url(` is rejected.
- *
- * No Electron imports.
- */
+/** Custom themes are `<userData>/themes/<id>.json`, validated with the shared schema. No Electron imports. */
 import fsp from 'node:fs/promises';
 import path from 'node:path';
 
@@ -27,13 +18,8 @@ import {
   type ThemeSummary,
 } from '../../shared/settings';
 import { log } from '../log';
-import { writeAtomic } from '../persistence/json-store';
 
-/**
- * Parses one theme file. Returns undefined (and logs) when it isn't a valid
- * theme. A file from a newer app version is shown as far as this one
- * understands it; the app never writes existing theme files.
- */
+/** Parses one theme file. Returns undefined (and logs) when it isn't a valid theme. A file from a newer app version is read as far as this one understands it. */
 export function parseTheme(id: string, text: string): ThemeData | undefined {
   let data: unknown;
   try {
@@ -96,13 +82,16 @@ export function themeSource(
 }
 
 function isDarkColor(hex: string | undefined): boolean | undefined {
-  const match = /^#?([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})/i.exec(hex ?? '');
-  if (!match) return undefined;
-  const [r, g, b] = match.slice(1).map((part) => parseInt(part, 16));
+  const digits = /^#?([0-9a-f]{3,4}|[0-9a-f]{6}|[0-9a-f]{8})$/i.exec(hex ?? '')?.[1];
+  if (!digits) return undefined;
+  // `#rgb` and `#rgba` double each digit.
+  const full =
+    digits.length <= 4 ? [...digits.slice(0, 3)].map((c) => c + c).join('') : digits;
+  const [r, g, b] = [0, 2, 4].map((at) => parseInt(full.slice(at, at + 2), 16));
   return 0.2126 * r! + 0.7152 * g! + 0.0722 * b! < 128;
 }
 
-/** Turns an imported Monaco theme into a theme file. Throws `invalid-argument` if it isn't one. */
+/** Turns an imported Monaco theme into a theme file. Throws `invalid-argument` if it isn't one or has no name. */
 export function themeFromMonaco(name: string, data: unknown): ThemeFile {
   const result = monacoThemeSchema.safeParse(data);
   if (!result.success) {
@@ -112,12 +101,14 @@ export function themeFromMonaco(name: string, data: unknown): ThemeFile {
       result.error.message,
     );
   }
+  const title = name.trim().slice(0, 100);
+  if (!title) throw new FiddleError(ErrorCode.invalidArgument, 'A theme needs a name');
   const editor = result.data;
   const isDark =
     editor.base !== undefined
       ? editor.base === 'vs-dark' || editor.base === 'hc-black'
       : (isDarkColor(editor.colors?.['editor.background']) ?? true);
-  return { name: name.slice(0, 100) || 'Theme', isDark, editor, common: {} };
+  return { name: title, isDark, editor, common: {} };
 }
 
 /** A file-name-safe ID for a theme name that doesn't clash with `taken` or a built-in theme. */
@@ -137,27 +128,19 @@ export function themeId(name: string, taken: ReadonlySet<string>): string {
   return id;
 }
 
-/**
- * Writes a new theme file with the current `schemaVersion`, atomically
- * (`writeAtomic`), and returns its path. Never overwrites: an existing file
- * fails with `EEXIST`.
- */
+/** Writes a new theme file with the current `schemaVersion` and returns its path. The create is exclusive: an existing file fails with `EEXIST`. */
 export async function writeTheme(
   dir: string,
   id: string,
   theme: ThemeFile,
 ): Promise<string> {
   const file = path.join(dir, `${id}.json`);
-  const exists = await fsp.stat(file).then(
-    () => true,
-    () => false,
-  );
-  if (exists)
-    throw Object.assign(new Error(`${file} already exists`), { code: 'EEXIST' });
   const { schemaVersion: _ignored, ...data } = theme;
-  await writeAtomic(
+  await fsp.mkdir(dir, { recursive: true });
+  await fsp.writeFile(
     file,
     `${JSON.stringify({ schemaVersion: THEME_SCHEMA_VERSION, ...data }, null, 2)}\n`,
+    { flag: 'wx' },
   );
   return file;
 }

@@ -1,13 +1,3 @@
-/**
- * Drag and drop onto the window. Mount once in the shell:
- *
- *   const dragging = useDocumentDrop();   // true while something is dragged over the window
- *
- * - A gist URL or an `electron-fiddle://` link is sent to main (`OpenDropped`),
- *   which loads it with the usual prompts.
- * - A dropped folder is left to Chromium: its `file://` navigation is caught
- *   in main and opened as a fiddle folder, so no file paths cross IPC.
- */
 import { useEffect, useState } from 'react';
 
 import { documentsApi } from '../../../ipc/renderer';
@@ -46,6 +36,10 @@ function canOpen(data: DataTransfer | null): boolean {
   );
 }
 
+/**
+ * True while something is dragged over the window. A dropped folder is left to Chromium (main catches its
+ * `file://` navigation), so no file paths cross IPC.
+ */
 export function useDocumentDrop(): boolean {
   const [dragging, setDragging] = useState(false);
 
@@ -77,8 +71,10 @@ export function useDocumentDrop(): boolean {
       if (isTextDrag(event)) event.preventDefault();
     };
     const onDrop = (event: DragEvent) => {
+      const skip = ignored(event);
       depth = 0;
       setDragging(false);
+      if (skip) return;
       const link = event.dataTransfer ? droppedLink(event.dataTransfer) : undefined;
       if (!link) return;
       event.preventDefault();

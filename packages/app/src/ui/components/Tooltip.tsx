@@ -24,7 +24,6 @@ export interface TooltipProps {
   isDisabled?: boolean;
 }
 
-/** Appears after 500ms, 10px below the target by default. */
 export function Tooltip({
   label,
   kbd,

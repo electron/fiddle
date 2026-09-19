@@ -1,21 +1,9 @@
-/**
- * The GitHub token on disk: `<userData>/credentials/github`, encrypted with
- * async `safeStorage`.
- *
- * - On Linux with a `basic_text` or `unknown` backend, encryption is only
- *   obfuscation, so the token is kept for the session unless the user
- *   explicitly accepts plaintext storage.
- * - Without any encryption, the token is always session-only.
- * - A file that can't be decrypted is reported and kept, never deleted.
- *
- * No Electron imports: `safeStorage` is injected, so this runs in plain Node tests.
- */
 import { mkdir, readFile, rm } from 'node:fs/promises';
 import path from 'node:path';
 
 import { writeAtomic } from '../persistence/json-store';
 
-/** The subset of Electron's `safeStorage` this module uses. */
+/** The subset of Electron's `safeStorage` used here, injected so tests need no Electron. */
 export interface SafeStorageLike {
   isAsyncEncryptionAvailable(): Promise<boolean>;
   encryptStringAsync(plainText: string): Promise<Buffer>;
@@ -30,7 +18,7 @@ export type CredentialStorageKind = 'encrypted' | 'weak' | 'unavailable';
 
 interface StoredCredentials {
   token: string;
-  /** The login the token belonged to when it was saved, so an offline start still knows it. */
+  /** So an offline start still knows the login. */
   login: string;
 }
 
@@ -39,10 +27,10 @@ export type LoadResult =
   | { kind: 'ok'; credentials: StoredCredentials }
   | { kind: 'decrypt-failed' };
 
+/** Encryption on these Linux backends is only obfuscation: the token stays in memory unless the user accepts plaintext. */
 const WEAK_LINUX_BACKENDS = new Set(['basic_text', 'unknown']);
 
 interface CredentialStoreOptions {
-  /** Absolute path, normally `<userData>/credentials/github`. */
   file: string;
   safeStorage: SafeStorageLike;
   platform: NodeJS.Platform;
@@ -88,16 +76,13 @@ export class CredentialStore {
       return { kind: 'decrypt-failed' };
     }
     if (shouldReEncrypt) {
-      // Best effort: the key rotated. The old file still decrypts if this fails.
+      // Best effort: the old file still decrypts if this fails.
       await this.#write(credentials).catch(() => undefined);
     }
     return { kind: 'ok', credentials };
   }
 
-  /**
-   * Saves the credentials when storage allows it. Returns false when the token
-   * must stay in memory for this session only; any older file is removed then.
-   */
+  /** False when the token must stay in memory only; an older file is removed then. */
   async save(
     credentials: StoredCredentials,
     options: { allowPlaintext: boolean },

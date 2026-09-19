@@ -89,6 +89,7 @@ describe('themeFromMonaco', () => {
   it('needs base or rules', () => {
     expect(() => themeFromMonaco('x', { colors: {} })).toThrow(FiddleError);
     expect(() => themeFromMonaco('x', 'nope')).toThrow(FiddleError);
+    expect(() => themeFromMonaco('  ', { base: 'vs' })).toThrow(FiddleError);
   });
 
   it('works out light or dark', () => {
@@ -102,6 +103,17 @@ describe('themeFromMonaco', () => {
       themeFromMonaco('a', { rules: [], colors: { 'editor.background': '#101010' } })
         .isDark,
     ).toBe(true);
+    for (const [color, isDark] of [
+      ['#fff', false],
+      ['#fffa', false],
+      ['#000', true],
+      ['#ffffff80', false],
+    ] as const) {
+      expect(
+        themeFromMonaco('a', { rules: [], colors: { 'editor.background': color } })
+          .isDark,
+      ).toBe(isDark);
+    }
     expect(themeFromMonaco('Solarized', { base: 'vs' })).toMatchObject({
       name: 'Solarized',
       common: {},

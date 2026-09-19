@@ -20,7 +20,6 @@ export interface TextFieldProps extends Omit<
   /** Shown below the field in spark when the field is invalid. */
   errorMessage?: string;
   placeholder?: string;
-  /** md is 30px tall, sm is 24px. */
   size?: 'md' | 'sm';
   /** For fields that sit on the chrome, such as the sidebar search. */
   onGlass?: boolean;

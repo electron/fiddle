@@ -86,12 +86,12 @@
 }
 
 .item[data-hovered],
-.item[aria-current='page'] {
+.item[aria-current='true'] {
   background: var(--lu-hover);
   color: var(--lu-ink);
 }
 
-.item[aria-current='page'] .itemIcon {
+.item[aria-current='true'] .itemIcon {
   color: var(--lu-accent);
 }
 
@@ -112,4 +112,17 @@
   flex: none;
   font: 500 11px/14px var(--lu-font-sans);
   color: var(--lu-ink-muted);
+}
+
+/* Forced colors drops the fill that marks the current section. */
+@media (forced-colors: active) {
+  .item[aria-current='true'] {
+    outline: 2px solid var(--lu-ink);
+    outline-offset: -2px;
+  }
+
+  .item[aria-current='true'][data-focus-visible] {
+    outline: 3px solid var(--lu-focus-ring);
+    outline-offset: -3px;
+  }
 }

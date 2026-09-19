@@ -31,8 +31,9 @@ vi.mock('../editor/models', () => ({
 }));
 vi.mock('../editor/runtime-errors', () => ({
   claimReveal: vi.fn(),
+  setRuntimeErrors: vi.fn(),
+  toEditorErrors: () => [],
   useRevealRequest: () => null,
-  useRuntimeErrors: () => [],
 }));
 vi.mock('../editor/types', () => ({ useEditorTypes: () => undefined }));
 vi.mock('../features/documents/useDocumentDrop', () => ({
@@ -61,6 +62,7 @@ const file = (name: string) => ({ name, visible: true });
 const windowState = (layout: Partial<WindowState['layout']>): WindowState =>
   ({
     rev: 1,
+    title: 'fiddle',
     view: 'editor',
     menuBar: null,
     layout: { ...DEFAULT_LAYOUT, ...layout },

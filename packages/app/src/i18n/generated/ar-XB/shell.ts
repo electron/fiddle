@@ -4,7 +4,6 @@ export default {
   "hideSidebar": "\u200f\u202eHide\u202c\u200f \u200f\u202esidebar\u202c\u200f",
   "showSidebar": "\u200f\u202eShow\u202c\u200f \u200f\u202esidebar\u202c\u200f",
   "edited": "\u200f\u202eEdited\u202c\u200f",
-  "windowTitleEdited": "{{name}} \u200f\u202e(edited)\u202c\u200f",
   "settings": "\u200f\u202eSettings\u202c\u200f",
   "menuBar": "\u200f\u202eApplication\u202c\u200f \u200f\u202emenu\u202c\u200f",
   "menuBarMore": "\u200f\u202eMore\u202c\u200f",

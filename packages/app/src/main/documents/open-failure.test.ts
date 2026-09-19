@@ -1,10 +1,13 @@
 /** A window that fails to start is destroyed; its unsaved draft and the session must survive that. */
 import { EventEmitter } from 'node:events';
 import fs from 'node:fs';
+import fsp from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
 
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+
+import { initFakeDocuments } from './test-helpers';
 
 let userData = '';
 const fakeWindow = Object.assign(new EventEmitter(), {
@@ -33,28 +36,9 @@ async function setup(
   createWindow: (id: string, contents: EventEmitter) => Promise<void>,
 ) {
   const documents = await import('./service');
-  const windows = new Map<string, Record<string, unknown>>();
-  const hub = {
-    app: { settings: { sessionRestore: false } },
-    getWindow: (id: string) => windows.get(id),
-    updateWindow: (id: string, patch: Record<string, unknown>) => {
-      windows.set(id, { ...windows.get(id), ...patch });
-      return 1;
-    },
-  };
   const contents = new Map<string, EventEmitter>();
-  documents.initDocuments({
-    hub: hub as never,
-    platform: 'linux',
-    versions: {
-      releases: () => [],
-      release: () => undefined,
-      localBuild: () => undefined,
-    } as never,
-    github: { client: () => undefined } as never,
-    npm: { packument: async () => ({ versions: {} }) } as never,
-    createWindow: async (id: string) => {
-      windows.set(id, {});
+  initFakeDocuments(documents, {
+    onCreateWindow: async (id) => {
       const own = new EventEmitter();
       contents.set(id, own);
       documents.attachWindow(id, own as never);
@@ -104,8 +88,10 @@ describe('openFiddleWindow', () => {
     expect(() => documents.getFiddle(ID)).toThrow();
 
     // The failed window's `destroyed` event arrives after the rejection.
+    const remove = vi.spyOn(fsp, 'rm');
     contents.get(ID)!.emit('destroyed');
-    await new Promise((resolve) => setTimeout(resolve, 50));
+    await new Promise((resolve) => setImmediate(resolve));
+    expect(remove).not.toHaveBeenCalled();
     expect(fs.existsSync(draft)).toBe(true);
   });
 });

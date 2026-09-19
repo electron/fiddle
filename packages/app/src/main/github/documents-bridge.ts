@@ -1,7 +1,3 @@
-/**
- * What the gist flows need from the documents service. The GitHub service
- * takes this as an interface so tests can pass a fake.
- */
 import type { VersionRef } from '../../fiddle/fiddle';
 import type { FileMap } from '../../fiddle/files';
 import {
@@ -13,7 +9,7 @@ import {
 import type { StateHub } from '../state-hub';
 
 export interface GistFiddle {
-  /** Every file's text from the editor mirror, hidden files included. */
+  /** Hidden files included. */
   files: FileMap;
   name: string;
   versionRef: VersionRef;
@@ -33,7 +29,7 @@ interface GistSaved {
 
 export interface GistDocuments {
   getFiddle(windowId: string): Promise<GistFiddle>;
-  /** The default template for the window's Electron version (for "publish as revision"). */
+  /** For "publish as revision". */
   getTemplate(windowId: string): Promise<FileMap>;
   /**
    * Published or updated: link the gist, unlink the local folder, and make

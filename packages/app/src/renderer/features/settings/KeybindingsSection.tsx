@@ -1,8 +1,3 @@
-/**
- * Every command in the registry with its shortcut. Record a new shortcut,
- * remove it (a `null` override) or reset it. Shared shortcuts are flagged.
- * Only overrides are stored, under `keybindings`.
- */
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -55,7 +50,7 @@ export function KeybindingsSection() {
   );
   const label = (id: CommandId) => tMain(commands[id].label);
 
-  // Dev-only commands (the Develop menu's) only in development builds.
+  // Dev-only commands are listed in development builds only.
   const rows = commandIds
     .filter((id) => isCommandListed(id, app))
     .map((id) => ({ id, label: label(id) }))
@@ -102,7 +97,7 @@ export function KeybindingsSection() {
               <li key={id} className={styles.shortcut} data-command={id}>
                 <div className={styles.shortcutText}>
                   <span className={styles.shortcutLabel}>
-                    {name}
+                    <span id={`shortcut-${id}-name`}>{name}</span>
                     {overridden && (
                       <span
                         className={styles.modified}
@@ -144,10 +139,18 @@ export function KeybindingsSection() {
                   <span className={styles.none}>{t('keybindings.none')}</span>
                 )}
                 <div className={styles.shortcutActions}>
-                  <Button size="sm" variant="secondary" onPress={() => setRecording(id)}>
+                  <Button
+                    id={`shortcut-${id}-change`}
+                    aria-labelledby={`shortcut-${id}-change shortcut-${id}-name`}
+                    size="sm"
+                    variant="secondary"
+                    onPress={() => setRecording(id)}
+                  >
                     {t('keybindings.change')}
                   </Button>
                   <IconButton
+                    id={`shortcut-${id}-remove`}
+                    aria-labelledby={`shortcut-${id}-remove shortcut-${id}-name`}
                     size="sm"
                     variant="ghost"
                     icon="minus"
@@ -184,9 +187,8 @@ interface RecorderProps {
 const FUNCTION_KEY = /^F([1-9]|1\d|2[0-4])$/;
 
 /**
- * Captures the next key combination. Escape or leaving the field cancels; Tab
- * and Shift+Tab move on. A key with no Ctrl, Cmd or Alt would be taken from
- * every text field, so only function keys are recorded without one.
+ * Captures the next key combination. Escape or leaving the field cancels, Tab moves on.
+ * A bare key would be taken from every text field, so only function keys are recorded without a modifier.
  */
 function Recorder({ label, placeholder, platform, onDone }: RecorderProps) {
   const ref = useRef<HTMLInputElement>(null);

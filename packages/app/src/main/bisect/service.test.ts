@@ -1,5 +1,5 @@
 /** The bisect lifecycle: how each run ends the bisect or gives a verdict, and Stop. */
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import type { BisectState } from '../../shared/stores';
 import type { RunOutcome } from '../run/logic';
@@ -57,7 +57,7 @@ function setup() {
         obsolete: false,
         supported: true,
       })),
-    state: () => 'installed',
+    isInstalled: () => true,
     install: vi.fn(async () => ''),
   };
   const hub = {
@@ -95,6 +95,9 @@ let ctx: ReturnType<typeof setup>;
 beforeEach(() => {
   ctx = setup();
 });
+afterEach(() => {
+  vi.useRealTimers();
+});
 
 describe('BisectService (auto)', () => {
   it('finds the first bad version from exit codes', async () => {
@@ -127,6 +130,13 @@ describe('BisectService (auto)', () => {
     expect(ctx.logs.some((line) => line.startsWith('bisectVerdictBad'))).toBe(false);
   });
 
+  it('tells the user when a run throws, instead of letting the bisect vanish', async () => {
+    ctx.runs.run.mockRejectedValueOnce(new Error('spawn failed'));
+    await ctx.service.start('w', '1.0.0', '5.0.0', true);
+    await vi.waitFor(() => expect(ctx.bisect()).toBeNull());
+    expect(ctx.logs).toContain('bisectInvalid');
+  });
+
   it('ends the bisect quietly when the run is stopped from the Run control', async () => {
     await ctx.service.start('w', '1.0.0', '5.0.0', true);
     const first = await ctx.nextRun();
@@ -139,6 +149,7 @@ describe('BisectService (auto)', () => {
   });
 
   it('leaves a new bisect alone when the one it replaced finishes late', async () => {
+    vi.useFakeTimers();
     await ctx.service.start('w', '1.0.0', '5.0.0', true);
     const old = await ctx.nextRun();
     ctx.service.stop('w');
@@ -149,7 +160,7 @@ describe('BisectService (auto)', () => {
     expect(ctx.bisect()).not.toBeNull();
 
     old.resolve({ code: 0, signal: null, stopped: true });
-    await new Promise((resolve) => setTimeout(resolve, 10));
+    await vi.advanceTimersByTimeAsync(0);
     expect(ctx.bisect()).toMatchObject({ auto: true, result: null });
     replacement.resolve({ code: 0, signal: null, stopped: true });
     await vi.waitFor(() => expect(ctx.bisect()).toBeNull());

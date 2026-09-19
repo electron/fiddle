@@ -1,16 +1,15 @@
 #!/usr/bin/env node
 // `yarn driver <command>`: drive a test build of the app from the shell.
 // Every command prints one JSON object, `{ ok: true, result }` or
-// `{ ok: false, error }` (exit code 1). The app launched by `launch` stays up
-// between commands; a background process owns it, its display and its
-// fixture server until `quit`.
+// `{ ok: false, error }` (exit code 1). `launch` starts a background process
+// that owns the app, its display and its fixture server until `quit`.
 //
 //   launch [--no-build] [--seed N] [--locale L]   build the test build, start the app
 //   snapshot                                      accessibility tree, `role "name"` lines
 //   query <role> [name] | query --text <text>     wait for matches, list them
 //   click <role> [name] | click --text <text>     real click on exactly one match
-//   type <text> [--role R --name N]               type (into a clicked element)
-//   press <key>                                   e.g. Enter, Escape, CmdOrCtrl+S
+//   type <text> [--role R --name N | --text T]    type (into a clicked element)
+//   press <key> [--role R --name N | --text T]    e.g. Enter, Escape, CmdOrCtrl+S
 //   run-command <id>                              run a command from the registry
 //   screenshot [file]                             PNG of the window
 //   eval-hook <name> [json-args...]               window.__fiddleTest[name](...)
@@ -21,8 +20,9 @@
 //   call <method> [json-params]                   any driver method (protocol.ts)
 //   quit                                          quit the app and clean up
 //
-// Options: --window <index|windowId>, --timeout <ms>, --session <name>.
-// Names like /regex/i are regular expressions.
+// Options: --window <index|windowId>, --timeout <ms>, --session <name>
+// (default: $FIDDLE_DRIVER_SESSION, else `default`, so two agents share one app
+// unless they name sessions). Names like /regex/i are regular expressions.
 import { spawn } from 'node:child_process';
 import fs from 'node:fs';
 import os from 'node:os';

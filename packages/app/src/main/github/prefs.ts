@@ -1,9 +1,3 @@
-/**
- * The two gist settings, `gistPublishAsRevision` and `gistVisibility`
- * (src/shared/settings.ts). They are read from the `App` store's effective
- * settings and written through the settings service, so they persist in
- * settings.json and show up in the Settings page.
- */
 import type { SettingsService } from '../settings/service';
 import type { StateHub } from '../state-hub';
 

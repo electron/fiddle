@@ -2,7 +2,7 @@ import { mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import * as path from 'node:path';
 
-import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { ErrorCode } from '../shared/errors';
 import {
@@ -14,10 +14,10 @@ import {
   findPackageManager,
   IGNORE_SCRIPTS_ENV,
   installModules,
+  isFloatingVersion,
   isValidPackageName,
   isValidVersionSpec,
   loadLoginShellPath,
-  normalizeModuleVersion,
   pickLatestVersion,
   runCommand,
 } from './modules';
@@ -181,11 +181,11 @@ describe('install commands', () => {
 });
 
 describe('versions', () => {
-  it('normalizes non-semver versions to the latest', () => {
-    expect(normalizeModuleVersion('1.2.3', '2.0.0')).toBe('1.2.3');
-    expect(normalizeModuleVersion('*', '2.0.0')).toBe('2.0.0');
-    expect(normalizeModuleVersion('^1.0.0', '2.0.0')).toBe('2.0.0');
-    expect(normalizeModuleVersion('*', undefined)).toBe('*');
+  it('floats only `*`, `latest` and empty specs', () => {
+    for (const spec of ['*', 'latest', '', 'x'])
+      expect(isFloatingVersion(spec), spec).toBe(true);
+    for (const spec of ['1.2.3', '^4.18.2', '~1.0.0', '>=1 <3', '4.x', 'next', 'beta'])
+      expect(isFloatingVersion(spec), spec).toBe(false);
     expect(pickLatestVersion(['1.0.0', '10.0.0', '2.0.0', '11.0.0-beta.1'])).toBe(
       '10.0.0',
     );
@@ -266,24 +266,26 @@ describe('host lookups', () => {
     expect(win.calls).toHaveLength(0);
   });
 
-  it('runs the login shell and reads PATH between the markers', async () => {
-    if (process.platform === 'win32') return;
-    const dir = await mkdtemp(path.join(tmpdir(), 'fiddle-shell-'));
-    try {
-      // A fake shell: ignores its arguments and prints a banner around the marked PATH.
-      const shell = path.join(dir, 'fake-shell');
-      await writeFile(
-        shell,
-        '#!/bin/sh\necho "Welcome"\necho __FIDDLE_SHELL_PATH__\necho /fake/bin:/usr/bin\necho __FIDDLE_SHELL_PATH__\necho bye\n',
-        { mode: 0o755 },
-      );
-      expect(await loadLoginShellPath({ env: { SHELL: shell } })).toBe(
-        '/fake/bin:/usr/bin',
-      );
-    } finally {
-      await rm(dir, { recursive: true, force: true });
-    }
-  });
+  it.skipIf(process.platform === 'win32')(
+    'runs the login shell and reads PATH between the markers',
+    async () => {
+      const dir = await mkdtemp(path.join(tmpdir(), 'fiddle-shell-'));
+      try {
+        // A fake shell: ignores its arguments and prints a banner around the marked PATH.
+        const shell = path.join(dir, 'fake-shell');
+        await writeFile(
+          shell,
+          '#!/bin/sh\necho "Welcome"\necho __FIDDLE_SHELL_PATH__\necho /fake/bin:/usr/bin\necho __FIDDLE_SHELL_PATH__\necho bye\n',
+          { mode: 0o755 },
+        );
+        expect(await loadLoginShellPath({ env: { SHELL: shell } })).toBe(
+          '/fake/bin:/usr/bin',
+        );
+      } finally {
+        await rm(dir, { recursive: true, force: true });
+      }
+    },
+  );
 });
 
 describe('runCommand', () => {
@@ -315,6 +317,42 @@ describe('runCommand', () => {
     expect(result.output).toBe('\u20ac\n');
     expect(chunks.join('')).toBe('\u20ac\n');
   });
+
+  it('passes on whole lines, and the unfinished last line at the end', async () => {
+    const script =
+      'process.stdout.write("ab"); setTimeout(() => { process.stdout.write("c\\nd"); setTimeout(() => process.stdout.write("e\\nf"), 50) }, 50)';
+    const chunks: string[] = [];
+    await runCommand(
+      { command: node, args: ['-e', script] },
+      { onOutput: (t) => chunks.push(t) },
+    );
+    expect(chunks).toEqual(['abc\n', 'de\n', 'f']);
+  });
+
+  it.skipIf(process.platform === 'win32')(
+    'cancels with an AbortSignal, after the command and its children have exited',
+    async () => {
+      const script =
+        'const { spawn } = require("node:child_process");' +
+        'const child = spawn(process.execPath, ["-e", "setTimeout(() => {}, 20000)"], { stdio: "inherit" });' +
+        'console.log(process.pid, child.pid); setTimeout(() => {}, 20000)';
+      const controller = new AbortController();
+      let printed = '';
+      const promise = runCommand(
+        { command: node, args: ['-e', script] },
+        {
+          signal: controller.signal,
+          onOutput: (text) => {
+            printed += text;
+            if (printed.includes('\n')) controller.abort();
+          },
+        },
+      );
+      await expect(promise).rejects.toMatchObject({ code: ErrorCode.cancelled });
+      for (const pid of printed.trim().split(' ').map(Number))
+        await vi.waitFor(() => expect(() => process.kill(pid, 0)).toThrow());
+    },
+  );
 
   it('cancels with an AbortSignal', async () => {
     const controller = new AbortController();
@@ -367,6 +405,7 @@ writeFileSync('args.json', JSON.stringify({
   ignoreScripts: process.env.npm_config_ignore_scripts ?? null,
   yarnScripts: process.env.YARN_ENABLE_SCRIPTS ?? null,
   token: process.env.GITHUB_TOKEN ?? null,
+  npmToken: process.env.NPM_TOKEN ?? null,
 }));
 console.log('installed');
 process.exit(Number(process.env.FAKE_EXIT ?? 0));`,
@@ -397,10 +436,14 @@ process.exit(Number(process.env.FAKE_EXIT ?? 0));`,
     );
   });
 
-  it('defaults to the filtered environment', async () => {
+  it('defaults to the package manager environment: the npm token in, other secrets out', async () => {
     const dir = await mkdtemp(path.join(root, 'run-'));
-    const saved = process.env.GITHUB_TOKEN;
+    const saved = {
+      GITHUB_TOKEN: process.env.GITHUB_TOKEN,
+      NPM_TOKEN: process.env.NPM_TOKEN,
+    };
     process.env.GITHUB_TOKEN = 'ghp_secret';
+    process.env.NPM_TOKEN = 'npm_secret';
     try {
       await installModules({
         dir,
@@ -409,11 +452,13 @@ process.exit(Number(process.env.FAKE_EXIT ?? 0));`,
         sfwPath: fakeSfw,
       });
     } finally {
-      if (saved === undefined) delete process.env.GITHUB_TOKEN;
-      else process.env.GITHUB_TOKEN = saved;
+      for (const [name, value] of Object.entries(saved)) {
+        if (value === undefined) delete process.env[name];
+        else process.env[name] = value;
+      }
     }
     expect(JSON.parse(await readFile(path.join(dir, 'args.json'), 'utf8'))).toMatchObject(
-      { token: null },
+      { token: null, npmToken: 'npm_secret' },
     );
   });
 

@@ -1,12 +1,6 @@
 /**
- * Settings: the zod schema with a default for every setting, plus the pure
- * helpers main and the renderer share.
- *
- * - `<userData>/settings.json` stores only values that differ from the
- *   defaults (sparse). The defaults live here, in code.
- * - The `App` store carries the full, effective `settings`.
- * - `keybindings` holds overrides only: `{ [commandId]: accelerator | null }`,
- *   where `null` unbinds the command.
+ * `settings.json` stores only values that differ from the defaults; the defaults
+ * live here. `keybindings` holds overrides only, and `null` unbinds a command.
  */
 import { z } from 'zod';
 
@@ -19,6 +13,7 @@ import {
   type CommandId,
   type KeyContext,
 } from './commands';
+import { DEFAULT_ENDPOINTS } from './endpoints';
 import type { Platform } from './stores';
 
 /** The built-in theme: Lucent dark or Lucent light, following `appearance`. */
@@ -48,8 +43,8 @@ export type Mirror = z.infer<typeof mirrorSchema>;
 
 export const MIRRORS = {
   default: {
-    electron: 'https://github.com/electron/electron/releases/download/',
-    nightly: 'https://github.com/electron/nightlies/releases/download/',
+    electron: DEFAULT_ENDPOINTS.electronMirror,
+    nightly: DEFAULT_ENDPOINTS.electronNightlyMirror,
   },
   china: {
     electron: 'https://npmmirror.com/mirrors/electron/',
@@ -156,7 +151,7 @@ export type Keybindings = Settings['keybindings'];
 export const settingKeys = Object.keys(settingsSchema.shape) as SettingKey[];
 export const defaultSettings: Settings = settingsSchema.parse({});
 
-/** EIPC argument schemas (see `interface Settings` in fiddle.eipc). */
+/** EIPC argument schemas. */
 export const settingKeySchema = z.enum(settingKeys as [SettingKey, ...SettingKey[]]);
 export const settingValueSchema = z.unknown();
 export type SettingValue = z.infer<typeof settingValueSchema>;
@@ -339,7 +334,7 @@ export function effectiveAccelerator(
   return effectiveAccelerators(id, platform, keybindings)[0];
 }
 
-/** What has focus, or was right-clicked, in a window (`Window.SetFocusContext`). */
+/** What has focus, or was right-clicked, in a window (`Window.ReportContextMenu`). */
 export const focusContextSchema = z.enum(['editor', 'console', 'other']);
 export type FocusContext = z.infer<typeof focusContextSchema>;
 
@@ -355,10 +350,9 @@ function isKeyContext(value: string): value is KeyContext {
 }
 
 /**
- * Every keybinding after overrides. A command's bindings
- * take its definition's context. An override key `<commandId>@<context>`
- * (`editor`, `console` or `running`) adds a binding that only applies there,
- * e.g. `{ "run.toggle@editor": "CmdOrCtrl+Enter" }`; `null` there adds none.
+ * Every keybinding after overrides. An override key `<commandId>@<context>`
+ * adds a binding that only applies in that context, e.g.
+ * `{ "run.toggle@editor": "CmdOrCtrl+Enter" }`; `null` there adds none.
  */
 export function resolveKeybindings(
   platform: Platform,

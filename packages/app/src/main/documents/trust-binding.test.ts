@@ -1,8 +1,4 @@
-/**
- * Trust approval is bound to the approved fiddle: a fiddle swapped into
- * the window later (deep link, LoadGist, OpenDropped) needs its own approval,
- * and callers run the fiddle that was approved.
- */
+/** Trust approval is bound to the approved fiddle: one swapped into the window later needs its own. */
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
@@ -11,6 +7,9 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import type { Fiddle } from '../../fiddle/fiddle';
 import { gistOrigin } from '../../fiddle/trust';
+import { initFakeDocuments } from './test-helpers';
+
+const W = '11111111-1111-4111-8111-111111111111';
 
 let userData = '';
 const showMessageBox = vi.fn();
@@ -55,36 +54,16 @@ async function setup(
 ) {
   const documents = await import('./service');
   const { createDoc } = await import('./model');
-  const windows = new Map<string, Record<string, unknown>>();
-  const hub = {
-    app: { settings: { sessionRestore: false } },
-    getWindow: (id: string) => windows.get(id),
-    updateWindow: (id: string, patch: Record<string, unknown>) => {
-      windows.set(id, { ...windows.get(id), ...patch });
-      return 1;
-    },
-  };
-  documents.initDocuments({
-    hub: hub as never,
-    platform: 'linux',
-    versions: {
-      releases: () => [],
-      release: () => undefined,
-      localBuild: () => undefined,
-    } as never,
-    github: { client: () => undefined } as never,
-    npm: { packument: options.packument ?? (async () => ({ versions: {} })) } as never,
-    createWindow: async (id: string) => {
-      windows.set(id, {});
-    },
+  initFakeDocuments(documents, {
+    npm: options.packument && { packument: options.packument },
   });
   const approved = gistFiddle('octocat', 'approved()', options.modules);
   await documents.openFiddleWindow({
-    windowId: 'w',
+    windowId: W,
     doc: createDoc(approved, 'approved'),
   });
   const swapIn = (owner: string) =>
-    documents.updateDoc('w', (doc) =>
+    documents.updateDoc(W, (doc) =>
       createDoc(gistFiddle(owner, 'attacker()'), owner, { previous: doc }),
     );
   return { documents, approved, swapIn };
@@ -105,21 +84,21 @@ describe('ensureTrusted', () => {
     const { documents, approved } = await setup();
     showMessageBox.mockResolvedValue({ response: 0, checkboxChecked: false });
 
-    const first = await documents.ensureTrusted('w', 'auto-bisect');
+    const first = await documents.ensureTrusted(W, 'auto-bisect');
     expect(first).toMatchObject({ approved: true, allowScripts: false });
     expect(first.approved && first.fiddle.files).toEqual(approved.files);
-    await documents.ensureTrusted('w', 'auto-bisect');
+    await documents.ensureTrusted(W, 'auto-bisect');
     expect(showMessageBox).toHaveBeenCalledTimes(1);
   });
 
   it('asks again once another fiddle is loaded into the window, e.g. between bisect steps', async () => {
     const { documents, swapIn } = await setup();
     showMessageBox.mockResolvedValue({ response: 0, checkboxChecked: false });
-    await documents.ensureTrusted('w', 'auto-bisect');
+    await documents.ensureTrusted(W, 'auto-bisect');
 
     swapIn('mallory');
     showMessageBox.mockResolvedValue({ response: 1, checkboxChecked: false });
-    expect(await documents.ensureTrusted('w', 'auto-bisect')).toEqual({
+    expect(await documents.ensureTrusted(W, 'auto-bisect')).toEqual({
       approved: false,
       allowScripts: false,
     });
@@ -132,7 +111,7 @@ describe('ensureTrusted', () => {
       swapIn('mallory');
       return { response: 0, checkboxChecked: true };
     });
-    expect(await documents.ensureTrusted('w', 'run')).toEqual({
+    expect(await documents.ensureTrusted(W, 'run')).toEqual({
       approved: false,
       allowScripts: false,
     });
@@ -141,10 +120,10 @@ describe('ensureTrusted', () => {
   it('asks again for install scripts when an operation needs them and the approval left them off', async () => {
     const { documents } = await setup();
     showMessageBox.mockResolvedValue({ response: 0, checkboxChecked: false });
-    await documents.ensureTrusted('w', 'run', { packagesWithInstallScripts: [] });
+    await documents.ensureTrusted(W, 'run', { packagesWithInstallScripts: [] });
 
     showMessageBox.mockResolvedValue({ response: 0, checkboxChecked: true });
-    const result = await documents.ensureTrusted('w', 'package', {
+    const result = await documents.ensureTrusted(W, 'package', {
       packagesWithInstallScripts: ['esbuild@0.25.0'],
       requireScripts: true,
     });
@@ -169,7 +148,7 @@ describe('installScriptPackages', () => {
   it('reads the registry through the injected client and lists the modules with install scripts', async () => {
     const packument = vi.fn(async (name: string) => packuments[name]);
     const { documents } = await setup({ packument, modules });
-    expect(await documents.installScriptPackages('w')).toEqual(['esbuild@0.20.0']);
+    expect(await documents.installScriptPackages(W)).toEqual(['esbuild@0.20.0']);
     expect(packument).toHaveBeenCalledWith('esbuild', expect.any(AbortSignal));
   });
 
@@ -180,15 +159,15 @@ describe('installScriptPackages', () => {
       },
       modules,
     });
-    expect(await documents.installScriptPackages('w')).toEqual(['esbuild', 'lodash']);
+    expect(await documents.installScriptPackages(W)).toEqual(['esbuild', 'lodash']);
   });
 
   it('lists nothing for a trusted fiddle', async () => {
     const { documents } = await setup({ packument: vi.fn(), modules });
-    documents.updateDoc('w', (doc) => ({
+    documents.updateDoc(W, (doc) => ({
       ...doc,
       fiddle: { ...doc.fiddle, origin: { kind: 'local' } },
     }));
-    expect(await documents.installScriptPackages('w')).toEqual([]);
+    expect(await documents.installScriptPackages(W)).toEqual([]);
   });
 });

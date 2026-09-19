@@ -1,9 +1,3 @@
-/**
- * Monaco's actions, merged into the command palette. The shell's editor
- * registers a provider (for example mapping `editor.getSupportedActions()`)
- * and binds F1 to `windowApi.RunCommand('app.commandPalette')` instead of
- * Monaco's own quick command.
- */
 export interface EditorAction {
   id: string;
   label: string;
@@ -12,7 +6,6 @@ export interface EditorAction {
 
 let provider: (() => EditorAction[]) | undefined;
 
-/** Pass undefined when the editor goes away. */
 export function setEditorActionProvider(next: (() => EditorAction[]) | undefined): void {
   provider = next;
 }
@@ -20,7 +13,8 @@ export function setEditorActionProvider(next: (() => EditorAction[]) | undefined
 export function getEditorActions(): EditorAction[] {
   try {
     return provider?.() ?? [];
-  } catch {
+  } catch (error) {
+    console.error('[fiddle] listing the editor actions failed', error);
     return [];
   }
 }

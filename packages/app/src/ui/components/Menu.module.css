@@ -141,3 +141,14 @@
   border: 0;
   background: var(--lu-line);
 }
+
+/* Forced colors drops the translucent fill that marks the focused item. */
+@media (forced-colors: active) {
+  .item[data-hovered],
+  .item[data-focused],
+  .item[data-open],
+  .item:focus {
+    outline: 2px solid var(--lu-focus-ring);
+    outline-offset: -2px;
+  }
+}

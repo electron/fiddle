@@ -6,7 +6,8 @@ import * as semver from 'semver';
 import { z } from 'zod';
 
 import { ErrorCode, FiddleError } from '../shared/errors';
-import { envFromEntries, fiddleProcessEnv } from './env';
+import { envFromEntries, packageManagerEnv } from './env';
+import { killTree } from './kill-tree';
 
 export type PackageManager = 'npm' | 'yarn';
 export type ModuleSpecProblem = 'invalid-name' | 'invalid-spec';
@@ -14,7 +15,7 @@ export type ModuleSpecProblem = 'invalid-name' | 'invalid-spec';
 export interface CommandLine {
   command: string;
   args: string[];
-  /** Variables added to the command's environment. */
+  /** Added to the command's environment. */
   env?: Record<string, string>;
 }
 
@@ -60,12 +61,9 @@ export function assertModuleSpec(name: string, spec: string): void {
   }
 }
 
-/** Keeps exact semver versions. Anything else (`*`, ranges, tags) becomes `latest` when it's known. */
-export function normalizeModuleVersion(
-  version: string,
-  latest: string | undefined,
-): string {
-  return semver.valid(version) ? version : (latest ?? version);
+/** `*`, `latest` and empty specs float to the newest release. Exact versions, ranges and dist-tags are kept as declared. */
+export function isFloatingVersion(spec: string): boolean {
+  return spec === 'latest' || semver.validRange(spec) === '*';
 }
 
 /** The newest stable version in a package's version list. */
@@ -81,11 +79,7 @@ export interface InstallCommandOptions {
   sfwPath?: string;
 }
 
-/**
- * Turns dependency lifecycle scripts off through the environment: npm and
- * Yarn 1 read `npm_config_ignore_scripts`, Yarn 2+ reads `YARN_ENABLE_SCRIPTS`
- * (and rejects `--ignore-scripts`).
- */
+/** Turns lifecycle scripts off. npm and Yarn 1 read the first; Yarn 2+ reads the second and rejects `--ignore-scripts`. */
 export const IGNORE_SCRIPTS_ENV: Readonly<Record<string, string>> = {
   npm_config_ignore_scripts: 'true',
   YARN_ENABLE_SCRIPTS: 'false',
@@ -162,10 +156,7 @@ export async function findPackageManager(
 
 const PATH_MARKER = '__FIDDLE_SHELL_PATH__';
 
-/**
- * The PATH from the user's login shell on macOS and Linux, so npm and yarn
- * installed through shell profiles are found. Undefined on Windows or failure.
- */
+/** The PATH from the user's login shell, so npm and yarn set up in shell profiles are found. Undefined on Windows or failure. */
 export async function loadLoginShellPath(
   options: HostOptions & { timeoutMs?: number } = {},
 ): Promise<string | undefined> {
@@ -186,7 +177,7 @@ export async function loadLoginShellPath(
     const value = stdout
       .split(PATH_MARKER)[1]
       // eslint-disable-next-line no-control-regex
-      ?.replace(/\[[0-9;?]*[A-Za-z]/g, '')
+      ?.replace(/\u001b\[[0-9;?]*[A-Za-z]/g, '')
       .trim();
     return value || undefined;
   } catch {
@@ -210,64 +201,78 @@ export interface CommandResult {
 }
 
 const MAX_OUTPUT = 1024 * 1024;
+/** A line with no newline this long is passed on as it is. */
+const MAX_PENDING = 64 * 1024;
 
 /**
- * Spawns a command and collects its output. On Windows it runs through the
- * shell (npm and yarn are `.cmd` files) with every argument double-quoted;
- * arguments containing `"`, `%` or newlines are refused there.
+ * Spawns a command and collects its output; `onOutput` gets whole lines, and the
+ * unfinished last line at the end. On Windows it runs through the shell (npm
+ * and yarn are `.cmd` files) with every argument double-quoted, which is safe
+ * only for validated arguments: `"`, `%` and newlines are refused. An abort
+ * stops the whole process tree and rejects once the command has exited.
  */
 export function runCommand(
   line: CommandLine,
   options: RunCommandOptions = {},
 ): Promise<CommandResult> {
-  const win = (options.platform ?? process.platform) === 'win32';
+  const platform = options.platform ?? process.platform;
+  const win = platform === 'win32';
   if (win && line.args.some((a) => /["%\r\n]/.test(a))) {
     return Promise.reject(
       new FiddleError(ErrorCode.invalidArgument, 'Argument not allowed on Windows'),
     );
   }
-  if (options.signal?.aborted) {
-    return Promise.reject(
-      new FiddleError(ErrorCode.cancelled, `${line.command} was cancelled`),
-    );
-  }
+  const { signal } = options;
+  const cancelled = () =>
+    new FiddleError(ErrorCode.cancelled, `${line.command} was cancelled`);
+  if (signal?.aborted) return Promise.reject(cancelled());
   return new Promise((resolve, reject) => {
     const child = spawn(line.command, win ? line.args.map((a) => `"${a}"`) : line.args, {
       cwd: options.cwd,
       env: options.env,
-      signal: options.signal,
       shell: win,
+      // Leads its own process group on POSIX, so an abort reaches npm's children too.
+      detached: !win,
       windowsHide: true,
       stdio: ['ignore', 'pipe', 'pipe'],
     });
+    const onAbort = () => killTree(child, platform);
+    signal?.addEventListener('abort', onAbort, { once: true });
     let output = '';
-    const onData = (text: string) => {
+    const pending = { stdout: '', stderr: '' };
+    const collect = (stream: 'stdout' | 'stderr') => (text: string) => {
       output = (output + text).slice(-MAX_OUTPUT);
-      options.onOutput?.(text);
+      const buffered = pending[stream] + text;
+      const end = buffered.lastIndexOf('\n') + 1;
+      pending[stream] = buffered.slice(end);
+      if (end > 0) options.onOutput?.(buffered.slice(0, end));
+      if (pending[stream].length > MAX_PENDING) {
+        options.onOutput?.(pending[stream]);
+        pending[stream] = '';
+      }
     };
     // Strings, so a multi-byte character split between two chunks stays whole.
-    child.stdout?.setEncoding('utf8').on('data', onData);
-    child.stderr?.setEncoding('utf8').on('data', onData);
+    child.stdout?.setEncoding('utf8').on('data', collect('stdout'));
+    child.stderr?.setEncoding('utf8').on('data', collect('stderr'));
     child.once('error', (error: NodeJS.ErrnoException) => {
-      if (options.signal?.aborted || error.name === 'AbortError') {
-        reject(new FiddleError(ErrorCode.cancelled, `${line.command} was cancelled`));
-      } else {
-        reject(
-          new FiddleError(
-            ErrorCode.unavailable,
-            `Could not start ${line.command}: ${error.message}`,
-            {
-              command: line.command,
-              errno: error.code,
-            },
-          ),
-        );
-      }
+      signal?.removeEventListener('abort', onAbort);
+      reject(
+        new FiddleError(
+          ErrorCode.unavailable,
+          `Could not start ${line.command}: ${error.message}`,
+          {
+            command: line.command,
+            errno: error.code,
+          },
+        ),
+      );
     });
-    child.once('close', (code, signal) => {
-      if (options.signal?.aborted)
-        reject(new FiddleError(ErrorCode.cancelled, `${line.command} was cancelled`));
-      else resolve({ code, signal, output });
+    // `close`, not `exit`: the caller deletes the directory next, so nothing may still be writing.
+    child.once('close', (code, exitSignal) => {
+      signal?.removeEventListener('abort', onAbort);
+      for (const rest of Object.values(pending)) if (rest) options.onOutput?.(rest);
+      if (signal?.aborted) reject(cancelled());
+      else resolve({ code, signal: exitSignal, output });
     });
   });
 }
@@ -289,7 +294,7 @@ export interface InstallModulesOptions extends InstallCommandOptions {
   /** Where to install. Must be `tempRoot` or inside it. */
   dir: string;
   tempRoot: string;
-  /** Default: `fiddleProcessEnv()`, the parent environment minus the denylist. */
+  /** Default: `packageManagerEnv()`. */
   env?: NodeJS.ProcessEnv;
   signal?: AbortSignal;
   onOutput?: (text: string) => void;
@@ -304,7 +309,7 @@ export async function installModules(
   const line = buildInstallCommand(options);
   const env = envFromEntries(
     [
-      ...Object.entries(options.env ?? fiddleProcessEnv()),
+      ...Object.entries(options.env ?? packageManagerEnv()),
       ...Object.entries(line.env ?? {}),
     ],
     options.platform,
@@ -326,7 +331,6 @@ export async function installModules(
   return result;
 }
 
-/** Fetches a package's registry metadata. */
 export type RegistryFetch = (name: string, signal?: AbortSignal) => Promise<unknown>;
 
 const PackumentSchema = z.object({

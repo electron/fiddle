@@ -8,11 +8,7 @@ import { Button, Dialog, TextField } from '../../../ui';
 import styles from './gists.module.css';
 import { useLoadedGist } from './state';
 
-/**
- * Loads a gist by URL or ID through Documents. Mount it only while it's open.
- * A gist URL or ID on the clipboard fills the empty field, selected so that
- * typing replaces it; main reads the clipboard.
- */
+/** A gist URL or ID on the clipboard fills the empty field, selected so typing replaces it. */
 export function OpenGistDialog({ onClose }: { onClose: () => void }) {
   const { t } = useTranslation('gists');
   const loaded = useLoadedGist();

@@ -7,6 +7,7 @@ import { settingsApi, windowApi } from '../ipc/renderer';
 import { BUILTIN_THEME, type ThemeData } from '../shared/settings';
 import { DialogHost, Toaster } from '../ui';
 import { useModelsSynced } from './editor/models';
+import { log } from './features/about/log';
 import { useKeybindings } from './features/commands/keybindings';
 import { useWindowCommands } from './features/commands/window-commands';
 import { CommandPalette } from './features/palette/CommandPalette';
@@ -16,7 +17,6 @@ import { Shell } from './shell/Shell';
 import { useAppearance } from './shell/theme';
 import { useAppState, useStoreError, useWindowState } from './state';
 
-/** The window: the shell, plus the app-wide mounts (dialogs, toasts, palette). */
 export function App() {
   const { t, i18n } = useTranslation('shell');
   const appState = useAppState() ?? null;
@@ -29,12 +29,11 @@ export function App() {
   const ready =
     storeError !== undefined || (appState !== null && win !== null && modelsSynced);
   useEffect(() => {
-    if (storeError) console.error('[fiddle] a store failed to load', storeError);
+    if (storeError) log.error('a store failed to load', storeError);
   }, [storeError]);
   const material = appState?.material;
   const locale = appState?.locale;
 
-  // A custom theme's data comes from Settings.GetTheme; the built-in one is Lucent.
   const themeId = appState?.settings.theme ?? BUILTIN_THEME;
   const [customTheme, setCustomTheme] = useState<{
     id: string;
@@ -47,8 +46,7 @@ export function App() {
       (data: ThemeData | null | undefined) => {
         if (current) setCustomTheme({ id: themeId, data: data ?? null });
       },
-      (error: unknown) =>
-        console.error('[fiddle] loading the theme failed', themeId, error),
+      (error: unknown) => log.error('loading the theme failed', themeId, error),
     );
     return () => {
       current = false;
@@ -68,9 +66,8 @@ export function App() {
 
   useSyncLocale(locale);
 
-  // Main shows the window once we report ready: after the first commit with
-  // both stores and the editor text, plus two frames so the shell and Monaco
-  // (which renders on its own animation frame) have painted. Never shown blank.
+  // Main shows the window once we report ready: after both stores and the editor text are in, plus two frames
+  // so Monaco (which paints on its own animation frame) has drawn.
   const reported = useRef(false);
   useEffect(() => {
     if (!ready || reported.current) return;
@@ -78,7 +75,7 @@ export function App() {
     requestAnimationFrame(() =>
       requestAnimationFrame(() => {
         windowApi.ReportReady().catch((error: unknown) => {
-          console.error('[fiddle] ReportReady failed', error);
+          log.error('ReportReady failed', error);
         });
       }),
     );

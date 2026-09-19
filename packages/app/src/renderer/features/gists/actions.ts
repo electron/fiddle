@@ -1,4 +1,3 @@
-/** Gist actions that end in a toast: update, delete, copy link, and error reporting. */
 import type { TFunction } from 'i18next';
 
 import { githubApi, settingsApi } from '../../../ipc/renderer';
@@ -45,11 +44,7 @@ export function showGistSaved(
   });
 }
 
-/**
- * Signed out, or a token GitHub no longer accepts: sign in, then retry.
- * Anything else: the error GitHub reported, plus a hint about ownership or
- * connectivity when one applies (`gistErrorHint`).
- */
+/** Signed out, or a token GitHub no longer accepts: sign in, then retry. Anything else is toasted with a hint. */
 export function reportGistError(
   t: GistT,
   action: GistAction,

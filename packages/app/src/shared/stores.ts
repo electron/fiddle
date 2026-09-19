@@ -1,19 +1,9 @@
 /**
- * The two EIPC stores. Main owns them and is their only writer (through the
- * StateHub); renderers read them and request changes through methods.
- *
- * These zod schemas are the single source of truth: the EIPC schema imports
- * them with `zod_reference`, so every pushed value is validated, and the
- * TypeScript types below are inferred from them.
- *
- * Keep stores small. Bulk data (fiddle text, release lists, console output) is
- * fetched with a method; a store only carries a revision number for it.
+ * The EIPC schema imports these with `zod_reference`, so every pushed value is
+ * validated. Keep stores small: bulk data (fiddle text, release lists, console
+ * output) is fetched with a method, and a store only carries a revision for it.
  */
 import { z } from 'zod';
-
-// The CSP enforces Trusted Types, and zod's JIT probe (`new Function`) is reported
-// as a violation even though zod catches it. Every schema is parsed after this runs.
-z.config({ jitless: true });
 
 import { VersionRefSchema } from '../fiddle/fiddle';
 import { settingsSchema, storageNoticeSchema, themeSummarySchema } from './settings';
@@ -21,10 +11,7 @@ import { settingsSchema, storageNoticeSchema, themeSummarySchema } from './setti
 export const platformSchema = z.enum(['darwin', 'win32', 'linux']);
 export type Platform = z.infer<typeof platformSchema>;
 
-/**
- * The OS material under the window chrome (Lucent "Glass on real windows").
- * `none` means the renderer adds `lu-no-material` to `<html>`.
- */
+/** The OS material under the window chrome. `none` means the renderer adds `lu-no-material` to `<html>`. */
 export const materialSchema = z.enum(['vibrancy', 'acrylic', 'none']);
 export type Material = z.infer<typeof materialSchema>;
 
@@ -36,11 +23,7 @@ export const appStateSchema = z.object({
   locale: z.string(),
   platform: platformSchema,
   material: materialSchema,
-  /**
-   * True in unpackaged (development and test) builds, which have the Develop
-   * menu and its dev-only commands (src/shared/commands.ts). False or absent in
-   * the packaged app.
-   */
+  /** True in unpackaged (development and test) builds, which have the Develop menu and its dev-only commands. */
   dev: z.boolean().optional(),
   settings: settingsSchema,
   /** Custom themes in `<userData>/themes/`. The data is fetched with `Settings.GetTheme`. */
@@ -74,23 +57,12 @@ export const windowStateSchema = z.object({
     .lazy(() => versionNoticeSchema)
     .nullable()
     .optional(),
-  /**
-   * Windows and Linux: the application menu for the title bar's menu bar,
-   * built for this window by src/main/menu.ts and pushed whenever the native
-   * menu is rebuilt. Absent on macOS, which has the OS menu bar, unless a test
-   * or dev run forces it; the Develop menu's toggle adds or removes it on any
-   * platform. Absent means the title bar draws no menu bar.
-   */
+  /** The application menu for the title bar's menu bar. Absent means the title bar draws none (macOS has the OS menu bar). */
   menuBar: z.lazy(() => z.array(menuNodeSchema)).optional(),
 });
 export type WindowState = z.infer<typeof windowStateSchema>;
 
-/**
- * One entry of a menu, as the renderer draws it. `id` is what
- * `Window.ActivateMenuItem` takes: a command ID, `role:<role>`, `recent:<n>`,
- * `example:<name>` or, for a submenu, `menu:<name>`. `accelerator` is display
- * text already written for the platform, e.g. `Ctrl+Shift+P`.
- */
+/** One entry of a menu, as the renderer draws it. `id` is what `Window.ActivateMenuItem` takes; `accelerator` is display text for the platform. */
 export type MenuNode =
   | { kind: 'submenu'; id: string; label: string; enabled: boolean; children: MenuNode[] }
   | {
@@ -147,9 +119,9 @@ export type WindowView = z.infer<typeof windowViewSchema>;
 export const windowLayoutSchema = z.object({
   sidebar: z.boolean(),
   /**
-   * The files in the editor panes, from the start (src/shared/panes.ts). Empty,
-   * or a single entry, means the editor isn't split. The renderer drops names
-   * that aren't visible files; main keeps the focused pane on `activeFile`.
+   * The files in the editor panes, from the start. Empty, or a single entry,
+   * means the editor isn't split. The renderer drops names that aren't visible
+   * files; main keeps the focused pane on `activeFile`.
    */
   panes: z.array(z.string()).default([]),
   consoleHeight: z.number().nonnegative(),
@@ -316,7 +288,7 @@ export const runStateSchema = z.object({
   /** The Electron version of the current or last run, e.g. `43.0.0` or a local build's name. */
   version: z.string().optional(),
   result: z.enum(['success', 'failure', 'invalid']).optional(),
-  /** Runtime errors of the current or last run, at most 50. */
+  /** Runtime errors of the current or last run. */
   errors: z.array(runtimeErrorSchema),
   /** Console lines with `seq` at or below this were cleared. */
   clearedSeq: z.number().int().nonnegative(),

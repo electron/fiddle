@@ -1,8 +1,3 @@
-/**
- * Flushes every JSON store before the app goes away: quit is held until the
- * flush finishes, and a window's `session-end` (Windows log-off) and
- * `powerMonitor` `shutdown` flush too. Call once, after `app.whenReady()`.
- */
 import { app, powerMonitor } from 'electron';
 
 import { flushLog, log } from '../log';

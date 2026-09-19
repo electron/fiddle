@@ -5,6 +5,7 @@ vi.mock('../../../ipc/renderer', () => ({
   documentsApi: { OpenDropped: vi.fn(() => Promise.resolve()) },
 }));
 
+import { documentsApi } from '../../../ipc/renderer';
 import { droppedLink, useDocumentDrop } from './useDocumentDrop';
 
 function data(values: Record<string, string>) {
@@ -39,11 +40,11 @@ describe('useDocumentDrop', () => {
     dragging = useDocumentDrop();
     return null;
   }
-  const drag = (type: string, types: string[] = []) =>
+  const drag = (type: string, types: string[] = [], text = '') =>
     act(() => {
       const event = new Event(type, { bubbles: true, cancelable: true });
       Object.defineProperty(event, 'dataTransfer', {
-        value: { types, getData: () => '' },
+        value: { types, getData: () => text },
       });
       document.body.dispatchEvent(event);
     });
@@ -72,5 +73,16 @@ describe('useDocumentDrop', () => {
     // Editor tabs dragged from another window.
     drag('dragenter', ['application/x-fiddle-tab', 'text/plain']);
     expect(dragging).toBe(false);
+  });
+
+  it('opens a dropped gist link, unless the drag started in the window', () => {
+    render(<Probe />);
+    const link = 'https://gist.github.com/octocat/abc';
+    drag('dragstart', ['text/plain']);
+    drag('drop', ['text/plain'], link);
+    expect(documentsApi.OpenDropped).not.toHaveBeenCalled();
+    drag('dragend');
+    drag('drop', ['text/plain'], link);
+    expect(documentsApi.OpenDropped).toHaveBeenCalledWith(link);
   });
 });

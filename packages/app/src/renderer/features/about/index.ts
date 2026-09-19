@@ -1,8 +1,3 @@
-/**
- * Platform services in each window: log forwarding, Sentry, the first-run
- * crash-reports notice and the update-available toast. Called once from
- * renderer/main.tsx.
- */
 import type { i18n } from 'i18next';
 
 import { showCrashReportsNotice } from './crash-notice';

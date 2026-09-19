@@ -1,8 +1,3 @@
-/**
- * Which version a window uses, pure so it runs under plain Node: the default
- * for new windows, whether a version is usable, the fallback when it isn't,
- * and whether a docs example's channel is hidden.
- */
 import type { VersionRef } from '../../fiddle/fiddle';
 import { getReleaseChannel, type ReleaseChannel } from '../../fiddle/versions';
 import type { LocalBuild, ReleaseRow } from '../../shared/stores';
@@ -16,7 +11,7 @@ export interface VersionLookup {
 /** Why a window can't use a version. */
 export type VersionProblem = 'unknown' | 'unsupported' | 'localUnknown' | 'localMissing';
 
-/** Undefined when the version is usable: a release this computer can run, or a local build with its binary. */
+/** Undefined when it's a release this computer can run, or a local build with its binary. */
 export function versionProblem(
   ref: VersionRef,
   lookup: VersionLookup,
@@ -45,10 +40,9 @@ export interface VersionCatalog {
 }
 
 /**
- * The first usable version in the picker's order: available local builds,
- * then the visible releases newest first, then any other release this
- * computer can run. `installedOnly` skips releases that aren't downloaded,
- * for when a download just failed and another would likely fail too.
+ * Available local builds, then the visible releases newest first, then any
+ * other release this computer can run. `installedOnly` is for a failed
+ * download: another would likely fail too.
  */
 export function firstUsableVersion(
   catalog: VersionCatalog,
@@ -71,11 +65,7 @@ export function firstUsableVersion(
   return undefined;
 }
 
-/**
- * The version new windows start with: the last one the user picked
- * while it's still usable, otherwise the latest stable release this computer
- * can run. Undefined without a release list.
- */
+/** The last version the user picked while it's still usable, else the latest stable release this computer can run. */
 export function defaultVersionFor(
   rows: readonly ReleaseRow[],
   last: VersionRef | undefined,

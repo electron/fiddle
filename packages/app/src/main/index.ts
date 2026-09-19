@@ -1,9 +1,3 @@
-/**
- * Main process entry and composition root. Before `ready`: Squirrel, headless
- * CLI, test harness, crash reporting, scheme and sandbox, then the
- * single-instance lock and deep-link queue. The harness comes before the lock
- * because it moves userData, which the lock is keyed on.
- */
 import path from 'node:path';
 
 import { app, BrowserWindow, dialog } from 'electron';
@@ -35,49 +29,38 @@ import { isTestMode } from './test-mode';
 import { installOsIntegration, openColdStartFolder } from './ux/integration';
 import { detectMaterial, detectPlatform, rendererEntry } from './window';
 
-// Squirrel.Windows install, update and uninstall events: the app only
-// creates or removes shortcuts, then quits.
 const squirrelEvent = handleSquirrelStartup();
 
-// Headless CLI: `--headless <command>` runs one command and
-// exits with its code. No lock, windows, migration, updates, crash reports or stores.
+// `--headless <command>` runs one command and exits: no lock, windows, migration, updates, crash reports or stores.
 const headless = squirrelEvent ? undefined : headlessArgs(process.argv);
 if (headless) startHeadless(headless);
 
-// Test builds only: temp dirs, stubs, network guard and the e2e driver, before
-// anything reads app paths. Release builds compile it out.
+// Before anything reads app paths, and before the single-instance lock, which is
+// keyed on the userData the harness moves. Compiled out of other builds.
 const testHarness =
   __FIDDLE_TEST_BUILD__ && isTestMode() ? installTestHarness() : undefined;
 
-// Sentry starts before `ready`, if "Send crash reports" allows it (off in dev, test and headless mode).
-if (!squirrelEvent) initCrashReporting();
+if (!squirrelEvent) initCrashReporting(headless !== undefined);
 
 // Both must happen before `ready`.
 registerAppScheme();
 app.enableSandbox();
-// Chromium's UI language (`--lang`) follows the language setting.
 if (!squirrelEvent && !headless) applyChromiumLanguage();
 
-// The single-instance lock, and deep links (`argv`, `second-instance`,
-// `open-url`) and `open-file` queued until the windows are up.
 const primary = !squirrelEvent && !headless && installEarlyDocumentHandlers();
 
 async function main(): Promise<void> {
   await app.whenReady();
 
-  // 1. Disk. Quit on the last window closed (not on macOS), installed before
-  // the import so its hidden reader window never quits the app. Then the log
-  // file, then the one-time import, which must finish before any store exists.
+  // Before the import, so its hidden reader window never quits the app.
   installQuitOnLastWindowClosed();
   initLogFile(path.join(app.getPath('userData'), 'logs'));
   const migration = await runMigration();
 
-  // 2. State: settings, i18n, the StateHub, flushing every store on quit.
   const platform = detectPlatform();
   const settingsFile = loadSettings();
   const locale = await initMainI18n(preferredLocales(settingsFile.store));
   const hub = new StateHub(
-    // `dev`: unpackaged (development and test) builds get the Develop menu and its commands.
     {
       locale,
       platform,
@@ -90,7 +73,6 @@ async function main(): Promise<void> {
   installFlushOnExit();
   const settings = await startSettings(hub, settingsFile.store);
 
-  // 3. Security and the app:// protocol (or the Vite dev server).
   applySessionSecurity();
   hardenAllWebContents();
   const entry = rendererEntry();
@@ -101,7 +83,6 @@ async function main(): Promise<void> {
     await handleAppProtocol(entry.rendererDir);
   }
 
-  // 4. Services, each created once.
   const services = await createServices({
     hub,
     settings,
@@ -109,13 +90,10 @@ async function main(): Promise<void> {
     rendererUrl: entry.url,
   });
 
-  // 5. Commands and the menu.
   registerCommands(services.registry, services);
   testHarness?.attach(services);
   installMenu(services);
 
-  // 6. Platform (About panel, protocol, updates, first-run prompts) and OS
-  // integration, then windows: the last session, or a new fiddle.
   await startPlatform(hub, migration.firstLaunch);
   installOsIntegration(services);
   app.on('activate', () => {
@@ -126,7 +104,6 @@ async function main(): Promise<void> {
     }
   });
   await startDocuments();
-  // A Windows jump list task that started the app opens its folder now.
   openColdStartFolder();
 }
 

@@ -1,14 +1,6 @@
 /**
- * Editor type definitions for the shell's Monaco:
- *
- * - `electron.d.ts` from unpkg (`electron` or `electron-nightly`), cached per
- *   version in `<cache>/types/electron/<version>.d.ts` and dropped when the
- *   version is removed.
- * - `@types/node` for that Electron's Node, cached in
- *   `<cache>/types/node/<version>.json`. If the exact version isn't published,
- *   the newest in the same major is used.
- * - Local builds read `<build>/gen/electron/tsc/typings/electron.d.ts` and are
- *   watched, so edits reload live.
+ * Editor types: `electron.d.ts` and `@types/node` from unpkg, cached under
+ * `<cache>/types`, or a local build's own `electron.d.ts`, which is watched.
  */
 import fs from 'node:fs';
 import fsp from 'node:fs/promises';
@@ -54,7 +46,8 @@ function typeFilesFromMeta(meta: unknown): string[] {
 export class TypesService {
   readonly #options: TypesServiceOptions;
   readonly #inflight = new Map<string, Promise<unknown>>();
-  readonly #watchers = new Map<string, fs.FSWatcher>();
+  /** Local build ID → closes its watcher. */
+  readonly #watchers = new Map<string, () => void>();
 
   constructor(options: TypesServiceOptions) {
     this.#options = options;
@@ -83,6 +76,12 @@ export class TypesService {
     this.#watch(build.id, file);
     const electron = await fsp.readFile(file, 'utf8').catch(() => null);
     return { version: build.name, electron, node: {} };
+  }
+
+  /** Stops watching every local build whose ID isn't in `ids`. */
+  retainWatches(ids: ReadonlySet<string>): void {
+    for (const buildId of [...this.#watchers.keys()])
+      if (!ids.has(buildId)) this.#unwatch(buildId);
   }
 
   /** Drops a removed version's cached `electron.d.ts`. */
@@ -170,16 +169,33 @@ export class TypesService {
     }
   }
 
+  #unwatch(buildId: string): void {
+    this.#watchers.get(buildId)?.();
+    this.#watchers.delete(buildId);
+  }
+
   #watch(buildId: string, file: string): void {
     if (this.#watchers.has(buildId) || !fs.existsSync(file)) return;
     let timer: ReturnType<typeof setTimeout> | undefined;
+    let replaced = false;
     try {
-      const watcher = fs.watch(file, () => {
+      const watcher = fs.watch(file, (event) => {
+        replaced ||= event === 'rename';
         clearTimeout(timer);
-        timer = setTimeout(() => this.#options.onLocalChange(buildId), 300);
+        timer = setTimeout(() => {
+          // A rebuild that replaces the file leaves the watcher on the old one.
+          if (replaced) {
+            this.#unwatch(buildId);
+            this.#watch(buildId, file);
+          }
+          this.#options.onLocalChange(buildId);
+        }, 300);
       });
-      watcher.on('error', () => this.#watchers.delete(buildId));
-      this.#watchers.set(buildId, watcher);
+      watcher.on('error', () => this.#unwatch(buildId));
+      this.#watchers.set(buildId, () => {
+        clearTimeout(timer);
+        watcher.close();
+      });
     } catch (error) {
       log.warn('watching local build types failed', file, error);
     }

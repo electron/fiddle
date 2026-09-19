@@ -1,22 +1,16 @@
 /**
- * The preload for every app window. Windows run with `sandbox: true`, so this
- * is bundled into one CommonJS file (vite.preload.config.ts).
- *
- * It exposes only the EIPC bindings, and only to the app's own main frame: the
- * generated preload checks `location.origin` (app://main, or the Vite dev
- * server's http://localhost) and the frame before exposing each interface.
- * `ipcRenderer` itself is never exposed.
+ * Windows run with `sandbox: true`, so this is bundled into one CommonJS file.
+ * It exposes only the EIPC bindings, whose generated code checks the origin and
+ * frame. `ipcRenderer` itself is never exposed.
  */
 import '../ipc/generated/preload/fiddle';
 
-// Sentry's renderer transport (IPCMode.Classic), the one documented exception
-// to EIPC. Same origin rule as the EIPC bindings. The
-// renderer only uses it when main's Sentry is on (src/main/crash/sentry.ts).
+// Sentry's renderer transport (IPCMode.Classic): the one exception to EIPC. It
+// follows the same origin rule, and the renderer uses it only when Sentry is on.
 import { hookupIpc } from '@sentry/electron/preload-namespaced';
 
 const { protocol, host, hostname } = window.location;
-// The Vite dev server origin exists only in `yarn start` (development mode);
-// other builds compile that branch out.
+// The Vite dev server origin exists only in `yarn start`; other builds compile that branch out.
 const devServer =
   import.meta.env.MODE === 'development' &&
   protocol === 'http:' &&

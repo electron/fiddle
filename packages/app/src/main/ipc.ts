@@ -1,7 +1,6 @@
 /**
- * Binds the EIPC interfaces for one window. Everything is bound with
- * `.for(webContents)` and closes over the window's `windowId`, so renderers
- * never send one. The bindings live on the webContents and survive reloads.
+ * Binds the EIPC interfaces for one window, each closing over its `windowId` so
+ * renderers never send one. The bindings live on the webContents and survive reloads.
  */
 import { app, type WebContents } from 'electron';
 

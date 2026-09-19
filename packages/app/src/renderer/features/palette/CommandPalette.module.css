@@ -9,21 +9,6 @@
   padding-top: calc(var(--lu-size-titlebar) + var(--lu-space-2));
 }
 
-.modal {
-  outline: none;
-}
-
-.modal[data-entering] {
-  animation: palette-in var(--lu-dur-base) var(--lu-ease);
-}
-
-@keyframes palette-in {
-  from {
-    opacity: 0;
-    transform: translateY(-4px) scale(0.98);
-  }
-}
-
 /* Overrides the menu's max-content sizing. */
 .surface {
   display: flex;
@@ -76,10 +61,14 @@
 
 .keys {
   flex: none;
-  margin-left: var(--lu-space-3);
+  margin-inline-start: var(--lu-space-3);
 }
 
 .empty {
   padding: 6px 10px;
   color: var(--lu-ink-muted);
+}
+
+.empty:empty {
+  display: none;
 }

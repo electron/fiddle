@@ -22,11 +22,7 @@ function withOverride(preferred: readonly string[]): readonly string[] {
   return forced && (!app.isPackaged || isTestMode()) ? [forced, ...preferred] : preferred;
 }
 
-/**
- * Main loads `main` (command labels and menus) plus every `main<Name>`
- * namespace (e.g. `mainDocuments`) for its dialogs and notices. Renderer
- * namespaces are never loaded here.
- */
+/** Main loads `main` plus every `main<Name>` namespace (its dialogs and notices), never the renderer's. */
 const mainNamespaces = namespaces.filter(
   (ns) => ns === 'main' || /^main[A-Z]/.test(ns),
 ) as Namespace[];

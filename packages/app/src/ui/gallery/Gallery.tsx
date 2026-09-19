@@ -11,7 +11,6 @@ import {
   confirmDialog,
   Dialog,
   DialogHost,
-  DialogSurface,
   EmptyState,
   FormField,
   Icon,
@@ -50,7 +49,6 @@ import {
   Tabs,
   Tag,
   TextField,
-  Toast,
   Toaster,
   ToolbarButton,
   ToolbarCapsule,
@@ -169,11 +167,6 @@ function GlassWell({ children }: { children: ReactNode }) {
       <div className={styles.glassInner}>{children}</div>
     </div>
   );
-}
-
-/** A stand-in desktop behind overlays. */
-function StageWell({ children }: { children: ReactNode }) {
-  return <div className={styles.stageWell}>{children}</div>;
 }
 
 function RunCapsule({
@@ -303,12 +296,34 @@ function LiveOverlays() {
           onPress={() =>
             showToast({
               tone: 'success',
-              title: 'Copied',
-              description: 'The gist link is on your clipboard.',
+              title: 'Published',
+              description: 'gist.github.com/8f3a2c',
             })
           }
         >
-          Show a toast
+          Success toast
+        </Button>
+        <Button
+          onPress={() =>
+            showToast({
+              tone: 'error',
+              title: 'Fiddle crashed',
+              description: 'Renderer exited with code 1.',
+            })
+          }
+        >
+          Error toast
+        </Button>
+        <Button
+          onPress={() =>
+            showToast({
+              tone: 'warning',
+              title: 'Package not found',
+              description: 'lodahs is not on npm.',
+            })
+          }
+        >
+          Warning toast
         </Button>
         <Button
           onPress={() =>
@@ -396,7 +411,9 @@ export function Gallery({
             <Switch isSelected={noMaterial} onChange={setNoMaterial}>
               No material
             </Switch>
-            <ToolbarButton icon="upload">Publish</ToolbarButton>
+            <ToolbarButton icon="upload" label="Publish">
+              Publish
+            </ToolbarButton>
             <Tooltip label="Settings">
               <ToolbarButton icon="settings" label="Settings" />
             </Tooltip>
@@ -435,8 +452,7 @@ export function Gallery({
                 id="renderer"
                 label="renderer.js"
                 pill="1 error"
-                unsaved
-                unsavedLabel="Unsaved changes"
+                unsaved="Unsaved changes"
               />
               <TreeRow id="css" label="styles.css" />
             </Tree>
@@ -458,10 +474,14 @@ export function Gallery({
                     <Tab
                       key={f.id}
                       id={f.id}
-                      errorCount={f.id === 'renderer' ? 1 : undefined}
-                      errorLabel="1 error"
-                      unsaved={f.id === 'renderer' || f.id === 'preload'}
-                      unsavedLabel="Unsaved changes"
+                      error={
+                        f.id === 'renderer' ? { count: 1, label: '1 error' } : undefined
+                      }
+                      unsaved={
+                        f.id === 'renderer' || f.id === 'preload'
+                          ? 'Unsaved changes'
+                          : undefined
+                      }
                       icon={f.id === 'css' ? 'window' : undefined}
                     >
                       {f.label}
@@ -557,9 +577,11 @@ export function Gallery({
                   <GlassWell>
                     <ToolbarButton icon="sidebar" label="Toggle sidebar" />
                     <ToolbarButton icon="sidebar" label="Toggle sidebar" isPressed />
-                    <ToolbarButton icon="upload">Publish</ToolbarButton>
+                    <ToolbarButton icon="upload" label="Publish">
+                      Publish
+                    </ToolbarButton>
                     <ToolbarButton icon="settings" label="Settings" />
-                    <ToolbarButton icon="upload" isDisabled>
+                    <ToolbarButton icon="upload" label="Publish" isDisabled>
                       Publish
                     </ToolbarButton>
                   </GlassWell>
@@ -852,10 +874,10 @@ export function Gallery({
                   <Tabs defaultValue="b">
                     <TabList aria-label="Example tabs">
                       <Tab id="a">General</Tab>
-                      <Tab id="b" errorCount={3} errorLabel="3 errors">
+                      <Tab id="b" error={{ count: 3, label: '3 errors' }}>
                         Problems
                       </Tab>
-                      <Tab id="c" unsaved unsavedLabel="Unsaved changes">
+                      <Tab id="c" unsaved="Unsaved changes">
                         Draft
                       </Tab>
                       <Tab id="d" isDisabled>
@@ -888,8 +910,7 @@ export function Gallery({
                         <TreeRow
                           id="preload-2"
                           label="preload.js"
-                          unsaved
-                          unsavedLabel="Unsaved changes"
+                          unsaved="Unsaved changes"
                         />
                         <TreeRow id="renderer-2" label="renderer.js" pill="1 error" />
                         <TreeRow id="html-2" label="index.html" />
@@ -1078,73 +1099,6 @@ export function Gallery({
                       testing.
                     </Callout>
                   </Col>
-                </Specimen>
-                <Specimen label="Toast · success, error, info, warning" wide>
-                  <StageWell>
-                    <div className={styles.toastStack}>
-                      <Toast
-                        tone="success"
-                        title="Published"
-                        actionLabel="Copy link"
-                        closeLabel="Dismiss"
-                        onClose={() => {}}
-                      >
-                        gist.github.com/8f3a2c
-                      </Toast>
-                      <Toast tone="error" title="Fiddle crashed" actionLabel="Logs">
-                        Renderer exited with code 1.
-                      </Toast>
-                    </div>
-                    <div className={styles.toastStack}>
-                      <Toast
-                        tone="info"
-                        title="Electron 44.0.0-beta.3 is ready"
-                        actionLabel="Switch"
-                      />
-                      <Toast
-                        tone="warning"
-                        title="Package not found"
-                        closeLabel="Dismiss"
-                        onClose={() => {}}
-                      >
-                        lodahs is not on npm.
-                      </Toast>
-                    </div>
-                  </StageWell>
-                </Specimen>
-                <Specimen label="Dialog · form, alert" wide>
-                  <StageWell>
-                    <DialogSurface
-                      title="Publish fiddle"
-                      description="Creates a gist that anyone with the link can open."
-                      closeLabel="Close"
-                      onClose={() => {}}
-                      footer={
-                        <>
-                          <Button variant="ghost">Cancel</Button>
-                          <Button variant="primary" icon="upload">
-                            Publish
-                          </Button>
-                        </>
-                      }
-                    >
-                      <TextField label="Description" defaultValue="Vibrancy on macOS" />
-                      <Checkbox defaultSelected>Secret gist</Checkbox>
-                    </DialogSurface>
-                    <DialogSurface
-                      title="Discard unsaved changes?"
-                      icon="warning"
-                      iconTone="warning"
-                      width={400}
-                      description="renderer.js and styles.css have changes that are not saved."
-                      footer={
-                        <>
-                          <Button variant="ghost">Keep editing</Button>
-                          <Button variant="danger">Discard</Button>
-                        </>
-                      }
-                    />
-                  </StageWell>
                 </Specimen>
                 <Specimen label="Popover · anchored with an arrow">
                   <div className={styles.popoverRoom}>

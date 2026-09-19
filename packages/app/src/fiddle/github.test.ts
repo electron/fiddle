@@ -182,6 +182,9 @@ describe('auth', () => {
       ErrorCode.unavailable,
     );
     expect((await check({ 'retry-after': '60' })).code).toBe(ErrorCode.unavailable);
+    expect((await check({ 'retry-after': '60' })).details).toMatchObject({
+      reason: 'rate-limited',
+    });
     expect((await check({ 'x-ratelimit-remaining': '42' })).code).toBe(
       ErrorCode.forbidden,
     );

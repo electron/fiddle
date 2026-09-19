@@ -1,22 +1,7 @@
 /**
- * The atomic JSON store every persisted file goes through. Every file is JSON
- * with a `schemaVersion`. No Electron imports.
- *
- * - Reads (synchronous, once, at creation) try the file, then `<file>.bak`,
- *   then the defaults. The `.bak` is only used when the file exists but can't
- *   be read or parsed: a file the user deleted means "start over".
- * - A file that isn't a JSON object is corrupt. It is moved to
- *   `<name>.corrupt-<timestamp>.json` and a notice is raised.
- * - Schema failures are per key: the invalid key is dropped in memory and
- *   logged. Schemas are loose, so unknown keys round-trip unchanged.
- * - Migrations are pure `vN → vN+1` functions. A file newer than `version` is
- *   opened read-only (writes are skipped) and a notice is raised.
- * - Writes go through one serialized queue per file that coalesces to the
- *   latest value: temp file, fsync, copy the current file to `.bak`, rename
- *   (retried on Windows), then fsync the directory on POSIX.
- *
- * `flushAll()` is called on quit, `session-end` and `powerMonitor` `shutdown`
- * (see ./lifecycle.ts).
+ * Every persisted file is a JSON object with a `schemaVersion`. A key that fails
+ * its schema is dropped in memory. It stays on disk only if it has no default:
+ * the next write replaces one that has. No Electron imports.
  */
 import { randomUUID } from 'node:crypto';
 import fs from 'node:fs';
@@ -38,7 +23,6 @@ interface ObjectSchema {
 type Migration = (data: Record<string, unknown>) => Record<string, unknown>;
 
 interface JsonStoreOptions<T> {
-  /** Absolute path of the JSON file. */
   file: string;
   /** A loose object schema. Keys are validated one by one. */
   schema: ObjectSchema;
@@ -63,7 +47,7 @@ export interface JsonStore<T> {
    * reads during a write are ignored.
    */
   reload(): boolean;
-  /** True when the file is newer than this app: changes are kept in memory only. */
+  /** True when the file is newer than this app or couldn't be read: changes are kept in memory only. A `reload()` that reads the file clears it. */
   readonly readOnly: boolean;
   readonly file: string;
 }
@@ -112,7 +96,8 @@ export function createJsonStore<T>(options: JsonStoreOptions<T>): JsonStore<T> {
   const { file, schema, version } = options;
   const loaded = load(options);
   let value = loaded.value;
-  // Invalid keys stay on disk until the value gets a valid one.
+  let readOnly = loaded.readOnly;
+  // Invalid keys without a default stay on disk until the value gets a valid one.
   let invalidOnDisk = loaded.invalid;
   // The file text we last read or started writing.
   let lastText = loaded.text;
@@ -145,7 +130,7 @@ export function createJsonStore<T>(options: JsonStoreOptions<T>): JsonStore<T> {
   };
 
   const schedule = (): void => {
-    if (loaded.readOnly) return;
+    if (readOnly) return;
     dirty = true;
     if (writing) return;
     writingStores.add(store as JsonStore<unknown>);
@@ -160,7 +145,10 @@ export function createJsonStore<T>(options: JsonStoreOptions<T>): JsonStore<T> {
     set(next) {
       const resolved =
         typeof next === 'function' ? (next as (prev: T) => T)(value) : next;
-      value = validate(schema, resolved as Record<string, unknown>, file) as T;
+      value = {
+        ...options.defaults,
+        ...validate(schema, resolved as Record<string, unknown>, file),
+      } as T;
       schedule();
     },
     async flush() {
@@ -181,11 +169,17 @@ export function createJsonStore<T>(options: JsonStoreOptions<T>): JsonStore<T> {
       const decoded = decode(options, raw);
       value = decoded.value;
       invalidOnDisk = decoded.invalid;
+      readOnly = decoded.readOnly;
       return true;
     },
-    readOnly: loaded.readOnly,
+    get readOnly() {
+      return readOnly;
+    },
     file,
   };
+  // Nothing else writes the main file back after a recovery, and the next launch
+  // would find no file and start from the defaults.
+  if (loaded.recovered) schedule();
   return store;
 }
 
@@ -194,6 +188,8 @@ interface Loaded<T> {
   invalid: Record<string, unknown>;
   readOnly: boolean;
   text?: string;
+  /** The values came from `.bak` because the main file was corrupt. */
+  recovered?: boolean;
 }
 
 function load<T>(options: JsonStoreOptions<T>): Loaded<T> {
@@ -201,10 +197,28 @@ function load<T>(options: JsonStoreOptions<T>): Loaded<T> {
   const empty: Loaded<T> = { value: defaults, invalid: {}, readOnly: false };
   // A missing main file means "defaults", not "restore the backup".
   if (!fs.existsSync(file)) return empty;
-  const main = readCandidate(file);
-  const candidate = main ?? readCandidate(`${file}.bak`);
-  if (!candidate) return empty;
-  return { ...decode(options, candidate.data), text: main?.text };
+  let main: Candidate | undefined;
+  try {
+    main = readCandidate(file);
+  } catch (error) {
+    // Unreadable is not corrupt (a virus scanner may hold the file): show the
+    // backup, but never write over a file that may be the newer one.
+    log.error('failed to read', file, error);
+    const backup = readBackup(file);
+    return { ...(backup ? decode(options, backup.data) : empty), readOnly: true };
+  }
+  if (main) return { ...decode(options, main.data), text: main.text };
+  const backup = readBackup(file);
+  return backup ? { ...decode(options, backup.data), recovered: true } : empty;
+}
+
+function readBackup(file: string): Candidate | undefined {
+  try {
+    return readCandidate(`${file}.bak`);
+  } catch (error) {
+    log.error('failed to read', `${file}.bak`, error);
+    return undefined;
+  }
 }
 
 function decode<T>(
@@ -260,20 +274,36 @@ function validate(
   return out;
 }
 
+type Candidate = { data: Record<string, unknown>; text: string };
+
+/** A virus scanner or indexer can hold a file for a moment; a short wait is cheaper than a read-only session. */
+const TRANSIENT_READ_ERRORS = new Set(['EBUSY', 'EACCES', 'EPERM']);
+const READ_RETRIES = 3;
+const READ_RETRY_MS = 30;
+
+function readFileRetrying(file: string): string {
+  for (let attempt = 0; ; attempt++) {
+    try {
+      return fs.readFileSync(file, 'utf8');
+    } catch (error) {
+      const code = (error as NodeJS.ErrnoException).code ?? '';
+      if (attempt >= READ_RETRIES || !TRANSIENT_READ_ERRORS.has(code)) throw error;
+      Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, READ_RETRY_MS);
+    }
+  }
+}
+
 /**
- * Reads one candidate. Returns undefined if it is missing, unreadable or
- * corrupt; a corrupt file is moved aside first.
+ * Reads one candidate. Returns undefined if it is missing or corrupt (a corrupt
+ * file is moved aside first) and throws if it can't be read.
  */
-function readCandidate(
-  file: string,
-): { data: Record<string, unknown>; text: string } | undefined {
+function readCandidate(file: string): Candidate | undefined {
   let text: string;
   try {
-    text = fs.readFileSync(file, 'utf8');
+    text = readFileRetrying(file);
   } catch (error) {
-    if ((error as NodeJS.ErrnoException).code !== 'ENOENT')
-      log.error('failed to read', file, error);
-    return undefined;
+    if ((error as NodeJS.ErrnoException).code === 'ENOENT') return undefined;
+    throw error;
   }
   const data = parseObject(text);
   if (data) return { data, text };
@@ -296,6 +326,23 @@ function parseObject(text: string): Record<string, unknown> | undefined {
     }
   } catch {
     // Not JSON.
+  }
+  return undefined;
+}
+
+/**
+ * The JSON object in `file`, or in its `.bak` when the file can't be used, for
+ * values needed before the stores exist. Unlike a store it moves nothing aside.
+ */
+export function readJsonObjectSync(file: string): Record<string, unknown> | undefined {
+  if (!fs.existsSync(file)) return undefined;
+  for (const candidate of [file, `${file}.bak`]) {
+    try {
+      const data = parseObject(fs.readFileSync(candidate, 'utf8'));
+      if (data) return data;
+    } catch {
+      // Missing or unreadable: try the backup.
+    }
   }
   return undefined;
 }

@@ -137,3 +137,19 @@
   outline: var(--lu-focus-outline);
   outline-offset: 1px;
 }
+
+/* Forced colors drops the switch's fills: outline the track and draw the knob in text colours. */
+@media (forced-colors: active) {
+  .track {
+    outline: 1px solid var(--lu-ink);
+    outline-offset: -1px;
+  }
+
+  .knob {
+    background: var(--lu-ink);
+  }
+
+  .switch[data-selected] .knob {
+    background: var(--lu-on-action);
+  }
+}

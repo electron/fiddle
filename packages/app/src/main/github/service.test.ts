@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { GitHubClient } from '../../fiddle/github';
 import { ErrorCode, FiddleError } from '../../shared/errors';
@@ -177,12 +177,17 @@ const stored: LoadResult = {
 };
 
 describe('whenReady', () => {
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
   it('settles at once when init never ran', async () => {
     const { service } = setup();
     await expect(service.whenReady()).resolves.toBeUndefined();
   });
 
   it('waits until the stored token is restored and checked', async () => {
+    vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] });
     let answer!: () => void;
     const checked = new Promise<void>((resolve) => (answer = resolve));
     const user = () =>
@@ -194,13 +199,26 @@ describe('whenReady', () => {
     void service.init();
     let ready = false;
     const waiting = service.whenReady().then(() => (ready = true));
-    await new Promise((resolve) => setTimeout(resolve, 10));
+    await vi.advanceTimersByTimeAsync(10);
     expect(ready).toBe(false);
 
     answer();
     await waiting;
     expect(service.login).toBe('octocat');
     expect(store.load).toHaveBeenCalledTimes(1);
+  });
+
+  it('stops waiting when reading the stored token hangs', async () => {
+    vi.useFakeTimers();
+    const { service, store } = setup({ stored });
+    store.load.mockImplementation(() => new Promise<LoadResult>(() => undefined));
+    void service.init();
+    let ready = false;
+    const waiting = service.whenReady().then(() => (ready = true));
+    await vi.advanceTimersByTimeAsync(7000);
+    expect(ready).toBe(false);
+    await vi.advanceTimersByTimeAsync(1500);
+    await waiting;
   });
 
   it('settles when the check fails, keeping the token', async () => {

@@ -1,9 +1,6 @@
 /**
- * Socket Firewall. Module installs run as
- * `node sfw.mjs npm|yarn …` (`buildInstallCommand` in src/fiddle/modules.ts),
- * so the `sfw` package's entry is spawned from disk and never bundled.
- * Packaged builds ship it at `<resources>/sfw.mjs` (forge.config.ts
- * `extraResource`); dev and test runs use it from node_modules.
+ * Module installs spawn `node sfw.mjs npm|yarn …`, so the `sfw` entry is a file
+ * on disk, never bundled: `<resources>/sfw.mjs` when packaged (forge.config.ts).
  */
 import fs from 'node:fs';
 import { createRequire } from 'node:module';

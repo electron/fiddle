@@ -24,15 +24,21 @@ export function Badge({ tone = 'neutral', dot, children, className }: BadgeProps
   );
 }
 
-export interface TagProps {
+interface TagBaseProps {
   tone?: Tone;
   children: ReactNode;
-  /** Adds a remove button. */
-  onRemove?: () => void;
-  /** Accessible name for the remove button. */
-  removeLabel?: string;
   className?: string;
 }
+
+export type TagProps = TagBaseProps &
+  (
+    | {
+        /** Adds a remove button, named by `removeLabel`. */
+        onRemove: () => void;
+        removeLabel: string;
+      }
+    | { onRemove?: undefined; removeLabel?: undefined }
+  );
 
 /** A short label like Badge, neutral by default and optionally removable. */
 export function Tag({

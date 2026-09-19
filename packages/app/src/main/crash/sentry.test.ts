@@ -53,7 +53,6 @@ vi.mock('../log', () => ({
 }));
 vi.mock('../test-mode', () => ({ testFlags: () => ({ sentry: mocks.sentryFlag }) }));
 
-const originalArgv = process.argv;
 const rendererCrash = {
   tags: { 'event.environment': 'native', 'event.process': 'renderer' },
 };
@@ -81,11 +80,9 @@ beforeEach(() => {
   mocks.init.mockClear();
   mocks.close.mockClear();
   mocks.showMessageBox.mockReset().mockResolvedValue({ response: 1 });
-  process.argv = ['electron', 'main.js'];
 });
 
 afterEach(() => {
-  process.argv = originalArgv;
   fs.rmSync(mocks.userData, { recursive: true, force: true });
 });
 
@@ -105,10 +102,6 @@ describe('initCrashReporting', () => {
     ['an unpackaged app', () => void (mocks.isPackaged = false)],
     ['test mode', () => void (mocks.sentryFlag = false)],
     [
-      'headless mode',
-      () => void (process.argv = ['electron', 'main.js', '--headless', 'run']),
-    ],
-    [
       'the setting turned off',
       () => writeSettings('{"schemaVersion":1,"crashReports":false}'),
     ],
@@ -118,6 +111,28 @@ describe('initCrashReporting', () => {
     initCrashReporting();
     expect(mocks.init).not.toHaveBeenCalled();
     expect(isCrashReportingEnabled()).toBe(false);
+  });
+
+  it('stays off for headless mode', async () => {
+    const { initCrashReporting, isCrashReportingEnabled } = await load();
+    initCrashReporting(true);
+    expect(mocks.init).not.toHaveBeenCalled();
+    expect(isCrashReportingEnabled()).toBe(false);
+  });
+
+  it('keeps the setting turned off when settings.json is corrupt and only the backup has it', async () => {
+    writeSettings('{"crashReports":');
+    fs.writeFileSync(
+      path.join(mocks.userData, 'settings.json.bak'),
+      '{"schemaVersion":1,"crashReports":false}',
+    );
+    const { initCrashReporting } = await load();
+    initCrashReporting();
+    expect(mocks.init).not.toHaveBeenCalled();
+    expect(fs.readdirSync(mocks.userData).sort()).toEqual([
+      'settings.json',
+      'settings.json.bak',
+    ]);
   });
 
   it('falls back to the default (on) for a corrupt file or a value of the wrong type', async () => {
@@ -157,7 +172,8 @@ describe('renderer crash consent', () => {
     mocks.showMessageBox.mockResolvedValue({ response: 0 });
 
     const sent = beforeSend()(rendererCrash);
-    await vi.waitFor(() => expect(mocks.showMessageBox).not.toHaveBeenCalled());
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    expect(mocks.showMessageBox).not.toHaveBeenCalled();
     markCrashUiReady();
     expect(await sent).not.toBeNull();
     expect(mocks.showMessageBox).toHaveBeenCalledOnce();

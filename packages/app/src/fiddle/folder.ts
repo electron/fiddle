@@ -1,8 +1,9 @@
 import { randomBytes } from 'node:crypto';
-import { mkdir, readdir, readFile, rename, rm, writeFile } from 'node:fs/promises';
+import { mkdir, open, readdir, readFile, rm } from 'node:fs/promises';
 import * as path from 'node:path';
-import { setTimeout as sleep } from 'node:timers/promises';
 import { fileURLToPath } from 'node:url';
+
+import { renameWithRetry } from '@electron/fiddle-core';
 
 import { ErrorCode, FiddleError } from '../shared/errors';
 import {
@@ -16,6 +17,9 @@ import {
   PACKAGE_JSON,
 } from './files';
 import { type PickedFiles, pickFiddleFiles, type PickOptions } from './pick';
+
+/** Windows refuses to delete a file another process has open, for a moment. */
+const RM_OPTIONS = { force: true, maxRetries: 5 };
 
 export const GITIGNORE_CONTENT = 'node_modules\nout';
 const GITIGNORE = '.gitignore';
@@ -78,54 +82,35 @@ function assertWritableNames(names: readonly string[]): void {
   }
 }
 
-const RENAME_RETRIES = 5;
-const RENAME_RETRY_CODES = new Set(['EPERM', 'EBUSY', 'EACCES']);
-
-/** On Windows, a file another process has open (an editor, an indexer, a virus scanner) refuses to be replaced for a moment. */
-async function renameWithRetry(from: string, to: string): Promise<void> {
-  for (let attempt = 1; ; attempt++) {
-    try {
-      await rename(from, to);
-      return;
-    } catch (error) {
-      const code = (error as NodeJS.ErrnoException).code ?? '';
-      if (
-        process.platform !== 'win32' ||
-        !RENAME_RETRY_CODES.has(code) ||
-        attempt >= RENAME_RETRIES
-      )
-        throw error;
-      await sleep(25 * 2 ** attempt);
-    }
-  }
-}
-
 /**
- * Writes `target` as a regular file: the content goes to a new temp file in
- * the same folder, created exclusively (`wx` never opens through an existing
- * link), which is then renamed over `target`. A rename replaces a symlink at
- * `target` instead of following it, so a link created after any check is
- * never written through.
+ * Writes `target` through an exclusive (`wx`) temp file in the same folder,
+ * renamed over `target`. A rename replaces a symlink at `target` instead of
+ * following it, so a link created after any check is never written through.
  */
 async function writeRegularFile(target: string, content: string): Promise<void> {
   const temp = path.join(
     path.dirname(target),
     `.${path.basename(target)}.${randomBytes(6).toString('hex')}.tmp`,
   );
-  await writeFile(temp, content, { encoding: 'utf8', flag: 'wx' });
   try {
+    const handle = await open(temp, 'wx');
+    try {
+      await handle.writeFile(content, 'utf8');
+      await handle.sync();
+    } finally {
+      await handle.close();
+    }
     await renameWithRetry(temp, target);
   } catch (error) {
-    await rm(temp, { force: true });
+    await rm(temp, RM_OPTIONS);
     throw error;
   }
 }
 
 /**
- * Everything in `dir` that `writeFiddleFolder(dir, files)` would replace or
- * delete, for the overwrite warning: each name in `files` (empty ones are
- * deleted) and `.gitignore`, matched ignoring case as on macOS and Windows.
- * Empty if `dir` doesn't exist.
+ * What `writeFiddleFolder(dir, files)` would replace or delete in `dir`, for
+ * the overwrite warning: the names in `files` and `.gitignore`, matched
+ * ignoring case. Empty if `dir` doesn't exist.
  */
 export async function findFilesToReplace(dir: string, files: FileMap): Promise<string[]> {
   const targets = [...Object.keys(files), GITIGNORE];
@@ -138,36 +123,44 @@ export async function findFilesToReplace(dir: string, files: FileMap): Promise<s
 }
 
 /**
- * Writes a fiddle to `dir`: files with empty content are deleted from disk,
- * and `.gitignore` is written on every save. `remove` names files the fiddle
- * no longer has (removed or renamed), which are deleted before anything is
- * written, so a rename that only changes case ends with the new name. All
- * names are checked first.
+ * Writes a fiddle to `dir`: empty files are deleted from disk (unless
+ * `keepEmpty`) and `.gitignore` is written every time. `remove` names files
+ * the fiddle no longer has. Deletes come after the writes, so a failure
+ * leaves the old files, except for a removed name that only differs in case
+ * from a written one: that goes first, so a case-only rename ends with the new
+ * name. All names are checked first.
  */
 export async function writeFiddleFolder(
   dir: string,
   files: FileMap,
   remove: readonly string[] = [],
+  { keepEmpty = false }: { keepEmpty?: boolean } = {},
 ): Promise<void> {
   const entries = Object.entries(files);
   assertWritableNames(entries.map(([name]) => name));
   assertWritableNames(remove);
   await mkdir(dir, { recursive: true });
-  for (const name of remove) await rm(path.join(dir, name), { force: true });
-  for (const [name, content] of entries) {
-    const target = path.join(dir, name);
-    // rm removes a symlink itself, not what it points to.
-    if (content === '') await rm(target, { force: true });
-    else await writeRegularFile(target, content);
-  }
+  const written = entries.filter(([, content]) => keepEmpty || content !== '');
+  const names = written.map(([name]) => name);
+  const early = remove.filter((name) => hasName(names, name));
+  for (const name of early) await rm(path.join(dir, name), RM_OPTIONS);
+  for (const [name, content] of written)
+    await writeRegularFile(path.join(dir, name), content);
   await writeRegularFile(path.join(dir, GITIGNORE), GITIGNORE_CONTENT);
+  const late = [
+    ...remove.filter((name) => !early.includes(name)),
+    ...entries
+      .filter(([, content]) => !keepEmpty && content === '')
+      .map(([name]) => name),
+  ];
+  // rm removes a symlink itself, not what it points to.
+  for (const name of late) await rm(path.join(dir, name), RM_OPTIONS);
 }
 
 /**
  * The local path of a dropped `file:` URL, or undefined if it could reach
- * another machine: a host other than none or `localhost` (the URL parser
- * turns `localhost` into none), or a UNC path such as `\\server\share` or
- * `//server/share`.
+ * another machine: a host (the URL parser turns `localhost` into none) or a UNC
+ * path such as `\\server\share` or `//server/share`.
  */
 export function localPathFromFileUrl(
   url: string,

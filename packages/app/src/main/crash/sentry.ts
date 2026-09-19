@@ -1,19 +1,3 @@
-/**
- * Sentry in the main process: org `electronjs`, project `electron-fiddle`.
- *
- * - Off in dev (unpackaged), in test mode, in headless mode, and when the
- *   "Send crash reports" setting is off. The setting is read from
- *   settings.json before `Sentry.init`, which runs before `ready`. Turning it
- *   off closes Sentry at once; turning it on applies at the next launch.
- * - An explicit integration allowlist: no console, network or local-variable
- *   integrations. `sendDefaultPii` is off.
- * - `IPCMode.Classic`: renderers reach Sentry through the app's own preload
- *   (src/preload/index.ts), the one exception to EIPC-only IPC.
- * - `beforeSend` / `beforeBreadcrumb` scrub everything (./scrub.ts). Native
- *   dumps from main are never sent; renderer dumps only after the user agrees,
- *   crash by crash.
- */
-import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 
@@ -23,6 +7,7 @@ import { app, dialog } from 'electron';
 import { defaultSettings, parseSetting } from '../../shared/settings';
 import { tm } from '../i18n';
 import { log } from '../log';
+import { readJsonObjectSync } from '../persistence/json-store';
 import { testFlags } from '../test-mode';
 import { prepareEvent, scrubBreadcrumb } from './scrub';
 
@@ -43,22 +28,13 @@ function releaseName(appName: string, version: string): string {
   return `${appName.replace(/\W/g, '-')}@${version.replace(/^v/, '')}`;
 }
 
-/** Headless CLI mode never sends crash reports. */
-function isHeadless(argv: readonly string[] = process.argv): boolean {
-  return argv.includes('--headless');
-}
-
-/** Reads `crashReports` straight from settings.json: Sentry starts before the settings store. */
+/** Sentry starts before the settings store, so this reads settings.json (or its `.bak`, as the store would) itself. */
 function readCrashReportsSetting(userData: string): boolean {
-  try {
-    const data: unknown = JSON.parse(
-      fs.readFileSync(path.join(userData, 'settings.json'), 'utf8'),
-    );
-    const value = (data as { crashReports?: unknown } | null)?.crashReports;
-    return parseSetting('crashReports', value)?.value ?? defaultSettings.crashReports;
-  } catch {
-    return defaultSettings.crashReports;
-  }
+  const data = readJsonObjectSync(path.join(userData, 'settings.json'));
+  return (
+    parseSetting('crashReports', data?.crashReports)?.value ??
+    defaultSettings.crashReports
+  );
 }
 
 let resolveUiReady: () => void = () => undefined;
@@ -97,13 +73,13 @@ function askToSendRendererCrash(): Promise<boolean> {
   });
 }
 
-/** Starts Sentry in main if it's allowed. Call before `ready`, after Squirrel handling. */
-export function initCrashReporting(): void {
+/** Starts Sentry in main if it's allowed. Call before `ready`, after Squirrel handling. Headless CLI runs never send reports. */
+export function initCrashReporting(headless = false): void {
   const off = !app.isPackaged
     ? 'dev'
     : !testFlags().sentry
       ? 'test mode'
-      : isHeadless()
+      : headless
         ? 'headless'
         : !readCrashReportsSetting(app.getPath('userData'))
           ? 'setting'
@@ -116,8 +92,10 @@ export function initCrashReporting(): void {
   Sentry.init({
     dsn: SENTRY_DSN,
     release: releaseName(app.getName(), app.getVersion()),
+    // Renderers reach Sentry through the app's own preload: the one exception to EIPC-only IPC.
     ipcMode: Sentry.IPCMode.Classic,
     sendDefaultPii: false,
+    // An explicit allowlist: no console, network or local-variable integrations, so those never collect anything.
     defaultIntegrations: false,
     integrations: [
       // Native crashes. What is sent is decided in prepareEvent.

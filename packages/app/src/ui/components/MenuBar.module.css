@@ -1,4 +1,3 @@
-/* The menus themselves use Menu.module.css: surface, items, key column, separators. */
 .bar {
   position: relative;
   display: flex;
@@ -83,7 +82,7 @@
   -webkit-app-region: no-drag;
 }
 
-/* Open menus sit in a layer on <body>, each placed by MenuBar.tsx. */
+/* Open menus sit in a layer on <body>. */
 .layer {
   position: fixed;
   top: 0;
@@ -95,4 +94,15 @@
 .panel {
   position: fixed;
   -webkit-app-region: no-drag;
+}
+
+/* Forced colors drops the translucent fills that mark the hovered, open and focused title. */
+@media (forced-colors: active) {
+  .title:hover,
+  .title[data-open],
+  .bar[data-engaged] .title:focus,
+  .bar[data-engaged] .title:focus-visible {
+    outline: 2px solid var(--lu-focus-ring);
+    outline-offset: -2px;
+  }
 }

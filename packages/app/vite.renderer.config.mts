@@ -1,16 +1,11 @@
-// Renderer bundle, served over app://main.
-// Standalone: `vite build -c vite.renderer.config.ts` -> .vite/renderer/main_window/.
 import fs from 'node:fs/promises';
 import path from 'node:path';
 
 import react from '@vitejs/plugin-react';
 import { defaultClientConditions, defineConfig, type Plugin } from 'vite';
 
-/**
- * Writes bundle-manifest.json: every file in the bundle. The app:// handler
- * serves only files listed there (src/main/bundle.ts). Packaged builds carry no
- * source maps (forge.config.ts), so production manifests leave them out.
- */
+// The app:// handler serves only files listed in bundle-manifest.json.
+// Packaged builds strip source maps, so production manifests leave them out.
 function bundleManifest(mode: string): Plugin {
   return {
     name: 'fiddle:bundle-manifest',

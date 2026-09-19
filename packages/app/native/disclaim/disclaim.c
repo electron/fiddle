@@ -3,18 +3,11 @@
  *
  *   fiddle-disclaim <program> [argument...]
  *
- * macOS charges a process's privacy (TCC) requests, such as the camera, the
- * microphone and screen recording, to its responsible process: the app that
- * started the chain of processes it belongs to. A fiddle that Electron Fiddle
- * starts would therefore use Electron Fiddle's grants. This helper replaces
- * itself with <program> after disclaiming responsibility, so the program is
- * its own responsible process and gets its own grants.
- *
- * The helper does not fork. POSIX_SPAWN_SETEXEC makes posix_spawn behave like
- * exec, so the pid, the open files, the working directory, the environment and
- * the signal state are the ones the caller set up, and the exit status and
- * signals reach the program directly. <program> is a path: there is no PATH
- * search, and its arguments, argv[0] included, are passed on unchanged.
+ * macOS charges a process's privacy (TCC) requests to its responsible process,
+ * so a fiddle would use Electron Fiddle's grants. This helper disclaims
+ * responsibility and replaces itself with <program> (POSIX_SPAWN_SETEXEC, no
+ * fork), so pid, environment and signals reach the program unchanged.
+ * <program> is a path: there is no PATH search.
  *
  * Exit codes (the program's own when it runs):
  *    64  usage: no program given (EX_USAGE)

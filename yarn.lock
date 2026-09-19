@@ -2501,9 +2501,6 @@ __metadata:
     typescript-eslint: "npm:^8.69.0"
     vite: "npm:8.2.2"
     vitest: "npm:^5.0.0"
-  dependenciesMeta:
-    electron:
-      built: true
   languageName: unknown
   linkType: soft
 

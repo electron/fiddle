@@ -31,17 +31,15 @@ const DIALOGS = {
   'gist.signIn': 'sign-in',
 } as const;
 
-/**
- * The title bar's Publish capsule. With no gist loaded it publishes; once a
- * gist is loaded it opens the gist menu. It also hosts the gist dialogs and
- * answers the gist commands (`Window.Command`). `compact`: a narrow title bar
- * shows Publish as an icon button; its tooltip keeps the label.
- */
+/** Publishes, or with a gist loaded opens the gist menu. It also hosts the gist dialogs and answers the `gist.*` commands. */
 export function PublishButton({ compact = false }: { compact?: boolean } = {}) {
   const { t } = useTranslation('gists');
   const login = useGitHubLogin();
   const gist = useLoadedGist();
   const { isPublic, showHistory } = useGistSettings();
+  // Only the owner can update or delete a gist. Signed out, the sign-in decides.
+  const foreign =
+    !!gist?.owner && !!login && gist.owner.toLowerCase() !== login.toLowerCase();
   const openKbd = useShortcut('gist.open');
 
   const onCommand = useEffectEvent((id: string) => {
@@ -114,7 +112,7 @@ export function PublishButton({ compact = false }: { compact?: boolean } = {}) {
           {button}
           <MenuPopover placement="bottom end" offset={10}>
             <Menu aria-label={t('menuLabel')} onAction={(key) => onAction(String(key))}>
-              <MenuItem id="update" icon="upload">
+              <MenuItem id="update" icon="upload" isDisabled={foreign}>
                 {t('menuUpdate')}
               </MenuItem>
               <MenuItem id="publish" icon="plus">
@@ -147,7 +145,7 @@ export function PublishButton({ compact = false }: { compact?: boolean } = {}) {
                 </MenuItem>
               </MenuSection>
               <MenuSeparator />
-              <MenuItem id="delete" icon="trash" isDanger>
+              <MenuItem id="delete" icon="trash" isDanger isDisabled={foreign}>
                 {t('menuDelete')}
               </MenuItem>
             </Menu>

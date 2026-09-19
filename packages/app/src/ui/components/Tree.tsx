@@ -65,8 +65,8 @@ export interface TreeRowProps {
   pill?: string;
   /** `warning` draws the pill in the warning colour, such as "2 warnings". */
   pillTone?: 'error' | 'warning';
-  unsaved?: boolean;
-  unsavedLabel?: string;
+  /** Draws an unsaved dot. The text is spoken with it, such as "Unsaved changes". */
+  unsaved?: string;
   /** Text direction of the label, e.g. `ltr` for file names in a mirrored locale. */
   labelDir?: 'ltr' | 'rtl' | 'auto';
   isDisabled?: boolean;
@@ -82,7 +82,6 @@ export function TreeRow({
   pill,
   pillTone,
   unsaved,
-  unsavedLabel,
   labelDir,
   isDisabled,
   children,
@@ -91,6 +90,7 @@ export function TreeRow({
   return (
     <TreeItem
       id={id}
+      data-key={id}
       textValue={label}
       isDisabled={isDisabled}
       className={cx(styles.row, className)}
@@ -112,9 +112,11 @@ export function TreeRow({
                 {pill}
               </span>
             )}
-            {unsaved && <span className={styles.dot} aria-hidden="true" />}
-            {unsaved && unsavedLabel && (
-              <VisuallyHidden>{`, ${unsavedLabel}`}</VisuallyHidden>
+            {unsaved && (
+              <>
+                <span className={styles.dot} aria-hidden="true" />
+                <VisuallyHidden>{`, ${unsaved}`}</VisuallyHidden>
+              </>
             )}
           </>
         )}

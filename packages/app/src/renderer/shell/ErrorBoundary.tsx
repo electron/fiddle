@@ -1,13 +1,9 @@
-/**
- * Catches a render error in one region of the window (the sidebar, the sheet,
- * the shell, the palette) and shows a small error state with Reload in its
- * place, so one component's error never blanks the whole window.
- */
 import { Component, type ErrorInfo, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { windowApi } from '../../ipc/renderer';
 import { Button, EmptyState } from '../../ui';
+import { log } from '../features/about/log';
 import styles from './ErrorBoundary.module.css';
 
 interface ErrorBoundaryProps {
@@ -26,11 +22,7 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, { failed: boole
   }
 
   override componentDidCatch(error: unknown, info: ErrorInfo): void {
-    console.error(
-      `[fiddle] the ${this.props.region} failed to render`,
-      error,
-      info.componentStack,
-    );
+    log.error(`the ${this.props.region} failed to render`, error, info.componentStack);
   }
 
   override render(): ReactNode {

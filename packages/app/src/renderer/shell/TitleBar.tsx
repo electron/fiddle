@@ -18,6 +18,7 @@ import {
   Tooltip,
   type MenuBarMenu,
 } from '../../ui';
+import { log } from '../features/about/log';
 import { OpenGistButton } from '../features/gists/OpenGistButton';
 import { PublishButton } from '../features/gists/PublishButton';
 import { RunButton } from '../features/run/RunButton';
@@ -48,13 +49,9 @@ const NAME_SHOW_ABOVE = 64;
 const DIVIDER_ROOM = 2 * GAP + 1;
 
 /**
- * Three parts in a row: the left group
- * (sidebar button, the menu bar off macOS, the name), the capsule, and the
- * right group (Open gist, Publish, Settings). The groups flex equally, so the
- * capsule sits centred while both have room and is pushed, never overlapped,
- * when one doesn't. Before that happens the name truncates, the menus fold and
- * the name hides; in the narrowest windows Publish drops its label, then Open
- * gist and Run's hint go and the version picker narrows (./title-bar-fit.ts).
+ * Left group, capsule, right group. The groups flex equally, so the capsule
+ * sits centred while both have room and is pushed, never overlapped, when one
+ * doesn't; title-bar-fit.ts says what gives way first in narrow windows.
  */
 export function TitleBar({
   name,
@@ -88,7 +85,7 @@ export function TitleBar({
   const onDoubleClick = (event: MouseEvent<HTMLElement>) => {
     if (platform !== 'darwin' || (event.target as Element).closest(CONTROLS)) return;
     windowApi.DoubleClickTitleBar().catch((error: unknown) => {
-      console.error('[fiddle] title bar double-click failed', error);
+      log.error('title bar double-click failed', error);
     });
   };
 
@@ -123,9 +120,8 @@ export function TitleBar({
     };
   }, [hasMenuBar]);
 
-  // The menus may run up to the divider, its gaps and the group's padding before
-  // the capsule where it sits centred at full width, so titles fold before
-  // anything is pushed or narrowed.
+  // The menus may run up to where the capsule sits centred at full width (less the divider and the group's
+  // padding), so titles fold before anything is pushed or narrowed.
   const menusRoom = useCallback(() => {
     const header = headerRef.current;
     const menuBox = menusRef.current;
@@ -135,7 +131,7 @@ export function TitleBar({
     const box = menuBox.getBoundingClientRect();
     // The picker element itself: the capsule's first child is react-aria's
     // collection <template>.
-    const picker = capsule.querySelector<HTMLElement>('[data-tour="version-picker"]');
+    const picker = capsule.querySelector<HTMLElement>(`.${styles.picker}`);
     const pickerWidth = picker?.getBoundingClientRect().width ?? PICKER;
     const fullCapsule =
       capsule.getBoundingClientRect().width + Math.max(0, PICKER - pickerWidth);
@@ -149,7 +145,7 @@ export function TitleBar({
 
   const activateMenuItem = (id: string) => {
     windowApi.ActivateMenuItem(id).catch((error: unknown) => {
-      console.error(`[fiddle] menu item ${id} failed`, error);
+      log.error(`menu item ${id} failed`, error);
     });
   };
 

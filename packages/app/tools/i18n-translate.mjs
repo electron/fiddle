@@ -1,31 +1,12 @@
 #!/usr/bin/env node
-// `yarn i18n:translate`: translates new and changed English strings into every
-// shipped locale (each folder in src/i18n/locales) with an LLM.
+// `yarn i18n:translate [--locale <code>] [--dry-run [--json]] [--from <file>]`
+// translates new and changed English strings into each shipped locale with an
+// LLM (ANTHROPIC_API_KEY; FIDDLE_TRANSLATE_MODEL overrides the model).
 //
-//   yarn i18n:translate                    every shipped locale
-//   yarn i18n:translate --locale fr        one locale (starts it if it's new)
-//   yarn i18n:translate --dry-run          print what would be translated
-//   yarn i18n:translate --dry-run --json   print the model requests as JSON
-//   yarn i18n:translate --from done.json   take translations from a file
-//                                          ({ "<locale>": { "<ns>:<key>": text } })
-//                                          instead of the API
-//
-// The API key comes from ANTHROPIC_API_KEY; FIDDLE_TRANSLATE_MODEL overrides
-// the model. Each request carries the key's description, its maxLength and
-// the glossary (src/i18n/glossary.json). Output is validated (placeholders,
-// tags, plural forms, maxLength) before it's written.
-//
-// State lives in src/i18n/translations/<locale>.json, one entry per key (or
-// plural group): { source, translation, reviewed }.
-// - `source` hashes the English text the translation was made from. When
-//   English changes, a machine translation is redone.
-// - `translation` hashes the text this script wrote. If the file's text no
-//   longer matches, a human edited it: it becomes `reviewed` and is never
-//   overwritten. A translation with no entry at all is a human's too.
-// - When English changes under a reviewed translation, it's flagged for
-//   re-review (i18n-check warns) and left alone. Editing the translation
-//   clears the flag; to keep the text as is, set `source` to the new hash.
-// Keys English no longer has are removed.
+// src/i18n/translations/<locale>.json records { source, translation, reviewed } per
+// key. A translation with no entry, or edited since the script wrote it, is
+// human-reviewed and never overwritten; i18n:check warns when English changes under it.
+// To keep a reviewed translation after such a change, set its `source` to the new hash.
 import fs from 'node:fs';
 import path from 'node:path';
 import { parseArgs } from 'node:util';
@@ -53,13 +34,11 @@ import {
 } from './i18n-shared.mjs';
 
 const BATCH_SIZE = 40;
+// A batch's reply is not streamed and can take minutes; a hung request must not stall the run.
+const REQUEST_TIMEOUT_MS = 5 * 60 * 1000;
 export const DEFAULT_MODEL = 'claude-opus-5';
 
-/**
- * Compares a locale with English and its state. Returns the units to
- * translate (`new` or `changed`), reviewed ones to flag, keys to remove, and
- * the carried-over messages and state.
- */
+/** Compares a locale with English and its state: what to translate, flag and remove. */
 export function planLocale(english, locale, messages, meta) {
   const plan = { todo: [], review: [], removed: [], humanEdits: [] };
   const nextMessages = {};
@@ -134,10 +113,7 @@ function ordered(entries, locale, messages) {
   return out;
 }
 
-/**
- * Plans a locale and, unless `dryRun`, sends the work to `translate` in
- * batches: `translate(request) -> { [unitKey]: string | { category: string } }`.
- */
+/** Plans a locale and, unless `dryRun`, sends `translate` batches: `(request) -> { [unitKey]: string | { category: string } }`. */
 export async function translateLocale({
   english,
   locale,
@@ -236,7 +212,7 @@ export function anthropicTranslator({
   model = DEFAULT_MODEL,
   fetchImpl = globalThis.fetch,
 }) {
-  // Claude Opus 5 and Fable 5.1 retry on a fallback model when a request is declined.
+  // These models retry on a fallback model when a request is declined.
   const fallback = /^claude-(opus-5|fable-5-1)\b/.test(model);
   return async (request) => {
     const response = await fetchImpl('https://api.anthropic.com/v1/messages', {
@@ -247,6 +223,7 @@ export function anthropicTranslator({
         'anthropic-version': '2023-06-01',
         ...(fallback && { 'anthropic-beta': 'server-side-fallback-2026-07-01' }),
       },
+      signal: globalThis.AbortSignal.timeout(REQUEST_TIMEOUT_MS),
       body: JSON.stringify({
         model,
         max_tokens: 16000,

@@ -1,11 +1,3 @@
-/**
- * Settings in main: validates changes, keeps `settings.json` sparse (only
- * values that differ from the defaults) and puts the effective settings in
- * the `App` store. Every change returns the `App` rev that includes it, which
- * the renderer uses to reconcile its optimistic updates.
- *
- * No Electron imports.
- */
 import { randomUUID } from 'node:crypto';
 import path from 'node:path';
 
@@ -26,7 +18,6 @@ import type { AppPatch } from '../state-hub';
 
 export const SETTINGS_VERSION = 1;
 
-/** The part of the StateHub settings needs. */
 export interface SettingsHub {
   readonly app: AppState;
   updateApp(patch: AppPatch): number;
@@ -43,7 +34,7 @@ function unknownKeys(sparse: SparseSettings): Record<string, unknown> {
 
 /** Per-key validation of an outside settings object. Invalid and unknown keys are dropped. */
 export function sanitizeSettings(data: Record<string, unknown>): {
-  settings: Settings;
+  settings: SparseSettings;
   dropped: string[];
 } {
   const sparse: Record<string, unknown> = {};
@@ -54,7 +45,7 @@ export function sanitizeSettings(data: Record<string, unknown>): {
     if (parsed) sparse[key] = parsed.value;
     else dropped.push(key);
   }
-  return { settings: fromSparse(sparse), dropped };
+  return { settings: sparse as SparseSettings, dropped };
 }
 
 export class SettingsService {
@@ -92,7 +83,6 @@ export class SettingsService {
     return this.set(key, defaultSettings[key]);
   }
 
-  /** Replaces every setting, e.g. after an import. */
   replace(settings: Settings): number {
     this.#store.set((prev) => ({ ...unknownKeys(prev), ...toSparse(settings) }));
     return this.#hub.updateApp({ settings });

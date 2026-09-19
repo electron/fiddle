@@ -1,8 +1,3 @@
-/**
- * The one error type that crosses process boundaries. Throw it anywhere; the
- * IPC transport serializes `{ code, message, details }` and re-throws it on
- * the other side. Unexpected errors become `internal`.
- */
 export const ErrorCode = {
   internal: 'internal',
   invalidArgument: 'invalid-argument',
@@ -16,6 +11,7 @@ export const ErrorCode = {
   installFailed: 'install-failed',
 } as const;
 
+/** Open to any string: the CLI adds its own codes (`CliErrorCode`), and a code from another process isn't checked. */
 export type ErrorCode = (typeof ErrorCode)[keyof typeof ErrorCode] | (string & {});
 
 export interface SerializedFiddleError {
@@ -24,6 +20,7 @@ export interface SerializedFiddleError {
   details?: unknown;
 }
 
+/** Throw it anywhere; the IPC transport carries `{ code, message, details }` across processes. Unexpected errors become `internal`. */
 export class FiddleError extends Error {
   readonly code: ErrorCode;
   readonly details?: unknown;

@@ -1,7 +1,3 @@
-/**
- * Also falls back when the window loads or restores a version it can't use.
- * Every version choice goes through `services.versionSelector`.
- */
 import { clipboard } from 'electron';
 
 import { implement, Versions } from '../../ipc/main';
@@ -27,11 +23,9 @@ export function bindVersionsIpc(ctx: IpcContext): void {
       (await selector.select(windowId, ref, { remember: true })) ??
       hub.getWindow(windowId)?.rev ??
       0,
-    Download: (version) => {
+    Download: async (version) => {
       known(version);
-      void versions
-        .install(version)
-        .catch((error: unknown) => log.warn(`downloading ${version} failed`, error));
+      await versions.install(version);
     },
     Remove: (version) => versions.remove(version),
     DownloadAll: (list) => {
@@ -63,8 +57,7 @@ export function bindVersionsIpc(ctx: IpcContext): void {
     },
   });
 
-  // Whenever the window's version changes (a restore, a folder load, a
-  // draft), check that it can use it.
+  // A restore, a folder load or a draft can bring a version this window can't use.
   let seen: VersionRefValue | undefined;
   const stop = hub.onChange((change) => {
     if (change.store !== 'window' || change.windowId !== windowId) return;

@@ -1,25 +1,15 @@
-/**
- * Squirrel.Windows startup events, handled here rather than by
- * electron-squirrel-startup. main/index.ts calls `handleSquirrelStartup()`
- * before anything else; when it returns true, the app does nothing but this
- * and quits.
- *
- * - `--squirrel-install` / `--squirrel-updated`: create the shortcuts and
- *   register `electron-fiddle://` for the Squirrel stub.
- * - `--squirrel-uninstall`: remove both.
- * - `--squirrel-obsolete`: quit.
- */
 import { spawn } from 'node:child_process';
 import path from 'node:path';
 
 import { app } from 'electron';
 
+import { log } from '../log';
+
 export const PROTOCOL = 'electron-fiddle';
 
 /**
- * Squirrel's stub launcher, `%LOCALAPPDATA%\electron-fiddle\electron-fiddle.exe`,
- * one folder above `app-<version>\electron-fiddle.exe`. It always starts the
- * newest installed version, so the protocol is registered for it.
+ * Squirrel's stub launcher, one folder above `app-<version>\electron-fiddle.exe`.
+ * It always starts the newest installed version, so the protocol is registered for it.
  */
 export function squirrelStubPath(execPath: string = process.execPath): string {
   return path.resolve(path.dirname(execPath), '..', 'electron-fiddle.exe');
@@ -35,12 +25,16 @@ export function squirrelEvent(argv: readonly string[]): SquirrelEvent | undefine
 function runUpdateExe(args: string[]): Promise<void> {
   const updateExe = path.resolve(path.dirname(process.execPath), '..', 'Update.exe');
   return new Promise((resolve) => {
+    const failed = (error: unknown) => {
+      log.warn('Update.exe failed', args, error);
+      resolve();
+    };
     try {
       spawn(updateExe, args, { detached: true })
         .on('close', () => resolve())
-        .on('error', () => resolve());
-    } catch {
-      resolve();
+        .on('error', failed);
+    } catch (error) {
+      failed(error);
     }
   });
 }

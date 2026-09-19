@@ -1,17 +1,7 @@
 /**
- * The macOS privacy helper (native/disclaim). macOS charges a process's
- * camera, microphone and other privacy requests to its responsible process,
- * so a fiddle started by Electron Fiddle would use the app's grants. Fiddles
- * start through `fiddle-disclaim <electron> <args…>` instead, which disclaims
- * responsibility and execs Electron: the fiddle is its own responsible
- * process, and `child_process` sees an ordinary child. Its grants belong to
- * the Electron build it runs on (`com.github.Electron`), and downloaded builds
- * are ad hoc signed, so macOS asks again for each build.
- *
- * Packaged builds ship the helper at `<resources>/fiddle-disclaim`
- * (forge.config.ts); dev and test runs use
- * `native/disclaim/build/fiddle-disclaim`, which `sh native/disclaim/build.sh`
- * builds. Only macOS uses it.
+ * macOS charges a process's camera and microphone requests to its responsible
+ * process, so fiddles start through `fiddle-disclaim`, which disclaims
+ * responsibility and execs Electron. Only macOS uses it.
  */
 import fs from 'node:fs';
 import path from 'node:path';
@@ -22,7 +12,7 @@ import { ErrorCode, FiddleError } from '../../shared/errors';
 import { tm } from '../i18n';
 import { log } from '../log';
 
-/** The file name of the helper; forge.config.ts ships it under this name. */
+/** Must match the name forge.config.ts ships the helper under. */
 export const DISCLAIM_HELPER = 'fiddle-disclaim';
 
 export interface DisclaimLocation {

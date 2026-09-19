@@ -73,7 +73,5 @@ export default {
   "accountSignedInAs": "Signed in as {{login}}",
   "accountSignedOut": "Not signed in",
   "accountSignOut": "Sign out",
-  "accountSignIn": "Sign in",
-  "asRevisionLabel": "Publish as revision",
-  "asRevisionHelp": "Creates the gist from the default template first, then updates it with your files, so the gist's history shows your changes."
+  "accountSignIn": "Sign in"
 } as const;

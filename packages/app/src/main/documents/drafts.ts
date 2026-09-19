@@ -1,8 +1,3 @@
-/**
- * Drafts: a dirty window's mirror, saved to `<userData>/drafts/<windowId>.json`.
- * A draft is written 500 ms after the last edit, and at least every 5 seconds
- * during continuous editing. No Electron imports.
- */
 import fs from 'node:fs';
 import fsp from 'node:fs/promises';
 import path from 'node:path';
@@ -51,7 +46,6 @@ const draftSchema = z.looseObject({
   name: z.string(),
   fiddle: storedFiddleSchema.nullable(),
   baseline: fileMap,
-  /** Missing in drafts written before modules counted toward `dirty`. */
   baselineModules: z.record(z.string(), z.string()).optional(),
   activeFile: z.string().nullable(),
   gistOwner: z.string().optional(),
@@ -67,6 +61,8 @@ const EMPTY_DRAFT: Draft = {
   activeFile: null,
 };
 
+/** A window ID is a draft's file name, so it must not be able to leave the drafts folder. */
+export const WINDOW_ID_RE = /^[0-9a-f-]{36}$/i;
 const DRAFT_FILE_RE = /^([0-9a-f-]{36})\.json$/i;
 
 interface Timers {
@@ -134,7 +130,6 @@ export class DraftScheduler {
   }
 }
 
-/** Draft files in one folder, written through the atomic JSON store. */
 export class DraftStore {
   readonly #dir: string;
   readonly #stores = new Map<string, JsonStore<Draft>>();
@@ -144,7 +139,7 @@ export class DraftStore {
   }
 
   #file(id: string): string {
-    if (!/^[0-9a-f-]{36}$/i.test(id)) throw new Error(`Invalid draft id: ${id}`);
+    if (!WINDOW_ID_RE.test(id)) throw new Error(`Invalid draft id: ${id}`);
     return path.join(this.#dir, `${id}.json`);
   }
 
@@ -183,7 +178,20 @@ export class DraftStore {
     ]);
   }
 
-  /** IDs of every draft on disk. */
+  /** Renames a draft that can't be read, so it isn't deleted with its window but stays for manual recovery. */
+  async setAside(id: string): Promise<boolean> {
+    this.#stores.delete(id);
+    try {
+      await fsp.rename(
+        this.#file(id),
+        path.join(this.#dir, `${id}.unreadable-${Date.now()}.json`),
+      );
+      return true;
+    } catch {
+      return false;
+    }
+  }
+
   async list(): Promise<string[]> {
     let names: string[];
     try {

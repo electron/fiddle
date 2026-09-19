@@ -1,18 +1,3 @@
-/**
- * The keybinding dispatcher. For the focused window
- * it runs commands by ID for every keybinding after the overrides in
- * `App.settings.keybindings`, so that:
- * - second defaults (F5 for Run, F1 for the palette), commands without a menu
- *   item and scoped keybindings (Clear console in the console) work;
- * - Monaco never shadows an app command: this listens in the capture phase,
- *   so Monaco only gets the keys the app doesn't use.
- *
- * A key it handles is `preventDefault`ed, so the native menu doesn't run the
- * command again. The menu still covers keys pressed where the page has no
- * focus (DevTools, native dialogs).
- *
- * It also tells main what a context menu opens over (`Window.ReportContextMenu`).
- */
 import { useEffect, useRef } from 'react';
 
 import { windowApi } from '../../../ipc/renderer';
@@ -29,6 +14,7 @@ import {
 } from '../../../shared/settings';
 import type { AppState, WindowState } from '../../../shared/stores';
 import { useAppState, useWindowState } from '../../state';
+import { toastError } from '../../toast-error';
 
 /** Undo, redo and select all keep their native keys: Monaco's, a text field's, or the Edit menu's. */
 const NATIVE: ReadonlySet<CommandId> = new Set<CommandId>([
@@ -37,11 +23,11 @@ const NATIVE: ReadonlySet<CommandId> = new Set<CommandId>([
   'edit.selectAll',
 ]);
 
-/** Where an element is: a Monaco editor, the console (its tour anchor), or elsewhere. */
+/** Where an element is: a Monaco editor, the console (`data-region="console"`), or elsewhere. */
 export function focusContextOf(target: EventTarget | null): FocusContext {
   if (!(target instanceof Element)) return 'other';
   if (target.closest('.monaco-editor')) return 'editor';
-  if (target.closest('[data-tour="console"]')) return 'console';
+  if (target.closest('[data-region="console"]')) return 'console';
   return 'other';
 }
 
@@ -82,6 +68,7 @@ export function commandForKey(
   return binding.id;
 }
 
+/** Capture phase, so Monaco only gets the keys the app doesn't use. A handled key is prevented so the native menu doesn't run it again. */
 export function useKeybindings(): void {
   const app = useAppState();
   const win = useWindowState();
@@ -99,9 +86,7 @@ export function useKeybindings(): void {
       event.preventDefault();
       event.stopPropagation();
       if (event.repeat) return;
-      windowApi
-        .RunCommand(id)
-        .catch((error: unknown) => console.error(`[fiddle] command ${id} failed`, error));
+      windowApi.RunCommand(id).catch(toastError);
     };
     const onContextMenu = (event: MouseEvent) => {
       windowApi

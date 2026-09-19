@@ -4,7 +4,6 @@ export default {
   "hideSidebar": "Hide sidebar",
   "showSidebar": "Show sidebar",
   "edited": "Edited",
-  "windowTitleEdited": "{{name}} (edited)",
   "settings": "Settings",
   "menuBar": "Application menu",
   "menuBarMore": "More",

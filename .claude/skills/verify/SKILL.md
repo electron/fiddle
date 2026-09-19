@@ -37,7 +37,7 @@ d press Escape
 d run-command view.toggleSplit           # any command ID from src/shared/commands.ts
 d stores > /tmp/stores.json              # App + Window store JSON
 d press "CmdOrCtrl+Shift+O"              # accelerators go through CDP key events
-d violations; d logs --tail 30
+d violations; d logs
 d quit
 FIDDLE_DEV_MENU_DUMP=1 FIDDLE_DEV_QUIT=1 yarn start:xvfb > /tmp/menu.log 2>&1   # native menu template
 SH

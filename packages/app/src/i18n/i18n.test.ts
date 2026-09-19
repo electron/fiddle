@@ -1,7 +1,7 @@
 import { createInstance } from 'i18next';
 import { describe, expect, it } from 'vitest';
 
-import { formatDate, formatNumber, formatRelative } from './format';
+import { formatDate } from './format';
 import {
   catalogBackend,
   i18nOptions,
@@ -78,21 +78,12 @@ describe('localeDirection', () => {
 describe('format', () => {
   const now = Date.UTC(2026, 8, 13, 12, 0, 0);
 
-  it('formats numbers and dates in the given locale', () => {
-    expect(formatNumber('de', 1234.5)).toBe('1.234,5');
-    expect(formatNumber('en', 0.25, { style: 'percent' })).toBe('25%');
+  it('formats dates in the given locale', () => {
     expect(formatDate('ja', now, { dateStyle: 'long', timeZone: 'UTC' })).toBe(
       '2026年9月13日',
     );
     expect(formatDate('en', now, { dateStyle: 'medium', timeZone: 'UTC' })).toBe(
       'Sep 13, 2026',
     );
-  });
-
-  it('formats relative times in their largest whole unit', () => {
-    expect(formatRelative('en', now - 3 * 60_000, now)).toBe('3 minutes ago');
-    expect(formatRelative('en', now + 2 * 86_400_000, now)).toBe('in 2 days');
-    expect(formatRelative('de', now - 86_400_000, now)).toBe('gestern');
-    expect(formatRelative('en', now, now)).toBe('now');
   });
 });

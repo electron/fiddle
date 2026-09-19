@@ -1,14 +1,3 @@
-/**
- * Bisect over the visible releases between a known-good and a known-bad
- * version.
- *
- * - Manual: each step stops the fiddle and switches the window to the version
- *   under test; the user marks it Good, Bad or Skip.
- * - Auto: runs the fiddle on each version through the normal run path (the
- *   same trust check and spawn); exit code 0 is good. Both ends are verified
- *   first. A run that says nothing about the version (refused, stopped, or one
- *   that never started Electron) stops the bisect.
- */
 import { Bisector, bisectCompareUrl, type BisectStep } from '../../fiddle/bisect';
 import { compareVersions, getVersionRange } from '../../fiddle/versions';
 import { ErrorCode, FiddleError } from '../../shared/errors';
@@ -64,10 +53,8 @@ export class BisectService {
       );
     }
     const settings = this.#hub.app.settings;
-    const visible = visibleVersions(
-      this.#versions.releases(),
-      settings,
-      (v) => this.#versions.state(v) === 'installed',
+    const visible = visibleVersions(this.#versions.releases(), settings, (v) =>
+      this.#versions.isInstalled(v),
     );
     const range = getVersionRange(good, bad, visible);
     if (range.length < 2)
@@ -86,7 +73,9 @@ export class BisectService {
       this.#setBisect(windowId, { good, bad, auto: true, current: null, result: null });
       void this.#auto(windowId, session, range).catch((error: unknown) => {
         log.error('auto bisect failed', error);
-        if (this.#sessions.get(windowId) === session) this.stop(windowId);
+        if (this.#sessions.get(windowId) !== session) return;
+        this.stop(windowId);
+        this.#runs.log(windowId, t('bisectInvalid'), 'error');
       });
       return;
     }
@@ -122,7 +111,6 @@ export class BisectService {
       this.#runs.setState(windowId, { bisect: null });
   }
 
-  /** The result's compare URL, if the bisect finished. */
   compareUrl(windowId: string): string | undefined {
     const result = this.#runs.state(windowId).bisect?.result;
     return result ? bisectCompareUrl(result.good, result.bad) : undefined;
@@ -136,7 +124,6 @@ export class BisectService {
       this.#finish(windowId, session, step.good, step.bad);
       return;
     }
-    // Each step stops the running fiddle and switches to the version under test.
     this.#runs.stop(windowId);
     await documents.setFiddleVersion(windowId, {
       kind: 'release',
@@ -146,7 +133,7 @@ export class BisectService {
     this.#typesChanged(windowId);
     this.#setBisect(windowId, { ...current, current: step.version });
     this.#runs.log(windowId, t('bisectStep', { version: step.version }));
-    if (this.#versions.state(step.version) !== 'installed') {
+    if (!this.#versions.isInstalled(step.version)) {
       void this.#versions
         .install(step.version)
         .catch((error: unknown) => log.warn('bisect download failed', error));

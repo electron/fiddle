@@ -10,9 +10,8 @@ on:
 
 permissions: {}
 
-# A new push to a pull request cancels the run it supersedes. Pushes to main
-# and release tags are never cancelled. Called from release.yml, the group is
-# the release run's own.
+# A new push cancels the pull request run it supersedes. Runs on main and on
+# release tags are never cancelled.
 concurrency:
   group: ci-${{ github.workflow }}-${{ github.event_name == 'pull_request' && github.ref || github.sha }}
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
@@ -42,7 +41,7 @@ jobs:
         with:
           node-version-file: .nvmrc
           cache: yarn
-      # Electron's install script and `yarn package` download the same zip.
+      # The app's postinstall and `yarn package` download the same Electron zip.
       - name: Cache the Electron download
         uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
@@ -52,8 +51,7 @@ jobs:
             ~/AppData/Local/electron/Cache
           key: electron-${{ runner.os }}-${{ hashFiles('yarn.lock') }}
           restore-keys: electron-${{ runner.os }}-
-      # This job holds no secrets, so Electron's install script may run
-      # (`dependenciesMeta.electron.built`); e2e tests need its binary.
+      # The e2e tests need the Electron binary that the app's postinstall downloads.
       - name: Install dependencies
         run: yarn install --immutable
       # `git add -N` makes a generated file that was never committed show up in
@@ -71,25 +69,27 @@ jobs:
         run: |
           yarn i18n:check
           yarn i18n:test
+      - name: Format
+        run: yarn format:check
       - name: Lint
         run: yarn lint
       - name: Typecheck
         run: yarn typecheck
       - name: Unit tests
         run: yarn test
-      # Fiddles start through this helper on macOS, so the end-to-end tests
-      # below run them that way. The self-check proves it disclaims
-      # responsibility on this macOS version.
+      # Builds main, preload and renderer for release and for tests, and checks
+      # the test-only markers are in the second and not the first.
+      - name: Test-only code stays out of release builds
+        run: yarn workspace electron-fiddle driver:release-check
+      # Fiddles start through this helper on macOS. The self-check proves it
+      # disclaims responsibility on this macOS version.
       - name: Privacy helper self-check (macOS)
         if: runner.os == 'macOS'
         run: |
           packages/app/native/disclaim/build.sh
           packages/app/native/disclaim/build/selfcheck packages/app/native/disclaim/build/fiddle-disclaim
-      - name: End-to-end tests (Linux)
-        if: runner.os == 'Linux'
-        run: xvfb-run --auto-servernum yarn test:e2e
+      # On Linux the e2e driver starts its own Xvfb display per app.
       - name: End-to-end tests
-        if: runner.os != 'Linux'
         run: yarn test:e2e
       # Unsigned: no signing variables are set here.
       - name: Package smoke test
@@ -125,29 +125,6 @@ jobs:
       # credentials and installs aren't found.
       - name: Check app identity
         run: node tools/release-identity.mjs
-
-  # Upgrade test, disabled until it is implemented:
-  #   1. Install the latest published release.
-  #   2. Seed it with fixture data, including an encrypted token.
-  #   3. Update to the candidate through Squirrel from a local feed.
-  #   4. Verify the import and that the credentials decrypt.
-  #   5. Update the candidate to candidate+1.
-  # Once it works, drop `if: false`, add it to `gha-done`, and make the
-  # release depend on it.
-  upgrade-test:
-    name: Upgrade test (${{ matrix.os }})
-    if: false
-    strategy:
-      fail-fast: false
-      matrix:
-        os:
-          - macos-latest
-          - windows-latest
-    runs-on: ${{ matrix.os }}
-    permissions:
-      contents: read
-    steps:
-      - run: echo "Upgrade test is not implemented yet" && exit 1
 
   gha-done:
     name: GitHub Actions Completed

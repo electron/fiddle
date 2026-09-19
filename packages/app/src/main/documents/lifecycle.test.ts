@@ -2,14 +2,17 @@
  * Save, replace, quit and session restore, through the real Documents service
  * with Electron's dialogs, windows and app faked.
  */
+import { EventEmitter } from 'node:events';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
+import { pathToFileURL } from 'node:url';
 
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { createFiddle } from '../../fiddle/fiddle';
 import { DEFAULT_LAYOUT } from '../../shared/stores';
+import { initFakeDocuments } from './test-helpers';
 
 let userData = '';
 const appHandlers = new Map<string, (...args: unknown[]) => void>();
@@ -83,34 +86,16 @@ async function setup(
 ) {
   const documents = await import('./service');
   const model = await import('./model');
-  const windows = new Map<string, Record<string, unknown>>();
-  documents.initDocuments({
-    hub: {
-      app: { settings: { sessionRestore: options.sessionRestore ?? false } },
-      getWindow: (id: string) => windows.get(id),
-      updateWindow: (id: string, patch: Record<string, unknown>) => {
-        windows.set(id, { ...windows.get(id), ...patch });
-        return 1;
-      },
-      onChange: () => () => undefined,
-    } as never,
-    platform: 'linux',
+  const windows = initFakeDocuments(documents, {
+    sessionRestore: options.sessionRestore,
     versions: {
       releases: () => [{ version: '30.0.0', supported: true }],
       release: (v: string) =>
         v === '30.0.0' ? { version: v, supported: true } : undefined,
       localBuild: (id: string) =>
         id === 'build' ? { id, name: 'build', path: '/builds/x' } : undefined,
-      electronVersions: {},
-    } as never,
-    github: {
-      client: () => ({ loadGist: options.loadGist }),
-      whenReady: async () => undefined,
-    } as never,
-    npm: { packument: async () => ({ versions: {} }) } as never,
-    createWindow: async (id: string, init: Record<string, unknown>) => {
-      windows.set(id, { ...init });
     },
+    github: { client: () => ({ loadGist: options.loadGist }) },
   });
   const open = (files: Record<string, string>, source: { localPath?: string } = {}) =>
     documents.openFiddleWindow({
@@ -279,6 +264,53 @@ describe('openFolderIn', () => {
   });
 });
 
+describe('a dropped file URL', () => {
+  async function setupWindow() {
+    const { documents, open } = await setup();
+    await open({ 'main.js': 'main' });
+    const contents = new EventEmitter();
+    documents.attachWindow(W, contents as never);
+    const drop = (url: string) => {
+      const event = { preventDefault: vi.fn() };
+      contents.emit('will-navigate', event, url);
+      return event;
+    };
+    return { documents, drop };
+  }
+
+  it('opens a dropped folder, and shows an error for a dropped file instead of opening its parent folder', async () => {
+    put({ 'main.js': 'from disk' });
+    const { documents, drop } = await setupWindow();
+
+    expect(drop(pathToFileURL(folder).href).preventDefault).toHaveBeenCalled();
+    await vi.waitFor(() =>
+      expect(documents.getFiddle(W).files['main.js']).toBe('from disk'),
+    );
+    expect(messageBox).not.toHaveBeenCalled();
+
+    // Opening the parent folder would read this.
+    put({ 'main.js': 'changed on disk' });
+    drop(pathToFileURL(path.join(folder, 'main.js')).href);
+    await vi.waitFor(() =>
+      expect(messageBox).toHaveBeenCalledWith(
+        W,
+        expect.objectContaining({ type: 'error' }),
+      ),
+    );
+    expect(documents.getFiddle(W).files['main.js']).toBe('from disk');
+  });
+
+  it('refuses a URL that is not a local path, without a dialog', async () => {
+    const { documents, drop } = await setupWindow();
+
+    expect(drop('file://server/share/fiddle').preventDefault).toHaveBeenCalled();
+    await new Promise((resolve) => setTimeout(resolve, 50));
+
+    expect(messageBox).not.toHaveBeenCalled();
+    expect(documents.getFiddle(W).files).toEqual({ 'main.js': 'main' });
+  });
+});
+
 describe('replacing the fiddle while a load is running', () => {
   it('asks again when text was typed in the meantime, and keeps it if the user says no', async () => {
     let finish!: (gist: unknown) => void;
@@ -355,9 +387,12 @@ describe('markPublished', () => {
 });
 
 describe('session restore', () => {
-  const entry = (windowId: string, extra: Record<string, unknown> = {}) => ({
-    windowId,
-    name: windowId,
+  /** A window ID for a one-letter (hex) name. */
+  const wid = (c: string) =>
+    `${c.repeat(8)}-${c.repeat(4)}-4${c.repeat(3)}-8${c.repeat(3)}-${c.repeat(12)}`;
+  const entry = (name: string, extra: Record<string, unknown> = {}) => ({
+    windowId: wid(name),
+    name,
     fiddle: {
       hidden: [],
       version,
@@ -404,7 +439,7 @@ describe('session restore', () => {
         .getStateStore()
         .get()
         .sessions.map((s) => s.windowId),
-    ).toEqual(['a', 'b']);
+    ).toEqual([wid('a'), wid('b')]);
 
     finish(gistResult);
     await starting;
@@ -423,9 +458,9 @@ describe('session restore', () => {
 
     await documents.startDocuments();
 
-    expect([...windows.keys()]).toEqual(['a']);
+    expect([...windows.keys()]).toEqual([wid('a')]);
     expect(messageBox).toHaveBeenCalledWith(
-      'a',
+      wid('a'),
       expect.objectContaining({
         message: 'restoreFailedMessage',
         detail: expect.stringContaining('"names":"b"'),
@@ -434,8 +469,8 @@ describe('session restore', () => {
     appHandlers.get('before-quit')!({ preventDefault: vi.fn() });
     const sessions = documents.getStateStore().get().sessions;
     expect(sessions.map((s) => [s.windowId, s.failedRestores])).toEqual([
-      ['a', undefined],
-      ['b', 1],
+      [wid('a'), undefined],
+      [wid('b'), 1],
     ]);
   });
 
@@ -453,7 +488,38 @@ describe('session restore', () => {
     // Only the new window the app opened in its place.
     const sessions = documents.getStateStore().get().sessions;
     expect(sessions).toHaveLength(1);
-    expect(sessions[0]!.windowId).not.toBe('b');
+    expect(sessions[0]!.windowId).not.toBe(wid('b'));
+  });
+
+  it('sets aside a draft it cannot read instead of deleting it with the reloaded window', async () => {
+    const loadGist = vi
+      .fn<(id: string) => Promise<unknown>>()
+      .mockImplementation(async () => gistResult);
+    const { documents, windows } = await setup({ sessionRestore: true, loadGist });
+    seed(documents, [entry('a')]);
+    const drafts = path.join(userData, 'drafts');
+    fs.mkdirSync(drafts);
+    fs.writeFileSync(
+      path.join(drafts, `${wid('a')}.json`),
+      JSON.stringify({
+        schemaVersion: 1,
+        windowId: wid('a'),
+        savedAt: '',
+        name: 'a',
+        fiddle: { files: 'not a map' },
+        baseline: {},
+        activeFile: null,
+      }),
+    );
+
+    await documents.startDocuments();
+
+    expect([...windows.keys()]).toEqual([wid('a')]);
+    await vi.waitFor(() =>
+      expect(fs.readdirSync(drafts)).toEqual([
+        expect.stringMatching(/^a{8}-.*\.unreadable-\d+\.json$/),
+      ]),
+    );
   });
 
   it('restores every window, in the order they were saved', async () => {
@@ -463,7 +529,7 @@ describe('session restore', () => {
     const { documents, windows } = await setup({ sessionRestore: true, loadGist });
     seed(documents, [entry('a'), entry('b'), entry('c')]);
     await documents.startDocuments();
-    expect([...windows.keys()]).toEqual(['a', 'b', 'c']);
-    expect(documents.getFiddle('c').files['main.js']).toBe('from the gist');
+    expect([...windows.keys()]).toEqual([wid('a'), wid('b'), wid('c')]);
+    expect(documents.getFiddle(wid('c')).files['main.js']).toBe('from the gist');
   });
 });

@@ -1,8 +1,3 @@
-/**
- * Adds windows, native dialogs and persistence to the window-free load/save
- * logic (./load.ts) and editor mirror (./model.ts), which the headless CLI
- * also uses.
- */
 import { randomUUID } from 'node:crypto';
 import fs from 'node:fs/promises';
 import path from 'node:path';
@@ -70,6 +65,7 @@ import {
   DraftScheduler,
   DraftStore,
   storedFiddleSchema,
+  WINDOW_ID_RE,
   type Draft,
   type StoredFiddle,
 } from './drafts';
@@ -105,7 +101,6 @@ import {
 
 const RECENT_LIMIT = 10;
 
-/** Operations that run the fiddle's code. */
 export type CodeExecutingOperation =
   'run' | 'install-modules' | 'auto-bisect' | 'package' | 'make';
 
@@ -115,32 +110,29 @@ const RESTORE_ATTEMPTS = 3;
 const TEMPLATE_WAIT_MS = 1500;
 
 const sessionEntrySchema = z.object({
-  windowId: z.string(),
+  windowId: z.string().regex(WINDOW_ID_RE),
   name: z.string(),
   /** Launches that failed to reopen this window from its folder or gist. */
   failedRestores: z.number().optional(),
-  /** `fileNames`: the files the window had, in display order (the order the user gave the tabs). */
+  /** `fileNames`: the files the window had, in the order the user gave the tabs. */
   fiddle: storedFiddleSchema
     .omit({ files: true })
     .extend({ fileNames: z.array(z.string()) }),
-  /** Set when `fileNames` is in display order; older sessions listed them in load order. */
-  ordered: z.boolean().optional(),
   activeFile: z.string().nullable(),
   layout: windowLayoutSchema,
   gistOwner: z.string().optional(),
 });
 type SessionEntry = z.infer<typeof sessionEntrySchema>;
 
-/** `state.json`. Loose: other modules keep their own keys here through `getStateStore()`. */
+/** `state.json`. Loose: other modules keep their own keys here. */
 const stateSchema = z.looseObject({
   sessions: z.array(sessionEntrySchema),
   recentFolders: z.array(z.string()),
-  /** Folders with a saved untrusted fiddle, by path, and its origin: untrusted until approved. */
+  /** Folders with a saved untrusted fiddle, by path: it stays untrusted until approved. */
   untrustedFolders: z.record(z.string(), storedFiddleSchema.shape.origin).optional(),
-  /** Onboarding (../ux/onboarding.ts): the tour was finished or dismissed, and the crash-reports notice was shown. */
   tourDone: z.boolean().optional(),
   crashNoticeShown: z.boolean().optional(),
-  /** The Electron version the user last picked (../versions/select.ts). New windows start with it. */
+  /** The Electron version the user last picked: new windows start with it. */
   lastVersion: VersionRefSchema.optional(),
 });
 export type AppStateFile = z.infer<typeof stateSchema>;
@@ -148,14 +140,12 @@ export type AppStateFile = z.infer<typeof stateSchema>;
 interface Deps {
   hub: StateHub;
   platform: Platform;
-  /** The release list: default version, template majors, usable gist versions and Forge options. */
   versions: Pick<
     VersionsService,
     'releases' | 'release' | 'localBuild' | 'electronVersions'
   >;
-  /** Gists load with the signed-in user's client, so private gists work, once the stored token is restored (`whenReady`). */
+  /** Gists load with the signed-in user's client, so private gists work, once the stored token is restored. */
   github: Pick<GitHubService, 'client' | 'whenReady'>;
-  /** The install-script check in the trust dialog reads a module's registry metadata. */
   npm: Pick<NpmClient, 'packument'>;
   createWindow(windowId: string, init: WindowInit): Promise<unknown>;
   /** A docs example was loaded into the window: select its version like `SetVersion`. */
@@ -217,7 +207,6 @@ function github() {
   return requireDeps().github.client();
 }
 
-/** The app's bundled `static/` folder (quick-start template, Show Me examples). */
 export function staticDir(): string {
   return app.isPackaged
     ? path.join(process.resourcesPath, 'static')
@@ -231,11 +220,7 @@ export function getStateStore(): JsonStore<AppStateFile> {
   return stateStore;
 }
 
-/**
- * Before `ready`: takes the single-instance lock and starts listening for
- * deep links (`argv`, `second-instance`, `open-url`) and `open-file`.
- * Returns false when another instance owns the lock; the caller quits.
- */
+/** Before `ready`. False when another instance owns the single-instance lock: the caller quits. */
 export function installEarlyDocumentHandlers(): boolean {
   if (!app.requestSingleInstanceLock()) return false;
   const coldLink = findDeepLinkInArgv(process.argv);
@@ -259,7 +244,7 @@ export function installEarlyDocumentHandlers(): boolean {
   return true;
 }
 
-/** The app's template loader, here and in the CLI. A missing branch is expected; a failed download is worth a warning. */
+/** A missing minimal-repro branch is expected; a failed download is worth a warning. */
 export function appTemplateLoader(options: {
   isReleasedMajor: (major: number) => boolean;
   fetch: typeof fetch;
@@ -311,7 +296,6 @@ export function initDocuments(options: Deps): void {
   draftStore = new DraftStore(path.join(userData, 'drafts'));
 }
 
-/** Reopens the last session (or a new window), offers orphaned drafts, then handles queued links and files. */
 export async function startDocuments(): Promise<void> {
   const onDisk = await draftStore.list();
   for (const id of onDisk) draftsOnDisk.add(id);
@@ -321,10 +305,11 @@ export async function startDocuments(): Promise<void> {
   sessionReady = true;
   if (docs.size === 0) await openFiddleWindow();
 
-  const orphans = [...unclaimed].flatMap((id) => {
-    const draft = draftStore.read(id);
-    return draft ? [draft] : [];
-  });
+  const orphans: Draft[] = [];
+  for (const id of unclaimed) {
+    const draft = await readDraft(id);
+    if (draft) orphans.push(draft);
+  }
   if (orphans.length > 0) {
     const { response } = await messageBox(lastFocused, {
       type: 'question',
@@ -353,19 +338,14 @@ export async function startDocuments(): Promise<void> {
   }
 }
 
-/**
- * Reopens the last session's windows, all at once. A window that can't be
- * loaded stays in the session for the next launches, and the user is told.
- */
+/** A window that can't be loaded stays in the session for later launches, and the user is told. */
 async function restoreSession(unclaimed: Set<string>): Promise<void> {
   const entries = getStateStore().get().sessions;
   for (const entry of entries) unclaimed.delete(entry.windowId);
   const prepared = await Promise.all(
     entries.map(async (entry) => {
       try {
-        const draft = draftsOnDisk.has(entry.windowId)
-          ? draftStore.read(entry.windowId)
-          : undefined;
+        const draft = await readDraft(entry.windowId);
         return { entry, doc: draft ? docFromDraft(draft) : await docFromSession(entry) };
       } catch (error) {
         log.warn('could not reopen a window', entry.windowId, error);
@@ -400,6 +380,18 @@ async function restoreSession(unclaimed: Set<string>): Promise<void> {
       detail: td('restoreFailedDetail', { names: failed.join(', ') }),
     });
   }
+}
+
+/** A draft that can't be read is set aside for manual recovery, so a clean reload of its window doesn't delete it. */
+async function readDraft(windowId: string): Promise<Draft | undefined> {
+  if (!draftsOnDisk.has(windowId)) return undefined;
+  const draft = draftStore.read(windowId);
+  if (!draft) {
+    draftsOnDisk.delete(windowId);
+    if (await draftStore.setAside(windowId))
+      log.warn('set aside an unreadable draft', windowId);
+  }
+  return draft;
 }
 
 function docFromDraft(draft: Draft): Doc {
@@ -439,9 +431,7 @@ async function docFromSession(entry: SessionEntry): Promise<Doc> {
     loaded = await newFiddle(templates, stored.version);
   }
   // The session keeps the order the user gave the tabs, and which files were hidden.
-  const files = entry.ordered
-    ? orderFiles(loaded.fiddle.files, stored.fileNames)
-    : loaded.fiddle.files;
+  const files = orderFiles(loaded.fiddle.files, stored.fileNames);
   const fiddle: Fiddle = {
     ...loaded.fiddle,
     files,
@@ -491,7 +481,6 @@ export async function openFiddleWindow(options: OpenWindowOptions = {}): Promise
   return windowId;
 }
 
-/** Called when a window is created: close prompts, focus tracking, file drops. */
 export function attachWindow(windowId: string, contents: WebContents): void {
   const win = getWindow(windowId);
   let closeApproved = false;
@@ -528,8 +517,9 @@ export function attachWindow(windowId: string, contents: WebContents): void {
       return;
     }
     void withErrorDialog(windowId, async () => {
-      const stat = await fs.stat(target);
-      await openFolderIn(windowId, stat.isDirectory() ? target : path.dirname(target));
+      if (!(await fs.stat(target)).isDirectory())
+        throw new FiddleError(ErrorCode.invalidArgument, `Not a folder: ${target}`);
+      await openFolderIn(windowId, target);
     });
   });
   contents.once('destroyed', () => onDestroyed(windowId));
@@ -611,7 +601,6 @@ function requireDoc(windowId: string | undefined): Doc {
   return doc;
 }
 
-/** Stores `doc` as the window's fiddle, pushes the store, and keeps title, panes, draft and session in step. */
 function commit(
   windowId: string,
   doc: Doc,
@@ -747,7 +736,7 @@ export function setFiddleModules(
   return updateDoc(windowId, (doc) => docSetModules(doc, modules, normalized));
 }
 
-/** What a gist holds after a publish or update: the fiddle's files and modules as they were sent, and the `fiddleRev` they came from. */
+/** What was sent to the gist, and the `fiddleRev` it came from. */
 export interface PublishedSnapshot {
   files: FileMap;
   modules: Readonly<Record<string, string>>;
@@ -755,10 +744,8 @@ export interface PublishedSnapshot {
 }
 
 /**
- * After publishing: the gist is linked and the folder unlinked, and what was
- * sent becomes the saved state, so an edit made while the request was in
- * flight stays unsaved. Does nothing if the window is gone, or another
- * fiddle, or another set of files, has taken its place.
+ * After publishing: links the gist, unlinks the folder, and makes what was sent the saved state, so an
+ * edit made while the request was in flight stays unsaved. Does nothing if another fiddle has taken the window.
  */
 export function markPublished(
   windowId: string,
@@ -794,7 +781,7 @@ export function markGistDeleted(windowId: string): number {
   });
 }
 
-/** What `ensureTrusted` resolves with. `fiddle` is the approved fiddle: callers use it, not the window's current one. */
+/** `fiddle` is the approved fiddle: callers run it, not the window's current one. */
 type TrustResult =
   | { approved: true; allowScripts: boolean; fiddle: Fiddle }
   | { approved: false; allowScripts: false };
@@ -820,10 +807,7 @@ async function modulesWithInstallScripts(
   }
 }
 
-/**
- * The window's modules with install scripts, when an approval has to list
- * them: none for a trusted origin or an approval that already allowed scripts.
- */
+/** The modules an approval has to list: none for a trusted origin or an approval that already allowed scripts. */
 export async function installScriptPackages(windowId: string): Promise<string[]> {
   const doc = requireDoc(windowId);
   if (!isUntrustedOrigin(doc.fiddle.origin) || (isTrusted(doc) && doc.approvedScripts))
@@ -832,15 +816,9 @@ export async function installScriptPackages(windowId: string): Promise<string[]>
 }
 
 /**
- * Before a code-executing operation: approves the fiddle's origin, showing
- * the native trust dialog (origin, files, dependencies, and the packages
- * with install scripts) if it is untrusted.
- *
- * The approval is bound to that origin: once the window holds a fiddle from
- * elsewhere, the next operation asks again, and a fiddle swapped in while
- * the dialog is open is never approved. Callers run the returned `fiddle`.
- * `allowScripts` says whether install scripts may run; `requireScripts`
- * asks again when an earlier approval left them off.
+ * Approves the fiddle's origin before it runs code, with the native trust dialog if it is untrusted.
+ * The approval is bound to the origin: a fiddle swapped in later, or while the dialog is open, needs
+ * its own. `requireScripts` asks again when an earlier approval left install scripts off.
  */
 export async function ensureTrusted(
   windowId: string,
@@ -930,6 +908,7 @@ async function confirmReplace(windowId: string): Promise<boolean> {
     message: td('replaceMessage'),
     detail: td('replaceDetail', { name: doc.name }),
     ok: td('discard'),
+    defaultId: 1,
   });
 }
 
@@ -1060,7 +1039,7 @@ function confirmDocsExample(
   });
 }
 
-/** A gist URL or an `electron-fiddle://` link dropped on the window. */
+/** Text dropped on the window counts only if it is a deep link or a gist URL. */
 export async function openDropped(windowId: string, text: string): Promise<void> {
   const trimmed = text.trim().split(/\s+/)[0] ?? '';
   if (isDeepLink(trimmed)) {
@@ -1096,21 +1075,21 @@ export async function openFolderIn(
     dir = picked;
   }
   const folder = path.resolve(dir);
-  const open = [...docs].find(([, doc]) => samePath(doc.fiddle.source.localPath, folder));
+  const findOpen = () =>
+    [...docs].find(([, doc]) => samePath(doc.fiddle.source.localPath, folder));
+  const open = findOpen();
   if (open) {
     focusWindow(open[0]);
     return;
   }
-  let loaded = false;
-  await replaceIn(windowId, async (context) => {
-    const result = withFolderTrust(folder, await loadFolder(folder, context));
-    loaded = true;
-    return result;
-  });
-  if (loaded) addRecentFolder(folder);
+  await replaceIn(windowId, async (context) =>
+    withFolderTrust(folder, await loadFolder(folder, context)),
+  );
+  // A declined replace prompt leaves the folder unopened.
+  if (findOpen()) addRecentFolder(folder);
 }
 
-/** The files a save into the fiddle's own folder deletes because the fiddle no longer has them. Any other folder holds none of ours. */
+/** The files a save into the fiddle's own folder deletes because the fiddle no longer has them. */
 function removedBySave(
   doc: Doc,
   dir: string,
@@ -1156,6 +1135,7 @@ export async function saveIn(
         message: td('overwriteMessage', { folder: path.basename(dir) }),
         detail: td('overwriteDetail', { files: existing.join(', ') }),
         ok: td('replace'),
+        defaultId: 1,
       }))
     ) {
       return false;
@@ -1329,7 +1309,8 @@ async function handleDeepLink(url: string): Promise<void> {
       link.kind === 'gist' &&
       shouldOfferSignIn(error, Boolean(hub().app.githubLogin))
     ) {
-      await offerSignIn(target ?? lastFocused, url);
+      const host = target ?? lastFocused;
+      await withErrorDialog(host, () => offerSignIn(host, url));
       return;
     }
     await showError(target, td('loadFailed'), error);
@@ -1338,7 +1319,7 @@ async function handleDeepLink(url: string): Promise<void> {
 
 let stopSignInRetry: (() => void) | undefined;
 
-/** A deep-linked gist that may be private: asks to sign in, opens the sign-in dialog, and handles the link again once a login is set. */
+/** Asks to sign in for a gist link that may be private, then handles the link again once a login is set. */
 async function offerSignIn(windowId: string | undefined, url: string): Promise<void> {
   if (
     !(await confirm(windowId, {
@@ -1349,6 +1330,10 @@ async function offerSignIn(windowId: string | undefined, url: string): Promise<v
   ) {
     return;
   }
+  // With every window closed (macOS) there is no window to show the sign-in dialog in.
+  const id = getWindow(windowId) ? windowId : await openFiddleWindow();
+  const win = getWindow(id);
+  if (!win) return;
   const stop = hub().onChange((change) => {
     if (change.store !== 'app' || !hub().app.githubLogin) return;
     stop();
@@ -1356,7 +1341,10 @@ async function offerSignIn(windowId: string | undefined, url: string): Promise<v
     deepLinks.push(url);
   });
   stopSignInRetry = stop;
-  sendWindowCommand(windowId, 'gist.signIn');
+  // A new window only listens for commands once its page is ready, which is when it is shown.
+  if (id !== windowId && !win.isVisible())
+    win.once('show', () => sendWindowCommand(id, 'gist.signIn'));
+  else sendWindowCommand(id, 'gist.signIn');
 }
 
 function storeFiddle(fiddle: Fiddle): StoredFiddle {
@@ -1388,17 +1376,21 @@ function restoreFiddle(stored: StoredFiddle): Fiddle {
 function writeDraft(windowId: string): void {
   const doc = docs.get(windowId);
   if (!doc || !isDirty(doc)) return;
-  draftsOnDisk.add(windowId);
-  draftStore.write({
-    windowId,
-    savedAt: new Date().toISOString(),
-    name: doc.name,
-    fiddle: storeFiddle(doc.fiddle),
-    baseline: doc.baseline,
-    baselineModules: { ...doc.baselineModules },
-    activeFile: doc.activeFile,
-    ...(doc.gistOwner ? { gistOwner: doc.gistOwner } : {}),
-  });
+  try {
+    draftStore.write({
+      windowId,
+      savedAt: new Date().toISOString(),
+      name: doc.name,
+      fiddle: storeFiddle(doc.fiddle),
+      baseline: doc.baseline,
+      baselineModules: { ...doc.baselineModules },
+      activeFile: doc.activeFile,
+      ...(doc.gistOwner ? { gistOwner: doc.gistOwner } : {}),
+    });
+    draftsOnDisk.add(windowId);
+  } catch (error) {
+    log.warn('could not write a draft', windowId, error);
+  }
 }
 
 async function removeDraft(windowId: string): Promise<void> {
@@ -1417,7 +1409,6 @@ function sessionEntries(): SessionEntry[] {
       windowId,
       name: doc.name,
       fiddle: { ...fiddle, fileNames: Object.keys(files) },
-      ordered: true,
       activeFile: doc.activeFile,
       layout: deps?.hub.getWindow(windowId)?.layout ?? DEFAULT_LAYOUT,
     };

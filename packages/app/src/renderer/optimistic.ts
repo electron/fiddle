@@ -1,8 +1,6 @@
 /**
- * Optimistic changes on top of a store. A change shows at once; it stays until
- * the store reaches the `rev` main answered with, so a push from before it
- * can't undo it, and it goes when main rejects it (the error is a toast).
- * Keep one per store.
+ * Optimistic changes on top of a store: a change shows at once and stays until the store reaches the `rev` main
+ * answered with, so an older push can't undo it. It goes when main rejects it. Keep one per store.
  */
 import { useEffect, useMemo } from 'react';
 

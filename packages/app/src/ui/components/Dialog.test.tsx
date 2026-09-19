@@ -111,6 +111,15 @@ describe('confirmDialog', () => {
     return result;
   };
 
+  it('resolves true when confirmed', async () => {
+    const result = ask();
+    expect(
+      await screen.findByRole('alertdialog', { name: 'Delete main.js?' }),
+    ).toBeTruthy();
+    fireEvent.click(screen.getByRole('button', { name: 'Delete' }));
+    await expect(result).resolves.toBe(true);
+  });
+
   it('starts on Cancel when the action destroys something, so a stray Enter keeps it', async () => {
     const result = ask();
     const cancel = await screen.findByRole('button', { name: 'Cancel' });
@@ -129,6 +138,70 @@ describe('confirmDialog', () => {
 });
 
 describe('promptDialog', () => {
+  const ask = (defaultValue?: string) => {
+    render(<DialogHost />);
+    let result!: Promise<string | null>;
+    act(() => {
+      result = promptDialog({
+        title: 'Name this fiddle',
+        label: 'Name',
+        defaultValue,
+        confirmLabel: 'Save',
+        cancelLabel: 'Cancel',
+      });
+    });
+    return result;
+  };
+
+  it('returns the typed value', async () => {
+    const result = ask('untitled');
+    fireEvent.change(await screen.findByRole('textbox', { name: 'Name' }), {
+      target: { value: 'window-vibrancy' },
+    });
+    fireEvent.click(screen.getByRole('button', { name: 'Save' }));
+    await expect(result).resolves.toBe('window-vibrancy');
+  });
+
+  it('returns null when cancelled', async () => {
+    const result = ask();
+    fireEvent.click(await screen.findByRole('button', { name: 'Cancel' }));
+    await expect(result).resolves.toBeNull();
+  });
+
+  it('resolves with the value when the form is submitted, as Enter in the field does', async () => {
+    const result = ask('untitled');
+    const field = await screen.findByRole('textbox', { name: 'Name' });
+    fireEvent.change(field, { target: { value: 'renamed' } });
+    fireEvent.submit(field.closest('form')!);
+    await expect(result).resolves.toBe('renamed');
+  });
+
+  it('gives focus back to what opened it once the prompt is gone', async () => {
+    render(
+      <>
+        <button type="button">Opener</button>
+        <DialogHost />
+      </>,
+    );
+    const opener = screen.getByRole('button', { name: 'Opener' });
+    act(() => opener.focus());
+    let result!: Promise<string | null>;
+    act(() => {
+      result = promptDialog({
+        title: 'Name this fiddle',
+        label: 'Name',
+        confirmLabel: 'Save',
+        cancelLabel: 'Cancel',
+      });
+    });
+    const field = await screen.findByRole('textbox', { name: 'Name' });
+    await waitFor(() => expect(document.activeElement).toBe(field));
+    fireEvent.submit(field.closest('form')!);
+    await expect(result).resolves.toBe('');
+    await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull());
+    await waitFor(() => expect(document.activeElement).toBe(opener));
+  });
+
   it('shows a replacing prompt its own default, even under the same title', async () => {
     render(<DialogHost />);
     let first!: Promise<string | null>;

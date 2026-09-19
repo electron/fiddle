@@ -1,15 +1,3 @@
-/**
- * Which sidebar group a fiddle file belongs to, for the sidebar sections, the
- * tab row's process label and the split view. Pure; no DOM.
- *
- * Groups are inferred from names alone:
- * - main: the main entry, and helper scripts named `main-*` or `main.*`;
- * - preload: `preload.{js,cjs,mjs}` and scripts named `preload-*` or `preload.*`;
- * - renderer: every `.html` and `.css` file, `renderer.{js,cjs,mjs}` and
- *   scripts named `renderer-*` or `renderer.*`;
- * - other: everything else, such as JSON files and `utils.js`.
- * Only `isMainEntry` names count as the main entry; `main-menu.js` is a helper.
- */
 import { assertCanAddFile } from '../../fiddle/files';
 
 export type FileProcess = 'main' | 'preload' | 'renderer' | 'other';
@@ -64,10 +52,8 @@ function canAdd(existing: readonly string[], name: string): boolean {
 }
 
 /**
- * The name the "add file" prompt of a group starts with: the group's own name
- * (`preload.js`), or, when the file rules refuse that (it exists, or it would
- * be a second main entry), the first free `preload-2.js`, `preload-3.js`, ….
- * Other has no naming convention, so its prompt starts empty.
+ * The name an "add file" prompt starts with: the group's own (`preload.js`), or the first free `preload-2.js`,
+ * `preload-3.js`, … when the file rules refuse that. `other` has no convention, so its prompt starts empty.
  */
 export function suggestFileName(
   process: FileProcess,

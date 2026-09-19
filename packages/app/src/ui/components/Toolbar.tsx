@@ -47,14 +47,14 @@ export interface ToolbarButtonProps extends Omit<
   icon?: IconName;
   /** Visible label. Leave out for a 36 × 36 icon button. */
   children?: ReactNode;
-  /** Accessible name; required when there's no visible label. */
-  label?: string;
+  /** Accessible name when there's no visible label. */
+  label: string;
   isPressed?: boolean;
   className?: string;
   style?: CSSProperties;
 }
 
-/** A standalone 36px glass capsule button on the chrome, such as Publish and Settings. */
+/** A standalone 36px glass capsule button on the chrome. */
 export function ToolbarButton({
   icon,
   children,

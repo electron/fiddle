@@ -104,3 +104,16 @@
   border-radius: var(--lu-radius-round);
   background: var(--lu-ink-faint);
 }
+
+/* Forced colors drops the fill that marks the selected row. */
+@media (forced-colors: active) {
+  .row[data-selected] {
+    outline: 2px solid var(--lu-ink);
+    outline-offset: -2px;
+  }
+
+  .row[data-selected][data-focus-visible] {
+    outline: 3px solid var(--lu-focus-ring);
+    outline-offset: -3px;
+  }
+}

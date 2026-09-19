@@ -1,8 +1,3 @@
-/**
- * Shows each storage notice (a corrupt or too-new data file, from main's
- * JSON stores) once as a toast that stays until dismissed. Mount it once per
- * window, next to the Toaster.
- */
 import { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 

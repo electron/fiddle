@@ -1,16 +1,8 @@
 #!/usr/bin/env node
-// `yarn fiddle <command>`: the headless CLI against the dev build.
-//
-// Builds main in development mode (like `yarn start:xvfb`, main only), then
-// runs `electron <app> --headless <command>` in the caller's directory,
-// passing stdio through and exiting with the CLI's exit code. Run
-// `yarn generate` first if the i18n catalogs or EIPC schemas changed.
-//
-//   FIDDLE_CLI_SKIP_BUILD=1   reuse the last build of main
-//   FIDDLE_CLI_VERBOSE=1      keep main's info logs (on stderr)
-//
-// Headless mode needs no display, but a fiddle that opens windows does: on a
-// Linux machine without one, use `xvfb-run -a yarn fiddle run ...`.
+// `yarn fiddle <command>`: builds main in development mode, then runs
+// `electron <app> --headless <command>` in the caller's directory and exits with its code.
+// FIDDLE_CLI_SKIP_BUILD=1 reuses the last build; FIDDLE_CLI_VERBOSE=1 keeps main's info logs.
+// A fiddle that opens windows needs a display: on Linux without one, use `xvfb-run -a yarn fiddle run ...`.
 import path from 'node:path';
 
 import electronPath from 'electron';

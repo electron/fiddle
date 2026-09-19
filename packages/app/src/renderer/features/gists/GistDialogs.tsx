@@ -4,7 +4,6 @@ import { PublishDialog } from './PublishDialog';
 import { SignInDialog } from './SignInDialog';
 import { closeGistDialog, useGistDialog } from './state';
 
-/** Renders whichever gist dialog is open. Mounted once, by PublishButton. */
 export function GistDialogs() {
   const dialog = useGistDialog();
   if (!dialog) return null;

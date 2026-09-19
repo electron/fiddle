@@ -1,13 +1,8 @@
 /**
- * A Windows and Linux style menu bar for the title bar, its menus drawn like
- * Menu.tsx's. react-aria has menus but no menu bar, and its menus are modal
- * (an underlay swallows the hover that switches menus), so the bar runs its
- * own, with the keyboard behaviour of a native one: arrows, first-letter
- * jumps, Alt or F10 to focus the bar, and Alt+letter mnemonics.
- *
- * Choosing an item closes everything and restores focus first, then calls
- * `onAction`, so Cut or Format document act on what had focus. Pressing a
- * title never takes focus itself.
+ * react-aria has no menu bar, and its menus are modal (an underlay swallows the hover that
+ * switches menus), so the bar runs its own. Choosing an item closes everything and restores
+ * focus first, then calls `onAction`, so Cut or Format document act on what had focus.
+ * Pressing a title never takes focus itself.
  */
 import {
   useEffect,
@@ -90,7 +85,7 @@ export function deriveMnemonics(labels: readonly string[]): (Mnemonic | undefine
   });
 }
 
-/** The ids of the trailing More button's menu, and of the one Menu button a bar too narrow for two titles folds into. */
+/** The ids of the More button's menu, and of the one Menu button a bar too narrow for two titles folds into. */
 const MORE_ID = 'menubar:more';
 const MENU_ID = 'menubar:menu';
 /** Fewer titles than this beside the More button, and the bar folds into the Menu button instead. */
@@ -146,7 +141,7 @@ export function MenuBar({
   /** The first menu after opening animates in; switching along the bar doesn't. */
   const [entering, setEntering] = useState(false);
 
-  // All the titles; or the ones that fit and a More button holding the rest; or one Menu button holding everything.
+  // All the titles, or those that fit plus a More button, or one Menu button.
   const shownCount = Math.min(shown, menus.length);
   const folded = shownCount < menus.length;
   const compact = folded && shownCount < MIN_TITLES;
@@ -514,7 +509,7 @@ export function MenuBar({
     if (panels.length > 0 && openTop !== index) openTopMenu(index, 'panel', false);
   };
 
-  /** The pointer reached an item: it takes the focus, and after a beat its submenu opens (or a sibling's closes). */
+  /** The pointer reached an item: it takes focus, and after a beat its submenu opens (or a sibling's closes). */
   const onItemMouseEnter = (
     event: ReactMouseEvent<HTMLElement>,
     menu: MenuBarMenu,
@@ -541,9 +536,8 @@ export function MenuBar({
     } else activate(node);
   };
 
-  // Alt, F10 and Alt+letter, wherever focus is. In the capture phase, after the
-  // keybinding dispatcher (installed first), whose keys arrive `defaultPrevented`.
-  // A dialog keeps the keyboard to itself, and so does a field recording a shortcut.
+  // Alt, F10 and Alt+letter, wherever focus is: capture phase, after the keybinding
+  // dispatcher (installed first), whose keys arrive `defaultPrevented`.
   const onGlobalKeyDown = useEffectEvent((event: KeyboardEvent) => {
     const target = event.target instanceof Element ? event.target : null;
     if (target?.closest(INERT_TARGETS)) return;
@@ -626,8 +620,7 @@ export function MenuBar({
   }, []);
   useEffect(() => () => window.clearTimeout(hoverTimer.current), []);
 
-  // How many titles fit: measured on unseen copies (so the answer doesn't depend
-  // on what's shown), again on resize, once the fonts are in and when the menus change.
+  // How many titles fit, measured on unseen copies so the answer doesn't depend on what's shown.
   const labelsKey = menus.map((menu) => menu.label).join('\n');
   const measure = useEffectEvent(() => {
     let next = menus.length;
@@ -710,7 +703,8 @@ export function MenuBar({
           <Icon name="more" />
         </span>
       </div>
-      {/* The title bar is a drag region, which no click on reaches the page: while the bar is engaged the window is no-drag, so one closes it like any outside click. On <body> because a later drag region overrides an earlier no-drag one, and the title bar's own come after this bar. */}
+      {/* Clicks on a drag region never reach the page, so while engaged a no-drag layer catches
+          them. It is on <body>: a later drag region overrides an earlier no-drag one. */}
       {(engaged || open.length > 0) &&
         createPortal(<div className={styles.noDrag} aria-hidden="true" />, document.body)}
       {panels.length > 0 &&

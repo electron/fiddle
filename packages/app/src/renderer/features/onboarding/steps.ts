@@ -1,10 +1,6 @@
-/**
- * The onboarding tour. Each step points at an element marked
- * `data-tour="<target>"`; a step whose target isn't on screen shows its card
- * in the middle of the window instead.
- */
 import type onboarding from '../../../i18n/generated/en/onboarding';
 
+/** Each target is the `data-tour` attribute of an element. */
 export type TourTarget =
   'editor' | 'version-picker' | 'run' | 'publish' | 'console' | 'sidebar';
 type TourKey = keyof typeof onboarding;
@@ -45,10 +41,7 @@ export const CARD_WIDTH = 280;
 const GAP = 12;
 const MARGIN = 12;
 
-/**
- * Where the card goes: below the target if it fits, otherwise above, otherwise
- * over its lower part (large targets like the editor), clamped to the viewport.
- */
+/** Below the target if it fits, else above, else over its lower part (large targets), clamped to the viewport. */
 export function placeCard(
   target: Rect | null,
   card: { width: number; height: number },

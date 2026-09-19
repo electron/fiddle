@@ -1,8 +1,3 @@
-/**
- * The onboarding tour: offered on first launch until it's finished or
- * dismissed, and replayed by `help.showTour`. Coachmarks use Popover styling
- * and cut a highlighted hole around the element they explain.
- */
 import {
   useCallback,
   useEffect,
@@ -16,6 +11,8 @@ import { Dialog, Modal, ModalOverlay } from 'react-aria-components';
 
 import { documentsApi, onboardingApi, windowApi } from '../../../ipc/renderer';
 import { Button } from '../../../ui';
+import { useWindowState } from '../../state';
+import { toastError } from '../../toast-error';
 import styles from './OnboardingTour.module.css';
 import {
   BASICS_STEPS,
@@ -27,6 +24,11 @@ import {
 } from './steps';
 
 type Mode = 'off' | 'offer' | 'main' | 'basics';
+
+/** How far the highlight ring sits outside its target. */
+const HALO = 4;
+/** Where a card waits until it has been measured; it stays focusable, which `visibility: hidden` would prevent. */
+const OFFSCREEN = -9999;
 
 function findTarget(target: TourTarget | undefined): Rect | null {
   if (!target) return null;
@@ -52,26 +54,35 @@ function useTargetRect(target: TourTarget | undefined, key: unknown): Rect | nul
   return rect;
 }
 
-/** Positions a card of CARD_WIDTH once its height is known. */
-function useCardPosition(
-  place: (height: number) => { top: number; left: number },
-  deps: unknown[],
-) {
-  const card = useRef<HTMLDivElement>(null);
-  const [position, setPosition] = useState<{ top: number; left: number } | null>(null);
+interface Position {
+  top: number;
+  left: number;
+}
+
+/** Places a card of CARD_WIDTH from its measured height, and again when its content or the window changes size. */
+function useCardPosition(place: (height: number) => Position) {
+  const [card, setCard] = useState<HTMLDivElement | null>(null);
+  const [position, setPosition] = useState<Position | null>(null);
   useLayoutEffect(() => {
-    const frame = requestAnimationFrame(() =>
-      setPosition(place(card.current?.offsetHeight ?? 160)),
-    );
-    return () => cancelAnimationFrame(frame);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, deps);
-  const style = {
-    width: CARD_WIDTH,
-    top: position?.top ?? -9999,
-    left: position?.left ?? -9999,
+    if (!card) return;
+    const update = () => setPosition(place(card.offsetHeight));
+    update();
+    const observer = new ResizeObserver(update);
+    observer.observe(card);
+    window.addEventListener('resize', update);
+    return () => {
+      observer.disconnect();
+      window.removeEventListener('resize', update);
+    };
+  }, [card, place]);
+  return {
+    setCard,
+    style: {
+      width: CARD_WIDTH,
+      top: position?.top ?? OFFSCREEN,
+      left: position?.left ?? OFFSCREEN,
+    },
   };
-  return { card, style };
 }
 
 interface StepCardProps {
@@ -82,17 +93,17 @@ interface StepCardProps {
   children: ReactNode;
 }
 
-/** A modal tour step: dims the window, rings the target and contains focus. */
 function StepCard({ rect, label, onEscape, onArrow, children }: StepCardProps) {
-  const { card, style } = useCardPosition(
-    (height) =>
+  const place = useCallback(
+    (height: number) =>
       placeCard(
         rect,
         { width: CARD_WIDTH, height },
         { width: window.innerWidth, height: window.innerHeight },
       ),
-    [rect, children],
+    [rect],
   );
+  const { setCard, style } = useCardPosition(place);
   return (
     <ModalOverlay
       isOpen
@@ -104,16 +115,16 @@ function StepCard({ rect, label, onEscape, onArrow, children }: StepCardProps) {
         <div
           className={styles.hole}
           style={{
-            top: rect.top - 4,
-            left: rect.left - 4,
-            width: rect.width + 8,
-            height: rect.height + 8,
+            top: rect.top - HALO,
+            left: rect.left - HALO,
+            width: rect.width + 2 * HALO,
+            height: rect.height + 2 * HALO,
           }}
         />
       ) : (
         <div className={styles.dim} />
       )}
-      <Modal ref={card} className={styles.card} style={style}>
+      <Modal ref={setCard} className={styles.card} style={style}>
         <Dialog aria-label={label}>
           {/* Arrow keys step through the tour; Escape (the overlay) ends it. */}
           <div
@@ -131,18 +142,17 @@ function StepCard({ rect, label, onEscape, onArrow, children }: StepCardProps) {
   );
 }
 
+const placeOffer = (height: number): Position => ({
+  top: window.innerHeight - height - 48,
+  left: window.innerWidth - CARD_WIDTH - 24,
+});
+
 /** The first-launch offer: non-modal, in the bottom corner, doesn't take focus. */
 function OfferCard({ label, children }: { label: string; children: ReactNode }) {
-  const { card, style } = useCardPosition(
-    (height) => ({
-      top: window.innerHeight - height - 48,
-      left: window.innerWidth - CARD_WIDTH - 24,
-    }),
-    [],
-  );
+  const { setCard, style } = useCardPosition(placeOffer);
   return (
     <div
-      ref={card}
+      ref={setCard}
       role="dialog"
       aria-label={label}
       className={styles.card}
@@ -157,13 +167,16 @@ export function OnboardingTour() {
   const { t } = useTranslation('onboarding');
   const [mode, setMode] = useState<Mode>('off');
   const [index, setIndex] = useState(0);
+  const activeFile = useWindowState()?.fiddle.activeFile ?? null;
+  // The file that was open when the basics began, to go back to when the tour ends.
+  const returnTo = useRef<string | null>(null);
 
   useEffect(() => {
     let live = true;
     onboardingApi.ShouldOfferTour().then(
       (offer) =>
         live && offer && setMode((current) => (current === 'off' ? 'offer' : current)),
-      () => {},
+      (error: unknown) => console.error('[fiddle] checking the tour offer failed', error),
     );
     const stop = windowApi.onCommand((id) => {
       if (id !== 'help.showTour') return;
@@ -182,16 +195,19 @@ export function OnboardingTour() {
   const offersBasics = mode === 'main' && isLast;
 
   useEffect(() => {
-    if (step?.file) documentsApi.SetActiveFile(step.file).catch(() => {});
+    if (step?.file) documentsApi.SetActiveFile(step.file).catch(toastError);
   }, [step]);
 
   const rect = useTargetRect(step?.target, step);
 
   const finish = useCallback(() => {
     setMode('off');
-    onboardingApi.SetTourDone().catch(() => {});
+    onboardingApi.SetTourDone().catch(toastError);
+    if (returnTo.current) documentsApi.SetActiveFile(returnTo.current).catch(toastError);
+    returnTo.current = null;
   }, []);
   const start = (next: Mode) => {
+    if (next === 'basics') returnTo.current = activeFile;
     setIndex(0);
     setMode(next);
   };

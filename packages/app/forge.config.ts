@@ -23,7 +23,7 @@ import { extractsWithoutAddon, isTargetAddon } from './tools/native-addons';
 
 const appDir = import.meta.dirname;
 
-// Shipped UI locales (src/i18n/locales/*). Pseudo-locales are generated and never listed.
+// Pseudo-locales are generated, so only the real locale folders count.
 const shippedLocales = fs
   .readdirSync(path.join(appDir, 'src/i18n/locales'), { withFileTypes: true })
   .filter((entry) => entry.isDirectory())
@@ -42,20 +42,14 @@ const linuxOptions = {
   mimeType: ['x-scheme-handler/electron-fiddle'],
 };
 
-// Derived from Forge rather than imported from `@electron/windows-sign`, so the
-// type always matches the version Forge itself depends on.
+// Derived from Forge so the type matches the version Forge depends on.
 type WindowsSignOptions = NonNullable<MakerMSIX['config']['windowsSignOptions']>;
 
 /**
- * Windows code signing through Azure Trusted Signing.
- *
- * Authentication is not handled here. In CI, `azure/login` performs an OIDC
- * login with the Azure CLI, and the Trusted Signing dlib then picks up that
- * session through `AzureCliCredential`. This function only tells signtool
- * where the dlib lives and which account and certificate profile to use.
- *
- * Returns `undefined` when none of the Azure variables are set, so local and
- * CI builds produce unsigned artifacts. Throws when only some are set.
+ * Azure Trusted Signing. Authentication happens outside: the dlib picks up
+ * the Azure CLI session that `azure/login` leaves in CI. Returns `undefined`
+ * (an unsigned build) when no Azure variable is set, and throws when only some
+ * are.
  */
 function getWindowsSignOptions(): WindowsSignOptions | undefined {
   const {
@@ -100,9 +94,8 @@ function getWindowsSignOptions(): WindowsSignOptions | undefined {
         Endpoint: endpoint,
         CodeSigningAccountName: accountName,
         CertificateProfileName: certificateProfileName,
-        // `azure/login` leaves us with an Azure CLI session. Skip the other
-        // credential providers DefaultAzureCredential would otherwise probe,
-        // some of which (managed identity) time out slowly on GitHub runners.
+        // Skip the credential providers DefaultAzureCredential would probe
+        // besides the Azure CLI; managed identity times out slowly on runners.
         ExcludeCredentials: [
           'ManagedIdentityCredential',
           'WorkloadIdentityCredential',
@@ -126,19 +119,14 @@ function getWindowsSignOptions(): WindowsSignOptions | undefined {
     timestampServer: 'http://timestamp.acs.microsoft.com',
     // Trusted Signing certificates are SHA-256 only; no SHA-1 dual signing.
     hashes: ['sha256'] as WindowsSignOptions['hashes'],
-    // Certificate selection is done by the dlib, not by signtool's `/a`.
+    // The dlib selects the certificate, not signtool's `/a`.
     automaticallySelectCertificate: false,
   };
 }
 
 type NotarizeOptions = NonNullable<ForgeConfig['packagerConfig']>['osxNotarize'];
 
-/**
- * Notarization runs only on macOS in CI (or with FORCE_NOTARIZATION). It uses
- * an App Store Connect API key: APPLE_API_KEY is the path to the `.p8` file,
- * with APPLE_API_KEY_ID and APPLE_API_ISSUER. An Apple ID (APPLE_ID and
- * APPLE_ID_PASSWORD) is accepted as a fallback.
- */
+/** Notarizes on macOS in CI (or with FORCE_NOTARIZATION), with an Apple ID. */
 function getNotarizeOptions(): NotarizeOptions {
   if (process.platform !== 'darwin') return undefined;
 
@@ -147,21 +135,7 @@ function getNotarizeOptions(): NotarizeOptions {
     return undefined;
   }
 
-  const {
-    APPLE_API_KEY,
-    APPLE_API_KEY_ID,
-    APPLE_API_ISSUER,
-    APPLE_ID,
-    APPLE_ID_PASSWORD,
-  } = process.env;
-
-  if (APPLE_API_KEY && APPLE_API_KEY_ID && APPLE_API_ISSUER) {
-    return {
-      appleApiKey: APPLE_API_KEY,
-      appleApiKeyId: APPLE_API_KEY_ID,
-      appleApiIssuer: APPLE_API_ISSUER,
-    };
-  }
+  const { APPLE_ID, APPLE_ID_PASSWORD } = process.env;
 
   if (APPLE_ID && APPLE_ID_PASSWORD) {
     return {
@@ -171,25 +145,15 @@ function getNotarizeOptions(): NotarizeOptions {
     };
   }
 
-  console.warn(
-    'Should be notarizing, but neither APPLE_API_KEY, APPLE_API_KEY_ID and APPLE_API_ISSUER nor APPLE_ID and APPLE_ID_PASSWORD are set!',
-  );
+  console.warn('Should be notarizing, but APPLE_ID and APPLE_ID_PASSWORD are not set!');
   return undefined;
 }
 
 const windowsSignOptions = getWindowsSignOptions();
 
-/**
- * Native modules can't be bundled, so vite.main.config.mts keeps them external,
- * and Forge's Vite plugin packages only `.vite/`. This copies each one into the
- * app's node_modules, with only the target's napi-rs addon
- * (`index.<platform>-<arch>[-<abi>].node` or `index.<platform>-universal.node`).
- * `asar.unpack` keeps the addons out of the asar. None has dependencies.
- * Electron runs on glibc only, so musl addons are left out. A target with no
- * addon fails the build, unless core unpacks without one there
- * (`extractsWithoutAddon`, win32-ia32): otherwise the app can't unpack any
- * download.
- */
+// Native modules stay external in the main bundle and Forge's Vite plugin packages
+// only `.vite/`, so each is copied in with just the target's addon. A target with no
+// addon fails the build unless core extracts without one (`extractsWithoutAddon`).
 const NATIVE_MODULES = ['@electron-internal/extract-zip'];
 
 async function copyNativeModules(buildPath: string, platform: string, arch: string) {
@@ -207,30 +171,27 @@ async function copyNativeModules(buildPath: string, platform: string, arch: stri
   }
 }
 
-/**
- * Socket Firewall: module installs spawn `node sfw.mjs npm …`, so the
- * `sfw` package's entry ships outside the asar, at `<resources>/sfw.mjs`
- * (`extraResource`; src/main/platform/sfw.ts finds it). Without the package,
- * installs run without it and the console says so.
- */
-function sfwEntry(): string[] {
-  try {
-    return [createRequire(import.meta.url).resolve('sfw/dist/sfw.mjs')];
-  } catch {
-    console.warn(
-      'The sfw package is not installed, so this build ships without Socket Firewall.',
-    );
-    return [];
-  }
+// Module installs spawn `node sfw.mjs npm …` from `<resources>/sfw.mjs`, outside
+// the asar (src/main/platform/sfw.ts). `resolve` throws when the package is
+// missing, so packaging fails rather than shipping without Socket Firewall.
+const sfwEntry = () => createRequire(import.meta.url).resolve('sfw/dist/sfw.mjs');
+
+// releases.json and contributors.json are compiled into main, so the copy of
+// `static/` in `<resources>` leaves them out.
+function stageStatic(): string {
+  const source = path.join(appDir, 'static');
+  const staged = path.join(appDir, 'out', '.static');
+  fs.rmSync(staged, { recursive: true, force: true });
+  fs.cpSync(source, path.join(staged, 'static'), {
+    recursive: true,
+    filter: (file) =>
+      !['releases.json', 'contributors.json'].includes(path.relative(source, file)),
+  });
+  return path.join(staged, 'static');
 }
 
-/**
- * The macOS privacy helper (native/disclaim): fiddles start through it so they
- * don't inherit the app's privacy grants. `prePackage` builds it, universal, and
- * adds it to `extraResource` for darwin targets only, so it ships at
- * `<resources>/fiddle-disclaim` (src/main/platform/disclaim.ts finds it). It is
- * signed with the hardened runtime and no entitlements (`osxSign` below).
- */
+// The macOS helper that starts fiddles without the app's privacy grants ships at
+// `<resources>/fiddle-disclaim`, on darwin targets only.
 const DISCLAIM_HELPER = 'fiddle-disclaim';
 
 const config: ForgeConfig = {
@@ -243,19 +204,21 @@ const config: ForgeConfig = {
       });
     },
     prePackage: async (forgeConfig, platform) => {
-      if (platform !== 'darwin') return;
-      if (process.platform !== 'darwin') {
-        throw new Error('The macOS privacy helper can only be built on macOS.');
+      // `static/` holds Show Me, the quick-start template and
+      // import-local-storage.html (`staticDir()` in src/main/documents/service.ts).
+      // fiddle.png is the Linux About panel icon, which GTK reads from disk.
+      const extraResource = [stageStatic(), path.join(iconDir, 'fiddle.png'), sfwEntry()];
+      if (platform === 'darwin') {
+        if (process.platform !== 'darwin') {
+          throw new Error('The macOS privacy helper can only be built on macOS.');
+        }
+        execFileSync('sh', [path.join(disclaimDir, 'build.sh')], { stdio: 'inherit' });
+        extraResource.push(path.join(disclaimDir, 'build', DISCLAIM_HELPER));
       }
-      execFileSync('sh', [path.join(disclaimDir, 'build.sh')], { stdio: 'inherit' });
-      const packagerConfig = (forgeConfig.packagerConfig ??= {});
-      packagerConfig.extraResource = [
-        ...[packagerConfig.extraResource ?? []].flat(),
-        path.join(disclaimDir, 'build', DISCLAIM_HELPER),
-      ];
+      (forgeConfig.packagerConfig ??= {}).extraResource = extraResource;
     },
-    // Nothing at runtime reads source maps, and they are about three quarters
-    // of the asar. The release workflow uploads them from `.vite/`.
+    // Source maps are about three quarters of the asar and nothing at runtime
+    // reads them. The release workflow uploads them from `.vite/`.
     packageAfterCopy: async (_config, buildPath, _electronVersion, platform, arch) => {
       await copyNativeModules(buildPath, platform, arch);
       const built = path.join(buildPath, '.vite');
@@ -268,30 +231,10 @@ const config: ForgeConfig = {
     name: 'Electron Fiddle',
     executableName: 'electron-fiddle',
     asar: { unpack: '**/*.node' },
-    // Bundled content main reads at runtime: Show Me, the quick-start template
-    // and import-local-storage.html. Packaged builds find it at
-    // `<resources>/static`, dev runs at `<app path>/static` (`staticDir()` in
-    // src/main/documents/service.ts). releases.json and contributors.json are
-    // compiled into the bundles, so their copies here are never read.
-    extraResource: [path.join(appDir, 'static'), ...sfwEntry()],
     icon: path.join(iconDir, 'fiddle'),
     appBundleId: 'com.electron.fiddle',
     extendInfo: { CFBundleLocalizations: shippedLocales },
     appCategoryType: 'public.app-category.developer-tools',
-    usageDescription: {
-      Camera:
-        'Access is needed by certain built-in fiddles in addition to any custom fiddles that use the Camera',
-      Microphone:
-        'Access is needed by certain built-in fiddles in addition to any custom fiddles that use the Microphone',
-      Calendars:
-        'Access is needed by certain built-in fiddles in addition to any custom fiddles that may access Calendars',
-      Contacts:
-        'Access is needed by certain built-in fiddles in addition to any custom fiddles that may access Contacts',
-      Reminders:
-        'Access is needed by certain built-in fiddles in addition to any custom fiddles that may access Reminders',
-      AudioCapture:
-        'Access is needed by certain built-in fiddles in addition to any custom fiddles that may capture Audio',
-    },
     protocols: [
       { name: 'Electron Fiddle Launch Protocol', schemes: ['electron-fiddle'] },
     ],
@@ -367,7 +310,8 @@ const config: ForgeConfig = {
     new PublisherGitHub({
       repository: { owner: 'electron', name: 'fiddle' },
       draft: true,
-      prerelease: false,
+      // Publishing an alpha as a full release would make it the update target.
+      prerelease: packageJson.version.includes('-'),
       generateReleaseNotes: true,
     }),
   ],

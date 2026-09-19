@@ -1,4 +1,13 @@
-import { cp, mkdtemp, readdir, readFile, rm, stat, writeFile } from 'node:fs/promises';
+import {
+  cp,
+  mkdir,
+  mkdtemp,
+  readdir,
+  readFile,
+  rm,
+  stat,
+  writeFile,
+} from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -127,9 +136,11 @@ describe('importOldApp', () => {
       'utf8',
     );
     expect(credentials).toBe(`new:${JSON.stringify({ token, login: 'octocat' })}`);
-    expect((await stat(path.join(userData, 'credentials', 'github'))).mode & 0o777).toBe(
-      0o600,
-    );
+    if (process.platform !== 'win32') {
+      expect(
+        (await stat(path.join(userData, 'credentials', 'github'))).mode & 0o777,
+      ).toBe(0o600);
+    }
 
     const theme = JSON.parse(
       await readFile(path.join(userData, 'themes', 'dracula.json'), 'utf8'),
@@ -222,19 +233,45 @@ describe('importOldApp', () => {
     await expect(stat(path.join(userData, 'credentials', 'github'))).rejects.toThrow();
   });
 
-  it('records nothing when the old localStorage cannot be read, so the next launch tries again', async () => {
+  it('does not record the import when the old localStorage cannot be read, so the next launch tries again', async () => {
     const failing = deps({
       readLocalStorage: async () => {
         throw new Error('window failed');
       },
     });
     await expect(importOldApp(failing)).rejects.toThrow('window failed');
-    await expect(stat(path.join(userData, 'state.json'))).rejects.toThrow();
+    expect(await readJson('state.json')).toEqual({ schemaVersion: 1, storageTries: 1 });
     await expect(stat(path.join(userData, 'settings.json'))).rejects.toThrow();
 
     const result = await importOldApp(deps());
     expect(result.firstLaunch).toBe(true);
     expect(await readJson('settings.json')).toMatchObject({ theme: 'dracula' });
+    expect(await readJson('state.json')).not.toHaveProperty('storageTries');
+  });
+
+  it('goes on without the old localStorage after a few failed launches, and says so', async () => {
+    const failing = deps({
+      readLocalStorage: async () => {
+        throw new Error('window failed');
+      },
+    });
+    await expect(importOldApp(failing)).rejects.toThrow();
+    await expect(importOldApp(failing)).rejects.toThrow();
+    const result = await importOldApp(failing);
+    expect(result).toMatchObject({
+      firstLaunch: true,
+      summary: { localStorage: 'unreadable', localBuilds: 2, themes: 1 },
+    });
+    await expect(stat(path.join(userData, 'settings.json'))).rejects.toThrow();
+    expect(await readJson('state.json')).toEqual({
+      schemaVersion: 1,
+      importedFrom: {
+        version: '1.0.0',
+        at: '2026-09-13T12:00:00.000Z',
+        localStorage: 'unreadable',
+      },
+    });
+    expect((await importOldApp(failing)).firstLaunch).toBe(false);
   });
 
   it('leaves an unreadable state.json alone instead of treating it as a first launch', async () => {
@@ -300,6 +337,40 @@ describe('importElectronVersions', () => {
     } finally {
       Reflect.deleteProperty(process, 'noAsar');
     }
+  });
+
+  it("removes the temp folder a cut-short copy left, but not core's, and copies the version again", async () => {
+    const cache = path.join(root, 'cache', 'electron');
+    await mkdir(path.join(cache, '.import-30.0.0-abc123'), { recursive: true });
+    await writeFile(path.join(cache, '.import-30.0.0-abc123', 'partial'), 'x');
+    await mkdir(path.join(cache, '.tmp-31.0.0_host_1_abc'), { recursive: true });
+    await importElectronVersions(path.join(userData, 'electron-bin'), cache);
+    expect((await readdir(cache)).sort()).toEqual([
+      '.tmp-31.0.0_host_1_abc',
+      '29.1.0',
+      '30.0.0',
+    ]);
+  });
+
+  it('throws after trying every version when one could not be imported', async () => {
+    const cache = path.join(root, 'cache', 'electron');
+    const oldBin = path.join(userData, 'electron-bin');
+    await writeFile(
+      path.join(oldBin, `electron-v31.0.0-${process.platform}-${process.arch}.zip`),
+      'not a zip',
+    );
+    await expect(importElectronVersions(oldBin, cache)).rejects.toThrow('31.0.0');
+    const names = await readdir(cache);
+    expect(names).toEqual(expect.arrayContaining(['29.1.0', '30.0.0']));
+    expect(names).not.toContain('31.0.0');
+  });
+
+  it('throws when the old electron-bin folder cannot be read', async () => {
+    const file = path.join(root, 'file');
+    await writeFile(file, 'x');
+    await expect(
+      importElectronVersions(file, path.join(root, 'cache')),
+    ).rejects.toThrow();
   });
 
   it('does nothing without an old electron-bin folder', async () => {

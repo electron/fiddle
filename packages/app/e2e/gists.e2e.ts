@@ -31,7 +31,7 @@ describe('gists', () => {
   const openGist = async (value: string) => {
     await app().runCommand('gist.open');
     await app().query(role('dialog', 'Open a gist'));
-    // The field may offer a gist link from the clipboard, selected: typing over a selection replaces it.
+    // Once a gist link is on the clipboard the field offers it, selected; select all so typing replaces whatever is there.
     await app().press('CmdOrCtrl+A', role('textbox', 'Gist URL or ID'));
     await app().type(value);
   };
@@ -121,9 +121,7 @@ describe('gists', () => {
   });
 
   it('publishes with a description and visibility, then offers the link', async () => {
-    if (!(await app().snapshot(0)).includes('dialog "Publish to GitHub"')) {
-      await app().click(role('button', 'Publish'));
-    }
+    // Signing in continues the publish that asked for it.
     await app().query(role('dialog', 'Publish to GitHub'));
     expect(
       await app().evaluate(
@@ -227,8 +225,7 @@ describe('gists', () => {
   });
 
   it('deletes the gist and marks the fiddle unsaved', async () => {
-    if ((await app().snapshot(0)).includes('dialog "Gist history"'))
-      await app().press('Escape');
+    // Loading a revision closes the history.
     await app().waitForAbsent(role('dialog', 'Gist history'));
     await gistMenu('Delete gist');
     await app().query(role('alertdialog', 'Delete this gist?'));
@@ -238,16 +235,18 @@ describe('gists', () => {
     await expect.poll(async () => (await fiddle()).dirty).toBe(true);
   });
 
-  it('signs out from the settings', async () => {
+  it('signs out from the settings, and forgets the stored token', async () => {
+    // Whether sign-in stored a token depends on the OS keyring, so put one where the app keeps it.
+    const stored = path.join(app().testDir ?? '', 'userData', 'credentials', 'github');
+    fs.mkdirSync(path.dirname(stored), { recursive: true });
+    fs.writeFileSync(stored, 'stored token');
     await app().press('CmdOrCtrl+,');
     await app().click(role('button', 'GitHub'));
     await app().query(text('Signed in as fiddle-e2e'));
     await app().click(role('button', 'Sign out'));
     await app().query(text('Not signed in'));
     await expect.poll(async () => (await appState(app())).githubLogin).toBeUndefined();
-    expect(
-      fs.existsSync(path.join(app().testDir ?? '', 'userData', '.github-credentials')),
-    ).toBe(false);
+    await expect.poll(() => fs.existsSync(stored)).toBe(false);
     // The fiddle is unsaved: the harness quits after the last test.
     await app().queueDialog('messageBox', { button: 'Quit' });
   });

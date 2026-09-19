@@ -1,13 +1,3 @@
-/**
- * Session integration with the OS:
- * - taskbar and dock progress for downloads, bisect and package/make;
- * - a system notification when a long operation finishes while its window
- *   isn't focused (the `notifications` setting turns it off);
- * - the window flashes, or the dock icon bounces, when one fails;
- * - the Windows jump list and the macOS dock menu, with New window, New
- *   fiddle and recent folders.
- * Installed once, by main/index.ts.
- */
 import path from 'node:path';
 
 import {

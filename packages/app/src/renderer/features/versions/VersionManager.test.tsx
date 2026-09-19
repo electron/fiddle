@@ -1,4 +1,4 @@
-import { render, screen, within } from '@testing-library/react';
+import { fireEvent, render, screen, within } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { defaultSettings } from '../../../shared/settings';
@@ -10,6 +10,7 @@ const mocks = vi.hoisted(() => ({
   versionsApi: {
     Download: vi.fn(() => Promise.resolve()),
     Remove: vi.fn(() => Promise.resolve()),
+    DownloadAll: vi.fn((_versions: string[]) => Promise.resolve()),
   },
 }));
 
@@ -31,7 +32,10 @@ const releases = (count: number): ReleaseRow[] =>
     supported: true,
   }));
 
-const appWith = (installs: NonNullable<AppState['versions']>['installs']) =>
+const appWith = (
+  installs: NonNullable<AppState['versions']>['installs'],
+  downloadingAll = true,
+) =>
   ({
     rev: 1,
     settings: { ...defaultSettings, channels: ['stable', 'beta'] },
@@ -39,7 +43,7 @@ const appWith = (installs: NonNullable<AppState['versions']>['installs']) =>
       releasesRev: 1,
       installs,
       localBuilds: [],
-      downloadingAll: true,
+      downloadingAll,
       arch: 'x64',
     },
   }) as unknown as AppState;
@@ -58,5 +62,14 @@ describe('VersionManager', () => {
       screen.getByRole('cell', { name: version }).closest('tr')!;
     expect(within(row('40.0.0')).getByRole('button', { name: 'download' })).toBeTruthy();
     expect(within(row('41.0.0')).getByRole('button', { name: 'remove' })).toBeTruthy();
+  });
+
+  it('downloads every matching version, not only the rows on screen', () => {
+    mocks.rows = releases(250);
+    mocks.app = appWith({}, false);
+    render(<VersionManager />);
+    expect(screen.getAllByRole('cell', { name: /^\d+\.0\.0$/ })).toHaveLength(200);
+    fireEvent.click(screen.getByRole('button', { name: 'downloadAll' }));
+    expect(mocks.versionsApi.DownloadAll.mock.calls[0]?.[0]).toHaveLength(250);
   });
 });

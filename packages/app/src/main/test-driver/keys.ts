@@ -1,10 +1,3 @@
-/**
- * Key combos for `press` (Electron accelerator style) and characters for
- * `type`, mapped to what CDP's `Input.dispatchKeyEvent` takes: the DOM `key`
- * and `code`, the legacy `keyCode`, a modifier bitmask and the text the key
- * inserts. US keyboard layout. No Electron imports.
- */
-
 export type Modifier = 'shift' | 'control' | 'alt' | 'meta';
 
 /** `Input.dispatchKeyEvent` modifier bits. */
@@ -38,13 +31,7 @@ export interface KeyPress {
   modifiers: number;
   /** Text the press inserts; undefined for shortcuts and keys that type nothing. */
   text: string | undefined;
-  /**
-   * Editing commands to send with the key (CDP `commands`). On macOS, Chromium
-   * leaves Cmd+C, V, X, A, Z and Y to the Edit menu, whose roles send `copy:`
-   * and friends to the key window, which attaches them to the key event. A
-   * window that isn't key gets nothing, so the driver attaches them itself.
-   * Empty elsewhere: there Blink maps Ctrl+C and the rest on its own.
-   */
+  /** CDP `commands`, for Cmd+C, V, X, A, Z and Y on macOS: Chromium leaves them to the Edit menu, which never reaches a window that isn't key. Empty elsewhere. */
   commands: string[];
 }
 
@@ -199,13 +186,8 @@ export function keyForCharacter(char: string): KeyDefinition | undefined {
 }
 
 /**
- * Parses `CmdOrCtrl+Shift+P`, `Enter`, `ArrowDown`, `Ctrl+Shift+PageUp`, `a`.
- * `+` alone (or `Plus`) is the plus key. A letter in a shortcut is the key,
- * not the capital: `CmdOrCtrl+S` holds no Shift.
- *
- * `Shift+F10` opens the focused element's context menu on Windows and Linux.
- * Chromium ignores it on macOS, where only the Menu key does that, so there
- * it becomes that key and specs stay platform-neutral.
+ * Parses `CmdOrCtrl+Shift+P`, `Enter`, `a`. A letter in a shortcut is the key, not the capital.
+ * `Shift+F10` (context menu) is ignored by Chromium on macOS, where only the Menu key works, so it becomes that key.
  */
 export function parseKeyCombo(combo: string, platform: NodeJS.Platform): KeyPress {
   const parts = combo === '+' ? ['+'] : combo.split('+').filter((part) => part !== '');

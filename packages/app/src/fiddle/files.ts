@@ -34,10 +34,7 @@ export type FileRuleViolation =
   | 'remove-main-entry'
   | 'file-not-found';
 
-/**
- * Known files, in display order. Everything else sorts after these,
- * alphabetically.
- */
+/** Known files in display order. Everything else sorts after them, alphabetically. */
 export const KNOWN_FILES: readonly string[] = [
   'main.cjs',
   'main.js',
@@ -158,7 +155,6 @@ export function isEmptyOrPlaceholder(name: string, content: string): boolean {
   return trimmed === '' || trimmed === getPlaceholder(name);
 }
 
-/** Known files first in `KNOWN_FILES` order, then the rest alphabetically. */
 export function compareFileNames(a: string, b: string): number {
   const ia = KNOWN_FILES.indexOf(a);
   const ib = KNOWN_FILES.indexOf(b);
@@ -193,7 +189,6 @@ export function orderFiles(files: FileMap, order: readonly string[]): FileMap {
   return Object.fromEntries(names.map((name) => [name, files[name]!]));
 }
 
-/** Throws unless `name` is a valid editable file name on its own. */
 export function assertValidFileName(name: string): void {
   if (name.length === 0) throw fileRuleError('empty-name', name);
   if (hasPathSeparator(name)) throw fileRuleError('path-separator', name);
@@ -216,7 +211,6 @@ export function assertCanAddFile(existing: readonly string[], name: string): voi
     throw fileRuleError('second-main-entry', name);
 }
 
-/** Throws unless `from` can be renamed to `to` among `existing`. */
 export function assertCanRenameFile(
   existing: readonly string[],
   from: string,

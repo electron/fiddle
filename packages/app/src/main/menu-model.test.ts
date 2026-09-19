@@ -250,7 +250,7 @@ describe('activateMenuItem', () => {
     expect(() => activateMenuItem(template, 'menu:openRecent', win)).toThrow(
       expect.objectContaining({ code: 'forbidden' }),
     );
-    // Hidden items aren't in the model, but choosing one by id still just runs it: main decides visibility, not trust.
+    // A separator has no id to choose.
     expect(() => activateMenuItem(template, 'separator', win)).toThrow(FiddleError);
   });
 });

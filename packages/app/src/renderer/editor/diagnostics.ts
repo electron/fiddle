@@ -1,9 +1,3 @@
-/**
- * Per-file diagnostics for the tab badges, sidebar pills and pane headers: the
- * running fiddle's runtime errors plus Monaco's own markers (syntax errors and
- * warnings). `models.ts` reports the markers; this
- * module has no Monaco import, so the merge runs anywhere.
- */
 import { useMemo } from 'react';
 
 import { createStore, useStore } from '../store';
@@ -22,7 +16,6 @@ export interface FileDiagnostics {
 const EMPTY: readonly EditorMarker[] = [];
 const markers = createStore(EMPTY);
 
-/** Replaces Monaco's error and warning markers, one entry per marker. */
 export function setEditorMarkers(next: readonly EditorMarker[]): void {
   if (next.length === 0 && markers.get().length === 0) return;
   markers.set(next.length ? [...next] : EMPTY);

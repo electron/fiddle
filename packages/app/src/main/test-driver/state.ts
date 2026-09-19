@@ -1,4 +1,4 @@
-/** What the test harness records while the app runs. No Electron imports. */
+// No Electron imports.
 import type {
   ConsoleLine,
   DialogKind,

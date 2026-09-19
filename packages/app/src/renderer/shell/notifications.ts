@@ -1,8 +1,3 @@
-/**
- * The notification list: every toast shown in
- * this window, newest first, with its action. The status bar's bell counts
- * the ones that appeared since the list was last opened.
- */
 import { useSyncExternalStore } from 'react';
 
 import { toastQueue, type ToastContent } from '../../ui';

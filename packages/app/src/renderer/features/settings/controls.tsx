@@ -1,10 +1,3 @@
-/**
- * Setting rows. Each row shows its title and description, a mark and a reset
- * button when the value differs from its default, and hides itself when the
- * settings search doesn't match its title, description or key.
- *
- * Text fields keep typing local and commit on blur or Enter.
- */
 import { createContext, useContext, useState, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -36,6 +29,9 @@ export function useSettingText(key: SettingKey): { title: string; description: s
   return { title: t(`${key}.title`), description: t(`${key}.description`) };
 }
 
+export const titleId = (setting: SettingKey) => `setting-${setting}`;
+export const descriptionId = (setting: SettingKey) => `setting-${setting}-description`;
+
 export interface RowProps {
   setting: SettingKey;
   /** Text on the left, a compact control on the right. */
@@ -58,7 +54,7 @@ export function Row({ setting, inline, note, children }: RowProps) {
     <div className={styles.row} data-inline={inline || undefined} data-setting={setting}>
       <div className={styles.rowText}>
         <div className={styles.rowHead}>
-          <span id={`setting-${setting}`} className={styles.rowTitle}>
+          <span id={titleId(setting)} className={styles.rowTitle}>
             {title}
           </span>
           {modified && (
@@ -69,13 +65,21 @@ export function Row({ setting, inline, note, children }: RowProps) {
                 aria-label={t('modified')}
                 title={t('modified')}
               />
-              <Button size="sm" variant="ghost" onPress={() => reset(setting)}>
+              <Button
+                id={`${titleId(setting)}-reset`}
+                aria-labelledby={`${titleId(setting)}-reset ${titleId(setting)}`}
+                size="sm"
+                variant="ghost"
+                onPress={() => reset(setting)}
+              >
                 {t('reset')}
               </Button>
             </>
           )}
         </div>
-        <p className={styles.rowDescription}>{description}</p>
+        <p id={descriptionId(setting)} className={styles.rowDescription}>
+          {description}
+        </p>
         {note && <p className={styles.rowDescription}>{note}</p>}
       </div>
       <div className={styles.rowControl}>{children}</div>
@@ -92,6 +96,7 @@ export function SwitchRow({ setting }: { setting: KeysOf<boolean> }) {
     <Row setting={setting} inline>
       <Switch
         aria-label={title}
+        aria-describedby={descriptionId(setting)}
         isSelected={settings[setting]}
         onChange={(on) => set(setting, on)}
       />
@@ -137,6 +142,7 @@ export function TextRow({ setting, invalidMessage, placeholder, mono }: TextRowP
       <TextField
         className={styles.field}
         aria-label={title}
+        aria-describedby={descriptionId(setting)}
         value={draft}
         placeholder={placeholder}
         mono={mono}
@@ -193,6 +199,7 @@ export function ListRow({ setting, invalidMessage }: ListRowProps) {
             <TextField
               className={styles.listField}
               aria-label={title}
+              aria-describedby={descriptionId(setting)}
               value={row}
               mono
               isInvalid={invalid.has(index)}

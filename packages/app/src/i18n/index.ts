@@ -1,14 +1,5 @@
-/**
- * i18n shared by main and the renderer. Catalogs are compiled by
- * `yarn generate` into one small module per locale and namespace
- * (src/i18n/generated/), so startup never parses a full catalog:
- *
- * - main loads only the `main*` namespaces (menus, dialogs, notices);
- * - a window loads the shell's namespaces before first paint (renderer.ts),
- *   and the others lazily through `useTranslation('<ns>')`.
- *
- * English is the fallback, key by key.
- */
+// `yarn generate` compiles the catalogs into one module per locale and namespace,
+// so startup loads only the namespaces it needs. English is the fallback, key by key.
 import type { BackendModule, InitOptions } from 'i18next';
 
 import {
@@ -29,16 +20,12 @@ export {
 
 export const fallbackLocale: Locale = 'en';
 
-/**
- * `en-XA` (accented, about 40% longer) and `ar-XB` (right-to-left, mirrored)
- * are generated from English by `yarn generate`, for e2e and layout checks.
- * Select one with the locale setting, or `FIDDLE_LOCALE` in dev and test runs.
- */
+/** `en-XA` (accented, longer) and `ar-XB` (right-to-left) are generated for layout checks. */
 export function isPseudoLocale(locale: string): boolean {
   return (pseudoLocales as readonly string[]).includes(locale);
 }
 
-/** Real languages: the language setting's choices and macOS's CFBundleLocalizations. */
+/** Real languages: the language setting's choices. */
 export const shippedLocales: readonly Locale[] = locales.filter(
   (locale) => !isPseudoLocale(locale),
 );

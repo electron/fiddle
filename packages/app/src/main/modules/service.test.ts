@@ -41,12 +41,17 @@ describe('ModulesService', () => {
     expect(modules()).toEqual({ lodash: '4.17.21' });
   });
 
-  it('keeps an exact version and normalizes anything else', async () => {
+  it('keeps a chosen version, range or tag and resolves only a floating one', async () => {
+    npm.latestVersion.mockClear();
     const { hub, modules } = fakeHub({ a: '1.0.0' });
     const service = new ModulesService(hub, npm, log);
     await service.add('w', 'b', '2.0.0');
+    await service.add('w', 'c', '^4.18.2');
+    await service.add('w', 'd', 'next');
+    expect(modules()).toEqual({ a: '1.0.0', b: '2.0.0', c: '^4.18.2', d: 'next' });
     await service.setVersion('w', 'a', '*');
-    expect(modules()).toEqual({ a: '1.2.3', b: '2.0.0' });
+    expect(modules().a).toBe('1.2.3');
+    expect(npm.latestVersion).toHaveBeenCalledTimes(1);
   });
 
   it('rejects invalid names, specs and unknown modules', async () => {
@@ -71,10 +76,22 @@ describe('ModulesService', () => {
     expect(modules()).toEqual({ b: '2.0.0' });
   });
 
-  it('normalizes loaded non-semver versions to the latest', async () => {
-    const { hub, modules } = fakeHub({ lodash: '*', exact: '1.0.0', range: '^1.0.0' });
+  it('pins loaded floating versions and keeps the specs a fiddle declares', async () => {
+    const { hub, modules } = fakeHub({
+      lodash: '*',
+      tagged: 'latest',
+      exact: '1.0.0',
+      range: '^1.0.0',
+      tag: 'next',
+    });
     await new ModulesService(hub, npm, log).normalize('w');
-    expect(modules()).toEqual({ lodash: '4.17.21', exact: '1.0.0', range: '1.2.3' });
+    expect(modules()).toEqual({
+      lodash: '4.17.21',
+      tagged: '1.2.3',
+      exact: '1.0.0',
+      range: '^1.0.0',
+      tag: 'next',
+    });
   });
 
   it('writes user changes as edits and normalization as not', async () => {

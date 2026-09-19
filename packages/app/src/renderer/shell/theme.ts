@@ -1,11 +1,3 @@
-/**
- * Applies the appearance: following the system (the
- * default) leaves `data-theme` off so the tokens' media queries decide;
- * otherwise `data-theme` is `light` or `dark`. A custom theme sets its own
- * light/dark mode and its `common` tokens as CSS variables. High contrast (a
- * built-in high-contrast theme, or OS high contrast with Lucent) sets
- * `data-contrast="high"`, and Monaco gets a `hc-black` or `hc-light` base.
- */
 import { useEffect, useLayoutEffect } from 'react';
 
 import {

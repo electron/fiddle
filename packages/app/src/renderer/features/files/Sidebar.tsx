@@ -1,11 +1,3 @@
-/**
- * The sidebar's file list: every file in the fiddle, open in a tab or not,
- * grouped by name into Main, Preload, Renderer and Other (`processOf`), then
- * the packages section. Clicking a file opens its tab. File operations are
- * checked here for early feedback; main validates them too. Each group head has its own add button, which opens the
- * new-file prompt with the group's naming hint and a free name filled in.
- * Each row's pill counts the file's errors, or its warnings when it has none.
- */
 import { useRef, useState, type MouseEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -44,7 +36,6 @@ import styles from './Sidebar.module.css';
 /** Past this many files the sidebar offers a filter field. */
 const FILTER_THRESHOLD = 8;
 
-/** Each group head's add button label, and the naming hint its prompt shows. */
 const addInGroupKey = {
   main: 'addMainFile',
   preload: 'addPreloadFile',
@@ -68,10 +59,7 @@ export interface SidebarProps {
   onSetVisible: (name: string, visible: boolean) => void;
 }
 
-/**
- * The file menu's target. It stays set after the menu closes (`open` goes
- * false), so the items don't change while the menu animates out.
- */
+/** Stays set after the menu closes (`open` goes false), so the items don't change while it animates out. */
 interface MenuState {
   name: string;
   x: number;
@@ -102,11 +90,7 @@ export function Sidebar({
 
   const fail = (error: unknown) => toastError(error, t('fileChangeFailed'));
 
-  /**
-   * Asks for a name and adds the file. From a group head, the prompt explains
-   * the group's naming convention and starts with a free name for it; the name
-   * typed still decides the group, and validation is the same either way.
-   */
+  // From a group head the prompt starts with a free name for the group; the name typed still decides the group.
   const addFile = async (group?: FileProcess) => {
     const name = (
       await promptDialog({
@@ -162,9 +146,8 @@ export function Sidebar({
 
   // Right-click, or the context-menu key on a focused row.
   const onContextMenu = (event: MouseEvent<HTMLElement>) => {
-    // Tree rows are labelled with their text value, the file name.
     const row = (event.target as HTMLElement).closest<HTMLElement>('[role="row"]');
-    const name = row?.getAttribute('aria-label');
+    const name = row?.dataset.key;
     if (!row || !name) return;
     event.preventDefault();
     const rect = row.getBoundingClientRect();
@@ -210,7 +193,7 @@ export function Sidebar({
         return (
           <section key={process} className={styles.section}>
             <div className={styles.header}>
-              <h4 className={styles.head}>{label}</h4>
+              <h2 className={styles.head}>{label}</h2>
               <Tooltip label={addLabel}>
                 <IconButton
                   icon="plus"
@@ -238,8 +221,7 @@ export function Sidebar({
                       labelDir="ltr"
                       pill={badgeLabel(badge)}
                       pillTone={badge?.tone}
-                      unsaved={dirtyFiles.includes(file.name)}
-                      unsavedLabel={t('unsaved')}
+                      unsaved={dirtyFiles.includes(file.name) ? t('unsaved') : undefined}
                     />
                   );
                 })}

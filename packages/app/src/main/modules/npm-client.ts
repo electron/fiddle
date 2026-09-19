@@ -1,8 +1,3 @@
-/**
- * npm search (Algolia's public npm index) and version lists (the npm
- * registry). No Electron imports: main passes `net.fetch`, tests pass a stub
- * or point the endpoints at the fixture server.
- */
 import * as semver from 'semver';
 
 import { isValidPackageName, pickLatestVersion } from '../../fiddle/modules';
@@ -28,7 +23,6 @@ interface NpmEndpoints {
   registryUrl: string;
 }
 
-/** The npm endpoints from the app's endpoint set: `getEndpoints()` (src/shared/endpoints.ts). */
 export function npmEndpoints(base: {
   algolia: string;
   npmRegistry: string;
@@ -45,6 +39,7 @@ const ALGOLIA_API_KEY = '4efa2042cf4dba11be6e96e5c394e1a4';
 
 const SEARCH_LIMIT = 5;
 const VERSIONS_TTL_MS = 5 * 60_000;
+const REQUEST_TIMEOUT_MS = 30_000;
 const CACHE_SIZE = 100;
 
 export type FetchFn = (url: string, init?: RequestInit) => Promise<Response>;
@@ -216,9 +211,12 @@ export class NpmClient {
   }
 
   async #request(url: string, init: RequestInit, packageName?: string): Promise<unknown> {
+    // The timeout also covers reading the body, so a stalled connection can't leave a call pending.
+    const timeout = AbortSignal.timeout(REQUEST_TIMEOUT_MS);
+    const signal = init.signal ? AbortSignal.any([init.signal, timeout]) : timeout;
     let response: Response;
     try {
-      response = await this.#fetch(url, init);
+      response = await this.#fetch(url, { ...init, signal });
     } catch (error) {
       if (init.signal?.aborted)
         throw new FiddleError(ErrorCode.cancelled, 'The request was cancelled');

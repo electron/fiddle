@@ -14,4 +14,13 @@ describe('gistErrorHint', () => {
   ] as const)('maps %s to %s', (_what, code, hint) => {
     expect(gistErrorHint(new FiddleError(code, 'GitHub responded'))).toBe(hint);
   });
+
+  it('gives no hint when the failure reason already says what is wrong', () => {
+    const hint = (code: ErrorCode, reason?: string) =>
+      gistErrorHint(new FiddleError(code, 'x', reason ? { reason } : undefined));
+    expect(hint(ErrorCode.unavailable)).toBe('hintConnectivity');
+    expect(hint(ErrorCode.unavailable, 'rate-limited')).toBeUndefined();
+    expect(hint(ErrorCode.notFound)).toBe('hintOwnership');
+    expect(hint(ErrorCode.notFound, 'no-gist')).toBeUndefined();
+  });
 });

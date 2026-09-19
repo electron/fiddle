@@ -1,11 +1,8 @@
-/**
- * IntelliSense for the window's Electron version: the type definitions come
- * from `Versions.GetTypes` and are fetched again on `Versions.TypesChanged`.
- */
 import { useEffect } from 'react';
 
 import { versionsApi } from '../../ipc/renderer';
 import type { EditorTypes } from '../../shared/stores';
+import { log } from '../features/about/log';
 import { monaco } from './monaco';
 
 export function applyEditorTypes(types: EditorTypes | null): void {
@@ -31,7 +28,7 @@ export function useEditorTypes(): void {
         (types: EditorTypes | null | undefined) => {
           if (mine === seq) applyEditorTypes(types ?? null);
         },
-        (error: unknown) => console.error('[fiddle] loading editor types failed', error),
+        (error: unknown) => log.error('loading editor types failed', error),
       );
     };
     let unsubscribe: (() => void) | undefined;
@@ -40,7 +37,7 @@ export function useEditorTypes(): void {
       load();
     } catch (error) {
       // Versions isn't bound in this context (a test or the gallery).
-      console.error('[fiddle] editor types unavailable', error);
+      log.error('editor types unavailable', error);
     }
     return () => {
       seq += 1;

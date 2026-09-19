@@ -1,8 +1,5 @@
-/**
- * View-only editor state for this window (never persisted): the soft wrap and
- * minimap toggles, the focused editor, and its cursor for the status bar.
- */
 import { documentsApi } from '../../ipc/renderer';
+import { setEditorActionProvider } from '../features/palette/editor-actions';
 import { createStore, useStore } from '../store';
 import type { monaco } from './monaco';
 
@@ -34,10 +31,16 @@ export function setCursor(file: string, line: number, column: number): void {
   set({ cursor: { file, line, column } });
 }
 
-export function setFocusedEditor(
-  editor: monaco.editor.IStandaloneCodeEditor | null,
-): void {
+export function setFocusedEditor(editor: monaco.editor.IStandaloneCodeEditor): void {
   focused = editor;
+  // Its actions show up in the app's command palette.
+  setEditorActionProvider(() =>
+    editor.getSupportedActions().map((action) => ({
+      id: action.id,
+      label: action.label,
+      run: () => action.run(),
+    })),
+  );
 }
 
 type ViewState = monaco.editor.ICodeEditorViewState | null;
@@ -64,10 +67,7 @@ export function releaseViewState(file: string): void {
   if (renamed !== undefined && state) viewStates.set(renamed, state);
 }
 
-/**
- * Renames a file through main. Its model is recreated under the new name (the
- * name is its URI), so the editor's view state is carried over to the new name.
- */
+/** Renames a file through main. Its model is recreated under the new name, so its view state moves to it. */
 export async function renameFile(from: string, to: string): Promise<void> {
   renames.set(from, to);
   try {
@@ -80,7 +80,9 @@ export async function renameFile(from: string, to: string): Promise<void> {
 
 /** A disposed editor stops being the focused one; another pane's editor stays it. */
 export function clearFocusedEditor(editor: monaco.editor.IStandaloneCodeEditor): void {
-  if (focused === editor) focused = null;
+  if (focused !== editor) return;
+  focused = null;
+  setEditorActionProvider(undefined);
 }
 
 export async function formatFocusedEditor(): Promise<void> {

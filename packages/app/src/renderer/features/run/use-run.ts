@@ -9,8 +9,9 @@ import type {
   VersionRefValue,
 } from '../../../shared/stores';
 import { useAppState, useWindowState } from '../../state';
+import { toastError } from '../../toast-error';
 
-/** The label key of each state that shows plain text: the status bar's, and the Run button's while it is busy. */
+/** Label keys of the states that show plain text, in the status bar and the busy Run button. */
 export const STATUS_LABEL = {
   ready: 'ready',
   checking: 'checking',
@@ -27,7 +28,7 @@ export const IDLE_RUN: RunState = {
   bisect: null,
 };
 const CONSOLE_LIMIT = 1000;
-// A fiddle that colours its output (FORCE_COLOR, or a library that decides so) writes terminal escape sequences the console doesn't interpret.
+// A fiddle that colours its output (FORCE_COLOR, or a library) writes escape sequences the console doesn't interpret.
 // eslint-disable-next-line no-control-regex
 const ESCAPE_SEQUENCE = /\u001b\[[0-?]*[ -/]*[@-~]/g;
 
@@ -50,10 +51,7 @@ export function versionLabel(
   return app?.versions?.localBuilds.find((b) => b.id === ref.id)?.name;
 }
 
-/**
- * Console lines: the backlog from `Run.GetOutput`, then `Run.Output` batches.
- * Lines already seen, and lines at or below `Window.run.clearedSeq`, are dropped.
- */
+/** The backlog from `Run.GetOutput`, then `Run.Output` batches, without lines already seen or at or below `clearedSeq`. */
 export function useConsoleLines(): OutputLine[] {
   const [lines, setLines] = useState<OutputLine[]>([]);
   const clearedSeq = useRunState().clearedSeq;
@@ -73,21 +71,26 @@ export function useConsoleLines(): OutputLine[] {
           : next;
       });
     };
+    // Batches that arrive before the backlog wait for it, so nothing is lost.
+    const flush = () => {
+      const early = pending ?? [];
+      pending = null;
+      add(early);
+    };
     let unsubscribe: (() => void) | undefined;
     try {
-      // Batches that arrive before the backlog wait for it, so nothing is lost.
       unsubscribe = runApi.onOutput((batch) =>
         pending ? pending.push(...batch) : add(batch),
       );
       runApi.GetOutput().then(
         (backlog) => {
           add(backlog);
-          const early = pending ?? [];
-          pending = null;
-          add(early);
+          flush();
         },
-        (error: unknown) =>
-          console.error('[fiddle] loading console output failed', error),
+        (error: unknown) => {
+          flush();
+          if (live) toastError(error);
+        },
       );
     } catch (error) {
       console.error('[fiddle] console unavailable', error);

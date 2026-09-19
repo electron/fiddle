@@ -1,12 +1,7 @@
 /**
- * Closing the last window quits the app, except on macOS.
- *
- * The handler is installed right after `ready`, before the one-time import.
- * The import's hidden reader window (../migration/local-storage.ts) is the
- * only window while it exists, and destroying it emits `window-all-closed`.
- * Without a listener Electron would quit; with a plain "quit unless macOS"
- * listener, Linux and Windows would quit too. So the event is ignored until
- * startup has finished: before that, only hidden helper windows can close.
+ * `window-all-closed` is ignored until startup has finished: the import's hidden
+ * reader window is the only window until then, and destroying it would quit
+ * Linux and Windows.
  */
 import { app } from 'electron';
 

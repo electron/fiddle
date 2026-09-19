@@ -1,8 +1,4 @@
-/**
- * Help → "Copy diagnostics": versions, OS, and the settings that differ from
- * the defaults, without secrets. The text is for bug reports read by
- * maintainers, so its labels are not translated.
- */
+/** Help → "Copy diagnostics". The labels stay English: maintainers read the bug reports. */
 import os from 'node:os';
 
 import { app, clipboard } from 'electron';

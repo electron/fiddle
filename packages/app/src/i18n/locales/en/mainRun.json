@@ -23,6 +23,10 @@
     "message": "Couldn't start Electron: {{message}}",
     "description": "Console line when Electron can't be started."
   },
+  "runFailed": {
+    "message": "Couldn't run the fiddle: {{message}}",
+    "description": "Console line when a run fails for a reason other than a refused check or a failed install, for example a full disk. {{message}} is the system's error."
+  },
   "privacyHelperMissing": {
     "message": "The privacy helper ({{path}}) is missing or can't run, so fiddles can't start: they would share Electron Fiddle's camera, microphone and other permissions. Reinstall Electron Fiddle.",
     "description": "Console error in a packaged macOS build when the helper that starts fiddles without Electron Fiddle's privacy permissions is missing. {{path}} is where it should be."

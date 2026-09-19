@@ -1,8 +1,4 @@
-/**
- * The main-side command registry: handlers for the shared definitions in
- * src/shared/commands.ts. Native menus, the renderer (`Window.RunCommand`) and
- * e2e tests all invoke commands by ID. No Electron imports.
- */
+/** Main-side handlers for the shared command definitions. Menus, the renderer (`Window.RunCommand`) and e2e tests all run commands by ID. No Electron imports. */
 import { isCommandEnabled, isCommandId, type CommandId } from '../shared/commands';
 import { ErrorCode, FiddleError } from '../shared/errors';
 import type { StateHub } from './state-hub';

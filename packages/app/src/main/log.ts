@@ -1,13 +1,6 @@
 /**
- * The main-process logger. Entries go to the console (prefixed `[fiddle]`)
- * and, once `initLogFile()` has run, to JSON-lines files in `<userData>/logs/`:
- * `main.log`, then `main.1.log` and `main.2.log`. The file rotates at 5 MB, so
- * at most three files are kept. Secrets are redacted: token patterns, and the
- * home directory becomes `~` (see ./crash/scrub.ts). Renderer logs arrive
- * through `AppPlatform.Log`. Entries logged before `initLogFile()` are
- * buffered, then written.
- *
  * No Electron imports, so modules that log still run under plain Node tests.
+ * Entries logged before `initLogFile()` are buffered and written once it runs.
  */
 import fs from 'node:fs';
 import fsp from 'node:fs/promises';
@@ -28,23 +21,37 @@ const MAX_EARLY_LINES = 1000;
 
 const home = os.homedir();
 
-/** Makes a detail JSON-safe and redacted: errors keep name, message, stack and code; cycles are cut. */
-function toJson(value: unknown, seen: WeakSet<object>, depth: number): unknown {
-  if (value instanceof Error) {
-    const { code } = value as { code?: unknown };
-    return {
-      name: value.name,
-      message: redactSecrets(value.message, home),
-      ...(value.stack === undefined ? {} : { stack: redactSecrets(value.stack, home) }),
-      ...(code === undefined ? {} : { code: toJson(code, seen, depth + 1) }),
-    };
-  }
+/** Makes a detail JSON-safe and redacted. Cycles are cut; an object shared without cycling prints in full each time. */
+function toJson(value: unknown, seen: Set<object>, depth: number): unknown {
   if (typeof value === 'string') return redactSecrets(value, home);
   if (typeof value === 'bigint') return value.toString();
   if (typeof value === 'function' || typeof value === 'symbol') return String(value);
   if (typeof value !== 'object' || value === null) return value;
   if (seen.has(value) || depth > 8) return '[circular]';
   seen.add(value);
+  const json = objectToJson(value, seen, depth);
+  seen.delete(value);
+  return json;
+}
+
+function objectToJson(value: object, seen: Set<object>, depth: number): unknown {
+  if (value instanceof Error) {
+    const { code, details, cause } = value as {
+      code?: unknown;
+      details?: unknown;
+      cause?: unknown;
+    };
+    const extra = (name: string, item: unknown) =>
+      item === undefined ? {} : { [name]: toJson(item, seen, depth + 1) };
+    return {
+      name: value.name,
+      message: redactSecrets(value.message, home),
+      ...(value.stack === undefined ? {} : { stack: redactSecrets(value.stack, home) }),
+      ...extra('code', code),
+      ...extra('details', details),
+      ...extra('cause', cause),
+    };
+  }
   if (Array.isArray(value)) return value.map((item) => toJson(item, seen, depth + 1));
   const out: Record<string, unknown> = {};
   for (const [key, item] of Object.entries(value)) {
@@ -70,7 +77,7 @@ export function formatEntry(
     process: source,
     msg: redactSecrets(message, home),
     ...(details.length
-      ? { details: details.map((detail) => toJson(detail, new WeakSet(), 0)) }
+      ? { details: details.map((detail) => toJson(detail, new Set(), 0)) }
       : {}),
   });
 }

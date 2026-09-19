@@ -1,11 +1,3 @@
-/**
- * Runtime errors thrown by the running fiddle, shown as tab badges, sidebar
- * pills, the error line and the error lens.
- *
- * A tiny external store. Versions and run calls `setRuntimeErrors` (and
- * `revealLocation` for the console's location links); the shell reads it with
- * `useRuntimeErrors`.
- */
 import type { RuntimeErrorValue } from '../../shared/stores';
 import { createStore, useStore } from '../store';
 
@@ -35,6 +27,17 @@ const errors = createStore(EMPTY);
 const reveal = createStore<RevealRequest | null>(null);
 let claimedSeq = 0;
 
+/** Main's runtime errors in the shape the editor uses. */
+export function toEditorErrors(errors: readonly RuntimeErrorValue[]): RuntimeError[] {
+  return errors.map((error) => ({
+    file: error.file,
+    line: error.line,
+    column: error.column ?? 1,
+    message: error.message ? `${error.name}: ${error.message}` : error.name,
+    process: error.process,
+  }));
+}
+
 const sameError = (a: RuntimeError, b: RuntimeError) =>
   a.file === b.file &&
   a.line === b.line &&
@@ -42,11 +45,7 @@ const sameError = (a: RuntimeError, b: RuntimeError) =>
   a.message === b.message &&
   a.process === b.process;
 
-/**
- * Replaces the current errors. Pass `[]` to clear them (for example on the
- * next run). A list equal to the current one changes nothing, so the error
- * lenses aren't rebuilt by every store push.
- */
+/** A list equal to the current one changes nothing, so the error lenses aren't rebuilt by every store push. */
 export function setRuntimeErrors(next: readonly RuntimeError[]): void {
   const current = errors.get();
   if (
@@ -61,7 +60,6 @@ export const getRuntimeErrors = errors.get;
 
 export const useRuntimeErrors = (): readonly RuntimeError[] => useStore(errors);
 
-/** Opens the file's editor and moves the cursor to the location. */
 export function revealLocation(file: string, line: number, column: number): void {
   reveal.set({ file, line, column, seq: (reveal.get()?.seq ?? 0) + 1 });
 }
@@ -75,7 +73,6 @@ export function claimReveal(seq: number): boolean {
   return true;
 }
 
-/** Splits "TypeError: message" into its type name and the rest. */
 export function splitErrorMessage(message: string): {
   title: string | null;
   text: string;

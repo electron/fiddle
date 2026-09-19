@@ -1,7 +1,3 @@
-/**
- * Small pure rules for runs: result classification, the pre-run ESM check and
- * the generated package name. No Electron imports.
- */
 import * as semver from 'semver';
 
 import type { InstallStateValue } from '../../shared/stores';

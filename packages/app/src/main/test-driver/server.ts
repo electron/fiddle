@@ -1,4 +1,3 @@
-/** The driver's socket server and its methods (see ./protocol.ts). */
 import fs from 'node:fs';
 import net from 'node:net';
 import path from 'node:path';

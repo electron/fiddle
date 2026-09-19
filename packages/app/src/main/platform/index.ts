@@ -1,11 +1,3 @@
-/**
- * App platform behavior, started from main/index.ts after the services and
- * menu, before windows: the About panel, protocol registration, the macOS move
- * to /Applications, updates, and the background copy of old Electron versions.
- *
- * Squirrel events (./squirrel.ts) and Sentry (../crash/sentry.ts) start
- * earlier, before `ready`.
- */
 import { applyCrashReportsSetting, markCrashUiReady } from '../crash/sentry';
 import { importElectronVersionsInBackground } from '../migration';
 import type { StateHub } from '../state-hub';
@@ -28,5 +20,5 @@ export async function startPlatform(hub: StateHub, firstLaunch: boolean): Promis
   hub.onChange(() => applyCrashReportsSetting(hub.app.settings.crashReports));
   await offerMoveToApplications(firstLaunch);
   startUpdates();
-  if (firstLaunch) importElectronVersionsInBackground();
+  importElectronVersionsInBackground();
 }

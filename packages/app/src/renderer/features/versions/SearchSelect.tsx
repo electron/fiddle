@@ -1,16 +1,3 @@
-/**
- * A select whose menu starts with a search field: the version picker
- * and module versions. The trigger, value and menu look
- * like the design system's Select. Typing filters the list, and the caller
- * does the filtering, so it controls matching and order. Actions (such as
- * "Copy version number") end the menu while nothing is typed; choosing one
- * calls `onAction`, not `onChange`.
- *
- * The list can hold thousands of versions, so it's virtualized: only the
- * rows in view are in the DOM, and the list is rebuilt only when `groups` or
- * `actions` change. Row text that changes often (download progress) goes in
- * `details` instead, which re-renders the rows showing it and nothing else.
- */
 import { createContext, Fragment, memo, use, useMemo } from 'react';
 import {
   Autocomplete,
@@ -71,11 +58,7 @@ export interface SearchSelectProps {
   placeholder?: string;
   actions?: SearchOption[];
   onAction?: (id: string) => void;
-  /**
-   * Detail text by option id that replaces the option's own and may change
-   * many times a second, such as "Downloading 42%". A change re-renders the
-   * rows in view, not the list.
-   */
+  /** Detail text by option id that replaces the option's own and changes often, such as "Downloading 42%". A change re-renders the rows in view, not the list. */
   details?: Readonly<Record<string, string>>;
   /** A note under the list, such as "Showing 150 of 2,000". */
   note?: string;
@@ -87,11 +70,7 @@ export interface SearchSelectProps {
 const NO_ACTIONS: SearchOption[] = [];
 const NO_DETAILS: Readonly<Record<string, string>> = {};
 
-/**
- * Row heights in px for the virtualized list. They mirror Menu.module.css:
- * an item is size-row tall, a header is a caption line (14) with 8 above and
- * 4 below, and a separator is a hairline with 5 above and below.
- */
+/** Row heights in px for the virtualized list; they must match Menu.module.css. */
 const ROW_HEIGHT = 28;
 const HEADING_HEIGHT = 26;
 const SEPARATOR_HEIGHT = 11;
@@ -164,11 +143,7 @@ function Option({ option }: { option: SearchOption }) {
 const textLength = (option: SearchOption) =>
   option.label.length + (option.detail?.length ?? 0) + (option.hint?.length ?? 0);
 
-/**
- * Virtualized rows are positioned absolutely, so they can't size the menu.
- * These hidden, zero-height copies of the longest rows do instead, so the
- * menu still grows to fit its longest label, between 200 and 360px.
- */
+/** Virtualized rows can't size the menu, so hidden copies of the longest rows do. */
 function Sizer({
   groups,
   actions,
@@ -199,7 +174,7 @@ function Sizer({
   );
 }
 
-/** Memoized: with stable props, a re-render of the caller costs nothing here. */
+/** A select whose menu starts with a search field. The caller filters; rows are virtualized. */
 export const SearchSelect = memo(function SearchSelect({
   groups,
   value,
@@ -219,8 +194,7 @@ export const SearchSelect = memo(function SearchSelect({
 }: SearchSelectProps) {
   const inCapsule = useInCapsule();
   const showActions = actions.length > 0 && query.trim() === '';
-  // The same element while the options don't change, so a re-render of the
-  // caller (a store push) skips the list and its collection entirely.
+  // The same element while the options don't change, so a caller's re-render skips the list.
   const list = useMemo(
     () => (
       <Virtualizer layout={MenuLayout} layoutOptions={LAYOUT_OPTIONS}>

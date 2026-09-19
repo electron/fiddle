@@ -7,7 +7,7 @@
   ],
   "packageManager": "yarn@4.10.3",
   "engines": {
-    "node": ">=22.12.0"
+    "node": "^22.22.2 || ^24.15.0 || >=26.0.0"
   },
   "scripts": {
     "start": "yarn workspace electron-fiddle start",
@@ -28,11 +28,6 @@
     "fiddle": "node packages/app/tools/fiddle-cli.mjs",
     "package": "yarn workspace electron-fiddle package",
     "make": "yarn workspace electron-fiddle make"
-  },
-  "dependenciesMeta": {
-    "electron": {
-      "built": true
-    }
   },
   "resolutions": {
     "@electron-forge/maker-base": "8.0.0-alpha.10",

@@ -1,5 +1,4 @@
 // The headless CLI of the test build, in test mode against the fixture server.
-// Fiddles run with Chromium's headless Ozone backend, so no display is needed.
 import { spawn } from 'node:child_process';
 import fs from 'node:fs';
 import { createRequire } from 'node:module';
@@ -36,7 +35,8 @@ describe('headless CLI', () => {
     if (dir) fs.rmSync(dir, { recursive: true, force: true });
   });
 
-  const cli = (...args: string[]) =>
+  /** Runs the CLI, killing it after `timeout` ms so a hung run doesn't outlive the test. */
+  const cli = (timeout: number, ...args: string[]) =>
     new Promise<CliRun>((resolve, reject) => {
       const env: NodeJS.ProcessEnv = {
         ...process.env,
@@ -50,24 +50,19 @@ describe('headless CLI', () => {
       delete env.NODE_OPTIONS;
       const child = spawn(
         electron,
-        [
-          ...electronArgs(electron),
-          '--log-level=3',
-          TEST_BUILD_DIR,
-          '--headless',
-          ...args,
-        ],
-        {
-          env,
-          cwd: dir,
-        },
+        [...electronArgs(), '--log-level=3', TEST_BUILD_DIR, '--headless', ...args],
+        { env, cwd: dir, timeout, killSignal: 'SIGKILL' },
       );
       let stdout = '';
       let stderr = '';
       child.stdout.on('data', (chunk: Buffer) => (stdout += chunk.toString()));
       child.stderr.on('data', (chunk: Buffer) => (stderr += chunk.toString()));
       child.once('error', reject);
-      child.once('exit', (code) =>
+      child.once('exit', (code, signal) => {
+        if (signal === 'SIGKILL') {
+          reject(new Error(`the CLI didn't exit within ${timeout} ms\n${stderr}`));
+          return;
+        }
         resolve({
           code,
           stdout,
@@ -76,8 +71,8 @@ describe('headless CLI', () => {
             .split('\n')
             .filter((line) => line.startsWith('{'))
             .map((line) => JSON.parse(line) as Record<string, unknown>),
-        }),
-      );
+        });
+      });
     });
 
   const fiddle = (name: string, main: string) => {
@@ -86,16 +81,16 @@ describe('headless CLI', () => {
     fs.writeFileSync(path.join(folder, 'main.js'), main);
     return folder;
   };
-  // The fiddle's own Electron: no display, and no sandbox where the app's has none.
+  // The fiddle's own Electron: no display (Chromium's headless Ozone backend), and no sandbox where the app's has none.
   const fiddleFlags = () => [
     '--flag=--ozone-platform=headless',
-    ...electronArgs(electron)
+    ...electronArgs()
       .filter((arg) => arg === '--no-sandbox')
       .map((arg) => `--flag=${arg}`),
   ];
 
   it('lists versions as JSON, with the stable and beta channels by default', async () => {
-    const run = await cli('versions', 'list', '--json');
+    const run = await cli(50_000, 'versions', 'list', '--json');
     expect(run.code, run.stderr).toBe(0);
     const result = run.lines.at(-1) as {
       ok: boolean;
@@ -110,6 +105,7 @@ describe('headless CLI', () => {
 
   it("exits with the fiddle's exit code", async () => {
     const run = await cli(
+      170_000,
       'run',
       fiddle('fails', 'process.exit(3);\n'),
       '--json',
@@ -126,6 +122,7 @@ describe('headless CLI', () => {
     const main =
       "console.log('LD_PRELOAD=' + (process.env.LD_PRELOAD ?? 'unset'));\nprocess.exit(0);\n";
     const run = await cli(
+      110_000,
       'run',
       fiddle('passes', main),
       '--json',
@@ -141,7 +138,7 @@ describe('headless CLI', () => {
   }, 120_000);
 
   it('exits with 64 for an unknown command', async () => {
-    const run = await cli('nope', '--json');
+    const run = await cli(50_000, 'nope', '--json');
     expect(run.code).toBe(64);
     expect(run.lines.at(-1)).toMatchObject({ ok: false });
   }, 60_000);

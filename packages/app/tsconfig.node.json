@@ -19,7 +19,8 @@
     "src/i18n",
     "src/ipc/main.ts",
     "*.config.ts",
-    "*.config.mts"
+    "*.config.mts",
+    "tools/*.test.ts"
   ],
   "exclude": ["src/i18n/renderer.ts"]
 }

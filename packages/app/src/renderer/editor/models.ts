@@ -1,21 +1,9 @@
-/**
- * One Monaco model per fiddle file, as `inmemory://fiddle/<name>`, kept in
- * step with `Window.fiddle.files`:
- *
- * - New names and every new `fiddleRev` fetch text with `Documents.GetFiles`.
- * - Models whose names are gone are disposed. A renamed file gets a new model,
- *   so its undo history starts over: Monaco can't move a model's edit stack to
- *   another URI through its public API.
- * - Local changes go to main with `EditFile(name, text, fiddleRev)`, at most
- *   once per animation frame.
- *
- * Runtime errors are drawn here too, as model decorations and markers, so
- * every editor showing a file shows its errors. Monaco's own errors and
- * warnings are reported to `diagnostics.ts` for the badges.
- */
+// A renamed file gets a new model and so a new undo history: Monaco can't move a model's edit stack to another URI.
 import { getEditorLanguage } from '../../fiddle/files';
 import { documentsApi } from '../../ipc/renderer';
+import { log } from '../features/about/log';
 import { createStore, useStore } from '../store';
+import { toastError } from '../toast-error';
 import { setEditorMarkers, type EditorMarker } from './diagnostics';
 import { releaseViewState } from './editor-state';
 import { monaco } from './monaco';
@@ -23,7 +11,7 @@ import { getRuntimeErrors, type RuntimeError } from './runtime-errors';
 
 type Model = monaco.editor.ITextModel;
 
-/** The marker owner of the runtime errors drawn below; they count through runtime-errors.ts instead. */
+/** Runtime errors are drawn as markers of this owner; diagnostics counts them separately. */
 const RUNTIME_OWNER = 'fiddle-runtime';
 
 const models = new Map<string, Model>();
@@ -33,8 +21,16 @@ let fetchSeq = 0;
 /** True while we apply text from main, so it isn't echoed back. */
 let applying = false;
 const pendingEdits = new Set<string>();
-let frame = 0;
-/** Counts model creations and disposals. */
+/** What main holds for each file, as far as we know: the text it last sent us or we last sent it. */
+const mirrored = new Map<string, string>();
+/** While typing, a file's whole text goes to main at most this often. */
+const EDIT_INTERVAL_MS = 250;
+let flushTimer: ReturnType<typeof setTimeout> | undefined;
+let lastFlush = 0;
+/** New text is on its way from main: edits made against the old rev would be dropped, so they wait for it. */
+let refreshing = false;
+/** A send failed and none has succeeded since: the user was told once, not on every keystroke. */
+let editsFailing = false;
 const modelVersion = createStore(0);
 const synced = createStore(false);
 const errorDecorations = new Map<string, string[]>();
@@ -55,7 +51,6 @@ export function markModelsSynced(): void {
 
 export const useModelsSynced = (): boolean => useStore(synced);
 
-/** Re-renders when models are created or disposed; returns the file's model. */
 export function useModel(name: string | null | undefined): Model | undefined {
   useStore(modelVersion);
   return getModel(name);
@@ -65,18 +60,52 @@ function emitModelsChanged() {
   modelVersion.set(modelVersion.get() + 1);
 }
 
-function flushEdits() {
-  frame = 0;
+function scheduleFlush(): void {
+  flushTimer ??= setTimeout(
+    flushEdits,
+    Math.max(0, lastFlush + EDIT_INTERVAL_MS - Date.now()),
+  );
+}
+
+function flushEdits(): void {
+  clearTimeout(flushTimer);
+  flushTimer = undefined;
+  if (refreshing || pendingEdits.size === 0) return;
+  lastFlush = Date.now();
   const rev = fiddleRev;
   for (const name of pendingEdits) {
     const model = models.get(name);
     if (!model) continue;
-    documentsApi.EditFile(name, model.getValue(), rev).catch((error: unknown) => {
-      console.error('[fiddle] EditFile failed', name, error);
-    });
+    const text = model.getValue();
+    mirrored.set(name, text);
+    documentsApi.EditFile(name, text, rev).then(
+      () => {
+        editsFailing = false;
+      },
+      (error: unknown) => {
+        log.error('saving an edit failed', name, error);
+        if (!editsFailing) toastError(error);
+        editsFailing = true;
+        // Main lacks this text: the next flush sends it again.
+        mirrored.delete(name);
+        if (models.has(name)) pendingEdits.add(name);
+      },
+    );
   }
   pendingEdits.clear();
 }
+
+// Main runs and saves the text it holds, so what was typed goes before a command can read it: on any focus change
+// and on a shortcut. This listener is registered before the keybinding dispatcher's, so it hears the key first.
+window.addEventListener('blur', flushEdits, true);
+window.addEventListener(
+  'keydown',
+  (event) => {
+    if (event.ctrlKey || event.metaKey || event.altKey || /^F\d+$/.test(event.key))
+      flushEdits();
+  },
+  true,
+);
 
 function createModel(name: string, text: string): Model {
   const model = monaco.editor.createModel(text, getEditorLanguage(name), modelUri(name));
@@ -84,7 +113,7 @@ function createModel(name: string, text: string): Model {
   model.onDidChangeContent(() => {
     if (applying) return;
     pendingEdits.add(name);
-    if (!frame) frame = requestAnimationFrame(flushEdits);
+    scheduleFlush();
   });
   models.set(name, model);
   return model;
@@ -115,10 +144,6 @@ function publishMarkers(): void {
   setEditorMarkers(list);
 }
 
-/**
- * Brings the models in line with the store. Call it whenever the file list or
- * `fiddleRev` changes.
- */
 export async function syncModels(names: readonly string[], rev: number): Promise<void> {
   markerListener ??= monaco.editor.onDidChangeMarkers(publishMarkers);
   const revChanged = rev !== fiddleRev;
@@ -130,6 +155,7 @@ export async function syncModels(names: readonly string[], rev: number): Promise
     releaseViewState(name);
     errorDecorations.delete(name);
     pendingEdits.delete(name);
+    mirrored.delete(name);
     changed = true;
   }
   if (changed) publishMarkers();
@@ -139,19 +165,30 @@ export async function syncModels(names: readonly string[], rev: number): Promise
     return;
   }
   const seq = ++fetchSeq;
-  const texts = await documentsApi.GetFiles();
+  refreshing = revChanged;
+  let texts: Awaited<ReturnType<typeof documentsApi.GetFiles>>;
+  try {
+    texts = await documentsApi.GetFiles();
+  } finally {
+    if (seq === fetchSeq) refreshing = false;
+  }
   if (seq !== fetchSeq) return;
-  // Only now do edits carry the new rev: one typed while the text was on its way was made against the old
-  // text, which the new text replaces, and main must not keep it.
   fiddleRev = rev;
   if (revChanged) pendingEdits.clear();
   for (const name of names) {
     const text = Object.hasOwn(texts, name) ? (texts[name] ?? '') : '';
     const model = models.get(name);
     if (!model) createModel(name, text);
-    // A new fiddle replaces every model's text; otherwise keep local edits.
-    else if (revChanged) setText(model, text);
+    else if (revChanged) {
+      // A new fiddle replaces every model's text. A rename or an add bumps the rev too, and leaves the files as
+      // they were: text typed meanwhile, on top of what main still holds, is kept and sent again.
+      const local = model.getValue();
+      if (local !== text && text === mirrored.get(name)) pendingEdits.add(name);
+      else setText(model, text);
+    }
+    mirrored.set(name, text);
   }
+  if (pendingEdits.size > 0) scheduleFlush();
   applyRuntimeErrors(getRuntimeErrors());
   emitModelsChanged();
 }

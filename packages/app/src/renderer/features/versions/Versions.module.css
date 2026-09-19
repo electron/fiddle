@@ -17,7 +17,7 @@
   padding-bottom: var(--lu-space-1);
 }
 
-/* Chromium's own clear button isn't Lucent; Escape clears the field instead. */
+/* Chromium's own clear button isn't Lucent. */
 .search input::-webkit-search-cancel-button {
   display: none;
 }
@@ -31,8 +31,7 @@
   outline: none;
 }
 
-/* The list's rows are virtualized and positioned absolutely, so they can't
-   size the menu. These hidden copies of its longest rows do instead. */
+/* Hidden copies of the longest rows size the menu; the virtualized rows can't. */
 .sizer {
   flex: none;
   height: 0;

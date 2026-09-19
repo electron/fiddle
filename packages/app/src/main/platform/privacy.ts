@@ -1,9 +1,6 @@
 /**
- * "Reset privacy permissions", on macOS only. A fiddle starts through the
- * privacy helper (./disclaim.ts), so it is its own responsible process: the
- * camera, microphone and other grants it got belong to the stock Electron app
- * it runs on. `tccutil reset All <bundle ID>` forgets them, for that app and
- * for Electron Fiddle, after a confirmation.
+ * macOS only: `tccutil reset` forgets the camera, microphone and other grants
+ * of Electron Fiddle and of the stock Electron its fiddles run on.
  */
 import { execFile } from 'node:child_process';
 import { promisify } from 'node:util';
@@ -37,6 +34,7 @@ export async function resetPrivacyPermissions(windowId: string): Promise<boolean
     message: tp('resetPrivacyMessage'),
     detail: tp('resetPrivacyDetail'),
     ok: tp('resetPrivacyButton'),
+    defaultId: 1,
   });
   if (!ok) return false;
   try {

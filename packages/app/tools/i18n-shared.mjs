@@ -1,10 +1,6 @@
-// Catalog helpers shared by `yarn generate` (tools/generate.mjs) and the i18n
-// tools (i18n-check.mjs, i18n-translate.mjs). Plain Node, no dependencies.
-//
-// English (src/i18n/locales/en/<ns>.json) is the source: every key is
-// `{ message, description, maxLength? }`. Other locales are flat i18next JSON
-// v4 (`key: message`). A plural key is a group of `<key>_<category>` entries,
-// with the CLDR categories of each locale (German: one, other; Japanese: other).
+// Catalog helpers for `yarn generate` and the i18n tools. English is the source:
+// `{ message, description, maxLength? }` per key. Other locales are flat i18next JSON
+// (`key: message`); a plural is a group of `<key>_<category>` entries, per CLDR.
 import { createHash } from 'node:crypto';
 import fs from 'node:fs';
 import path from 'node:path';
@@ -93,10 +89,9 @@ export function pluralCategories(locale) {
 }
 
 /**
- * Splits one English namespace into translation units: a plain key, or a
- * plural group (`errorCount_one` + `errorCount_other` -> `errorCount`) that is
- * translated as a whole. A `_one` key without an `_other` stays a plain key
- * (i18n-check reports it).
+ * Splits an English namespace into translation units: a plain key, or a plural
+ * group (`errorCount_one` + `_other`) translated as a whole. A `_one` without an
+ * `_other` stays a plain key; i18n-check reports it.
  */
 export function unitsOf(entries) {
   const units = [];
@@ -338,10 +333,9 @@ const PADDING = 'one two three four five six seven eight nine ten'.split(' ');
 const PROTECTED = /(\{\{[^}]*\}\}|\$t\([^)]*\)|<[^>]+>)/;
 
 /**
- * - `en-XA`: accented and about 40% longer, in brackets, so hard-coded
- *   strings, truncation and clipped layouts stand out.
- * - `ar-XB`: every word forced right-to-left (RLO…PDF inside RLMs), so the
- *   text reads mirrored and the app runs with `dir="rtl"`.
+ * `en-XA`: accented, about 40% longer, in brackets, so hard-coded strings and
+ * clipped layouts stand out. `ar-XB`: every word forced right-to-left (RLO…PDF
+ * inside RLMs), so the text reads mirrored and the app runs with `dir="rtl"`.
  */
 export function pseudoLocalize(locale, text) {
   const parts = text.split(PROTECTED);
@@ -354,7 +348,9 @@ export function pseudoLocalize(locale, text) {
     return `[${accented}${pad}]`;
   }
   if (locale === 'ar-XB') {
-    return mapText((part) => part.replace(/\S+/g, (word) => `‏‮${word}‬‏`));
+    return mapText((part) =>
+      part.replace(/\S+/g, (word) => `\u200F\u202E${word}\u202C\u200F`),
+    );
   }
   throw new Error(`unknown pseudo-locale ${locale}`);
 }

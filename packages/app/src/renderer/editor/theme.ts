@@ -1,7 +1,3 @@
-/**
- * The Lucent editor theme, built at runtime from the `--lu-*` tokens, so
- * Monaco follows the appearance (and imported themes' `common` tokens).
- */
 import type { editor } from 'monaco-editor';
 
 export const EDITOR_TOKENS = [
@@ -101,11 +97,7 @@ function hex2(n: number): string {
     .padStart(2, '0');
 }
 
-/**
- * Converts a computed CSS colour (`rgb()`, `rgba()` or `color(srgb …)`, which
- * is what Chromium reports for `color-mix`) to `#rrggbb` or `#rrggbbaa`.
- * Returns undefined for anything else.
- */
+/** A computed `rgb()`, `rgba()` or `color(srgb …)` (what Chromium reports for `color-mix`) as `#rrggbb[aa]`; undefined for anything else. */
 export function cssColorToHex(value: string): string | undefined {
   const text = value.trim();
   if (/^#[0-9a-f]{6}([0-9a-f]{2})?$/i.test(text)) return text.toLowerCase();

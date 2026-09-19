@@ -156,10 +156,15 @@ describe('NpmClient', () => {
     await client.packument('@scope/pkg');
     expect(fetch).toHaveBeenCalledTimes(2);
     expect(fetch.mock.calls[0]?.[0]).toBe('http://fixture.test/npm/@scope%2Fpkg');
-    expect(fetch.mock.calls[0]?.[1]).toMatchObject({
+    const init = fetch.mock.calls[0]?.[1];
+    expect(init).toMatchObject({
       headers: { accept: 'application/vnd.npm.install-v1+json' },
-      signal: controller.signal,
     });
+    // The caller's signal still cancels the request; without one, a timeout signal is used.
+    expect(init?.signal?.aborted).toBe(false);
+    controller.abort();
+    expect(init?.signal?.aborted).toBe(true);
+    expect(fetch.mock.calls[1]?.[1]?.signal).toBeInstanceOf(AbortSignal);
     await expect(client.packument('-bad')).rejects.toMatchObject({
       code: 'invalid-argument',
     });

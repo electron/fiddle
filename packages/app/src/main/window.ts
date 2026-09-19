@@ -1,8 +1,3 @@
-/**
- * App windows: the OS material shows through a transparent page, and Lucent
- * paints a thin tint.
- */
-import { randomUUID } from 'node:crypto';
 import fs from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
@@ -14,10 +9,9 @@ import {
   type BrowserWindowConstructorOptions,
 } from 'electron';
 
-import { DEFAULT_LAYOUT, type Material, type Platform } from '../shared/stores';
+import type { Material, Platform } from '../shared/stores';
 import { APP_ORIGIN } from './bundle';
 import { attachContextMenu } from './context-menu';
-import { emptyFiddleState } from './documents/model';
 import { attachWindow } from './documents/service';
 import { bindWindowIpc } from './ipc';
 import { log } from './log';
@@ -26,12 +20,12 @@ import type { Services } from './services';
 import type { WindowInit } from './state-hub';
 import { trackWindow, untrackWindow } from './windows';
 
-/** Matches the renderer name in forge.config.ts and vite.renderer.config.ts. */
+/** Must match the renderer name in forge.config.ts and vite.renderer.config.mts. */
 const RENDERER_NAME = 'main_window';
+// The title bar height and `--lu-ink` must match the Lucent CSS: the OS draws the caption buttons.
 const TITLE_BAR_HEIGHT = 56;
 /** How long a loaded page may take to report ready before the window is shown anyway. */
 const READY_TIMEOUT_MS = 5000;
-/** Lucent --lu-ink, for the Windows caption buttons. */
 const INK = { light: '#1b1c26', dark: '#eef1f8' } as const;
 
 export function detectPlatform(): Platform {
@@ -96,9 +90,9 @@ export function windowOptions(
     return {
       ...common,
       titleBarStyle: 'hiddenInset',
-      // Traffic lights centred in the 56px title bar.
+      // Traffic lights centred in the title bar.
       trafficLightPosition: { x: 20, y: 22 },
-      // 'sidebar' is more translucent than 'under-window' and reads closer to the design.
+      // More translucent than 'under-window'.
       vibrancy: 'sidebar',
       visualEffectState: 'followWindow',
     };
@@ -115,25 +109,22 @@ export function windowOptions(
       ...(material === 'acrylic' ? { backgroundMaterial: 'acrylic' as const } : {}),
     };
   }
-  // Linux: native frame and no material; the renderer adds `lu-no-material`.
-  // The menu bar is drawn in the title bar, so the native one stays
-  // hidden: auto-hide keeps `Menu.setApplicationMenu` from showing it, while
-  // the menu it sets still gives the window its accelerators.
+  // Linux: native frame, no material. The menu bar is drawn in the title bar, so
+  // the native one stays hidden: auto-hide keeps `Menu.setApplicationMenu` from
+  // showing it, while the menu it sets still gives the window its accelerators.
   return { ...common, autoHideMenuBar: true };
 }
 
 export async function createAppWindow({
   services,
   url,
-  windowId = randomUUID(),
+  windowId,
   init,
 }: {
   services: Services;
   url: string;
-  /** Session restore reopens a window under its old ID. */
-  windowId?: string;
-  /** The window's initial store value; Documents provides the fiddle part. */
-  init?: WindowInit;
+  windowId: string;
+  init: WindowInit;
 }): Promise<BrowserWindow> {
   const { hub, platform } = services;
   const win = new BrowserWindow(windowOptions(platform, hub.app.material));
@@ -141,8 +132,7 @@ export async function createAppWindow({
   const contents = win.webContents;
   trackWindow(windowId, win);
   blockNavigation(contents);
-  // Documents: close prompts, focus tracking and dropped folders. Its
-  // `destroyed` handler runs before the one below, while the window is registered.
+  // Documents' `destroyed` handler must run before the one below, while the window is still registered.
   attachWindow(windowId, contents);
   attachContextMenu(windowId, contents, services);
   contents.once('destroyed', () => {
@@ -163,14 +153,8 @@ export async function createAppWindow({
         log.error('dev screenshot failed', error),
       );
     };
-    const initial = init ?? {
-      title: app.getName(),
-      view: 'editor',
-      fiddle: emptyFiddleState(),
-      layout: DEFAULT_LAYOUT,
-    };
     // Also called after every reload; only the first one shows the window.
-    bindWindowIpc({ contents, windowId, services }, initial, show);
+    bindWindowIpc({ contents, windowId, services }, init, show);
 
     // A page that loads but never reports ready (its script failed) would stay hidden for good.
     contents.on('did-finish-load', () => {
@@ -205,10 +189,9 @@ export async function createAppWindow({
 }
 
 /**
- * Dev tooling only (`yarn start:xvfb`): FIDDLE_DEV_SCREENSHOT=<file.png> saves
- * the first window once it's ready, FIDDLE_DEV_QUIT=1 then quits. Compiled out
- * of production-mode builds (`vite build` keeps `import.meta.env.DEV` false
- * even in development mode, so this checks MODE).
+ * Dev only (`yarn start:xvfb`): FIDDLE_DEV_SCREENSHOT=<file.png> saves the first
+ * ready window, FIDDLE_DEV_QUIT=1 then quits. Checks MODE because `vite build`
+ * keeps `import.meta.env.DEV` false even in development mode.
  */
 async function devScreenshot(win: BrowserWindow): Promise<void> {
   const file = process.env.FIDDLE_DEV_SCREENSHOT;

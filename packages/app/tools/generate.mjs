@@ -1,12 +1,7 @@
 #!/usr/bin/env node
-// `yarn generate`: offline and idempotent code generation.
-//
-//   1. EIPC bindings: src/ipc/*.eipc -> src/ipc/generated/
-//   2. i18n catalogs: src/i18n/locales/<locale>/<ns>.json -> src/i18n/generated/
-//
-// Generated source is committed. Files are only rewritten when their content
-// changes, so running this while other tools watch the tree is cheap, and a
-// clean checkout regenerates with no diff.
+// `yarn generate`: offline and idempotent. EIPC bindings (src/ipc/*.eipc) and i18n
+// catalogs (src/i18n/locales -> generated/) are committed and only rewritten when
+// their content changes.
 import { createHash } from 'node:crypto';
 import fs from 'node:fs/promises';
 import os from 'node:os';
@@ -153,7 +148,7 @@ function compileMessages(locale, file, raw) {
 // no committed file carries invisible direction overrides.
 function catalogModule(messages) {
   const json = JSON.stringify(messages, null, 2).replace(
-    /[‎‏‪-‮⁦-⁩]/g,
+    /[\u200E\u200F\u202A-\u202E\u2066-\u2069]/g,
     (c) => `\\u${c.charCodeAt(0).toString(16).padStart(4, '0')}`,
   );
   return `${HEADER}export default ${json} as const;\n`;
@@ -172,8 +167,7 @@ async function compileI18n() {
         `src/i18n/locales/${locale}: pseudo-locales are generated from English`,
       );
   }
-  // Pseudo-locales (en-XA, ar-XB) come last, generated from English
-  // (tools/i18n-shared.mjs), so every build can run in them.
+  // Pseudo-locales come last, generated from English.
   const locales = [...shipped, ...pseudoLocales];
 
   const wanted = new Map();

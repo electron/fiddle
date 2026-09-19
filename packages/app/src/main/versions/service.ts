@@ -1,14 +1,3 @@
-/**
- * Electron versions:
- *
- * - The release list starts from the bundled snapshot or the cached copy, and
- *   is refreshed with `net.fetch` at startup and on demand. Only `releasesRev`
- *   is stored; the list is fetched with `Versions.GetReleases`.
- * - Installs use core's `Installer` in the `per-version` layout with locks:
- *   `<cache>/electron/<version>/`. Install state and progress go in
- *   `App.versions`, at most 10 updates a second.
- * - Local builds live in `<userData>/local-builds.json`.
- */
 import { randomUUID } from 'node:crypto';
 import fs from 'node:fs';
 import fsp from 'node:fs/promises';
@@ -46,6 +35,11 @@ import { isReleaseList, toReleaseRows } from './releases';
 import { getEndpoints } from '../test-mode';
 
 const PROGRESS_INTERVAL_MS = 100;
+/** How long a local build's `available` is reused while progress publishes. */
+const BUILD_CHECK_MS = 2000;
+/** A cached release list this young is used without asking the network. */
+const RELEASES_TTL_MS = 4 * 60 * 60 * 1000;
+const RELEASES_TIMEOUT_MS = 30_000;
 
 /** `fetch` on Chromium's network stack, so the system proxy and certificates apply. */
 const netFetch: typeof fetch = (input, init) =>
@@ -61,10 +55,7 @@ type StoredBuild = z.infer<typeof storedBuildSchema>;
 const localBuildsFileSchema = z.object({ builds: z.array(storedBuildSchema) });
 type LocalBuildsFile = z.infer<typeof localBuildsFileSchema>;
 
-/**
- * core's installer on the shared cache, in the `per-version` layout, which
- * always takes cross-process locks. `options.downloader` is a `net.fetch` one.
- */
+/** core's installer on the shared cache. The `per-version` layout always takes cross-process locks. */
 export function createInstaller(
   cache: CachePaths,
   options: Pick<InstallerOptions, 'downloader'> = {},
@@ -80,28 +71,49 @@ export function createInstaller(
   );
 }
 
+type FetchList = (url: string, init?: { signal?: AbortSignal }) => Promise<Response>;
+
 interface ReleaseListText {
   text: string;
   data: unknown[];
 }
 
-/** The cached release list, or else the bundled snapshot, with its text. */
-async function readReleaseListText(cache: CachePaths): Promise<ReleaseListText> {
+/** ISO dates sort as text. */
+function newestDate(data: readonly unknown[]): string {
+  let newest = '';
+  for (const entry of data) {
+    const date = (entry as { date?: unknown }).date;
+    if (typeof date === 'string' && date > newest) newest = date;
+  }
+  return newest;
+}
+
+/**
+ * The cached release list, or the bundled snapshot when there is none or the
+ * app shipped a newer one. `fresh`: the cache is young enough to skip a fetch.
+ */
+async function readReleaseListText(
+  cache: CachePaths,
+): Promise<ReleaseListText & { fresh: boolean }> {
+  const snapshot = JSON.parse(snapshotText) as unknown[];
   try {
     const text = await fsp.readFile(cache.releases, 'utf8');
     const data: unknown = JSON.parse(text);
-    if (isReleaseList(data)) return { text, data };
+    if (isReleaseList(data) && newestDate(data) >= newestDate(snapshot)) {
+      const age = Date.now() - (await fsp.stat(cache.releases)).mtimeMs;
+      return { text, data, fresh: age >= 0 && age < RELEASES_TTL_MS };
+    }
   } catch {
-    // No cached list yet.
+    // No usable cached list.
   }
-  return { text: snapshotText, data: JSON.parse(snapshotText) as unknown[] };
+  return { text: snapshotText, data: snapshot, fresh: false };
 }
 
 async function fetchReleaseListText(
   url: string,
-  fetch: (url: string) => Promise<Response>,
+  fetch: FetchList,
 ): Promise<ReleaseListText> {
-  const response = await fetch(url);
+  const response = await fetch(url, { signal: AbortSignal.timeout(RELEASES_TIMEOUT_MS) });
   if (!response.ok) throw new Error(`HTTP ${response.status}`);
   const text = await response.text();
   const data: unknown = JSON.parse(text);
@@ -116,7 +128,6 @@ function cacheReleaseList(cache: CachePaths, text: string): Promise<void> {
   );
 }
 
-/** The cached release list, or else the bundled snapshot. */
 export async function readReleaseList(cache: CachePaths): Promise<unknown[]> {
   return (await readReleaseListText(cache)).data;
 }
@@ -125,14 +136,13 @@ export async function readReleaseList(cache: CachePaths): Promise<unknown[]> {
 export async function fetchReleaseList(
   cache: CachePaths,
   url: string,
-  fetch: (url: string) => Promise<Response>,
+  fetch: FetchList,
 ): Promise<unknown[]> {
   const { text, data } = await fetchReleaseListText(url, fetch);
   await cacheReleaseList(cache, text);
   return data;
 }
 
-/** core's `ElectronVersions` and the release rows for a release list. */
 export async function loadReleases(
   data: unknown[],
   cache: CachePaths,
@@ -160,9 +170,8 @@ export async function loadReleases(
 const withSlash = (url: string) => (url.endsWith('/') ? url : `${url}/`);
 
 /**
- * Download mirrors for the mirror settings. `auto` picks China's for a zh-CN
- * system locale. A mirror the user chose (China, or a custom one) overrides
- * `ELECTRON_MIRROR` and the like; `auto` and `default` leave those in charge.
+ * `auto` picks China's mirror for a zh-CN locale. A mirror the user chose
+ * overrides `ELECTRON_MIRROR` and the like; `auto` and `default` leave those in charge.
  */
 export function mirrorsFor(
   settings: Pick<Settings, 'mirror' | 'customMirrorElectron' | 'customMirrorNightly'>,
@@ -177,8 +186,7 @@ export function mirrorsFor(
   // The default mirror comes from the injected endpoints, so test mode uses the fixture server.
   const { electronMirror, electronNightlyMirror } = getEndpoints();
   if (kind === 'custom') {
-    // A mirror serves the binaries every run executes, so only https. The
-    // schema refuses others too; this also covers a hand-edited settings.json.
+    // Only https, since the binaries run. This also covers a hand-edited settings.json.
     const custom = (url: string) => (isHttpsUrl(url) ? withSlash(url) : undefined);
     const release = custom(settings.customMirrorElectron);
     const nightly = custom(settings.customMirrorNightly);
@@ -220,7 +228,6 @@ export async function installRelease(
   return exec;
 }
 
-/** The executable of an installed release, or undefined if it isn't installed. */
 export function installedExecPath(
   installer: Installer,
   cache: CachePaths,
@@ -237,7 +244,7 @@ interface VersionsServiceOptions {
   cache: CachePaths;
   userData: string;
   releasesUrl: string;
-  fetch: (url: string) => Promise<Response>;
+  fetch: FetchList;
   /** Versions in use by some window; they can't be removed. */
   activeVersions: () => { releases: Set<string>; builds: Set<string> };
   /** Called after a version is removed, to drop its cached types. */
@@ -251,12 +258,13 @@ export class VersionsService {
   #versions: ElectronVersions | undefined;
   #rows: ReleaseRow[] = [];
   #releasesRev = 0;
-  /** The text of the list `#rows` came from, to skip a refresh that changes nothing. */
+  /** The text `#rows` came from, so a refresh that changes nothing rebuilds nothing. */
   #releasesText: string | undefined;
   #installs: VersionsState['installs'] = {};
   #downloadAll: AbortController | undefined;
   #downloadAllFailed = false;
   #progressTimer: ReturnType<typeof setTimeout> | undefined;
+  #buildChecks = new Map<string, { at: number; available: boolean }>();
 
   constructor(options: VersionsServiceOptions) {
     this.#options = options;
@@ -274,10 +282,11 @@ export class VersionsService {
     });
   }
 
-  /** Loads the cached or bundled list, publishes the store, then refreshes in the background. */
+  /** Refreshes in the background unless the cached list is fresh. */
   async init(): Promise<void> {
-    const { text, data } = await readReleaseListText(this.#options.cache);
+    const { text, data, fresh } = await readReleaseListText(this.#options.cache);
     await this.#setReleases(data, text);
+    if (fresh) return;
     this.refresh().catch((error: unknown) =>
       log.warn('refreshing the release list failed', error),
     );
@@ -297,7 +306,7 @@ export class VersionsService {
     return this.#rows.find((row) => row.version === version);
   }
 
-  /** Fetches releases.json with Chromium's network stack and caches it. Throws when the fetch fails. */
+  /** Fetches releases.json and caches it. Throws when the fetch fails. */
   async refresh(): Promise<void> {
     const { cache, releasesUrl, fetch } = this.#options;
     const { text, data } = await fetchReleaseListText(releasesUrl, fetch).catch(
@@ -307,8 +316,8 @@ export class VersionsService {
         });
       },
     );
-    if (text === this.#releasesText) return;
-    await this.#setReleases(data, text);
+    if (text !== this.#releasesText) await this.#setReleases(data, text);
+    // Also when unchanged: the file's age is what tells `init` the list is fresh.
     await cacheReleaseList(cache, text);
   }
 
@@ -316,12 +325,10 @@ export class VersionsService {
     return this.installer.state(version);
   }
 
-  /** The executable of an installed release. */
   execPath(version: string): string | undefined {
     return installedExecPath(this.installer, this.#options.cache, version);
   }
 
-  /** Downloads and unpacks a release. Resolves with its executable. */
   async install(version: string, signal?: AbortSignal): Promise<string> {
     return installRelease(this.installer, this.#options.cache, version, {
       mirror: this.#mirrors(),
@@ -372,7 +379,6 @@ export class VersionsService {
     this.#downloadAll?.abort();
   }
 
-  /** Removes every download and local build that no window uses. */
   async deleteAll(): Promise<void> {
     const active = this.#options.activeVersions();
     this.stopDownloadAll();
@@ -393,13 +399,20 @@ export class VersionsService {
     this.#publish();
   }
 
-  localBuilds(): LocalBuild[] {
-    return this.#builds.get().builds.map((b) => ({
-      id: b.id,
-      name: b.name,
-      path: b.path,
-      available: fs.existsSync(Installer.getExecPath(b.path)),
-    }));
+  /** `maxAgeMs`: reuse a disk check this recent, so a slow drive can't stall hot paths. */
+  localBuilds(maxAgeMs = 0): LocalBuild[] {
+    const now = Date.now();
+    const checked = new Map<string, { at: number; available: boolean }>();
+    const builds = this.#builds.get().builds.map((b) => {
+      let check = this.#buildChecks.get(b.path);
+      if (!check || now - check.at >= maxAgeMs) {
+        check = { at: now, available: fs.existsSync(Installer.getExecPath(b.path)) };
+      }
+      checked.set(b.path, check);
+      return { id: b.id, name: b.name, path: b.path, available: check.available };
+    });
+    this.#buildChecks = checked;
+    return builds;
   }
 
   localBuild(id: string): LocalBuild | undefined {
@@ -417,10 +430,7 @@ export class VersionsService {
     return this.installer.state(version) === InstallState.installed;
   }
 
-  /**
-   * Asks for a build folder. Returns the build's ID. A folder that's already
-   * registered asks "Switch to <name>?" and returns its ID if the user agrees.
-   */
+  /** A folder that's already registered asks "Switch to <name>?" and returns its ID if the user agrees. */
   async addLocalBuild(parent: DialogParent): Promise<string | undefined> {
     const t = tm('mainRun');
     const folder = await pickFolder(parent, {
@@ -451,7 +461,6 @@ export class VersionsService {
     return this.registerLocalBuild(folder);
   }
 
-  /** Registers a folder that holds an Electron build. A folder that's already registered keeps its ID. */
   registerLocalBuild(folder: string): string {
     const resolved = path.resolve(folder);
     const existing = this.#builds
@@ -535,7 +544,7 @@ export class VersionsService {
       versions: {
         releasesRev: this.#releasesRev,
         installs: { ...this.#installs },
-        localBuilds: this.localBuilds(),
+        localBuilds: this.localBuilds(BUILD_CHECK_MS),
         downloadingAll: this.#downloadAll !== undefined,
         downloadAllFailed: this.#downloadAllFailed,
         arch: process.arch,

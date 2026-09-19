@@ -1,10 +1,3 @@
-/**
- * Auto bisect without a window, shared by `BisectService` and the
- * headless CLI: both ends are verified first, then a binary search runs
- * `check` on each version. `check` resolves true for good, false for bad, and
- * undefined to stop (an invalid run, or the user stopped the bisect).
- * No Electron imports.
- */
 import { Bisector } from '../../fiddle/bisect';
 
 type AutoBisectResult =
@@ -12,6 +5,7 @@ type AutoBisectResult =
   /** `unexpected` is an end that didn't give the expected result. */
   | { stopped: true; unexpected?: string };
 
+/** `check` resolves true for good, false for bad, and undefined to stop. Both ends are verified first. */
 export async function autoBisect(
   range: readonly string[],
   check: (version: string) => Promise<boolean | undefined>,

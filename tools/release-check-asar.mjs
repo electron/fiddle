@@ -1,23 +1,11 @@
 #!/usr/bin/env node
-// Fails if the e2e test driver was packaged into a build.
-//
-//   node tools/release-check-asar.mjs [outDir]   (default: packages/app/out)
-//
-// Looks through every app.asar under outDir. Asar archives store files
-// uncompressed, so a byte search finds any bundled string.
+// `node tools/release-check-asar.mjs [outDir]` (default packages/app/out) fails if
+// test-only code was packaged. Asar archives store files uncompressed, so a byte
+// search finds any bundled string.
 import fs from 'node:fs';
 import path from 'node:path';
 
-// Strings that exist only in src/main/test-driver and the renderer test hooks.
-// Keep in sync with MARKERS in packages/app/tools/driver-release-check.ts.
-// That script is TypeScript; this one runs on any Node with no dependencies, on
-// every release runner.
-const MARKERS = [
-  'ELECTRON_FIDDLE_DRIVER_SOCKET',
-  'Accessibility.getFullAXTree',
-  'non-loopback request',
-  '__fiddleTest',
-];
+import { MARKERS } from './release-markers.mjs';
 
 const outDir = path.resolve(
   process.argv[2] ?? path.join(import.meta.dirname, '..', 'packages', 'app', 'out'),
@@ -26,8 +14,7 @@ const outDir = path.resolve(
 function* findAsars(dir) {
   for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
     const full = path.join(dir, entry.name);
-    // Dirents for symlinks (macOS framework links) are not directories, so
-    // this never loops.
+    // Dirents for symlinks (macOS framework links) are not directories, so this never loops.
     if (entry.isDirectory()) yield* findAsars(full);
     else if (entry.isFile() && entry.name === 'app.asar') yield full;
   }
@@ -45,7 +32,7 @@ for (const asar of asars) {
   const found = MARKERS.filter((marker) => bytes.includes(marker));
   if (found.length > 0) {
     failed = true;
-    console.error(`FAIL ${asar}: contains the e2e driver (${found.join(', ')})`);
+    console.error(`FAIL ${asar}: contains test-only code (${found.join(', ')})`);
   } else {
     console.log(`ok   ${asar}`);
   }

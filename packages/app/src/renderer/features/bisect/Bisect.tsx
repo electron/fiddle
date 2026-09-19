@@ -1,11 +1,7 @@
-/**
- * Bisect: the range dialog (opened by the `bisect.toggle` command),
- * Good / Bad / Skip / Cancel in the status bar while bisecting, and the result
- * with the GitHub comparison.
- */
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { bisectCompareUrl } from '../../../fiddle/bisect';
 import { getDefaultBisectRange, compareVersions } from '../../../fiddle/versions';
 import { runApi, windowApi } from '../../../ipc/renderer';
 import type { RunState } from '../../../shared/stores';
@@ -16,7 +12,6 @@ import { useAppState } from '../../state';
 import { toastError } from '../../toast-error';
 import { useReleases } from '../run/use-run';
 
-/** Runs a bisect call and shows why it failed. */
 const attempt = (promise: Promise<unknown>, failedTitle: string) =>
   promise.catch((error: unknown) => toastError(error, failedTitle));
 
@@ -52,15 +47,13 @@ export function BisectControls({ run }: { run: RunState }) {
 export function BisectDialogs({ run }: { run: RunState }) {
   const { t } = useTranslation('run');
   const [open, setOpen] = useState(false);
-  useEffect(() => {
-    try {
-      return windowApi.onCommand((id) => {
+  useEffect(
+    () =>
+      windowApi.onCommand((id) => {
         if (id === 'bisect.toggle') setOpen(true);
-      });
-    } catch {
-      return undefined;
-    }
-  }, []);
+      }),
+    [],
+  );
   const result = run.bisect?.result ?? null;
   const call = (promise: Promise<unknown>) => attempt(promise, t('bisectFailed'));
 
@@ -88,7 +81,7 @@ export function BisectDialogs({ run }: { run: RunState }) {
           }
         >
           <p>{t('bisectResult', { good: result.good, bad: result.bad })}</p>
-          <InlineCode>{`https://github.com/electron/electron/compare/v${result.good}...v${result.bad}`}</InlineCode>
+          <InlineCode>{bisectCompareUrl(result.good, result.bad)}</InlineCode>
         </Dialog>
       )}
     </>

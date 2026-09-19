@@ -3,11 +3,7 @@ const isContainer = (value: unknown): value is Record<string, unknown> =>
   value !== null &&
   (Array.isArray(value) || Object.getPrototypeOf(value) === Object.prototype);
 
-/**
- * `next`, with every part that equals the same part of `prev` replaced by
- * `prev`'s own object, so unchanged parts keep their identity. Covers plain
- * objects and arrays, which is what a store push carries.
- */
+/** `next`, with every part equal to the same part of `prev` replaced by `prev`'s own object. Plain objects and arrays only. */
 export function shareEqual<T>(prev: unknown, next: T): T {
   if (Object.is(prev, next)) return next;
   if (

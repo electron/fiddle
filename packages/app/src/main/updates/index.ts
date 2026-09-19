@@ -1,13 +1,3 @@
-/**
- * Updates. Off in dev (unpackaged) and test mode.
- *
- * - macOS and Windows (Squirrel): `update-electron-app` against
- *   update.electronjs.org for electron/fiddle, every hour, first 10 s after
- *   launch.
- * - Linux and MSIX: no auto-update. The GitHub releases API is checked once a
- *   day, and an "Update available" toast goes to the windows through the
- *   `AppPlatform.UpdateAvailable` event.
- */
 import { app, BrowserWindow, net } from 'electron';
 import {
   makeUserNotifier,
@@ -28,15 +18,20 @@ const LATEST_RELEASE_PAGE = 'https://github.com/electron/fiddle/releases/latest'
 
 const FIRST_CHECK_MS = 10_000;
 const RELEASE_CHECK_MS = 24 * 60 * 60 * 1000;
+const RELEASE_CHECK_TIMEOUT_MS = 30_000;
 
 let available: AvailableUpdate | undefined;
+/** Shown windows, which a later check can reach. */
+const shownWindows = new Set<BrowserWindow>();
 
+/** Off in dev and test mode. Linux and MSIX have no auto-update and get a toast instead. */
 export function startUpdates(): void {
   if (!app.isPackaged || !testFlags().updates) {
     log.info('updates are off (dev or test mode)');
     return;
   }
   if (process.platform === 'linux' || process.windowsStore) {
+    watchWindows();
     setTimeout(() => {
       void checkReleases();
       setInterval(() => void checkReleases(), RELEASE_CHECK_MS);
@@ -71,6 +66,32 @@ function startAutoUpdates(): void {
   });
 }
 
+function announce(win: BrowserWindow): void {
+  if (available && !win.isDestroyed()) {
+    AppPlatform.getDispatcher(win.webContents)?.dispatchUpdateAvailable(
+      available.version,
+    );
+  }
+}
+
+/**
+ * A window's renderer can listen once the window is shown, so a window opened
+ * after the check hears about the update then.
+ */
+function watchWindows(): void {
+  const watch = (win: BrowserWindow) => {
+    const shown = () => {
+      shownWindows.add(win);
+      win.once('closed', () => shownWindows.delete(win));
+      announce(win);
+    };
+    if (win.isVisible()) shown();
+    else win.once('show', shown);
+  };
+  BrowserWindow.getAllWindows().forEach(watch);
+  app.on('browser-window-created', (_event, win) => watch(win));
+}
+
 /** Linux and MSIX: tells every window about a newer GitHub release. */
 async function checkReleases(): Promise<void> {
   try {
@@ -78,6 +99,7 @@ async function checkReleases(): Promise<void> {
       `${getEndpoints().githubApi}/repos/${UPDATE_REPO}/releases?per_page=20`,
       {
         headers: { accept: 'application/vnd.github+json' },
+        signal: AbortSignal.timeout(RELEASE_CHECK_TIMEOUT_MS),
       },
     );
     if (!response.ok) throw new Error(`HTTP ${response.status}`);
@@ -88,9 +110,7 @@ async function checkReleases(): Promise<void> {
     if (!update || update.version === available?.version) return;
     available = update;
     log.info('update available', update.version);
-    for (const win of BrowserWindow.getAllWindows()) {
-      AppPlatform.getDispatcher(win.webContents)?.dispatchUpdateAvailable(update.version);
-    }
+    shownWindows.forEach(announce);
   } catch (error) {
     log.warn('release check failed', error);
   }

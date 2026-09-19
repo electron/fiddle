@@ -1,10 +1,3 @@
-/**
- * The sheet: the tab row, the editor panes (one Monaco pane, or up to
- * `MAX_PANES` side by side), the console and, when `Window.view` is
- * `settings`, the settings page instead. Tabs are the visible files: dragging
- * one along the row moves it, dragging it onto a pane shows its file there or
- * in a new pane beside it, and closing one hides its file.
- */
 import { Fragment, useLayoutEffect, useState, type DragEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -18,6 +11,7 @@ import {
   SplitHandle,
   Tab,
   TabList,
+  TabPanel,
   Tabs,
   Tooltip,
 } from '../../ui';
@@ -300,22 +294,23 @@ function EditorArea({
 
   return (
     <>
-      {/* The whole row takes a dragged tab: past the last tab it goes to the end. */}
-      <div
-        className={styles.tabrow}
-        data-tab-dragging={dragged ? '' : undefined}
-        onDragOver={onRowDragOver}
-        onDragLeave={(event) => {
-          if (!event.currentTarget.contains(event.relatedTarget as Node | null))
-            setInsert(null);
-        }}
-        onDrop={onRowDrop}
-      >
-        <div className={styles.tabs}>
-          <Tabs value={active} onChange={onSelectFile}>
+      <Tabs value={active} onChange={onSelectFile} className={styles.tabsRoot}>
+        {/* The whole row takes a dragged tab: past the last tab it goes to the end. */}
+        <div
+          className={styles.tabrow}
+          data-tab-dragging={dragged ? '' : undefined}
+          onDragOver={onRowDragOver}
+          onDragLeave={(event) => {
+            if (!event.currentTarget.contains(event.relatedTarget as Node | null))
+              setInsert(null);
+          }}
+          onDrop={onRowDrop}
+        >
+          <div className={styles.tabs}>
             <TabList aria-label={t('openFiles')}>
               {visible.map((file, index) => {
                 const fileBadge = badge(file.name);
+                const errorLabel = badgeLabel(fileBadge);
                 return (
                   <Tab
                     key={file.name}
@@ -329,99 +324,108 @@ function EditorArea({
                     onClose={() => onCloseFile(file.name)}
                     drag={{ type: TAB_DRAG_TYPE, data: file.name }}
                     dropIndicator={indicatorFor(file.name, index === visible.length - 1)}
-                    errorCount={fileBadge?.count}
-                    errorTone={fileBadge?.tone}
-                    errorLabel={badgeLabel(fileBadge)}
-                    unsaved={fiddle.dirtyFiles.includes(file.name)}
-                    unsavedLabel={t('unsaved')}
+                    error={
+                      fileBadge && errorLabel
+                        ? {
+                            count: fileBadge.count,
+                            tone: fileBadge.tone,
+                            label: errorLabel,
+                          }
+                        : undefined
+                    }
+                    unsaved={
+                      fiddle.dirtyFiles.includes(file.name) ? t('unsaved') : undefined
+                    }
                   >
                     <span dir="ltr">{file.name}</span>
                   </Tab>
                 );
               })}
             </TabList>
-          </Tabs>
-        </div>
-        {!split && (
-          <span className={styles.process}>{t(processLabelKey[processOf(active)])}</span>
-        )}
-        <Tooltip
-          label={split ? t('closeSplit') : t('splitEditor')}
-          kbd={split ? undefined : splitKbd}
-        >
-          <IconButton
-            icon="columns"
-            size="sm"
+          </div>
+          {!split && (
+            <span className={styles.process}>
+              {t(processLabelKey[processOf(active)])}
+            </span>
+          )}
+          <Tooltip
             label={split ? t('closeSplit') : t('splitEditor')}
-            isPressed={split}
-            onPress={onToggleSplit}
-          />
-        </Tooltip>
-      </div>
-      <div ref={setRow} className={styles.panes} data-tour="editor">
-        {panes.map((name, index) => {
-          const last = index === panes.length - 1;
-          return (
-            // Keyed by position, so a pane keeps its editor while the file it shows changes.
-            <Fragment key={index}>
-              {index > 0 && (
-                <SplitHandle
-                  value={widths[index - 1] ?? PANE_MIN}
-                  min={PANE_MIN}
-                  max={
-                    (widths[index - 1] ?? PANE_MIN) +
-                    (widths[index] ?? PANE_MIN) -
-                    PANE_MIN
-                  }
-                  onChange={(width) => resizePane(index - 1, width)}
-                  onReset={() => setShares([])}
-                  label={t('resizePanes')}
-                  className={styles.divider}
-                />
-              )}
-              <div
-                className={styles.pane}
-                data-pane-index={index}
-                style={
-                  split && !last && rowWidth
-                    ? { flex: 'none', width: widths[index] }
-                    : undefined
-                }
-              >
-                {split && (
-                  <PaneHeader
-                    name={name}
-                    badge={badge(name)}
-                    onMaximize={() => onMaximize(name)}
-                    onClose={() => onClosePane(name)}
-                  />
-                )}
-                <EditorPane
-                  file={name}
-                  primary={name === active}
-                  onFocus={() => onFocusPane(name)}
-                />
-                {dragged && (
-                  <PaneDropZones
-                    zones={dropZonesFor(index)}
-                    onDrop={(file, position) => onDropOnPane(file, index, position)}
-                  />
-                )}
-              </div>
-            </Fragment>
-          );
-        })}
-      </div>
+            kbd={split ? undefined : splitKbd}
+          >
+            <IconButton
+              icon="columns"
+              size="sm"
+              label={split ? t('closeSplit') : t('splitEditor')}
+              isPressed={split}
+              onPress={onToggleSplit}
+            />
+          </Tooltip>
+        </div>
+        <TabPanel id={active} className={styles.tabpanel}>
+          <div ref={setRow} className={styles.panes} data-tour="editor">
+            {panes.map((name, index) => {
+              const last = index === panes.length - 1;
+              return (
+                // Keyed by position, so a pane keeps its editor while the file it shows changes.
+                <Fragment key={index}>
+                  {index > 0 && (
+                    <SplitHandle
+                      value={widths[index - 1] ?? PANE_MIN}
+                      min={PANE_MIN}
+                      max={
+                        (widths[index - 1] ?? PANE_MIN) +
+                        (widths[index] ?? PANE_MIN) -
+                        PANE_MIN
+                      }
+                      onChange={(width) => resizePane(index - 1, width)}
+                      onReset={() => setShares([])}
+                      label={t('resizePanes')}
+                      className={styles.divider}
+                    />
+                  )}
+                  <div
+                    className={styles.pane}
+                    data-pane-index={index}
+                    style={
+                      split && !last && rowWidth
+                        ? { flex: 'none', width: widths[index] }
+                        : undefined
+                    }
+                  >
+                    {split && (
+                      <PaneHeader
+                        name={name}
+                        badge={badge(name)}
+                        onMaximize={() => onMaximize(name)}
+                        onClose={() => onClosePane(name)}
+                      />
+                    )}
+                    <EditorPane
+                      file={name}
+                      primary={name === active}
+                      onFocus={() => onFocusPane(name)}
+                    />
+                    {dragged && (
+                      <PaneDropZones
+                        zones={dropZonesFor(index)}
+                        onDrop={(file, position) => onDropOnPane(file, index, position)}
+                      />
+                    )}
+                  </div>
+                </Fragment>
+              );
+            })}
+          </div>
+        </TabPanel>
+      </Tabs>
       {consoleArea}
     </>
   );
 }
 
 /**
- * A pane's drop target for a dragged tab: each edge (a quarter of the pane)
- * opens the file in a new pane on that side, the middle shows it in this pane.
- * The hint draws what the drop would fill. Only `zones` that would change
- * something are offered: none on the dragged file's own pane, no edges at `MAX_PANES`.
+ * A pane's drop target for a dragged tab: each edge (a quarter of the pane) opens the file in a new pane on that
+ * side, the middle shows it here. Only `zones` that would change something are offered.
  */
 function PaneDropZones({
   zones,

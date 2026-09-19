@@ -1,8 +1,3 @@
-/**
- * Delivery of `electron-fiddle://` links: links that arrive before the app is
- * ready are queued, and only one link is handled (one prompt pending) at a
- * time. Also the text of the gist confirmation. No Electron imports.
- */
 import type { TFunction } from 'i18next';
 
 import type { GistLoadResult } from '../../fiddle/github';
@@ -12,10 +7,8 @@ import { ErrorCode, FiddleError } from '../../shared/errors';
 export const DIALOG_TEXT_MAX = 200;
 
 /**
- * Untrusted text (a gist description, owner or file name) for one line of a
- * native dialog, so it can't fake other lines: control characters and line
- * breaks become one space, bidi controls are removed, and it's cut to `max`
- * characters.
+ * Untrusted text for one line of a native dialog, so it can't fake other lines: control
+ * characters and line breaks become one space, bidi controls go, and it's cut to `max` characters.
  */
 export function dialogText(text: string, max = DIALOG_TEXT_MAX): string {
   const chars = Array.from(
@@ -27,11 +20,7 @@ export function dialogText(text: string, max = DIALOG_TEXT_MAX): string {
   return chars.length > max ? `${chars.slice(0, max - 1).join('')}…` : chars.join('');
 }
 
-/**
- * The deep-link confirmation for a gist: owner (with a warning when the
- * link names someone else), revision SHA, files, dependencies, and last the
- * free-text description. Every gist-controlled value is one sanitized line.
- */
+/** Every gist-controlled value is one sanitized line, and the free-text description comes last. */
 export function gistLinkDetail(
   link: { owner?: string },
   gist: Pick<GistLoadResult, 'owner' | 'description' | 'revision' | 'files'>,
@@ -63,22 +52,14 @@ export function gistLinkDetail(
   return lines.join('\n');
 }
 
-/**
- * A gist link that fails with "not found" or "unauthorized" while signed out
- * may be a private gist: offer to sign in, then try again.
- */
+/** A gist link that isn't found while signed out may be a private gist. */
 export function shouldOfferSignIn(error: unknown, signedIn: boolean): boolean {
   if (signedIn) return false;
   const { code } = FiddleError.from(error);
   return code === ErrorCode.notFound || code === ErrorCode.unauthorized;
 }
 
-/**
- * A gist page URL (`https://gist.github.com/[<owner>/]<id>[/<sha>]`), for
- * example one dropped on the macOS dock icon, as the matching
- * `electron-fiddle://gist/…` link, so it gets the same parsing and trust
- * prompt. Undefined for anything else.
- */
+/** A gist page URL as the matching `electron-fiddle://gist/…` link, so it gets the same trust prompt. Undefined for anything else. */
 export function gistUrlToDeepLink(text: string): string | undefined {
   let url: URL;
   try {
@@ -122,7 +103,7 @@ export class DeepLinkQueue {
     this.#onBusy = onBusy;
   }
 
-  /** Queues a link. Once the app is ready, links are handled in order, one prompt at a time. */
+  /** Links that arrive before `start()` wait for it; after that they're handled in order, one prompt at a time. */
   push(url: string): void {
     this.#queued.push(url);
     if (!this.#ready) return;
@@ -130,7 +111,6 @@ export class DeepLinkQueue {
     else void this.#drain();
   }
 
-  /** The app is ready: handle queued links in order, one at a time. */
   async start(): Promise<void> {
     this.#ready = true;
     await this.#drain();
@@ -140,7 +120,6 @@ export class DeepLinkQueue {
     return this.#busy;
   }
 
-  /** Links waiting for the pending one. */
   get waiting(): number {
     return this.#queued.length;
   }

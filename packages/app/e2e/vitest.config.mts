@@ -1,11 +1,6 @@
-// The e2e Vitest project: `yarn test:e2e` (root). It builds the test build once
-// (./global-setup.ts), then runs every packages/app/e2e/*.e2e.ts in parallel
-// forks. Each spec file launches its own app, display and fixture server.
-//
-// Workers: FIDDLE_E2E_WORKERS sets how many spec files (apps) run at once. The
-// default is Vitest's (one per core but one) on Linux, where each app has its
-// own Xvfb display, and at most 4 on macOS and Windows, where the apps share
-// the desktop, the GPU and the clipboard with whoever runs them.
+// `yarn test:e2e`: builds the test build once (./global-setup.ts), then runs every *.e2e.ts in
+// parallel forks. Each spec file launches its own app. On macOS and Windows the apps share the
+// desktop and the GPU, so at most 4 run at once; FIDDLE_E2E_WORKERS overrides.
 import os from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';

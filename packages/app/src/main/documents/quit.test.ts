@@ -34,6 +34,7 @@ vi.mock('../i18n', () => ({
 import { app } from 'electron';
 
 import type { Fiddle } from '../../fiddle/fiddle';
+import { initFakeDocuments } from './test-helpers';
 
 const WINDOW_ID = '00000000-0000-4000-8000-000000000001';
 const mockApp = app as unknown as EventEmitter & { quit: ReturnType<typeof vi.fn> };
@@ -50,29 +51,7 @@ const fiddle: Fiddle = {
 async function setup(dirty: boolean) {
   const documents = await import('./service');
   const { createDoc } = await import('./model');
-  const windows = new Map<string, Record<string, unknown>>();
-  const hub = {
-    app: { settings: { sessionRestore: false } },
-    getWindow: (id: string) => windows.get(id),
-    updateWindow: (id: string, patch: Record<string, unknown>) => {
-      windows.set(id, { ...windows.get(id), ...patch });
-      return 1;
-    },
-  };
-  documents.initDocuments({
-    hub: hub as never,
-    platform: 'linux',
-    versions: {
-      releases: () => [],
-      release: () => undefined,
-      localBuild: () => undefined,
-    } as never,
-    github: { client: () => undefined } as never,
-    npm: { packument: async () => ({ versions: {} }) } as never,
-    createWindow: async (id: string) => {
-      windows.set(id, {});
-    },
-  });
+  initFakeDocuments(documents);
   documents.installEarlyDocumentHandlers();
   const doc = createDoc(
     fiddle,

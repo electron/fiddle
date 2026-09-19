@@ -7,6 +7,7 @@ const mocks = vi.hoisted(() => ({
   clearedSeq: 0,
   push: undefined as ((batch: OutputLine[]) => void) | undefined,
   backlog: undefined as ((lines: OutputLine[]) => void) | undefined,
+  toastError: vi.fn(),
   runApi: {
     onOutput: vi.fn((handler: (batch: OutputLine[]) => void) => {
       mocks.push = handler;
@@ -19,6 +20,7 @@ const mocks = vi.hoisted(() => ({
 }));
 
 vi.mock('../../../ipc/renderer', () => ({ runApi: mocks.runApi, versionsApi: {} }));
+vi.mock('../../toast-error', () => ({ toastError: mocks.toastError }));
 vi.mock('../../state', () => ({
   useAppState: () => undefined,
   useWindowState: () => ({ run: { clearedSeq: mocks.clearedSeq } as RunState }),
@@ -58,6 +60,19 @@ describe('useConsoleLines', () => {
     expect(texts()).toEqual(['line 1', 'line 2', 'line 3', 'line 4']);
     act(() => mocks.push?.([line(4), line(5)]));
     expect(texts()).toEqual(['line 1', 'line 2', 'line 3', 'line 4', 'line 5']);
+  });
+
+  it('keeps showing live output when the backlog cannot be loaded', async () => {
+    mocks.runApi.GetOutput.mockImplementationOnce(() =>
+      Promise.reject(new Error('gone')),
+    );
+    render(<Probe />);
+    act(() => mocks.push?.([line(1)]));
+    await act(async () => undefined);
+    expect(texts()).toEqual(['line 1']);
+    act(() => mocks.push?.([line(2)]));
+    expect(texts()).toEqual(['line 1', 'line 2']);
+    expect(mocks.toastError).toHaveBeenCalledTimes(1);
   });
 
   it('leaves out lines the run has cleared', async () => {

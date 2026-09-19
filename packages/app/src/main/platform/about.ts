@@ -1,11 +1,3 @@
-/**
- * The native About panel: app and Electron versions, contributors and the
- * website. Contributors come from
- * `static/contributors.json`, which tools/release-data.mjs writes and the
- * build bundles (the Settings credits read the same file). When it's missing
- * or empty, the list is empty and macOS links to the contributors page instead.
- */
-import fs from 'node:fs';
 import path from 'node:path';
 
 import { app } from 'electron';
@@ -20,11 +12,7 @@ const contributorFiles = import.meta.glob<unknown>('../../../static/contributors
   import: 'default',
 });
 
-/**
- * Display names from contributors.json: `{ contributors: [{ login, url,
- * contributions }] }` as tools/release-data.mjs writes it, or a bare array of
- * the same entries. An entry's `name` wins over its login when it has one.
- */
+/** Names from contributors.json: `{ contributors: [...] }` or a bare array. An entry's `name` wins over its `login`. */
 export function contributorNames(data: unknown): string[] {
   const list = Array.isArray(data)
     ? data
@@ -45,7 +33,10 @@ export function contributorNames(data: unknown): string[] {
 export function setupAboutPanel(): void {
   const tp = tm('mainPlatform');
   const names = contributorNames(Object.values(contributorFiles)[0]);
-  const icon = path.join(app.getAppPath(), 'assets', 'icons', 'fiddle.png');
+  // Linux only, and read from disk: forge.config.ts ships the file in `extraResource`.
+  const icon = app.isPackaged
+    ? path.join(process.resourcesPath, 'fiddle.png')
+    : path.join(app.getAppPath(), 'assets', 'icons', 'fiddle.png');
   const isMac = process.platform === 'darwin';
   app.setAboutPanelOptions({
     applicationName: app.getName(),
@@ -62,6 +53,6 @@ export function setupAboutPanel(): void {
     credits: names.length ? names.join(', ') : CONTRIBUTORS_PAGE,
     authors: names,
     website: WEBSITE,
-    ...(fs.existsSync(icon) ? { iconPath: icon } : {}),
+    iconPath: icon,
   });
 }

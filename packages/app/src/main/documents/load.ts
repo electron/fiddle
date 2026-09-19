@@ -1,8 +1,3 @@
-/**
- * Loading, creating and saving fiddles without a window, so the headless CLI
- * can reuse them. Everything that needs the user (confirmations) is passed in.
- * No Electron imports.
- */
 import * as path from 'node:path';
 
 import { loadDocsExample } from '../../fiddle/docs-examples';
@@ -92,11 +87,7 @@ export async function loadShowMe(
   };
 }
 
-/**
- * Applies a loaded `package.json`: its modules replace the current
- * ones, and a usable Electron version replaces the current version. Without a
- * `package.json` the current modules and version are kept.
- */
+/** A loaded `package.json`'s modules and usable Electron version replace the current ones; without one both are kept. */
 function applyPackageJson(
   context: LoadContext,
   pkg: ParsedPackageJson | undefined,
@@ -148,11 +139,7 @@ interface GistRulesOptions {
   isUsableVersion?: (version: string) => boolean;
 }
 
-/**
- * Turns a loaded gist into a fiddle: unsupported files are skipped,
- * unknown supported files are added only if the user agrees, and a gist with
- * no supported files is an error (`pickFiddleFiles` throws `no-supported-files`).
- */
+/** Unknown supported files are added only if the user agrees; a gist with no supported files is an error. */
 export async function fiddleFromGist(
   gist: GistLoadResult,
   options: GistRulesOptions,

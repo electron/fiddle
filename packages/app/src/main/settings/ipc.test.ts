@@ -72,6 +72,25 @@ describe('ImportSettings', () => {
     expect(service.replace).not.toHaveBeenCalled();
   });
 
+  it('resets the settings the file does not mention, but keeps crash reports', async () => {
+    service.settings = { ...defaultSettings, crashReports: false, showObsolete: true };
+    try {
+      await importFile('{"editorFontSize":18}');
+      expect(service.replace).toHaveBeenCalledWith({
+        ...defaultSettings,
+        crashReports: false,
+        editorFontSize: 18,
+      });
+      expect(mocks.confirm).not.toHaveBeenCalled();
+
+      service.replace.mockClear();
+      await importFile('{"crashReports":true}');
+      expect(service.replace).toHaveBeenCalledWith(defaultSettings);
+    } finally {
+      service.settings = defaultSettings;
+    }
+  });
+
   it('applies a harmless file without asking', async () => {
     expect(await importFile('{"editorFontSize":18,"unknownKey":1}')).toBe(7);
     expect(mocks.confirm).not.toHaveBeenCalled();

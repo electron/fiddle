@@ -3,17 +3,15 @@ import { useTranslation } from 'react-i18next';
 
 import { githubApi } from '../../../ipc/renderer';
 import { FiddleError } from '../../../shared/errors';
-import { Button, FormField, Icon, showToast, Switch } from '../../../ui';
-import { useSettings } from '../settings/use-settings';
+import { Button, FormField, Icon, showToast } from '../../../ui';
 import styles from './gists.module.css';
 import { SignInDialog } from './SignInDialog';
 import { useGitHubLogin } from './state';
 
-/** Settings: the GitHub account (sign in or out) and "Publish as revision". */
+/** Settings: the GitHub account, to sign in or out. */
 export function GitHubAccountSection() {
   const { t } = useTranslation('gists');
   const login = useGitHubLogin();
-  const { settings, set } = useSettings();
   const [signingIn, setSigningIn] = useState(false);
 
   const signOut = () => {
@@ -42,13 +40,6 @@ export function GitHubAccountSection() {
             </Button>
           )}
         </div>
-      </FormField>
-      <FormField label={t('asRevisionLabel')} helper={t('asRevisionHelp')} inline>
-        <Switch
-          aria-label={t('asRevisionLabel')}
-          isSelected={settings.gistPublishAsRevision}
-          onChange={(value) => set('gistPublishAsRevision', value)}
-        />
       </FormField>
       {signingIn && <SignInDialog onClose={() => setSigningIn(false)} />}
     </div>

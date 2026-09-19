@@ -2,6 +2,7 @@ import { describe, expect, it, vi } from 'vitest';
 
 vi.mock('../editor/monaco', () => ({ applyEditorTheme: vi.fn() }));
 
+const { EDITOR_TOKENS } = await import('../editor/theme');
 const { applyAppearance, highContrastFor } = await import('./theme');
 const { currentThemeSnapshot } = await import('./theme-snapshot');
 
@@ -31,7 +32,7 @@ describe('high contrast', () => {
     root.dataset.contrast = 'high';
     const snapshot = currentThemeSnapshot(root);
     expect(snapshot).toMatchObject({ isDark: true, editor: { base: 'hc-black' } });
-    expect(Object.keys(snapshot.common)).toContain('syntax-keyword');
+    expect(Object.keys(snapshot.common)).toEqual([...EDITOR_TOKENS]);
     root.dataset.theme = 'light';
     expect(currentThemeSnapshot(root).editor.base).toBe('hc-light');
     delete root.dataset.contrast;

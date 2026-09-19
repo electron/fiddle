@@ -448,7 +448,7 @@ test('pseudo-locales keep placeholders; en-XA is ~40% longer, ar-XB forces RTL',
   assert.ok(xa.length >= text.length * 1.4, xa);
 
   const xb = pseudoLocalize('ar-XB', 'Run {{name}}');
-  assert.equal(xb, '‏‮Run‬‏ {{name}}');
+  assert.equal(xb, '\u200F\u202ERun\u202C\u200F {{name}}');
 
   // ar-XB gets all six Arabic plural forms, falling back to English `other`.
   const messages = pseudoMessages('ar-XB', english().run);
@@ -463,5 +463,5 @@ test('pseudo-locales keep placeholders; en-XA is ~40% longer, ar-XB forces RTL',
   for (const category of ['zero', 'two', 'few', 'many', 'other']) {
     assert.match(messages[`errorCount_${category}`], /errors/);
   }
-  assert.match(messages.errorCount_one, /error‬/);
+  assert.match(messages.errorCount_one, /error\u202C/);
 });

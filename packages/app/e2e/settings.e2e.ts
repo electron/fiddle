@@ -19,7 +19,8 @@ import {
 describe('settings', () => {
   const app = useApp();
   const settings = async () => (await appState(app())).settings;
-  const setting = (key: string) => async () => (await settings())[key];
+  const setting = (key: keyof AppState['settings']) => async () =>
+    (await settings())[key];
   const open = async (section: string) => {
     if ((await windowState(app())).view !== 'settings')
       await app().click(role('button', 'Settings'));
@@ -89,7 +90,7 @@ describe('settings', () => {
   it('marks a changed value and resets it', async () => {
     await open('Execution');
     expect(await app().snapshot(0)).toContain('image "Changed from the default"');
-    await app().click(role('button', 'Reset'));
+    await app().click(role('button', 'Reset Clear the console on every run'));
     await expect.poll(setting('clearConsoleOnRun')).toBe(false);
     expect(await app().snapshot(0)).not.toContain('Changed from the default');
   });
@@ -132,7 +133,9 @@ describe('settings', () => {
   it('edits the Electron settings', async () => {
     await open('Electron');
     // The current version's channel can't be turned off.
-    expect(await states(role('checkbox', 'Stable'))).toContain('disabled');
+    // The version manager's filter has a "Stable" checkbox too, and query order isn't page order.
+    const stable = await app().query(role('checkbox', 'Stable'));
+    expect(stable.some((box) => box.states.includes('disabled'))).toBe(true);
     await app().click(text(/^Nightly$/, { nth: 0 }));
     await expect.poll(setting('channels')).toEqual(['stable', 'beta', 'nightly']);
 

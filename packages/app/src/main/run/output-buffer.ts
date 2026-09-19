@@ -1,8 +1,3 @@
-/**
- * One window's console output: every line gets a sequence
- * number, new lines go out in batches every 16 ms, and the last 1000 lines are
- * kept for `Run.GetOutput()`. No Electron imports.
- */
 import type { OutputLine } from '../../shared/stores';
 
 export const OUTPUT_LIMIT = 1000;
@@ -35,7 +30,6 @@ export class OutputBuffer {
     return full;
   }
 
-  /** Sends pending lines now. */
   flush(): void {
     if (this.#timer) clearTimeout(this.#timer);
     this.#timer = undefined;
@@ -46,7 +40,6 @@ export class OutputBuffer {
     this.#send(batch);
   }
 
-  /** The backlog, oldest first. */
   get lines(): readonly OutputLine[] {
     return this.#lines.length > OUTPUT_LIMIT
       ? this.#lines.slice(-OUTPUT_LIMIT)

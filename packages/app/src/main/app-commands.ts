@@ -33,7 +33,7 @@ const FORWARDED = [
   'gist.publish',
   'gist.open',
   'gist.history',
-  // Menus and keybindings (src/renderer/features/commands/window-commands.ts).
+  // Handled in the renderer, for menus and keybindings.
   'console.clear',
   'editor.formatAll',
   'editor.formatSelection',
@@ -43,10 +43,9 @@ const FORWARDED = [
 ] as const satisfies readonly CommandId[];
 
 /**
- * Undo, redo and select all: the window sends them to the focused Monaco
- * editor, or runs the editing command where its focus is. Another page with
- * focus (DevTools) or, on macOS, a native dialog gets them the way the native
- * roles would send them.
+ * Undo, redo and select all go to the focused Monaco editor, or run where focus
+ * is. Another page with focus (DevTools), or on macOS a native dialog, gets them
+ * the way the native roles would send them.
  */
 function editCommand(
   windowId: string | undefined,

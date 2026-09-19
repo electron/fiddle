@@ -1,8 +1,4 @@
-/**
- * The CLI's command glue: how a fiddle spec is read, how `--module` is
- * parsed, and which error code each refusal carries. Nothing here reaches
- * the network.
- */
+/** The CLI's command glue: how a fiddle spec and `--module` are read, and the error code of each refusal. */
 import { mkdir, mkdtemp, readdir, readFile, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
@@ -10,7 +6,8 @@ import path from 'node:path';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { ErrorCode } from '../../shared/errors';
-import { Reporter } from './output';
+import { descriptors } from './descriptors';
+import { CliErrorCode, Reporter } from './output';
 
 const paths = vi.hoisted(() => ({ cache: '' }));
 vi.mock('../test-mode', async (importOriginal) => ({
@@ -149,6 +146,55 @@ describe('runCommand', () => {
       ok: true,
       data: { files: ['main.js', 'package.json'] },
     });
+  });
+
+  describe('a remote fiddle', () => {
+    const ID = '8c5fc0c6a5153d49b5a4a56d3ed9da8f';
+    const gist = {
+      id: ID,
+      owner: { login: 'octocat' },
+      files: { 'main.js': { filename: 'main.js', content: 'console.log(1)' } },
+      history: [{ version: '1'.repeat(40) }],
+    };
+    const isTTY = Object.getOwnPropertyDescriptor(process.stdin, 'isTTY');
+    beforeEach(async () => {
+      Object.defineProperty(process.stdin, 'isTTY', { value: false, configurable: true });
+      vi.mocked((await import('electron')).net.fetch).mockImplementation(async () =>
+        Response.json(gist),
+      );
+    });
+    afterEach(() => {
+      if (isTTY) Object.defineProperty(process.stdin, 'isTTY', isTTY);
+      else delete (process.stdin as { isTTY?: boolean }).isTTY;
+    });
+
+    const remoteInput = (id: 'run' | 'bisect' | 'package' | 'make', trust: boolean) =>
+      descriptors[id].input.parse({ fiddle: ID, good: '30.0.0', bad: '31.0.0', trust });
+
+    it.each(['run', 'bisect', 'package', 'make'] as const)(
+      'is refused by %s without --trust, and never starts the forge task',
+      async (id) => {
+        const result = await run(id, remoteInput(id, false));
+        expect(result.code).toBe(CliErrorCode.untrusted);
+        const { runForgeTask } = await import('../packaging/service');
+        expect(runForgeTask).not.toHaveBeenCalled();
+      },
+    );
+
+    it.each(['run', 'bisect', 'package', 'make'] as const)(
+      'gets past the trust check in %s with --trust',
+      async (id) => {
+        // What comes next (a build, a download) may leave files: keep them in the test's folder.
+        for (const key of ['TMPDIR', 'TEMP', 'TMP']) vi.stubEnv(key, dir);
+        try {
+          expect((await run(id, remoteInput(id, true))).code).not.toBe(
+            CliErrorCode.untrusted,
+          );
+        } finally {
+          vi.unstubAllEnvs();
+        }
+      },
+    );
   });
 
   it('needs GITHUB_TOKEN to write a gist, and never uses the app’s stored token', async () => {

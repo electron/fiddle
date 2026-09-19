@@ -49,16 +49,15 @@ export function TabList({ children, className, ...rest }: TabListProps) {
 export interface TabProps {
   id: string;
   children: ReactNode;
-  /** Error count badge after the label. */
-  errorCount?: number;
-  /** Spoken with the badge, such as "1 error". */
-  errorLabel?: string;
-  /** `warning` draws the badge in the warning colour, for a count of warnings. */
-  errorTone?: 'error' | 'warning';
-  /** Unsaved dot after the badge. */
-  unsaved?: boolean;
-  /** Spoken with the dot, such as "Unsaved changes". */
-  unsavedLabel?: string;
+  /** An error badge after the label. `label` is spoken with it, such as "1 error". */
+  error?: {
+    count: number;
+    label: string;
+    /** `warning` draws the badge in the warning colour, for a count of warnings. */
+    tone?: 'error' | 'warning';
+  };
+  /** Draws an unsaved dot after the badge. The text is spoken with it, such as "Unsaved changes". */
+  unsaved?: string;
   /** A glyph before the label, such as the window glyph for a popped-out file. */
   icon?: IconName;
   /**
@@ -77,11 +76,8 @@ export interface TabProps {
 export function Tab({
   id,
   children,
-  errorCount,
-  errorLabel,
-  errorTone,
+  error,
   unsaved,
-  unsavedLabel,
   icon,
   onClose,
   drag,
@@ -146,18 +142,20 @@ export function Tab({
     >
       {icon && <Icon name={icon} className={styles.icon} />}
       <span className={styles.label}>{children}</span>
-      {errorCount ? (
-        <span className={styles.errors} data-tone={errorTone} aria-hidden="true">
-          {errorCount}
-        </span>
-      ) : null}
-      {errorCount && errorLabel ? (
-        <VisuallyHidden>{`, ${errorLabel}`}</VisuallyHidden>
-      ) : null}
-      {unsaved ? <span className={styles.dot} aria-hidden="true" /> : null}
-      {unsaved && unsavedLabel ? (
-        <VisuallyHidden>{`, ${unsavedLabel}`}</VisuallyHidden>
-      ) : null}
+      {error && (
+        <>
+          <span className={styles.errors} data-tone={error.tone} aria-hidden="true">
+            {error.count}
+          </span>
+          <VisuallyHidden>{`, ${error.label}`}</VisuallyHidden>
+        </>
+      )}
+      {unsaved && (
+        <>
+          <span className={styles.dot} aria-hidden="true" />
+          <VisuallyHidden>{`, ${unsaved}`}</VisuallyHidden>
+        </>
+      )}
       {onClose && (
         // Hidden from assistive tech: a tab's content is presentational, so
         // keyboard and screen reader users close it with Delete instead.

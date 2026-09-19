@@ -1,7 +1,3 @@
-/**
- * Linux and MSIX have no auto-update, so they compare the app version with
- * GitHub releases and show an "Update available" notice.
- */
 import semver from 'semver';
 
 /** The fields of a GitHub release this app reads. */

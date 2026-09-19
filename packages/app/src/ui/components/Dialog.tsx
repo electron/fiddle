@@ -5,7 +5,6 @@ import {
   Modal,
   ModalOverlay,
 } from 'react-aria-components';
-import { cx } from '../cx';
 import { Icon, type IconName } from '../icons/Icon';
 import { Button, IconButton } from './Button';
 import { TextField } from './TextField';
@@ -13,73 +12,18 @@ import styles from './Dialog.module.css';
 
 export type DialogTone = 'accent' | 'warning' | 'success' | 'danger';
 
-interface LayoutProps {
-  heading: ReactNode;
+export interface DialogProps {
+  title: ReactNode;
+  isOpen: boolean;
+  onOpenChange: (isOpen: boolean) => void;
   description?: ReactNode;
   icon?: IconName;
   iconTone?: DialogTone;
   children?: ReactNode;
   footer?: ReactNode;
+  /** Adds a close button in the header, named by this. Escape always closes. */
   closeLabel?: string;
-  onClose?: () => void;
-}
-
-function DialogLayout({
-  heading,
-  description,
-  icon,
-  iconTone = 'accent',
-  children,
-  footer,
-  closeLabel,
-  onClose,
-}: LayoutProps) {
-  const closable = Boolean(onClose && closeLabel);
-  return (
-    <>
-      <div className={styles.head} data-closable={closable || undefined}>
-        {icon && (
-          <span className={styles.icon} data-tone={iconTone}>
-            <Icon name={icon} size={18} />
-          </span>
-        )}
-        {heading}
-        {closable && (
-          <IconButton icon="close" size="sm" label={closeLabel!} onPress={onClose} />
-        )}
-      </div>
-      {description && <div className={styles.description}>{description}</div>}
-      {children && <div className={styles.body}>{children}</div>}
-      {footer && <div className={styles.footer}>{footer}</div>}
-    </>
-  );
-}
-
-export interface DialogSurfaceProps extends Omit<LayoutProps, 'heading'> {
-  title: ReactNode;
-  width?: number;
-  className?: string;
-}
-
-/** The dialog panel on its own, for inline use and specimens. */
-export function DialogSurface({
-  title,
-  width = 420,
-  className,
-  ...rest
-}: DialogSurfaceProps) {
-  return (
-    <div className={cx(styles.surface, className)} style={{ maxWidth: width }}>
-      <DialogLayout {...rest} heading={<h2 className={styles.title}>{title}</h2>} />
-    </div>
-  );
-}
-
-export interface DialogProps extends Omit<LayoutProps, 'heading' | 'onClose'> {
-  title: ReactNode;
-  isOpen: boolean;
-  onOpenChange: (isOpen: boolean) => void;
-  /** Close by clicking the scrim. Escape always closes. */
+  /** Close by clicking the scrim. */
   isDismissable?: boolean;
   role?: 'dialog' | 'alertdialog';
   width?: number;
@@ -89,10 +33,15 @@ export function Dialog({
   title,
   isOpen,
   onOpenChange,
+  description,
+  icon,
+  iconTone = 'accent',
+  children,
+  footer,
+  closeLabel,
   isDismissable = true,
   role,
   width = 420,
-  ...rest
 }: DialogProps) {
   return (
     <ModalOverlay
@@ -104,15 +53,24 @@ export function Dialog({
       <Modal className={styles.modal} style={{ maxWidth: width }}>
         <AriaDialog role={role} className={styles.surface}>
           {({ close }) => (
-            <DialogLayout
-              {...rest}
-              onClose={close}
-              heading={
+            <>
+              <div className={styles.head} data-closable={closeLabel ? '' : undefined}>
+                {icon && (
+                  <span className={styles.icon} data-tone={iconTone}>
+                    <Icon name={icon} size={18} />
+                  </span>
+                )}
                 <Heading slot="title" className={styles.title}>
                   {title}
                 </Heading>
-              }
-            />
+                {closeLabel && (
+                  <IconButton icon="close" size="sm" label={closeLabel} onPress={close} />
+                )}
+              </div>
+              {description && <div className={styles.description}>{description}</div>}
+              {children && <div className={styles.body}>{children}</div>}
+              {footer && <div className={styles.footer}>{footer}</div>}
+            </>
           )}
         </AriaDialog>
       </Modal>
@@ -197,32 +155,23 @@ function finish(value: boolean | string | null) {
   listeners.forEach((listener) => listener());
 }
 
-function PromptBody({ options }: { options: PromptOptions }) {
+function PromptField({ options, formId }: { options: PromptOptions; formId: string }) {
   const [value, setValue] = useState(options.defaultValue ?? '');
   return (
     <form
+      id={formId}
       onSubmit={(e) => {
         e.preventDefault();
         finish(value);
       }}
     >
-      <div className={styles.body}>
-        <TextField
-          label={options.label}
-          value={value}
-          onChange={setValue}
-          placeholder={options.placeholder}
-          autoFocus
-        />
-      </div>
-      <div className={styles.footer}>
-        <Button variant="ghost" onPress={() => finish(null)}>
-          {options.cancelLabel}
-        </Button>
-        <Button variant="primary" type="submit">
-          {options.confirmLabel}
-        </Button>
-      </div>
+      <TextField
+        label={options.label}
+        value={value}
+        onChange={setValue}
+        placeholder={options.placeholder}
+        autoFocus
+      />
     </form>
   );
 }
@@ -230,58 +179,59 @@ function PromptBody({ options }: { options: PromptOptions }) {
 /** Renders the dialogs that confirmDialog and promptDialog ask for. Mount once. */
 export function DialogHost() {
   const request = useSyncExternalStore(subscribe, () => current);
-  const cancel = () => finish(request?.kind === 'confirm' ? false : null);
-  const danger = request?.kind === 'confirm' && request.options.tone === 'danger';
+  if (!request) return null;
+  const common = {
+    isOpen: true,
+    title: request.options.title,
+    description: request.options.message,
+    onOpenChange: (open: boolean) => {
+      if (!open) finish(null);
+    },
+  };
+  // Both dialogs are keyed by request, so a replacing prompt starts from its own default.
+  if (request.kind === 'prompt') {
+    const formId = `prompt-${request.id}`;
+    return (
+      <Dialog
+        key={request.id}
+        {...common}
+        footer={
+          <>
+            <Button variant="ghost" onPress={() => finish(null)}>
+              {request.options.cancelLabel}
+            </Button>
+            <Button variant="primary" type="submit" form={formId}>
+              {request.options.confirmLabel}
+            </Button>
+          </>
+        }
+      >
+        <PromptField options={request.options} formId={formId} />
+      </Dialog>
+    );
+  }
+  const danger = request.options.tone === 'danger';
   return (
-    <ModalOverlay
-      isOpen={request !== null}
-      onOpenChange={(open) => {
-        if (!open) cancel();
-      }}
-      isDismissable
-      className={styles.scrim}
-    >
-      <Modal className={styles.modal} style={{ maxWidth: 400 }}>
-        {request && (
-          <AriaDialog
-            role={request.kind === 'confirm' ? 'alertdialog' : 'dialog'}
-            className={styles.surface}
+    <Dialog
+      key={request.id}
+      {...common}
+      role="alertdialog"
+      icon={request.options.icon}
+      iconTone={request.options.iconTone}
+      footer={
+        <>
+          <Button variant="ghost" onPress={() => finish(false)} autoFocus={danger}>
+            {request.options.cancelLabel}
+          </Button>
+          <Button
+            variant={danger ? 'danger' : 'primary'}
+            onPress={() => finish(true)}
+            autoFocus={!danger}
           >
-            <div className={styles.head}>
-              {request.kind === 'confirm' && request.options.icon && (
-                <span
-                  className={styles.icon}
-                  data-tone={request.options.iconTone ?? 'accent'}
-                >
-                  <Icon name={request.options.icon} size={18} />
-                </span>
-              )}
-              <Heading slot="title" className={styles.title}>
-                {request.options.title}
-              </Heading>
-            </div>
-            {request.options.message && (
-              <div className={styles.description}>{request.options.message}</div>
-            )}
-            {request.kind === 'confirm' ? (
-              <div className={styles.footer}>
-                <Button variant="ghost" onPress={() => finish(false)} autoFocus={danger}>
-                  {request.options.cancelLabel}
-                </Button>
-                <Button
-                  variant={danger ? 'danger' : 'primary'}
-                  onPress={() => finish(true)}
-                  autoFocus={!danger}
-                >
-                  {request.options.confirmLabel}
-                </Button>
-              </div>
-            ) : (
-              <PromptBody key={request.id} options={request.options} />
-            )}
-          </AriaDialog>
-        )}
-      </Modal>
-    </ModalOverlay>
+            {request.options.confirmLabel}
+          </Button>
+        </>
+      }
+    />
   );
 }

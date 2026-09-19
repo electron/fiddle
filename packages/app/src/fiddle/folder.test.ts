@@ -25,17 +25,21 @@ import {
 const renameMock = vi.hoisted(() => ({ fail: [] as string[] }));
 vi.mock('node:fs/promises', async (importOriginal) => {
   const actual = await importOriginal<typeof import('node:fs/promises')>();
-  return {
-    ...actual,
-    rename: async (from: string, to: string) => {
-      const code = renameMock.fail.shift();
-      if (code) throw Object.assign(new Error(code), { code });
-      return actual.rename(from, to);
-    },
+  // core's retry loop calls the default export's `rename`.
+  const rename = async (from: string, to: string) => {
+    const code = renameMock.fail.shift();
+    if (code) throw Object.assign(new Error(code), { code });
+    return actual.rename(from, to);
   };
+  return { ...actual, rename, default: { ...actual, rename } };
 });
 
-vi.mock('node:timers/promises', () => ({ setTimeout: () => Promise.resolve() }));
+// The retry loop's sleeps move the fake clock, so its time limit is reached at once.
+vi.mock('node:timers/promises', () => ({
+  setTimeout: async (ms: number) => {
+    vi.advanceTimersByTime(ms);
+  },
+}));
 
 let dir: string;
 beforeEach(async () => {
@@ -65,7 +69,8 @@ describe('readFiddleFolder', () => {
     await mkdir(path.join(dir, 'sub'));
     await writeFile(path.join(dir, 'sub', 'nested.js'), 'nested');
     await mkdir(path.join(dir, 'looks-like.js'));
-    await symlink(path.join(dir, 'main.js'), path.join(dir, 'link.js'));
+    if (process.platform !== 'win32')
+      await symlink(path.join(dir, 'main.js'), path.join(dir, 'link.js'));
 
     const result = await readFiddleFolder(dir);
     expect(result.files).toEqual({ 'main.js': 'main', 'Index.HTML': '<p/>' });
@@ -160,6 +165,26 @@ describe('writeFiddleFolder', () => {
     ]);
   });
 
+  it('deletes only after everything is written, so a failed write leaves the old files', async () => {
+    await put({ 'a.js': 'old', 'empty.js': 'old' });
+    try {
+      renameMock.fail = ['EIO'];
+      await expect(
+        writeFiddleFolder(dir, { 'main.js': 'new', 'empty.js': '' }, ['a.js']),
+      ).rejects.toMatchObject({ code: 'EIO' });
+    } finally {
+      renameMock.fail = [];
+    }
+    expect((await readdir(dir)).sort()).toEqual(['a.js', 'empty.js']);
+  });
+
+  it('writes empty files when asked to, for a run', async () => {
+    await writeFiddleFolder(dir, { 'main.js': 'x', 'preload.js': '' }, [], {
+      keepEmpty: true,
+    });
+    expect(await readFile(path.join(dir, 'preload.js'), 'utf8')).toBe('');
+  });
+
   it('ends a case-only rename with the new name', async () => {
     await put({ 'main.js': 'old' });
     await writeFiddleFolder(dir, { 'Main.js': 'new' }, ['main.js']);
@@ -182,16 +207,18 @@ describe('writeFiddleFolder', () => {
   it('retries a rename that Windows refuses while another process holds the file', async () => {
     const platform = Object.getOwnPropertyDescriptor(process, 'platform')!;
     Object.defineProperty(process, 'platform', { value: 'win32' });
+    vi.useFakeTimers({ toFake: ['Date'] });
     try {
       renameMock.fail = ['EBUSY', 'EPERM'];
       await writeFiddleFolder(dir, { 'main.js': 'x' });
       expect(await readFile(path.join(dir, 'main.js'), 'utf8')).toBe('x');
-      renameMock.fail = Array<string>(10).fill('EBUSY');
+      renameMock.fail = Array<string>(100).fill('EBUSY');
       await expect(writeFiddleFolder(dir, { 'main.js': 'y' })).rejects.toMatchObject({
         code: 'EBUSY',
       });
       expect((await readdir(dir)).filter((name) => name.endsWith('.tmp'))).toEqual([]);
     } finally {
+      vi.useRealTimers();
       Object.defineProperty(process, 'platform', platform);
       renameMock.fail = [];
     }
@@ -234,29 +261,32 @@ describe('writeFiddleFolder', () => {
     expect(await readdir(dir)).toEqual([]);
   });
 
-  it('replaces symlinks instead of following them out of the folder', async () => {
-    const outside = await mkdtemp(path.join(tmpdir(), 'fiddle-outside-'));
-    try {
-      await put({ 'secret.js': 'secret', ignore: 'ignore' }, outside);
-      await symlink(path.join(outside, 'secret.js'), path.join(dir, 'main.js'));
-      await symlink(path.join(outside, 'secret.js'), path.join(dir, 'gone.js'));
-      await symlink(path.join(outside, 'ignore'), path.join(dir, '.gitignore'));
+  it.skipIf(process.platform === 'win32')(
+    'replaces symlinks instead of following them out of the folder',
+    async () => {
+      const outside = await mkdtemp(path.join(tmpdir(), 'fiddle-outside-'));
+      try {
+        await put({ 'secret.js': 'secret', ignore: 'ignore' }, outside);
+        await symlink(path.join(outside, 'secret.js'), path.join(dir, 'main.js'));
+        await symlink(path.join(outside, 'secret.js'), path.join(dir, 'gone.js'));
+        await symlink(path.join(outside, 'ignore'), path.join(dir, '.gitignore'));
 
-      await writeFiddleFolder(dir, { 'main.js': 'new', 'gone.js': '' });
+        await writeFiddleFolder(dir, { 'main.js': 'new', 'gone.js': '' });
 
-      expect(await readFile(path.join(outside, 'secret.js'), 'utf8')).toBe('secret');
-      expect(await readFile(path.join(outside, 'ignore'), 'utf8')).toBe('ignore');
-      expect((await readdir(outside)).sort()).toEqual(['ignore', 'secret.js']);
-      expect((await readdir(dir)).sort()).toEqual(['.gitignore', 'main.js']);
-      expect((await lstat(path.join(dir, 'main.js'))).isSymbolicLink()).toBe(false);
-      expect(await readFile(path.join(dir, 'main.js'), 'utf8')).toBe('new');
-      expect(await readFile(path.join(dir, '.gitignore'), 'utf8')).toBe(
-        GITIGNORE_CONTENT,
-      );
-    } finally {
-      await rm(outside, { recursive: true, force: true });
-    }
-  });
+        expect(await readFile(path.join(outside, 'secret.js'), 'utf8')).toBe('secret');
+        expect(await readFile(path.join(outside, 'ignore'), 'utf8')).toBe('ignore');
+        expect((await readdir(outside)).sort()).toEqual(['ignore', 'secret.js']);
+        expect((await readdir(dir)).sort()).toEqual(['.gitignore', 'main.js']);
+        expect((await lstat(path.join(dir, 'main.js'))).isSymbolicLink()).toBe(false);
+        expect(await readFile(path.join(dir, 'main.js'), 'utf8')).toBe('new');
+        expect(await readFile(path.join(dir, '.gitignore'), 'utf8')).toBe(
+          GITIGNORE_CONTENT,
+        );
+      } finally {
+        await rm(outside, { recursive: true, force: true });
+      }
+    },
+  );
 });
 
 describe('findFilesToReplace', () => {

@@ -30,7 +30,7 @@ describe('deep links', () => {
       delete env.NODE_OPTIONS;
       const child = spawn(
         electron,
-        [...electronArgs(electron), '--ozone-platform=headless', TEST_BUILD_DIR, ...args],
+        [...electronArgs(), '--ozone-platform=headless', TEST_BUILD_DIR, ...args],
         { env, stdio: 'ignore' },
       );
       const timer = setTimeout(() => {

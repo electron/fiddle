@@ -13,24 +13,24 @@ import { installPlatformRenderer, log } from './features/about';
 import { StoreProvider } from './state';
 
 async function start(): Promise<void> {
-  // Read both stores before first paint. App reports ready once it has painted
-  // with both stores, and main shows the window then.
-  const [app] = await Promise.all([
-    appApi.AppStore.getState(),
-    windowApi.WindowStore.getState(),
-  ]);
+  // The locale, platform and material are needed before the first render. If the App store can't be read, render
+  // anyway: App shows the error, which a blank window can't.
+  const app = await appApi.AppStore.getState().catch(() => undefined);
 
   const root = document.documentElement;
-  root.lang = app.locale;
-  root.dataset.platform = app.platform;
-  // Lucent: without an OS material, the tokens swap to their opaque fallbacks.
-  root.classList.toggle('lu-no-material', app.material === 'none');
-  root.dataset.material = app.material;
+  if (app) {
+    root.lang = app.locale;
+    root.dataset.platform = app.platform;
+    // Lucent: without an OS material, the tokens swap to their opaque fallbacks.
+    root.classList.toggle('lu-no-material', app.material === 'none');
+    root.dataset.material = app.material;
+  }
+  const locale = app?.locale ?? navigator.language;
 
   // Monaco reads its strings while its modules load, and App imports it: the locale's bundle goes first.
   const [i18n, { App }] = await Promise.all([
-    initRendererI18n(app.locale),
-    loadMonacoMessages(app.locale).then(() => import('./App')),
+    initRendererI18n(locale),
+    loadMonacoMessages(locale).then(() => import('./App')),
   ]);
   void installPlatformRenderer(i18n);
   const container = document.getElementById('root');

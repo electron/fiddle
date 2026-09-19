@@ -5,10 +5,12 @@ import path from 'node:path';
 
 import { afterAll, beforeAll, beforeEach } from 'vitest';
 
+import type { AppState, WindowState } from '../src/shared/stores.ts';
 import { launchApp, type FiddleApp, type LaunchOptions } from './driver.ts';
 import { startFixtureServer, type FixtureServer } from './fixtures/server.ts';
 
 export { FIXTURE_GIST_ID, role, text, type FiddleApp } from './driver.ts';
+export type { AppState, WindowState };
 
 export interface AppHandle {
   (): FiddleApp;
@@ -17,11 +19,8 @@ export interface AppHandle {
 }
 
 /**
- * One app per spec file: launched before the first test and closed after the
- * last. Call the returned getter inside tests. When a test fails, a screenshot,
- * the accessibility snapshot and log tails are printed and the temp dir is
- * kept. After the last test, any isolation violation (a non-loopback request,
- * an unscripted dialog, a lost renderer) fails the file.
+ * One app per spec file, launched before the first test and closed after the last. A failing test
+ * prints diagnostics and keeps the temp dir; an isolation violation fails the file.
  */
 export function useApp(options: LaunchOptions = {}): AppHandle {
   let app: FiddleApp | undefined;
@@ -61,65 +60,6 @@ export function useApp(options: LaunchOptions = {}): AppHandle {
       return fixtures;
     },
   });
-}
-
-// The parts of src/shared/stores.ts that specs read.
-
-export type VersionRef =
-  { kind: 'release'; version: string } | { kind: 'local'; id: string };
-
-export interface WindowState {
-  windowId: string;
-  title: string;
-  view: 'editor' | 'settings';
-  fiddle: {
-    name: string;
-    fiddleRev: number;
-    dirty: boolean;
-    dirtyFiles: string[];
-    activeFile: string | null;
-    files: { name: string; visible: boolean }[];
-    modules: Record<string, string>;
-    versionRef: VersionRef;
-    source: {
-      localPath?: string;
-      gistId?: string;
-      gistRevision?: string;
-      gistOwner?: string;
-      templateName?: string;
-      origin: string;
-      trusted: boolean;
-    };
-  };
-  /** `panes`: the files in the editor panes, from the start; empty when the editor isn't split. */
-  layout: {
-    sidebar: boolean;
-    panes: string[];
-    consoleHeight: number;
-    sidebarWidth: number;
-    consoleVisible: boolean;
-  };
-  run?: {
-    status: string;
-    result?: string;
-    clearedSeq: number;
-    bisect: {
-      good: string;
-      bad: string;
-      current: string | null;
-      result: { good: string; bad: string } | null;
-    } | null;
-  };
-}
-
-export interface AppState {
-  settings: Record<string, unknown>;
-  themes: { id: string; name: string }[];
-  githubLogin?: string;
-  versions?: {
-    installs: Record<string, { state: string; percent?: number }>;
-    localBuilds: { id: string; name: string; path: string; available: boolean }[];
-  };
 }
 
 /** The Window store of `window` (default: the first window). */

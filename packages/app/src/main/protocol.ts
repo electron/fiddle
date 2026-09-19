@@ -1,8 +1,4 @@
-/**
- * The privileged app:// scheme. App content is served from the renderer
- * bundle through `protocol.handle`, with the CSP as a response header.
- * Never registered with `bypassCSP`; service workers stay off.
- */
+/** The privileged app:// scheme. Never registered with `bypassCSP`; service workers stay off. */
 import fs from 'node:fs/promises';
 import path from 'node:path';
 

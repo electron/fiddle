@@ -111,9 +111,27 @@ describe('headlessArgs', () => {
     ],
     [['electron-fiddle', '--no-sandbox', '--headless'], []],
     [['electron-fiddle', 'run'], undefined],
+    [
+      [
+        'electron-fiddle',
+        'electron-fiddle://gist/1',
+        '--headless',
+        'run',
+        'x',
+        '--trust',
+      ],
+      undefined,
+    ],
   ])('%j gives %j', async (argv, expected) => {
     const { headlessArgs } = await import('./index');
     expect(headlessArgs(argv)).toEqual(expected);
+  });
+
+  it('skips the app path of an unpackaged run', async () => {
+    const { headlessArgs } = await import('./index');
+    const argv = ['electron', '--no-sandbox', '/app', '--headless', 'run', 'x'];
+    expect(headlessArgs(argv, true)).toEqual(['run', 'x']);
+    expect(headlessArgs(argv, false)).toBeUndefined();
   });
 });
 

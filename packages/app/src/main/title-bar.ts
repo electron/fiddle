@@ -1,8 +1,6 @@
 /**
- * macOS: double-clicking empty title bar space does what System Settings >
- * Desktop & Dock > "Double-click a window's title bar to" says.
- * The title bar is ours (`titleBarStyle: 'hiddenInset'`), so the renderer
- * reports the double-click and this applies the preference.
+ * macOS: double-clicking empty title bar space follows System Settings > Desktop
+ * & Dock. The title bar is ours, so the renderer reports the double-click.
  */
 import { systemPreferences, type BrowserWindow } from 'electron';
 

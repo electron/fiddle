@@ -1,15 +1,14 @@
-/* Lucent extensions. Values the component library needs that lucent-tokens.css doesn't name.
-   lucent-tokens.css stays verbatim; add missing values here, never there. */
+/* Lucent extensions: values the components need that lucent-tokens.css doesn't name.
+   This file loads after it, so the material, contrast and forced-colors blocks below
+   also override its tokens. */
 
 :root {
-  /* states */
   --lu-disabled-opacity: 0.4;
   --lu-press-scale-tile: 0.98;
   --lu-focus-outline: 3px solid color-mix(in srgb, var(--lu-focus-ring) 70%, transparent);
   --lu-ring-field: 0 0 0 3.5px color-mix(in srgb, var(--lu-accent) 26%, transparent);
   --lu-ring-invalid: 0 0 0 3.5px color-mix(in srgb, var(--lu-spark) 22%, transparent);
 
-  /* the primary sheen: white, 20% to 0 over the top 55%; 28% on hover */
   --lu-sheen: linear-gradient(
     180deg,
     rgba(255, 255, 255, 0.2),
@@ -25,10 +24,8 @@
     rgba(255, 255, 255, 0.2),
     rgba(255, 255, 255, 0)
   );
-  /* pressed primary: action mixed 14% toward black, sheen removed */
   --lu-action-pressed: color-mix(in srgb, var(--lu-action) 86%, #000000);
 
-  /* selection controls */
   --lu-knob: #ffffff;
   --lu-shadow-knob:
     0 0 0 0.5px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.2),
@@ -38,46 +35,36 @@
     inset 0 0.5px 0 rgba(255, 255, 255, 0.4),
     0 1px 2px color-mix(in srgb, var(--lu-action) 35%, transparent);
 
-  /* key caps: 0.5px line-strong ring with a 1px bottom lip */
   --lu-shadow-kbd:
     0 0 0 0.5px var(--lu-line-strong),
     0 1px 0 0.5px color-mix(in srgb, var(--lu-line-strong) 60%, transparent);
 
-  /* cards: 0.5px button-edge ring; hover adds a soft 10/24 shadow */
   --lu-shadow-card:
     inset 0 0 0 0.5px var(--lu-button-edge), 0 1px 2px rgba(0, 0, 0, 0.04);
   --lu-shadow-card-hover:
     inset 0 0 0 0.5px var(--lu-button-edge), 0 2px 4px rgba(0, 0, 0, 0.04),
     0 10px 24px -12px rgba(20, 24, 48, 0.28);
 
-  /* overlays: shadow-popover plus the two rims */
   --lu-shadow-overlay:
     var(--lu-shadow-popover), inset 0 0.5px 0 var(--lu-rim),
     inset 0 0 0 0.5px var(--lu-rim-soft);
-  /* tooltips: 0.5px white rim at 14% */
   --lu-tooltip-rim: rgba(255, 255, 255, 0.14);
 
-  /* progress bar: accent with a lighter start (accent 75% into white) */
   --lu-progress-bar: linear-gradient(
     90deg,
     color-mix(in srgb, var(--lu-accent) 75%, #ffffff),
     var(--lu-accent)
   );
 
-  /* the running pill's dot halo, and the badge dot's halo in its own colour */
   --lu-halo-spark: 0 0 0 2.5px color-mix(in srgb, var(--lu-spark) 22%, transparent);
   --lu-halo-current: 0 0 0 2.5px color-mix(in srgb, currentColor 20%, transparent);
 
-  /* the Stop button: spark-soft with a faint red ring */
   --lu-shadow-stop: inset 0 0 0 0.5px color-mix(in srgb, var(--lu-spark) 30%, transparent);
-  /* tooltips: the rim plus the popover shadow */
   --lu-shadow-tooltip: 0 0 0 0.5px var(--lu-tooltip-rim), var(--lu-shadow-popover);
-  /* the 0.5px button-edge ring around tables and inline pages */
   --lu-ring-edge: inset 0 0 0 0.5px var(--lu-button-edge);
   /* a hairline on the inside right edge (settings nav) */
   --lu-hairline-end: inset calc(-1 * var(--lu-size-hairline)) 0 0 var(--lu-line);
 
-  /* type the scale doesn't name */
   --lu-type-window-title: 650 13px/16px var(--lu-font-sans);
   --lu-type-window-title-tracking: -0.01em;
   --lu-type-tab: 500 12.5px/16px var(--lu-font-sans); /* tabs */
@@ -90,7 +77,6 @@
   --lu-type-count: 600 10px/16px var(--lu-font-sans); /* a tab's error count */
   --lu-type-pill: 600 10.5px/16px var(--lu-font-sans); /* a sidebar row's "1 error" */
 
-  /* radii the scale doesn't name */
   --lu-radius-tooltip: 8px;
   --lu-radius-switch: 10px;
   --lu-radius-knob: 8px;
@@ -101,42 +87,23 @@
   --lu-dur-spin: 800ms;
   --lu-dur-indeterminate: 1200ms;
 
-  /* layer order for app-drawn overlays */
   --lu-z-popover: 100;
   --lu-z-dialog: 200;
   --lu-z-toast: 300;
   --lu-z-tooltip: 400;
 }
 
-/* Per-appearance extensions.
-   sheet shadow: shadow-island, plus a 0.5px top rim at 8% white in dark.
-   specimen stage: a stand-in for the user's desktop behind glass, for the gallery and
-   specimens only. The app itself never paints it; the OS material shows through instead. */
+/* Sheet shadow: shadow-island, plus a 0.5px top rim at 8% white in dark. */
 :root {
   --lu-shadow-sheet: var(--lu-shadow-island);
-  --lu-specimen-stage:
-    radial-gradient(70% 90% at 6% 0%, #a9d8ff, rgba(169, 216, 255, 0) 70%),
-    radial-gradient(60% 90% at 96% 8%, #bff3fb, rgba(191, 243, 251, 0) 70%),
-    radial-gradient(70% 90% at 92% 104%, #c7d3ff, rgba(199, 211, 255, 0) 70%),
-    radial-gradient(60% 80% at 8% 100%, #9feaf9, rgba(159, 234, 249, 0) 70%), #eaf3fb;
 }
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme='light']) {
     --lu-shadow-sheet: var(--lu-shadow-island), inset 0 0.5px 0 rgba(255, 255, 255, 0.08);
-    --lu-specimen-stage:
-      radial-gradient(70% 90% at 6% 0%, #1f4fd6, rgba(31, 79, 214, 0) 70%),
-      radial-gradient(60% 90% at 96% 8%, #16566a, rgba(22, 86, 106, 0) 70%),
-      radial-gradient(70% 90% at 92% 104%, #243a9e, rgba(36, 58, 158, 0) 70%),
-      radial-gradient(60% 80% at 8% 100%, #0f5a6b, rgba(15, 90, 107, 0) 70%), #10121b;
   }
 }
 :root[data-theme='dark'] {
   --lu-shadow-sheet: var(--lu-shadow-island), inset 0 0.5px 0 rgba(255, 255, 255, 0.08);
-  --lu-specimen-stage:
-    radial-gradient(70% 90% at 6% 0%, #1f4fd6, rgba(31, 79, 214, 0) 70%),
-    radial-gradient(60% 90% at 96% 8%, #16566a, rgba(22, 86, 106, 0) 70%),
-    radial-gradient(70% 90% at 92% 104%, #243a9e, rgba(36, 58, 158, 0) 70%),
-    radial-gradient(60% 80% at 8% 100%, #0f5a6b, rgba(15, 90, 107, 0) 70%), #10121b;
 }
 
 /* Materials that went opaque don't need a blur. */
@@ -155,11 +122,11 @@
   }
 }
 
-/* Native materials (macOS vibrancy, Windows acrylic) already blur and tint the
-   desktop, so Lucent's chrome tint is thinner over them than the design's 0.62,
-   which assumed a CSS blur over the raw desktop. Reduce transparency, Increase
-   contrast and high contrast keep their own values: this only applies with no
-   such preference, and `:where()` keeps it below the high-contrast rules. */
+/* Native materials (macOS vibrancy, Windows acrylic) already blur and tint the desktop, so
+   the chrome tint is thinner over them (0.36 light, 0.42 dark) than the token's 0.62, which
+   assumes a CSS blur over the raw desktop. Reduce transparency, Increase contrast and high
+   contrast keep their own values: this only applies with no such preference, and `:where()`
+   keeps it below the high-contrast rules. */
 @media (prefers-reduced-transparency: no-preference) and (prefers-contrast: no-preference) {
   :root:where([data-material='vibrancy'], [data-material='acrylic']) {
     --lu-material-chrome: rgba(250, 250, 253, 0.36);
@@ -253,7 +220,9 @@
 }
 
 /* Forced colours (Windows high contrast): glass and tints drop to system colours.
-   `:root` is repeated so this outranks the appearance and high-contrast rules above. */
+   `:root` is repeated so this outranks the appearance and high-contrast rules above.
+   The translucent fills (--lu-fill, --lu-hover, --lu-chip, ...) are left alone: the browser
+   drops them, so components mark selected and focused states with outlines of their own. */
 @media (forced-colors: active) {
   :root:root:root:root {
     --lu-size-hairline: 1px;
@@ -285,7 +254,7 @@
     --lu-rim: CanvasText;
     --lu-rim-soft: CanvasText;
     --lu-accent: Highlight;
-    --lu-accent-soft: Highlight;
+    --lu-accent-soft: Canvas;
     --lu-action: Highlight;
     --lu-on-action: HighlightText;
     --lu-focus-ring: Highlight;

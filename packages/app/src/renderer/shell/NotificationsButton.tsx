@@ -1,7 +1,3 @@
-/**
- * The status bar's bell: a count of toasts not seen in the list yet, and a
- * popover with every toast this window showed, newest first. Actions stay usable there.
- */
 import { useTranslation } from 'react-i18next';
 
 import { useFormat } from '../../i18n/renderer';

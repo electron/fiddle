@@ -21,7 +21,7 @@ const items: PaletteItem[] = [
   command('view.toggleDevTools', 'Toggle developer tools', { keywords: ['inspect'] }),
   { id: 'file:main.js', kind: 'file', label: 'main.js' },
   { id: 'file:renderer.js', kind: 'file', label: 'renderer.js' },
-  { id: 'version:44.0.0', kind: 'version', label: '44.0.0', detail: 'Stable' },
+  { id: 'version:44.0.0', kind: 'version', label: '44.0.0', keywords: ['stable'] },
 ];
 
 const labels = (list: PaletteItem[]) => list.map((item) => item.label);
@@ -80,7 +80,7 @@ describe('rankItems', () => {
     expect(labels(ranked)).toEqual(['renderer.js', 'main.js']);
   });
 
-  it('matches keywords and details below labels', () => {
+  it('matches keywords below labels', () => {
     expect(labels(rankItems(items, 'inspect', []))).toEqual(['Toggle developer tools']);
     expect(labels(rankItems(items, 'stable', []))).toEqual(['44.0.0']);
   });

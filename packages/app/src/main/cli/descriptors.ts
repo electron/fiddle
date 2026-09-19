@@ -1,16 +1,5 @@
-/**
- * Operation descriptors for the headless CLI: one per command, with its zod
- * input schema, its description, its output shape and its error codes.
- * `argv.ts` parses the command line and writes `--help` from these. No
- * Electron imports.
- *
- * - Input fields named in `positionals` come from positional arguments, in
- *   order. Every other field is a flag: `electronPath` is `--electron-path`.
- *   Booleans are switches, and arrays can be repeated.
- * - Defaults are the app's default settings: the CLI never reads settings.json.
- * - A field's help is the `mainCli` key `arg<Field>`, e.g. `argElectronPath`.
- * - `--json` and `--help` work with every command.
- */
+// Input fields named in `positionals` are positional arguments, in order; the
+// rest are flags. Help for a field is the `mainCli` key `arg<Field>`.
 import { z } from 'zod';
 
 import type mainCli from '../../i18n/generated/en/mainCli';

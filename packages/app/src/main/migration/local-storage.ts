@@ -1,19 +1,14 @@
 /**
- * Reads the previous Electron Fiddle's localStorage for the one-time import.
- * The old app kept its settings in the `file://` origin's localStorage, in the
- * default session of this same userData folder.
- *
- * This is the only `file://` load the app ever makes (see security.ts): a
- * hidden, sandboxed window with no preload and no IPC loads the blank page
- * shipped in `static/import-local-storage.html`, the values are read with
- * `executeJavaScript`, and the window is destroyed.
+ * The old app kept its settings in the `file://` origin's localStorage. This is
+ * the only `file://` load the app makes: a hidden, sandboxed window without
+ * preload or IPC.
  */
 import fs from 'node:fs';
 import path from 'node:path';
 
 import { app, BrowserWindow } from 'electron';
 
-/** The app's `static/` folder, as main/documents/service.ts `staticDir()` finds it. */
+/** In the same `static/` folder as `staticDir()` in documents/service.ts. */
 function blankPage(): string {
   const dir = app.isPackaged
     ? path.join(process.resourcesPath, 'static')

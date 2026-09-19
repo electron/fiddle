@@ -1,9 +1,3 @@
-/**
- * Settings in the renderer: the `App` store's settings with this window's
- * pending changes on top (see ../../optimistic.ts). `set` and `reset` show the
- * change at once, call main, and reconcile on the returned rev. A rejected
- * change is dropped and shown as a toast.
- */
 import { useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -59,7 +53,7 @@ export function useSettings(): UseSettings {
   return { app, settings, set, reset };
 }
 
-/** Runs a settings action (import, export, theme and file actions) and toasts its error. */
+/** Runs a settings action and toasts its error. */
 export function useSettingsAction(): (action: () => Promise<unknown>) => void {
   const { t } = useTranslation('settings');
   return useCallback(

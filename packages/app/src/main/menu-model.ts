@@ -1,9 +1,3 @@
-/**
- * The application menu as data, for the title bar's menu bar on Windows and
- * Linux (`Window.menuBar`): the native template of src/main/menu.ts serialized
- * to `MenuNode`s, and the lookup and role table `Window.ActivateMenuItem` uses
- * to do what the native item does.
- */
 import {
   app,
   Menu,
@@ -22,11 +16,8 @@ type Role = NonNullable<Item['role']>;
 
 /**
  * Whether app windows draw the menu bar in their title bar at launch: always on
- * Windows (the title bar is ours) and Linux (the native menu bar is hidden),
- * never on macOS, which has the OS menu bar, except when a test
- * (`FIDDLE_TEST_MENUBAR=1`) or a dev run (`FIDDLE_DEV_MENUBAR=1 yarn start`)
- * forces it. The Develop menu's toggle flips it from there while the app runs
- * (`toggleWindowMenuBar` in ./menu.ts).
+ * Windows and Linux, on macOS only when a test (`FIDDLE_TEST_MENUBAR=1`) or a
+ * dev run (`FIDDLE_DEV_MENUBAR=1 yarn start`) forces it.
  */
 export function hasWindowMenuBar(platform: Platform): boolean {
   if (platform !== 'darwin' || testMenuBar()) return true;
@@ -37,11 +28,7 @@ export function hasWindowMenuBar(platform: Platform): boolean {
   );
 }
 
-/**
- * The key Electron gives a role item that has no accelerator of its own
- * (lib/browser/api/menu-item-roles.ts), so the model shows what the native
- * menu shows.
- */
+/** The key Electron gives a role item with no accelerator of its own, so the model shows what the native menu shows. */
 export function roleAccelerator(role: Role, platform: Platform): string | undefined {
   switch (role) {
     case 'cut':
@@ -61,11 +48,7 @@ export function roleAccelerator(role: Role, platform: Platform): string | undefi
   }
 }
 
-/**
- * The template as the renderer draws it. Every item but separators needs an
- * `id` (menu.ts gives each one); hidden items are dropped, and accelerators
- * become display text for the platform.
- */
+/** The template as the renderer draws it: every item but separators needs an `id`, hidden items are dropped, and accelerators become display text. */
 export function toMenuModel(template: readonly Item[], platform: Platform): MenuNode[] {
   return template.flatMap((item): MenuNode[] => {
     if (item.type === 'separator') return [{ kind: 'separator' }];
@@ -115,12 +98,10 @@ export function findMenuItem(template: readonly Item[], id: string): Item | unde
 }
 
 /**
- * What Electron's roles do (menu-item-roles.ts), for the roles the Windows and
- * Linux template uses. `MenuItem.click()` runs a role itself on those
- * platforms, but not on macOS, where AppKit handles roles natively; this
- * table runs them everywhere, so a menu bar forced on macOS for tests behaves
- * the same. Editing roles act on the window's page, which has focus again by
- * the time the renderer calls `ActivateMenuItem`.
+ * What Electron's roles do, for the roles the Windows and Linux template uses.
+ * `MenuItem.click()` runs a role only off macOS, so a bar forced on macOS needs
+ * this table. Editing roles act on the page, which has focus again by the time
+ * `ActivateMenuItem` arrives.
  */
 const ROLE_ACTIONS: Partial<Record<Role, (win: BrowserWindow) => void>> = {
   cut: (win) => win.webContents.cut(),
@@ -180,6 +161,6 @@ export function activateMenuItem(
   }
   if (typeof item.click !== 'function')
     throw new FiddleError(ErrorCode.unavailable, `Menu item ${id} does nothing`);
-  // Our click handlers only read the window (menu.ts); the item and event are the native menu's.
+  // Our click handlers only read the window, so the item and event can be empty.
   item.click({} as Electron.MenuItem, win, {} as Electron.KeyboardEvent);
 }

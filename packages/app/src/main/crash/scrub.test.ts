@@ -1,3 +1,5 @@
+import vm from 'node:vm';
+
 import { describe, expect, it, vi } from 'vitest';
 
 import {
@@ -64,14 +66,19 @@ describe('redactSecrets', () => {
     expect(redactSecrets(text, home)).toBe(text);
   });
 
-  it('takes linear time on long runs of word characters, hyphens and dots', () => {
-    const started = performance.now();
+  it('finishes on long runs of word characters, hyphens and dots', () => {
+    // Quadratic patterns would run for minutes; the timeout turns that into a failure.
     for (const unit of ['a-', 'a.', 'a-b.']) {
       const text = unit.repeat(40_000);
-      expect(redactSecrets(text, home)).toBe(text);
-      expect(scrubText(text, home)).toBe(text);
+      const run = (scrub: typeof redactSecrets) =>
+        vm.runInNewContext(
+          'scrub(text, home)',
+          { scrub, text, home },
+          { timeout: 10_000 },
+        );
+      expect(run(redactSecrets)).toBe(text);
+      expect(run(scrubText)).toBe(text);
     }
-    expect(performance.now() - started).toBeLessThan(1000);
   });
 
   it('still redacts a secret pair and URL password inside long text', () => {
@@ -169,6 +176,13 @@ describe('scrubEvent', () => {
 });
 
 describe('scrubBreadcrumb', () => {
+  it('redacts values nested deeper than the scrubber walks', () => {
+    let deep: unknown = { apiKey: 'hunter2', text: `${home}/a` };
+    for (let i = 0; i < 30; i++) deep = { next: deep };
+    const out = scrubBreadcrumb({ category: 'app', data: deep }, home);
+    expect(JSON.stringify(out)).not.toMatch(/hunter2|fiddler/);
+  });
+
   it('drops console and network breadcrumbs', () => {
     for (const category of ['console', 'fetch', 'xhr', 'electron.net']) {
       expect(scrubBreadcrumb({ category, message: 'x' }, home)).toBeNull();

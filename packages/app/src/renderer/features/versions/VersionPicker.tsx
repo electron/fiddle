@@ -1,19 +1,3 @@
-/**
- * The Electron version picker in the toolbar capsule. Its menu lists local
- * builds and the "Stable" and "Pre-release" groups, each newest first; a search
- * drops the groups for one newest-first list. Versions this computer can't run
- * are disabled, and "Copy version number" ends the menu. Disabled while running
- * or bisecting.
- *
- * It also shows the window's version notices (fallbacks and failed
- * downloads) as toasts, and retries the version's download when the
- * computer comes back online.
- *
- * Every store push replaces every object in the store, and a download pushes
- * ten times a second. So the list is built from stable copies of only what
- * it depends on (`useStableJson`), and download percentages skip it: they
- * reach the rows through SearchSelect's `details`.
- */
 import type { TFunction } from 'i18next';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -33,6 +17,7 @@ import type {
 import { cx, showToast } from '../../../ui';
 import { setVersionRef } from '../../shell/window-state';
 import { useAppState, useWindowState } from '../../state';
+import { toastError } from '../../toast-error';
 import { IDLE_RUN, useReleases, versionLabel } from '../run/use-run';
 import { SearchSelect, type SearchGroup, type SearchOption } from './SearchSelect';
 import styles from './Versions.module.css';
@@ -63,8 +48,8 @@ export function parseRefId(id: string): VersionRefValue | undefined {
 }
 
 /**
- * A copy of `value` that keeps its identity until its content changes, for
- * memo dependencies: store pushes replace objects that didn't change.
+ * Every store push replaces every object, and a download pushes ten times a second:
+ * this keeps a value's identity until its content changes.
  */
 function useStableJson<T>(value: T): T {
   const json = JSON.stringify(value);
@@ -155,11 +140,7 @@ function useVersionNotice(notice: VersionNotice | null | undefined) {
 function useRetryWhenOnline() {
   useEffect(() => {
     const retry = () => {
-      versionsApi
-        .RetryDownload()
-        .catch((error: unknown) =>
-          console.error('[fiddle] retrying the download failed', error),
-        );
+      versionsApi.RetryDownload().catch((error: unknown) => toastError(error));
     };
     window.addEventListener('online', retry);
     return () => window.removeEventListener('online', retry);
@@ -182,7 +163,6 @@ export function VersionPicker({ className }: { className?: string } = {}) {
   const settings = app?.settings;
   const installs = app?.versions?.installs ?? NO_INSTALLS;
 
-  // The list's inputs, unchanged by pushes that don't change them.
   const filter = useStableJson<VersionFilterSettings | null>(
     settings
       ? {
@@ -229,7 +209,7 @@ export function VersionPicker({ className }: { className?: string } = {}) {
   const copy = useCallback(() => {
     versionsApi.CopyVersion().then(
       () => showToast({ tone: 'success', title: tv('copied', { version: known ?? '' }) }),
-      (error: unknown) => console.error('[fiddle] copying the version failed', error),
+      (error: unknown) => toastError(error),
     );
   }, [tv, known]);
   const setVersion = useCallback(

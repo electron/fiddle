@@ -1,20 +1,4 @@
-/**
- * Redaction shared by the log file and Sentry.
- *
- * - `redactSecrets`: token patterns, and the home directory becomes `~`.
- *   Used for every log entry.
- * - `scrubText`: also strips URL query strings and gist IDs. Used for
- *   everything Sentry sends.
- * - `prepareEvent` (`beforeSend`) and `scrubBreadcrumb` (`beforeBreadcrumb`).
- *   Fiddle contents, console output and the environment never leave: extras,
- *   user data, request bodies, stack-frame variables and unknown contexts are
- *   dropped, and so are console and network breadcrumbs. Native crash dumps
- *   from main (or any other non-renderer process) are never sent; a renderer
- *   dump is sent only if the user agrees to that one crash.
- *
- * No Electron imports.
- */
-
+/** Redaction shared by the log file and Sentry. No Electron imports. */
 export const REDACTED = '[redacted]';
 
 /** Keys whose values are secrets (`author` is not). */
@@ -136,7 +120,8 @@ const DROPPED_BREADCRUMBS = new Set([
 
 function scrubValue(value: unknown, home: string, depth = 0): unknown {
   if (typeof value === 'string') return scrubText(value, home);
-  if (depth > 20 || typeof value !== 'object' || value === null) return value;
+  if (typeof value !== 'object' || value === null) return value;
+  if (depth > 20) return REDACTED;
   if (Array.isArray(value)) return value.map((item) => scrubValue(item, home, depth + 1));
   const out: Record<string, unknown> = {};
   for (const [key, item] of Object.entries(value)) {

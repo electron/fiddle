@@ -1,8 +1,3 @@
-/**
- * The first-run notice that crash reports are on: a
- * non-blocking toast with a link to Settings → Privacy. Main says whether to
- * show it, once ever (state.json).
- */
 import type { i18n } from 'i18next';
 
 import { appPlatformApi } from '../../../ipc/renderer';

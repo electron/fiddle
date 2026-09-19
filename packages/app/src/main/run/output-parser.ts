@@ -1,17 +1,3 @@
-/**
- * Turns a running fiddle's stdout and stderr into console lines and runtime
- * errors. No Electron imports.
- *
- * - Node's inspector banner is dropped; its port is reported instead.
- * - With `ELECTRON_ENABLE_LOGGING`, Chromium writes renderer console messages
- *   to stderr: `[pid:…:ERROR:CONSOLE(4)] "Uncaught TypeError: …", source:
- *   file:///…/renderer.js (4)` (newer Chromium writes `CONSOLE:4]`). These
- *   become Renderer lines; a message can span several lines. Chromium's other
- *   log lines are dropped unless advanced logging is on.
- * - Main-process errors are an `…Error: message` line followed by stack frames.
- *   The first frame inside the run directory gives the location.
- * - Paths inside the run directory are mapped back to fiddle file names.
- */
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -44,6 +30,8 @@ const INSPECTOR_NOISE = [
   /^Debugger attached\.?$/,
   /^Waiting for the debugger to disconnect\.*$/,
 ];
+// Chromium's renderer console lines: `[pid:…:ERROR:CONSOLE(4)] "message", source: file:///…/renderer.js (4)`;
+// newer builds write `CONSOLE:4]`.
 const LEVELS = '(INFO|WARNING|ERROR|FATAL|VERBOSE\\d*)';
 const CONSOLE_START = new RegExp(
   `^\\[[^\\]]*?:${LEVELS}:CONSOLE(?:\\(\\d+\\)|:\\d+)\\] "`,
@@ -265,7 +253,8 @@ export class OutputParser {
     end: { source: string; line: number } | undefined,
   ): SourceLocation | undefined {
     const { roots, files } = this.#options;
-    for (const match of message.matchAll(INLINE_FRAME)) {
+    // Only the shown text is scanned: INLINE_FRAME is quadratic on a long run of `/`.
+    for (const match of message.slice(0, MAX_LINE).matchAll(INLINE_FRAME)) {
       const file = mapToFiddleFile(match[1]!, roots, files);
       if (file) return { file, line: Number(match[2]), column: Number(match[3]) };
     }

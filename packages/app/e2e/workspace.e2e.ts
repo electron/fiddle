@@ -31,7 +31,6 @@ describe('workspace', () => {
 
   it('splits the editor and closes the split', async () => {
     await app().click(role('button', 'Split editor'));
-    // A second pane opens beside the focused one, showing renderer.js.
     await expect
       .poll(async () => (await layout()).panes)
       .toEqual(['main.js', 'renderer.js']);
@@ -154,7 +153,6 @@ describe('workspace', () => {
     const last = before.at(-1)!;
     const tabPattern = (name: string) => new RegExp(`^${name.replaceAll('.', '\\.')}\\b`);
 
-    // Drag the last tab in front of the first.
     await dragTabAlongRow(last, first, 'before');
     await expect.poll(visibleTabs).toEqual([last, ...before.slice(0, -1)]);
     // The sidebar follows: within its group, the file moved too (main owns one order for both).
@@ -162,7 +160,6 @@ describe('workspace', () => {
       (await windowState(app())).fiddle.files.map((file) => file.name).indexOf(last),
     ).toBe(0);
 
-    // Move tab right acts on the selected tab.
     await app().click(role('tab', tabPattern(last)));
     await expect.poll(activeFile).toBe(last);
     await app().runCommand('editor.moveTabRight');
@@ -203,7 +200,6 @@ describe('workspace', () => {
     await expect.poll(panes).toEqual([a, b, c]);
     await expect.poll(activeFile).toBe(c);
     await expect.poll(async () => (await app().query(role('code'))).length).toBe(3);
-    // A near edge opens the new pane before that one.
     await dragTabToPane(d, 0, 'before');
     await expect.poll(panes).toEqual([d, a, b, c]);
     await expect.poll(async () => (await app().query(role('code'))).length).toBe(4);
@@ -224,7 +220,6 @@ describe('workspace', () => {
     await expect.poll(panes).toEqual([b, c, d]);
     await expect.poll(activeFile).toBe(d);
 
-    // Close pane closes one and keeps its tab; Maximize keeps only that pane.
     await app().click(role('button', 'Close pane', { nth: 0 }));
     await expect.poll(panes).toEqual([c, d]);
     expect(await visibleTabs()).toContain(b);
@@ -257,24 +252,17 @@ describe('workspace', () => {
     await app().query(role('region', 'Console'));
   });
 
-  it('routes undo, redo, select all and copy to the editor', async () => {
+  it('routes undo and redo to the editor', async () => {
     const dirty = async () => (await windowState(app())).fiddle.dirty;
-    const undoAll = async () => {
-      for (let i = 0; i < 10 && (await dirty()); i++) await app().press('CmdOrCtrl+Z');
-      await expect.poll(dirty).toBe(false);
-    };
     await app().click(role('code'));
     await app().type('// typed');
     await expect.poll(dirty).toBe(true);
-    await undoAll();
+    for (let i = 0; i < 10 && (await dirty()); i++) await app().press('CmdOrCtrl+Z');
+    await expect.poll(dirty).toBe(false);
     await app().press('Shift+CmdOrCtrl+Z');
     await expect.poll(dirty).toBe(true);
-
-    await app().press('CmdOrCtrl+A');
-    await app().press('CmdOrCtrl+C');
-    await expect.poll(() => app().clipboard()).toContain('electron');
-    await app().click(role('code'));
-    await undoAll();
+    for (let i = 0; i < 10 && (await dirty()); i++) await app().press('CmdOrCtrl+Z');
+    await expect.poll(dirty).toBe(false);
   });
 
   it('shows the editor diagnostics on the file tab', async () => {

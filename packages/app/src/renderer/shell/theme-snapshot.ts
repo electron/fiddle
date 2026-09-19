@@ -1,10 +1,5 @@
-/**
- * The built-in theme as it's drawn now: Lucent's
- * Monaco theme and token values, read from the rendered tokens, with a
- * high-contrast Monaco base under `data-contrast="high"`. The editor uses it
- * for high contrast; "Create from current" writes it for a built-in theme.
- * Doesn't load Monaco.
- */
+// The built-in theme as drawn now: Monaco theme and token values read from the rendered tokens, with a
+// high-contrast base under `data-contrast="high"`. Doesn't load Monaco.
 import type { ThemeSnapshot } from '../../shared/settings';
 import { buildLucentTheme, readEditorTokens } from '../editor/theme';
 

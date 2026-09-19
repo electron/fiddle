@@ -104,7 +104,7 @@ describe('SettingsService', () => {
     });
   });
 
-  it('replaces everything on import and exports the sparse values', () => {
+  it('validates an outside settings object per key, and replaces and exports the sparse values', () => {
     const { hub, service } = open();
     service.set('showObsolete', true);
     const { settings, dropped } = sanitizeSettings({
@@ -113,8 +113,9 @@ describe('SettingsService', () => {
       theme: 42,
       unknown: 'x',
     });
+    expect(settings).toEqual({ packageManager: 'yarn' });
     expect(dropped).toEqual(['theme', 'unknown']);
-    service.replace(settings);
+    service.replace(fromSparse(settings));
     expect(hub.app.settings.showObsolete).toBe(false);
     expect(hub.app.settings.packageManager).toBe('yarn');
     expect(service.exportData()).toEqual({ schemaVersion: 1, packageManager: 'yarn' });

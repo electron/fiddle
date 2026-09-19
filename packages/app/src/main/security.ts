@@ -1,13 +1,7 @@
 /**
- * Hardening for sessions and webContents. Web preferences are set where windows
- * are created (window.ts).
- *
- * `file://` is never loaded, with one exception: the one-time import
- * (src/main/migration/local-storage.ts) loads `static/import-local-storage.html`
- * once, on the first launch, to read the previous app's file:// localStorage.
- * It runs before the handlers below are installed, so that window locks itself
- * down: hidden, sandboxed, no preload and no IPC, navigation and new windows
- * blocked, a `default-src 'none'` CSP, and it's destroyed right after reading.
+ * `file://` is never loaded except by the one-time localStorage import
+ * (migration/local-storage.ts), which runs before these handlers are installed,
+ * so its window locks itself down.
  */
 import { app, BrowserWindow, session, shell, type WebContents } from 'electron';
 

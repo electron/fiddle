@@ -1,9 +1,3 @@
-/**
- * GitHub sign-in and the gist flows. The token lives only here, in main; the
- * `App` store only ever gets the login name.
- *
- * No Electron imports: storage, the client, documents and settings are injected.
- */
 import {
   findMainEntry,
   PACKAGE_JSON,
@@ -17,7 +11,7 @@ import type { CredentialStorageKind, CredentialStore } from './credentials';
 import type { GistDocuments, GistFiddle } from './documents-bridge';
 import type { GistPrefs } from './prefs';
 
-/** Shown once to the user; `decrypt-failed` means they were signed out and the file was kept. */
+/** `decrypt-failed`: the user was signed out and the file was kept. */
 type GitHubNotice = 'decrypt-failed';
 
 interface GistLink {
@@ -27,9 +21,9 @@ interface GistLink {
 
 interface GistHistory {
   id: string;
-  /** The revision the window has loaded or last saved; undefined when unknown. */
+  /** The revision the window has loaded or last saved. */
   activeSha: string | undefined;
-  /** Oldest first, as returned by GitHubClient.listGistRevisions. */
+  /** Oldest first. */
   revisions: GistRevision[];
 }
 
@@ -43,8 +37,10 @@ interface GitHubServiceOptions {
   log: { warn(...args: unknown[]): void; error(...args: unknown[]): void };
 }
 
-/** The startup check of the stored token. A slow answer keeps the token and lets session restore and deep links go on. */
+/** A slow answer keeps the token and lets session restore and deep links go on. */
 const STARTUP_CHECK_TIMEOUT_MS = 5000;
+/** `whenReady` also covers reading the token, which can wait on a keychain prompt. */
+const READY_TIMEOUT_MS = 8000;
 
 export class GitHubService {
   readonly #options: GitHubServiceOptions;
@@ -61,22 +57,28 @@ export class GitHubService {
     return this.#login;
   }
 
-  /**
-   * The startup check, run once. Loads the stored token and asks GitHub who it
-   * belongs to: a 401 or 403 deletes it; being offline or rate limited keeps it.
-   */
+  /** Runs once: a 401 or 403 on the stored token deletes it; offline or rate limited keeps it. */
   init(): Promise<void> {
     this.#init ??= this.#restore();
     return this.#init;
   }
 
   /**
-   * Settles once `init` has restored and checked the stored token, or at once
-   * if it never ran. Session restore and deep links wait for it, so private
-   * gists load with the user's token. Never rejects.
+   * Settles once `init` has restored and checked the stored token, at once if
+   * it never ran, or after `READY_TIMEOUT_MS`. Session restore and deep links
+   * wait for it, so private gists load with the user's token. Never rejects.
    */
   whenReady(): Promise<void> {
-    return (this.#init ?? Promise.resolve()).catch(() => undefined);
+    const init = this.#init;
+    if (!init) return Promise.resolve();
+    return new Promise((resolve) => {
+      const timer = setTimeout(resolve, READY_TIMEOUT_MS);
+      const done = () => {
+        clearTimeout(timer);
+        resolve();
+      };
+      init.then(done, done);
+    });
   }
 
   async #restore(): Promise<void> {
@@ -114,10 +116,7 @@ export class GitHubService {
     return this.#options.store.kind();
   }
 
-  /**
-   * Verifies a personal access token (format, validity, `gist` scope) and
-   * stores it. Returns whether it was persisted or kept for this session only.
-   */
+  /** `persisted` is false when the token is kept for this session only. */
   async signIn(
     token: string,
     allowPlaintext: boolean,
@@ -147,18 +146,13 @@ export class GitHubService {
     await this.#options.store.delete();
   }
 
-  /** Returns the pending notice once. */
   takeNotice(): GitHubNotice | undefined {
     const notice = this.#notice;
     this.#notice = undefined;
     return notice;
   }
 
-  /**
-   * Publishes the window's fiddle as a new gist. With "publish as revision",
-   * the gist is created from the default template first and then updated with
-   * the real files, so its history shows the fiddle as a diff.
-   */
+  /** With "publish as revision", the gist is created from the template and then updated, so its history shows a diff. */
   async publish(
     windowId: string,
     input: { description: string; isPublic: boolean },
@@ -182,10 +176,7 @@ export class GitHubService {
     return { id: saved.id, url: saved.url };
   }
 
-  /**
-   * Syncs the files to the loaded gist. Remote files the fiddle held and has
-   * removed are deleted; any others (a README, images) stay.
-   */
+  /** Remote files the fiddle held and has removed are deleted; any others (a README, images) stay. */
   async update(windowId: string): Promise<GistLink> {
     const client = this.#authedClient();
     const fiddle = await this.#options.documents.getFiddle(windowId);
@@ -248,7 +239,7 @@ function loadedGistId(fiddle: GistFiddle): string {
   return id;
 }
 
-/** The fiddle's files plus a generated package.json with its modules, Electron version and author. */
+/** The fiddle's files plus a generated package.json. */
 export function gistFiles(
   fiddle: Omit<GistFiddle, 'savedNames' | 'fiddleRev'>,
   author?: string,
@@ -266,11 +257,8 @@ export function gistFiles(
 }
 
 /**
- * Creates a gist with `files`, without a window (shared with the headless
- * CLI). With a `template` ("publish as revision"), it's created from the
- * template and the fiddle's package.json, then updated with the files, so its
- * history shows the fiddle as a diff. If that update fails, `onUpdateFailed`
- * gets the gist, which exists with the template.
+ * Also used by the headless CLI. With a `template`, the gist is created from it
+ * and then updated with `files`; if that fails, `onUpdateFailed` gets the gist.
  */
 export async function publishGist(
   client: GitHubClient,

@@ -1,18 +1,10 @@
-/**
- * Package and make with Electron Forge: the Forge transform, `<pm> install`,
- * `<pm> run package|make`, then reveal `out/`.
- *
- * Both run the fiddle's dependencies' install scripts and Forge itself, so they
- * need the same trust approval as a run. An unapproved fiddle is refused; there
- * is no scripts-off fallback, because Forge can't work that way.
- */
 import fsp from 'node:fs/promises';
-import os from 'node:os';
 import path from 'node:path';
 
 import type { ElectronVersions } from '@electron/fiddle-core';
 import { shell } from 'electron';
 
+import appPackage from '../../../package.json';
 import type { VersionRef } from '../../fiddle/fiddle';
 import { findMainEntry, PACKAGE_JSON, type FileMap } from '../../fiddle/files';
 import { writeFiddleFolder } from '../../fiddle/folder';
@@ -32,11 +24,12 @@ import * as documents from '../documents/service';
 import { tm } from '../i18n';
 import { log } from '../log';
 import type { StateHub } from '../state-hub';
+import { makeRunDir } from '../run/process';
 import { PM_INSTALL_URLS, type RunService } from '../run/service';
 import type { VersionsService } from '../versions/service';
 
-/** Same Forge range as "Save as Forge project". */
-const FORGE_VERSION = '^7.8.0';
+/** Fiddle projects get the Forge the app is built with. */
+const FORGE_VERSION = appPackage.devDependencies['@electron-forge/cli'];
 
 /** The Electron a Forge project gets. Window-free, shared with the headless CLI. */
 interface ForgeElectron {
@@ -48,7 +41,6 @@ interface ForgeElectron {
   electronVersions: ElectronVersions;
 }
 
-/** Forge transform options: the nightly's ABI, a local build's path and the latest stable. */
 export function forgeOptionsFor(electron: ForgeElectron): ForgeTransformOptions {
   const { release, localPath } = electron;
   const latestStable = electron.releases.find((r) => !r.version.includes('-'))?.version;
@@ -63,7 +55,6 @@ export function forgeOptionsFor(electron: ForgeElectron): ForgeTransformOptions 
   };
 }
 
-/** The Electron for a fiddle's version: the release, or a local build's folder. */
 export function forgeElectronFor(
   ref: VersionRef,
   versions: Pick<VersionsService, 'localBuild' | 'releases' | 'electronVersions'>,
@@ -105,7 +96,7 @@ interface ForgeInstallOptions {
   sfwPath?: string;
 }
 
-/** The commands of a Forge task: `<pm> install` (`node <sfw.mjs> <pm> install` with Socket Firewall), then `<pm> run package|make`. */
+/** The commands of a Forge task: `<pm> install` (through Socket Firewall if set), then `<pm> run package|make`. */
 export function forgeTaskCommands(
   pm: PackageManager,
   task: 'package' | 'make',
@@ -199,8 +190,8 @@ export async function packageFiddle(
       },
       forgeElectronFor(fiddle.version, versions),
     );
-    dir = await fsp.mkdtemp(path.join(os.tmpdir(), `electron-fiddle-${task}-`));
-    await writeFiddleFolder(dir, project);
+    dir = await makeRunDir(`electron-fiddle-${task}-`);
+    await writeFiddleFolder(dir, project, [], { keepEmpty: true });
     runs.log(
       windowId,
       task === 'package' ? t('packaging', { path: dir }) : t('making', { path: dir }),
@@ -241,6 +232,6 @@ export async function packageFiddle(
 async function removeProject(dir: string | undefined): Promise<void> {
   if (dir === undefined) return;
   await fsp
-    .rm(dir, { recursive: true, force: true })
+    .rm(dir, { recursive: true, force: true, maxRetries: 5, retryDelay: 200 })
     .catch((error: unknown) => log.warn('removing the project failed', dir, error));
 }

@@ -6,6 +6,7 @@ export default {
   "exitedCode": "Electron exited with code {{code}}",
   "exitedSignal": "Electron was stopped by {{signal}}",
   "spawnFailed": "Couldn't start Electron: {{message}}",
+  "runFailed": "Couldn't run the fiddle: {{message}}",
   "privacyHelperMissing": "The privacy helper ({{path}}) is missing or can't run, so fiddles can't start: they would share Electron Fiddle's camera, microphone and other permissions. Reinstall Electron Fiddle.",
   "downloading": "Downloading Electron {{version}}…",
   "downloadFailed": "Couldn't download Electron {{version}}: {{message}}",

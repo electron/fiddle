@@ -1,8 +1,3 @@
-/**
- * Electron downloads in the headless CLI go through `net.fetch`, so the system
- * proxy and certificate store apply. This is an `@electron/get` downloader,
- * passed to core's Installer.
- */
 import fs from 'node:fs';
 import fsp from 'node:fs/promises';
 import path from 'node:path';
@@ -26,6 +21,7 @@ interface DownloadOptions {
   getProgressCallback?: (progress: Progress) => unknown;
 }
 
+/** An `@electron/get` downloader on `net.fetch`, so the system proxy and certificate store apply. */
 export function fetchDownloader(fetchFn: typeof fetch): Downloader {
   return {
     async download(url: string, targetFilePath: string, options?: DownloadOptions) {

@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { githubApi } from '../../../ipc/renderer';
 import { ErrorCode, FiddleError } from '../../../shared/errors';
 import { Button, Callout, Checkbox, Dialog, showToast, TextField } from '../../../ui';
+import { toastError } from '../../toast-error';
 import type { GistT } from './actions';
 import styles from './gists.module.css';
 
@@ -24,11 +25,7 @@ export interface SignInDialogProps {
   onSignedIn?: () => void;
 }
 
-/**
- * Personal access token sign-in. Mount it only while it's open. A token on
- * the clipboard is used when the field is left empty; main reads it, so the
- * renderer never sees it.
- */
+/** A token on the clipboard is used when the field is left empty; main reads it, so the renderer never sees it. */
 export function SignInDialog({ onClose, onSignedIn }: SignInDialogProps) {
   const { t } = useTranslation('gists');
   const [token, setToken] = useState('');
@@ -139,7 +136,9 @@ export function SignInDialog({ onClose, onSignedIn }: SignInDialogProps) {
           size="sm"
           icon="external"
           className={styles.tokenLink}
-          onPress={() => void githubApi.OpenNewTokenPage()}
+          onPress={() =>
+            githubApi.OpenNewTokenPage().catch((e: unknown) => toastError(e))
+          }
         >
           {t('signInCreateToken')}
         </Button>

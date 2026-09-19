@@ -243,3 +243,17 @@
   background: currentColor;
   box-shadow: var(--lu-halo-spark);
 }
+
+/* Forced colors drops the fill that marks a selected row. */
+@media (forced-colors: active) {
+  .row[data-selected],
+  .tr[aria-selected='true'] {
+    outline: 2px solid var(--lu-ink);
+    outline-offset: -2px;
+  }
+
+  .row[data-selected][data-focus-visible] {
+    outline: 3px solid var(--lu-focus-ring);
+    outline-offset: -3px;
+  }
+}

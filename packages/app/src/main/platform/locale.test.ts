@@ -56,11 +56,13 @@ describe('relaunchApp', () => {
 });
 
 describe('localeSettingFrom', () => {
-  it('reads a chosen language and ignores the system default and unreadable text', () => {
-    expect(localeSettingFrom('{"locale":"de"}')).toBe('de');
-    expect(localeSettingFrom('{"locale":"system"}')).toBeUndefined();
-    expect(localeSettingFrom('{"locale":3}')).toBeUndefined();
-    expect(localeSettingFrom('{nope')).toBeUndefined();
+  it('reads a chosen language and ignores the system default and invalid values', () => {
+    expect(localeSettingFrom({ locale: 'de' })).toBe('de');
+    expect(localeSettingFrom({ locale: 'pt-BR' })).toBe('pt-BR');
+    expect(localeSettingFrom({ locale: 'system' })).toBeUndefined();
+    expect(localeSettingFrom({ locale: 3 })).toBeUndefined();
+    expect(localeSettingFrom({ locale: 'not a language' })).toBeUndefined();
+    expect(localeSettingFrom({})).toBeUndefined();
     expect(localeSettingFrom(undefined)).toBeUndefined();
   });
 });

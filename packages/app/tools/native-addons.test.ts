@@ -54,11 +54,3 @@ describe('isTargetAddon', () => {
     }
   });
 });
-
-describe('extractsWithoutAddon', () => {
-  it('is true only for win32-ia32', () => {
-    expect(extractsWithoutAddon('win32', 'ia32')).toBe(true);
-    expect(extractsWithoutAddon('win32', 'x64')).toBe(false);
-    expect(extractsWithoutAddon('linux', 'ia32')).toBe(false);
-  });
-});

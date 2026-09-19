@@ -7,10 +7,7 @@ export const ADVANCED_LOGGING_ENV: Readonly<Record<string, string>> = {
   ELECTRON_ENABLE_STACK_DUMPING: 'true',
 };
 
-/**
- * Parent-environment variables kept from fiddle processes on top of core's
- * default denylist: app-internal variables, the e2e driver's included.
- */
+/** App-internal parent-environment variables, the e2e driver's included, that no child process gets. */
 export const FIDDLE_EXTRA_ENV_DENYLIST: readonly string[] = ['ELECTRON_FIDDLE_*'];
 
 export interface ParsedEnvEntries {
@@ -23,16 +20,13 @@ export interface ParsedEnvEntries {
 
 const KEY_RE = /^[A-Za-z_][A-Za-z0-9_]*$/;
 
-/** Blocked by exact name, ignoring case. */
 const BLOCKED_USER_ENV_KEYS: readonly string[] = ['NODE_OPTIONS', 'ELECTRON_RUN_AS_NODE'];
 
 /**
  * Variables the user can't set, ignoring case, because they change what
- * Electron runs rather than what the fiddle sees:
- * - `LD_*` and `DYLD_*` load code into every process through the dynamic
- *   loader. Core drops them too (`ALWAYS_BLOCKED_ENV`).
- * - `NODE_OPTIONS` can `--require` any file into the fiddle's main process.
- * - `ELECTRON_RUN_AS_NODE` turns Electron into plain Node.js running the fiddle's entry point.
+ * Electron runs: `LD_*` and `DYLD_*` load code through the dynamic loader,
+ * `NODE_OPTIONS` can `--require` any file, and `ELECTRON_RUN_AS_NODE` turns
+ * Electron into plain Node.js.
  */
 export function isBlockedUserEnvKey(key: string): boolean {
   const upper = key.toUpperCase();
@@ -115,10 +109,10 @@ export interface FiddleEnvOptions {
 }
 
 /**
- * The environment for fiddle processes and module installs, through core's
- * `buildChildEnv`: `parent` minus core's denylist and
- * {@link FIDDLE_EXTRA_ENV_DENYLIST}, then the advanced-logging variables,
- * then the user's. On Windows a variable replaces any differently-cased copy.
+ * The environment for fiddle processes, through core's `buildChildEnv`:
+ * `parent` minus core's denylist and {@link FIDDLE_EXTRA_ENV_DENYLIST}, then
+ * the advanced-logging variables, then the user's. On Windows a variable
+ * replaces any differently-cased copy.
  */
 export function fiddleProcessEnv(
   options: FiddleEnvOptions = {},
@@ -129,4 +123,25 @@ export function fiddleProcessEnv(
     ...Object.entries(options.userEnv ?? {}),
   ]);
   return buildChildEnv({ extraDenylist: FIDDLE_EXTRA_ENV_DENYLIST, vars }, parent);
+}
+
+/** Where `.npmrc` and Yarn read registry credentials from. */
+const PACKAGE_MANAGER_AUTH_ENV =
+  /^(?:NPM_TOKEN|NODE_AUTH_TOKEN|YARN_NPM_AUTH_TOKEN|YARN_NPM_AUTH_IDENT|NPM_CONFIG_.*_AUTH(?:TOKEN)?)$/i;
+
+/**
+ * The environment for npm, yarn and Forge: the fiddle's, plus the registry
+ * credentials above, so an install doesn't fail on `${NPM_TOKEN}` in
+ * `~/.npmrc`. Other secrets stay out, since install scripts run with it.
+ */
+export function packageManagerEnv(
+  parent: NodeJS.ProcessEnv = process.env,
+): NodeJS.ProcessEnv {
+  const auth = Object.entries(parent).filter(([name]) =>
+    PACKAGE_MANAGER_AUTH_ENV.test(name),
+  );
+  return buildChildEnv(
+    { extraDenylist: FIDDLE_EXTRA_ENV_DENYLIST, vars: Object.fromEntries(auth) },
+    parent,
+  );
 }

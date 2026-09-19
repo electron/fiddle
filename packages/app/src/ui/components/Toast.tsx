@@ -1,4 +1,3 @@
-import type { ReactNode } from 'react';
 import {
   Button as AriaButton,
   Text,
@@ -7,60 +6,12 @@ import {
   UNSTABLE_ToastQueue as ToastQueue,
   UNSTABLE_ToastRegion as AriaToastRegion,
 } from 'react-aria-components';
-import { cx } from '../cx';
 import { Icon } from '../icons/Icon';
 import { IconButton } from './Button';
 import styles from './Toast.module.css';
 
 /** Also the name of the tone's icon. */
 export type ToastTone = 'info' | 'success' | 'warning' | 'error';
-
-export interface ToastProps {
-  tone?: ToastTone;
-  title: ReactNode;
-  children?: ReactNode;
-  actionLabel?: string;
-  onAction?: () => void;
-  closeLabel?: string;
-  onClose?: () => void;
-  className?: string;
-}
-
-/** A toast on its own, for inline use and specimens. Live toasts go through showToast and Toaster. */
-export function Toast({
-  tone = 'info',
-  title,
-  children,
-  actionLabel,
-  onAction,
-  closeLabel,
-  onClose,
-  className,
-}: ToastProps) {
-  return (
-    <div className={cx(styles.toast, className)} data-tone={tone}>
-      <Icon name={tone} className={styles.icon} />
-      <div className={styles.body}>
-        <div className={styles.title}>{title}</div>
-        {children && <div className={styles.text}>{children}</div>}
-        {actionLabel && (
-          <AriaButton className={styles.action} onPress={onAction}>
-            {actionLabel}
-          </AriaButton>
-        )}
-      </div>
-      {onClose && closeLabel && (
-        <IconButton
-          icon="close"
-          size="sm"
-          label={closeLabel}
-          onPress={onClose}
-          className={styles.close}
-        />
-      )}
-    </div>
-  );
-}
 
 export interface ToastContent {
   tone?: ToastTone;

@@ -1,8 +1,3 @@
-/**
- * Creates every main-process service once, with explicit dependencies.
- * Documents stays a module (./documents/service.ts) and gets its dependencies
- * through `initDocuments`.
- */
 import path from 'node:path';
 
 import { app, net, safeStorage } from 'electron';
@@ -74,9 +69,9 @@ function activeVersions(
 }
 
 /**
- * Creates the services and starts them: the release list is loaded before
- * this resolves (Documents asks it for the default version), and the GitHub
- * token check and module normalization run in the background.
+ * Creates and starts the services. The release list is loaded before this
+ * resolves (Documents needs the default version); the GitHub token check and
+ * module normalization run in the background.
  */
 export async function createServices({
   hub,
@@ -91,7 +86,7 @@ export async function createServices({
 }): Promise<Services> {
   const userData = app.getPath('userData');
   const cache = cachePaths();
-  const fetch = (url: string) => net.fetch(url);
+  const fetch = (url: string, init?: RequestInit) => net.fetch(url, init);
   const contentsOf = (windowId: string) => getWindow(windowId)?.webContents;
 
   const versions: VersionsService = new VersionsService({
@@ -101,21 +96,27 @@ export async function createServices({
     releasesUrl: getEndpoints().releasesJson,
     fetch,
     activeVersions: () => activeVersions(hub, runs),
-    onRemoved: (version) => void types.removeVersion(version),
+    onRemoved: (version) => {
+      types
+        .removeVersion(version)
+        .catch((error: unknown) => log.warn('removing cached types failed', error));
+    },
   });
   const types = new TypesService({
     dir: cache.types,
     fetch,
     nodeVersionOf: (version) => versions.release(version)?.node,
-    // A watched local build's types changed: tell the windows that use it.
     onLocalChange: (buildId) => {
       for (const windowId of hub.windowIds) {
         const ref = hub.getWindow(windowId)?.fiddle.versionRef;
-        const contents = contentsOf(windowId);
-        if (ref?.kind === 'local' && ref.id === buildId && contents)
-          Versions.getDispatcher(contents)?.dispatchTypesChanged();
+        if (ref?.kind === 'local' && ref.id === buildId) typesChanged(windowId);
       }
     },
+  });
+  hub.onChange((change) => {
+    if (change.store !== 'app') return;
+    const builds = hub.app.versions?.localBuilds ?? [];
+    types.retainWatches(new Set(builds.map((build) => build.id)));
   });
   const runs = new RunService(hub, versions, (windowId, lines) => {
     const contents = contentsOf(windowId);

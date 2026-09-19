@@ -15,9 +15,8 @@ export interface SplitHandleProps {
   /** Keyboard step in px. */
   step?: number;
   /**
-   * Set when the controlled pane is visually after the handle (right or below), so dragging toward it shrinks it.
-   * A vertical handle follows the text direction by default: its pane comes first in the markup, so in a
-   * right-to-left layout it sits on the right.
+   * Set when the controlled pane is after the handle (right or below), so dragging toward it
+   * shrinks it. A vertical handle follows the text direction by default.
    */
   reverse?: boolean;
   /** Double-click or Enter restores the default size. */

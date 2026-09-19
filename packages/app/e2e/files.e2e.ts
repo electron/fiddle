@@ -72,9 +72,7 @@ describe('files', () => {
 
     await fromMenu('renamed.js', 'Close tab');
     await expect.poll(files).toContainEqual({ name: 'renamed.js', visible: false });
-    // Clicking the row would open the file, which shows it again, so reopen
-    // the menu from the keyboard on the row, once the closed menu has given
-    // focus back to it.
+    // A click on the row would reopen the file, so open the menu from the keyboard once focus is back on it.
     await app().waitForAbsent(role('menu', 'File actions'));
     await app().waitForIdle();
     await app().press('Shift+F10');
@@ -87,11 +85,7 @@ describe('files', () => {
     await expect.poll(names).not.toContain('renamed.js');
   });
 
-  /**
-   * The given snapshot lines (`heading "Preload"`, `row "preload.js"`) in the
-   * order the accessibility snapshot has them, leaving out the ones it lacks.
-   * The sidebar lists each group's rows under the group's head.
-   */
+  /** The given snapshot lines in the order the accessibility snapshot has them, leaving out the ones it lacks. */
   const snapshotOrder = async (lines: string[]) => {
     const snapshot = await app().snapshot();
     return lines

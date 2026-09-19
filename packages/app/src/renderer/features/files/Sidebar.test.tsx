@@ -84,6 +84,23 @@ describe('Sidebar groups', () => {
   });
 });
 
+describe('Sidebar context menu', () => {
+  it('opens for the row under the pointer and acts on its file', async () => {
+    renderSidebar();
+    fireEvent.contextMenu(
+      within(group('processRenderer')).getByRole('row', { name: /index\.html/ }),
+      {
+        clientX: 40,
+        clientY: 60,
+      },
+    );
+    fireEvent.click(await screen.findByRole('menuitem', { name: 'rename' }));
+    expect((await nameField()).value).toBe('index.html');
+    fireEvent.click(screen.getByRole('button', { name: 'cancel' }));
+    await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull());
+  });
+});
+
 describe('Sidebar filter', () => {
   const MANY = [...TEMPLATE, 'a.js', 'b.js', 'c.js', 'd.js', 'e.js'];
   const sidebar = (names: readonly string[]) => (

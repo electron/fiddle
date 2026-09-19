@@ -6,6 +6,7 @@ import {
   envFromEntries,
   fiddleProcessEnv,
   isBlockedUserEnvKey,
+  packageManagerEnv,
   parseEnvEntries,
   parseEnvEntry,
 } from './env';
@@ -209,6 +210,36 @@ describe('fiddleProcessEnv', () => {
       ELECTRON_DEBUG_NOTIFICATIONS: 'true',
       ELECTRON_ENABLE_STACK_DUMPING: 'true',
       electron_enable_logging: 'false',
+    });
+  });
+});
+
+describe('packageManagerEnv', () => {
+  it('adds the registry credentials to the fiddle environment, and no other secret', () => {
+    expect(
+      packageManagerEnv({
+        PATH: '/usr/bin',
+        NPM_TOKEN: 'npm_x',
+        NODE_AUTH_TOKEN: 'n',
+        YARN_NPM_AUTH_TOKEN: 'y',
+        NPM_CONFIG__AUTH: 'basic',
+        GH_TOKEN: 'gh',
+        GITHUB_TOKEN: 'ghp_x',
+        AWS_SECRET_ACCESS_KEY: 'aws',
+        AWS_PROFILE: 'p',
+        MY_SECRET: 's',
+        MY_API_KEY: 'k',
+        SSH_AUTH_SOCK: '/tmp/agent',
+        NODE_OPTIONS: '--require x',
+        LD_PRELOAD: 'x',
+        ELECTRON_FIDDLE_E2E_DRIVER: '1',
+      }),
+    ).toEqual({
+      PATH: '/usr/bin',
+      NPM_TOKEN: 'npm_x',
+      NODE_AUTH_TOKEN: 'n',
+      YARN_NPM_AUTH_TOKEN: 'y',
+      NPM_CONFIG__AUTH: 'basic',
     });
   });
 });

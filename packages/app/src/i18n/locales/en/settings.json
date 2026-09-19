@@ -265,6 +265,10 @@
     "message": "Passed to Electron when a fiddle runs.",
     "description": "Help for the Electron flags list."
   },
+  "electronFlags.invalid": {
+    "message": "A flag can have at most 1,000 characters.",
+    "description": "Error under an Electron flag row that is too long."
+  },
   "environmentVariables.title": {
     "message": "Environment variables",
     "description": "Setting: environment variables for every run."
@@ -423,6 +427,10 @@
     "message": "Used when a fiddle is saved or packaged. Leave it empty to use your user name.",
     "description": "Help for the package.json author setting."
   },
+  "packageAuthor.invalid": {
+    "message": "The author can have at most 200 characters.",
+    "description": "Error under the package.json author field when the value is too long. package.json is a file name; keep it as is."
+  },
   "gistShowHistory.title": {
     "message": "Show gist revision history",
     "description": "Setting: show a gist's revisions."
@@ -432,11 +440,11 @@
     "description": "Help for the gist history setting."
   },
   "gistPublishAsRevision.title": {
-    "message": "Publish as a revision",
-    "description": "Setting: update the fiddle's gist instead of making a new one."
+    "message": "Publish as revision",
+    "description": "Setting: publish a new gist in two steps, so its history shows the fiddle's files as a change."
   },
   "gistPublishAsRevision.description": {
-    "message": "Update the fiddle's gist instead of creating a new one.",
+    "message": "Creates the gist from the default template first, then updates it with your files, so the gist's history shows your changes.",
     "description": "Help for the publish as revision setting."
   },
   "gistVisibility.title": {

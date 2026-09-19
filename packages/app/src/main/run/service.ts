@@ -1,23 +1,3 @@
-/**
- * Running fiddles.
- *
- * 1. Trust first (`ensureTrusted`), then the pre-run checks: the version is
- *    installed (or downloads now) or the local build exists, and `main.mjs`
- *    needs Electron 28.
- * 2. The files and `package.json` go into a new `mkdtemp` dir (0700).
- * 3. Modules install with npm or yarn; scripts are off for untrusted fiddles.
- * 4. core's `Runner` spawns Electron with the filtered environment, the
- *    inspector on 127.0.0.1:0 and `ELECTRON_ENABLE_LOGGING`, so renderer
- *    console messages reach stderr and can be mapped to runtime errors.
- * 5. Stop sends SIGTERM, then SIGKILL after a second. Cleanup deletes only the
- *    dir this run created, in the background: the window is ready as soon as
- *    the fiddle has exited, and quitting waits for the deletes. The fiddle's
- *    userData is `<run dir>/user-data` (`--user-data-dir`), so it goes with it,
- *    unless "keep user data dirs" is on.
- *
- * `Window.run.status` goes through checking, downloading and unzipping (the
- * version), installing (modules), starting and running.
- */
 import type { ChildProcess } from 'node:child_process';
 import fsp from 'node:fs/promises';
 
@@ -28,7 +8,7 @@ import { parseEnvEntries } from '../../fiddle/env';
 import { findMainEntry } from '../../fiddle/files';
 import { findPackageManager, installModules } from '../../fiddle/modules';
 import { osUserName } from '../../fiddle/package-json';
-import { FiddleError } from '../../shared/errors';
+import { ErrorCode, FiddleError } from '../../shared/errors';
 import type { OutputLine, RunState, VersionRefValue } from '../../shared/stores';
 import * as documents from '../documents/service';
 import { tm } from '../i18n';
@@ -49,6 +29,7 @@ import {
   makeRunDir,
   spawnElectron,
   stopChild,
+  sweepStaleDirs,
   toolEnv as loadToolEnv,
   waitForExit,
   writeRunApp,
@@ -74,7 +55,11 @@ export const IDLE_RUN: RunState = {
 };
 
 /** A pre-run check refused the run; the message is for the console. */
-class Refused extends Error {}
+class Refused extends FiddleError {
+  constructor(message: string) {
+    super('run-refused', message);
+  }
+}
 
 interface WindowRun {
   buffer: OutputBuffer;
@@ -104,6 +89,7 @@ export class RunService {
   readonly #runs = new Map<string, WindowRun>();
   /** Runs and run-dir deletes still going, for a quit to wait for. */
   readonly #tasks = new Set<Promise<unknown>>();
+  readonly #stopWaiters = new Set<{ windowId: string; done: () => void }>();
   /** The fiddle each window showed last, to clear its console when another loads. */
   readonly #fiddles = new Map<string, { identity: string; rev: number }>();
 
@@ -143,12 +129,11 @@ export class RunService {
     this.setState(windowId, { clearedSeq: this.#entry(windowId).buffer.clear() });
   }
 
-  /** Adds a line from Fiddle itself. */
   log(windowId: string, text: string, kind: ConsoleKind = 'system'): void {
     this.#entry(windowId).buffer.push({ process: 'fiddle', kind, text });
   }
 
-  /** Adds raw tool output (npm, yarn, Forge), line by line. */
+  /** Adds tool output (npm, yarn, Forge), one console line per line. */
   logText(windowId: string, text: string): void {
     for (const line of text.split(/\r?\n/)) {
       if (line.trim() !== '')
@@ -189,7 +174,7 @@ export class RunService {
     if (entry) entry.abort = undefined;
   }
 
-  /** The environment for npm, yarn and Forge: filtered like a fiddle's, with the login shell's PATH. */
+  /** The environment for npm, yarn and Forge, for packaging. */
   toolEnv(): Promise<NodeJS.ProcessEnv> {
     return loadToolEnv();
   }
@@ -248,10 +233,11 @@ export class RunService {
         this.log(windowId, tm('mainRun')('exitedSignal', { signal: 'SIGTERM' }));
         outcome = { signal: 'SIGTERM' };
       } else {
-        log.error('run failed', error);
+        const failure = FiddleError.from(error);
+        log.error('run failed', failure.code, error);
         this.log(
           windowId,
-          tm('mainRun')('spawnFailed', { message: FiddleError.from(error).message }),
+          tm('mainRun')('runFailed', { message: failure.message }),
           'error',
         );
         outcome = { spawnFailed: true };
@@ -278,21 +264,28 @@ export class RunService {
     if (entry.child) stopChild(entry.child);
   }
 
-  /** Stops the window's run, and resolves once the window is ready again. */
+  /** Stops the window's run, and resolves once the window is ready again or gone. */
   stopAndWait(windowId: string): Promise<void> {
     this.stop(windowId);
     if (!this.isBusy(windowId)) return Promise.resolve();
     return new Promise((resolve) => {
+      const waiter = {
+        windowId,
+        done: () => {
+          off();
+          this.#stopWaiters.delete(waiter);
+          resolve();
+        },
+      };
       const off = this.#hub.onChange((change) => {
         if (
-          change.store !== 'window' ||
-          change.windowId !== windowId ||
-          this.isBusy(windowId)
+          change.store === 'window' &&
+          change.windowId === windowId &&
+          !this.isBusy(windowId)
         )
-          return;
-        off();
-        resolve();
+          waiter.done();
       });
+      this.#stopWaiters.add(waiter);
     });
   }
 
@@ -303,7 +296,6 @@ export class RunService {
     );
   }
 
-  /** True while a run or a run-dir delete is going. */
   hasWork(): boolean {
     return this.#tasks.size > 0;
   }
@@ -331,6 +323,9 @@ export class RunService {
   /** The window closed: stop its run and forget its console. */
   disposeWindow(windowId: string): void {
     this.stop(windowId);
+    // A closed window gets no more change events for its waiters to see.
+    for (const waiter of [...this.#stopWaiters])
+      if (waiter.windowId === windowId) waiter.done();
     this.#runs.get(windowId)?.buffer.dispose();
     this.#runs.delete(windowId);
     this.#fiddles.delete(windowId);
@@ -378,9 +373,8 @@ export class RunService {
 
   /**
    * A different fiddle loaded: it starts with an empty console and no runtime
-   * errors. Keyed on the fiddle's identity, like the shell, and only
-   * when the editor text was replaced too: saving under a new name changes the
-   * identity but not `fiddleRev`, and adding a file bumps `fiddleRev` only.
+   * errors. That needs a new identity and a new `fiddleRev`: saving under a new
+   * name changes only the identity, and adding a file bumps only `fiddleRev`.
    */
   #onWindowChange(windowId: string): void {
     const fiddle = this.#hub.getWindow(windowId)?.fiddle;
@@ -461,7 +455,6 @@ export class RunService {
           ? t('installingModules', { pm })
           : t('installingModulesNoScripts', { pm }),
       );
-      // Socket Firewall wraps the install when it's on and `sfw.mjs` is there.
       const sfwPath = this.sfwPath(windowId);
       try {
         await installModules({
@@ -486,7 +479,7 @@ export class RunService {
       }
       await writeRunPackageJson(appDir, withElectron);
     }
-    if (signal.aborted) throw new Error('aborted');
+    if (signal.aborted) throw new FiddleError(ErrorCode.cancelled, 'The run was stopped');
 
     this.setState(windowId, { status: 'starting' });
     const userEnv = parseEnvEntries(settings.environmentVariables);
@@ -572,7 +565,6 @@ export class RunService {
     if (!exec) {
       this.setState(windowId, { status: 'downloading', version });
       this.log(windowId, t('downloading', { version }));
-      // Downloading, then unzipping, as core's installer reports them.
       const onState = (event: InstallStateEvent) => {
         const status =
           event.version === version ? installRunStatus(event.state) : undefined;
@@ -611,6 +603,9 @@ export class RunService {
 
 /** Holds quit until running fiddles have exited and their directories are gone. Call once, after `app.whenReady()`. */
 export function installRunCleanupOnExit(runs: RunService): void {
+  sweepStaleDirs().catch((error: unknown) =>
+    log.warn('sweeping old run dirs failed', error),
+  );
   let held = false;
   app.on('will-quit', (event) => {
     if (held || !runs.hasWork()) return;

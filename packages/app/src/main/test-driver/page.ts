@@ -1,11 +1,5 @@
-/**
- * One app window's page, driven through `webContents.debugger` (CDP): the
- * accessibility tree for queries, and `Input.*` for clicks, keys and typing.
- * CDP input goes straight to the page's widget, so it needs no OS focus, and
- * the page emulates focus (`Emulation.setFocusEmulationEnabled`) whether or
- * not its window is the key window. That's what lets spec files run in
- * parallel on one desktop (macOS).
- */
+// CDP input goes straight to the page's widget and the page emulates focus, so
+// no OS focus is needed: that's what lets spec files run in parallel on one desktop (macOS).
 import fs from 'node:fs/promises';
 
 import type { WebContents } from 'electron';
@@ -60,13 +54,7 @@ interface Box {
   hitDescription: string;
 }
 
-/**
- * Runs on the resolved DOM node: scrolls it into view if needed, then measures
- * and hit-tests it. A control that's visually hidden inside its <label> (React
- * Aria clips the real input of a switch, checkbox or radio to a pixel, which
- * can even drift outside the label) is measured by its label, where a user
- * would click.
- */
+/** Scrolls the node into view, then measures and hit-tests it. A control clipped to a pixel inside its <label> (React Aria) is measured by the label. */
 const BOX_FUNCTION = `function () {
   const el = this.nodeType === 1 ? this : this.parentElement;
   if (!el) return null;
@@ -173,12 +161,7 @@ export class Page {
     return (await this.contents.debugger.sendCommand(method, params)) as T;
   }
 
-  /**
-   * Dispatches an `Input.*` event, which resolves once the page has handled
-   * it. An event that closes its own window (Cmd+W, a Close button) takes the
-   * target away before it or the events after it are acknowledged: that
-   * action is done, not failed.
-   */
+  /** An event that closes its own window (Cmd+W, a Close button) takes the target away before it is acknowledged: that's done, not failed. */
   async #input(method: string, params: object): Promise<void> {
     if (this.contents.isDestroyed()) return;
     try {
@@ -283,12 +266,7 @@ export class Page {
     );
   }
 
-  /**
-   * Waits for exactly one enabled match (or `nth`) that has a size, is on top
-   * at its center, and is stable: the same box on the next animation frame. A
-   * popover that's still being placed or a list that's still scrolling would
-   * otherwise take the press where the element was and the release where it is.
-   */
+  /** Waits for one enabled match with a size, on top at its center and still for a frame, so a click's press and release land together. */
   actionable(query: Query): Promise<ElementInfo> {
     const check = ({ info, box }: Found): string | undefined => {
       if (info.states.includes('disabled')) return 'the element is disabled';
@@ -358,12 +336,8 @@ export class Page {
   }
 
   /**
-   * Types into whatever has focus, a key at a time, as from a US keyboard.
-   * Characters it has no key for (é, emoji) are inserted as text. `\n` presses Enter.
-   *
-   * Then it waits for the next animation frame, so work the page batches per
-   * frame (the editor sends its edits to main once per frame) is done before
-   * the spec's next step, which may be a Save keystroke.
+   * Types a key at a time, as from a US keyboard; characters with no key (é, emoji) are inserted as
+   * text. Ends by waiting a frame: the editor sends its edits to main once per frame.
    */
   async type(text: string): Promise<void> {
     for (const char of text) {
@@ -405,11 +379,7 @@ export class Page {
     }
   }
 
-  /**
-   * Presses a combo such as `Enter`, `Escape`, `CmdOrCtrl+S` or `Shift+Tab`.
-   * A key the page doesn't handle goes no further: the native menu never sees
-   * it, so shortcuts work through the renderer's keybinding dispatcher.
-   */
+  /** A key the page doesn't handle never reaches the native menu, so shortcuts work through the renderer's keybinding dispatcher. */
   async press(combo: string): Promise<void> {
     const { key, code, keyCode, modifiers, text, commands } = parseKeyCombo(
       combo,

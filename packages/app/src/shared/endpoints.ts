@@ -1,9 +1,4 @@
-/**
- * Every network base URL the app uses, in one injectable object. Read URLs
- * only from `getEndpoints()` (src/main/test-mode.ts), never from literals, so
- * test mode can point all of them at the local fixture server
- * (packages/app/e2e/fixtures/). No Electron imports.
- */
+/** Read URLs only from `getEndpoints()`, never from literals, so test mode can point all of them at the fixture server. */
 export interface Endpoints {
   /** GitHub REST API, e.g. `${githubApi}/gists/<id>`. */
   githubApi: string;

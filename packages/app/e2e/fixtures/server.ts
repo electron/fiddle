@@ -1,27 +1,10 @@
 /**
- * The local fixture server behind every endpoint in test mode
- * (src/shared/endpoints.ts `fixtureEndpoints`). It listens on 127.0.0.1 and
- * records every request, so specs can assert on traffic.
+ * The local fixture server behind every endpoint in test mode (`fixtureEndpoints` in
+ * src/shared/endpoints.ts). It records every request so specs can assert on traffic.
  *
- * Routes, relative to its URL:
- *   /releases.json                         data/releases.json
- *   /electron-mirror/<v>/<file>            Electron zips from a local cache, and SHASUMS256.txt;
- *                                          other versions get the installed Electron's zip
- *   /nightly-mirror/<v>/<file>             the same
- *   /github-api/user                       a signed-in user whose token has the gist scope
- *   /github-api/gists/<id>[/<sha>]         data/gists/<id>.json, or a gist created here (GET);
- *                                          create (POST), update (PATCH), delete (DELETE), kept in memory
- *   /github-api/gists/<id>/commits         the gist's `history`
- *   /gist-raw/<owner>/<id>/raw/<rev>/<f>   a file from data/gists/<id>.json
- *   /unpkg/<pkg>@<v>/<path>.d.ts, ?meta    small type definitions
- *   /algolia/1/indexes/...                 data/npm-search.json
- *   /npm/<name>                            a packument with versions 1.0.0 and 1.1.0 (latest)
- *   /minimal-repro/archive/<branch>.zip    data/minimal-repro/ as a zip
- *
- * Electron zips come from FIDDLE_E2E_ELECTRON_ZIPS (a directory), ELECTRON_CACHE
- * or @electron/get's default cache (where CI's cached download lands). If the
- * installed Electron's zip isn't there and `zip` is available, one is made from
- * node_modules/electron/dist.
+ * Electron zips come from FIDDLE_E2E_ELECTRON_ZIPS (a directory), ELECTRON_CACHE or @electron/get's
+ * default cache (where CI's cached download lands). If the installed Electron's zip isn't there
+ * and `zip` is available, one is made from node_modules/electron/dist.
  */
 import { execFileSync } from 'node:child_process';
 import crypto from 'node:crypto';

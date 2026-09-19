@@ -87,6 +87,23 @@ describe('SettingsPage', () => {
     expect(screen.getByText('noResults')).toBeTruthy();
   });
 
+  it('finds the macOS privacy reset row, and only on macOS', () => {
+    const search = () =>
+      fireEvent.change(screen.getByRole('textbox', { name: 'search' }), {
+        target: { value: 'privacyReset' },
+      });
+    const view = render(<SettingsPage />);
+    search();
+    expect(screen.getByText('noResults')).toBeTruthy();
+    view.unmount();
+
+    mocks.app = { ...mocks.app, platform: 'darwin' };
+    render(<SettingsPage />);
+    search();
+    expect(screen.getByRole('heading', { name: 'section.privacy' })).toBeTruthy();
+    expect(screen.getByText('privacyReset.button')).toBeTruthy();
+  });
+
   it('marks changed values and resets them', () => {
     render(<SettingsPage />);
     fireEvent.click(screen.getByRole('button', { name: 'section.execution' }));
@@ -96,7 +113,7 @@ describe('SettingsPage', () => {
       document.querySelector('[data-setting="socketFirewall"] [aria-label="modified"]'),
     ).toBeNull();
 
-    fireEvent.click(screen.getByRole('button', { name: 'reset' }));
+    fireEvent.click(screen.getByRole('button', { name: 'reset packageManager.title' }));
     expect(mocks.settingsApi.ResetSetting).toHaveBeenCalledWith('packageManager');
   });
 
@@ -139,15 +156,23 @@ describe('General settings', () => {
     mocks.app = { ...mocks.app, settings: { ...defaultSettings, locale: 'en-12' } };
     render(<SettingsPage />);
     expect(screen.getByRole('heading', { name: 'section.general' })).toBeTruthy();
-    expect(screen.getByRole('button', { name: /locale\.title/ }).textContent).toContain(
-      'en-12',
-    );
+    expect(
+      screen.getByRole('button', { name: /^(?!reset).*locale\.title/ }).textContent,
+    ).toContain('en-12');
   });
 
   const pickLanguage = () => {
-    fireEvent.click(screen.getByRole('button', { name: /locale\.title/ }));
+    fireEvent.click(screen.getByRole('button', { name: /^(?!reset).*locale\.title/ }));
     fireEvent.click(screen.getByRole('option', { name: /Deutsch|German/ }));
   };
+
+  it('offers real languages only, not the pseudo-locales', () => {
+    render(<SettingsPage />);
+    fireEvent.click(screen.getByRole('button', { name: /^(?!reset).*locale\.title/ }));
+    const names = screen.getAllByRole('option').map((option) => option.textContent);
+    expect(names.some((name) => /German|Deutsch/.test(name ?? ''))).toBe(true);
+    expect(names.some((name) => /Pseudo/.test(name ?? ''))).toBe(false);
+  });
 
   it('offers the relaunch once main has accepted the language', async () => {
     render(<SettingsPage />);

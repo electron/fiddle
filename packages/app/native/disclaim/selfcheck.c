@@ -4,14 +4,6 @@
  *
  *   ./selfcheck <path to fiddle-disclaim>
  *
- * The check starts copies of itself (`selfcheck --report`, `--exit`, `--wait`)
- * as the program and asks macOS who is responsible for them. Started
- * directly, a copy shares this process's responsibility, which shows the
- * question tells the two cases apart. Started through the helper, it must be
- * its own responsible process, and keep the pid the spawn returned, its
- * arguments and its environment. Exit status, signals and the helper's own
- * failures are checked too.
- *
  * Exits 0 when every check passes, 1 when one fails, 2 when it cannot check.
  */
 #include <dlfcn.h>

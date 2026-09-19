@@ -1,8 +1,7 @@
 name: Refresh bundled data
 
-# The Electron release list and the contributors list are committed snapshots,
-# refreshed by this scheduled bot PR. Builds never fetch them. Run it by hand
-# before a release to ship the latest list.
+# The Electron release list and the contributors list are committed snapshots
+# that this bot PR refreshes weekly. Run it by hand before a release.
 on:
   schedule:
     - cron: '0 6 * * 1'

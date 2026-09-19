@@ -1,11 +1,7 @@
-/**
- * Main-process side of EIPC. Always bind interfaces through `implement`, which
- * wraps every handler with the FiddleError transport: a thrown `FiddleError`
- * reaches the renderer with its code, anything else becomes `internal` and its
- * stack is logged here.
- */
+/** Bind interfaces through `implement`, so every handler goes through the FiddleError transport. */
 import type { WebContents } from 'electron';
 
+import { log } from '../main/log';
 import { wrapImplementation } from '../shared/error-transport';
 
 export { App, Window } from './generated/browser/fiddle';
@@ -24,7 +20,7 @@ interface Bindable<Impl, Dispatcher> {
 }
 
 function logUnexpected(error: unknown): void {
-  console.error('[fiddle] unexpected error in an IPC handler:', error);
+  log.error('unexpected error in an IPC handler', error);
 }
 
 export function implement<Impl extends object, Dispatcher>(

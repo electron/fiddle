@@ -1,9 +1,7 @@
 /**
- * Editor panes: one row of side-by-side panes, each showing one visible file,
- * no file in two panes. `Window.layout.panes` lists their files from the
- * start; fewer than two entries means the editor isn't split.
- * `fiddle.activeFile` is the focused pane's file. Pure; shared by main (which
- * keeps the panes in step with the active file) and the renderer.
+ * One row of side-by-side editor panes, each showing one visible file, none in
+ * two panes. `fiddle.activeFile` is the focused pane's file. Pure; shared by
+ * main, which keeps the panes in step with it, and the renderer.
  */
 
 /** At most this many editor panes side by side. */

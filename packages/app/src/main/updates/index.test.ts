@@ -1,3 +1,5 @@
+import { EventEmitter } from 'node:events';
+
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 const mocks = vi.hoisted(() => ({
@@ -6,6 +8,7 @@ const mocks = vi.hoisted(() => ({
   fetch: vi.fn(),
   updateElectronApp: vi.fn(),
   dispatchUpdateAvailable: vi.fn(),
+  windowCreated: undefined as ((event: unknown, win: unknown) => void) | undefined,
 }));
 
 vi.mock('electron', () => ({
@@ -14,8 +17,11 @@ vi.mock('electron', () => ({
       return mocks.isPackaged;
     },
     getVersion: () => '1.2.3',
+    on: (event: string, listener: (event: unknown, win: unknown) => void) => {
+      if (event === 'browser-window-created') mocks.windowCreated = listener;
+    },
   },
-  BrowserWindow: { getAllWindows: () => [{ webContents: {} }] },
+  BrowserWindow: { getAllWindows: () => [] },
   net: { fetch: mocks.fetch },
 }));
 vi.mock('update-electron-app', () => ({
@@ -25,7 +31,10 @@ vi.mock('update-electron-app', () => ({
 }));
 vi.mock('../../ipc/main', () => ({
   AppPlatform: {
-    getDispatcher: () => ({ dispatchUpdateAvailable: mocks.dispatchUpdateAvailable }),
+    getDispatcher: (contents: { name: string }) => ({
+      dispatchUpdateAvailable: (version: string) =>
+        mocks.dispatchUpdateAvailable(contents.name, version),
+    }),
   },
 }));
 vi.mock('../i18n', () => ({ tm: () => (key: string) => key }));
@@ -38,7 +47,7 @@ vi.mock('../test-mode', () => ({
   testFlags: () => ({ updates: mocks.updatesFlag }),
 }));
 
-import { startUpdates } from './index';
+let startUpdates: typeof import('./index').startUpdates;
 
 const realPlatform = process.platform;
 
@@ -54,13 +63,27 @@ function serve(releases: unknown[]): void {
   mocks.fetch.mockImplementation(async () => json(releases));
 }
 
-beforeEach(() => {
+/** A window that the app announces through `browser-window-created`. */
+function openWindow(name: string, visible: boolean) {
+  const win = Object.assign(new EventEmitter(), {
+    webContents: { name },
+    isVisible: () => visible,
+    isDestroyed: () => false,
+  });
+  mocks.windowCreated?.({}, win);
+  return { show: () => win.emit('show') };
+}
+
+beforeEach(async () => {
+  vi.resetModules();
+  ({ startUpdates } = await import('./index'));
   vi.useFakeTimers();
   mocks.isPackaged = true;
   mocks.updatesFlag = true;
   mocks.fetch.mockReset();
   mocks.updateElectronApp.mockClear();
   mocks.dispatchUpdateAvailable.mockClear();
+  mocks.windowCreated = undefined;
 });
 
 afterEach(() => {
@@ -91,15 +114,34 @@ describe('startUpdates', () => {
     it('announces a newer release once, however often it checks', async () => {
       serve([release('v1.3.0')]);
       startUpdates();
+      openWindow('a', true);
       await vi.advanceTimersByTimeAsync(10_000);
-      expect(mocks.dispatchUpdateAvailable).toHaveBeenCalledExactlyOnceWith('1.3.0');
+      expect(mocks.dispatchUpdateAvailable).toHaveBeenCalledExactlyOnceWith('a', '1.3.0');
 
       await vi.advanceTimersByTimeAsync(24 * 60 * 60 * 1000);
       expect(mocks.dispatchUpdateAvailable).toHaveBeenCalledOnce();
 
       serve([release('v1.4.0')]);
       await vi.advanceTimersByTimeAsync(24 * 60 * 60 * 1000);
-      expect(mocks.dispatchUpdateAvailable).toHaveBeenLastCalledWith('1.4.0');
+      expect(mocks.dispatchUpdateAvailable).toHaveBeenLastCalledWith('a', '1.4.0');
+    });
+
+    it('tells a window once it is shown, if it opened after the check or was not ready', async () => {
+      serve([release('v1.3.0')]);
+      startUpdates();
+      const early = openWindow('early', false);
+      await vi.advanceTimersByTimeAsync(10_000);
+      expect(mocks.dispatchUpdateAvailable).not.toHaveBeenCalled();
+
+      early.show();
+      expect(mocks.dispatchUpdateAvailable).toHaveBeenCalledExactlyOnceWith(
+        'early',
+        '1.3.0',
+      );
+
+      openWindow('late', false).show();
+      expect(mocks.dispatchUpdateAvailable).toHaveBeenLastCalledWith('late', '1.3.0');
+      expect(mocks.dispatchUpdateAvailable).toHaveBeenCalledTimes(2);
     });
 
     it('says nothing when the release check fails', async () => {

@@ -1,22 +1,3 @@
-/**
- * Choosing a window's Electron version:
- *
- * - `select` is `Versions.SetVersion`: it checks the version, sets it,
- *   remembers it for new windows when the user picked it, and downloads it
- *   if needed.
- * - `validate` runs when a window loads or restores a version it can't use
- *   (not in the release list, can't run here, or a local build whose binary
- *   is gone). It falls back to the first usable version and says so.
- * - A failed download falls back to the first usable version that's already
- *   downloaded, because another download would likely fail too. Without one
- *   the version stays and the error shows. `retry` downloads it again once
- *   the computer is back online.
- * - `docsExampleLoaded` offers to show a docs example's hidden release
- *   channel, then selects its version the way `select` does.
- *
- * No Electron imports: services.ts wires it to Documents, the StateHub and
- * native dialogs, so it runs under plain Node in tests.
- */
 import type { VersionRef } from '../../fiddle/fiddle';
 import type { ReleaseChannel } from '../../fiddle/versions';
 import { ErrorCode, FiddleError } from '../../shared/errors';
@@ -62,7 +43,7 @@ export interface VersionSelectorDeps {
   isBusy: (windowId: string) => boolean;
   /** The window's version, or undefined once it's closed. */
   getVersion: (windowId: string) => VersionRef | undefined;
-  /** Sets the window's version (Documents). Resolves with the Window rev. */
+  /** Resolves with the Window rev. */
   setVersion: (windowId: string, ref: VersionRef) => Promise<number>;
   /** Remembers the version the user picked, for new windows. */
   remember: (ref: VersionRef) => void;
@@ -94,7 +75,7 @@ export class VersionSelector {
     this.#deps = deps;
   }
 
-  /** `SetVersion`. Resolves with the Window rev if the version changed. */
+  /** Resolves with the Window rev if the version changed. */
   async select(
     windowId: string,
     ref: VersionRef,
@@ -120,7 +101,7 @@ export class VersionSelector {
     return rev;
   }
 
-  /** Falls back if the window's version is one it can't use. */
+  /** A version that's unknown, can't run here, or is a local build with no binary falls back to a usable one, with a notice. */
   async validate(windowId: string): Promise<void> {
     const deps = this.#deps;
     const ref = deps.getVersion(windowId);
@@ -148,7 +129,7 @@ export class VersionSelector {
     if (ref && !versionProblem(ref, this.#deps.versions)) this.#download(windowId, ref);
   }
 
-  /** After a docs example loads: offers to show its hidden channel, then selects its version. */
+  /** Offers to show the example's hidden release channel, then selects its version. */
   async docsExampleLoaded(windowId: string): Promise<void> {
     const deps = this.#deps;
     const loaded = deps.getVersion(windowId);

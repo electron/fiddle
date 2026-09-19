@@ -6,6 +6,7 @@ export default {
   "exitedCode": "[Éļéçţŕöñ éẋîţéð ŵîţĥ çöðé {{code}} one two three]",
   "exitedSignal": "[Éļéçţŕöñ ŵáš šţöþþéð ƀý {{signal}} one two three]",
   "spawnFailed": "[Çöûļðñ'ţ šţáŕţ Éļéçţŕöñ: {{message}} one two three]",
+  "runFailed": "[Çöûļðñ'ţ ŕûñ ţĥé ƒîððļé: {{message}} one two three]",
   "privacyHelperMissing": "[Ţĥé þŕîṽáçý ĥéļþéŕ ({{path}}) îš ɱîššîñĝ öŕ çáñ'ţ ŕûñ, šö ƒîððļéš çáñ'ţ šţáŕţ: ţĥéý ŵöûļð šĥáŕé Éļéçţŕöñ Ƒîððļé'š çáɱéŕá, ɱîçŕöþĥöñé áñð öţĥéŕ þéŕɱîššîöñš. Ŕéîñšţáļļ Éļéçţŕöñ Ƒîððļé. one two three four five six seven eight nine ten one two three four five]",
   "downloading": "[Ðöŵñļöáðîñĝ Éļéçţŕöñ {{version}}… one two three]",
   "downloadFailed": "[Çöûļðñ'ţ ðöŵñļöáð Éļéçţŕöñ {{version}}: {{message}} one two three]",

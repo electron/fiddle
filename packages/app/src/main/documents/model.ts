@@ -1,8 +1,4 @@
-/**
- * The editor mirror for one window: the fiddle main holds, its last-saved
- * baseline, and the pieces of the `Window` store derived from them. Pure and
- * immutable: every function returns a new `Doc`. No Electron imports.
- */
+/** Every function here returns a new `Doc`; none mutates its argument. */
 import {
   addFile,
   fileNames,
@@ -63,9 +59,8 @@ function firstVisible(fiddle: Fiddle): string | null {
 }
 
 /**
- * A doc for a freshly loaded fiddle. Its baseline is its files (a clean load)
- * unless one is given, e.g. when a draft is restored. Pass the doc it replaces
- * so `fiddleRev` keeps increasing within a window.
+ * Its baseline is its files (a clean load) unless one is given, e.g. a restored draft.
+ * Pass the doc it replaces so `fiddleRev` keeps increasing within a window.
  */
 export function createDoc(
   fiddle: Fiddle,
@@ -107,11 +102,7 @@ export function dirtyFileNames(doc: Doc): string[] {
   );
 }
 
-/**
- * Replaces the modules. A `normalized` change (a loaded `*` resolved to the
- * latest version) moves the baseline along for modules the user hadn't
- * changed, so it doesn't mark the fiddle dirty.
- */
+/** A `normalized` change (a loaded `*` resolved to a version) moves the baseline along for unchanged modules, so it isn't dirty. */
 export function docSetModules(
   doc: Doc,
   modules: Readonly<Record<string, string>>,

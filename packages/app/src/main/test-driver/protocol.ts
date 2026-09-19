@@ -1,11 +1,6 @@
-/**
- * The e2e driver's wire protocol: newline-delimited JSON over the socket named
- * by `ELECTRON_FIDDLE_DRIVER_SOCKET`. One request per line,
- * `{ id, method, params }`; one response per line, `{ id, ok, result | error }`.
- *
- * Types only (plus one constant), shared by the driver in main and the client
- * in packages/app/e2e/driver.ts. No imports.
- */
+// Newline-delimited JSON over the socket named by `ELECTRON_FIDDLE_DRIVER_SOCKET`:
+// `{ id, method, params }` requests, `{ id, ok, result | error }` responses.
+// Also loaded by the plain-Node clients (e2e/driver.ts, tools/driver.ts): no imports.
 
 /** A name or text: an exact string, or a regular expression. */
 export type TextMatcher = string | { regex: string; flags?: string };
@@ -56,11 +51,7 @@ export interface ConsoleLine {
 
 export type DialogKind = 'messageBox' | 'open' | 'save';
 
-/**
- * A scripted answer for the next dialog of a kind:
- * - messageBox: `{ button: 'Open' }` (by label) or `{ response: 0 }`, optional `checkboxChecked`.
- * - open: `{ filePaths: [...] }`; save: `{ filePath }`; either: `{ canceled: true }`.
- */
+/** A scripted answer for the next dialog of a kind: a messageBox `button` (by label) or `response`; `filePaths` or `filePath`; or `canceled`. */
 export type DialogResponse =
   | { response?: number; button?: string; checkboxChecked?: boolean }
   | { filePaths: string[] }

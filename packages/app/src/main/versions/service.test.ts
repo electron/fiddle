@@ -123,7 +123,8 @@ afterEach(() => {
   fs.rmSync(dir, { recursive: true, force: true });
 });
 
-const release = (version: string) => ({ version, date: '2026-01-01', node: '24.0.0' });
+// Newer than the bundled snapshot, which a cached list must not lose to.
+const release = (version: string) => ({ version, date: '2099-01-01', node: '24.0.0' });
 const listText = (...versions: string[]) => JSON.stringify(versions.map(release));
 
 function setup(options: { active?: string[]; cached?: string } = {}) {
@@ -160,6 +161,11 @@ function setup(options: { active?: string[]; cached?: string } = {}) {
 }
 
 const respond = (text: string) => async () => new Response(text);
+const HOURS = 60 * 60 * 1000;
+const backdate = (file: string, ms: number) => {
+  const then = new Date(Date.now() - ms);
+  fs.utimesSync(file, then, then);
+};
 
 describe('release list', () => {
   it('falls back to the bundled list when the cached one is not a release list', async () => {
@@ -168,9 +174,28 @@ describe('release list', () => {
     expect(Array.isArray(data) && data.length > 100).toBe(true);
   });
 
+  it('prefers the bundled list to an older cached one', async () => {
+    const older = JSON.stringify([{ version: '30.0.0', date: '2026-01-01' }]);
+    const { cache } = setup({ cached: older });
+    const data = await readReleaseList(cache);
+    expect(Array.isArray(data) && data.length > 100).toBe(true);
+  });
+
+  it('skips the network at startup while the cached list is fresh, and fetches once it is old', async () => {
+    const { service, cache, fetch } = setup({ cached: listText('30.0.0') });
+    fetch.mockImplementation(respond(listText('30.0.0')));
+    await service.init();
+    expect(fetch).not.toHaveBeenCalled();
+
+    backdate(cache.releases, 5 * HOURS);
+    await service.init();
+    expect(fetch).toHaveBeenCalledTimes(1);
+  });
+
   it('publishes a refreshed list, caches its text, and skips a refresh that changes nothing', async () => {
     const first = listText('30.0.0', '29.0.0');
     const { service, cache, fetch, updateApp, rev } = setup({ cached: first });
+    backdate(cache.releases, 5 * HOURS);
     fetch.mockImplementation(respond(first));
     await service.init();
     await vi.waitFor(() => expect(fetch).toHaveBeenCalledTimes(1));

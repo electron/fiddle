@@ -58,7 +58,7 @@ export interface ProgressRingProps {
   className?: string;
 }
 
-/** A determinate ring, used in place of an icon (Run while downloading). */
+/** A determinate ring, used in place of an icon. */
 export function ProgressRing({ value, size = 14, label, className }: ProgressRingProps) {
   if (!label) {
     return (
@@ -84,7 +84,7 @@ export interface SpinnerProps {
   className?: string;
 }
 
-/** An indeterminate ring. The only thing in the app that loops. */
+/** An indeterminate ring, for progress of unknown length. */
 export function Spinner({ size = 14, label, className }: SpinnerProps) {
   if (!label) {
     return (

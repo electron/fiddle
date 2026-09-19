@@ -26,12 +26,16 @@ class FakeModel {
 }
 
 const mocks = vi.hoisted(() => ({
+  toastError: vi.fn(),
+  logError: vi.fn(),
   GetFiles: vi.fn(),
   EditFile: vi.fn((_name: string, _text: string, _rev: number) => Promise.resolve(0)),
   RenameFile: vi.fn(() => Promise.resolve(0)),
 }));
 
 vi.mock('../../ipc/renderer', () => ({ documentsApi: mocks }));
+vi.mock('../toast-error', () => ({ toastError: mocks.toastError }));
+vi.mock('../features/about/log', () => ({ log: { error: mocks.logError } }));
 vi.mock('./monaco', () => ({
   monaco: {
     Uri: { from: ({ path }: { path: string }) => ({ path }) },
@@ -51,33 +55,61 @@ type Models = typeof import('./models');
 
 let models: Models;
 let editorState: typeof import('./editor-state');
-let frames: Array<() => void> = [];
-const nextFrame = () => {
-  const run = frames;
-  frames = [];
-  for (const frame of run) frame();
-};
+/** Lets the pending send go: a first edit after a pause is sent at once, later ones within 250 ms wait. */
+const settle = (ms = 250) => vi.advanceTimersByTime(ms);
 const files = (texts: Record<string, string>) => Promise.resolve(texts);
 
 beforeEach(async () => {
+  vi.useFakeTimers();
   vi.resetModules();
   vi.clearAllMocks();
-  frames = [];
-  vi.stubGlobal('requestAnimationFrame', (frame: () => void) => frames.push(frame));
   models = await import('./models');
   editorState = await import('./editor-state');
 });
 
 describe('editor models', () => {
-  it('sends an edit once per frame, stamped with the rev the text came from', async () => {
+  it('sends an edit stamped with the rev the text came from, once for edits made together', async () => {
     mocks.GetFiles.mockReturnValue(files({ 'main.js': 'a' }));
     await models.syncModels(['main.js'], 3);
     const model = models.getModel('main.js')!;
     model.setValue('ab');
     model.setValue('abc');
-    nextFrame();
+    settle();
     expect(mocks.EditFile).toHaveBeenCalledTimes(1);
     expect(mocks.EditFile).toHaveBeenCalledWith('main.js', 'abc', 3);
+  });
+
+  it('sends at most one edit per interval while typing, and the last text goes at the end of it', async () => {
+    mocks.GetFiles.mockReturnValue(files({ 'main.js': '' }));
+    await models.syncModels(['main.js'], 1);
+    const model = models.getModel('main.js')!;
+    model.setValue('a');
+    settle(1);
+    expect(mocks.EditFile).toHaveBeenCalledTimes(1);
+    model.setValue('ab');
+    settle(100);
+    model.setValue('abc');
+    settle(100);
+    expect(mocks.EditFile).toHaveBeenCalledTimes(1);
+    settle(100);
+    expect(mocks.EditFile).toHaveBeenCalledTimes(2);
+    expect(mocks.EditFile).toHaveBeenLastCalledWith('main.js', 'abc', 1);
+  });
+
+  it('sends what was typed before a shortcut or a focus change can act on it', async () => {
+    mocks.GetFiles.mockReturnValue(files({ 'main.js': '' }));
+    await models.syncModels(['main.js'], 1);
+    const model = models.getModel('main.js')!;
+    model.setValue('a');
+    settle(1);
+    model.setValue('ab');
+    window.dispatchEvent(new KeyboardEvent('keydown', { key: 'r', metaKey: true }));
+    expect(mocks.EditFile).toHaveBeenLastCalledWith('main.js', 'ab', 1);
+    model.setValue('abc');
+    window.dispatchEvent(new KeyboardEvent('keydown', { key: 'c' }));
+    expect(mocks.EditFile).toHaveBeenCalledTimes(2);
+    window.dispatchEvent(new FocusEvent('blur'));
+    expect(mocks.EditFile).toHaveBeenLastCalledWith('main.js', 'abc', 1);
   });
 
   it('does not echo the text main sent back to it', async () => {
@@ -85,29 +117,60 @@ describe('editor models', () => {
     await models.syncModels(['main.js'], 1);
     mocks.GetFiles.mockReturnValueOnce(files({ 'main.js': 'new fiddle' }));
     await models.syncModels(['main.js'], 2);
-    nextFrame();
+    settle();
     expect(models.getModel('main.js')!.getValue()).toBe('new fiddle');
     expect(mocks.EditFile).not.toHaveBeenCalled();
   });
 
-  it('keeps an edit typed while new text is on its way from reaching main', async () => {
+  // A rename bumps the rev as a new fiddle does, and leaves the text as main has it.
+  it('keeps text typed while the new rev is on its way, and sends it with that rev', async () => {
     mocks.GetFiles.mockReturnValueOnce(files({ 'main.js': 'a', 'view.js': '' }));
     await models.syncModels(['main.js', 'view.js'], 1);
-    // A rename bumps the rev; the reply lists the files as main has them.
     let reply!: (texts: Record<string, string>) => void;
     mocks.GetFiles.mockReturnValueOnce(new Promise((resolve) => (reply = resolve)));
     const sync = models.syncModels(['main.js', 'renamed.js'], 2);
     models.getModel('main.js')!.setValue('ab');
-    nextFrame();
-    // Made against the old text, so it carries the old rev and main drops it.
-    expect(mocks.EditFile).toHaveBeenCalledWith('main.js', 'ab', 1);
+    // Made against the old rev, which main would drop: it waits.
+    settle();
+    expect(mocks.EditFile).not.toHaveBeenCalled();
     reply({ 'main.js': 'a', 'renamed.js': '' });
     await sync;
-    expect(models.getModel('main.js')!.getValue()).toBe('a');
-    mocks.EditFile.mockClear();
-    models.getModel('main.js')!.setValue('ac');
-    nextFrame();
-    expect(mocks.EditFile).toHaveBeenCalledWith('main.js', 'ac', 2);
+    expect(models.getModel('main.js')!.getValue()).toBe('ab');
+    settle();
+    expect(mocks.EditFile).toHaveBeenCalledWith('main.js', 'ab', 2);
+  });
+
+  it("replaces text typed while a new fiddle's text is on its way", async () => {
+    mocks.GetFiles.mockReturnValueOnce(files({ 'main.js': 'a' }));
+    await models.syncModels(['main.js'], 1);
+    let reply!: (texts: Record<string, string>) => void;
+    mocks.GetFiles.mockReturnValueOnce(new Promise((resolve) => (reply = resolve)));
+    const sync = models.syncModels(['main.js'], 2);
+    models.getModel('main.js')!.setValue('ab');
+    reply({ 'main.js': 'new fiddle' });
+    await sync;
+    settle();
+    expect(models.getModel('main.js')!.getValue()).toBe('new fiddle');
+    expect(mocks.EditFile).not.toHaveBeenCalled();
+  });
+
+  it('tells the user once when sending fails, logs each failure and sends the text again later', async () => {
+    mocks.GetFiles.mockReturnValue(files({ 'main.js': '' }));
+    await models.syncModels(['main.js'], 1);
+    const model = models.getModel('main.js')!;
+    mocks.EditFile.mockRejectedValue(new Error('gone'));
+    model.setValue('a');
+    settle(1);
+    await vi.advanceTimersByTimeAsync(0);
+    model.setValue('ab');
+    settle();
+    await vi.advanceTimersByTimeAsync(0);
+    expect(mocks.logError).toHaveBeenCalledTimes(2);
+    expect(mocks.toastError).toHaveBeenCalledTimes(1);
+
+    mocks.EditFile.mockResolvedValue(0);
+    window.dispatchEvent(new FocusEvent('blur'));
+    expect(mocks.EditFile).toHaveBeenLastCalledWith('main.js', 'ab', 1);
   });
 
   it('disposes the models of files that are gone', async () => {

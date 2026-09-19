@@ -296,13 +296,5 @@
   "accountSignIn": {
     "message": "Sign in",
     "description": "Settings button that opens the GitHub sign-in dialog."
-  },
-  "asRevisionLabel": {
-    "message": "Publish as revision",
-    "description": "Settings switch for publishing gists in two steps so the gist history shows a diff."
-  },
-  "asRevisionHelp": {
-    "message": "Creates the gist from the default template first, then updates it with your files, so the gist's history shows your changes.",
-    "description": "Help text under the Publish as revision switch."
   }
 }

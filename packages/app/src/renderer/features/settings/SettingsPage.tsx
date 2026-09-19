@@ -1,9 +1,3 @@
-/**
- * The settings page, shown in the sheet when `Window.view` is `settings`
- * Search filters every section by title, description and key; changed values
- * are marked and can be reset; settings.json can be opened, imported and
- * exported.
- */
 import {
   useContext,
   useEffect,
@@ -15,7 +9,7 @@ import { useTranslation } from 'react-i18next';
 
 import contributors from '../../../../static/contributors.json';
 import { getReleaseChannel } from '../../../fiddle/versions';
-import { locales } from '../../../i18n';
+import { shippedLocales } from '../../../i18n';
 import {
   appApi,
   appPlatformApi,
@@ -52,13 +46,14 @@ import { VersionManager } from '../versions/VersionManager';
 import { currentThemeSnapshot } from '../../shell/theme-snapshot';
 import { setView } from '../../shell/window-state';
 import {
+  descriptionId,
   ListRow,
   matchesQuery,
   Row,
   SearchContext,
   SwitchRow,
   TextRow,
-  useSettingText,
+  titleId,
 } from './controls';
 import { KeybindingsSection } from './KeybindingsSection';
 import { clearRequestedSection, useRequestedSection, type SectionId } from './sections';
@@ -68,23 +63,25 @@ import { useSettings, useSettingsAction } from './use-settings';
 /** Elements whose Escape belongs to an open menu, popover or dialog. */
 const OVERLAY = '[role="dialog"], [role="alertdialog"], [role="menu"], [role="listbox"]';
 
+type SearchKey = SettingKey | 'privacyReset';
+
 interface SectionDef {
   id: SectionId;
   icon: IconName;
-  /** The settings in the section, for search. */
-  keys: readonly SettingKey[];
+  keys: readonly SearchKey[];
   body: ComponentType<{ showAll: boolean }>;
 }
 
 export function SettingsPage() {
   const { t } = useTranslation('settings');
   const run = useSettingsAction();
+  const { app, settings } = useSettings();
   const requested = useRequestedSection();
   const [current, setCurrent] = useState<SectionId>(requested ?? 'general');
   const [query, setQuery] = useState('');
   const searching = query.trim() !== '';
 
-  // A section asked for while the page is open is shown, and the request is forgotten.
+  // A section asked for while the page is open is shown, then the request is forgotten.
   const [seen, setSeen] = useState(requested);
   if (requested !== seen) {
     setSeen(requested);
@@ -97,9 +94,8 @@ export function SettingsPage() {
     if (requested) clearRequestedSection();
   }, [requested]);
 
-  // Escape closes settings wherever focus is, not only inside the page.
-  // An open menu, popover or dialog gets it first: React Aria stops Escape there,
-  // and a press in one, or on a control whose popup is open, is left alone.
+  // Escape closes settings wherever focus is, but an open menu, popover or dialog
+  // (or a control whose popup is open) gets it first.
   const close = useEffectEvent(() => void setView('editor', t('actionFailed')));
   useEffect(() => {
     let forOverlay = false;
@@ -132,7 +128,15 @@ export function SettingsPage() {
   }, []);
 
   const title = (id: SectionId) => t(`section.${id}`);
-  const rowMatches = (key: SettingKey) =>
+  // Rows that aren't on screen can't be found.
+  const isRendered = (key: SearchKey) =>
+    key === 'privacyReset'
+      ? app?.platform === 'darwin'
+      : key === 'customMirrorElectron' || key === 'customMirrorNightly'
+        ? settings.mirror === 'custom'
+        : true;
+  const rowMatches = (key: SearchKey) =>
+    isRendered(key) &&
     matchesQuery(query, t(`${key}.title`), t(`${key}.description`), key);
   const shown = searching
     ? SECTIONS.filter(
@@ -272,7 +276,7 @@ function GeneralSection() {
   };
   const localeItems: SelectOption[] = [
     { id: 'system', label: t('locale.system') },
-    ...locales.map((code) => ({ id: code, label: languageName(code) })),
+    ...shippedLocales.map((code) => ({ id: code, label: languageName(code) })),
   ];
   if (!localeItems.some((item) => item.id === settings.locale)) {
     localeItems.push({ id: settings.locale, label: languageName(settings.locale) });
@@ -352,7 +356,6 @@ function EditorSection() {
         invalidMessage={t('editorFontFamily.invalid')}
       />
       <TextRow setting="editorFontSize" invalidMessage={t('editorFontSize.invalid')} />
-      {/* Font changes apply after a reload. */}
       <div className={styles.row} data-inline>
         <div className={styles.rowText}>
           <p className={styles.rowDescription}>{t('editorFont.reloadHint')}</p>
@@ -375,7 +378,7 @@ function ExecutionSection() {
   const { settings, set } = useSettings();
   return (
     <>
-      <ListRow setting="electronFlags" />
+      <ListRow setting="electronFlags" invalidMessage={t('electronFlags.invalid')} />
       <ListRow
         setting="environmentVariables"
         invalidMessage={t('environmentVariables.invalid')}
@@ -413,7 +416,12 @@ function ElectronSection({ showAll }: { showAll: boolean }) {
   return (
     <>
       <Row setting="channels">
-        <div className={styles.inlineGroup}>
+        <div
+          className={styles.inlineGroup}
+          role="group"
+          aria-labelledby={titleId('channels')}
+          aria-describedby={descriptionId('channels')}
+        >
           {CHANNELS.map((channel) => {
             const selected = settings.channels.includes(channel);
             return (
@@ -441,6 +449,7 @@ function ElectronSection({ showAll }: { showAll: boolean }) {
       <Row setting="mirror">
         <RadioGroup
           aria-label={t('mirror.title')}
+          aria-describedby={descriptionId('mirror')}
           orientation="horizontal"
           value={settings.mirror}
           onChange={(value) => set('mirror', value as Mirror)}
@@ -476,19 +485,11 @@ function ElectronSection({ showAll }: { showAll: boolean }) {
 function GitHubSection({ showAll }: { showAll: boolean }) {
   const { t } = useTranslation('settings');
   const { settings, set } = useSettings();
-  const { query } = useContext(SearchContext);
-  // The account section also holds "Publish as a revision".
-  const revision = useSettingText('gistPublishAsRevision');
   return (
     <>
-      {(showAll ||
-        matchesQuery(
-          query,
-          revision.title,
-          revision.description,
-          'gistPublishAsRevision',
-        )) && <GitHubAccountSection />}
-      <TextRow setting="packageAuthor" invalidMessage={t('packageAuthor.description')} />
+      {showAll && <GitHubAccountSection />}
+      <SwitchRow setting="gistPublishAsRevision" />
+      <TextRow setting="packageAuthor" invalidMessage={t('packageAuthor.invalid')} />
       <SwitchRow setting="gistShowHistory" />
       <Row setting="gistVisibility">
         <SegmentedControl
@@ -561,7 +562,6 @@ function AboutSection() {
   );
 }
 
-/** Crash reports, and on macOS "Reset privacy permissions". */
 function PrivacySection() {
   const { t } = useTranslation('settings');
   const { app } = useSettings();
@@ -570,7 +570,8 @@ function PrivacySection() {
   const title = t('privacyReset.title');
   const description = t('privacyReset.description');
   const showReset =
-    app?.platform === 'darwin' && (showAll || matchesQuery(query, title, description));
+    app?.platform === 'darwin' &&
+    (showAll || matchesQuery(query, title, description, 'privacyReset'));
   const reset = async () => {
     if (await appPlatformApi.ResetPrivacyPermissions())
       showToast({ tone: 'success', title: t('privacyReset.done') });
@@ -655,6 +656,11 @@ const SECTIONS: readonly SectionDef[] = [
     keys: ['screenReader'],
     body: AccessibilitySection,
   },
-  { id: 'privacy', icon: 'lock', keys: ['crashReports'], body: PrivacySection },
+  {
+    id: 'privacy',
+    icon: 'lock',
+    keys: ['crashReports', 'privacyReset'],
+    body: PrivacySection,
+  },
   { id: 'about', icon: 'info', keys: [], body: AboutSection },
 ];

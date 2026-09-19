@@ -1,20 +1,8 @@
-/**
- * Headless CLI output: human text or JSON, exit codes and
- * the locale. Pure: writers are injected. No Electron imports.
- *
- * With `--json`, stdout gets one JSON object per line, each with `schemaVersion`:
- * - `{ type: 'log', level, text }`: a line from Fiddle itself;
- * - `{ type: 'output', stream, text }`: a line of the fiddle's or a tool's output;
- * - last, `{ type: 'result', command, ok: true, data }`, or
- *   `{ type: 'result', command, ok: false, error: { code, message, details? } }`.
- *
- * Without it, results go to stdout, Fiddle's own lines and errors to stderr,
- * and the fiddle's output to the stream it was written to.
- */
 import { constants } from 'node:os';
 
 import { ErrorCode, type SerializedFiddleError } from '../../shared/errors';
 
+/** With `--json`, stdout is one object per line, each with this `schemaVersion`: `log`, `output`, then a last `result` (`ok`, and `data` or `error`). */
 export const SCHEMA_VERSION = 1;
 
 /** Error codes the CLI adds to the shared ones. */
@@ -88,7 +76,6 @@ export class Reporter {
     this.#io = io;
   }
 
-  /** A line from Fiddle itself. */
   log(text: string, level: LogLevel = 'info'): void {
     if (this.json) this.#event({ type: 'log', level, text });
     else this.#io.stderr(`${text}\n`);
@@ -121,7 +108,7 @@ export class Reporter {
     else if (human !== '') this.#io.stdout(human.endsWith('\n') ? human : `${human}\n`);
   }
 
-  /** The command failed. `human` is the translated message for stderr. */
+  /** `human` is the translated message for stderr. */
   error(error: SerializedFiddleError, human: string): void {
     this.flush();
     if (!this.json) {

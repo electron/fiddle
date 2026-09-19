@@ -1,11 +1,7 @@
 /**
- * Command definitions, shared by main and the renderer. Every user action is a
- * command with an ID, an i18n label key (in the `main` namespace), an
- * accelerator per platform and an enablement predicate.
- *
- * Predicates are pure functions of the two stores: main evaluates them for
- * native menus, and renderers run the same code against their stores.
- * Handlers live in main (src/main/app-commands.ts).
+ * Every user action is a command with an i18n label key (in the `main`
+ * namespace), an accelerator per platform and an enablement predicate. Predicates
+ * are pure functions of the two stores, so main and the renderer agree.
  */
 import type main from '../i18n/generated/en/main';
 import type { AppState, Platform, WindowState } from './stores';
@@ -19,11 +15,7 @@ export type Accelerator =
 /** `win` is undefined when no app window is focused (possible on macOS). */
 export type Enablement = (app: AppState, win: WindowState | undefined) => boolean;
 
-/**
- * Where a keybinding applies: the editor or the console has focus, or the
- * fiddle is running. Scoped keybindings are dispatched by the renderer
- * (src/renderer/features/commands/keybindings.ts), never by the native menu.
- */
+/** Where a keybinding applies. Scoped keybindings are dispatched by the renderer, never by the native menu. */
 export type KeyContext = 'editor' | 'console' | 'running';
 export const keyContexts: readonly KeyContext[] = ['editor', 'console', 'running'];
 
@@ -35,11 +27,7 @@ export interface CommandDefinition {
   /** Where the default keybindings apply. Unset means everywhere. Menus never register a scoped keybinding. */
   context?: KeyContext;
   enabled?: Enablement;
-  /**
-   * For developing Fiddle itself: the Develop menu (src/main/menu.ts). Enabled
-   * only while `App.dev` is set (unpackaged builds), and left out of the palette
-   * and Settings > Keyboard otherwise (`isCommandListed`).
-   */
+  /** For developing Fiddle itself: enabled only while `App.dev` is set, and left out of the palette and Settings > Keyboard otherwise. */
   devOnly?: boolean;
 }
 
@@ -69,10 +57,8 @@ export const commands = {
     accelerator: 'CmdOrCtrl+\\',
     enabled: hasWindow,
   },
-  // Move the active tab along the tab row (the Window menu): Ctrl+Shift+PageUp
-  // and PageDown as in VS Code and Chrome; on macOS, whose laptops have no Page
-  // keys, Ctrl+Cmd+Left and Right (VS Code's "move editor into the previous or
-  // next group"), which Monaco leaves free.
+  // Ctrl+Shift+PageUp/PageDown as in VS Code and Chrome; macOS laptops have no
+  // Page keys, so Ctrl+Cmd+Left/Right, which Monaco leaves free.
   'editor.moveTabLeft': {
     label: 'moveTabLeft',
     accelerator: { default: 'Ctrl+Shift+PageUp', darwin: 'Ctrl+Cmd+Left' },
@@ -233,8 +219,6 @@ export const commands = {
   },
   // Font changes apply after a reload; Settings offers this next to them.
   'view.reloadAllWindows': { label: 'reloadAllWindows' },
-  // The Develop menu (unpackaged builds): shows or hides the title bar's menu
-  // bar in every window, on any platform, without a restart.
   'dev.toggleMenuBar': { label: 'toggleMenuBar', devOnly: true },
 } as const satisfies Record<string, CommandDefinition>;
 

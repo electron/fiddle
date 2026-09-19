@@ -239,7 +239,7 @@ export interface StatusPillProps {
   className?: string;
 }
 
-/** The status bar's "Running" pill. */
+/** A pill with a status dot. */
 export function StatusPill({ children, className }: StatusPillProps) {
   return (
     <span className={cx(styles.pill, className)}>

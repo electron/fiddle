@@ -1,9 +1,5 @@
-/**
- * Monaco, loaded through Vite's ESM worker imports and started under the app's
- * CSP. `require-trusted-types-for 'script'` covers `new Worker()`, so workers
- * are created from bundled same-origin URLs through the `fiddleMonacoWorker`
- * Trusted Types policy (listed in src/main/csp.ts with Monaco's own policies).
- */
+// `require-trusted-types-for 'script'` covers `new Worker()`, so workers are created from same-origin bundle URLs
+// through the `fiddleMonacoWorker` policy, which src/main/csp.ts must list.
 import * as monaco from 'monaco-editor';
 import editorWorkerUrl from 'monaco-editor/editor/editor.worker.js?worker&url';
 import cssWorkerUrl from 'monaco-editor/languages/features/css/css.worker.js?worker&url';
@@ -81,6 +77,11 @@ monaco.typescript.javascriptDefaults.setDiagnosticsOptions({
   noSuggestionDiagnostics: true,
 });
 
+// F1 is the app's palette (a keybinding the user can change or remove), never Monaco's own quick command.
+monaco.editor.addKeybindingRules([
+  { keybinding: monaco.KeyCode.F1, command: '-editor.action.quickCommand' },
+]);
+
 // Formatting is Prettier's (./format.ts). Monaco uses the first formatter it
 // finds, so the built-in JavaScript, HTML and CSS ones are turned off.
 // setModeConfiguration replaces the whole configuration, so keep the rest.
@@ -100,10 +101,7 @@ css.setModeConfiguration({
 });
 registerPrettierFormatter(monaco.languages);
 
-/**
- * (Re)defines the editor theme and applies it: Lucent, built from the current
- * tokens, or a custom theme's own Monaco theme data.
- */
+/** Lucent, built from the current tokens, or a custom theme's own Monaco theme data. */
 export function applyEditorTheme(custom?: MonacoTheme): void {
   const { theme } = document.documentElement.dataset;
   const isDark = theme

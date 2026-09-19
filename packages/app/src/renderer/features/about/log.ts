@@ -1,12 +1,8 @@
-/**
- * Renderer logging: the console, plus main's log file through
- * `AppPlatform.Log`. Main redacts secrets before writing.
- */
 import { appPlatformApi } from '../../../ipc/renderer';
 
 type Level = 'info' | 'warn' | 'error';
 
-/** Main's `LogText` limit (fiddle.eipc). */
+/** Main's `LogText` limit. */
 const MAX_LENGTH = 10_000;
 
 function describe(detail: unknown): string {
@@ -29,7 +25,7 @@ function send(level: Level, message: string, details: unknown[]): void {
       .Log(level as Parameters<typeof appPlatformApi.Log>[0], text)
       .catch(() => undefined);
   } catch {
-    // Not in an app window (tests, the component gallery).
+    // The bridge throws synchronously outside an app window (tests, the gallery); a logger must not.
   }
 }
 

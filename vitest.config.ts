@@ -8,7 +8,6 @@ const browserConditions = ['fiddle-source', ...defaultClientConditions];
 
 export default defineConfig({
   test: {
-    passWithNoTests: true,
     projects: [
       // packages/core/vitest.config.ts (node environment).
       'packages/core',
@@ -19,7 +18,7 @@ export default defineConfig({
           name: 'app:node',
           root: './packages/app',
           environment: 'node',
-          include: ['src/{main,fiddle,shared,i18n}/**/*.test.ts', 'tools/*.test.ts'],
+          include: ['src/**/*.test.ts', 'tools/*.test.ts'],
         },
       },
       {
@@ -28,7 +27,7 @@ export default defineConfig({
           name: 'app:jsdom',
           root: './packages/app',
           environment: 'jsdom',
-          include: ['src/{renderer,ui}/**/*.test.tsx'],
+          include: ['src/**/*.test.tsx'],
           setupFiles: ['./vitest.jsdom.setup.ts'],
         },
       },

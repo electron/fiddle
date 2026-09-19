@@ -4,7 +4,6 @@ import { ToolbarButton, Tooltip } from '../../../ui';
 import { useShortcut } from '../../use-shortcut';
 import { showGistDialog } from './state';
 
-/** The title bar's Open gist button, left of Publish. It opens the same dialog as `gist.open`. */
 export function OpenGistButton() {
   const { t } = useTranslation('gists');
   const kbd = useShortcut('gist.open');

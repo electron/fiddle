@@ -123,11 +123,15 @@ describe('VersionPicker', () => {
     const builds = vi.mocked(pickerGroups).mock.calls.length;
 
     // Ten of these a second while downloading: only the row's text changes.
-    push(
-      (app) => (app.versions!.installs['43.7.0'] = { state: 'downloading', percent: 42 }),
-    );
-    rerender(<VersionPicker />);
-    expect(option('r:43.7.0')?.textContent).toContain('stateDownloading {"percent":42}');
+    for (const percent of [12, 27, 42]) {
+      push(
+        (app) => (app.versions!.installs['43.7.0'] = { state: 'downloading', percent }),
+      );
+      rerender(<VersionPicker />);
+      expect(option('r:43.7.0')?.textContent).toContain(
+        `stateDownloading {"percent":${percent}}`,
+      );
+    }
     // An unrelated push changes nothing either.
     push((app) => (app.screenReaderActive = true));
     rerender(<VersionPicker />);

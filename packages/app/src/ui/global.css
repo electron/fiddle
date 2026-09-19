@@ -30,9 +30,7 @@ body {
   font-synthesis-weight: none;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
-  /* App chrome is not selectable, like any desktop app. Text meant to be read
-     or copied opts back in: form fields and the editor here, console output,
-     dialog and toast messages in their own styles. */
+  /* App chrome isn't selectable, like any desktop app. Text meant to be read opts back in. */
   user-select: none;
   cursor: default;
 }
@@ -61,8 +59,6 @@ samp {
   font-family: var(--lu-font-mono);
 }
 
-/* Focus: a 3px ring in accent at 70%, 1px offset. Components that sit in lists and
-   tab rows draw it inset; fields draw a border and a soft ring instead. */
 /* Zero specificity, so a component's own focus rule always wins. Components built on
    react-aria style [data-focus-visible] themselves. */
 :where(:focus-visible) {
@@ -73,8 +69,7 @@ samp {
   outline: none;
 }
 
-/* Reduce motion: the tokens zero the durations that move things and the press scale.
-   Smooth scrolling travels too, so drop it. Colour changes and spinners stay. */
+/* The tokens zero the durations that move things; smooth scrolling goes too. */
 @media (prefers-reduced-motion: reduce) {
   html {
     scroll-behavior: auto;
@@ -84,6 +79,6 @@ samp {
 /* Windows high contrast: let the system colours through and keep focus visible. */
 @media (forced-colors: active) {
   :where(:focus-visible) {
-    outline: 3px solid Highlight;
+    outline: 3px solid var(--lu-focus-ring);
   }
 }

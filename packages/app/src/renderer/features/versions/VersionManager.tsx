@@ -1,7 +1,3 @@
-/**
- * The version manager, for the Settings page's Electron section: a filter, channel and "downloaded only" checkboxes, bulk
- * actions, and a table of local builds and releases with status and action.
- */
 import { memo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -37,7 +33,7 @@ type InstallState = VersionsState['installs'][string]['state'];
 const report = (promise: Promise<unknown>) =>
   promise.catch((error: unknown) => toastError(error));
 
-// The rows below are memoized on primitives, so a download's progress pushes re-render only the row it is on.
+// Memoized on primitives: a download's progress re-renders only its own row's cells.
 const LocalStatus = memo(function LocalStatus({ available }: { available: boolean }) {
   const { t } = useTranslation('run');
   return (
@@ -306,11 +302,10 @@ export function VersionManager() {
             size="sm"
             variant="secondary"
             icon="download"
-            // Only the rows on screen, not the ones past the row limit.
             onPress={() =>
               report(
                 versionsApi.DownloadAll(
-                  shown
+                  matches
                     .filter(
                       (r) => r.supported && installs[r.version]?.state !== 'installed',
                     )

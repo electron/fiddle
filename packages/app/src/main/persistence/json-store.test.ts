@@ -1,4 +1,5 @@
-import { mkdtemp, readdir, readFile, rm, writeFile } from 'node:fs/promises';
+import fs from 'node:fs';
+import { mkdir, mkdtemp, readdir, readFile, rm, stat, writeFile } from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
 
@@ -14,6 +15,7 @@ import {
   flushAll,
   hasPendingWrites,
   onJsonStoreNotice,
+  readJsonObjectSync,
   type JsonStoreNotice,
 } from './json-store';
 
@@ -109,16 +111,16 @@ describe('reading', () => {
     expect(await readJson()).toEqual({ schemaVersion: 2, name: 'fixed', count: 6 });
   });
 
-  it('drops invalid values passed to set', async () => {
+  it('replaces an invalid value passed to set with its default', async () => {
     const store = open();
     store.set({ name: 'ok', count: 1.5 } as Data);
-    expect(store.get()).toEqual({ name: 'ok' });
+    expect(store.get()).toEqual({ name: 'ok', count: 0 });
     await store.flush();
   });
 });
 
 describe('corruption', () => {
-  it('moves a corrupt file aside, tells the user and recovers from .bak', async () => {
+  it('moves a corrupt file aside, tells the user and recovers from .bak, on this launch and the next', async () => {
     await writeFile(
       `${file}.bak`,
       JSON.stringify({ schemaVersion: 2, name: 'backup', count: 1 }),
@@ -133,8 +135,8 @@ describe('corruption', () => {
         movedTo: expect.stringMatching(/data\.corrupt-[\dTZ-]+\.json$/),
       },
     ]);
+    await store.flush();
     const files = await readdir(dir);
-    expect(files).not.toContain('data.json');
     expect(files.filter((name) => /^data\.corrupt-.*\.json$/.test(name))).toHaveLength(1);
     expect(
       await readFile(
@@ -145,6 +147,63 @@ describe('corruption', () => {
         'utf8',
       ),
     ).toBe('{ not json');
+
+    // The recovered values are back in the main file, so the next launch keeps them.
+    expect(await readJson()).toEqual({ schemaVersion: 2, name: 'backup', count: 1 });
+    notices = [];
+    expect(open().get()).toEqual({ name: 'backup', count: 1 });
+    expect(notices).toEqual([]);
+  });
+
+  it('keeps a file it cannot read and does not write over it', async () => {
+    await writeFile(
+      `${file}.bak`,
+      JSON.stringify({ schemaVersion: 2, name: 'older', count: 1 }),
+    );
+    // Reading a folder fails with an error other than "not found".
+    await mkdir(file);
+    const store = open();
+    expect(store.readOnly).toBe(true);
+    expect(store.get()).toEqual({ name: 'older', count: 1 });
+    expect(notices).toEqual([]);
+
+    store.set((prev) => ({ ...prev, count: 2 }));
+    await store.flush();
+    expect((await stat(file)).isDirectory()).toBe(true);
+    expect(await readJson(`${file}.bak`)).toMatchObject({ name: 'older', count: 1 });
+  });
+
+  it('retries a read that fails for a moment, instead of going read-only', async () => {
+    await writeFile(file, JSON.stringify({ schemaVersion: 2, name: 'disk', count: 1 }));
+    const real = fs.readFileSync;
+    let busy = 2;
+    const spy = vi.spyOn(fs, 'readFileSync').mockImplementation(((...args) => {
+      if (args[0] === file && busy-- > 0)
+        throw Object.assign(new Error('busy'), { code: 'EBUSY' });
+      return Reflect.apply(real, fs, args);
+    }) as typeof fs.readFileSync);
+    try {
+      const store = open();
+      expect(store.readOnly).toBe(false);
+      expect(store.get()).toEqual({ name: 'disk', count: 1 });
+    } finally {
+      spy.mockRestore();
+    }
+  });
+
+  it('leaves read-only once a reload can read the file', async () => {
+    await mkdir(file);
+    const store = open();
+    expect(store.readOnly).toBe(true);
+    await rm(file, { recursive: true });
+    await writeFile(file, JSON.stringify({ schemaVersion: 2, name: 'disk', count: 5 }));
+    expect(store.reload()).toBe(true);
+    expect(store.readOnly).toBe(false);
+    expect(store.get()).toEqual({ name: 'disk', count: 5 });
+
+    store.set((prev) => ({ ...prev, count: 6 }));
+    await store.flush();
+    expect(await readJson()).toMatchObject({ count: 6 });
   });
 
   it('treats JSON that is not an object as corrupt', async () => {
@@ -165,7 +224,10 @@ describe('corruption', () => {
       `${file}.bak`,
       JSON.stringify({ schemaVersion: 2, name: 'backup', count: 1 }),
     );
-    expect(open().get()).toEqual(defaults);
+    const store = open();
+    expect(store.get()).toEqual(defaults);
+    await store.flush();
+    expect(await readdir(dir)).toEqual(['data.json.bak']);
   });
 
   it('copies the previous file to .bak before each write', async () => {
@@ -272,6 +334,22 @@ describe('writing', () => {
     store.set((prev) => ({ ...prev, count: 4 }));
     await store.flush();
     expect(await readJson(nested)).toMatchObject({ count: 4 });
+  });
+});
+
+describe('readJsonObjectSync', () => {
+  it('reads the file, falls back to .bak when it is unusable, and moves nothing', async () => {
+    expect(readJsonObjectSync(file)).toBeUndefined();
+
+    await writeFile(`${file}.bak`, '{"count":1}');
+    expect(readJsonObjectSync(file)).toBeUndefined();
+
+    await writeFile(file, '{"count":2}');
+    expect(readJsonObjectSync(file)).toEqual({ count: 2 });
+
+    await writeFile(file, '{ nope');
+    expect(readJsonObjectSync(file)).toEqual({ count: 1 });
+    expect(await readdir(dir)).toEqual(['data.json', 'data.json.bak']);
   });
 });
 

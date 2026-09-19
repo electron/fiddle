@@ -1,13 +1,3 @@
-/**
- * The headless CLI's commands. Each handler gets its descriptor's parsed
- * input and returns its output. They call the app's own fiddle logic and
- * services, without a window, the StateHub or the app's stores; anything that
- * isn't a flag uses the app's default settings.
- *
- * Commands that execute the fiddle check trust first (trust.ts). Remote
- * fiddles install modules without install scripts, like an app approval that
- * doesn't allow them.
- */
 import fs from 'node:fs';
 import fsp from 'node:fs/promises';
 import path from 'node:path';
@@ -62,6 +52,7 @@ import { gistFiles, publishGist } from '../github/service';
 import { tm } from '../i18n';
 import { log } from '../log';
 import { forgeOptionsFor, forgeProject, runForgeTask } from '../packaging/service';
+import { sfwEntryPath } from '../platform/sfw';
 import {
   bisectVerdict,
   classifyRun,
@@ -76,6 +67,7 @@ import {
   toolEnv,
   waitForExit,
   writeRunApp,
+  writeRunPackageJson,
 } from '../run/process';
 import { PM_INSTALL_URLS } from '../run/service';
 import { getCacheRoot, getEndpoints } from '../test-mode';
@@ -130,8 +122,8 @@ function cachedReleases(ctx: Ctx): Promise<Releases> {
 
 /** The release list refreshed from the network, or the cached one if that fails. */
 function freshReleases(ctx: Ctx): Promise<Releases> {
-  return (ctx.memo.fresh ??= fetchReleaseList(ctx.cache, ctx.releasesUrl, (url) =>
-    net.fetch(url),
+  return (ctx.memo.fresh ??= fetchReleaseList(ctx.cache, ctx.releasesUrl, (url, init) =>
+    net.fetch(url, init),
   ).then(
     (data) => loadReleases(data, ctx.cache, ctx.releasesUrl),
     (error: unknown) => {
@@ -308,7 +300,7 @@ export function withModules(
   return modules;
 }
 
-/** The trust prompt (trust.ts), on the terminal: the question on stderr, the answer from stdin. Ctrl+C or `signal` cancels it. */
+/** The trust prompt on the terminal: the question on stderr, the answer from stdin. Ctrl+C or `signal` cancels it. */
 function terminalPrompt(signal: AbortSignal): TrustPrompt {
   return {
     get interactive() {
@@ -378,10 +370,29 @@ async function releaseExec(ctx: Ctx, version: string): Promise<string> {
   if (installed) return installed;
   ctx.reporter.log(tm('mainRun')('downloading', { version }));
   const mirror = mirrorsFor(defaultSettings, app.getSystemLocale());
-  return installRelease(ctx.installer, ctx.cache, version, {
-    mirror,
-    signal: ctx.signal,
-  });
+  try {
+    return await installRelease(ctx.installer, ctx.cache, version, {
+      mirror,
+      signal: ctx.signal,
+    });
+  } catch (error) {
+    if (ctx.signal.aborted) throw error;
+    throw new FiddleError(
+      ErrorCode.network,
+      tm('mainRun')('downloadFailed', {
+        version,
+        message: FiddleError.from(error).message,
+      }),
+    );
+  }
+}
+
+/** `sfw.mjs`, to wrap installs with, as the app does when Socket Firewall is on (its default). */
+function sfwPath(ctx: Ctx): string | undefined {
+  if (!defaultSettings.socketFirewall) return undefined;
+  const file = sfwEntryPath();
+  if (!file) ctx.reporter.log(tm('mainRun')('noSocketFirewall'), 'warn');
+  return file;
 }
 
 async function chooseElectron(
@@ -414,10 +425,7 @@ interface RunSpec {
   };
 }
 
-/**
- * One run through the app's run pieces: the pre-run checks, a new run dir,
- * modules, then Electron, with its output streamed to the reporter.
- */
+/** One run through the app's run pieces (see RunService), with output streamed to the reporter. */
 async function runOnce(
   ctx: Ctx,
   spec: RunSpec,
@@ -449,28 +457,37 @@ async function runOnce(
   ctx.signal.throwIfAborted();
   const dir = await makeRunDir();
   try {
-    const appDir = await writeRunApp(dir, files, {
+    const packageJson = {
       name: toPackageName(loaded.name),
       main: mainEntry,
       author: osUserName(),
       modules,
-    });
+    };
+    // devDependencies.electron goes in after the module install, or npm and
+    // yarn would install Electron as well.
+    const withElectron = electron.release
+      ? { ...packageJson, electronVersion: electron.release }
+      : packageJson;
+    const appDir = await writeRunApp(dir, files, hasModules ? packageJson : withElectron);
     if (hasModules) {
       ctx.reporter.log(
         allowScripts
           ? tr('installingModules', { pm })
           : tr('installingModulesNoScripts', { pm }),
       );
+      const sfw = sfwPath(ctx);
       await installModules({
         dir: appDir,
         tempRoot: dir,
         packageManager: pm,
         modules,
         ignoreScripts: !allowScripts,
+        ...(sfw ? { sfwPath: sfw } : {}),
         ...(env ? { env } : {}),
         signal: ctx.signal,
         onOutput: (text) => ctx.reporter.output('stderr', text),
       });
+      await writeRunPackageJson(appDir, withElectron);
     }
     const child = await spawnElectron({
       installer: ctx.installer,
@@ -480,7 +497,8 @@ async function runOnce(
       runDir: dir,
       flags: options.flag,
       keepUserDataDirs: defaultSettings.keepUserDataDirs,
-      env: userEnv.env,
+      // Always log: renderer console messages reach stderr, for runtime errors.
+      env: { ELECTRON_ENABLE_LOGGING: 'true', ...userEnv.env },
       advancedLogging: options.logging,
       // Output goes straight to the terminal, so there's no console to show the inspector port in.
       inspect: false,
@@ -554,16 +572,18 @@ async function packageOrMake(
   ctx.signal.throwIfAborted();
   const dir = await makeRunDir(`electron-fiddle-${task}-`);
   try {
-    await writeFiddleFolder(dir, project);
+    await writeFiddleFolder(dir, project, [], { keepEmpty: true });
     ctx.reporter.log(
       task === 'package' ? tr('packaging', { path: dir }) : tr('making', { path: dir }),
     );
+    const sfw = sfwPath(ctx);
     const failed = await runForgeTask(dir, input.pm, task, {
       env,
       signal: ctx.signal,
       onOutput: (text) => ctx.reporter.output('stderr', text),
       // As for runs: a remote fiddle's install scripts stay off.
       ignoreScripts: isUntrustedOrigin(loaded.fiddle.origin),
+      ...(sfw ? { sfwPath: sfw } : {}),
     });
     if (failed)
       throw new FiddleError(CliErrorCode.taskFailed, tr('commandFailed', failed), failed);

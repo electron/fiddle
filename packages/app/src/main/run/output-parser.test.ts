@@ -1,8 +1,13 @@
+import os from 'node:os';
+import path from 'node:path';
+import { pathToFileURL } from 'node:url';
+
 import { describe, expect, it } from 'vitest';
 
 import { mapToFiddleFile, OutputParser } from './output-parser';
 
-const root = '/tmp/electron-fiddle-abc';
+const root = path.join(os.tmpdir(), 'electron-fiddle-abc');
+const fileUrl = (name: string) => pathToFileURL(path.join(root, name)).href;
 const files = ['main.js', 'preload.js', 'renderer.js', 'index.html'];
 const parser = (chromiumLogs = false) =>
   new OutputParser({ roots: [root], files, chromiumLogs });
@@ -10,9 +15,7 @@ const parser = (chromiumLogs = false) =>
 describe('mapToFiddleFile', () => {
   it('maps paths and file URLs inside the run directory', () => {
     expect(mapToFiddleFile(`${root}/main.js`, [root], files)).toBe('main.js');
-    expect(mapToFiddleFile(`file://${root}/renderer.js`, [root], files)).toBe(
-      'renderer.js',
-    );
+    expect(mapToFiddleFile(fileUrl('renderer.js'), [root], files)).toBe('renderer.js');
   });
 
   it('ignores other paths and unknown files', () => {
@@ -63,7 +66,7 @@ describe('OutputParser', () => {
   it('maps an uncaught renderer error to renderer.js with its line', () => {
     const result = parser().push(
       'stderr',
-      `[1234:0913/194208.123456:ERROR:CONSOLE(4)] "Uncaught TypeError: Cannot read properties of undefined (reading 'getVibrancy')", source: file://${root}/renderer.js (4)\n`,
+      `[1234:0913/194208.123456:ERROR:CONSOLE(4)] "Uncaught TypeError: Cannot read properties of undefined (reading 'getVibrancy')", source: ${fileUrl('renderer.js')} (4)\n`,
     );
     expect(result.lines).toEqual([
       {
@@ -87,7 +90,7 @@ describe('OutputParser', () => {
   it('treats an uncaught error logged at INFO (Chromium 140+) as an error', () => {
     const result = parser().push(
       'stderr',
-      `[3775310:0913/225440.282724:INFO:CONSOLE:4] "Uncaught TypeError: Cannot read properties of undefined (reading 'getVibrancy')", source: file://${root}/renderer.js (4)\n`,
+      `[3775310:0913/225440.282724:INFO:CONSOLE:4] "Uncaught TypeError: Cannot read properties of undefined (reading 'getVibrancy')", source: ${fileUrl('renderer.js')} (4)\n`,
     );
     expect(result.lines[0]).toMatchObject({
       kind: 'error',
@@ -99,7 +102,7 @@ describe('OutputParser', () => {
   it('reads the newer CONSOLE:line format and console.log messages', () => {
     const result = parser().push(
       'stderr',
-      `[99:0913/1.2:INFO:CONSOLE:12] "Loaded index.html", source: file://${root}/renderer.js (12)\n`,
+      `[99:0913/1.2:INFO:CONSOLE:12] "Loaded index.html", source: ${fileUrl('renderer.js')} (12)\n`,
     );
     expect(result.lines).toEqual([
       { process: 'renderer', kind: 'log', text: 'Loaded index.html' },
@@ -112,7 +115,7 @@ describe('OutputParser', () => {
     expect(p.push('stderr', '[1:2:0913/1.2:WARNING:CONSOLE(1)] "first\n').lines).toEqual(
       [],
     );
-    const result = p.push('stderr', `second", source: file://${root}/renderer.js (7)\n`);
+    const result = p.push('stderr', `second", source: ${fileUrl('renderer.js')} (7)\n`);
     expect(result.lines).toEqual([
       {
         process: 'renderer',
@@ -135,7 +138,7 @@ describe('OutputParser', () => {
         line: 3,
         column: 9,
         name: 'Error',
-        message: 'boom\\n    at /tmp/electron-fiddle-abc/preload.js:3:9',
+        message: `boom\\n    at ${root}/preload.js:3:9`,
       },
     ]);
   });

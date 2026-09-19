@@ -63,6 +63,12 @@ interface FakeWindow extends EventEmitter {
 
 const hub = { app: { material: 'none' }, unregisterWindow: vi.fn() };
 const services = { hub, platform: 'linux' } as never;
+const args = {
+  services,
+  url: 'app://main/index.html',
+  windowId: 'w',
+  init: {} as never,
+};
 
 function lastWindow(): FakeWindow {
   return mocks.windows.at(-1) as FakeWindow;
@@ -104,11 +110,7 @@ describe('windowOptions', () => {
 
 describe('createAppWindow', () => {
   it('starts hidden and shows the window once, when the renderer reports ready', async () => {
-    const win = await createAppWindow({
-      services,
-      url: 'app://main/index.html',
-      windowId: 'w',
-    }).then(() => lastWindow());
+    const win = await createAppWindow(args).then(() => lastWindow());
     expect(win.show).not.toHaveBeenCalled();
     reportReady();
     reportReady();
@@ -117,7 +119,7 @@ describe('createAppWindow', () => {
 
   describe('a page that loads but never reports ready', () => {
     it('is shown after a wait, so its failure is visible', async () => {
-      await createAppWindow({ services, url: 'app://main/index.html', windowId: 'w' });
+      await createAppWindow(args);
       const win = lastWindow();
       win.webContents.emit('did-finish-load');
       await vi.advanceTimersByTimeAsync(4999);
@@ -131,7 +133,7 @@ describe('createAppWindow', () => {
     });
 
     it('is left alone when it reports ready in time', async () => {
-      await createAppWindow({ services, url: 'app://main/index.html', windowId: 'w' });
+      await createAppWindow(args);
       const win = lastWindow();
       win.webContents.emit('did-finish-load');
       reportReady();
@@ -144,9 +146,7 @@ describe('createAppWindow', () => {
   describe('a window that cannot start', () => {
     it('is destroyed and forgotten when loading fails', async () => {
       mocks.loadURL.mockRejectedValue(new Error('ERR_FILE_NOT_FOUND'));
-      await expect(
-        createAppWindow({ services, url: 'app://main/index.html', windowId: 'w' }),
-      ).rejects.toThrow('ERR_FILE_NOT_FOUND');
+      await expect(createAppWindow(args)).rejects.toThrow('ERR_FILE_NOT_FOUND');
       const win = lastWindow();
       expect(win.destroy).toHaveBeenCalledOnce();
 
@@ -159,9 +159,7 @@ describe('createAppWindow', () => {
       mocks.bindWindowIpc.mockImplementation(() => {
         throw new Error('Window w is already registered');
       });
-      await expect(
-        createAppWindow({ services, url: 'app://main/index.html', windowId: 'w' }),
-      ).rejects.toThrow('already registered');
+      await expect(createAppWindow(args)).rejects.toThrow('already registered');
       const win = lastWindow();
       expect(win.destroy).toHaveBeenCalledOnce();
       expect(mocks.loadURL).not.toHaveBeenCalled();

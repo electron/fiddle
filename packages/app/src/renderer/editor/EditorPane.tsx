@@ -1,17 +1,11 @@
-/**
- * One Monaco editor showing one fiddle file. Runtime errors get an error lens:
- * a view zone under the line.
- */
 import './editor.css';
 
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
 import { I18nextProvider, useTranslation } from 'react-i18next';
 
-import { windowApi } from '../../ipc/renderer';
 import { Icon } from '../../ui';
 import { useAppState } from '../state';
-import { setEditorActionProvider } from '../features/palette/editor-actions';
 import {
   clearFocusedEditor,
   getViewState,
@@ -43,7 +37,6 @@ export interface EditorPaneProps {
 
 interface Zone {
   id: string;
-  /** Wraps the lens; the zone's height follows it. */
   inner: HTMLDivElement;
   zone: monaco.editor.IViewZone;
   root: Root;
@@ -104,6 +97,8 @@ export function EditorPane({ file, primary = false, onFocus }: EditorPaneProps) 
         horizontalScrollbarSize: 10,
       },
       tabSize: 2,
+      // Main shows a native context menu.
+      contextmenu: false,
     });
 
     // Hold the code column at 66px whatever the line-number width works out to.
@@ -118,14 +113,6 @@ export function EditorPane({ file, primary = false, onFocus }: EditorPaneProps) 
       instance.onDidFocusEditorText(() => {
         setFocusedEditor(instance);
         onFocusRef.current?.();
-        // Monaco's actions for the focused editor show up in the app's palette.
-        setEditorActionProvider(() =>
-          instance.getSupportedActions().map((action) => ({
-            id: action.id,
-            label: action.label,
-            run: () => action.run(),
-          })),
-        );
         const position = instance.getPosition();
         if (position) setCursor(fileRef.current, position.lineNumber, position.column);
       }),
@@ -134,12 +121,6 @@ export function EditorPane({ file, primary = false, onFocus }: EditorPaneProps) 
           setCursor(fileRef.current, position.lineNumber, position.column);
       }),
     ];
-    // F1 opens the app's command palette, which also lists Monaco's actions.
-    instance.addCommand(monaco.KeyCode.F1, () => {
-      windowApi.RunCommand('app.commandPalette').catch((error: unknown) => {
-        console.error('[fiddle] opening the command palette failed', error);
-      });
-    });
     fitGutter();
     setEditor(instance);
     return () => {
@@ -149,7 +130,6 @@ export function EditorPane({ file, primary = false, onFocus }: EditorPaneProps) 
     };
   }, []);
 
-  // Show the file's model, keeping each file's scroll and cursor while switching.
   useEffect(() => {
     if (!editor) return;
     const next = model ?? null;
@@ -178,7 +158,6 @@ export function EditorPane({ file, primary = false, onFocus }: EditorPaneProps) 
     });
   }, [editor, view.softWrap, view.minimap, file, t, screenReader]);
 
-  // revealLocation(): move the cursor there and focus.
   const reveal = useRevealRequest();
   useEffect(() => {
     if (
@@ -195,7 +174,6 @@ export function EditorPane({ file, primary = false, onFocus }: EditorPaneProps) 
     editor.focus();
   }, [editor, model, reveal, file]);
 
-  // The error lens: one view zone under each errored line.
   const errors = useRuntimeErrors();
   const mine = useMemo(() => {
     const byLine = new Map<number, RuntimeError>();

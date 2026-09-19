@@ -1,9 +1,3 @@
-/**
- * Dragging an editor tab: along the tab row to reorder it, or onto an editor
- * pane to show its file there or in a new pane beside it. The tab carries its
- * file name under `TAB_DRAG_TYPE`; `useTabDrag()` gives that name while such
- * a drag is under way.
- */
 import { useEffect, useState } from 'react';
 
 /** Lower case: `DataTransfer.types` lower-cases custom types. */

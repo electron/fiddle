@@ -115,23 +115,19 @@ export {
 } from './components/Progress';
 export {
   showToast,
-  Toast,
   Toaster,
   toastQueue,
   type ToastContent,
   type ToasterProps,
-  type ToastProps,
   type ToastTone,
 } from './components/Toast';
 export {
   confirmDialog,
   Dialog,
   DialogHost,
-  DialogSurface,
   promptDialog,
   type ConfirmOptions,
   type DialogProps,
-  type DialogSurfaceProps,
   type DialogTone,
   type PromptOptions,
 } from './components/Dialog';

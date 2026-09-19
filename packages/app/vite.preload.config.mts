@@ -1,6 +1,5 @@
-// Preload bundle. Windows use `sandbox: true`, so the preload must be a single
-// CommonJS file that requires nothing but `electron`.
-// Standalone: `vite build -c vite.preload.config.ts` -> .vite/build/preload.js.
+// Windows use `sandbox: true`, so the preload must be a single CommonJS file
+// that requires nothing but `electron`.
 import { defineConfig } from 'vite';
 
 export default defineConfig(({ mode }) => ({
@@ -8,7 +7,9 @@ export default defineConfig(({ mode }) => ({
     outDir: '.vite/build',
     emptyOutDir: false,
     copyPublicDir: false,
-    sourcemap: 'inline',
+    // An inline map would ship inside preload.js; production writes a `.map` file
+    // instead, which the packager strips.
+    sourcemap: mode === 'production' ? true : 'inline',
     minify: mode === 'production',
     target: 'chrome140',
     rollupOptions: {

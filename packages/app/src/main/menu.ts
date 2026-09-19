@@ -1,17 +1,7 @@
 /**
- * The native application menu, built from the shared command definitions. Role
- * items get explicit, translated labels. Items whose state main knows (the
- * sidebar, the console, the run, a bisect, full screen) say what they will do,
- * as macOS menus do; the palette keeps the command's own label. The menu is
- * rebuilt whenever anything it shows changes (a label, enablement, a
- * keybinding, recent folders, the locale, the focused window), so it follows
- * the focused window.
- *
- * On Windows and Linux the same template, built for each window, is also the
- * title bar's menu bar: `Window.menuBar` carries it as data (./menu-model.ts)
- * and `Window.ActivateMenuItem` chooses an item by its `id`. Every item has
- * one: the command ID, `role:<role>`, `menu:<name>`, `recent:<n>` or
- * `example:<name>`.
+ * Item `id`s: the command ID, `role:<role>`, `menu:<name>`, `recent:<n>` or
+ * `example:<name>`. On Windows and Linux the same template, built per window, is
+ * also the title bar's menu bar (`Window.menuBar`).
  */
 import { app, Menu, type MenuItemConstructorOptions } from 'electron';
 
@@ -243,7 +233,7 @@ export function buildMenuTemplate(
       submenu: [
         command('app.commandPalette'),
         separator,
-        // Layout. Main knows the sidebar and console state, so these say Hide or Show.
+        // Main knows the sidebar and console state, so these say Hide or Show.
         command(
           'view.toggleSidebar',
           (layout?.sidebar ?? true) ? 'hideSidebar' : 'showSidebar',
@@ -254,12 +244,11 @@ export function buildMenuTemplate(
         ),
         command('view.toggleSplit'),
         separator,
-        // Editor presentation. Its state lives in the renderer, so plain toggles.
+        // Their state lives in the renderer, so plain toggles.
         command('editor.toggleSoftWrap'),
         command('editor.toggleMinimap'),
         command('editor.toggleTabFocus'),
         separator,
-        // The app stays usable at 200% zoom.
         role('resetZoom', t('actualSize'), { accelerator: 'CmdOrCtrl+0' }),
         role('zoomIn', t('zoomIn'), { accelerator: 'CmdOrCtrl+Plus' }),
         role('zoomOut', t('zoomOut'), { accelerator: 'CmdOrCtrl+-' }),
@@ -301,10 +290,7 @@ export function buildMenuTemplate(
         ...(isMac ? [separator, role('front', t('bringAllToFront'))] : []),
       ],
     },
-    // Unpackaged builds only, late in the bar as Safari and VS Code place
-    // theirs. The reload commands are defined in every build (Settings' "Reload
-    // all windows", the error view's Reload, the palette and their keys); only
-    // the toggle is `devOnly`.
+    // Unpackaged builds only. The reload commands exist in every build; only the toggle is `devOnly`.
     ...(state.dev ? [developMenu(command, state.menuBar)] : []),
     {
       id: 'menu:help',
@@ -320,7 +306,6 @@ export function buildMenuTemplate(
         command('help.openLogsFolder'),
         command('help.copyDiagnostics'),
         separator,
-        // Last, as in VS Code: it's for looking under Fiddle's own hood.
         command('view.toggleDevTools'),
         ...(isMac ? [] : [separator, command('help.about')]),
       ],
@@ -336,11 +321,9 @@ let toggleMenuBar: (() => boolean) | undefined;
 
 export function installMenu({ registry, hub, platform }: Services): void {
   const dev = hub.app.dev === true;
-  // Whether windows draw the menu bar in their title bar: the platform's way,
-  // or what FIDDLE_TEST_MENUBAR or FIDDLE_DEV_MENUBAR force at launch. The
-  // Develop menu flips it at runtime (`dev.toggleMenuBar`).
+  // Whether windows draw the menu bar in their title bar. `dev.toggleMenuBar` flips it at runtime.
   let inWindow = hasWindowMenuBar(platform);
-  // Forced onto macOS (a test or dev run, or the toggle), the title bar shows what Linux users get.
+  // Forced onto macOS, the title bar shows what Linux users get.
   const barPlatform: Platform = platform === 'darwin' ? 'linux' : platform;
   let scheduled = false;
   let shown: string | undefined;
@@ -365,8 +348,7 @@ export function installMenu({ registry, hub, platform }: Services): void {
       scheduled = false;
       const focused = focusedWindowId();
       const template = buildMenuTemplate(registry, stateFor(focused));
-      // Store changes come up to 10 times a second during downloads; rebuild
-      // only when something the menu shows has changed.
+      // Downloads change the store often; rebuild only when something the menu shows has changed.
       const key = JSON.stringify([focused, describeMenu(template)]);
       if (key !== shown) {
         shown = key;
@@ -422,12 +404,7 @@ export function installMenu({ registry, hub, platform }: Services): void {
   refresh();
 }
 
-/**
- * `dev.toggleMenuBar` (the Develop menu): shows the title bar menu bar in every
- * window, whatever the platform, or hides it again, without a restart. On macOS
- * the bar shows the Linux menus; on Linux the native menu bar stays hidden
- * either way. Returns whether the bar is now drawn.
- */
+/** `dev.toggleMenuBar`: shows or hides the title bar menu bar in every window, whatever the platform. Returns whether it is now drawn. */
 export function toggleWindowMenuBar(): boolean {
   if (!toggleMenuBar)
     throw new FiddleError(ErrorCode.unavailable, 'The menu is not installed yet');

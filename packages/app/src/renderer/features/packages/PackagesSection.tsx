@@ -1,48 +1,28 @@
-/**
- * The sidebar's Packages section: an "Add a package" field that searches npm
- * (debounced, top 5, matches highlighted), then one row per module with a
- * searchable version menu and a remove button. Modules live in
- * `Window.fiddle.modules`; every change goes through the `Modules` methods in
- * main.
- */
-import { memo, useEffect, useMemo, useRef, useState } from 'react';
+import { memo, useEffect, useId, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import {
-  ComboBox,
-  Input,
-  ListBox,
-  ListBoxItem,
-  Popover,
-  type Key,
-} from 'react-aria-components';
+import { ComboBox, Input, ListBox, ListBoxItem, Popover } from 'react-aria-components';
 
 import { modulesApi } from '../../../ipc/renderer';
 import type { PackageSearchResults, PackageVersions } from '../../../shared/stores';
-import { cx, Icon, IconButton, showToast } from '../../../ui';
+import { cx, Icon, IconButton } from '../../../ui';
 import field from '../../../ui/components/Field.module.css';
 import menu from '../../../ui/components/Menu.module.css';
+import { addModule } from '../../shell/window-state';
 import { useWindowState } from '../../state';
+import { toastError } from '../../toast-error';
 import { SearchSelect, type SearchOption } from '../versions/SearchSelect';
 import { highlightParts } from './highlight';
 import styles from './PackagesSection.module.css';
 
 const SEARCH_DEBOUNCE_MS = 250;
-/**
- * The version menu searches every published version but renders at most
- * this many matches, so packages with thousands of versions stay fast.
- */
+/** The version menu searches every version but renders this many matches at most, so packages with thousands stay fast. */
 const MAX_LISTED = 150;
 
 type SearchStatus = 'idle' | 'loading' | 'done' | 'error';
 
-function errorText(error: unknown): string {
-  return error instanceof Error ? error.message : String(error);
-}
-
-/** How long a version list is reused; main's npm client caches for the same time, so asking earlier gains nothing. */
+/** How long a version list is reused; main's npm client caches for the same time. */
 const VERSIONS_TTL_MS = 5 * 60_000;
 
-/** Shared across rows and remounts, so several rows avoid repeat IPC. */
 const versionRequests = new Map<
   string,
   { at: number; request: Promise<PackageVersions> }
@@ -111,17 +91,10 @@ function PackageSearch() {
     return () => clearTimeout(timer);
   }, [query]);
 
-  const add = (key: Key | null) => {
-    if (key === null) return;
-    const name = String(key);
+  const add = (name: string) => {
+    const hit = results.find((result) => result.name === name);
     onInputChange('');
-    modulesApi.AddModule(name, null).catch((error: unknown) => {
-      showToast({
-        title: t('addFailed', { name }),
-        description: errorText(error),
-        tone: 'error',
-      });
-    });
+    void addModule(name, hit?.version ?? null, t('addFailed', { name }));
   };
 
   const empty =
@@ -139,7 +112,7 @@ function PackageSearch() {
         onInputChange={onInputChange}
         items={results}
         selectedKey={null}
-        onSelectionChange={add}
+        onSelectionChange={(key) => key !== null && add(String(key))}
         menuTrigger="input"
         // Only while there's a query, so the suggestions close once a package is added (which clears it).
         allowsEmptyCollection={query.trim() !== ''}
@@ -147,7 +120,21 @@ function PackageSearch() {
       >
         <div className={field.field}>
           <Icon name="search" size={14} className={field.icon} />
-          <Input className={field.input} placeholder={t('addPlaceholder')} />
+          <Input
+            className={field.input}
+            placeholder={t('addPlaceholder')}
+            onKeyDown={(event) => {
+              // With no suggestion highlighted, Enter commits the typed text as a custom value and never selects.
+              const typed = query.trim();
+              if (
+                event.key === 'Enter' &&
+                typed &&
+                !event.nativeEvent.isComposing &&
+                !event.currentTarget.hasAttribute('aria-activedescendant')
+              )
+                add(typed);
+            }}
+          />
         </div>
         <Popover className={menu.popover} placement="bottom start" offset={4}>
           <ListBox<PackageSearchResults[number]>
@@ -184,7 +171,7 @@ function PackageSearch() {
   );
 }
 
-// Memoized on its two strings: a store push re-renders the sidebar, and each row's version menu builds a hidden collection.
+// Memoized: a store push re-renders the sidebar, and each row's version menu builds a hidden collection.
 const ModuleRow = memo(function ModuleRow({
   name,
   version,
@@ -200,6 +187,7 @@ const ModuleRow = memo(function ModuleRow({
     let live = true;
     loadVersions(name).then(
       (list) => live && setVersions(list),
+      // The menu then lists only the current version.
       () => {},
     );
     return () => {
@@ -218,12 +206,7 @@ const ModuleRow = memo(function ModuleRow({
   }, [versions, version, query, t]);
   const shown = Math.min(total, MAX_LISTED);
 
-  const failed = (error: unknown) =>
-    showToast({
-      title: t('changeFailed', { name }),
-      description: errorText(error),
-      tone: 'error',
-    });
+  const failed = (error: unknown) => toastError(error, t('changeFailed', { name }));
 
   return (
     <li className={styles.row}>
@@ -263,15 +246,12 @@ const ModuleRow = memo(function ModuleRow({
 export function PackagesSection() {
   const { t } = useTranslation('packages');
   const win = useWindowState();
+  const titleId = useId();
   const modules = win ? Object.entries(win.fiddle.modules) : [];
 
   return (
-    <section
-      className={styles.section}
-      aria-labelledby="packages-title"
-      data-tour="packages"
-    >
-      <h2 id="packages-title" className={styles.head}>
+    <section className={styles.section} aria-labelledby={titleId}>
+      <h2 id={titleId} className={styles.head}>
         {t('title')}
       </h2>
       <PackageSearch />

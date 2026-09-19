@@ -1,9 +1,4 @@
-/**
- * The test harness, compiled only into test builds (see ../test-mode.ts). main
- * calls `installTestHarness()` before `ready` when `isTestMode()`.
- *
- * Keep this module free of top-level side effects so release builds drop it.
- */
+// Keep this module free of top-level side effects so release builds drop it.
 import nodeCrypto from 'node:crypto';
 import fs from 'node:fs';
 import http from 'node:http';
@@ -15,6 +10,7 @@ import { format } from 'node:util';
 import {
   app,
   BrowserWindow,
+  clipboard,
   dialog,
   Menu,
   net,
@@ -317,6 +313,14 @@ function stubOsSideEffects(state: TestState): void {
       return true;
     },
   });
+  // The real clipboard is shared with every other app, including other e2e apps and the developer's.
+  let clipboardText = '';
+  Object.assign(clipboard, {
+    readText: () => clipboardText,
+    writeText: (text: string) => {
+      clipboardText = text;
+    },
+  });
   Notification.prototype.show = function (this: Notification) {
     record('notification.show', { title: this.title, body: this.body });
   };
@@ -331,18 +335,8 @@ function stubOsSideEffects(state: TestState): void {
 }
 
 /**
- * macOS has no Xvfb: the app under test shares the desktop with whoever runs
- * the tests, usually several apps at once. So there it stays out of the way:
- * - accessory activation policy: no Dock icon, never the active app;
- * - windows are shown without activating, one level below normal windows.
- *   FIDDLE_TEST_FOREGROUND=1 (the launcher's FIDDLE_E2E_FOREGROUND) keeps the
- *   normal level, to watch a `yarn driver` session;
- * - a power assertion keeps App Nap from throttling an app nobody can see;
- * - window focus is emulated: showing or focusing a window makes it the
- *   focused one, and a closed window passes focus back to the previous one.
- *   The OS never makes a window key.
- * The driver needs none of this: input goes through CDP and pages emulate
- * focus (./page.ts).
+ * macOS has no Xvfb, so the app shares the desktop with whoever runs the tests: no Dock icon,
+ * windows shown inactive (one level down unless FIDDLE_TEST_FOREGROUND=1), focus emulated.
  */
 function stayInBackground(state: TestState): void {
   const foreground = process.env.FIDDLE_TEST_FOREGROUND === '1';
@@ -357,6 +351,7 @@ function stayInBackground(state: TestState): void {
   accessory();
   void app.whenReady().then(() => {
     accessory();
+    // App Nap would throttle an app nobody can see.
     powerSaveBlocker.start('prevent-app-suspension');
   });
   app.focus = () => note('app.focus() skipped');
@@ -504,7 +499,7 @@ function resolveDialog(
       : { canceled: false, filePath: queued.filePath };
   }
   const cancelId = typeof options.cancelId === 'number' ? options.cancelId : 0;
-  if (!queued || !('response' in queued || 'button' in queued)) {
+  if (!queued || 'canceled' in queued || 'filePaths' in queued || 'filePath' in queued) {
     return { response: cancelId, checkboxChecked: false };
   }
   let response = queued.response ?? cancelId;

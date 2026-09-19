@@ -7,6 +7,7 @@
     "module": "preserve",
     "moduleResolution": "bundler",
     "allowImportingTsExtensions": true,
+    "allowJs": true,
     "erasableSyntaxOnly": true,
     "lib": ["esnext"],
     "types": ["node"],

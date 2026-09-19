@@ -73,7 +73,5 @@ export default {
   "accountSignedInAs": "[Šîĝñéð îñ áš {{login}} one two]",
   "accountSignedOut": "[Ñöţ šîĝñéð îñ one two]",
   "accountSignOut": "[Šîĝñ öûţ one]",
-  "accountSignIn": "[Šîĝñ îñ one]",
-  "asRevisionLabel": "[Þûƀļîšĥ áš ŕéṽîšîöñ one two]",
-  "asRevisionHelp": "[Çŕéáţéš ţĥé ĝîšţ ƒŕöɱ ţĥé ðéƒáûļţ ţéɱþļáţé ƒîŕšţ, ţĥéñ ûþðáţéš îţ ŵîţĥ ýöûŕ ƒîļéš, šö ţĥé ĝîšţ'š ĥîšţöŕý šĥöŵš ýöûŕ çĥáñĝéš. one two three four five six seven eight nine ten one]"
+  "accountSignIn": "[Šîĝñ îñ one]"
 } as const;

@@ -1,7 +1,3 @@
-/**
- * The settings page's sections, and opening the page at one from outside it
- * (for example the crash-reports notice's link to Privacy).
- */
 import { createStore, useStore } from '../../store';
 import { setView } from '../../shell/window-state';
 
@@ -18,7 +14,7 @@ export type SectionId =
 
 const requested = createStore<SectionId | undefined>(undefined);
 
-/** Shows the settings page at `section`, also when it is already open. `errorTitle` titles the error toast if that fails. */
+/** Shows the settings page at `section`, also when it is already open. */
 export function openSettingsSection(
   section: SectionId,
   errorTitle: string,

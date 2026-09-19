@@ -1,13 +1,9 @@
-/** The Content-Security-Policy, sent as a response header on every app:// response (see protocol.ts). */
+/** The Content-Security-Policy sent with every app:// response. */
 import { session } from 'electron';
 
-/**
- * Trusted Types policy names the app may create. Add a name here when code
- * (Monaco, for example) calls `trustedTypes.createPolicy`; an empty list
- * allows none.
- */
+/** Trusted Types policy names the app may create. Add a name here before code calls `trustedTypes.createPolicy`. */
 const trustedTypesPolicies: readonly string[] = [
-  // Monaco (monaco-editor 0.56, `createTrustedTypesPolicy` calls in its ESM build).
+  // Monaco's own policies.
   'defaultWorkerFactory',
   'diffEditorWidget',
   'diffReview',
@@ -18,7 +14,7 @@ const trustedTypesPolicies: readonly string[] = [
   'standaloneColorizer',
   'stickyScrollViewLayer',
   'tokenizeToString',
-  // src/renderer/editor/monaco.ts: creates Monaco's workers from bundled URLs.
+  // Creates Monaco's workers from bundled URLs.
   'fiddleMonacoWorker',
 ];
 
@@ -40,9 +36,7 @@ const production: Directives = {
   'frame-ancestors': ["'none'"],
   'require-trusted-types-for': ["'script'"],
   // Monaco's bundle creates `defaultWorkerFactory` from two modules, hence 'allow-duplicates'.
-  'trusted-types': trustedTypesPolicies.length
-    ? [...trustedTypesPolicies, "'allow-duplicates'"]
-    : ["'none'"],
+  'trusted-types': [...trustedTypesPolicies, "'allow-duplicates'"],
 };
 
 function serialize(directives: Directives): string {
@@ -53,12 +47,7 @@ function serialize(directives: Directives): string {
 
 export const PRODUCTION_CSP = serialize(production);
 
-/**
- * Dev differences (unpackaged app on the Vite dev server only):
- * - `script-src` adds 'unsafe-inline': @vitejs/plugin-react injects its React
- *   Refresh preamble as an inline module script.
- * - `connect-src` adds the dev server's ws:// origin for hot module reload.
- */
+/** The Vite dev server: `script-src` allows the inline React Refresh preamble, and `connect-src` its hot-reload websocket. */
 function devCsp(devServerUrl: string): string {
   const { host } = new URL(devServerUrl);
   return serialize({

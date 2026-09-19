@@ -1,6 +1,9 @@
 import type { editor, IRange, languages } from 'monaco-editor';
 import { describe, expect, it, vi } from 'vitest';
 
+const mocks = vi.hoisted(() => ({ logWarn: vi.fn() }));
+vi.mock('../features/about/log', () => ({ log: { warn: mocks.logWarn } }));
+
 import { formatText, registerPrettierFormatter, type FormattingRegistry } from './format';
 
 const spaces = { tabSize: 2, insertSpaces: true };
@@ -109,7 +112,6 @@ describe('registerPrettierFormatter', () => {
 
   it('makes no edit when the text is already formatted or does not parse', async () => {
     const { documents } = register();
-    const warn = vi.spyOn(console, 'warn').mockImplementation(() => undefined);
     const tidy = fakeModel("const a = { b: 'c' }\n", 'javascript').model;
     expect(
       await documents
@@ -122,7 +124,6 @@ describe('registerPrettierFormatter', () => {
         .get('javascript')!
         .provideDocumentFormattingEdits(broken, spaces, token),
     ).toEqual([]);
-    expect(warn).toHaveBeenCalled();
-    warn.mockRestore();
+    expect(mocks.logWarn).toHaveBeenCalledOnce();
   });
 });

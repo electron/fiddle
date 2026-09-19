@@ -1,3 +1,5 @@
+import { EventEmitter } from 'node:events';
+import fs from 'node:fs';
 import { mkdir, mkdtemp, readdir, readFile, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
@@ -198,6 +200,54 @@ describe('TypesService.forLocal', () => {
       } as never),
     ).toMatchObject({
       electron: null,
+    });
+  });
+
+  describe('watching', () => {
+    afterEach(() => vi.restoreAllMocks());
+
+    async function watched() {
+      const build = path.join(dir, 'build');
+      const typings = path.join(build, 'gen', 'electron', 'tsc', 'typings');
+      await mkdir(typings, { recursive: true });
+      await writeFile(path.join(typings, 'electron.d.ts'), 'local');
+      const closed = vi.fn();
+      const watchers: EventEmitter[] = [];
+      vi.spyOn(fs, 'watch').mockImplementation(() => {
+        const watcher = Object.assign(new EventEmitter(), { close: closed });
+        watchers.push(watcher);
+        return watcher as never;
+      });
+      const types = new TypesService({
+        dir,
+        fetch: fakeFetch({ routes: {}, urls: [] }),
+        nodeVersionOf: () => undefined,
+        onLocalChange: () => undefined,
+      });
+      const open = () => types.forLocal({ id: 'b', name: 'B', path: build } as never);
+      return { types, open, closed, watchers };
+    }
+
+    it('watches a build once, and stops when the build is gone', async () => {
+      const { types, open, closed } = await watched();
+      await open();
+      await open();
+      expect(fs.watch).toHaveBeenCalledTimes(1);
+      types.retainWatches(new Set(['b']));
+      expect(closed).not.toHaveBeenCalled();
+      types.retainWatches(new Set());
+      expect(closed).toHaveBeenCalledOnce();
+      await open();
+      expect(fs.watch).toHaveBeenCalledTimes(2);
+    });
+
+    it('closes a watcher that failed, so the build can be watched again', async () => {
+      const { open, closed, watchers } = await watched();
+      await open();
+      watchers[0]!.emit('error', new Error('EPERM'));
+      expect(closed).toHaveBeenCalledOnce();
+      await open();
+      expect(fs.watch).toHaveBeenCalledTimes(2);
     });
   });
 });

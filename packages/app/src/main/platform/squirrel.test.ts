@@ -8,9 +8,11 @@ const mocks = vi.hoisted(() => ({
   setAsDefaultProtocolClient: vi.fn(),
   removeAsDefaultProtocolClient: vi.fn(),
   quit: vi.fn(),
+  warn: vi.fn(),
 }));
 
 vi.mock('node:child_process', () => ({ spawn: mocks.spawn }));
+vi.mock('../log', () => ({ log: { warn: mocks.warn } }));
 vi.mock('electron', () => ({
   app: {
     setAsDefaultProtocolClient: mocks.setAsDefaultProtocolClient,
@@ -119,5 +121,10 @@ describe('handleSquirrelStartup', () => {
     });
     launch('win32', 'install');
     await vi.waitFor(() => expect(mocks.quit).toHaveBeenCalledOnce());
+    expect(mocks.warn).toHaveBeenCalledWith(
+      'Update.exe failed',
+      expect.any(Array),
+      expect.any(Error),
+    );
   });
 });

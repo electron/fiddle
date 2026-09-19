@@ -1,12 +1,7 @@
 /**
- * Maps the previous Electron Fiddle's localStorage (every `GlobalSetting` in
- * its src/interfaces.ts, plus the window setting `gitHubPublishAsPublic`) to
- * the new sparse settings. Pure.
- *
- * The old app stored strings as they are (`theme`, `packageManager`,
- * `fontFamily`, …), booleans and numbers with `toString()`, and arrays and
- * objects as JSON. Values that fail the new schema are dropped, and values
- * equal to the new defaults are left out, so the result is sparse.
+ * The old app stored strings as they are, booleans and numbers with `toString()`,
+ * and arrays and objects as JSON. Values that fail the new schema are dropped and
+ * values equal to the new defaults are left out, so the result is sparse.
  */
 import {
   defaultSettings,

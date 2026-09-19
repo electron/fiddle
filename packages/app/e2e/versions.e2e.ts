@@ -193,10 +193,6 @@ describe('versions', () => {
   });
 
   it('adds a local build, and offers to switch to it when it is added again', async () => {
-    if ((await windowState(app())).view !== 'settings') {
-      await app().click(role('button', 'Settings'));
-      await app().click(role('button', 'Electron'));
-    }
     // The build folder is electron's dist/; on macOS the executable is three levels down, in Electron.app/Contents/MacOS.
     const exec = createRequire(path.join(APP_DIR, 'package.json'))('electron') as string;
     const dist =

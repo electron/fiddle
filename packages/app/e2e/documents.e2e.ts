@@ -11,7 +11,6 @@ import {
   makeFolder,
   readJson,
   role,
-  text,
   useApp,
   windowState,
 } from './harness.ts';
@@ -47,7 +46,8 @@ describe('documents', () => {
     await edit('// edited');
     await expect.poll(title).toBe(`${name} (edited)`);
     expect((await fiddle()).dirtyFiles).toEqual(['main.js']);
-    await app().query(text('Edited'));
+    // The title bar's "Edited" marker is hidden where the drawn menu bar takes the room (Linux, Windows).
+    await app().query(role('tab', /^main\.js , Unsaved changes$/));
   });
 
   it('saves to a new folder, asking for it only the first time', async () => {

@@ -1,8 +1,4 @@
-/**
- * What app:// may serve: only files listed in the renderer's bundle manifest
- * (written by vite.renderer.config.ts), each with a known MIME type.
- * No Electron imports, so it's unit-tested under plain Node.
- */
+/** What app:// may serve: only files in the renderer's bundle manifest, each with a known MIME type. No Electron imports. */
 import path from 'node:path';
 
 export const APP_SCHEME = 'app';

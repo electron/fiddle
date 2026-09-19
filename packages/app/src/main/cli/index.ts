@@ -1,13 +1,6 @@
 /**
- * Headless mode: `electron-fiddle --headless <command>`.
- *
- * main/index.ts checks for `--headless` before the single-instance lock and
- * hands over here instead of starting the app. So headless mode never takes
- * the lock, opens no windows, hides the Dock icon, and never runs the
- * migration, update checks or crash reports (crash/sentry.ts skips headless
- * too), and never reads or writes the app's stores. It shares the `core`
- * cache with the app. Chromium runs with its own `--headless` switch, so no
- * display is needed.
+ * Headless mode: `electron-fiddle --headless <command>`. main/index.ts hands
+ * over before the single-instance lock, so it never touches the app's stores.
  */
 import { app } from 'electron';
 
@@ -19,10 +12,23 @@ import { exitCodeForError, localeFromEnv, Reporter, type Writers } from './outpu
 
 const HEADLESS_SWITCH = '--headless';
 
-/** The arguments after `--headless`, or undefined when the app isn't headless. */
-export function headlessArgs(argv: readonly string[]): string[] | undefined {
-  const index = argv.indexOf(HEADLESS_SWITCH);
-  return index === -1 ? undefined : argv.slice(index + 1);
+/**
+ * The arguments after `--headless`, or undefined. The switch only counts among the leading
+ * switches (after the app path when unpackaged), so one injected after a deep link is ignored.
+ */
+export function headlessArgs(
+  argv: readonly string[],
+  defaultApp = process.defaultApp === true,
+): string[] | undefined {
+  let expectAppPath = defaultApp;
+  for (let i = 1; i < argv.length; i++) {
+    const arg = argv[i]!;
+    if (arg === HEADLESS_SWITCH) return argv.slice(i + 1);
+    if (arg.startsWith('-')) continue;
+    if (!expectAppPath) return undefined;
+    expectAppPath = false;
+  }
+  return undefined;
 }
 
 /** Runs one command, then exits with its code. Call before `ready`. */
@@ -41,7 +47,7 @@ export function startHeadless(args: string[]): void {
     process.stderr.write(
       `${error instanceof Error ? (error.stack ?? error.message) : String(error)}\n`,
     );
-    return exit(70);
+    return exit(exitCodeForError(ErrorCode.internal));
   });
 }
 
@@ -90,7 +96,7 @@ async function main(args: string[]): Promise<number> {
     const e = FiddleError.from(error);
     // Ctrl+C at a prompt cancels the command, like a signal does.
     if (controller.signal.aborted || e.code === ErrorCode.cancelled) return 130;
-    if (e.code === 'internal') console.error(error);
+    if (e.code === ErrorCode.internal) console.error(error);
     reporter.error(e, t('errorPrefix', { message: e.message }));
     return exitCodeForError(e.code);
   }

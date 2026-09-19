@@ -1,8 +1,7 @@
 module fiddle
 
-// Every interface is limited to the app's own main frame. In production that is
-// app://main. The only dev difference: an unpackaged app may also be served by
-// the Vite dev server on http://localhost (see CLAUDE.md, "Dev differences").
+// Every interface is limited to the app's own main frame: app://main, or in an
+// unpackaged app the Vite dev server on http://localhost.
 validator MainFrame = AND(
     is_main_frame is true
     OR(
@@ -15,7 +14,6 @@ validator MainFrame = AND(
     )
 )
 
-// Store values are defined as zod schemas in src/shared/stores.ts.
 // Import paths are relative to generated/_internal/<kind>/, where they are emitted.
 zod_reference AppState {
     import = "../../../../shared/stores"
@@ -86,7 +84,7 @@ interface Window {
 
     // A context menu is about to open over the editor, the console or anything
     // else. Sent during the DOM event, so it reaches main before Chromium's
-    // `context-menu` event on the same channel (src/main/context-menu.ts).
+    // `context-menu` event on the same channel.
     ReportContextMenu(context: FocusContext)
 
     // Windows and Linux: an item of the title bar's menu bar (`Window.menuBar`)
@@ -95,7 +93,7 @@ interface Window {
     ActivateMenuItem(id: MenuItemId)
 
     // Main's one channel to the window: commands whose handlers act on Monaco,
-    // view state or a dialog there (`sendWindowCommand` in src/main/windows.ts).
+    // view state or a dialog there.
     [Event]
     Command(id: CommandId)
 }
@@ -259,13 +257,13 @@ subtype VersionSpec = string(
 [Validator=MainFrame]
 [ContextBridge]
 interface Modules {
-    // npm search: the top 5 packages, an exact name match first.
+    // npm search: the best matches, an exact name match first.
     SearchPackages(query: PackageQuery) -> PackageSearchResults
     // Every published version, newest first, and the latest.
     GetPackageVersions(name: PackageName) -> PackageVersions
     // Adds a module at `version`, or at its latest version when omitted.
     AddModule(name: PackageName, version: VersionSpec?) -> number
-    // Non-semver versions such as `*` become the latest.
+    // Floating versions (`*`, `latest`) become the latest; ranges and other tags stay as given.
     SetModuleVersion(name: PackageName, version: VersionSpec) -> number
     RemoveModule(name: PackageName) -> number
 }
@@ -362,10 +360,10 @@ interface Versions {
 [Validator=MainFrame]
 [ContextBridge]
 interface Run {
-    // The last 1000 console lines. Lines at or below `Window.run.clearedSeq` are cleared.
+    // The console backlog. Lines at or below `Window.run.clearedSeq` are cleared.
     GetOutput() -> OutputLines
     ClearOutput()
-    // New console lines, batched every 16 ms.
+    // New console lines, batched.
     [Event]
     Output(lines: OutputLines)
 
@@ -379,7 +377,7 @@ interface Run {
 }
 
 // GitHub sign-in and gists. The token never leaves main; the App
-// store only carries `githubLogin`. Bound per window in src/main/github/ipc.ts.
+// store only carries `githubLogin`.
 
 subtype GitHubToken = string(
     minLength: 1

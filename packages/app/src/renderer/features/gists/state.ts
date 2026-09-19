@@ -1,7 +1,3 @@
-/**
- * Gist UI state: which gist dialog is open (one at a time, shared by the
- * Publish button, its menu and the gist commands) plus hooks over the stores.
- */
 import { useAppState, useWindowState } from '../../state';
 import { createStore, useStore } from '../../store';
 

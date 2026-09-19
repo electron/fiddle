@@ -21,11 +21,13 @@ import {
 import { applyRuntimeErrors, markModelsSynced, syncModels } from '../editor/models';
 import {
   claimReveal,
+  setRuntimeErrors,
+  toEditorErrors,
   useRevealRequest,
-  useRuntimeErrors,
 } from '../editor/runtime-errors';
-import { useDocumentDrop } from '../features/documents/useDocumentDrop';
 import { useEditorTypes } from '../editor/types';
+import { log } from '../features/about/log';
+import { useDocumentDrop } from '../features/documents/useDocumentDrop';
 import { Sidebar } from '../features/files/Sidebar';
 import { splitTarget } from './processes';
 import { Sheet } from './Sheet';
@@ -70,14 +72,19 @@ const ShellView = memo(function ShellView({
   useEffect(() => {
     syncModels(namesKey ? namesKey.split('\n') : [], fiddle.fiddleRev)
       .catch((error: unknown) => {
-        console.error('[fiddle] syncing editor models failed', error);
+        log.error('syncing editor models failed', error);
       })
       .finally(markModelsSynced);
   }, [namesKey, fiddle.fiddleRev]);
 
-  // When another fiddle loads, main clears its console and runtime errors (RunService).
-  const errors = useRuntimeErrors();
-  useEffect(() => applyRuntimeErrors(errors), [errors]);
+  // Main owns the run's errors (and clears them when another fiddle loads). The editors and badges read the copy in
+  // runtime-errors.ts, and the models draw them as markers.
+  const runErrors = state.run?.errors;
+  useEffect(() => {
+    const errors = toEditorErrors(runErrors ?? []);
+    setRuntimeErrors(errors);
+    applyRuntimeErrors(errors);
+  }, [runErrors]);
 
   const dropping = useDocumentDrop();
 
@@ -163,7 +170,6 @@ const ShellView = memo(function ShellView({
     showPanes(next, name);
   };
 
-  // Move tab left or right: the focused pane's tab moves one place along the row.
   const moveTab = (direction: -1 | 1) => {
     if (!active) return;
     const index = visibleNames.indexOf(active);
@@ -172,8 +178,8 @@ const ShellView = memo(function ShellView({
     void moveFile(active, before ?? null, failTitle);
   };
 
-  // Commands whose handlers act on view state and Monaco (Window.Command). The handler is kept in a ref, not
-  // `useEffectEvent`: React never updates the effect events of a memo component, so it would keep the first render's state.
+  // Window.Command handlers that act on view state and Monaco. Kept in a ref, not `useEffectEvent`: React never
+  // updates the effect events of a memo component, so it would keep the first render's state.
   const onCommand = (id: string) => {
     if (id === 'view.toggleSplit') toggleSplit();
     else if (id === 'editor.moveTabLeft') moveTab(-1);
@@ -193,10 +199,8 @@ const ShellView = memo(function ShellView({
   useEditorTypes();
 
   useEffect(() => {
-    document.title = fiddle.dirty
-      ? t('windowTitleEdited', { name: fiddle.name })
-      : fiddle.name;
-  }, [fiddle.dirty, fiddle.name, t]);
+    document.title = state.title;
+  }, [state.title]);
 
   const [sidebarWidth, setSidebarWidth] = useDraft(layout.sidebarWidth, (width) =>
     changeLayout({ sidebarWidth: width }),

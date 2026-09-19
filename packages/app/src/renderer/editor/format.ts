@@ -1,11 +1,6 @@
-/**
- * Formatting with standalone Prettier for
- * JavaScript, HTML and CSS: the whole document or the selection. Prettier
- * loads on the first format. monaco.ts registers it as Monaco's document and
- * range formatter, so the `editor.format` command and the context menu's
- * "Format document" and "Format selection" all go through it.
- */
 import type { editor, IDisposable, IRange, languages } from 'monaco-editor';
+
+import { log } from '../features/about/log';
 
 export const PRETTIER_PARSERS = {
   javascript: 'babel',
@@ -94,7 +89,7 @@ async function formatModel(
       : [{ range: model.getFullModelRange(), text: formatted }];
   } catch (error) {
     // Usually a syntax error: leave the text alone. The editor's markers show where.
-    console.warn('[fiddle] formatting failed', error);
+    log.warn('formatting failed', error);
     return [];
   }
 }

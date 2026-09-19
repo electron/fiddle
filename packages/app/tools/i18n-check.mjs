@@ -1,13 +1,8 @@
 #!/usr/bin/env node
-// `yarn i18n:check`: catalog checks CI runs. Fails on:
-//   - missing keys in a shipped locale, and keys English doesn't have;
-//   - placeholder or tag mismatches between English and a translation;
-//   - invalid plural forms, in English or a translation;
-//   - translations longer than the key's maxLength.
-//   - English keys that no source file seems to use. That scan is a heuristic:
-//     a key counts as used if its text appears as a string literal, or matches
-//     a template literal such as `notice.${kind}.title`, anywhere in src/.
-// Warns (without failing) about reviewed translations whose English changed.
+// `yarn i18n:check`: missing or extra keys, placeholder, tag and plural mismatches,
+// translations over maxLength, and English keys no source file seems to use (a
+// heuristic: a key counts as used if it appears as a string literal or matches a
+// template literal). Warns about reviewed translations whose English changed.
 import fs from 'node:fs';
 import path from 'node:path';
 import { pathToFileURL } from 'node:url';

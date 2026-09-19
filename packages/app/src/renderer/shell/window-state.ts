@@ -1,9 +1,5 @@
-/**
- * Changes to the Window store that show at once (see ../optimistic.ts), and
- * the store with the pending ones on top.
- */
 import { moveName } from '../../fiddle/files';
-import { documentsApi, versionsApi } from '../../ipc/renderer';
+import { documentsApi, modulesApi, versionsApi } from '../../ipc/renderer';
 import { followActiveFile } from '../../shared/panes';
 import type { VersionRefValue, WindowLayout, WindowState } from '../../shared/stores';
 import { createOptimistic } from '../optimistic';
@@ -121,6 +117,28 @@ export function setView(view: WindowState['view'], errorTitle: string): Promise<
   return change(
     (state) => ({ ...state, view }),
     () => documentsApi.SetView(view),
+    errorTitle,
+  );
+}
+
+/** Adds a module at `version`, or at its latest when `version` is null (the row appears once main has looked it up). */
+export function addModule(
+  name: string,
+  version: string | null,
+  errorTitle: string,
+): Promise<boolean> {
+  return change(
+    (state) =>
+      version === null
+        ? state
+        : {
+            ...state,
+            fiddle: {
+              ...state.fiddle,
+              modules: { ...state.fiddle.modules, [name]: version },
+            },
+          },
+    () => modulesApi.AddModule(name, version),
     errorTitle,
   );
 }

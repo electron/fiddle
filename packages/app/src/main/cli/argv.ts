@@ -1,9 +1,3 @@
-/**
- * The headless CLI's command line, driven by the descriptors: `node:util`
- * `parseArgs` splits the tokens, zod checks the values, and `--help` is
- * written from the same fields. Errors are `invalid-argument` FiddleErrors
- * with translated messages. No Electron imports.
- */
 import { parseArgs } from 'node:util';
 
 import type { z } from 'zod';
@@ -34,7 +28,6 @@ type ParsedCommandLine =
 
 export interface Field {
   name: string;
-  /** `--electron-path` for `electronPath`. */
   flag: string;
   type: 'string' | 'boolean';
   multiple: boolean;
@@ -46,7 +39,6 @@ export interface Field {
 
 type Translate = (key: string, options?: Record<string, unknown>) => string;
 
-/** A `mainCli` string. */
 export function t(key: CliKey, options?: Record<string, unknown>): string {
   return (tm('mainCli') as unknown as Translate)(key, options);
 }

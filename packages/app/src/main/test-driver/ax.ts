@@ -1,7 +1,4 @@
-/**
- * Accessibility-tree queries and snapshots over CDP's
- * `Accessibility.getFullAXTree` nodes. Pure functions, no Electron imports.
- */
+// No Electron imports: plain Node runs it in tests.
 import type { Query, TextMatcher } from './protocol';
 
 interface AXValue {
@@ -44,9 +41,28 @@ function matchText(actual: string, matcher: TextMatcher, substring: boolean): bo
   return new RegExp(matcher.regex, matcher.flags).test(actual);
 }
 
+/** CDP returns the tree's nodes in no particular order: walk it from the root instead. */
+function inDocumentOrder(nodes: AXNode[]): AXNode[] {
+  const byId = new Map(nodes.map((node) => [node.nodeId, node]));
+  const seen = new Set<string>();
+  const ordered: AXNode[] = [];
+  const visit = (node: AXNode): void => {
+    if (seen.has(node.nodeId)) return;
+    seen.add(node.nodeId);
+    ordered.push(node);
+    for (const id of node.childIds ?? []) {
+      const child = byId.get(id);
+      if (child) visit(child);
+    }
+  };
+  for (const node of nodes) if (node.parentId === undefined) visit(node);
+  for (const node of nodes) visit(node);
+  return ordered;
+}
+
 /** Non-ignored nodes matching `query`, in document order. */
 export function matchNodes(nodes: AXNode[], query: Query): AXNode[] {
-  return nodes.filter((node) => {
+  return inDocumentOrder(nodes).filter((node) => {
     if (node.ignored || node.backendDOMNodeId === undefined) return false;
     const role = roleOf(node);
     if (role === 'InlineTextBox') return false;
@@ -74,11 +90,7 @@ export function describeQuery(query: Query): string {
   return parts.length > 0 ? parts.join(' ') : '(any element)';
 }
 
-/**
- * The tree as indented `role "name" [states]` lines. Ignored nodes, unnamed
- * structural nodes, inline text boxes, and text that only repeats its
- * parent's name are left out; their children move up a level.
- */
+/** The tree as indented `role "name" [states]` lines. Ignored, unnamed structural and repeated-name nodes are left out, and their children move up. */
 export function formatSnapshot(nodes: AXNode[]): string {
   const byId = new Map(nodes.map((node) => [node.nodeId, node]));
   const root = nodes.find((node) => node.parentId === undefined) ?? nodes[0];

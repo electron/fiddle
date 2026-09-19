@@ -71,6 +71,13 @@ describe('matchNodes', () => {
   it('matches text by substring on text nodes only', () => {
     expect(matchNodes(tree, { text: 'Ge' }).map((n) => n.nodeId)).toEqual(['7']);
   });
+
+  it('returns matches in document order, whatever order CDP lists the nodes in', () => {
+    const scrambled = [...tree].reverse();
+    expect(matchNodes(scrambled, {}).map((n) => n.nodeId)).toEqual(
+      matchNodes(tree, {}).map((n) => n.nodeId),
+    );
+  });
 });
 
 describe('describeQuery', () => {

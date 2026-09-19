@@ -1,3 +1,5 @@
+import { readdirSync, readFileSync } from 'node:fs';
+import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
 
 import { BASICS_STEPS, MAIN_STEPS, placeCard } from './steps';
@@ -46,14 +48,16 @@ describe('placeCard', () => {
 });
 
 describe('tour steps', () => {
-  it('covers the main areas and the basics files', () => {
-    expect(new Set(MAIN_STEPS.map((step) => step.target))).toEqual(
-      new Set(['editor', 'version-picker', 'run', 'publish', 'console', 'sidebar']),
-    );
-    expect(BASICS_STEPS.map((step) => step.file)).toEqual([
-      'main.js',
-      'index.html',
-      'renderer.js',
-    ]);
+  it('point at the data-tour anchors the renderer renders, and every anchor has a step', () => {
+    const renderer = join(import.meta.dirname, '../..');
+    const anchors = new Set<string>();
+    for (const file of readdirSync(renderer, { recursive: true, encoding: 'utf8' })) {
+      if (!/\.tsx$/.test(file) || /\.test\./.test(file)) continue;
+      const source = readFileSync(join(renderer, file), 'utf8');
+      for (const [, anchor] of source.matchAll(/data-tour="([\w-]+)"/g))
+        anchors.add(anchor!);
+    }
+    const targets = new Set([...MAIN_STEPS, ...BASICS_STEPS].map((step) => step.target));
+    expect(anchors).toEqual(targets);
   });
 });

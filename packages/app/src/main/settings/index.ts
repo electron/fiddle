@@ -1,10 +1,3 @@
-/**
- * - `loadSettings()` reads `<userData>/settings.json` before the StateHub
- *   exists and returns the `App` store fields settings owns.
- * - `startSettings()` creates the service, loads custom themes, applies side
- *   effects (native theme, locale, screen reader) whenever the settings
- *   change, and applies outside edits to settings.json live.
- */
 import fs from 'node:fs';
 import path from 'node:path';
 

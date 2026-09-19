@@ -1,16 +1,7 @@
-import {
-  access,
-  mkdir,
-  mkdtemp,
-  readdir,
-  rename,
-  rm,
-  stat,
-  writeFile,
-} from 'node:fs/promises';
+import { access, mkdir, mkdtemp, readdir, rm, stat, writeFile } from 'node:fs/promises';
 import * as path from 'node:path';
 
-import { extractZip } from '@electron/fiddle-core';
+import { extractZip, renameWithRetry } from '@electron/fiddle-core';
 import * as semver from 'semver';
 
 import { ErrorCode, FiddleError } from '../shared/errors';
@@ -35,19 +26,15 @@ export interface TemplateLoaderOptions {
   archiveBaseUrl?: string;
   /** Per-download timeout. Default {@link TEMPLATE_TIMEOUT_MS}. */
   timeoutMs?: number;
-  /**
-   * How long a call waits for a download before it returns the bundled
-   * template. The download goes on, so a later call finds it. Default: wait
-   * for the download.
-   */
+  /** How long a call waits for a download before it returns the bundled template; the download goes on. Default: wait for it. */
   waitMs?: number;
   /** Aborts downloads in flight, e.g. on quit. */
   signal?: AbortSignal;
   /**
-   * Called when the bundled template is used instead of a download: with a
-   * `not-found` FiddleError when minimal-repro has no branch for the major
-   * yet ({@link isMissingTemplate}), once per branch, or with the error of a
-   * failed download, which the next call retries.
+   * Called when the bundled template is used instead of a download: once per
+   * branch with a `not-found` error when minimal-repro has none for the major
+   * yet ({@link isMissingTemplate}), or with a failed download's error, which
+   * the next call retries.
    */
   onFallback?: (branch: string, error: unknown) => void;
 }
@@ -132,9 +119,8 @@ async function archiveRoot(dir: string): Promise<string> {
 
 /**
  * The template's files, from `<cacheDir>/minimal-repro-<branch>/`, downloaded
- * on a miss. A 404 leaves a `.missing` marker that fails as `not-found`
- * without a request for {@link MISSING_TEMPLATE_TTL_MS}, so launches don't
- * keep asking for a branch minimal-repro doesn't have.
+ * on a miss. A 404 leaves a `.missing` marker, so launches don't keep asking
+ * for a branch minimal-repro doesn't have for {@link MISSING_TEMPLATE_TTL_MS}.
  */
 async function downloadTemplate(
   options: TemplateLoaderOptions,
@@ -177,7 +163,7 @@ async function downloadTemplate(
     const root = await archiveRoot(out);
     const { files } = await readFiddleFolder(root);
     try {
-      await rename(root, target);
+      await renameWithRetry(root, target);
     } catch (error) {
       // Another download may have finished first.
       if (!(await exists(target))) throw error;

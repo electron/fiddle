@@ -1,8 +1,3 @@
-/**
- * macOS first run: offers to move the app to /Applications. Only on the first
- * launch (no `importedFrom` yet), only for a packaged app outside
- * /Applications, and never in test mode.
- */
 import { app, dialog } from 'electron';
 
 import { tm } from '../i18n';

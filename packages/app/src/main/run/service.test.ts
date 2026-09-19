@@ -1,8 +1,4 @@
-/**
- * The run lifecycle: refusals, a spawn that fails right away, Stop, the run
- * directory's cleanup, and what quitting waits for. Electron isn't spawned:
- * `spawnElectron` returns a fake child.
- */
+/** The run lifecycle, with `spawnElectron` returning a fake child. */
 import { EventEmitter } from 'node:events';
 import fs from 'node:fs';
 import fsp from 'node:fs/promises';
@@ -198,6 +194,16 @@ describe('RunService.run', () => {
     expect(texts().some((text) => text.startsWith('spawnFailed'))).toBe(true);
   });
 
+  it('reports a failure before Electron starts as itself, not as a failed start', async () => {
+    ensureTrusted.mockRejectedValueOnce(new Error('ENOSPC: no space left on device'));
+    const { runs, state, texts } = setup();
+    expect(await runs.run('w')).toEqual({ spawnFailed: true });
+    expect(state()).toMatchObject({ status: 'ready', result: 'failure' });
+    expect(texts().at(-1)).toBe(
+      'runFailed:{"message":"ENOSPC: no space left on device"}',
+    );
+  });
+
   it('records a stop as stopped, although Electron exits 0 on SIGTERM', async () => {
     const child = fakeChild(0);
     spawnReturns(child);
@@ -293,6 +299,21 @@ describe('RunService.shutdown and stopAndWait', () => {
     await running(state);
     await runs.shutdown(20);
     expect(runs.hasWork()).toBe(true);
+    child.exit(0);
+    await result;
+    await runs.shutdown();
+  });
+
+  it('resolves stopAndWait when the window closes before the run has ended', async () => {
+    const child = fakeChild();
+    child.kill = vi.fn(() => true);
+    spawnReturns(child);
+    const { runs, state } = setup();
+    const result = runs.run('w');
+    await running(state);
+    const stopped = runs.stopAndWait('w');
+    runs.disposeWindow('w');
+    await stopped;
     child.exit(0);
     await result;
     await runs.shutdown();

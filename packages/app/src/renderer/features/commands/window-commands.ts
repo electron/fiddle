@@ -1,23 +1,15 @@
-/**
- * The window's side of commands main forwards (`Window.Command`) that act on
- * Monaco or the console: undo, redo and select all in the focused editor
- * (anywhere else, what the native roles do), go to definition, find references,
- * format selection and every file, tab-focus mode, and clear console.
- *
- * It also turns off Monaco's own context menu, since main shows a native one
- * (src/main/context-menu.ts), and Monaco's CmdOrCtrl+M, which is Minimize.
- */
 import { useEffect } from 'react';
 
 import { runApi, windowApi } from '../../../ipc/renderer';
 import { formatText, PRETTIER_PARSERS, type FormatLanguage } from '../../editor/format';
 import { monaco } from '../../editor/monaco';
 import { createStore, useStore } from '../../store';
+import { toastError } from '../../toast-error';
 import { focusContextOf } from './keybindings';
 
 type Editor = monaco.editor.ICodeEditor;
 
-/** Monaco actions (or `trigger` handler IDs) behind forwarded commands. */
+/** Monaco action or `trigger` handler IDs behind forwarded commands. */
 const EDITOR_ACTIONS: Readonly<Record<string, string>> = {
   'edit.undo': 'undo',
   'edit.redo': 'redo',
@@ -39,12 +31,9 @@ const tabFocus = createStore(false);
 
 monaco.editor.onDidCreateEditor((editor) => {
   // After the constructor has applied the editor's own options.
-  queueMicrotask(() =>
-    editor.updateOptions({
-      contextmenu: false,
-      ...(tabFocus.get() && { tabFocusMode: true }),
-    }),
-  );
+  queueMicrotask(() => {
+    if (tabFocus.get()) editor.updateOptions({ tabFocusMode: true });
+  });
   editor.onDidFocusEditorWidget(() => {
     lastEditor = editor;
   });
@@ -84,8 +73,8 @@ function setTabFocus(on: boolean): void {
 /** True while Tab moves focus out of the editor instead of inserting a tab. */
 export const useTabFocusMode = (): boolean => useStore(tabFocus);
 
-/** Formats every fiddle file Prettier can format, each as one undoable edit. */
-export async function formatAllFiles(): Promise<void> {
+/** Each file Prettier can format is one undoable edit. */
+async function formatAllFiles(): Promise<void> {
   for (const model of monaco.editor.getModels()) {
     const language = model.getLanguageId();
     if (model.uri.authority !== 'fiddle' || !Object.hasOwn(PRETTIER_PARSERS, language))
@@ -132,13 +121,7 @@ export function useWindowCommands(): void {
         if (action !== undefined) editorAction(id, action);
         else if (id === 'editor.formatAll') void formatAllFiles();
         else if (id === 'editor.toggleTabFocus') setTabFocus(!tabFocus.get());
-        else if (id === 'console.clear') {
-          runApi
-            .ClearOutput()
-            .catch((error: unknown) =>
-              console.error('[fiddle] clearing the console failed', error),
-            );
-        }
+        else if (id === 'console.clear') runApi.ClearOutput().catch(toastError);
       }),
     [],
   );

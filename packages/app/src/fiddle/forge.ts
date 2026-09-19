@@ -11,7 +11,6 @@ export const FORGE_MAKERS = [
 ] as const;
 
 export interface ForgeTransformOptions {
-  /** The Forge version to install, e.g. the app's own pinned version. */
   forgeVersion: string;
   /** The nightly's `modules` (ABI) from the release list; sets `forceABI` for `electron-nightly`. */
   nightlyAbi?: number | string;
@@ -96,7 +95,6 @@ export function forgeTransformPackageJson(
   return JSON.stringify(pkg, null, 2);
 }
 
-/** Applies the Forge transform to the files' `package.json`. */
 export function forgeTransform(files: FileMap, options: ForgeTransformOptions): FileMap {
   const text = files[PACKAGE_JSON];
   if (text === undefined) {

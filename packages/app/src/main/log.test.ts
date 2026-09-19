@@ -4,6 +4,7 @@ import path from 'node:path';
 
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
+import { FiddleError } from '../shared/errors';
 import { flushLog, formatEntry, initLogFile, log, LogFile } from './log';
 
 const home = os.homedir();
@@ -56,6 +57,35 @@ describe('formatEntry', () => {
       n: '1',
       self: '[circular]',
     });
+  });
+});
+
+describe('formatEntry errors and shared objects', () => {
+  it('keeps FiddleError details and the cause chain', () => {
+    const cause = new TypeError('fetch failed');
+    const error = new FiddleError('network', 'offline', { url: 'https://x.test', cause });
+    const [entry] = JSON.parse(formatEntry('warn', 'x', [error])).details;
+    expect(entry).toMatchObject({
+      code: 'network',
+      details: {
+        url: 'https://x.test',
+        cause: { name: 'TypeError', message: 'fetch failed' },
+      },
+    });
+    const wrapped = JSON.parse(formatEntry('warn', 'x', [new Error('outer', { cause })]))
+      .details[0];
+    expect(wrapped.cause).toMatchObject({ name: 'TypeError', message: 'fetch failed' });
+  });
+
+  it('prints an object shared twice in full and cuts only real cycles', () => {
+    const shared = { a: 1 };
+    const looped = new Error('loop');
+    looped.cause = looped;
+    const [entry, error] = JSON.parse(
+      formatEntry('info', 'x', [{ first: shared, second: shared }, looped]),
+    ).details;
+    expect(entry).toEqual({ first: { a: 1 }, second: { a: 1 } });
+    expect(error.cause).toBe('[circular]');
   });
 });
 

@@ -1,8 +1,30 @@
+/* A stand-in for the user's desktop behind glass. The app never paints it. */
 .stage {
+  --lu-specimen-stage:
+    radial-gradient(70% 90% at 6% 0%, #a9d8ff, rgba(169, 216, 255, 0) 70%),
+    radial-gradient(60% 90% at 96% 8%, #bff3fb, rgba(191, 243, 251, 0) 70%),
+    radial-gradient(70% 90% at 92% 104%, #c7d3ff, rgba(199, 211, 255, 0) 70%),
+    radial-gradient(60% 80% at 8% 100%, #9feaf9, rgba(159, 234, 249, 0) 70%), #eaf3fb;
   min-height: 100vh;
   padding: var(--lu-space-8);
   background: var(--lu-specimen-stage);
   color: var(--lu-ink);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) .stage {
+    --lu-specimen-stage:
+      radial-gradient(70% 90% at 6% 0%, #1f4fd6, rgba(31, 79, 214, 0) 70%),
+      radial-gradient(60% 90% at 96% 8%, #16566a, rgba(22, 86, 106, 0) 70%),
+      radial-gradient(70% 90% at 92% 104%, #243a9e, rgba(36, 58, 158, 0) 70%),
+      radial-gradient(60% 80% at 8% 100%, #0f5a6b, rgba(15, 90, 107, 0) 70%), #10121b;
+  }
+}
+:root[data-theme='dark'] .stage {
+  --lu-specimen-stage:
+    radial-gradient(70% 90% at 6% 0%, #1f4fd6, rgba(31, 79, 214, 0) 70%),
+    radial-gradient(60% 90% at 96% 8%, #16566a, rgba(22, 86, 106, 0) 70%),
+    radial-gradient(70% 90% at 92% 104%, #243a9e, rgba(36, 58, 158, 0) 70%),
+    radial-gradient(60% 80% at 8% 100%, #0f5a6b, rgba(15, 90, 107, 0) 70%), #10121b;
 }
 
 .window {
@@ -193,8 +215,7 @@
   align-self: stretch;
 }
 
-.glassWell,
-.stageWell {
+.glassWell {
   overflow: hidden;
   border-radius: var(--lu-radius-panel);
   corner-shape: squircle;
@@ -210,21 +231,6 @@
   background: var(--lu-material-chrome);
   -webkit-backdrop-filter: var(--lu-blur-chrome);
   backdrop-filter: var(--lu-blur-chrome);
-}
-
-.stageWell {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: flex-start;
-  gap: var(--lu-space-6);
-  padding: var(--lu-space-6);
-}
-
-.toastStack {
-  display: flex;
-  flex-direction: column;
-  gap: var(--lu-space-2);
-  width: 360px;
 }
 
 .tooltipRow {

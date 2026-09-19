@@ -1,8 +1,7 @@
 /**
- * Context menus for app windows, built from the command registry. The renderer
- * says what was right-clicked with `Window.ReportContextMenu`, sent during the
- * DOM `contextmenu` event, so it arrives before Chromium's `context-menu`
- * event, which comes over the same IPC channel.
+ * The renderer reports what was right-clicked with `Window.ReportContextMenu`
+ * during the DOM `contextmenu` event, so it arrives before Chromium's
+ * `context-menu` event, which comes over the same IPC channel.
  */
 import {
   app,

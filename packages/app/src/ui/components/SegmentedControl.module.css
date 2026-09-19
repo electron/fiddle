@@ -58,3 +58,16 @@
   outline: var(--lu-focus-outline);
   outline-offset: 1px;
 }
+
+/* Forced colors drops the fill that marks the selected segment. */
+@media (forced-colors: active) {
+  .segment[data-selected] {
+    outline: 2px solid var(--lu-ink);
+    outline-offset: -2px;
+  }
+
+  .segment[data-selected][data-focus-visible] {
+    outline: 3px solid var(--lu-focus-ring);
+    outline-offset: 1px;
+  }
+}

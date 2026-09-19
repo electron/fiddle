@@ -1,3 +1,4 @@
+import { existsSync } from 'node:fs';
 import fsp from 'node:fs/promises';
 import path from 'node:path';
 
@@ -7,6 +8,7 @@ import { implement, Settings } from '../../ipc/main';
 import { ErrorCode, FiddleError } from '../../shared/errors';
 import {
   changedExecutionSettings,
+  fromSparse,
   type Settings as AppSettings,
   type ThemeFile,
   type ThemeSnapshot,
@@ -16,6 +18,7 @@ import { dialogText } from '../documents/deep-link-queue';
 import { tm } from '../i18n';
 import type { IpcContext } from '../ipc';
 import { log } from '../log';
+import { writeAtomic } from '../persistence/json-store';
 import { themeFromMonaco, themeId, writeTheme } from '../themes/themes';
 import type { SettingsContext } from './index';
 import { sanitizeSettings, SETTINGS_VERSION } from './service';
@@ -108,18 +111,12 @@ export function bindSettingsIpc({
 
     OpenSettingsFile: async () => {
       await store.flush();
-      await fsp.mkdir(path.dirname(store.file), { recursive: true });
-      await fsp
-        .writeFile(
+      if (!existsSync(store.file)) {
+        await writeAtomic(
           store.file,
           `${JSON.stringify({ schemaVersion: SETTINGS_VERSION }, null, 2)}\n`,
-          {
-            flag: 'wx',
-          },
-        )
-        .catch((error: NodeJS.ErrnoException) => {
-          if (error.code !== 'EEXIST') throw error;
-        });
+        );
+      }
       await openPath(store.file);
     },
 
@@ -135,14 +132,19 @@ export function bindSettingsIpc({
       }
       const { settings: imported, dropped } = sanitizeSettings(data);
       if (dropped.length > 0) log.warn('settings import dropped keys', dropped);
+      // Export is sparse: a key the file lacks is at its default, except `crashReports`, which must not turn back on unasked.
+      const next = {
+        ...fromSparse(imported),
+        crashReports: imported.crashReports ?? service.settings.crashReports,
+      };
       // Flags, variables and mirrors decide what runs, so the user sees them first.
-      const changed = changedExecutionSettings(service.settings, imported);
+      const changed = changedExecutionSettings(service.settings, next);
       if (
         changed.length > 0 &&
-        !(await confirmExecutionSettings(windowId, changed, imported))
+        !(await confirmExecutionSettings(windowId, changed, next))
       )
         return null;
-      return service.replace(imported);
+      return service.replace(next);
     },
 
     ExportSettings: async () => {
@@ -152,7 +154,7 @@ export function bindSettingsIpc({
         filters: [{ name: t('jsonFiles'), extensions: ['json'] }],
       });
       if (!file) return;
-      await fsp.writeFile(file, `${JSON.stringify(service.exportData(), null, 2)}\n`);
+      await writeAtomic(file, `${JSON.stringify(service.exportData(), null, 2)}\n`);
     },
 
     DismissStorageNotice: (id) => service.dismissStorageNotice(id),

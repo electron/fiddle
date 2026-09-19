@@ -1,9 +1,3 @@
-/**
- * Run and Stop in the toolbar capsule: Ready, Checking, Downloading 42%, Unzipping,
- * Installing modules, Starting and Running. The width never jumps: at least
- * 108px, and one wider size for the long labels (downloading, installing
- * modules). Busy states show a spinner, and every state is announced.
- */
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -11,13 +5,14 @@ import { windowApi } from '../../../ipc/renderer';
 import type { RunState } from '../../../shared/stores';
 import { Button, srOnly } from '../../../ui';
 import { useAppState, useWindowState } from '../../state';
+import { toastError } from '../../toast-error';
 import { useShortcut } from '../../use-shortcut';
 import styles from './Run.module.css';
 import { IDLE_RUN, STATUS_LABEL, versionLabel } from './use-run';
 
 type Status = RunState['status'];
 
-/** `compact`: the narrowest title bar (Windows) drops the key hint and the no-jump floor to make room. */
+/** `compact`: the narrowest title bar (Windows) drops the key hint and the minimum width. */
 export function RunButton({ compact = false }: { compact?: boolean } = {}) {
   const { t } = useTranslation('run');
   const win = useWindowState();
@@ -40,7 +35,7 @@ export function RunButton({ compact = false }: { compact?: boolean } = {}) {
     if (status === 'ready') setPendingRev(win?.rev ?? null);
     windowApi.RunCommand('run.toggle').catch((error: unknown) => {
       setPendingRev(null);
-      console.error('[fiddle] run failed', error);
+      toastError(error);
     });
   };
 
@@ -54,7 +49,6 @@ export function RunButton({ compact = false }: { compact?: boolean } = {}) {
     running: t('announceRunning', { version }),
   };
 
-  // `data-tour` anchors the onboarding tour.
   return (
     <>
       {status === 'running' ? (

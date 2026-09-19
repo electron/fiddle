@@ -1,13 +1,8 @@
 #!/usr/bin/env node
-// Refreshes the bundled data snapshots:
-//
-//   packages/app/static/releases.json      from releases.electronjs.org
-//   packages/app/static/contributors.json  from the GitHub API
-//
-// .github/workflows/refresh-data.yml runs this on a schedule and opens a PR.
-// Builds never fetch this data, so a build with no network access succeeds.
-// Plain Node with no dependencies, so the workflow needs no install.
-// GITHUB_TOKEN (or GH_TOKEN), when set, raises the GitHub API rate limit.
+// Refreshes packages/app/static/releases.json (releases.electronjs.org) and
+// contributors.json (GitHub API); refresh-data.yml commits them through a PR.
+// Plain Node, no dependencies, so the workflow needs no install. GITHUB_TOKEN
+// (or GH_TOKEN) raises the GitHub API rate limit.
 import fs from 'node:fs/promises';
 import path from 'node:path';
 

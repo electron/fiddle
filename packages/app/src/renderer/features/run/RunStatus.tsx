@@ -1,30 +1,11 @@
-/**
- * The status bar's left side: "Ready", the run's current step or the
- * "Running" pill, then the Electron version and processor. Also hosts the
- * bisect controls and dialogs, and hands runtime errors to the editor's error
- * markers.
- */
 import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import type { RuntimeErrorValue } from '../../../shared/stores';
 import { srOnly, StatusPill } from '../../../ui';
-import { setRuntimeErrors, type RuntimeError } from '../../editor/runtime-errors';
 import { useAppState, useWindowState } from '../../state';
 import { BisectControls, BisectDialogs } from '../bisect/Bisect';
 import styles from './Run.module.css';
 import { IDLE_RUN, STATUS_LABEL, versionLabel } from './use-run';
-
-/** Main's runtime errors in the shape the editor markers use. */
-export function toEditorErrors(errors: readonly RuntimeErrorValue[]): RuntimeError[] {
-  return errors.map((error) => ({
-    file: error.file,
-    line: error.line,
-    column: error.column ?? 1,
-    message: error.message ? `${error.name}: ${error.message}` : error.name,
-    process: error.process,
-  }));
-}
 
 export function RunStatus() {
   const { t } = useTranslation('run');
@@ -32,9 +13,7 @@ export function RunStatus() {
   const app = useAppState();
   const run = win?.run ?? IDLE_RUN;
 
-  // Errors clear on the next run, and when another fiddle loads: main empties the list.
   const errors = run.errors;
-  useEffect(() => setRuntimeErrors(toEditorErrors(errors)), [errors]);
 
   // New console errors are announced once, politely.
   const [announcement, setAnnouncement] = useState('');

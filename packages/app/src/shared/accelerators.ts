@@ -1,9 +1,4 @@
-/**
- * Electron accelerators as people read them: `CmdOrCtrl+Shift+P` is ⌘⇧P on
- * macOS and Ctrl+Shift+P on Windows and Linux. Main formats the title bar's
- * menu model with it, and the renderer the palette, tooltips and Settings >
- * Keyboard, so every surface writes a shortcut the same way.
- */
+/** Electron accelerators as people read them, so every surface writes a shortcut the same way. */
 import type { Platform } from './stores';
 
 const MAC_KEYS: Record<string, string> = {

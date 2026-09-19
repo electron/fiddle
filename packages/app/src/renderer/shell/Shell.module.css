@@ -107,8 +107,8 @@
 }
 
 .capsule .picker {
-  /* A definite 180px (the design's width) sizes the capsule; it only shrinks,
-     down to 112px, once the groups have nothing left to give. */
+  /* A definite 180px sizes the capsule; it only shrinks, down to 112px, once the
+     groups have nothing left to give. */
   flex: 0 1 180px;
   width: 180px;
   min-width: 112px;

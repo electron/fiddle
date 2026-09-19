@@ -1,14 +1,6 @@
-/**
- * The e2e client. `launchApp()` starts the test build (out/test-build) with test
- * mode on, a fresh temp dir, its own fixture server and, on Linux, its own
- * headless X display (Xvfb, plus openbox when installed). On macOS the app runs
- * in the background of the real desktop (src/main/test-driver/index.ts);
- * FIDDLE_E2E_FOREGROUND=1 shows it in front. The returned `FiddleApp` drives
- * it over the driver socket.
- *
- * Plain Node with type stripping: import with `.ts` extensions, and no Vitest
- * imports here, since `yarn driver` (tools/driver.ts) uses this too.
- */
+// The e2e client: `launchApp()` starts the test build (out/test-build) with test mode on, a fresh
+// temp dir, its own fixture server and, on Linux, its own Xvfb display. Plain Node with type
+// stripping (`yarn driver` uses it too): `.ts` import extensions, and no Vitest imports.
 import { spawn } from 'node:child_process';
 import fs from 'node:fs';
 import { createRequire } from 'node:module';
@@ -18,6 +10,7 @@ import path from 'node:path';
 import type { Readable } from 'node:stream';
 import { fileURLToPath } from 'node:url';
 
+import { needsNoSandbox } from '../tools/electron-run.mjs';
 import type {
   DialogKind,
   DialogResponse,
@@ -115,7 +108,6 @@ interface Pending {
   timer: NodeJS.Timeout;
 }
 
-/** Newline-delimited JSON requests over the driver socket (src/main/test-driver/protocol.ts). */
 export class DriverClient {
   readonly #socket: net.Socket;
   readonly #pending = new Map<number, Pending>();
@@ -208,7 +200,7 @@ interface AppParts {
   keepArtifacts?: boolean;
 }
 
-/** A running app. Every method maps to one driver method (see protocol.ts for details). */
+/** A running app. Every method is one driver method. */
 export class FiddleApp {
   readonly client: DriverClient;
   readonly socketPath: string;
@@ -382,10 +374,12 @@ export class FiddleApp {
       } catch {
         // Already gone.
       }
+      let killTimer: NodeJS.Timeout | undefined;
       await Promise.race([
         this.exited,
-        new Promise((resolve) => setTimeout(resolve, 10_000)),
+        new Promise((resolve) => (killTimer = setTimeout(resolve, 10_000))),
       ]);
+      clearTimeout(killTimer);
       await this.#cleanup(this.#keep || this.#failed);
       if (this.#failed && this.testDir) {
         console.error(
@@ -431,28 +425,18 @@ function hasCommand(name: string): boolean {
   });
 }
 
-/** Chromium's sandbox needs a setuid chrome-sandbox on Linux, which containers usually lack. */
-export function electronArgs(electronPath: string): string[] {
+/** Electron arguments every test launch needs. */
+export function electronArgs(): string[] {
   if (process.platform !== 'linux') return [];
-  const args = ['--password-store=basic'];
-  try {
-    const stat = fs.statSync(path.join(path.dirname(electronPath), 'chrome-sandbox'));
-    if (!(stat.uid === 0 && stat.mode & 0o4000) || process.getuid?.() === 0) {
-      args.push('--no-sandbox');
-    }
-  } catch {
-    args.push('--no-sandbox');
-  }
-  return args;
+  return needsNoSandbox()
+    ? ['--password-store=basic', '--no-sandbox']
+    : ['--password-store=basic'];
 }
 
 /**
- * macOS: a module for `electron -r`, loaded into the main process of every
- * fiddle the app runs, so the fiddle's windows stay in the background like the
- * app's own (src/main/test-driver/index.ts): otherwise every `new BrowserWindow`
- * of a run activates that Electron and puts its window over the desktop. It
- * reaches runs through FIDDLE_DEV_ELECTRON_FLAGS (src/main/run/dev.ts), which
- * only development and test builds read.
+ * macOS: loaded with `electron -r` into every fiddle a run starts, so its windows stay in the
+ * background like the app's own; otherwise each `new BrowserWindow` activates that Electron over
+ * the desktop. It reaches runs through FIDDLE_DEV_ELECTRON_FLAGS, which only dev and test builds read.
  */
 const BACKGROUND_FIDDLE_PRELOAD = `// Written by packages/app/e2e/driver.ts for \`electron -r\`.
 const Module = require('node:module');
@@ -502,11 +486,7 @@ interface Display {
   stop(): void;
 }
 
-/**
- * A private X display per app: `Xvfb -displayfd` picks a free display number
- * atomically, so parallel apps never race for one (xvfb-run -a can). openbox
- * runs on it when installed, for real focus and window management.
- */
+/** A private X display per app: `-displayfd` picks a free number atomically, which `xvfb-run -a` doesn't under parallel launches. openbox runs on it when installed, for real focus handling. */
 async function startDisplay(): Promise<Display> {
   const given = process.env.FIDDLE_E2E_DISPLAY;
   if (given) return { env: { DISPLAY: given }, stop: () => undefined };
@@ -585,13 +565,24 @@ export async function launchApp(options: LaunchOptions = {}): Promise<FiddleApp>
       `No test build in ${appDir}. Build it with: yarn workspace electron-fiddle driver:build`,
     );
   }
+  // Before anything is started, so a failure here leaves nothing to clean up.
+  const electronPath = requireFromApp('electron') as string;
+  const fixtures = options.fixtures ?? (await startFixtureServer());
   const testDir = fs.mkdtempSync(path.join(os.tmpdir(), 'fiddle-e2e-'));
   const socketPath =
     process.platform === 'win32'
       ? `\\\\.\\pipe\\fiddle-driver-${path.basename(testDir)}`
       : path.join(testDir, 'driver.sock');
-  const fixtures = options.fixtures ?? (await startFixtureServer());
-  const display = process.platform === 'linux' ? await startDisplay() : undefined;
+  let display: Display | undefined;
+  if (process.platform === 'linux') {
+    try {
+      display = await startDisplay();
+    } catch (error) {
+      if (!options.fixtures) await fixtures.close();
+      fs.rmSync(testDir, { recursive: true, force: true });
+      throw error;
+    }
+  }
 
   const env: NodeJS.ProcessEnv = { ...process.env };
   for (const key of ['ELECTRON_RUN_AS_NODE', 'NODE_OPTIONS', 'ELECTRON_ENABLE_LOGGING']) {
@@ -613,13 +604,12 @@ export async function launchApp(options: LaunchOptions = {}): Promise<FiddleApp>
     ...options.env,
   });
 
-  const electronPath = requireFromApp('electron') as string;
   const output = fs.createWriteStream(path.join(testDir, 'app-output.log'));
   const tail: string[] = [];
   const verbose = options.verbose ?? process.env.FIDDLE_E2E_VERBOSE === '1';
   const child = spawn(
     electronPath,
-    [...electronArgs(electronPath), appDir, ...(options.args ?? [])],
+    [...electronArgs(), appDir, ...(options.args ?? [])],
     { env, stdio: ['ignore', 'pipe', 'pipe'] },
   );
   for (const stream of [child.stdout, child.stderr]) {

@@ -1,26 +1,7 @@
 /**
- * The one-time import from the previous Electron Fiddle.
- *
- * - Runs on the first launch, before any store is created, so it finishes
- *   before any new settings are written. `importedFrom: { version, at }` in
- *   state.json marks it done (`version` is the app version that ran it).
- * - Idempotent: every file is created only if it doesn't exist yet, so a run
- *   that was interrupted can simply run again.
- * - Old files are only read: nothing is ever moved or deleted.
- *
- * What it imports:
- * - localStorage settings (read by ./local-storage.ts) → sparse settings.json,
- *   and `tourDone` in state.json. Unknown keys are logged and ignored.
- * - `local-versions.json` (and the older `local-electron-versions` key) →
- *   local-builds.json `{ schemaVersion, builds: [{ id, name, path, addedAt }] }`.
- * - `.github-credentials` → `credentials/github`, re-encrypted with the
- *   CredentialStore.
- * - `~/.electron-fiddle/themes/*.json` → `<userData>/themes/`, keeping the
- *   Monaco editor colours; UI tokens come from Lucent.
- * - `electron-bin/` → the core cache (`importElectronVersions`), which the
- *   caller runs in the background after startup.
- *
- * No Electron imports: Electron APIs are injected, so this runs in plain Node tests.
+ * Runs before any store exists, so it writes the new files itself. Every file
+ * is created only if it doesn't exist yet, and old files are only read.
+ * Electron APIs are injected, so this runs in plain Node tests.
  */
 import { randomUUID } from 'node:crypto';
 import fs from 'node:fs';
@@ -40,17 +21,24 @@ import { BUILTIN_THEME } from '../../shared/settings';
 import { CredentialStore, type SafeStorageLike } from '../github/credentials';
 import { log } from '../log';
 import { writeAtomic } from '../persistence/json-store';
+import { SETTINGS_VERSION } from '../settings/service';
 import { themeFromMonaco, themeId, writeTheme } from '../themes/themes';
 import { mapOldSettings, oldThemeKey, type OldLocalVersion } from './old-settings';
 
-/** The `schemaVersion` of the files written here (settings, state, onboarding, local builds). */
-const SCHEMA_VERSION = 1;
+// The `version` of the stores that own these files (documents/service.ts, versions/service.ts).
+const STATE_VERSION = 1;
+const LOCAL_BUILDS_VERSION = 1;
+
+/** Launches that try the old localStorage before the import goes on without it. */
+const MAX_STORAGE_TRIES = 3;
 
 interface ImportedFrom {
   /** The version of this app that ran the import. */
   version: string;
   /** ISO timestamp. */
   at: string;
+  /** Set when the old settings could not be read and were not imported. */
+  localStorage?: 'unreadable';
 }
 
 export interface LocalBuild {
@@ -110,14 +98,9 @@ function readStateFile(file: string): Record<string, unknown> | undefined {
 
 /** Creates `file` with `data`, never overwriting. Returns false when it already exists. */
 async function createJsonFile(file: string, data: unknown): Promise<boolean> {
-  await fsp.mkdir(path.dirname(file), { recursive: true });
-  try {
-    await fsp.writeFile(file, `${JSON.stringify(data, null, 2)}\n`, { flag: 'wx' });
-    return true;
-  } catch (error) {
-    if ((error as NodeJS.ErrnoException).code === 'EEXIST') return false;
-    throw error;
-  }
+  if (fs.existsSync(file)) return false;
+  await writeAtomic(file, `${JSON.stringify(data, null, 2)}\n`);
+  return true;
 }
 
 /** Old themes → `<userData>/themes/<id>.json`. Returns old file name (no `.json`) → new ID. */
@@ -231,8 +214,30 @@ export async function importOldApp(deps: ImportDeps): Promise<ImportResult> {
 
   const summary: Record<string, unknown> = {};
 
-  // A failed read throws too: nothing is recorded, so the next launch tries again.
-  const values = (await deps.readLocalStorage()) ?? {};
+  const writeState = (next: Record<string, unknown>) =>
+    writeAtomic(
+      stateFile,
+      `${JSON.stringify({ schemaVersion: STATE_VERSION, ...next }, null, 2)}\n`,
+    );
+
+  let values: Record<string, string> = {};
+  let storageUnreadable = false;
+  try {
+    values = (await deps.readLocalStorage()) ?? {};
+  } catch (error) {
+    // The next launches try again, a few times: a reader window that never answers costs seconds every time.
+    const tries = (typeof state?.storageTries === 'number' ? state.storageTries : 0) + 1;
+    if (tries < MAX_STORAGE_TRIES) {
+      await writeState({ ...state, storageTries: tries });
+      throw error;
+    }
+    log.error(
+      'import: the old localStorage could not be read, going on without it',
+      error,
+    );
+    storageUnreadable = true;
+    summary.localStorage = 'unreadable';
+  }
 
   const themeIds = await importThemes(
     path.join(home, '.electron-fiddle', 'themes'),
@@ -249,7 +254,7 @@ export async function importOldApp(deps: ImportDeps): Promise<ImportResult> {
   const settingKeys = Object.keys(mapped.settings);
   if (settingKeys.length) {
     const created = await createJsonFile(path.join(userData, 'settings.json'), {
-      schemaVersion: SCHEMA_VERSION,
+      schemaVersion: SETTINGS_VERSION,
       ...mapped.settings,
     });
     summary.settings = created ? settingKeys : 'kept';
@@ -264,7 +269,7 @@ export async function importOldApp(deps: ImportDeps): Promise<ImportResult> {
   );
   if (builds.length) {
     const created = await createJsonFile(path.join(userData, 'local-builds.json'), {
-      schemaVersion: SCHEMA_VERSION,
+      schemaVersion: LOCAL_BUILDS_VERSION,
       builds,
     });
     summary.localBuilds = created ? builds.length : 'kept';
@@ -273,19 +278,26 @@ export async function importOldApp(deps: ImportDeps): Promise<ImportResult> {
   // Not named after the token: the log would redact a key like that.
   summary.github = await importGitHubToken(deps, mapped.gitHubLogin);
 
-  const importedFrom: ImportedFrom = { version: deps.version, at: now.toISOString() };
-  // Onboarding lives in state.json too (../ux/onboarding.ts).
+  const importedFrom: ImportedFrom = {
+    version: deps.version,
+    at: now.toISOString(),
+    ...(storageUnreadable ? { localStorage: 'unreadable' as const } : {}),
+  };
+  const { storageTries: _tries, ...kept } = state ?? {};
+  // Onboarding lives in state.json too.
   const onboarding = mapped.tourDone ? { tourDone: true } : {};
-  const text = `${JSON.stringify({ schemaVersion: SCHEMA_VERSION, ...state, ...onboarding, importedFrom }, null, 2)}\n`;
-  await writeAtomic(stateFile, text);
+  await writeState({ ...kept, ...onboarding, importedFrom });
   return { firstLaunch: true, summary };
 }
+
+/** Not `.tmp-`: core's Installer keeps its in-flight folders under that prefix in the same cache. */
+const IMPORT_TMP_PREFIX = '.import-';
 
 /** Copies a folder into place through a temp folder, so the target is complete or absent. */
 async function copyIntoPlace(source: string, target: string): Promise<void> {
   await fsp.mkdir(path.dirname(target), { recursive: true });
   const tmp = await fsp.mkdtemp(
-    path.join(path.dirname(target), `.tmp-${path.basename(target)}-`),
+    path.join(path.dirname(target), `${IMPORT_TMP_PREFIX}${path.basename(target)}-`),
   );
   try {
     await copyFolder(source, tmp, { verbatimSymlinks: true });
@@ -298,9 +310,9 @@ async function copyIntoPlace(source: string, target: string): Promise<void> {
 
 /**
  * Old `<userData>/electron-bin` → `<cache>/electron/<version>`, the per-version
- * layout core uses. Extracted folders (`current/`, `<version>/`) are copied;
- * zips for this platform are extracted by core's Installer. Versions already
- * in the cache are skipped. Returns the versions that were imported.
+ * layout core uses. Extracted folders are copied, zips for this platform are
+ * extracted. Versions already in the cache are skipped. Returns the versions
+ * that were imported, and throws once every version was tried if any failed.
  */
 export async function importElectronVersions(
   oldBin: string,
@@ -310,8 +322,9 @@ export async function importElectronVersions(
   let names: string[];
   try {
     names = await fsp.readdir(oldBin);
-  } catch {
-    return [];
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code === 'ENOENT') return [];
+    throw error;
   }
   const zip = new RegExp(`^electron-v(.+)-${platform}-${arch}\\.zip$`);
   const folders = new Map<string, string>();
@@ -339,7 +352,13 @@ export async function importElectronVersions(
     },
     { layout: 'per-version' },
   );
+  // A copy cut short by a quit leaves its temp folder behind.
+  for (const name of await fsp.readdir(versionsDir).catch(() => [] as string[])) {
+    if (name.startsWith(IMPORT_TMP_PREFIX))
+      await removeBestEffort(path.join(versionsDir, name));
+  }
   const imported: string[] = [];
+  const failed: string[] = [];
   for (const version of new Set([...folders.keys(), ...zips])) {
     if (fs.existsSync(path.join(versionsDir, version))) continue;
     try {
@@ -349,7 +368,9 @@ export async function importElectronVersions(
       imported.push(version);
     } catch (error) {
       log.warn('import: could not import Electron', version, error);
+      failed.push(version);
     }
   }
+  if (failed.length) throw new Error(`could not import Electron ${failed.join(', ')}`);
   return imported;
 }

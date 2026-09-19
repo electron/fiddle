@@ -15,6 +15,8 @@ export const GIST_DESCRIPTION_MAX = 256;
 export const DEFAULT_GIST_DESCRIPTION = 'Electron Fiddle Gist';
 const MAX_REDIRECTS = 5;
 const MAX_PAGES = 30;
+/** Per request, body included, so a stalled connection ends in an error instead of a spinner. */
+const REQUEST_TIMEOUT_MS = 60_000;
 
 export function isValidTokenFormat(token: string): boolean {
   return GITHUB_TOKEN_PATTERN.test(token);
@@ -187,8 +189,10 @@ async function toResponseError(res: Response): Promise<FiddleError> {
   }
   // A rate-limited 403 isn't a bad token, so the startup check must keep it.
   const rateLimited =
-    res.status === 403 &&
-    (res.headers.get('x-ratelimit-remaining') === '0' || res.headers.has('retry-after'));
+    res.status === 429 ||
+    (res.status === 403 &&
+      (res.headers.get('x-ratelimit-remaining') === '0' ||
+        res.headers.has('retry-after')));
   const code =
     res.status === 401
       ? ErrorCode.unauthorized
@@ -204,21 +208,33 @@ async function toResponseError(res: Response): Promise<FiddleError> {
                 ? ErrorCode.unavailable
                 : ErrorCode.internal;
   const message = `GitHub responded ${res.status}${githubMessage ? `: ${githubMessage}` : ''}`;
-  return new FiddleError(code, message, { status: res.status, githubMessage });
+  return new FiddleError(code, message, {
+    status: res.status,
+    githubMessage,
+    ...(rateLimited ? { reason: 'rate-limited' } : {}),
+  });
 }
 
-function toFetchError(error: unknown, signal?: AbortSignal): FiddleError {
+const isAbortError = (error: unknown) =>
+  error instanceof Error && error.name === 'AbortError';
+
+function toFetchError(
+  error: unknown,
+  signal: AbortSignal | undefined,
+  timeout: AbortSignal,
+): FiddleError {
   if (error instanceof FiddleError) return error;
-  if (signal?.aborted || (error instanceof Error && error.name === 'AbortError')) {
+  if (signal?.aborted || (!timeout.aborted && isAbortError(error))) {
     return new FiddleError(ErrorCode.cancelled, 'The request was cancelled');
   }
-  return new FiddleError(
-    ErrorCode.network,
-    'Could not reach GitHub. Your computer seems to be offline.',
-    {
-      cause: error instanceof Error ? error.message : String(error),
-    },
-  );
+  if (timeout.aborted) {
+    return new FiddleError(ErrorCode.network, 'GitHub did not respond in time.', {
+      reason: 'timeout',
+    });
+  }
+  return new FiddleError(ErrorCode.network, 'Could not reach GitHub.', {
+    cause: error instanceof Error ? error.message : String(error),
+  });
 }
 
 /**
@@ -279,6 +295,7 @@ export class GitHubClient {
       if (withToken) headers.Authorization = `Bearer ${this.token}`;
       if (body !== undefined) headers['Content-Type'] = 'application/json';
 
+      const timeout = AbortSignal.timeout(REQUEST_TIMEOUT_MS);
       let res: Response;
       try {
         res = await this.fetchFn(current, {
@@ -286,10 +303,10 @@ export class GitHubClient {
           body,
           headers,
           redirect: 'manual',
-          signal: init.signal,
+          signal: init.signal ? AbortSignal.any([init.signal, timeout]) : timeout,
         });
       } catch (error) {
-        throw toFetchError(error, init.signal);
+        throw toFetchError(error, init.signal, timeout);
       }
 
       const location = res.headers.get('location');

@@ -31,7 +31,7 @@ function isHeading(item: SideNavItem | SideNavHeading): item is SideNavHeading {
   return 'heading' in item;
 }
 
-/** Vertical navigation for settings. */
+/** Vertical navigation between the sections of a Page. */
 export function SideNav({
   items,
   value,
@@ -54,7 +54,7 @@ export function SideNav({
           <AriaButton
             key={item.id}
             className={styles.item}
-            aria-current={item.id === current ? 'page' : undefined}
+            aria-current={item.id === current ? 'true' : undefined}
             onPress={() => {
               setInner(item.id);
               onChange?.(item.id);
@@ -70,21 +70,28 @@ export function SideNav({
   );
 }
 
-export interface PageProps {
+interface PageBaseProps {
   title: string;
   /** Usually a SideNav. */
   nav: ReactNode;
   children: ReactNode;
-  /** Adds a close button (and closes on Escape). */
-  onClose?: () => void;
-  closeLabel?: string;
-  /** Key cap under the close button, such as "esc". */
-  closeHint?: string;
   className?: string;
   style?: CSSProperties;
 }
 
-/** A full-window page with a side nav, used for settings. Fills its container. */
+export type PageProps = PageBaseProps &
+  (
+    | {
+        /** Adds a close button (and closes on Escape), named by `closeLabel`. */
+        onClose: () => void;
+        closeLabel: string;
+        /** Key cap under the close button, such as "esc". */
+        closeHint?: string;
+      }
+    | { onClose?: undefined; closeLabel?: undefined; closeHint?: undefined }
+  );
+
+/** A full-window page with a side nav. Fills its container. */
 export function Page({
   title,
   nav,

@@ -1,11 +1,4 @@
-/**
- * Renderer side of EIPC. Renderer code imports IPC only from here, never from
- * ./generated directly (lint enforces it): these wrappers re-throw errors from
- * main as `FiddleError`s with a stable `code`.
- *
- *   const info = await appApi.GetAppInfo();
- *   const app = useAppStore();        // { state: 'ready', result: AppState } | …
- */
+/** Renderer code imports IPC only from here (lint enforces it): these wrappers re-throw errors from main as `FiddleError`s. */
 import { ErrorCode, FiddleError } from '../shared/errors';
 import { wrapRendererApi } from '../shared/error-transport';
 import {

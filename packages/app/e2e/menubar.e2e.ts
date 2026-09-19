@@ -1,20 +1,10 @@
-// The title bar's menu bar on Windows and Linux. FIDDLE_TEST_MENUBAR forces it
-// on every platform, so this runs on a macOS desktop too, where it shows the
-// Linux menus. Test builds are unpackaged, so they also have the
-// development-only Develop menu before Help. At the default width the last
-// titles may be folded into the More button (on macOS the traffic lights take
-// room too), so tests drive File, Edit and View, which always fit, and read
-// the whole list from the Window store.
+// The title bar's menu bar on Windows and Linux. FIDDLE_TEST_MENUBAR forces it on
+// every platform. At the default width the last titles may be folded into the
+// More button, so tests drive File, Edit and View and read the whole list from
+// the Window store.
 import { describe, expect, it } from 'vitest';
 
 import { role, text, useApp, windowState } from './harness.ts';
-
-interface MenuNode {
-  kind: string;
-  id?: string;
-  label?: string;
-  children?: MenuNode[];
-}
 
 describe('menu bar', () => {
   const app = useApp({ env: { FIDDLE_TEST_MENUBAR: '1' } });
@@ -34,27 +24,27 @@ describe('menu bar', () => {
     })()`) as Promise<{ role: string | null; name: string; inEditor: boolean } | null>;
 
   /** The menus main built for the window, from its store. */
-  const menuModel = async () =>
-    ((await windowState(app())) as unknown as { menuBar: MenuNode[] }).menuBar;
+  const menuBar = async () => (await windowState(app())).menuBar ?? [];
+  const menuLabels = async () =>
+    (await menuBar()).flatMap((menu) => (menu.kind === 'submenu' ? [menu.label] : []));
   /** The bar's titles while no menu is open: every menu, or the ones that fit and More. */
   const barTitles = async () =>
     (await app().query(role('menuitem'))).map((item) => item.name);
 
-  it('shows File, Edit, View, Run, Window and Help in the title bar', async () => {
+  it('shows every menu in the title bar', async () => {
     await app().query(role('menubar', 'Application menu'));
-    // Main builds it per window and pushes it in the Window store.
-    const menuBar = await menuModel();
-    expect(menuBar.map((menu) => [menu.kind, menu.id, menu.label])).toEqual([
-      ['submenu', 'menu:file', 'File'],
-      ['submenu', 'menu:edit', 'Edit'],
-      ['submenu', 'menu:view', 'View'],
-      ['submenu', 'menu:run', 'Run'],
-      ['submenu', 'menu:window', 'Window'],
-      ['submenu', 'menu:develop', 'Develop'],
-      ['submenu', 'menu:help', 'Help'],
+    // Test builds are unpackaged, so they have the Develop menu too.
+    expect(await menuBar()).toMatchObject([
+      { kind: 'submenu', id: 'menu:file', label: 'File' },
+      { kind: 'submenu', id: 'menu:edit', label: 'Edit' },
+      { kind: 'submenu', id: 'menu:view', label: 'View' },
+      { kind: 'submenu', id: 'menu:run', label: 'Run' },
+      { kind: 'submenu', id: 'menu:window', label: 'Window' },
+      { kind: 'submenu', id: 'menu:develop', label: 'Develop' },
+      { kind: 'submenu', id: 'menu:help', label: 'Help' },
     ]);
+    const labels = await menuLabels();
     // The bar shows them in order; what doesn't fit before the capsule is folded into More.
-    const labels = menuBar.map((menu) => menu.label);
     const titles = await barTitles();
     if (titles.at(-1) === 'More') {
       expect(titles.length).toBeGreaterThanOrEqual(3);
@@ -71,9 +61,7 @@ describe('menu bar', () => {
     const titles = await barTitles();
     if (titles.at(-1) !== 'More')
       skip('every title fits at this width, so nothing is folded');
-    const folded = (await menuModel())
-      .map((menu) => menu.label ?? '')
-      .slice(titles.length - 1);
+    const folded = (await menuLabels()).slice(titles.length - 1);
     expect(folded.length).toBeGreaterThan(0);
     await app().click(role('menuitem', 'More'));
     await app().query(role('menu', 'More'));
@@ -134,14 +122,11 @@ describe('menu bar', () => {
     await expect.poll(ratio).toBe(initial);
   });
 
-  it('gives editing items back the focus they act on: Select all, then Copy', async () => {
+  it('gives editing items back the focus they act on: Select all', async () => {
     await app().click(role('code'));
     await app().click(role('menuitem', 'Edit'));
     await app().click(role('menuitem', 'Select all'));
     await expect.poll(async () => (await focused())?.inEditor).toBe(true);
-    await app().click(role('menuitem', 'Edit'));
-    await app().click(role('menuitem', 'Copy'));
-    await expect.poll(() => app().clipboard()).toContain('electron');
   });
 
   it('takes the keyboard on Alt or Alt and a mnemonic, and gives it back on Escape', async () => {

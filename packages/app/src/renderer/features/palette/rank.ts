@@ -1,8 +1,3 @@
-/**
- * Filtering and ranking for the command palette. Pure functions, so the
- * palette component only renders what these return.
- */
-
 export type PaletteKind = 'command' | 'editor' | 'file' | 'version' | 'example';
 
 export interface PaletteItem {
@@ -10,8 +5,6 @@ export interface PaletteItem {
   id: string;
   kind: PaletteKind;
   label: string;
-  /** Secondary text, such as a version's channel. */
-  detail?: string;
   /** Extra words that match but aren't shown. */
   keywords?: string[];
   /** Key caps for the current shortcut. */
@@ -27,10 +20,7 @@ const isWordStart = (text: string, index: number) =>
   /[\s._\-/:@()]/.test(text[index - 1] ?? '') ||
   /[a-z][A-Z]/.test(text.slice(index - 1, index + 1));
 
-/**
- * How well `query` matches `text`, or null if it doesn't. Substrings beat
- * scattered letters; matches at a word start and near the front score higher.
- */
+/** Substrings beat scattered letters; matches at a word start and near the front score higher. Null if it doesn't match. */
 export function matchScore(query: string, text: string): number | null {
   const q = query.trim().toLowerCase();
   if (q === '') return 0;
@@ -62,22 +52,15 @@ export function matchScore(query: string, text: string): number | null {
 
 function itemScore(query: string, item: PaletteItem): number | null {
   let best = matchScore(query, item.label);
-  for (const text of [item.detail, ...(item.keywords ?? [])]) {
-    if (!text) continue;
+  for (const text of item.keywords ?? []) {
     const score = matchScore(query, text);
-    // Hidden or secondary text matches, but less than the label.
+    // Hidden text matches, but less than the label.
     if (score !== null && (best === null || score / 2 > best)) best = score / 2;
   }
   return best;
 }
 
-/**
- * The items to show for `query`, best first.
- * - Empty query: recently used items (most recent first), then the other
- *   commands in registry order. Files, versions and examples wait for a query.
- * - Otherwise: every matching item by score. Recently used items get a boost.
- *   Ties keep the input order.
- */
+/** Empty query: recent items, then the other commands. Otherwise every match by score, recent items boosted. */
 export function rankItems<T extends PaletteItem>(
   items: readonly T[],
   query: string,
@@ -105,7 +88,6 @@ export function rankItems<T extends PaletteItem>(
   return scored.slice(0, limit).map((entry) => entry.item);
 }
 
-/** Adds `id` to the front of the recent list, without duplicates. */
 export function pushRecent(recent: readonly string[], id: string, max = 8): string[] {
   return [id, ...recent.filter((other) => other !== id)].slice(0, max);
 }

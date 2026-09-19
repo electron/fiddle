@@ -1,41 +1,28 @@
-/**
- * Chromium's UI language follows the language setting. `--lang` must be set
- * before `ready`, before any store exists, so the setting is read straight
- * from settings.json. A change applies after a relaunch, which Settings
- * offers.
- */
-import fs from 'node:fs';
 import path from 'node:path';
 
 import { app } from 'electron';
 
 import { pickLocale } from '../../i18n';
+import { parseSetting } from '../../shared/settings';
+import { readJsonObjectSync } from '../persistence/json-store';
 import { isTestMode } from '../test-mode';
 
-/** The `locale` setting in settings.json's text, or undefined for the system default or an unreadable file. */
-export function localeSettingFrom(text: string | undefined): string | undefined {
-  if (!text) return undefined;
-  try {
-    const { locale } = JSON.parse(text) as { locale?: unknown };
-    return typeof locale === 'string' && locale !== 'system' ? locale : undefined;
-  } catch {
-    return undefined;
-  }
+/** The chosen language in the settings object, or undefined for the system default or an invalid value. */
+export function localeSettingFrom(
+  data: Record<string, unknown> | undefined,
+): string | undefined {
+  const locale = parseSetting('locale', data?.locale)?.value;
+  return locale === undefined || locale === 'system' ? undefined : locale;
 }
 
-/** Before `ready`: `--lang` for a chosen language (or `FIDDLE_LOCALE` in dev and test runs). */
+/** Before `ready`: `--lang` for a chosen language (or `FIDDLE_LOCALE` in dev and test runs). No store exists yet, so settings.json is read directly. */
 export function applyChromiumLanguage(): void {
   const forced =
     process.env.FIDDLE_LOCALE && (!app.isPackaged || isTestMode())
       ? process.env.FIDDLE_LOCALE
       : undefined;
-  let text: string | undefined;
-  try {
-    text = fs.readFileSync(path.join(app.getPath('userData'), 'settings.json'), 'utf8');
-  } catch {
-    // No settings yet: Chromium follows the OS.
-  }
-  const setting = forced ?? localeSettingFrom(text);
+  const data = readJsonObjectSync(path.join(app.getPath('userData'), 'settings.json'));
+  const setting = forced ?? localeSettingFrom(data);
   if (setting) app.commandLine.appendSwitch('lang', pickLocale([setting]));
 }
 
@@ -56,7 +43,6 @@ export function cancelRelaunch(): void {
   relaunchRequested = false;
 }
 
-/** Call once at startup. */
 export function installRelaunchOnQuit(): void {
   app.on('quit', () => {
     if (relaunchRequested) app.relaunch();

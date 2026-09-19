@@ -32,7 +32,7 @@ const windowState = (status = 'ready') =>
 
 document.body.innerHTML = `
   <div class="monaco-editor"><textarea id="editor"></textarea></div>
-  <section data-tour="console"><ol id="console" tabindex="0"></ol></section>
+  <section data-region="console"><ol id="console" tabindex="0"></ol></section>
   <input id="recorder" data-keybinding-recorder />
   <button id="other"></button>`;
 const element = (id: string) => document.getElementById(id);

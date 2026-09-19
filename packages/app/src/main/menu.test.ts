@@ -1,7 +1,7 @@
 import type { MenuItemConstructorOptions } from 'electron';
 import { describe, expect, it, vi } from 'vitest';
 
-import { commandIds, isCommandId, type CommandId } from '../shared/commands';
+import { commandIds, isCommandId, commands, type CommandId } from '../shared/commands';
 import { normalizeAccelerator } from '../shared/settings';
 import {
   DEFAULT_LAYOUT,
@@ -25,7 +25,7 @@ const electron = vi.hoisted(() => ({
   },
 }));
 vi.mock('electron', () => electron);
-// Real English labels, so the checks below read like the menu does.
+// The real English catalogue, for the sentence case check.
 vi.mock('./i18n', async () => {
   const { default: main } = await import('../i18n/generated/en/main');
   const messages: Record<string, string> = main;
@@ -50,12 +50,14 @@ vi.mock('./documents/service', () => ({
 vi.mock('./windows', () => ({
   focusedWindowId: () => undefined,
   getWindow: () => undefined,
-  windowIdOf: () => undefined,
+  windowIdOf: (window?: { id?: string }) => window?.id,
 }));
 vi.mock('./test-mode', () => ({ testMenuBar: () => false }));
 
 const { buildMenuTemplate, installMenu, toggleWindowMenuBar } = await import('./menu');
-const { toMenuModel } = await import('./menu-model');
+const { roleAccelerator, toMenuModel } = await import('./menu-model');
+const { t } = await import('./i18n');
+const { log } = await import('./log');
 const documents = await import('./documents/service');
 
 type Item = MenuItemConstructorOptions;
@@ -75,8 +77,11 @@ function windowState(
   } as unknown as WindowState;
 }
 
-function build(overrides: Partial<MenuState> = {}): Item[] {
-  return buildMenuTemplate(registry, {
+function build(
+  overrides: Partial<MenuState> = {},
+  commandRegistry: CommandRegistry = registry,
+): Item[] {
+  return buildMenuTemplate(commandRegistry, {
     platform: 'darwin',
     focused: '3c8f7a52-9d0e-4c6b-8f4d-2b1a0e9c7d55',
     win: windowState(),
@@ -88,438 +93,177 @@ function build(overrides: Partial<MenuState> = {}): Item[] {
   });
 }
 
-/** A top-level menu's items, by its English title. */
-function menu(template: Item[], title: string): Item[] {
-  const found = template.find((item) => item.label === title);
-  if (!found || !Array.isArray(found.submenu)) throw new Error(`no ${title} menu`);
+/** A top-level menu's items, by its `menu:<name>` id. */
+function menu(template: Item[], name: string): Item[] {
+  const found = template.find((item) => item.id === `menu:${name}`);
+  if (!found || !Array.isArray(found.submenu)) throw new Error(`no ${name} menu`);
   return found.submenu;
 }
 
-/** Command IDs, `(role)`s, submenu titles and `---` separators, in order. */
-const outline = (items: Item[]) =>
-  items.map((item) => {
-    if (item.type === 'separator') return '---';
-    if (item.id && isCommandId(item.id)) return item.id;
-    return item.role ? `(${item.role})` : item.label;
-  });
+const ids = (items: Item[]) => items.map((item) => item.id);
+const item = (items: Item[], id: string) =>
+  items.find((candidate) => candidate.id === id);
+
+function walk(items: Item[], visit: (item: Item, siblings: Item[]) => void): void {
+  for (const each of items) {
+    visit(each, items);
+    if (Array.isArray(each.submenu)) walk(each.submenu, visit);
+  }
+}
 
 /** The command items' IDs, anywhere in the template. */
 const commandsIn = (template: Item[]) => {
-  const ids = new Set<string>();
-  walk(template, (item) => void (item.id && isCommandId(item.id) && ids.add(item.id)));
-  return ids;
+  const found = new Set<string>();
+  walk(template, (each) => void (each.id && isCommandId(each.id) && found.add(each.id)));
+  return found;
 };
 
-const labels = (items: Item[]) =>
-  items.filter((item) => item.type !== 'separator').map((item) => item.label);
-
-function walk(items: Item[], visit: (item: Item, siblings: Item[]) => void): void {
-  for (const item of items) {
-    visit(item, items);
-    if (Array.isArray(item.submenu)) walk(item.submenu, visit);
-  }
-}
-
-/** The key Electron gives a role item that has no explicit accelerator (lib/browser/api/menu-item-roles.ts). */
-function roleAccelerator(role: string, platform: Platform): string | undefined {
-  switch (role) {
-    case 'hide':
-      return 'Command+H';
-    case 'hideOthers':
-      return 'Command+Alt+H';
-    case 'quit':
-      return platform === 'win32' ? undefined : 'CommandOrControl+Q';
-    case 'cut':
-      return 'CommandOrControl+X';
-    case 'copy':
-      return 'CommandOrControl+C';
-    case 'paste':
-      return 'CommandOrControl+V';
-    case 'minimize':
-      return 'CommandOrControl+M';
-    case 'togglefullscreen':
-      return platform === 'darwin' ? 'Control+Command+F' : 'F11';
-    default:
-      return undefined;
-  }
-}
-
 describe('application menu', () => {
-  it('has the app menu on macOS only, and the same six menus everywhere', () => {
-    expect(build({ platform: 'darwin' }).map((item) => item.label)).toEqual([
-      'Electron Fiddle',
-      'File',
-      'Edit',
-      'View',
-      'Run',
-      'Window',
-      'Help',
-    ]);
-    for (const platform of ['win32', 'linux'] as const) {
-      expect(build({ platform }).map((item) => item.label)).toEqual([
-        'File',
-        'Edit',
-        'View',
-        'Run',
-        'Window',
-        'Help',
-      ]);
-    }
-    const appMenu = menu(build({ platform: 'darwin' }), 'Electron Fiddle');
-    expect(outline(appMenu)).toEqual([
-      '(about)',
-      '---',
-      'app.preferences',
-      '---',
-      '(services)',
-      '---',
-      '(hide)',
-      '(hideOthers)',
-      '(unhide)',
-      '---',
-      '(quit)',
-    ]);
-    expect(appMenu.at(-1)?.label).toBe('Quit Electron Fiddle');
-  });
-
-  it('repeats no label within a menu, registers no key twice, and has no empty groups', () => {
+  it('has the app menu on macOS only, and the Develop menu before Help in development builds only', () => {
+    expect(build({ platform: 'darwin' })[0]?.id).toBe('menu:app');
     for (const platform of PLATFORMS) {
-      const template = build({ platform, dev: true });
-      const keys = new Map<string, string>();
-      walk(template, (item, siblings) => {
-        if (item.type === 'separator') {
-          const index = siblings.indexOf(item);
-          expect(
-            index > 0 && index < siblings.length - 1,
-            `${platform}: separator at the edge of a menu`,
-          ).toBe(true);
-          expect(
-            siblings[index - 1]?.type,
-            `${platform}: two separators in a row`,
-          ).not.toBe('separator');
-          return;
-        }
-        const accelerator =
-          item.accelerator ??
-          (item.role ? roleAccelerator(item.role, platform) : undefined);
-        if (accelerator) {
-          const key = normalizeAccelerator(String(accelerator), platform);
-          expect(
-            keys.get(key),
-            `${platform}: ${key} on both "${keys.get(key)}" and "${item.label}"`,
-          ).toBeUndefined();
-          keys.set(key, item.label ?? '?');
-        }
-      });
-      walk([{ submenu: template }], (item) => {
-        if (!Array.isArray(item.submenu)) return;
-        const shown = labels(item.submenu);
-        expect(
-          new Set(shown).size,
-          `${platform}: duplicate label in ${item.label ?? 'the menu bar'}: ${shown.join(', ')}`,
-        ).toBe(shown.length);
-      });
-    }
-  });
+      const top = (dev: boolean) => ids(build({ platform, dev }));
+      expect(top(false)).not.toContain('menu:develop');
+      expect(top(true).slice(-2)).toEqual(['menu:develop', 'menu:help']);
+      if (platform !== 'darwin') expect(top(false)).not.toContain('menu:app');
 
-  it('lays View out as palette, layout, editor, zoom, then one full screen item', () => {
-    const view = menu(build({ platform: 'darwin' }), 'View');
-    expect(outline(view)).toEqual([
-      'app.commandPalette',
-      '---',
-      'view.toggleSidebar',
-      'view.toggleConsole',
-      'view.toggleSplit',
-      '---',
-      'editor.toggleSoftWrap',
-      'editor.toggleMinimap',
-      'editor.toggleTabFocus',
-      '---',
-      '(resetZoom)',
-      '(zoomIn)',
-      '(zoomOut)',
-      '---',
-      '(togglefullscreen)',
-    ]);
-    expect(labels(view)).toEqual([
-      'Command palette…',
-      'Hide sidebar',
-      'Hide console',
-      'Split editor',
-      'Toggle soft wrap',
-      'Toggle minimap',
-      'Use Tab to move focus',
-      'Actual size',
-      'Zoom in',
-      'Zoom out',
-      'Enter full screen',
-    ]);
-    // The role brings Ctrl+Cmd+F or F11; nothing of ours registers a second full screen key.
-    expect(
-      view.find((item) => item.role === 'togglefullscreen')?.accelerator,
-    ).toBeUndefined();
-    for (const platform of PLATFORMS)
-      expect(outline(menu(build({ platform }), 'View'))).toEqual(outline(view));
-  });
-
-  it('adds a Develop menu before Help in development builds only, with the menu bar toggle and the reloads', () => {
-    expect(build({ platform: 'darwin', dev: true }).map((item) => item.label)).toEqual([
-      'Electron Fiddle',
-      'File',
-      'Edit',
-      'View',
-      'Run',
-      'Window',
-      'Develop',
-      'Help',
-    ]);
-    expect(build({ platform: 'win32', dev: true }).map((item) => item.label)).toEqual([
-      'File',
-      'Edit',
-      'View',
-      'Run',
-      'Window',
-      'Develop',
-      'Help',
-    ]);
-    for (const platform of PLATFORMS) {
-      const develop = menu(build({ platform, dev: true }), 'Develop');
-      expect(outline(develop)).toEqual([
-        'dev.toggleMenuBar',
-        '---',
-        'view.reload',
-        'view.reloadAllWindows',
-      ]);
-      expect(labels(develop)).toEqual([
-        'Toggle title bar menu bar',
-        'Reload',
-        'Reload all windows',
-      ]);
-      expect(develop.find((item) => item.id === 'view.reload')?.accelerator).toBe(
-        'CmdOrCtrl+Shift+R',
-      );
-      // View ends with the full screen item in every build.
-      expect(outline(menu(build({ platform, dev: true }), 'View')).at(-1)).toBe(
-        '(togglefullscreen)',
-      );
-      // Packaged builds have no Develop menu at all.
-      expect(build({ platform, dev: false }).map((item) => item.label)).not.toContain(
-        'Develop',
-      );
-      const release = [...commandsIn(build({ platform, dev: false }))];
-      expect(release).not.toContain('dev.toggleMenuBar');
-      expect(release).not.toContain('view.reload');
-      expect(release).not.toContain('view.reloadAllWindows');
+      const release = commandsIn(build({ platform, dev: false }));
+      for (const id of ['dev.toggleMenuBar', 'view.reload', 'view.reloadAllWindows'])
+        expect(release).not.toContain(id);
     }
-    // The reload keys still work in release builds: the commands stay defined, and the renderer dispatches every keybinding.
-    expect(commandIds).toContain('view.reload');
   });
 
   it("checks Develop's toggle while windows draw the title bar menu bar", () => {
     const toggle = (state: Partial<MenuState>) =>
-      menu(build({ dev: true, ...state }), 'Develop').find(
-        (item) => item.id === 'dev.toggleMenuBar',
-      );
+      item(menu(build({ dev: true, ...state }), 'develop'), 'dev.toggleMenuBar');
     expect(toggle({ menuBar: false })).toMatchObject({
       type: 'checkbox',
       checked: false,
-      enabled: true,
     });
     expect(toggle({ menuBar: true })).toMatchObject({ type: 'checkbox', checked: true });
-    // A dev tool: no key of its own.
-    expect(toggle({ platform: 'win32', menuBar: true })?.accelerator).toBeUndefined();
   });
 
-  it('ends Help with Toggle developer tools, then About where there is no app menu', () => {
-    expect(outline(menu(build({ platform: 'darwin' }), 'Help'))).toEqual([
-      'help.showTour',
-      '---',
-      'help.fiddleRepository',
-      'help.electronRepository',
-      'help.reportIssue',
-      '---',
-      'help.openLogsFolder',
-      'help.copyDiagnostics',
-      '---',
-      'view.toggleDevTools',
-    ]);
-    expect(outline(menu(build({ platform: 'win32' }), 'Help')).slice(-3)).toEqual([
-      'view.toggleDevTools',
-      '---',
-      'help.about',
-    ]);
-    expect(build({ platform: 'linux' }).find((item) => item.label === 'Help')?.role).toBe(
-      'help',
-    );
-    expect(
-      menu(build(), 'Help').find((item) => item.id === 'view.toggleDevTools')
-        ?.accelerator,
-    ).toBe('CmdOrCtrl+Alt+I');
-  });
-
-  it('keeps Open gist with the Open items, and Settings and Exit in File off macOS', () => {
-    expect(outline(menu(build({ platform: 'darwin' }), 'File'))).toEqual([
-      'file.newFiddle',
-      'file.newTest',
-      'app.newWindow',
-      '---',
-      'file.open',
-      'Open recent',
-      'gist.open',
-      '---',
-      'file.save',
-      'file.saveAs',
-      'file.saveAsForge',
-      '---',
-      'gist.publish',
-      'gist.history',
-      '---',
-      'Show me',
-      '---',
-      'file.close',
-    ]);
-    const file = menu(build({ platform: 'win32' }), 'File');
-    expect(outline(file).slice(-7)).toEqual([
-      'Show me',
-      '---',
-      'app.preferences',
-      '---',
-      'file.close',
-      '---',
-      '(quit)',
-    ]);
-    expect(file.at(-1)?.label).toBe('Exit');
-    expect(menu(build({ platform: 'linux' }), 'File').at(-1)?.label).toBe(
-      'Quit Electron Fiddle',
-    );
-    expect(file.find((item) => item.id === 'file.close')?.label).toBe('Close window');
-    // Show me checks the focused window's example.
-    const showMe = file.find((item) => item.label === 'Show me')?.submenu as Item[];
-    expect(showMe.filter((item) => item.checked).map((item) => item.label)).toEqual([
-      'BrowserWindow',
-    ]);
-  });
-
-  it('has the format commands and Clear console in Edit, after the clipboard group', () => {
-    const edit = menu(build({ platform: 'linux' }), 'Edit');
-    expect(outline(edit)).toEqual([
-      'edit.undo',
-      'edit.redo',
-      '---',
-      '(cut)',
-      '(copy)',
-      '(paste)',
-      'edit.selectAll',
-      '---',
-      'editor.format',
-      'editor.formatSelection',
-      'editor.formatAll',
-      '---',
-      'console.clear',
-    ]);
-    expect(edit.find((item) => item.id === 'editor.format')?.accelerator).toBe(
-      'Shift+Alt+F',
-    );
-    // Clear console's CmdOrCtrl+K only applies in the console, so the menu never registers it.
-    expect(edit.find((item) => item.id === 'console.clear')?.accelerator).toBeUndefined();
-  });
-
-  it('keeps the tab commands in the Window menu, with arrow keys on macOS and Page keys elsewhere', () => {
+  it('keeps Settings and Quit in the app menu on macOS and in File elsewhere, and About in Help only there', () => {
     const mac = build({ platform: 'darwin' });
-    expect(mac.find((item) => item.label === 'Window')?.role).toBe('window');
-    expect(outline(menu(mac, 'Window'))).toEqual([
-      '(minimize)',
-      '(zoom)',
-      '---',
-      'editor.moveTabLeft',
-      'editor.moveTabRight',
-      '---',
-      '(front)',
-    ]);
-    const keysIn = (template: Item[]) =>
-      menu(template, 'Window')
-        .filter((item) => item.id?.startsWith('editor.moveTab'))
-        .map((item) => item.accelerator);
-    expect(keysIn(mac)).toEqual(['Ctrl+Cmd+Left', 'Ctrl+Cmd+Right']);
-    const windows = build({ platform: 'win32' });
-    expect(outline(menu(windows, 'Window'))).toEqual([
-      '(minimize)',
-      '---',
-      'editor.moveTabLeft',
-      'editor.moveTabRight',
-    ]);
-    expect(keysIn(windows)).toEqual(['Ctrl+Shift+PageUp', 'Ctrl+Shift+PageDown']);
-    // Close window is File's (CmdOrCtrl+W); the Window menu doesn't repeat it.
-    for (const platform of PLATFORMS)
-      expect(
-        menu(build({ platform }), 'Window').some((item) => item.role === 'close'),
-      ).toBe(false);
+    expect(ids(menu(mac, 'app'))).toEqual(
+      expect.arrayContaining(['role:about', 'app.preferences', 'role:quit']),
+    );
+    expect(ids(menu(mac, 'file'))).not.toContain('app.preferences');
+    expect(ids(menu(mac, 'file'))).not.toContain('role:quit');
+    expect(ids(menu(mac, 'help'))).not.toContain('help.about');
+
+    for (const platform of ['win32', 'linux'] as const) {
+      const file = menu(build({ platform }), 'file');
+      expect(ids(file)).toContain('app.preferences');
+      expect(file.at(-1)).toMatchObject({ id: 'role:quit' });
+      expect(menu(build({ platform }), 'help').at(-1)).toMatchObject({
+        id: 'help.about',
+      });
+    }
+    // Windows says Exit, the others Quit.
+    const quit = (platform: Platform, name: string) =>
+      item(menu(build({ platform }), name), 'role:quit')?.label;
+    expect(quit('win32', 'file')).toBe(t('exit'));
+    expect(quit('linux', 'file')).toBe(t('quit', { name: t('appMenu') }));
+  });
+
+  it('lists the open windows in Window, with macOS-only zoom and bring-to-front roles', () => {
+    for (const platform of PLATFORMS) {
+      const template = build({ platform });
+      expect(template.find((each) => each.id === 'menu:window')?.role).toBe('window');
+      const windowMenu = ids(menu(template, 'window'));
+      expect(windowMenu).toEqual(expect.arrayContaining(['editor.moveTabLeft']));
+      // Close window is File's; the Window menu doesn't repeat it.
+      expect(windowMenu).not.toContain('role:close');
+      const mac = platform === 'darwin';
+      expect(windowMenu.includes('role:zoom')).toBe(mac);
+      expect(windowMenu.includes('role:front')).toBe(mac);
+    }
+  });
+
+  it('has one full screen item at the end of View, with no key of its own', () => {
+    for (const platform of PLATFORMS) {
+      const view = menu(build({ platform }), 'view');
+      expect(view.at(-1)).toMatchObject({ id: 'role:togglefullscreen' });
+      // The role brings Ctrl+Cmd+F or F11; nothing of ours registers a second key.
+      expect(view.at(-1)?.accelerator).toBeUndefined();
+    }
   });
 
   it('says what the stateful items will do', () => {
-    const idle = build();
-    expect(labels(menu(idle, 'Run'))).toEqual([
-      'Run',
-      'Bisect…',
-      'Package',
-      'Make installers',
-    ]);
-    const active = build({
+    const label = (state: Partial<MenuState>, name: string, id: string) =>
+      item(menu(build(state), name), id)?.label;
+    const bisect = (result: { good: string; bad: string } | null) => ({
+      good: '30.0.0',
+      bad: '31.0.0',
+      auto: true,
+      current: result ? null : '30.4.0',
+      result,
+    });
+
+    expect(label({}, 'view', 'view.toggleSidebar')).toBe(t('hideSidebar'));
+    expect(label({}, 'view', 'view.toggleConsole')).toBe(t('hideConsole'));
+    expect(label({}, 'view', 'role:togglefullscreen')).toBe(t('enterFullScreen'));
+    expect(label({}, 'run', 'run.toggle')).toBe(t('run'));
+    expect(label({}, 'run', 'bisect.toggle')).toBe(t(commands['bisect.toggle'].label));
+
+    const active = {
       win: windowState({
         layout: { sidebar: false, consoleVisible: false },
-        run: {
-          status: 'running',
-          bisect: {
-            good: '30.0.0',
-            bad: '31.0.0',
-            auto: true,
-            current: '30.4.0',
-            result: null,
-          },
-        },
+        run: { status: 'running', bisect: bisect(null) },
       }),
       fullScreen: true,
-    });
-    expect(labels(menu(active, 'Run'))).toEqual([
-      'Stop',
-      'Stop bisect',
-      'Package',
-      'Make installers',
-    ]);
-    expect(labels(menu(active, 'View')).slice(1, 3)).toEqual([
-      'Show sidebar',
-      'Show console',
-    ]);
-    expect(menu(active, 'View').at(-1)?.label).toBe('Exit full screen');
+    } satisfies Partial<MenuState>;
+    expect(label(active, 'view', 'view.toggleSidebar')).toBe(t('showSidebar'));
+    expect(label(active, 'view', 'view.toggleConsole')).toBe(t('showConsole'));
+    expect(label(active, 'view', 'role:togglefullscreen')).toBe(t('exitFullScreen'));
+    expect(label(active, 'run', 'run.toggle')).toBe(t('stop'));
+    expect(label(active, 'run', 'bisect.toggle')).toBe(t('stopBisect'));
+
     // A finished bisect is nothing to stop.
-    const finished = build({
-      win: windowState({
-        run: {
-          status: 'ready',
-          bisect: {
-            good: '30.0.0',
-            bad: '31.0.0',
-            auto: true,
-            current: null,
-            result: { good: '30.3.0', bad: '30.4.0' },
-          },
-        },
-      }),
+    const finished = windowState({
+      run: { status: 'ready', bisect: bisect({ good: '30.3.0', bad: '30.4.0' }) },
     });
-    expect(labels(menu(finished, 'Run')).slice(0, 2)).toEqual(['Run', 'Bisect…']);
-    // No focused window (macOS): the defaults, disabled by the registry.
+    expect(label({ win: finished }, 'run', 'bisect.toggle')).toBe(
+      t(commands['bisect.toggle'].label),
+    );
+
+    // No focused window (macOS): the defaults.
     expect(
-      labels(menu(build({ focused: undefined, win: undefined }), 'View')).slice(1, 3),
-    ).toEqual(['Hide sidebar', 'Hide console']);
+      label({ focused: undefined, win: undefined }, 'view', 'view.toggleSidebar'),
+    ).toBe(t('hideSidebar'));
   });
 
-  it('follows keybinding overrides, and drops an unbound key', () => {
-    const file = menu(
-      build({ keybindings: { 'file.save': 'Ctrl+Alt+S', 'file.saveAs': null } }),
-      'File',
-    );
-    expect(file.find((item) => item.id === 'file.save')?.accelerator).toBe('Ctrl+Alt+S');
-    expect(file.find((item) => item.id === 'file.saveAs')?.accelerator).toBeUndefined();
+  it('follows keybinding overrides, drops an unbound key and leaves context-scoped keys to the renderer', () => {
+    const template = build({
+      keybindings: { 'file.save': 'Ctrl+Alt+S', 'file.saveAs': null },
+    });
+    const file = menu(template, 'file');
+    expect(item(file, 'file.save')?.accelerator).toBe('Ctrl+Alt+S');
+    expect(item(file, 'file.saveAs')?.accelerator).toBeUndefined();
+    // Clear console's key only applies in the console, so a menu item would fire it everywhere.
+    expect(item(menu(template, 'edit'), 'console.clear')?.accelerator).toBeUndefined();
+  });
+
+  it('gives the main commands their default key on each platform', () => {
+    const expected: [id: CommandId, key: string, macKey?: string][] = [
+      ['file.save', 'CmdOrCtrl+S'],
+      ['view.reload', 'CmdOrCtrl+Shift+R'],
+      ['view.toggleDevTools', 'CmdOrCtrl+Alt+I'],
+      ['editor.format', 'Shift+Alt+F'],
+      ['editor.moveTabLeft', 'Ctrl+Shift+PageUp', 'Ctrl+Cmd+Left'],
+      ['editor.moveTabRight', 'Ctrl+Shift+PageDown', 'Ctrl+Cmd+Right'],
+    ];
+    for (const platform of PLATFORMS) {
+      const template = build({ platform, dev: true });
+      for (const [id, key, macKey = key] of expected) {
+        let found: Item | undefined;
+        walk(template, (each) => void (each.id === id && (found ??= each)));
+        expect(found?.accelerator, `${platform}: ${id}`).toBe(
+          platform === 'darwin' ? macKey : key,
+        );
+      }
+    }
   });
 
   it('reaches every command but the editor-only navigation ones from the menu bar', () => {
@@ -539,13 +283,55 @@ describe('application menu', () => {
     );
   });
 
-  it('uses sentence case, and an ellipsis only at the end of items that ask for more', () => {
+  it('repeats no label within a menu, registers no key twice, and has no empty groups', () => {
+    for (const platform of PLATFORMS) {
+      const template = build({ platform, dev: true });
+      const keys = new Map<string, string>();
+      walk(template, (each, siblings) => {
+        if (each.type === 'separator') {
+          const index = siblings.indexOf(each);
+          expect(
+            index > 0 && index < siblings.length - 1,
+            `${platform}: separator at the edge of a menu`,
+          ).toBe(true);
+          expect(
+            siblings[index - 1]?.type,
+            `${platform}: two separators in a row`,
+          ).not.toBe('separator');
+          return;
+        }
+        const accelerator =
+          each.accelerator ??
+          (each.role ? roleAccelerator(each.role, platform) : undefined);
+        if (accelerator) {
+          const key = normalizeAccelerator(String(accelerator), platform);
+          expect(
+            keys.get(key),
+            `${platform}: ${key} on both "${keys.get(key)}" and "${each.label}"`,
+          ).toBeUndefined();
+          keys.set(key, each.label ?? '?');
+        }
+      });
+      walk([{ submenu: template }], (each) => {
+        if (!Array.isArray(each.submenu)) return;
+        const shown = each.submenu
+          .filter((child) => child.type !== 'separator')
+          .map((child) => child.label);
+        expect(
+          new Set(shown).size,
+          `${platform}: duplicate label in ${each.label ?? 'the menu bar'}: ${shown.join(', ')}`,
+        ).toBe(shown.length);
+      });
+    }
+  });
+
+  it('uses sentence case, and an ellipsis only at the end of a label', () => {
     const properNouns = new Set(['Electron', 'Fiddle', 'GitHub', 'Forge', 'Tab']);
     for (const platform of PLATFORMS) {
-      walk(build({ platform, dev: true }), (item, siblings) => {
-        const label = item.label;
+      walk(build({ platform, dev: true }), (each, siblings) => {
+        const label = each.label;
         if (
-          item.type === 'separator' ||
+          each.type === 'separator' ||
           !label ||
           siblings.some((sibling) => sibling.type === 'radio')
         )
@@ -562,22 +348,70 @@ describe('application menu', () => {
         expect(capitalized, `${label}: title case`).toEqual([]);
       });
     }
-    // Dialog-opening items end in an ellipsis; plain actions and toggles don't.
-    const file = labels(menu(build(), 'File'));
-    expect(file).toEqual(
-      expect.arrayContaining([
-        'Open…',
-        'Open gist…',
-        'Save as…',
-        'Save as Forge project…',
-        'Publish to gist…',
-      ]),
-    );
-    expect(file).toEqual(expect.arrayContaining(['New fiddle', 'Save', 'Close window']));
   });
 });
 
-// The title bar's menu bar on Windows and Linux (`Window.menuBar`, ./menu-model.ts).
+describe('command items', () => {
+  it('are disabled when the registry says so, asking about the focused window', () => {
+    const isEnabled = vi.fn((id: string) => id !== 'file.save');
+    const template = build({ focused: 'w' }, {
+      isEnabled,
+      run: vi.fn(),
+    } as unknown as CommandRegistry);
+    const file = menu(template, 'file');
+    expect(item(file, 'file.save')).toMatchObject({ enabled: false });
+    expect(item(file, 'file.saveAs')).toMatchObject({ enabled: true });
+    expect(isEnabled).toHaveBeenCalledWith('file.save', 'w');
+  });
+
+  it('run in the window the click came from, else the focused one, and log a failure', async () => {
+    const run = vi.fn(() => Promise.resolve());
+    const template = build({ focused: 'focused' }, {
+      isEnabled: () => true,
+      run,
+    } as unknown as CommandRegistry);
+    const save = item(menu(template, 'file'), 'file.save')!;
+    const click = (window?: { id: string }) =>
+      save.click?.(
+        {} as Electron.MenuItem,
+        window as never,
+        {} as Electron.KeyboardEvent,
+      );
+
+    click({ id: 'clicked' });
+    expect(run).toHaveBeenLastCalledWith('file.save', { windowId: 'clicked' });
+    click();
+    expect(run).toHaveBeenLastCalledWith('file.save', { windowId: 'focused' });
+
+    run.mockRejectedValueOnce(new Error('boom'));
+    click();
+    await vi.waitFor(() => expect(log.error).toHaveBeenCalled());
+  });
+
+  it('open a recent folder and an example in the window the click came from', () => {
+    recent.folders = ['/tmp/f1'];
+    try {
+      const template = build({ platform: 'linux', focused: 'focused' });
+      const click = (id: string) => {
+        let found: Item | undefined;
+        walk(template, (candidate) => void (candidate.id === id && (found = candidate)));
+        if (!found) throw new Error(`no ${id}`);
+        found.click?.(
+          {} as Electron.MenuItem,
+          { id: 'clicked' } as never,
+          {} as Electron.KeyboardEvent,
+        );
+      };
+      click('recent:0');
+      expect(documents.openFolderIn).toHaveBeenCalledWith('clicked', '/tmp/f1');
+      click('example:Menu');
+      expect(documents.showMeIn).toHaveBeenCalledWith('clicked', 'Menu');
+    } finally {
+      recent.folders = [];
+    }
+  });
+});
+
 describe('menu bar model', () => {
   /** Every non-separator node, depth first. */
   const nodes = (model: MenuNode[]): Exclude<MenuNode, { kind: 'separator' }>[] =>
@@ -594,89 +428,31 @@ describe('menu bar model', () => {
   it('gives every item a stable, unique id, and is a valid store value', () => {
     for (const platform of PLATFORMS) {
       const template = build({ platform, dev: true });
-      const ids: string[] = [];
-      walk(template, (item) => {
-        if (item.type === 'separator') return;
-        expect(item.id, `${platform}: "${item.label}" has no id`).toBeTruthy();
-        ids.push(item.id!);
+      const all: string[] = [];
+      walk(template, (each) => {
+        if (each.type === 'separator') return;
+        expect(each.id, `${platform}: "${each.label}" has no id`).toBeTruthy();
+        all.push(each.id!);
       });
-      expect(new Set(ids).size, `${platform}: duplicate ids in ${ids.join(', ')}`).toBe(
-        ids.length,
+      expect(new Set(all).size, `${platform}: duplicate ids in ${all.join(', ')}`).toBe(
+        all.length,
       );
       const model = toMenuModel(template, platform);
       expect(menuBarSchema.safeParse(model).success).toBe(true);
-      // Every command and role of the native template is in the model, under the same id.
-      expect(nodes(model).map((node) => node.id)).toEqual(ids);
+      expect(nodes(model).map((node) => node.id)).toEqual(all);
     }
   });
 
-  it('lists File, Edit, View, Run, Window and Help as submenus, with formatted accelerators', () => {
-    const model = toMenuModel(build({ platform: 'win32' }), 'win32');
-    expect(
-      model.map((node) => (node.kind === 'submenu' ? [node.id, node.label] : node.kind)),
-    ).toEqual([
-      ['menu:file', 'File'],
-      ['menu:edit', 'Edit'],
-      ['menu:view', 'View'],
-      ['menu:run', 'Run'],
-      ['menu:window', 'Window'],
-      ['menu:help', 'Help'],
-    ]);
-    expect(find(model, 'file.newFiddle')).toEqual({
-      kind: 'item',
-      id: 'file.newFiddle',
-      label: 'New fiddle',
-      enabled: true,
-      accelerator: 'Ctrl+N',
-    });
-    expect(find(model, 'app.commandPalette')).toMatchObject({
-      accelerator: 'Ctrl+Shift+P',
-    });
-    expect(find(model, 'view.toggleSplit')).toMatchObject({ accelerator: 'Ctrl+\\' });
-    expect(find(model, 'editor.moveTabLeft')).toMatchObject({
-      accelerator: 'Ctrl+Shift+PageUp',
-    });
-    expect(find(model, 'editor.format')).toMatchObject({ accelerator: 'Shift+Alt+F' });
-    // Role items show the key Electron gives the role; Exit has none on Windows, Quit has Ctrl+Q on Linux.
-    expect(find(model, 'role:cut')).toMatchObject({
-      label: 'Cut',
-      accelerator: 'Ctrl+X',
-    });
-    expect(find(model, 'role:togglefullscreen')).toMatchObject({ accelerator: 'F11' });
-    expect(find(model, 'role:zoomIn')).toMatchObject({ accelerator: 'Ctrl++' });
-    expect(find(model, 'role:quit')).toEqual({
-      kind: 'item',
-      id: 'role:quit',
-      label: 'Exit',
-      enabled: true,
-    });
-    expect(
-      find(toMenuModel(build({ platform: 'linux' }), 'linux'), 'role:quit'),
-    ).toMatchObject({ label: 'Quit Electron Fiddle', accelerator: 'Ctrl+Q' });
-    expect(
-      find(toMenuModel(build({ platform: 'darwin' }), 'darwin'), 'file.save'),
-    ).toMatchObject({ accelerator: '⌘S' });
-    // A context-scoped key isn't the menu's, so the model shows none either.
-    expect(find(model, 'console.clear')).not.toHaveProperty('accelerator');
-  });
-
-  it('carries enablement, checked examples and the recent folders', () => {
+  it('carries enablement, the checked example and the recent folders', () => {
     recent.folders = ['/home/me/fiddles/one', '/home/me/fiddles/two'];
     try {
-      const disabled = {
-        isEnabled: (id: string) => id !== 'file.save',
-        run: vi.fn(() => Promise.resolve()),
-      } as unknown as CommandRegistry;
-      const template = buildMenuTemplate(disabled, {
-        platform: 'linux',
-        focused: 'w',
-        win: windowState(),
-        fullScreen: false,
-        keybindings: {},
-        dev: false,
-        menuBar: true,
-      });
-      const model = toMenuModel(template, 'linux');
+      const model = toMenuModel(
+        build({ platform: 'linux', focused: 'w' }, {
+          isEnabled: (id: string) => id !== 'file.save',
+          run: vi.fn(),
+        } as unknown as CommandRegistry),
+        'linux',
+      );
       expect(find(model, 'file.save')).toMatchObject({ enabled: false });
       expect(find(model, 'file.saveAs')).toMatchObject({ enabled: true });
       const showMe = find(model, 'menu:showMe');
@@ -704,54 +480,8 @@ describe('menu bar model', () => {
       { kind: 'item', id: 'recent:none', label: 'noRecent', enabled: false },
     ]);
   });
-
-  it('says Hide or Show and Run or Stop per window, like the native menu', () => {
-    const busy = toMenuModel(
-      build({
-        platform: 'win32',
-        win: windowState({
-          layout: { sidebar: false },
-          run: { status: 'running', bisect: null },
-        }),
-      }),
-      'win32',
-    );
-    expect(find(busy, 'view.toggleSidebar')).toMatchObject({ label: 'Show sidebar' });
-    expect(find(busy, 'run.toggle')).toMatchObject({
-      label: 'Stop',
-      accelerator: 'Ctrl+R',
-    });
-  });
-
-  it('opens a recent folder and an example in the window the click came from', () => {
-    recent.folders = ['/tmp/f1'];
-    try {
-      const template = build({ platform: 'linux', focused: 'the-window' });
-      const item = (id: string): Item => {
-        let found: Item | undefined;
-        walk(template, (candidate) => void (candidate.id === id && (found = candidate)));
-        if (!found) throw new Error(`no ${id}`);
-        return found;
-      };
-      item('recent:0').click?.(
-        {} as Electron.MenuItem,
-        undefined,
-        {} as Electron.KeyboardEvent,
-      );
-      expect(documents.openFolderIn).toHaveBeenCalledWith('the-window', '/tmp/f1');
-      item('example:Menu').click?.(
-        {} as Electron.MenuItem,
-        undefined,
-        {} as Electron.KeyboardEvent,
-      );
-      expect(documents.showMeIn).toHaveBeenCalledWith('the-window', 'Menu');
-    } finally {
-      recent.folders = [];
-    }
-  });
 });
 
-// installMenu's runtime state: the Develop menu's title bar menu bar toggle (`dev.toggleMenuBar`).
 describe('title bar menu bar toggle', () => {
   /** The StateHub as installMenu uses it: a dev build with these windows registered. */
   function fakeHub(windowIds: string[]) {
@@ -771,10 +501,19 @@ describe('title bar menu bar toggle', () => {
   /** Develop's toggle item in the native menu set last. */
   const nativeToggle = () => {
     const template = electron.Menu.setApplicationMenu.mock.calls.at(-1)?.[0] as Item[];
-    return menu(template, 'Develop').find((item) => item.id === 'dev.toggleMenuBar');
+    return item(menu(template, 'develop'), 'dev.toggleMenuBar');
   };
   const topLevel = (model: MenuNode[]) =>
-    model.map((node) => (node.kind === 'submenu' ? node.label : node.kind));
+    model.map((node) => (node.kind === 'submenu' ? node.id : node.kind));
+  const barMenus = [
+    'menu:file',
+    'menu:edit',
+    'menu:view',
+    'menu:run',
+    'menu:window',
+    'menu:develop',
+    'menu:help',
+  ];
 
   it('shows the bar in every window on macOS, with the Linux menus, then takes it away again', async () => {
     const hub = fakeHub(['w1', 'w2']);
@@ -792,22 +531,10 @@ describe('title bar menu bar toggle', () => {
     ]);
     const pushed = hub.updateWindow.mock.calls[0]![1].menuBar!;
     expect(menuBarSchema.safeParse(pushed).success).toBe(true);
-    expect(topLevel(pushed)).toEqual([
-      'File',
-      'Edit',
-      'View',
-      'Run',
-      'Window',
-      'Develop',
-      'Help',
-    ]);
     // Linux menus: Quit is in File, with Ctrl+Q written the Linux way.
+    expect(topLevel(pushed)).toEqual(barMenus);
     const file = pushed[0]?.kind === 'submenu' ? pushed[0].children : [];
-    expect(file.at(-1)).toMatchObject({
-      id: 'role:quit',
-      label: 'Quit Electron Fiddle',
-      accelerator: 'Ctrl+Q',
-    });
+    expect(file.at(-1)).toMatchObject({ id: 'role:quit', accelerator: 'Ctrl+Q' });
     // The toggle is checked now, in the pushed bar and in the native menu.
     const develop = pushed.find(
       (node) => node.kind === 'submenu' && node.id === 'menu:develop',
@@ -834,15 +561,7 @@ describe('title bar menu bar toggle', () => {
       installMenu({ registry, hub, platform } as unknown as Services);
       await rebuilt();
       expect(hub.updateWindow).toHaveBeenCalledTimes(1);
-      expect(topLevel(hub.updateWindow.mock.calls[0]![1].menuBar!)).toEqual([
-        'File',
-        'Edit',
-        'View',
-        'Run',
-        'Window',
-        'Develop',
-        'Help',
-      ]);
+      expect(topLevel(hub.updateWindow.mock.calls[0]![1].menuBar!)).toEqual(barMenus);
       expect(nativeToggle()).toMatchObject({ checked: true });
       expect(toggleWindowMenuBar()).toBe(false);
       await rebuilt();

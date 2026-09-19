@@ -4,7 +4,6 @@ export default {
   "hideSidebar": "[Ĥîðé šîðéƀáŕ one two]",
   "showSidebar": "[Šĥöŵ šîðéƀáŕ one two]",
   "edited": "[Éðîţéð one]",
-  "windowTitleEdited": "[{{name}} (éðîţéð) one two]",
   "settings": "[Šéţţîñĝš one]",
   "menuBar": "[Åþþļîçáţîöñ ɱéñû one two]",
   "menuBarMore": "[Ṁöŕé one]",

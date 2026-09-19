@@ -1,13 +1,15 @@
 /** The window-free run pieces, with real child processes. */
 import { spawn } from 'node:child_process';
 import fs from 'node:fs';
+import os from 'node:os';
 import path from 'node:path';
 
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
 vi.mock('electron', () => ({ app: { isPackaged: false } }));
 
-const { makeRunDir, stopChild, waitForExit, writeRunApp } = await import('./process');
+const { makeRunDir, stopChild, sweepStaleDirs, waitForExit, writeRunApp } =
+  await import('./process');
 
 const node = (script: string) =>
   spawn(process.execPath, ['-e', script], { stdio: ['ignore', 'pipe', 'pipe'] });
@@ -94,5 +96,31 @@ describe('run directories', () => {
     expect(
       JSON.parse(fs.readFileSync(path.join(appDir, 'package.json'), 'utf8')),
     ).toMatchObject({ name: 'demo', main: './main.js' });
+  });
+});
+
+describe('sweepStaleDirs', () => {
+  it('removes old run and project dirs, and nothing else', async () => {
+    const root = fs.mkdtempSync(path.join(os.tmpdir(), 'fiddle-sweep-'));
+    dirs.push(root);
+    const dayAgo = Date.now() / 1000 - 2 * 24 * 60 * 60;
+    const make = (name: string, old: boolean) => {
+      const dir = path.join(root, name);
+      fs.mkdirSync(dir);
+      fs.writeFileSync(path.join(dir, 'file'), 'x');
+      if (old) fs.utimesSync(dir, dayAgo, dayAgo);
+    };
+    make('electron-fiddle-aB3dE9', true);
+    make('electron-fiddle-package-aB3dE9', true);
+    make('electron-fiddle-make-aB3dE9', true);
+    make('electron-fiddle-Zz9Yy8', false);
+    make('electron-fiddle-notes', true);
+    make('other-aB3dE9', true);
+    await sweepStaleDirs(root);
+    expect(fs.readdirSync(root).sort()).toEqual([
+      'electron-fiddle-Zz9Yy8',
+      'electron-fiddle-notes',
+      'other-aB3dE9',
+    ]);
   });
 });

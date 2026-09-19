@@ -1,14 +1,7 @@
 /**
- * Carries `FiddleError`s across EIPC. IPC can't carry an error's class or
- * properties, only its message, so this is the one place that encodes them:
- *
- * - Main wraps every handler (`wrapImplementation`). A thrown error is
- *   serialized as `{ code, message, details }` into the rejected error's
- *   message. Unexpected errors become `internal`, and their stack is logged.
- * - The renderer wraps the generated API (`wrapRendererApi`), which re-throws
- *   that as a `FiddleError`.
- *
- * No Electron imports: this runs in main, the renderer and plain Node tests.
+ * IPC can't carry an error's class or properties, only its message. Main
+ * serializes `{ code, message, details }` into it (`wrapImplementation`) and the
+ * renderer re-throws a `FiddleError` (`wrapRendererApi`). No Electron imports.
  */
 import {
   ErrorCode,

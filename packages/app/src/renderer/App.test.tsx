@@ -6,6 +6,7 @@ const mocks = vi.hoisted(() => ({
   win: null as unknown,
   storeError: undefined as Error | undefined,
   synced: true,
+  logError: vi.fn(),
   ReportReady: vi.fn(() => Promise.resolve()),
 }));
 
@@ -23,6 +24,7 @@ vi.mock('react-i18next', () => ({
   }),
 }));
 vi.mock('../i18n/renderer', () => ({ useSyncLocale: () => undefined }));
+vi.mock('./features/about/log', () => ({ log: { error: mocks.logError } }));
 vi.mock('./state', () => ({
   useAppState: () => mocks.app,
   useWindowState: () => mocks.win,
@@ -77,15 +79,13 @@ describe('App', () => {
     mocks.app = undefined;
     mocks.win = null;
     mocks.storeError = new Error('bad store');
-    const error = vi.spyOn(console, 'error').mockImplementation(() => undefined);
     render(<App />);
     expect(screen.getByRole('alert')).toBeTruthy();
     expect(screen.queryByText('the shell')).toBeNull();
     expect(mocks.ReportReady).toHaveBeenCalledOnce();
-    expect(error).toHaveBeenCalledWith(
-      '[fiddle] a store failed to load',
+    expect(mocks.logError).toHaveBeenCalledWith(
+      'a store failed to load',
       mocks.storeError,
     );
-    error.mockRestore();
   });
 });

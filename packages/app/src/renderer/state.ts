@@ -1,12 +1,5 @@
-/**
- * The App and Window stores, subscribed once per window. EIPC adds an IPC
- * listener for every `useAppStore()` and `useWindowStore()` call, so only
- * `StoreProvider` calls them; everything else reads the stores from here.
- *
- * Main sends every push as new objects, so `StoreProvider` hands out the
- * previous objects for the parts that didn't change (`shareEqual`), which is
- * what lets `memo` and `useMemo` on a slice of a store skip work.
- */
+// EIPC adds an IPC listener for every `useAppStore()` and `useWindowStore()` call, so only `StoreProvider` calls
+// them. Main pushes new objects each time; `shareEqual` keeps unchanged parts as they were, so `memo` can skip work.
 import { createContext, createElement, use, useState, type ReactNode } from 'react';
 
 import {

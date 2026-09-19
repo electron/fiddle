@@ -7,12 +7,10 @@ on:
 
 permissions: {}
 
-# Release integrity:
-# - Each platform runs `publish --dry-run`; `release` runs `--from-dry-run`.
-# - Jobs that hold secrets install with `--mode=skip-build`, so no dependency
-#   lifecycle scripts run there. Forge downloads its own Electron to package.
-# - Only `build-windows` (Azure Trusted Signing) and `attest` (Sigstore) can
-#   request OIDC tokens. `attest` runs no repository or dependency code.
+# Each platform runs `publish --dry-run`; `release` runs `--from-dry-run`.
+# Jobs with secrets install with `--mode=skip-build`, so no dependency scripts
+# run there. Only `build-windows` (Azure) and `attest` (Sigstore) can request
+# OIDC tokens; `attest` runs no repository or dependency code.
 
 jobs:
   test:
@@ -109,8 +107,7 @@ jobs:
     runs-on: windows-latest
     permissions:
       contents: read
-      # Required for the OIDC login to Azure used for code signing. Kept in
-      # its own job so the macOS and Linux runners can't request ID tokens.
+      # For the Azure OIDC login. Only this job can request ID tokens.
       id-token: write
     environment: release
     steps:
@@ -152,10 +149,8 @@ jobs:
           "WINDOWS_SIGNTOOL_PATH=$($signtool.FullName)" >> $env:GITHUB_ENV
       - name: Build (Windows)
         env:
-          # AZURE_CODE_SIGNING_DLIB and WINDOWS_SIGNTOOL_PATH come from the
-          # previous step via GITHUB_ENV. The values below identify the Trusted
-          # Signing account and are not secrets; the endpoint must match the
-          # region the account was created in.
+          # The DLIB and signtool paths come from the previous step. The values
+          # below are not secrets; the endpoint must match the account's region.
           AZURE_CODE_SIGNING_ENDPOINT: https://eus.codesigning.azure.net
           AZURE_CODE_SIGNING_ACCOUNT_NAME: OpenJS-CodeSigning
           AZURE_CODE_SIGNING_CERTIFICATE_PROFILE_NAME: Electron
@@ -205,8 +200,7 @@ jobs:
       - attest
     environment: release
     permissions:
-      # Creates the draft release with the job's own token, so this job needs
-      # no OIDC token.
+      # Creates the draft release with the job's own token.
       contents: write
     steps:
       - run: git config --global core.autocrlf input
@@ -249,11 +243,21 @@ jobs:
         with:
           name: vite-source-maps
           path: packages/app/.vite
-      # The release name comes from package.json, with no `v` prefix, exactly
-      # as the app reports it to Sentry.
+      # No `v` prefix: the release name is the one the app reports to Sentry.
       - name: Read version
         id: version
         run: echo "version=$(node -p "require('./packages/app/package.json').version")" >> "$GITHUB_OUTPUT"
+      # Frame URLs: the renderer is served from app://main/, so its maps match
+      # `~/assets/...`; main and preload frames read app:///.vite/build/....
+      - uses: getsentry/action-release@ff07929a6537bac57790c3451cf4d364aca38528 # v3.7.0
+        env:
+          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+          SENTRY_ORG: electronjs
+          SENTRY_PROJECT: electron-fiddle
+        with:
+          release: Electron-Fiddle@${{ steps.version.outputs.version }}
+          sourcemaps: ./packages/app/.vite/renderer/main_window
+          url_prefix: '~/'
       - uses: getsentry/action-release@ff07929a6537bac57790c3451cf4d364aca38528 # v3.7.0
         env:
           SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
@@ -262,5 +266,6 @@ jobs:
         with:
           environment: production
           release: Electron-Fiddle@${{ steps.version.outputs.version }}
-          sourcemaps: ./packages/app/.vite/
-          url_prefix: '~/.vite'
+          set_commits: skip
+          sourcemaps: ./packages/app/.vite/build
+          url_prefix: '~/.vite/build'

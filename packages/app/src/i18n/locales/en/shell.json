@@ -18,10 +18,6 @@
     "description": "Shown after the fiddle name in the title bar when the fiddle has unsaved changes.",
     "maxLength": 20
   },
-  "windowTitleEdited": {
-    "message": "{{name}} (edited)",
-    "description": "The OS window title when the fiddle has unsaved changes. {{name}} is the fiddle name."
-  },
   "settings": {
     "message": "Settings",
     "description": "Title bar button that opens the settings page.",

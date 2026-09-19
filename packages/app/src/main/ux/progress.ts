@@ -1,7 +1,3 @@
-/**
- * What the OS integration shows, derived from the stores: taskbar and dock
- * progress, and which long operations just finished. Pure functions.
- */
 import type { RunState, VersionsState } from '../../shared/stores';
 
 type TaskbarProgress =

@@ -1,15 +1,11 @@
 /**
- * How the title bar degrades in narrow windows (the minimum size is 600×600).
- * Its layout already can't overlap: the sides are flex groups that
- * push the capsule instead of running under it, and the capsule's version
- * picker narrows last. This decides, from widths the CSS fixes, what gives way
- * before that: the Publish label, then (Windows at its narrowest, where the
- * caption buttons take 140px) the Open gist button and the Run button's key
- * hint. Widths are budgets in px: labels get room for long translations.
+ * What gives way in a narrow title bar (the window is at least 600px wide), before the capsule's version picker
+ * narrows: the Publish label, then the Open gist button and Run's key hint. The widths are px budgets that must
+ * match the CSS, and labels get room for long translations.
  */
 import type { Platform } from '../../shared/stores';
 
-/** Fixed widths of the title bar's parts, in px, from the Lucent anatomy and the components' CSS. */
+/** Fixed widths of the title bar's parts, in px, as the components' CSS lays them out. */
 export const TITLE_BAR_PARTS = {
   /** The title bar's own padding, each side. */
   padding: 12,
@@ -77,7 +73,6 @@ export function rightGroupMin(
   );
 }
 
-/** The capsule with the picker `picker` px wide and Run `run` px wide. */
 export const capsuleWidth = (picker: number, run: number): number =>
   P.capsuleChrome + picker + run;
 

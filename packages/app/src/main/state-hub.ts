@@ -1,11 +1,7 @@
 /**
- * Holds the `App` value and one `Window` value per window, bumps each store's
- * `rev` on every change, and fans pushes out: `App` changes go to every
- * registered window, `Window` changes only to their own. Pushes are coalesced
- * within a tick: several changes in one synchronous block produce one push per
- * store per window, carrying the latest value.
- *
- * No Electron imports: windows are represented by a `WindowSink`.
+ * Pushes are coalesced within a tick: several synchronous changes produce one
+ * push per store per window, carrying the latest value. No Electron imports:
+ * windows are `WindowSink`s.
  */
 import { ErrorCode, FiddleError } from '../shared/errors';
 import {

@@ -1,9 +1,3 @@
-/**
- * The command palette: CmdOrCtrl+Shift+P, and F1 in the editor (both arrive
- * as the `app.commandPalette` Window.Command). It searches commands with
- * their current shortcuts, the fiddle's files, Electron versions and Show Me
- * examples, with recently used items first.
- */
 import { useEffect, useId, useMemo, useRef, useState, type KeyboardEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Dialog, Modal, ModalOverlay } from 'react-aria-components';
@@ -15,14 +9,14 @@ import {
   isCommandEnabled,
   isCommandListed,
 } from '../../../shared/commands';
-import { FiddleError } from '../../../shared/errors';
 import { SHOW_ME_EXAMPLES } from '../../../shared/examples';
 import { effectiveAccelerator } from '../../../shared/settings';
 import { acceleratorKeys } from '../../../shared/accelerators';
 import type { AppState, ReleaseRow, WindowState } from '../../../shared/stores';
-import { cx, Icon, Kbd, showToast, type IconName } from '../../../ui';
+import { cx, Icon, Kbd, type IconName } from '../../../ui';
 import menu from '../../../ui/components/Menu.module.css';
 import { useAppState, useWindowState } from '../../state';
+import { toastError } from '../../toast-error';
 import { OnboardingTour } from '../onboarding/OnboardingTour';
 import { useReleases } from '../run/use-run';
 import styles from './CommandPalette.module.css';
@@ -70,7 +64,7 @@ function useEntries(
 ): Entry[] {
   const { t } = useTranslation('palette');
   const { t: tMain } = useTranslation('main');
-  // Separate from the rest so a store push while the palette is open doesn't translate every release again.
+  // Separate, so a store push while the palette is open doesn't translate every release again.
   const releaseEntries = useMemo<Entry[]>(
     () =>
       !open
@@ -194,19 +188,14 @@ export function CommandPalette() {
     const next = pushRecent(recent, entry.id);
     setRecent(next);
     writeRecent(next);
-    // The overlay gives focus back in a frame of its own, queued after this one. Wait for it, so
-    // the entry runs with focus where it was (the editor, for its actions).
+    // The overlay gives focus back a frame later. Wait for it, so the entry runs with focus where it was (the editor, for its actions).
     requestAnimationFrame(() => {
       requestAnimationFrame(() => {
         Promise.resolve()
           .then(() => entry.run())
-          .catch((error: unknown) => {
-            showToast({
-              title: t('runFailed', { label: entry.label }),
-              description: FiddleError.from(error).message,
-              tone: 'error',
-            });
-          });
+          .catch((error: unknown) =>
+            toastError(error, t('runFailed', { label: entry.label })),
+          );
       });
     });
   };
@@ -236,7 +225,7 @@ export function CommandPalette() {
         isDismissable
         className={styles.overlay}
       >
-        <Modal className={styles.modal}>
+        <Modal className={menu.popover}>
           <Dialog aria-label={t('label')} className={cx(menu.surface, styles.surface)}>
             <div className={styles.search}>
               <Icon name="search" className={styles.searchIcon} />
@@ -268,7 +257,6 @@ export function CommandPalette() {
               aria-label={t('label')}
               className={styles.list}
             >
-              {shown.length === 0 && <li className={styles.empty}>{t('empty')}</li>}
               {shown.map((entry, index) => (
                 <li
                   key={entry.id}
@@ -296,6 +284,9 @@ export function CommandPalette() {
                 </li>
               ))}
             </ul>
+            <div role="status" className={styles.empty}>
+              {shown.length === 0 ? t('empty') : null}
+            </div>
           </Dialog>
         </Modal>
       </ModalOverlay>
