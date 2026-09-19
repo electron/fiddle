@@ -30,6 +30,7 @@ import {
 } from './fs-util.js';
 import { LOCK_STALE_MS, isProcessAlive, withLock } from './lock.js';
 import { DefaultPaths, type Paths } from './paths.js';
+import { warmExecutable } from './warm.js';
 
 function getZipName(version: string): string {
   return `electron-v${version}-${process.platform}-${process.arch}.zip`;
@@ -693,6 +694,7 @@ export class Installer extends EventEmitter {
           }
           await fs.promises.writeFile(path.join(electronInstall, INSTALLED_MARKER), '');
         });
+        warmExecutable(electronExec);
       }
     } finally {
       this.installing.delete(version);
@@ -776,6 +778,7 @@ export class Installer extends EventEmitter {
         this.setState(version, originalState);
         throw err;
       }
+      warmExecutable(exec);
       return done();
     });
   }
