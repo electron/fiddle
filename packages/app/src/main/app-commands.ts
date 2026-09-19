@@ -16,6 +16,7 @@ import { packageFiddle } from './packaging/service';
 import { copyDiagnostics } from './platform/diagnostics';
 import { openExternalLink } from './security';
 import type { Services } from './services';
+import { openGalleryWindow } from './window';
 import { getWindow, sendWindowCommand, windowIdOf } from './windows';
 
 /** Handlers that act on Monaco, view state or a dialog in the window: sent there as `Window.Command`. */
@@ -140,4 +141,5 @@ export function registerCommands(registry: CommandRegistry, services: Services):
   registry.register('dev.toggleMenuBar', () => {
     toggleWindowMenuBar();
   });
+  registry.register('dev.openGallery', () => openGalleryWindow());
 }

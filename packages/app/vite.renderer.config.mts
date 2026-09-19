@@ -1,5 +1,6 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 
 import react from '@vitejs/plugin-react';
 import { defaultClientConditions, defineConfig, type Plugin } from 'vite';
@@ -24,6 +25,12 @@ function bundleManifest(mode: string): Plugin {
   };
 }
 
+// The component gallery (Develop > Open component gallery) is a second page, left out of release builds.
+const galleryPage = fileURLToPath(
+  new URL('./src/ui/gallery/index.html', import.meta.url),
+);
+const appPage = fileURLToPath(new URL('./index.html', import.meta.url));
+
 export default defineConfig(({ mode }) => ({
   base: './',
   plugins: [react(), bundleManifest(mode)],
@@ -36,6 +43,9 @@ export default defineConfig(({ mode }) => ({
     target: 'chrome140',
     // Never inline assets as data: URLs; the CSP allows data: only for images.
     assetsInlineLimit: 0,
+    ...(mode !== 'production' && {
+      rollupOptions: { input: { index: appPage, gallery: galleryPage } },
+    }),
   },
   resolve: {
     conditions: ['fiddle-source', ...defaultClientConditions],

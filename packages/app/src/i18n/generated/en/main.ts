@@ -38,6 +38,7 @@ export default {
   "toggleDevTools": "Toggle developer tools",
   "develop": "Develop",
   "toggleMenuBar": "Toggle title bar menu bar",
+  "openComponentGallery": "Open component gallery",
   "undo": "Undo",
   "redo": "Redo",
   "cut": "Cut",

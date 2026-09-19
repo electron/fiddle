@@ -1,6 +1,6 @@
 import { EventEmitter } from 'node:events';
 
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi, type Mock } from 'vitest';
 
 const mocks = vi.hoisted(() => ({
   windows: [] as unknown[],
@@ -20,6 +20,11 @@ vi.mock('electron', async () => {
     });
     destroyed = false;
     show = vi.fn();
+    focus = vi.fn();
+    close = vi.fn(() => {
+      this.destroyed = true;
+      this.emit('closed');
+    });
     destroy = vi.fn(() => {
       this.destroyed = true;
     });
@@ -52,16 +57,21 @@ vi.mock('./windows', () => ({
 }));
 
 import { log } from './log';
-import { createAppWindow, windowOptions } from './window';
+import { createAppWindow, openGalleryWindow, windowOptions } from './window';
 
 interface FakeWindow extends EventEmitter {
   options: { webPreferences: Record<string, unknown> };
   webContents: EventEmitter;
   show: ReturnType<typeof vi.fn>;
+  close: Mock<() => void>;
   destroy: ReturnType<typeof vi.fn>;
 }
 
-const hub = { app: { material: 'none' }, unregisterWindow: vi.fn() };
+const hub = {
+  app: { material: 'none' },
+  windowIds: [] as string[],
+  unregisterWindow: vi.fn(),
+};
 const services = { hub, platform: 'linux' } as never;
 const args = {
   services,
@@ -168,5 +178,43 @@ describe('createAppWindow', () => {
       expect(hub.unregisterWindow).toHaveBeenCalledWith('w');
       expect(mocks.untrackWindow).toHaveBeenCalledWith('w');
     });
+  });
+});
+
+describe('openGalleryWindow', () => {
+  it('opens the gallery page in a locked-down window without the preload, once at a time', async () => {
+    await openGalleryWindow();
+    const win = lastWindow();
+    expect(mocks.loadURL).toHaveBeenCalledWith('app://main/src/ui/gallery/index.html');
+    expect(win.options.webPreferences).toMatchObject({
+      sandbox: true,
+      contextIsolation: true,
+      nodeIntegration: false,
+      webSecurity: true,
+    });
+    expect(win.options.webPreferences).not.toHaveProperty('preload');
+    expect(win.show).toHaveBeenCalledOnce();
+    expect(mocks.trackWindow).not.toHaveBeenCalled();
+
+    await openGalleryWindow();
+    expect(mocks.windows).toHaveLength(1);
+    win.close();
+  });
+
+  it('closes with the last fiddle window, so it never keeps the app running', async () => {
+    await openGalleryWindow();
+    const gallery = lastWindow();
+    await createAppWindow(args);
+    const first = lastWindow();
+    await createAppWindow({ ...args, windowId: 'w2' });
+    const second = lastWindow();
+
+    hub.windowIds = ['w2'];
+    first.webContents.emit('destroyed');
+    expect(gallery.close).not.toHaveBeenCalled();
+
+    hub.windowIds = [];
+    second.webContents.emit('destroyed');
+    expect(gallery.close).toHaveBeenCalledOnce();
   });
 });

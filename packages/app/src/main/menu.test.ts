@@ -128,8 +128,22 @@ describe('application menu', () => {
       if (platform !== 'darwin') expect(top(false)).not.toContain('menu:app');
 
       const release = commandsIn(build({ platform, dev: false }));
-      for (const id of ['dev.toggleMenuBar', 'view.reload', 'view.reloadAllWindows'])
+      for (const id of [
+        'dev.toggleMenuBar',
+        'dev.openGallery',
+        'view.reload',
+        'view.reloadAllWindows',
+      ])
         expect(release).not.toContain(id);
+    }
+  });
+
+  it('opens the component gallery from the Develop menu', () => {
+    for (const platform of PLATFORMS) {
+      const develop = menu(build({ platform, dev: true }), 'develop');
+      expect(item(develop, 'dev.openGallery')).toMatchObject({
+        label: 'Open component gallery',
+      });
     }
   });
 

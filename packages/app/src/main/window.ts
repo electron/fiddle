@@ -7,6 +7,7 @@ import {
   BrowserWindow,
   nativeTheme,
   type BrowserWindowConstructorOptions,
+  type WebPreferences,
 } from 'electron';
 
 import type { Material, Platform } from '../shared/stores';
@@ -62,6 +63,16 @@ export function rendererEntry(): RendererEntry {
   };
 }
 
+/** Every window's web preferences; app windows add the preload. */
+const webPreferences: WebPreferences = {
+  contextIsolation: true,
+  sandbox: true,
+  nodeIntegration: false,
+  nodeIntegrationInSubFrames: false,
+  webSecurity: true,
+  spellcheck: false,
+};
+
 const inkColor = () => (nativeTheme.shouldUseDarkColors ? INK.dark : INK.light);
 
 export function windowOptions(
@@ -76,15 +87,7 @@ export function windowOptions(
     minHeight: 600,
     show: false,
     backgroundColor: '#00000000',
-    webPreferences: {
-      preload: path.join(__dirname, 'preload.js'),
-      contextIsolation: true,
-      sandbox: true,
-      nodeIntegration: false,
-      nodeIntegrationInSubFrames: false,
-      webSecurity: true,
-      spellcheck: false,
-    },
+    webPreferences: { preload: path.join(__dirname, 'preload.js'), ...webPreferences },
   };
   if (platform === 'darwin') {
     return {
@@ -138,6 +141,8 @@ export async function createAppWindow({
   contents.once('destroyed', () => {
     hub.unregisterWindow(windowId);
     untrackWindow(windowId);
+    // Open only while a fiddle window is: it must not keep the app running after the last one closes.
+    if (hub.windowIds.length === 0) gallery?.close();
   });
 
   try {
@@ -183,6 +188,39 @@ export async function createAppWindow({
     return win;
   } catch (error) {
     // Not shown yet: without this an invisible window would keep the app alive.
+    win.destroy();
+    throw error;
+  }
+}
+
+/** Bundled only outside release builds (`vite.renderer.config.mts`). */
+const GALLERY_PATH = 'src/ui/gallery/index.html';
+let gallery: BrowserWindow | undefined;
+
+/** Develop > Open component gallery. No preload and no state: the page is plain UI. */
+export async function openGalleryWindow(): Promise<void> {
+  if (gallery && !gallery.isDestroyed()) {
+    gallery.show();
+    gallery.focus();
+    return;
+  }
+  const win = new BrowserWindow({
+    width: 1280,
+    height: 820,
+    show: false,
+    autoHideMenuBar: true,
+    webPreferences,
+  });
+  gallery = win;
+  win.setMenuBarVisibility(false);
+  blockNavigation(win.webContents);
+  win.once('closed', () => {
+    if (gallery === win) gallery = undefined;
+  });
+  try {
+    await win.loadURL(new URL(GALLERY_PATH, rendererEntry().url).href);
+    win.show();
+  } catch (error) {
     win.destroy();
     throw error;
   }
