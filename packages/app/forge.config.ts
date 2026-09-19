@@ -63,6 +63,7 @@ function getWindowsSignOptions(): WindowsSignOptions | undefined {
     AZURE_CODE_SIGNING_ENDPOINT: endpoint,
     AZURE_CODE_SIGNING_ACCOUNT_NAME: accountName,
     AZURE_CODE_SIGNING_CERTIFICATE_PROFILE_NAME: certificateProfileName,
+    WINDOWS_SIGNTOOL_PATH: signToolPath,
   } = process.env;
 
   if (!dlib && !endpoint && !accountName && !certificateProfileName) {
@@ -75,6 +76,15 @@ function getWindowsSignOptions(): WindowsSignOptions | undefined {
         'AZURE_CODE_SIGNING_DLIB, AZURE_CODE_SIGNING_ENDPOINT, ' +
         'AZURE_CODE_SIGNING_ACCOUNT_NAME and ' +
         'AZURE_CODE_SIGNING_CERTIFICATE_PROFILE_NAME, or none of them.',
+    );
+  }
+
+  if (!signToolPath) {
+    // The signtool.exe vendored by @electron/windows-sign predates /dlib
+    // support. Trusted Signing needs one from Windows SDK 10.0.22621.755+.
+    throw new Error(
+      'Azure Trusted Signing needs a recent signtool.exe. Set ' +
+        'WINDOWS_SIGNTOOL_PATH to one from Windows SDK 10.0.22621.755 or later.',
     );
   }
 
@@ -110,6 +120,7 @@ function getWindowsSignOptions(): WindowsSignOptions | undefined {
   );
 
   return {
+    signToolPath,
     // Passed as an array so paths with spaces survive intact.
     signWithParams: ['/dlib', dlib, '/dmdf', metadataPath],
     timestampServer: 'http://timestamp.acs.microsoft.com',

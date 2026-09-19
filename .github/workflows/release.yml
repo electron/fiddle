@@ -128,7 +128,7 @@ jobs:
       - name: Install dependencies
         run: yarn install --immutable --mode=skip-build
       - name: Azure login
-        uses: azure/login@7ddb5af1ef8758cf1353cf3b42f940aee27ba21c # v3.0.2
+        uses: azure/login@a641126d1b8aa4d1fa005f4f92df94a3a4c4c906 # v3.1.0
         with:
           client-id: ${{ secrets.AZURE_CLIENT_ID }}
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
@@ -140,13 +140,23 @@ jobs:
           nuget install Microsoft.Trusted.Signing.Client -Version 1.0.95 -x -OutputDirectory $clientDir
           $dlib = Join-Path $clientDir 'Microsoft.Trusted.Signing.Client\bin\x64\Azure.CodeSigning.Dlib.dll'
           if (-not (Test-Path $dlib)) { throw "Azure.CodeSigning.Dlib.dll not found at $dlib" }
+
+          # Trusted Signing needs signtool.exe from Windows SDK 10.0.22621.755 or
+          # later; pick the newest SDK installed on the runner.
+          $signtool = Get-ChildItem "${env:ProgramFiles(x86)}\Windows Kits\10\bin\10.*\x64\signtool.exe" |
+            Sort-Object { [version]$_.Directory.Parent.Name } -Descending |
+            Select-Object -First 1
+          if (-not $signtool) { throw 'No Windows SDK signtool.exe found' }
+          Write-Host "Using signtool: $($signtool.FullName)"
+
           "AZURE_CODE_SIGNING_DLIB=$dlib" >> $env:GITHUB_ENV
+          "WINDOWS_SIGNTOOL_PATH=$($signtool.FullName)" >> $env:GITHUB_ENV
       - name: Build (Windows)
         env:
-          # AZURE_CODE_SIGNING_DLIB comes from the previous step via GITHUB_ENV.
-          # The values below identify the Trusted Signing account and are not
-          # secrets; the endpoint must match the region the account was
-          # created in.
+          # AZURE_CODE_SIGNING_DLIB and WINDOWS_SIGNTOOL_PATH come from the
+          # previous step via GITHUB_ENV. The values below identify the Trusted
+          # Signing account and are not secrets; the endpoint must match the
+          # region the account was created in.
           AZURE_CODE_SIGNING_ENDPOINT: https://eus.codesigning.azure.net
           AZURE_CODE_SIGNING_ACCOUNT_NAME: OpenJS-CodeSigning
           AZURE_CODE_SIGNING_CERTIFICATE_PROFILE_NAME: Electron
