@@ -18,24 +18,6 @@
     "description": "Button in the update dialog that closes it; the update installs on the next launch.",
     "maxLength": 20
   },
-  "versionBlockedMessage": {
-    "message": "This version of Electron Fiddle can no longer be used",
-    "description": "Blocking notice shown at startup when this app version has been withdrawn. The app quits after it."
-  },
-  "versionBlockedDetail": {
-    "message": "Download the latest version to keep using Electron Fiddle.",
-    "description": "Body of the blocking notice for a withdrawn version, used when the server gives no message of its own."
-  },
-  "downloadLatest": {
-    "message": "Download",
-    "description": "Button in the withdrawn-version notice that opens the download page, then quits.",
-    "maxLength": 20
-  },
-  "quit": {
-    "message": "Quit",
-    "description": "Button that quits the app.",
-    "maxLength": 20
-  },
   "moveMessage": {
     "message": "Move Electron Fiddle to the Applications folder?",
     "description": "macOS first-run question, shown when the app runs from outside /Applications."

@@ -1,5 +1,5 @@
 /**
- * Updates and rollout. Off in dev (unpackaged) and test mode.
+ * Updates. Off in dev (unpackaged) and test mode.
  *
  * - macOS and Windows (Squirrel): `update-electron-app` against
  *   update.electronjs.org for electron/fiddle, every hour, first 10 s after
@@ -7,10 +7,8 @@
  * - Linux and MSIX: no auto-update. The GitHub releases API is checked once a
  *   day, and an "Update available" toast goes to the windows through the
  *   `AppPlatform.UpdateAvailable` event.
- * - Kill switch: `update-policy.json` is fetched at startup. A blocked version
- *   gets a blocking notice, then quits. If the fetch fails, the app keeps running.
  */
-import { app, BrowserWindow, dialog, net, shell } from 'electron';
+import { app, BrowserWindow, net } from 'electron';
 import {
   makeUserNotifier,
   updateElectronApp,
@@ -22,24 +20,14 @@ import { tm } from '../i18n';
 import { log } from '../log';
 import { openExternalLink } from '../security';
 import { getEndpoints, testFlags } from '../test-mode';
-import {
-  evaluatePolicy,
-  parsePolicy,
-  pickUpdate,
-  type AvailableUpdate,
-  type GitHubRelease,
-} from './policy';
+import { pickUpdate, type AvailableUpdate, type GitHubRelease } from './releases';
 
 const UPDATE_REPO = 'electron/fiddle';
 const UPDATE_SERVICE = 'https://update.electronjs.org';
-/** The kill switch, kept in the electron/fiddle repository. */
-const UPDATE_POLICY_URL =
-  'https://raw.githubusercontent.com/electron/fiddle/main/update-policy.json';
 const LATEST_RELEASE_PAGE = 'https://github.com/electron/fiddle/releases/latest';
 
 const FIRST_CHECK_MS = 10_000;
 const RELEASE_CHECK_MS = 24 * 60 * 60 * 1000;
-const POLICY_TIMEOUT_MS = 10_000;
 
 let available: AvailableUpdate | undefined;
 
@@ -48,7 +36,6 @@ export function startUpdates(): void {
     log.info('updates are off (dev or test mode)');
     return;
   }
-  void checkUpdatePolicy();
   if (process.platform === 'linux' || process.windowsStore) {
     setTimeout(() => {
       void checkReleases();
@@ -112,44 +99,4 @@ async function checkReleases(): Promise<void> {
 /** The toast's action: the new release's page, after the usual link confirmation. */
 export async function openUpdatePage(): Promise<void> {
   await openExternalLink(available?.url ?? LATEST_RELEASE_PAGE);
-}
-
-async function checkUpdatePolicy(): Promise<void> {
-  let data: unknown;
-  try {
-    const response = await net.fetch(UPDATE_POLICY_URL, {
-      signal: AbortSignal.timeout(POLICY_TIMEOUT_MS),
-    });
-    if (!response.ok) {
-      log.info('no update policy', response.status);
-      return;
-    }
-    data = await response.json();
-  } catch (error) {
-    log.warn('update policy check failed; carrying on', error);
-    return;
-  }
-  const policy = parsePolicy(data);
-  if (!policy) {
-    log.warn('update policy is invalid; ignoring it');
-    return;
-  }
-  const verdict = evaluatePolicy(policy, app.getVersion());
-  if (verdict.blocked) await showBlockedNotice(verdict.message);
-}
-
-async function showBlockedNotice(message: string | undefined): Promise<void> {
-  log.error('this version is blocked by the update policy', app.getVersion());
-  const tp = tm('mainPlatform');
-  const { response } = await dialog.showMessageBox({
-    type: 'error',
-    message: tp('versionBlockedMessage'),
-    detail: message || tp('versionBlockedDetail'),
-    buttons: [tp('downloadLatest'), tp('quit')],
-    defaultId: 0,
-    cancelId: 1,
-    noLink: true,
-  });
-  if (response === 0) await shell.openExternal(LATEST_RELEASE_PAGE);
-  app.quit();
 }

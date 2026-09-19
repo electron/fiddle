@@ -1494,11 +1494,6 @@
     "translation": "435a212742c7",
     "reviewed": false
   },
-  "mainPlatform:downloadLatest": {
-    "source": "d6eafe823591",
-    "translation": "b3025b16bfa6",
-    "reviewed": false
-  },
   "mainPlatform:later": {
     "source": "73b6e48a1b55",
     "translation": "c47401bce409",
@@ -1519,11 +1514,6 @@
     "translation": "5ae883d61106",
     "reviewed": false
   },
-  "mainPlatform:quit": {
-    "source": "b3eb37acb66b",
-    "translation": "60935a92d7da",
-    "reviewed": false
-  },
   "mainPlatform:restart": {
     "source": "6b983a81e5e8",
     "translation": "3611a239a952",
@@ -1542,16 +1532,6 @@
   "mainPlatform:updateReadyTitle": {
     "source": "46570c771ff5",
     "translation": "106211fb3a66",
-    "reviewed": false
-  },
-  "mainPlatform:versionBlockedDetail": {
-    "source": "3f62b276c1ec",
-    "translation": "104d90285cb3",
-    "reviewed": false
-  },
-  "mainPlatform:versionBlockedMessage": {
-    "source": "d5f8a76464b0",
-    "translation": "8ea7cd384bf6",
     "reviewed": false
   },
   "mainRun:addLocalBuildButton": {

@@ -4,9 +4,6 @@ const mocks = vi.hoisted(() => ({
   isPackaged: true,
   updatesFlag: true,
   fetch: vi.fn(),
-  showMessageBox: vi.fn(),
-  openExternal: vi.fn(async () => undefined),
-  quit: vi.fn(),
   updateElectronApp: vi.fn(),
   dispatchUpdateAvailable: vi.fn(),
 }));
@@ -17,12 +14,9 @@ vi.mock('electron', () => ({
       return mocks.isPackaged;
     },
     getVersion: () => '1.2.3',
-    quit: mocks.quit,
   },
   BrowserWindow: { getAllWindows: () => [{ webContents: {} }] },
-  dialog: { showMessageBox: mocks.showMessageBox },
   net: { fetch: mocks.fetch },
-  shell: { openExternal: mocks.openExternal },
 }));
 vi.mock('update-electron-app', () => ({
   updateElectronApp: mocks.updateElectronApp,
@@ -56,33 +50,15 @@ function json(body: unknown, status = 200): Response {
   return new Response(JSON.stringify(body), { status });
 }
 
-/** Answers the policy request with `policy` and the releases request with `releases`. */
-function serve({
-  policy,
-  releases = [],
-}: {
-  policy?: Response | Error;
-  releases?: unknown[];
-}): void {
-  mocks.fetch.mockImplementation(async (url: string) => {
-    if (url.includes('update-policy')) {
-      if (policy instanceof Error) throw policy;
-      return policy ?? json({});
-    }
-    return json(releases);
-  });
+function serve(releases: unknown[]): void {
+  mocks.fetch.mockImplementation(async () => json(releases));
 }
-
-const flush = () => vi.advanceTimersByTimeAsync(0);
 
 beforeEach(() => {
   vi.useFakeTimers();
   mocks.isPackaged = true;
   mocks.updatesFlag = true;
   mocks.fetch.mockReset();
-  mocks.showMessageBox.mockReset().mockResolvedValue({ response: 1 });
-  mocks.openExternal.mockClear();
-  mocks.quit.mockClear();
   mocks.updateElectronApp.mockClear();
   mocks.dispatchUpdateAvailable.mockClear();
 });
@@ -104,43 +80,6 @@ describe('startUpdates', () => {
     expect(mocks.updateElectronApp).not.toHaveBeenCalled();
   });
 
-  describe('the kill switch', () => {
-    it('shows the notice for a blocked version and quits', async () => {
-      serve({ policy: json({ blockedVersions: ['1.2.x'], message: 'Broken build' }) });
-      startUpdates();
-      await flush();
-      expect(mocks.showMessageBox).toHaveBeenCalledWith(
-        expect.objectContaining({ type: 'error', detail: 'Broken build' }),
-      );
-      expect(mocks.quit).toHaveBeenCalledOnce();
-      expect(mocks.openExternal).not.toHaveBeenCalled();
-    });
-
-    it('quits after opening the download page too', async () => {
-      mocks.showMessageBox.mockResolvedValue({ response: 0 });
-      serve({ policy: json({ minVersion: '2.0.0' }) });
-      startUpdates();
-      await flush();
-      expect(mocks.openExternal).toHaveBeenCalledOnce();
-      expect(mocks.quit).toHaveBeenCalledOnce();
-    });
-
-    it('carries on when the policy is missing, unreachable, invalid or does not list this version', async () => {
-      for (const policy of [
-        json({}, 404),
-        new Error('offline'),
-        json({ blockedVersions: 'nope' }),
-        json({ blockedVersions: ['1.2.4'], minVersion: '1.0.0' }),
-      ]) {
-        serve({ policy });
-        startUpdates();
-        await flush();
-      }
-      expect(mocks.showMessageBox).not.toHaveBeenCalled();
-      expect(mocks.quit).not.toHaveBeenCalled();
-    });
-  });
-
   describe('Linux', () => {
     beforeEach(() => setPlatform('linux'));
 
@@ -150,7 +89,7 @@ describe('startUpdates', () => {
     });
 
     it('announces a newer release once, however often it checks', async () => {
-      serve({ releases: [release('v1.3.0')] });
+      serve([release('v1.3.0')]);
       startUpdates();
       await vi.advanceTimersByTimeAsync(10_000);
       expect(mocks.dispatchUpdateAvailable).toHaveBeenCalledExactlyOnceWith('1.3.0');
@@ -158,15 +97,13 @@ describe('startUpdates', () => {
       await vi.advanceTimersByTimeAsync(24 * 60 * 60 * 1000);
       expect(mocks.dispatchUpdateAvailable).toHaveBeenCalledOnce();
 
-      serve({ releases: [release('v1.4.0')] });
+      serve([release('v1.4.0')]);
       await vi.advanceTimersByTimeAsync(24 * 60 * 60 * 1000);
       expect(mocks.dispatchUpdateAvailable).toHaveBeenLastCalledWith('1.4.0');
     });
 
     it('says nothing when the release check fails', async () => {
-      mocks.fetch.mockImplementation(async (url: string) =>
-        url.includes('update-policy') ? json({}) : json({}, 500),
-      );
+      mocks.fetch.mockImplementation(async () => json({}, 500));
       startUpdates();
       await vi.advanceTimersByTimeAsync(10_000);
       expect(mocks.dispatchUpdateAvailable).not.toHaveBeenCalled();
