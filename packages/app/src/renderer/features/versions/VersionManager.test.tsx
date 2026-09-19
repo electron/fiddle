@@ -64,12 +64,22 @@ describe('VersionManager', () => {
     expect(within(row('41.0.0')).getByRole('button', { name: 'remove' })).toBeTruthy();
   });
 
-  it('downloads every matching version, not only the rows on screen', () => {
+  it('downloads every matching version of a filter, not only the rows on screen', () => {
     mocks.rows = releases(250);
     mocks.app = appWith({}, false);
     render(<VersionManager />);
+    fireEvent.change(screen.getByRole('textbox', { name: 'filterVersions' }), {
+      target: { value: '.0.0' },
+    });
     expect(screen.getAllByRole('cell', { name: /^\d+\.0\.0$/ })).toHaveLength(200);
     fireEvent.click(screen.getByRole('button', { name: 'downloadAll' }));
     expect(mocks.versionsApi.DownloadAll.mock.calls[0]?.[0]).toHaveLength(250);
+  });
+
+  it('offers no Download all until the list is filtered', () => {
+    mocks.rows = releases(250);
+    mocks.app = appWith({}, false);
+    render(<VersionManager />);
+    expect(screen.queryByRole('button', { name: 'downloadAll' })).toBeNull();
   });
 });

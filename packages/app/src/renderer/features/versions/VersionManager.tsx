@@ -297,7 +297,7 @@ export function VersionManager() {
           >
             {t('stopDownloads')}
           </Button>
-        ) : (
+        ) : needle ? (
           <Button
             size="sm"
             variant="secondary"
@@ -316,7 +316,7 @@ export function VersionManager() {
           >
             {t('downloadAll')}
           </Button>
-        )}
+        ) : null}
         <Button size="sm" variant="danger" icon="trash" onPress={() => void deleteAll()}>
           {t('deleteAll')}
         </Button>
