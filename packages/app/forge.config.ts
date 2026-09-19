@@ -161,7 +161,7 @@ function getNotarizeOptions(): NotarizeOptions {
   }
 
   console.warn(
-    'Should be notarizing, but APPLE_API_KEY, APPLE_API_KEY_ID and APPLE_API_ISSUER are missing!',
+    'Should be notarizing, but neither APPLE_API_KEY, APPLE_API_KEY_ID and APPLE_API_ISSUER nor APPLE_ID and APPLE_ID_PASSWORD are set!',
   );
   return undefined;
 }

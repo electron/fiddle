@@ -1,0 +1,81 @@
+name: Build
+
+# Builds, signs and notarizes the macOS app on both architectures, and fails
+# unless the result is notarized. It publishes nothing.
+#
+# Start it by pushing a tag such as v1.0.0-build.1, or by dispatching it on a
+# tag or on main. The `release` environment only accepts main and `v*.*.*`
+# tags, so any other ref is rejected before a job starts. Tags matching
+# `v*-build.*` are excluded from release.yml.
+on:
+  push:
+    tags:
+      - 'v*.*.*-build.*'
+  workflow_dispatch:
+
+permissions: {}
+
+jobs:
+  macos:
+    name: Build (macOS ${{ matrix.arch }})
+    if: github.repository == 'electron/fiddle'
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: macos-15-intel
+            arch: x64
+          - os: macos-latest
+            arch: arm64
+    runs-on: ${{ matrix.os }}
+    permissions:
+      contents: read
+    environment: release
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Setup Node.js
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version-file: .nvmrc
+          package-manager-cache: false
+      # No dependency lifecycle scripts run while signing secrets are present.
+      - name: Install dependencies
+        run: yarn install --immutable --mode=skip-build
+      - name: Load certificates
+        env:
+          MACOS_CERT_P12: ${{ secrets.MACOS_CERT_P12 }}
+          MACOS_CERT_PASSWORD: ${{ secrets.MACOS_CERT_PASSWORD }}
+        run: bash packages/app/build/add-macos-cert.sh
+      - name: Build, sign and notarize
+        env:
+          APPLE_ID: ${{ secrets.APPLE_ID }}
+          APPLE_ID_PASSWORD: ${{ secrets.APPLE_ID_PASSWORD }}
+        run: yarn workspace electron-fiddle run make --arch=${{ matrix.arch }}
+      - name: Check that the e2e driver is not packaged
+        run: node tools/release-check-asar.mjs packages/app/out
+      - name: Check that the app is signed and notarized
+        run: |
+          set -euo pipefail
+          apps=(packages/app/out/*/"Electron Fiddle.app")
+          if [ ! -d "${apps[0]}" ]; then
+            echo "No packaged app found" >&2
+            exit 1
+          fi
+          for app in "${apps[@]}"; do
+            codesign --verify --deep --strict --verbose=2 "$app"
+            xcrun stapler validate "$app"
+            spctl --assess --type execute --verbose=4 "$app"
+            packages/app/native/disclaim/check-packaged.sh "$app" --release
+          done
+      # Artifacts of a public repository can be downloaded by any signed-in
+      # GitHub user, so they expire after a day.
+      - name: Upload the zip
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: electron-fiddle-macos-${{ matrix.arch }}
+          path: packages/app/out/make/**/*.zip
+          retention-days: 1
+          if-no-files-found: error
