@@ -34,7 +34,7 @@ export async function ensureTrusted(
     td('detailFiles', { files: list(Object.keys(fiddle.files)) }),
     td('detailDependencies', { dependencies: list(dependencies) }),
   ].join('\n');
-  const answer = await prompt.ask(detail, t('trustQuestion'));
+  const answer = await prompt.ask(detail, `${t('trustQuestion')} `);
   if (!/^y(es)?$/i.test(answer.trim()))
     throw new FiddleError(CliErrorCode.untrusted, tm('mainRun')('untrusted'));
 }

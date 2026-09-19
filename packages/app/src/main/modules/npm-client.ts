@@ -2,6 +2,7 @@ import * as semver from 'semver';
 
 import { isValidPackageName, pickLatestVersion } from '../../fiddle/modules';
 import { ErrorCode, FiddleError } from '../../shared/errors';
+import { tm } from '../i18n';
 
 interface PackageSearchResult {
   name: string;
@@ -164,9 +165,11 @@ export class NpmClient {
   /** A package's registry metadata: the abbreviated document, with versions, dist-tags and `hasInstallScript`. Not cached. */
   async packument(name: string, signal?: AbortSignal): Promise<unknown> {
     if (!isValidPackageName(name)) {
-      throw new FiddleError(ErrorCode.invalidArgument, `Invalid package name: ${name}`, {
-        name,
-      });
+      throw new FiddleError(
+        ErrorCode.invalidArgument,
+        tm('mainModules')('invalidPackageName', { name }),
+        { name },
+      );
     }
     // Scoped names keep their `@` and escape the slash: `@scope%2Fname`.
     const url = `${this.#endpoints.registryUrl}/${name.replace('/', '%2F')}`;
@@ -203,9 +206,11 @@ export class NpmClient {
   async latestVersion(name: string): Promise<string> {
     const { latest } = await this.versions(name);
     if (!latest) {
-      throw new FiddleError(ErrorCode.notFound, `${name} has no published versions`, {
-        name,
-      });
+      throw new FiddleError(
+        ErrorCode.notFound,
+        tm('mainModules')('noPublishedVersions', { name }),
+        { name },
+      );
     }
     return latest;
   }
@@ -214,34 +219,34 @@ export class NpmClient {
     // The timeout also covers reading the body, so a stalled connection can't leave a call pending.
     const timeout = AbortSignal.timeout(REQUEST_TIMEOUT_MS);
     const signal = init.signal ? AbortSignal.any([init.signal, timeout]) : timeout;
+    const t = tm('mainModules');
+    const host = new URL(url).host;
     let response: Response;
     try {
       response = await this.#fetch(url, { ...init, signal });
     } catch (error) {
       if (init.signal?.aborted)
         throw new FiddleError(ErrorCode.cancelled, 'The request was cancelled');
-      throw new FiddleError(ErrorCode.network, `Could not reach ${new URL(url).host}`, {
+      throw new FiddleError(ErrorCode.network, t('registryUnreachable', { host }), {
         cause: error instanceof Error ? error.message : String(error),
       });
     }
     if (response.status === 404 && packageName !== undefined) {
-      throw new FiddleError(ErrorCode.notFound, `${packageName} is not on npm`, {
+      throw new FiddleError(ErrorCode.notFound, t('notOnNpm', { name: packageName }), {
         name: packageName,
       });
     }
     if (!response.ok) {
       throw new FiddleError(
         ErrorCode.network,
-        `${new URL(url).host} answered ${response.status}`,
-        {
-          status: response.status,
-        },
+        t('registryStatus', { host, status: response.status }),
+        { status: response.status },
       );
     }
     try {
       return await response.json();
     } catch {
-      throw new FiddleError(ErrorCode.network, `${new URL(url).host} sent invalid JSON`);
+      throw new FiddleError(ErrorCode.network, t('registryInvalidResponse', { host }));
     }
   }
 }

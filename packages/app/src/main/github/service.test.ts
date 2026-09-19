@@ -1,11 +1,16 @@
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeAll, describe, expect, it, vi } from 'vitest';
 
 import { GitHubClient } from '../../fiddle/github';
 import { ErrorCode, FiddleError } from '../../shared/errors';
+import { initMainI18n } from '../i18n';
 import type { LoadResult } from './credentials';
 import type { GistDocuments, GistFiddle } from './documents-bridge';
 import type { GistPrefs, PublishOptions } from './prefs';
 import { gistFiles, GitHubService } from './service';
+
+beforeAll(async () => {
+  await initMainI18n(['en']);
+});
 
 const TOKEN = `ghp_${'a'.repeat(36)}`;
 const ID = '8c5fc0c6a5153d49b5a4a56d3ed9da8f';

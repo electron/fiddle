@@ -661,7 +661,7 @@ const handlers: Handlers = {
     const good = input.good.replace(/^v/, '');
     const bad = input.bad.replace(/^v/, '');
     if (compareVersions(good, bad) >= 0)
-      throw new FiddleError(ErrorCode.invalidArgument, t('errorGoodNotOlder'));
+      throw new FiddleError(ErrorCode.invalidArgument, tr('bisectGoodNotOlder'));
     await requireRelease(ctx, good);
     const list = await requireRelease(ctx, bad);
     const filter = {

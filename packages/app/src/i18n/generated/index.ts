@@ -6,7 +6,7 @@ export type Locale = (typeof locales)[number];
 /** Generated from English for testing (accented and longer; right-to-left). Not real languages. */
 export const pseudoLocales = ["en-XA","ar-XB"] as const;
 
-export const namespaces = ["about","gists","main","mainCli","mainDocuments","mainPlatform","mainRun","mainSettings","mainUx","mainVersions","onboarding","packages","palette","run","settings","shell","versions"] as const;
+export const namespaces = ["about","gists","main","mainCli","mainDocuments","mainModules","mainPlatform","mainRun","mainSettings","mainUx","mainVersions","onboarding","packages","palette","run","settings","shell","versions"] as const;
 export type Namespace = (typeof namespaces)[number];
 
 export type Messages = Readonly<Record<string, string>>;
@@ -20,6 +20,7 @@ export const loaders: Record<Locale, Partial<Record<Namespace, Loader>>> = {
     "main": () => import('./en/main.js'),
     "mainCli": () => import('./en/mainCli.js'),
     "mainDocuments": () => import('./en/mainDocuments.js'),
+    "mainModules": () => import('./en/mainModules.js'),
     "mainPlatform": () => import('./en/mainPlatform.js'),
     "mainRun": () => import('./en/mainRun.js'),
     "mainSettings": () => import('./en/mainSettings.js'),
@@ -77,6 +78,7 @@ export const loaders: Record<Locale, Partial<Record<Namespace, Loader>>> = {
     "main": () => import('./en-XA/main.js'),
     "mainCli": () => import('./en-XA/mainCli.js'),
     "mainDocuments": () => import('./en-XA/mainDocuments.js'),
+    "mainModules": () => import('./en-XA/mainModules.js'),
     "mainPlatform": () => import('./en-XA/mainPlatform.js'),
     "mainRun": () => import('./en-XA/mainRun.js'),
     "mainSettings": () => import('./en-XA/mainSettings.js'),
@@ -96,6 +98,7 @@ export const loaders: Record<Locale, Partial<Record<Namespace, Loader>>> = {
     "main": () => import('./ar-XB/main.js'),
     "mainCli": () => import('./ar-XB/mainCli.js'),
     "mainDocuments": () => import('./ar-XB/mainDocuments.js'),
+    "mainModules": () => import('./ar-XB/mainModules.js'),
     "mainPlatform": () => import('./ar-XB/mainPlatform.js'),
     "mainRun": () => import('./ar-XB/mainRun.js'),
     "mainSettings": () => import('./ar-XB/mainSettings.js'),

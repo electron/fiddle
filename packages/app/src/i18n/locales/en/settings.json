@@ -219,8 +219,8 @@
     "description": "Setting: system notifications."
   },
   "notifications.description": {
-    "message": "Notify me when a long operation finishes while Fiddle is in the background.",
-    "description": "Help for the notifications setting. Fiddle is the app's short name."
+    "message": "Notify me when a long operation finishes while Electron Fiddle is in the background.",
+    "description": "Help for the notifications setting."
   },
 
   "editorFontFamily.title": {
@@ -295,7 +295,7 @@
     "description": "Setting: npm or yarn."
   },
   "packageManager.description": {
-    "message": "Installs the fiddle's npm modules.",
+    "message": "Installs the fiddle's npm packages.",
     "description": "Help for the package manager setting. npm is a product name."
   },
   "socketFirewall.title": {
@@ -548,7 +548,7 @@
     "description": "Setting: send crash reports."
   },
   "crashReports.description": {
-    "message": "Helps fix bugs. Fiddle contents, console output and environment variables are never sent.",
+    "message": "Helps fix bugs. The contents of your fiddles, console output and environment variables are never sent.",
     "description": "Help for the crash reports setting."
   },
 
@@ -580,16 +580,16 @@
     "maxLength": 60
   },
   "notice.corrupt.description": {
-    "message": "Fiddle set it aside and is using a backup or the defaults.",
+    "message": "Electron Fiddle set it aside and is using a backup or the defaults.",
     "description": "Toast text when a data file couldn't be read."
   },
   "notice.newer.title": {
-    "message": "{{file}} is from a newer Fiddle",
+    "message": "{{file}} is from a newer version",
     "description": "Toast title when a data file was written by a newer version of the app. {{file}} is the file name.",
     "maxLength": 60
   },
   "notice.newer.description": {
-    "message": "Changes won't be saved to it until you update Fiddle.",
+    "message": "Changes won't be saved to it until you update Electron Fiddle.",
     "description": "Toast text when a data file is from a newer app version."
   },
   "notice.dismiss": {

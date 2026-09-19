@@ -13,7 +13,7 @@
   },
   "exitedCode": {
     "message": "Electron exited with code {{code}}",
-    "description": "Console line when the fiddle exits."
+    "description": "Console line when the fiddle exits. {{code}} is the exit code."
   },
   "exitedSignal": {
     "message": "Electron was stopped by {{signal}}",
@@ -21,7 +21,7 @@
   },
   "spawnFailed": {
     "message": "Couldn't start Electron: {{message}}",
-    "description": "Console line when Electron can't be started."
+    "description": "Console line when Electron can't be started. {{message}} is the system's error."
   },
   "runFailed": {
     "message": "Couldn't run the fiddle: {{message}}",
@@ -37,39 +37,39 @@
   },
   "downloadFailed": {
     "message": "Couldn't download Electron {{version}}: {{message}}",
-    "description": "Console line and notice when a download fails."
+    "description": "Console line and notice when a download fails. {{version}} is the Electron version, {{message}} the error."
   },
   "installingModules": {
-    "message": "Installing modules with {{pm}}…",
-    "description": "Console line before npm or yarn installs the fiddle's modules."
+    "message": "Installing packages with {{pm}}…",
+    "description": "Console line before npm or yarn installs the fiddle's packages. {{pm}} is npm or yarn."
   },
   "installingModulesNoScripts": {
-    "message": "Installing modules with {{pm}}. Install scripts are off because this fiddle isn't trusted.",
-    "description": "Console line before modules install for an untrusted fiddle."
+    "message": "Installing packages with {{pm}}. Install scripts are off because this fiddle isn't trusted.",
+    "description": "Console line before packages install for an untrusted fiddle. {{pm}} is npm or yarn."
   },
   "modulesFailed": {
-    "message": "Installing modules failed: {{message}}",
-    "description": "Console line when the module install fails."
+    "message": "Installing packages failed: {{message}}",
+    "description": "Console line when the package install fails. {{message}} is the error."
   },
   "noSocketFirewall": {
-    "message": "Socket Firewall isn't available, so modules install without it.",
+    "message": "Socket Firewall isn't available, so packages install without it.",
     "description": "Console warning when the Socket Firewall setting is on but its binary is missing."
   },
   "pmMissing": {
-    "message": "{{pm}} wasn't found. Install it to use modules: {{url}}",
-    "description": "Console error when the package manager is missing. {{url}} explains how to install it."
+    "message": "{{pm}} wasn't found. Install it to use packages: {{url}}",
+    "description": "Console error when the package manager is missing. {{pm}} is npm or yarn, {{url}} explains how to install it."
   },
   "versionUnavailable": {
     "message": "Electron {{version}} can't run on this computer.",
-    "description": "Console error from the pre-run checks."
+    "description": "Console error from the pre-run checks. {{version}} is the Electron version."
   },
   "versionUnknown": {
     "message": "Electron {{version}} isn't a known release.",
-    "description": "Console error from the pre-run checks."
+    "description": "Console error from the pre-run checks. {{version}} is the Electron version."
   },
   "localBuildMissing": {
     "message": "The local build “{{name}}” is missing its Electron binary.",
-    "description": "Console error when the chosen local build is gone."
+    "description": "Console error when the chosen local build is gone. {{name}} is the build's name."
   },
   "esmNeeds28": {
     "message": "main.mjs needs Electron 28 or later.",
@@ -77,7 +77,7 @@
   },
   "envInvalid": {
     "message": "Skipped environment entries that couldn't be read: {{entries}}",
-    "description": "Console warning about the environment variables setting."
+    "description": "Console warning about the environment variables setting. {{entries}} is a comma-separated list of the entries."
   },
   "envBlocked": {
     "message": "Skipped environment variables that fiddles can't set, because they load code into Electron or change how it starts: {{keys}}",
@@ -97,8 +97,8 @@
     "description": "Error dialog title when a local build folder has no Electron binary."
   },
   "noBinaryDetail": {
-    "message": "Fiddle looked for {{file}} in {{path}}.",
-    "description": "Error dialog detail with the expected binary."
+    "message": "Electron Fiddle looked for {{file}} in {{path}}.",
+    "description": "Error dialog detail with the expected binary. {{file}} is the file name of the Electron executable, {{path}} the folder that was searched."
   },
   "cannotRemoveActive": {
     "message": "Electron {{version}} is in use, so it can't be removed.",
@@ -106,19 +106,19 @@
   },
   "packaging": {
     "message": "Packaging with Electron Forge in {{path}}…",
-    "description": "Console line when packaging starts."
+    "description": "Console line when packaging starts. {{path}} is the temporary project folder."
   },
   "making": {
     "message": "Making installers with Electron Forge in {{path}}…",
-    "description": "Console line when making installers starts."
+    "description": "Console line when making installers starts. {{path}} is the temporary project folder."
   },
   "packageDone": {
     "message": "Done. The output is in {{path}}",
-    "description": "Console line when packaging finishes."
+    "description": "Console line when packaging finishes. {{path}} is the folder with the result."
   },
   "commandFailed": {
     "message": "{{command}} failed with code {{code}}",
-    "description": "Console error when an npm or yarn command fails."
+    "description": "Console error when an npm or yarn command fails. {{command}} is the command line, such as npm install; {{code}} is its exit code."
   },
   "untrusted": {
     "message": "This fiddle isn't trusted, so it can't run here.",
@@ -126,27 +126,27 @@
   },
   "scriptsRequired": {
     "message": "Building needs the install scripts of {{packages}}, but they aren't allowed for this fiddle. Try again and allow install scripts when Electron Fiddle asks.",
-    "description": "Console error when package or make is refused because an untrusted fiddle's modules need install scripts. {{packages}} is a comma-separated list."
+    "description": "Console error when package or make is refused because an untrusted fiddle's packages need install scripts. {{packages}} is a comma-separated list."
   },
   "bisectStep": {
     "message": "Bisect: testing Electron {{version}}",
-    "description": "Console line for each bisect step."
+    "description": "Console line for each bisect step. {{version}} is the Electron version being tested."
   },
   "bisectVerdictGood": {
     "message": "Bisect: Electron {{version}} is good",
-    "description": "Console line after a bisect step."
+    "description": "Console line after a bisect step. {{version}} is the Electron version that was tested."
   },
   "bisectVerdictBad": {
     "message": "Bisect: Electron {{version}} is bad",
-    "description": "Console line after a bisect step."
+    "description": "Console line after a bisect step. {{version}} is the Electron version that was tested."
   },
   "bisectDone": {
     "message": "Bisect done: the change is between Electron {{good}} and {{bad}}. {{url}}",
-    "description": "Console line with the bisect result and the GitHub comparison URL."
+    "description": "Console line with the bisect result and the GitHub comparison URL. {{good}} is the last good version, {{bad}} the first bad one, {{url}} the comparison URL."
   },
   "bisectVerifyFailed": {
     "message": "Bisect stopped: Electron {{version}} didn't give the expected result, so the range can't be trusted.",
-    "description": "Console error when the good or bad end fails re-verification."
+    "description": "Console error when the good or bad end fails re-verification. {{version}} is the Electron version that didn't give the expected result."
   },
   "bisectInvalid": {
     "message": "Bisect stopped because a run didn't start.",
@@ -155,6 +155,10 @@
   "bisectTooFew": {
     "message": "Bisect needs at least two versions between the good and bad ones.",
     "description": "Error when the bisect range is too small."
+  },
+  "bisectGoodNotOlder": {
+    "message": "The good version must be older than the bad one.",
+    "description": "Error when a bisect starts with a good version that isn't older than the bad one."
   },
   "openCompareMessage": {
     "message": "Open the comparison on GitHub?",
@@ -165,5 +169,9 @@
     "description": "Button that opens the comparison in the browser.",
     "maxLength": 16
   },
-  "cancel": { "message": "Cancel", "description": "Dialog button.", "maxLength": 16 }
+  "cancel": {
+    "message": "Cancel",
+    "description": "Button that closes the open-comparison confirmation without opening the comparison.",
+    "maxLength": 16
+  }
 }

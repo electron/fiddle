@@ -60,13 +60,17 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 /** Asks before an import changes flags, environment variables or mirrors, listing each with its new value. */
 function confirmExecutionSettings(
   windowId: string,
-  keys: readonly (keyof AppSettings)[],
+  keys: ReturnType<typeof changedExecutionSettings>,
   next: AppSettings,
 ): Promise<boolean> {
+  const ts = tm('settings');
   const lines = keys.map((key) => {
     const value = next[key];
     const text = Array.isArray(value) ? value.join(', ') : String(value);
-    return `${key}: ${dialogText(text) || t('importEmpty')}`;
+    return t('importSettingLine', {
+      setting: ts(`${key}.title`),
+      value: dialogText(text) || t('importEmpty'),
+    });
   });
   return confirm(windowId, {
     type: 'warning',
@@ -195,10 +199,7 @@ export function bindSettingsIpc({
         // A built-in theme as the window renders it: Lucent's Monaco theme and token values.
         base = { name: t(builtinThemeName(builtin)), ...builtin };
       } else {
-        throw new FiddleError(
-          ErrorCode.invalidArgument,
-          'A built-in theme is copied from its current values',
-        );
+        throw new FiddleError(ErrorCode.invalidArgument, t('themeNeedsValues'));
       }
       return addTheme(
         settings,

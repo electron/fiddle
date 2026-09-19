@@ -47,10 +47,7 @@ export class BisectService {
   async start(windowId: string, good: string, bad: string, auto: boolean): Promise<void> {
     const t = tm('mainRun');
     if (compareVersions(good, bad) >= 0) {
-      throw new FiddleError(
-        ErrorCode.invalidArgument,
-        'The good version must be older than the bad one',
-      );
+      throw new FiddleError(ErrorCode.invalidArgument, t('bisectGoodNotOlder'));
     }
     const settings = this.#hub.app.settings;
     const visible = visibleVersions(this.#versions.releases(), settings, (v) =>

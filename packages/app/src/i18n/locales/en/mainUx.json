@@ -30,12 +30,12 @@
     "maxLength": 50
   },
   "runDone": {
-    "message": "Fiddle exited",
+    "message": "The fiddle exited",
     "description": "System notification title when a fiddle that ran for more than 10 seconds exits while the app is in the background.",
     "maxLength": 50
   },
   "runFailed": {
-    "message": "Fiddle exited with an error",
+    "message": "The fiddle exited with an error",
     "description": "System notification title when a fiddle that ran for more than 10 seconds exits with an error while the app is in the background.",
     "maxLength": 50
   },

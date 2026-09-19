@@ -7,6 +7,7 @@ import {
 import type { GistRevision, GistWriteResult, GitHubClient } from '../../fiddle/github';
 import { generatePackageJson } from '../../fiddle/package-json';
 import { ErrorCode, FiddleError } from '../../shared/errors';
+import { tm } from '../i18n';
 import type { CredentialStorageKind, CredentialStore } from './credentials';
 import type { GistDocuments, GistFiddle } from './documents-bridge';
 import type { GistPrefs } from './prefs';
@@ -222,9 +223,13 @@ export class GitHubService {
 
   #authedClient(): GitHubClient {
     if (!this.#token) {
-      throw new FiddleError(ErrorCode.unauthorized, 'Sign in to GitHub first', {
-        reason: 'signed-out',
-      });
+      throw new FiddleError(
+        ErrorCode.unauthorized,
+        tm('mainDocuments')('signInRequired'),
+        {
+          reason: 'signed-out',
+        },
+      );
     }
     return this.#options.createClient(this.#token);
   }

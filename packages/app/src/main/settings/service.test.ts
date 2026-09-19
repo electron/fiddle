@@ -2,7 +2,7 @@ import { mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
 
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 
 vi.mock('../log', () => ({ log: { info: vi.fn(), warn: vi.fn(), error: vi.fn() } }));
 
@@ -14,11 +14,16 @@ import {
   type SparseSettings,
 } from '../../shared/settings';
 import type { AppState } from '../../shared/stores';
+import { initMainI18n } from '../i18n';
 import { createJsonStore, flushAll } from '../persistence/json-store';
 import { sanitizeSettings, SettingsService, type SettingsHub } from './service';
 
 let dir: string;
 let file: string;
+
+beforeAll(async () => {
+  await initMainI18n(['en']);
+});
 
 beforeEach(async () => {
   dir = await mkdtemp(path.join(os.tmpdir(), 'settings-'));
@@ -84,7 +89,7 @@ describe('SettingsService', () => {
   it('rejects invalid values and unknown keys without changing anything', () => {
     const { hub, service } = open();
     expect(() => service.set('packageManager', 'pnpm')).toThrow(FiddleError);
-    expect(() => service.set('nope', true)).toThrow(/Unknown setting/);
+    expect(() => service.set('nope', true)).toThrow(/no setting named/);
     expect(hub.app.rev).toBe(0);
   });
 

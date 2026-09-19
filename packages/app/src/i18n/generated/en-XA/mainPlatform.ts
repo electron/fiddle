@@ -8,14 +8,11 @@ export default {
   "moveDetail": "[Ûþðáţéš îñšţáļļ ŕéļîáƀļý öñļý ŵĥéñ ţĥé áþþ îš îñ ţĥé Åþþļîçáţîöñš ƒöļðéŕ. one two three four five six seven]",
   "moveButton": "[Ṁöṽé ţö Åþþļîçáţîöñš one two]",
   "dontMove": "[Ðöñ'ţ ɱöṽé one]",
-  "crashConsentMessage": "[Å ŵîñðöŵ çŕášĥéð. Šéñð á çŕášĥ ŕéþöŕţ? one two three four]",
-  "crashConsentDetail": "[Ţĥé ŕéþöŕţ îñçļûðéš á šñáþšĥöţ öƒ ţĥé çŕášĥéð ŵîñðöŵ'š ɱéɱöŕý, ŵĥîçĥ ɱáý çöñţáîñ ţĥé çöðé ýöû ĥáð öþéñ. Îţ ĥéļþš ţĥé Éļéçţŕöñ Ƒîððļé ţéáɱ ƒîẋ ţĥé çŕášĥ. one two three four five six seven eight nine ten one two three]",
-  "sendReport": "[Šéñð ŕéþöŕţ one two]",
-  "dontSend": "[Ðöñ'ţ šéñð one]",
   "aboutVersion": "[{{version}} (Éļéçţŕöñ {{electron}}) one two]",
   "aboutCopyright": "[© Éļéçţŕöñ áûţĥöŕš one two]",
   "resetPrivacyMessage": "[Ŕéšéţ áļļ þŕîṽáçý þéŕɱîššîöñš? one two three]",
   "resetPrivacyDetail": "[Éļéçţŕöñ Ƒîððļé áñð ţĥé ƒîððļéš îţ ŕûñš ļöšé áççéšš ţö ţĥé çáɱéŕá, ɱîçŕöþĥöñé, çöñţáçţš áñð öţĥéŕ þŕöţéçţéð ðáţá. Ƒîððļéš ŕûñ áš ţĥé šţáñðáŕð Éļéçţŕöñ áþþ, šö öţĥéŕ áþþš ŕûññîñĝ öñ á þļáîñ Éļéçţŕöñ ðöŵñļöáð ļöšé áççéšš ţöö. ɱáçÖŠ ášķš áĝáîñ ţĥé ñéẋţ ţîɱé ţĥéý ñééð îţ. one two three four five six seven eight nine ten one two three four five six seven eight nine ten one two three]",
   "resetPrivacyButton": "[Ŕéšéţ one]",
-  "resetPrivacyFailed": "[Ţĥé þŕîṽáçý þéŕɱîššîöñš çöûļðñ'ţ ƀé ŕéšéţ. one two three four]"
+  "resetPrivacyFailed": "[Ţĥé þŕîṽáçý þéŕɱîššîöñš çöûļðñ'ţ ƀé ŕéšéţ. one two three four]",
+  "resetPrivacyUnavailable": "[Þŕîṽáçý þéŕɱîššîöñš çáñ öñļý ƀé ŕéšéţ öñ ɱáçÖŠ. one two three four]"
 } as const;

@@ -8,14 +8,11 @@ export default {
   "moveDetail": "Updates install reliably only when the app is in the Applications folder.",
   "moveButton": "Move to Applications",
   "dontMove": "Don't move",
-  "crashConsentMessage": "A window crashed. Send a crash report?",
-  "crashConsentDetail": "The report includes a snapshot of the crashed window's memory, which may contain the code you had open. It helps the Electron Fiddle team fix the crash.",
-  "sendReport": "Send report",
-  "dontSend": "Don't send",
   "aboutVersion": "{{version}} (Electron {{electron}})",
   "aboutCopyright": "© Electron authors",
   "resetPrivacyMessage": "Reset all privacy permissions?",
   "resetPrivacyDetail": "Electron Fiddle and the fiddles it runs lose access to the camera, microphone, contacts and other protected data. Fiddles run as the standard Electron app, so other apps running on a plain Electron download lose access too. macOS asks again the next time they need it.",
   "resetPrivacyButton": "Reset",
-  "resetPrivacyFailed": "The privacy permissions couldn't be reset."
+  "resetPrivacyFailed": "The privacy permissions couldn't be reset.",
+  "resetPrivacyUnavailable": "Privacy permissions can only be reset on macOS."
 } as const;

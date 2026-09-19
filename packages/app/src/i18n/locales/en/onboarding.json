@@ -24,7 +24,7 @@
   },
   "stepCount": {
     "message": "{{current}} of {{total}}",
-    "description": "Progress caption on a tour step, such as \"2 of 6\"."
+    "description": "Progress caption on a tour step, such as \"2 of 6\". {{current}} is the number of this step, {{total}} the number of steps."
   },
   "skipTour": {
     "message": "Skip tour",
@@ -59,7 +59,7 @@
     "description": "Tour step title, pointing at the version picker in the title bar."
   },
   "versionBody": {
-    "message": "Pick any release. Fiddle downloads it the first time you run it.",
+    "message": "Pick any release. Electron Fiddle downloads it the first time you run it.",
     "description": "Tour step body, pointing at the version picker in the title bar."
   },
   "runTitle": {
@@ -75,7 +75,7 @@
     "description": "Tour step title, pointing at the Publish button."
   },
   "publishBody": {
-    "message": "Publish it as a GitHub gist, and anyone can open it in Fiddle.",
+    "message": "Publish it as a GitHub gist, and anyone can open it in Electron Fiddle.",
     "description": "Tour step body, pointing at the Publish button."
   },
   "consoleTitle": {

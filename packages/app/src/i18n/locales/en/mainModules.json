@@ -1,0 +1,26 @@
+{
+  "invalidPackageName": {
+    "message": "“{{name}}” isn't a valid package name.",
+    "description": "Error when a package is added under a name npm doesn't allow. {{name}} is the name as typed."
+  },
+  "notOnNpm": {
+    "message": "{{name}} isn't on npm.",
+    "description": "Error when a package that isn't on the npm registry is added. {{name}} is the package name. npm is a product name."
+  },
+  "noPublishedVersions": {
+    "message": "{{name}} has no published versions.",
+    "description": "Error when a package on the npm registry has no version to add. {{name}} is the package name."
+  },
+  "registryUnreachable": {
+    "message": "Couldn't reach {{host}}.",
+    "description": "Error when the npm registry can't be reached, usually because the computer is offline. {{host}} is the registry's host name, such as registry.npmjs.org; keep it as it is."
+  },
+  "registryStatus": {
+    "message": "{{host}} answered with HTTP {{status}}.",
+    "description": "Error when the npm registry answers with an error status. {{host}} is the registry's host name, {{status}} the HTTP status code, such as 500; keep both as they are."
+  },
+  "registryInvalidResponse": {
+    "message": "{{host}} sent a response that couldn't be read.",
+    "description": "Error when the npm registry's answer isn't valid JSON. {{host}} is the registry's host name; keep it as it is."
+  }
+}

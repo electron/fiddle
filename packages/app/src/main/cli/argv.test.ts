@@ -136,7 +136,7 @@ describe('help', () => {
     expect(text).toMatch(/<fiddle> +A folder, a gist ID or URL/);
     expect(text).toMatch(/--electron-path <value> +A local Electron build/);
     expect(text).toMatch(
-      /--pm <npm\|yarn> +The package manager that installs modules Default: npm/,
+      /--pm <npm\|yarn> +The package manager to install packages with Default: npm/,
     );
     expect(text).toMatch(/--flag <value> +.* Repeatable\./);
     expect(text).toMatch(/--json +Print JSON/);

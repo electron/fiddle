@@ -21,7 +21,7 @@
   },
   "checking": {
     "message": "Checking",
-    "description": "Run button label and status while Fiddle checks that the fiddle can run (trust, version, package manager).",
+    "description": "Run button label and status while Electron Fiddle checks that the fiddle can run (trust, version, package manager).",
     "maxLength": 16
   },
   "unzipping": {
@@ -30,21 +30,21 @@
     "maxLength": 16
   },
   "installingModules": {
-    "message": "Installing modules",
-    "description": "Run button label and status while npm or yarn installs the fiddle's modules.",
+    "message": "Installing packages",
+    "description": "Run button label and status while npm or yarn installs the fiddle's packages.",
     "maxLength": 24
   },
   "announceChecking": {
     "message": "Checking the fiddle",
-    "description": "Screen reader announcement while Fiddle checks that the fiddle can run."
+    "description": "Screen reader announcement while Electron Fiddle checks that the fiddle can run."
   },
   "announceUnzipping": {
     "message": "Unzipping Electron {{version}}",
     "description": "Screen reader announcement while the downloaded Electron version is unzipped."
   },
   "announceInstalling": {
-    "message": "Installing modules",
-    "description": "Screen reader announcement while the fiddle's modules install."
+    "message": "Installing packages",
+    "description": "Screen reader announcement while the fiddle's packages install."
   },
   "announceReady": {
     "message": "Ready to run",
@@ -111,7 +111,7 @@
   },
   "processFiddle": {
     "message": "Fiddle",
-    "description": "Console process column for messages from Electron Fiddle itself.",
+    "description": "Console process column for messages from Electron Fiddle itself. The product name, shortened to fit the column; keep it short.",
     "maxLength": 10
   },
   "processMain": {
@@ -130,7 +130,7 @@
   },
   "newError": {
     "message": "{{name}} in {{file}}: {{message}}",
-    "description": "Polite screen reader announcement of a new runtime error."
+    "description": "Polite screen reader announcement of a new runtime error. {{name}} is the error type, such as TypeError; {{file}} is the file it was thrown in; {{message}} is the error message."
   },
   "electronVersion": {
     "message": "Electron {{version}}",
@@ -245,12 +245,12 @@
   },
   "stateInstalled": {
     "message": "Downloaded",
-    "description": "Install state: the version is ready to run.",
+    "description": "Install state: the version is downloaded and ready to run.",
     "maxLength": 24
   },
   "stateDownloaded": {
     "message": "Downloaded",
-    "description": "Install state: the zip is downloaded but not unpacked yet.",
+    "description": "Install state: the zip is downloaded but not unzipped yet. Reads the same as the ready state on purpose.",
     "maxLength": 24
   },
   "stateMissing": {
@@ -260,12 +260,12 @@
   },
   "stateDownloading": {
     "message": "Downloading {{percent}}%",
-    "description": "Install state while downloading.",
+    "description": "Install state while downloading. {{percent}} is 0 to 100.",
     "maxLength": 24
   },
   "stateInstalling": {
-    "message": "Unpacking",
-    "description": "Install state while the download is unpacked.",
+    "message": "Unzipping",
+    "description": "Install state while the downloaded zip is unzipped.",
     "maxLength": 24
   },
   "stateLocal": {
@@ -295,11 +295,11 @@
   },
   "truncated": {
     "message": "Showing {{shown}} of {{total}} versions. Filter to see more.",
-    "description": "Note under the version manager table when the list is cut short."
+    "description": "Note under the version manager table when the list is cut short. {{shown}} is how many versions are listed, {{total}} how many match the filter."
   },
   "noVersions": {
     "message": "No versions match",
-    "description": "Version manager empty state."
+    "description": "Shown in the version manager when no version matches the filter."
   },
   "bisectTitle": {
     "message": "Bisect",
@@ -307,7 +307,7 @@
     "maxLength": 30
   },
   "bisectIntro": {
-    "message": "Pick a version where the fiddle works and a later one where it doesn't. Fiddle then narrows down the release that changed it.",
+    "message": "Pick a version where the fiddle works and a later one where it doesn't. Electron Fiddle then narrows down the release that changed it.",
     "description": "Explanation in the bisect dialog."
   },
   "bisectGoodVersion": {
@@ -371,7 +371,7 @@
   },
   "bisectAutoRunning": {
     "message": "Auto bisect: {{version}}",
-    "description": "Status bar text during an automatic bisect.",
+    "description": "Status bar text during an automatic bisect. {{version}} is the version being tested.",
     "maxLength": 40
   },
   "bisectDoneTitle": {

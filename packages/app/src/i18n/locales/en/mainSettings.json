@@ -28,8 +28,20 @@
     "description": "Error when an imported settings file isn't a JSON object. {{file}} is the file name."
   },
   "notTheme": {
-    "message": "{{file}} isn't a Monaco theme. A theme needs \"base\" or \"rules\", with colours as hex values.",
-    "description": "Error when an imported theme file isn't a valid Monaco theme. {{file}} is the file name. Keep \"base\" and \"rules\" untranslated."
+    "message": "{{file}} isn't a Monaco theme. A theme needs “base” or “rules”, with colors as hex values.",
+    "description": "Error when an imported theme file isn't a valid Monaco theme. {{file}} is the file name. Keep “base” and “rules” untranslated."
+  },
+  "unknownSetting": {
+    "message": "There's no setting named “{{key}}”.",
+    "description": "Error when a setting that doesn't exist is changed or reset. {{key}} is the setting's ID, such as electronFlags; keep it as it is."
+  },
+  "invalidValue": {
+    "message": "The value for “{{setting}}” isn't valid.",
+    "description": "Error when a setting is set to a value it doesn't accept. {{setting}} is the setting's title, such as Font size."
+  },
+  "themeNeedsValues": {
+    "message": "A built-in theme can't be copied without its current values.",
+    "description": "Error when a copy of a built-in theme is requested without the values the theme has on screen."
   },
   "openFailed": {
     "message": "Couldn't open {{path}}: {{reason}}",
@@ -75,14 +87,13 @@
     "description": "Shown in the import confirmation for a setting that the import clears.",
     "maxLength": 20
   },
+  "importSettingLine": {
+    "message": "{{setting}}: {{value}}",
+    "description": "One line of the import confirmation: a setting and its new value. {{setting}} is the setting's title, such as Electron flags; {{value}} is the new value, or the word for an empty value."
+  },
   "importButton": {
     "message": "Import",
     "description": "Button that confirms importing the settings.",
     "maxLength": 20
-  },
-  "cancel": {
-    "message": "Cancel",
-    "description": "Dialog button.",
-    "maxLength": 16
   }
 }

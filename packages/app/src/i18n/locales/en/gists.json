@@ -10,19 +10,23 @@
   },
   "menuUpdate": {
     "message": "Update gist",
-    "description": "Gist menu item that uploads the current files to the loaded gist."
+    "description": "Gist menu item that uploads the current files to the loaded gist.",
+    "maxLength": 30
   },
   "menuPublishNew": {
     "message": "Publish as new gist",
-    "description": "Gist menu item that publishes the fiddle as a separate, new gist."
+    "description": "Gist menu item that publishes the fiddle as a separate, new gist.",
+    "maxLength": 30
   },
   "menuCopyLink": {
     "message": "Copy share link",
-    "description": "Gist menu item that copies a link to the loaded gist."
+    "description": "Gist menu item that copies a link to the loaded gist.",
+    "maxLength": 30
   },
   "menuHistory": {
     "message": "Show history",
-    "description": "Gist menu item that opens the gist's revision history."
+    "description": "Gist menu item that opens the gist's revision history.",
+    "maxLength": 30
   },
   "openGist": {
     "message": "Open gist…",
@@ -35,7 +39,8 @@
   },
   "menuDelete": {
     "message": "Delete gist",
-    "description": "Gist menu item that deletes the loaded gist from GitHub."
+    "description": "Gist menu item that deletes the loaded gist from GitHub.",
+    "maxLength": 30
   },
   "visibilitySecret": {
     "message": "Secret",
@@ -47,7 +52,8 @@
   },
   "cancel": {
     "message": "Cancel",
-    "description": "Button that closes a gist dialog without doing anything."
+    "description": "Button that closes a gist dialog without doing anything.",
+    "maxLength": 20
   },
   "close": {
     "message": "Close",
@@ -67,7 +73,8 @@
   },
   "signInCreateToken": {
     "message": "Create a token on GitHub",
-    "description": "Button that opens GitHub's new-token page with the gist scope already selected."
+    "description": "Button that opens GitHub's new-token page with the gist scope already selected.",
+    "maxLength": 40
   },
   "signInClipboardHint": {
     "message": "There's a token on your clipboard. Leave this empty to sign in with it.",
@@ -87,7 +94,8 @@
   },
   "signInSubmit": {
     "message": "Sign in",
-    "description": "Button that checks the token and signs in to GitHub."
+    "description": "Button that checks the token and signs in to GitHub.",
+    "maxLength": 20
   },
   "signInErrorFormat": {
     "message": "That doesn't look like a GitHub token. Tokens start with ghp_ or github_pat_.",
@@ -143,7 +151,8 @@
   },
   "publishSubmit": {
     "message": "Publish",
-    "description": "Button that publishes the gist."
+    "description": "Button that publishes the gist.",
+    "maxLength": 20
   },
   "published": {
     "message": "Published to GitHub",
@@ -159,7 +168,8 @@
   },
   "copyLink": {
     "message": "Copy link",
-    "description": "Toast action that copies the gist link."
+    "description": "Toast action that copies the gist link.",
+    "maxLength": 20
   },
   "linkCopied": {
     "message": "Link copied",
@@ -199,7 +209,8 @@
   },
   "deleteConfirm": {
     "message": "Delete",
-    "description": "Button that confirms deleting the gist."
+    "description": "Button that confirms deleting the gist.",
+    "maxLength": 20
   },
   "historyTitle": {
     "message": "Gist history",
@@ -223,15 +234,16 @@
   },
   "historyMeta": {
     "message": "{{sha}} · {{date}}",
-    "description": "Revision details: the short commit SHA, then the date and time."
+    "description": "Revision details in the history list. {{sha}} is the short commit SHA, {{date}} the date and time of the revision."
   },
   "historyChanges": {
     "message": "+{{additions}} −{{deletions}}",
-    "description": "Lines added and removed in a revision. Keep the + and − signs."
+    "description": "Lines added and removed in a revision. {{additions}} and {{deletions}} are line counts. Keep the + and − signs."
   },
   "historyActive": {
     "message": "Active",
-    "description": "Tag on the revision that's currently loaded."
+    "description": "Tag on the revision that's currently loaded.",
+    "maxLength": 16
   },
   "historyEmpty": {
     "message": "No revisions yet.",
@@ -259,7 +271,7 @@
   },
   "openCurrent": {
     "message": "Loaded now: {{url}}",
-    "description": "Help text in the open-gist dialog showing the URL of the gist that's loaded."
+    "description": "Help text in the open-gist dialog showing the URL of the gist that's loaded. {{url}} is that URL."
   },
   "openInvalid": {
     "message": "Enter a gist URL or a 32-character gist ID.",
@@ -267,7 +279,8 @@
   },
   "openSubmit": {
     "message": "Open",
-    "description": "Button that loads the gist."
+    "description": "Button that loads the gist.",
+    "maxLength": 20
   },
   "noticeDecryptFailed": {
     "message": "Signed out of GitHub",
@@ -283,7 +296,7 @@
   },
   "accountSignedInAs": {
     "message": "Signed in as {{login}}",
-    "description": "Settings text showing the GitHub user name."
+    "description": "Settings text showing who is signed in. {{login}} is the GitHub user name."
   },
   "accountSignedOut": {
     "message": "Not signed in",
@@ -291,10 +304,12 @@
   },
   "accountSignOut": {
     "message": "Sign out",
-    "description": "Settings button that signs out of GitHub and deletes the stored token."
+    "description": "Settings button that signs out of GitHub and deletes the stored token.",
+    "maxLength": 20
   },
   "accountSignIn": {
     "message": "Sign in",
-    "description": "Settings button that opens the GitHub sign-in dialog."
+    "description": "Settings button that opens the GitHub sign-in dialog.",
+    "maxLength": 20
   }
 }

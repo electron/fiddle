@@ -13,6 +13,7 @@ import {
   type SparseSettings,
 } from '../../shared/settings';
 import type { AppState } from '../../shared/stores';
+import { tm } from '../i18n';
 import type { JsonStore, JsonStoreNotice } from '../persistence/json-store';
 import type { AppPatch } from '../state-hub';
 
@@ -25,6 +26,13 @@ export interface SettingsHub {
 
 function isSettingKey(key: string): key is SettingKey {
   return (settingKeys as string[]).includes(key);
+}
+
+function unknownSetting(key: string): FiddleError {
+  return new FiddleError(
+    ErrorCode.invalidArgument,
+    tm('mainSettings')('unknownSetting', { key }),
+  );
 }
 
 /** Keeps the keys this app version doesn't know, so they round-trip. */
@@ -62,24 +70,20 @@ export class SettingsService {
   }
 
   set(key: string, value: unknown): number {
-    if (!isSettingKey(key))
-      throw new FiddleError(ErrorCode.invalidArgument, `Unknown setting: ${key}`);
+    if (!isSettingKey(key)) throw unknownSetting(key);
     const parsed = parseSetting(key, value);
     if (!parsed) {
       throw new FiddleError(
         ErrorCode.invalidArgument,
-        `Invalid value for setting "${key}"`,
-        {
-          key,
-        },
+        tm('mainSettings')('invalidValue', { setting: tm('settings')(`${key}.title`) }),
+        { key },
       );
     }
     return this.replace({ ...this.settings, [key]: parsed.value });
   }
 
   reset(key: string): number {
-    if (!isSettingKey(key))
-      throw new FiddleError(ErrorCode.invalidArgument, `Unknown setting: ${key}`);
+    if (!isSettingKey(key)) throw unknownSetting(key);
     return this.set(key, defaultSettings[key]);
   }
 

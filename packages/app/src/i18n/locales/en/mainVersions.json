@@ -25,11 +25,11 @@
   },
   "fallback": {
     "message": "{{problem}} This fiddle now uses {{fallback}}.",
-    "description": "Toast after Fiddle switched the window to another version. {{problem}} is one of the sentences above; {{fallback}} is e.g. 'Electron 43.0.0' or a local build's name."
+    "description": "Toast after the app switched the window to another version. {{problem}} is one of the sentences above; {{fallback}} is e.g. 'Electron 43.0.0' or a local build's name."
   },
   "electronVersion": {
     "message": "Electron {{version}}",
-    "description": "A release in the messages above, e.g. 'Electron 43.0.0'."
+    "description": "A release in the messages above, e.g. 'Electron 43.0.0'. {{version}} is a version number such as 43.0.0."
   },
   "showStableTitle": {
     "message": "Show stable releases?",

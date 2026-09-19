@@ -6,7 +6,10 @@ export default {
   "jsonFiles": "JSON files",
   "notJson": "{{file}} isn't valid JSON.",
   "notSettings": "{{file}} doesn't contain settings.",
-  "notTheme": "{{file}} isn't a Monaco theme. A theme needs \"base\" or \"rules\", with colours as hex values.",
+  "notTheme": "{{file}} isn't a Monaco theme. A theme needs “base” or “rules”, with colors as hex values.",
+  "unknownSetting": "There's no setting named “{{key}}”.",
+  "invalidValue": "The value for “{{setting}}” isn't valid.",
+  "themeNeedsValues": "A built-in theme can't be copied without its current values.",
   "openFailed": "Couldn't open {{path}}: {{reason}}",
   "themeCopyName": "{{name}} copy",
   "lucentDark": "Lucent dark",
@@ -16,6 +19,6 @@ export default {
   "importExecutionMessage": "Import settings that change how fiddles run?",
   "importExecutionDetail": "These settings control where Electron is downloaded from and what every run starts with. Only import settings from a source you trust.",
   "importEmpty": "none",
-  "importButton": "Import",
-  "cancel": "Cancel"
+  "importSettingLine": "{{setting}}: {{value}}",
+  "importButton": "Import"
 } as const;

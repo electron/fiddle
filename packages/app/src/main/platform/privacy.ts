@@ -22,13 +22,9 @@ export function tccutilArgs(bundleId = BUNDLE_ID): string[] {
 
 /** Resolves false when the user cancels. */
 export async function resetPrivacyPermissions(windowId: string): Promise<boolean> {
-  if (process.platform !== 'darwin') {
-    throw new FiddleError(
-      ErrorCode.unavailable,
-      'Privacy permissions can only be reset on macOS',
-    );
-  }
   const tp = tm('mainPlatform');
+  if (process.platform !== 'darwin')
+    throw new FiddleError(ErrorCode.unavailable, tp('resetPrivacyUnavailable'));
   const ok = await confirm(windowId, {
     type: 'warning',
     message: tp('resetPrivacyMessage'),

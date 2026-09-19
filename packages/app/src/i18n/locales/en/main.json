@@ -290,7 +290,7 @@
   },
   "stop": {
     "message": "Stop",
-    "description": "Run menu item, while the fiddle runs (or its Electron version downloads or its modules install), that stops it.",
+    "description": "Run menu item, while the fiddle runs (or its Electron version downloads or its packages install), that stops it.",
     "maxLength": 30
   },
   "packageFiddle": {

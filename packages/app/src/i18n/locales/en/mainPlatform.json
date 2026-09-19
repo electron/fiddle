@@ -36,24 +36,6 @@
     "description": "Button that keeps the app where it is.",
     "maxLength": 20
   },
-  "crashConsentMessage": {
-    "message": "A window crashed. Send a crash report?",
-    "description": "Question shown after an app window crashed natively, before a crash dump is uploaded."
-  },
-  "crashConsentDetail": {
-    "message": "The report includes a snapshot of the crashed window's memory, which may contain the code you had open. It helps the Electron Fiddle team fix the crash.",
-    "description": "Explains what a native crash report contains, so the user can decide whether to send it."
-  },
-  "sendReport": {
-    "message": "Send report",
-    "description": "Button that uploads the crash report.",
-    "maxLength": 20
-  },
-  "dontSend": {
-    "message": "Don't send",
-    "description": "Button that discards the crash report.",
-    "maxLength": 20
-  },
   "aboutVersion": {
     "message": "{{version}} (Electron {{electron}})",
     "description": "Version line in the About panel on Windows and Linux. {{version}} is the app version, {{electron}} the Electron version, e.g. 1.0.0 (Electron 44.3.0)."
@@ -80,5 +62,9 @@
   "resetPrivacyFailed": {
     "message": "The privacy permissions couldn't be reset.",
     "description": "Error when macOS's tccutil command fails."
+  },
+  "resetPrivacyUnavailable": {
+    "message": "Privacy permissions can only be reset on macOS.",
+    "description": "Error when resetting the privacy permissions is attempted on a system other than macOS."
   }
 }

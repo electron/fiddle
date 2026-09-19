@@ -6,8 +6,8 @@ export default {
   "packageFailed": "[Þáçķáĝîñĝ ƒáîļéð one two]",
   "downloadsDone": "[Ðöŵñļöáðš ƒîñîšĥéð one two]",
   "downloadsFailed": "[Å ðöŵñļöáð ƒáîļéð one two]",
-  "runDone": "[Ƒîððļé éẋîţéð one two]",
-  "runFailed": "[Ƒîððļé éẋîţéð ŵîţĥ áñ éŕŕöŕ one two three]",
+  "runDone": "[Ţĥé ƒîððļé éẋîţéð one two]",
+  "runFailed": "[Ţĥé ƒîððļé éẋîţéð ŵîţĥ áñ éŕŕöŕ one two three]",
   "notificationBody": "[{{name}} one]",
   "recent": "[Ŕéçéñţ one]"
 } as const;

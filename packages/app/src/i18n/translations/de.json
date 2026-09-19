@@ -1474,24 +1474,9 @@
     "translation": "58c5d0ebd6a7",
     "reviewed": false
   },
-  "mainPlatform:crashConsentDetail": {
-    "source": "a4f05c95f915",
-    "translation": "80ba7d7acd15",
-    "reviewed": false
-  },
-  "mainPlatform:crashConsentMessage": {
-    "source": "da0d95354109",
-    "translation": "aeb54cae65fa",
-    "reviewed": false
-  },
   "mainPlatform:dontMove": {
     "source": "e6bbe0aa6b8e",
     "translation": "585f515a74f1",
-    "reviewed": false
-  },
-  "mainPlatform:dontSend": {
-    "source": "11feeff6baec",
-    "translation": "435a212742c7",
     "reviewed": false
   },
   "mainPlatform:later": {
@@ -1517,11 +1502,6 @@
   "mainPlatform:restart": {
     "source": "6b983a81e5e8",
     "translation": "3611a239a952",
-    "reviewed": false
-  },
-  "mainPlatform:sendReport": {
-    "source": "a44d35311325",
-    "translation": "df3b73ca555b",
     "reviewed": false
   },
   "mainPlatform:updateReadyDetail": {

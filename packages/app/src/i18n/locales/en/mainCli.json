@@ -73,11 +73,11 @@
     "description": "CLI help for --env. Keep KEY=value as it is."
   },
   "argModule": {
-    "message": "An npm module for the fiddle, as name@version",
+    "message": "An npm package for the fiddle, as name@version",
     "description": "CLI help for --module. Keep name@version as it is."
   },
   "argPm": {
-    "message": "The package manager that installs modules",
+    "message": "The package manager to install packages with",
     "description": "CLI help for --pm."
   },
   "argLogging": {
@@ -85,7 +85,7 @@
     "description": "CLI help for --logging."
   },
   "argTrust": {
-    "message": "Let a remote fiddle's code run without asking. Its modules still install without install scripts.",
+    "message": "Let a remote fiddle's code run without asking. Its packages still install without install scripts.",
     "description": "CLI help for --trust."
   },
   "argGood": {
@@ -166,7 +166,7 @@
 
   "errorPrefix": {
     "message": "Error: {{message}}",
-    "description": "How the CLI prints an error."
+    "description": "How the CLI prints an error. {{message}} is the error text."
   },
   "errorHelpHint": {
     "message": "Run it with --help to see its options.",
@@ -178,7 +178,7 @@
   },
   "errorUnknownOption": {
     "message": "{{option}} isn't an option of “{{command}}”.",
-    "description": "CLI error for an unknown option."
+    "description": "CLI error for an unknown option. {{option}} is the option as typed, such as --forge; {{command}} is the command it was given to."
   },
   "errorMissingValue": {
     "message": "{{option}} needs a value.",
@@ -186,11 +186,11 @@
   },
   "errorUnexpectedValue": {
     "message": "{{option}} doesn't take a value.",
-    "description": "CLI error: a switch was given a value."
+    "description": "CLI error: a switch was given a value. {{option}} is the switch as typed, such as --json."
   },
   "errorTooManyArguments": {
     "message": "Unexpected arguments: {{args}}",
-    "description": "CLI error: extra positional arguments."
+    "description": "CLI error: extra positional arguments. {{args}} is the extra arguments, separated by spaces."
   },
   "errorMissingArgument": {
     "message": "{{name}} is missing.",
@@ -198,11 +198,15 @@
   },
   "errorInvalidChoice": {
     "message": "{{name}} must be one of: {{choices}}",
-    "description": "CLI error: a value isn't one of the allowed ones."
+    "description": "CLI error: a value isn't one of the allowed ones. {{name}} is the option or argument, {{choices}} the allowed values separated by commas."
   },
   "errorInvalidValue": {
     "message": "{{name}} is invalid: {{message}}",
-    "description": "CLI error: a value failed validation."
+    "description": "CLI error: a value failed validation. {{name}} is the option or argument, {{message}} says what is wrong with it."
+  },
+  "invalidVersion": {
+    "message": "expected a version like 30.0.0",
+    "description": "The end of the CLI error 'X is invalid: …' when a version option or argument isn't a version. Lower case: it follows a colon. Keep 30.0.0 as it is."
   },
   "errorFiddleNotFound": {
     "message": "“{{fiddle}}” isn't a folder, a gist ID or URL, example:<name> or electron:<tag>/<path>.",
@@ -210,14 +214,14 @@
   },
   "errorUnknownExample": {
     "message": "There's no example named “{{name}}”. The examples are: {{names}}",
-    "description": "CLI error for example:<name> with an unknown name."
+    "description": "CLI error for example:<name> with an unknown name. {{name}} is the name given, {{names}} the available examples."
   },
   "errorElectronExample": {
     "message": "Write Electron's examples as electron:<tag>/<path>, e.g. electron:v30.0.0/docs/fiddles/quick-start.",
     "description": "CLI error for a malformed electron: fiddle."
   },
   "errorInvalidModule": {
-    "message": "“{{module}}” isn't a module like name@version.",
+    "message": "“{{module}}” isn't a package like name@version.",
     "description": "CLI error for a bad --module value."
   },
   "errorElectronPathMissing": {
@@ -226,7 +230,7 @@
   },
   "errorGistId": {
     "message": "“{{id}}” isn't a gist ID or URL.",
-    "description": "CLI error for a bad gist argument."
+    "description": "CLI error for a bad gist argument. {{id}} is the text given."
   },
   "errorNoToken": {
     "message": "Set GITHUB_TOKEN to a GitHub token with the gist scope.",
@@ -234,16 +238,11 @@
   },
   "errorUntrusted": {
     "message": "This fiddle comes from {{origin}}. Add --trust to let its code run.",
-    "description": "CLI error when a remote fiddle would run without --trust and there's no terminal to ask in."
+    "description": "CLI error when a remote fiddle would run without --trust and there's no terminal to ask in. {{origin}} is where the fiddle comes from, such as a gist URL."
   },
-  "errorGoodNotOlder": {
-    "message": "The good version must be older than the bad one.",
-    "description": "CLI error for bisect's --good and --bad."
-  },
-
   "trustQuestion": {
-    "message": "Continue? [y/N] ",
-    "description": "CLI prompt before a remote fiddle's code runs. Only y or yes continues, so keep [y/N]."
+    "message": "Continue? [y/N]",
+    "description": "CLI prompt before a remote fiddle's code runs; a space is added after it. Only y or yes continues, so keep [y/N]."
   },
 
   "warnInvalidPackageJson": {
@@ -252,15 +251,15 @@
   },
   "warnUnusableVersion": {
     "message": "Electron {{version}} from the fiddle's package.json can't be used here.",
-    "description": "CLI warning while loading a fiddle."
+    "description": "CLI warning while loading a fiddle. {{version}} is the Electron version named in the fiddle's package.json."
   },
   "warnRejectedModules": {
-    "message": "Skipped modules that aren't valid: {{modules}}",
-    "description": "CLI warning while loading a fiddle."
+    "message": "Skipped packages that aren't valid: {{modules}}",
+    "description": "CLI warning while loading a fiddle. {{modules}} is a comma-separated list."
   },
   "warnGistPartial": {
     "message": "Created {{url}} from the template, but adding the fiddle's files failed. Run gist update to finish.",
-    "description": "CLI warning when a publish half-succeeds. Keep “gist update” as it is."
+    "description": "CLI warning when a publish half-succeeds. {{url}} is the new gist's URL. Keep “gist update” as it is."
   },
 
   "stateInstalled": {
@@ -277,7 +276,7 @@
   },
   "resultDownloaded": {
     "message": "Electron {{version}} is ready: {{path}}",
-    "description": "CLI result of versions download."
+    "description": "CLI result of versions download. {{version}} is the Electron version, {{path}} the path of its executable."
   },
   "resultRemoved": {
     "message": "Removed Electron {{version}}.",
@@ -285,19 +284,19 @@
   },
   "resultGistLoaded": {
     "message": "Saved gist {{id}} to {{dir}}",
-    "description": "CLI result of gist load."
+    "description": "CLI result of gist load. {{id}} is the gist ID, {{dir}} the folder it was saved to."
   },
   "resultGistPublished": {
     "message": "Published {{url}}",
-    "description": "CLI result of gist publish."
+    "description": "CLI result of gist publish. {{url}} is the new gist's URL."
   },
   "resultGistUpdated": {
     "message": "Updated {{url}}",
-    "description": "CLI result of gist update."
+    "description": "CLI result of gist update. {{url}} is the gist's URL."
   },
   "resultGistDeleted": {
     "message": "Deleted gist {{id}}.",
-    "description": "CLI result of gist delete."
+    "description": "CLI result of gist delete. {{id}} is the gist ID."
   },
   "resultRevisionCreated": {
     "message": "Created",
@@ -309,6 +308,6 @@
   },
   "resultExported": {
     "message": "Saved {{name}} to {{dir}}",
-    "description": "CLI result of export."
+    "description": "CLI result of export. {{name}} is the fiddle's name, {{dir}} the folder it was saved to."
   }
 }

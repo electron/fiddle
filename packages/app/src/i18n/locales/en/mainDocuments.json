@@ -134,13 +134,23 @@
     "description": "Error when a gist contains no supported files.",
     "maxLength": 120
   },
+  "notAFolder": {
+    "message": "“{{path}}” isn't a folder.",
+    "description": "Error dialog detail when something that isn't a folder is dropped on a window to open it. {{path}} is the dropped item's path.",
+    "maxLength": 300
+  },
+  "notAGist": {
+    "message": "“{{input}}” isn't a gist URL or ID.",
+    "description": "Error when text that isn't a gist URL or ID is loaded as a gist. {{input}} is that text.",
+    "maxLength": 300
+  },
   "loadWarnings": {
     "message": "The fiddle loaded with warnings",
     "description": "Title of the notice listing load warnings.",
     "maxLength": 80
   },
   "warnPackageJson": {
-    "message": "package.json isn't valid JSON, so its modules and Electron version were ignored.",
+    "message": "package.json isn't valid JSON, so its packages and Electron version were ignored.",
     "description": "Load warning for an invalid package.json.",
     "maxLength": 200
   },
@@ -150,8 +160,8 @@
     "maxLength": 200
   },
   "warnModules": {
-    "message": "These modules were skipped: {{modules}}.",
-    "description": "Load warning listing module specs that were rejected. {{modules}} is a comma-separated list.",
+    "message": "These packages were skipped: {{modules}}.",
+    "description": "Load warning listing package specs that were rejected. {{modules}} is a comma-separated list.",
     "maxLength": 300
   },
   "linkInvalid": {
@@ -181,7 +191,7 @@
   },
   "linkOwnerMismatch": {
     "message": "Warning: the link names {{linkOwner}} as the owner, but the gist belongs to {{owner}}.",
-    "description": "Warning in the deep link confirmation when the owner in the link doesn't match the gist.",
+    "description": "Warning in the deep link confirmation when the owner in the link doesn't match the gist. {{linkOwner}} is the owner named in the link, {{owner}} the gist's actual owner.",
     "maxLength": 200
   },
   "detailOwner": {
@@ -196,7 +206,7 @@
   },
   "detailRevision": {
     "message": "Revision: {{sha}}",
-    "description": "Line in a confirmation showing the gist revision SHA.",
+    "description": "Line in a confirmation showing the gist revision. {{sha}} is the revision's SHA.",
     "maxLength": 80
   },
   "detailVersion": {
@@ -211,12 +221,12 @@
   },
   "detailOrigin": {
     "message": "Source: {{origin}}",
-    "description": "Line in a confirmation showing where the fiddle came from.",
+    "description": "Line in a confirmation showing where the fiddle came from. {{origin}} is a short code, such as gist:<owner>/<id>@<sha> or electron:<tag>/<path>; keep it as it is.",
     "maxLength": 300
   },
   "detailFiles": {
     "message": "Files: {{files}}",
-    "description": "Line in a confirmation listing file names.",
+    "description": "Line in a confirmation listing file names. {{files}} is a comma-separated list of the file names.",
     "maxLength": 1000
   },
   "detailDependencies": {
@@ -270,12 +280,12 @@
     "maxLength": 300
   },
   "restoreFailedMessage": {
-    "message": "Some windows could not be reopened",
+    "message": "Some windows couldn't be reopened",
     "description": "Error title shown at startup when windows from the last session could not be loaded from their folder or gist.",
     "maxLength": 80
   },
   "restoreFailedDetail": {
-    "message": "Could not load the folder or gist of: {{names}}. Check that the folder is available and that you're online.",
+    "message": "Couldn't load the folder or gist of: {{names}}. Check that the folder is available and that you're online.",
     "description": "Detail of the restore error. {{names}} is a comma-separated list of window names.",
     "maxLength": 300
   },
@@ -313,5 +323,10 @@
     "message": "Sign in",
     "description": "Dialog button that opens the GitHub sign-in dialog.",
     "maxLength": 20
+  },
+  "signInRequired": {
+    "message": "Sign in to GitHub first.",
+    "description": "Error when an action needs a GitHub account and nobody is signed in.",
+    "maxLength": 120
   }
 }

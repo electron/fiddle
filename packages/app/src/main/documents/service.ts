@@ -518,7 +518,10 @@ export function attachWindow(windowId: string, contents: WebContents): void {
     }
     void withErrorDialog(windowId, async () => {
       if (!(await fs.stat(target)).isDirectory())
-        throw new FiddleError(ErrorCode.invalidArgument, `Not a folder: ${target}`);
+        throw new FiddleError(
+          ErrorCode.invalidArgument,
+          td('notAFolder', { path: target }),
+        );
       await openFolderIn(windowId, target);
     });
   });
@@ -1004,7 +1007,7 @@ export async function loadGistIn(
 ): Promise<number> {
   const id = getGistId(idOrUrl);
   if (!id)
-    throw new FiddleError(ErrorCode.invalidArgument, `Not a gist URL or ID: ${idOrUrl}`, {
+    throw new FiddleError(ErrorCode.invalidArgument, td('notAGist', { input: idOrUrl }), {
       reason: 'invalid-gist-id',
     });
   return replaceIn(windowId, (context) =>

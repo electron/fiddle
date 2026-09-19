@@ -5,6 +5,7 @@ import { z } from 'zod';
 import type mainCli from '../../i18n/generated/en/mainCli';
 import { ErrorCode } from '../../shared/errors';
 import { defaultSettings, releaseChannelSchema } from '../../shared/settings';
+import { tm } from '../i18n';
 import { CliErrorCode } from './output';
 
 export type CliKey = keyof typeof mainCli;
@@ -29,7 +30,9 @@ function command<I extends z.ZodObject, O extends z.ZodType>(
 }
 
 const fiddle = z.string().min(1);
-const version = z.string().regex(/^v?\d/, 'expected a version like 30.0.0');
+const version = z
+  .string()
+  .regex(/^v?\d/, { error: () => tm('mainCli')('invalidVersion') });
 const gistId = z.string().min(1);
 const dir = z.string().min(1);
 

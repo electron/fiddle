@@ -6,8 +6,8 @@ export default {
   "packageFailed": "Packaging failed",
   "downloadsDone": "Downloads finished",
   "downloadsFailed": "A download failed",
-  "runDone": "Fiddle exited",
-  "runFailed": "Fiddle exited with an error",
+  "runDone": "The fiddle exited",
+  "runFailed": "The fiddle exited with an error",
   "notificationBody": "{{name}}",
   "recent": "Recent"
 } as const;

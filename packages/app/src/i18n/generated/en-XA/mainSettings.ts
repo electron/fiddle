@@ -6,7 +6,10 @@ export default {
   "jsonFiles": "[ĴŠÖÑ ƒîļéš one]",
   "notJson": "[{{file}} îšñ'ţ ṽáļîð ĴŠÖÑ. one two three]",
   "notSettings": "[{{file}} ðöéšñ'ţ çöñţáîñ šéţţîñĝš. one two three]",
-  "notTheme": "[{{file}} îšñ'ţ á Ṁöñáçö ţĥéɱé. Å ţĥéɱé ñééðš \"ƀášé\" öŕ \"ŕûļéš\", ŵîţĥ çöļöûŕš áš ĥéẋ ṽáļûéš. one two three four five six seven eight]",
+  "notTheme": "[{{file}} îšñ'ţ á Ṁöñáçö ţĥéɱé. Å ţĥéɱé ñééðš “ƀášé” öŕ “ŕûļéš”, ŵîţĥ çöļöŕš áš ĥéẋ ṽáļûéš. one two three four five six seven]",
+  "unknownSetting": "[Ţĥéŕé'š ñö šéţţîñĝ ñáɱéð “{{key}}”. one two three]",
+  "invalidValue": "[Ţĥé ṽáļûé ƒöŕ “{{setting}}” îšñ'ţ ṽáļîð. one two three]",
+  "themeNeedsValues": "[Å ƀûîļţ-îñ ţĥéɱé çáñ'ţ ƀé çöþîéð ŵîţĥöûţ îţš çûŕŕéñţ ṽáļûéš. one two three four five]",
   "openFailed": "[Çöûļðñ'ţ öþéñ {{path}}: {{reason}} one two three]",
   "themeCopyName": "[{{name}} çöþý one]",
   "lucentDark": "[Ļûçéñţ ðáŕķ one two]",
@@ -16,6 +19,6 @@ export default {
   "importExecutionMessage": "[Îɱþöŕţ šéţţîñĝš ţĥáţ çĥáñĝé ĥöŵ ƒîððļéš ŕûñ? one two three four]",
   "importExecutionDetail": "[Ţĥéšé šéţţîñĝš çöñţŕöļ ŵĥéŕé Éļéçţŕöñ îš ðöŵñļöáðéð ƒŕöɱ áñð ŵĥáţ éṽéŕý ŕûñ šţáŕţš ŵîţĥ. Öñļý îɱþöŕţ šéţţîñĝš ƒŕöɱ á šöûŕçé ýöû ţŕûšţ. one two three four five six seven eight nine ten one two]",
   "importEmpty": "[ñöñé one]",
-  "importButton": "[Îɱþöŕţ one]",
-  "cancel": "[Çáñçéļ one]"
+  "importSettingLine": "[{{setting}}: {{value}} one]",
+  "importButton": "[Îɱþöŕţ one]"
 } as const;

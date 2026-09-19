@@ -5,6 +5,7 @@ import {
 } from '../../fiddle/modules';
 import { ErrorCode, FiddleError } from '../../shared/errors';
 import type { FiddleState } from '../../shared/stores';
+import { tm } from '../i18n';
 import type { ChangeListener } from '../state-hub';
 
 /** The parts of the StateHub and Documents this service needs. */
@@ -98,9 +99,11 @@ export class ModulesService {
 
   async #resolve(name: string, version: string | undefined): Promise<string> {
     if (!isValidPackageName(name)) {
-      throw new FiddleError(ErrorCode.invalidArgument, `Invalid package name: ${name}`, {
-        name,
-      });
+      throw new FiddleError(
+        ErrorCode.invalidArgument,
+        tm('mainModules')('invalidPackageName', { name }),
+        { name },
+      );
     }
     if (version !== undefined) assertModuleSpec(name, version);
     if (version !== undefined && !isFloatingVersion(version)) return version;

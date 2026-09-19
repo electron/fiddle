@@ -22,9 +22,9 @@ function withOverride(preferred: readonly string[]): readonly string[] {
   return forced && (!app.isPackaged || isTestMode()) ? [forced, ...preferred] : preferred;
 }
 
-/** Main loads `main` plus every `main<Name>` namespace (its dialogs and notices), never the renderer's. */
+/** Main loads `main`, every `main<Name>` namespace (its dialogs and notices) and `settings`, for the setting titles its dialogs name. */
 const mainNamespaces = namespaces.filter(
-  (ns) => ns === 'main' || /^main[A-Z]/.test(ns),
+  (ns) => ns === 'main' || ns === 'settings' || /^main[A-Z]/.test(ns),
 ) as Namespace[];
 
 export async function initMainI18n(preferred: readonly string[]): Promise<Locale> {

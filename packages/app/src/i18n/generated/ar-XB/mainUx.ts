@@ -6,8 +6,8 @@ export default {
   "packageFailed": "\u200f\u202ePackaging\u202c\u200f \u200f\u202efailed\u202c\u200f",
   "downloadsDone": "\u200f\u202eDownloads\u202c\u200f \u200f\u202efinished\u202c\u200f",
   "downloadsFailed": "\u200f\u202eA\u202c\u200f \u200f\u202edownload\u202c\u200f \u200f\u202efailed\u202c\u200f",
-  "runDone": "\u200f\u202eFiddle\u202c\u200f \u200f\u202eexited\u202c\u200f",
-  "runFailed": "\u200f\u202eFiddle\u202c\u200f \u200f\u202eexited\u202c\u200f \u200f\u202ewith\u202c\u200f \u200f\u202ean\u202c\u200f \u200f\u202eerror\u202c\u200f",
+  "runDone": "\u200f\u202eThe\u202c\u200f \u200f\u202efiddle\u202c\u200f \u200f\u202eexited\u202c\u200f",
+  "runFailed": "\u200f\u202eThe\u202c\u200f \u200f\u202efiddle\u202c\u200f \u200f\u202eexited\u202c\u200f \u200f\u202ewith\u202c\u200f \u200f\u202ean\u202c\u200f \u200f\u202eerror\u202c\u200f",
   "notificationBody": "{{name}}",
   "recent": "\u200f\u202eRecent\u202c\u200f"
 } as const;

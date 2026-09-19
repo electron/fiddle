@@ -99,19 +99,23 @@
   },
   "errorCount_one": {
     "message": "{{count}} error",
-    "description": "Pill on a sidebar file row and in an editor pane header: how many runtime errors the file has. Singular."
+    "description": "Pill on a sidebar file row and in an editor pane header: how many runtime errors the file has. {{count}} is the number. Singular.",
+    "maxLength": 20
   },
   "errorCount_other": {
     "message": "{{count}} errors",
-    "description": "Pill on a sidebar file row and in an editor pane header: how many runtime errors the file has. Plural."
+    "description": "Pill on a sidebar file row and in an editor pane header: how many runtime errors the file has. {{count}} is the number. Plural.",
+    "maxLength": 20
   },
   "warningCount_one": {
     "message": "{{count}} warning",
-    "description": "Pill on a sidebar file row, tab badge and editor pane header: how many editor warnings the file has, when it has no errors. Singular."
+    "description": "Pill on a sidebar file row, tab badge and editor pane header: how many editor warnings the file has, when it has no errors. {{count}} is the number. Singular.",
+    "maxLength": 20
   },
   "warningCount_other": {
     "message": "{{count}} warnings",
-    "description": "Pill on a sidebar file row, tab badge and editor pane header: how many editor warnings the file has, when it has no errors. Plural."
+    "description": "Pill on a sidebar file row, tab badge and editor pane header: how many editor warnings the file has, when it has no errors. {{count}} is the number. Plural.",
+    "maxLength": 20
   },
   "resizePanes": {
     "message": "Resize editor panes",
@@ -119,11 +123,11 @@
   },
   "notificationsButton_one": {
     "message": "Notifications, {{count}} new",
-    "description": "Accessible name of the status bar bell button when there is one notification the user hasn't seen in the list. Singular."
+    "description": "Accessible name of the status bar bell button when there is one notification the user hasn't seen in the list. {{count}} is the number of new notifications. Singular."
   },
   "notificationsButton_other": {
     "message": "Notifications, {{count}} new",
-    "description": "Accessible name of the status bar bell button when there are notifications the user hasn't seen in the list. Plural."
+    "description": "Accessible name of the status bar bell button when there are notifications the user hasn't seen in the list. {{count}} is the number of new notifications. Plural."
   },
   "noNotifications": {
     "message": "No notifications yet",
@@ -276,7 +280,7 @@
   },
   "lensHint": {
     "message": "Thrown in the {{process}} at {{file}}:{{line}}:{{column}}.",
-    "description": "Hint under a runtime error shown in the editor. {{process}} is 'main process', 'preload' or 'renderer'; the rest is the location."
+    "description": "Hint under a runtime error shown in the editor. {{process}} is 'main process', 'preload' or 'renderer'; {{file}}, {{line}} and {{column}} are the location of the error."
   },
   "lensProcessMain": {
     "message": "main process",
