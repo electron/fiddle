@@ -12,6 +12,7 @@ import { ErrorCode, FiddleError } from '../../shared/errors';
 import type { OutputLine, RunState, VersionRefValue } from '../../shared/stores';
 import * as documents from '../documents/service';
 import { tm } from '../i18n';
+import { errorMessage } from '../localize-error';
 import { log } from '../log';
 import { sfwEntryPath } from '../platform/sfw';
 import type { StateHub } from '../state-hub';
@@ -237,7 +238,7 @@ export class RunService {
         log.error('run failed', failure.code, error);
         this.log(
           windowId,
-          tm('mainRun')('runFailed', { message: failure.message }),
+          tm('mainRun')('runFailed', { message: errorMessage(failure) }),
           'error',
         );
         outcome = { spawnFailed: true };
@@ -470,11 +471,7 @@ export class RunService {
         });
       } catch (error) {
         if (signal.aborted) throw error;
-        this.log(
-          windowId,
-          t('modulesFailed', { message: FiddleError.from(error).message }),
-          'error',
-        );
+        this.log(windowId, t('modulesFailed', { message: errorMessage(error) }), 'error');
         return { installFailed: true };
       }
       await writeRunPackageJson(appDir, withElectron);

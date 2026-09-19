@@ -1,4 +1,5 @@
-import { ErrorCode, FiddleError } from '../shared/errors';
+import { ErrorCode } from '../shared/errors';
+import { reasonError } from './error-reasons';
 import { versionFromTag } from './deep-link';
 import {
   type FileMap,
@@ -33,10 +34,12 @@ export interface DocsExample extends PickedFiles {
 function assertExamplePath(p: string): void {
   const segments = p.split('/');
   if (segments.some((s) => s === '' || s === '.' || s === '..' || /[\\\0]/.test(s))) {
-    throw new FiddleError(ErrorCode.invalidArgument, `Invalid example path: ${p}`, {
-      reason: 'invalid-path',
-      path: p,
-    });
+    throw reasonError(
+      ErrorCode.invalidArgument,
+      'invalid-path',
+      `Invalid example path: ${p}`,
+      { path: p },
+    );
   }
 }
 
@@ -44,13 +47,11 @@ function assertExamplePath(p: string): void {
 export async function loadDocsExample(options: DocsExampleOptions): Promise<DocsExample> {
   const version = versionFromTag(options.tag);
   if (!version) {
-    throw new FiddleError(
+    throw reasonError(
       ErrorCode.invalidArgument,
+      'invalid-tag',
       `Could not determine the Electron version from ${options.tag}`,
-      {
-        reason: 'invalid-tag',
-        tag: options.tag,
-      },
+      { tag: options.tag },
     );
   }
   assertExamplePath(options.path);
@@ -70,13 +71,11 @@ export async function loadDocsExample(options: DocsExampleOptions): Promise<Docs
         (isSupportedFileName(e.name) && !isReservedFileName(e.name))),
   );
   if (!wanted.some((e) => e.name !== PACKAGE_JSON)) {
-    throw new FiddleError(
+    throw reasonError(
       ErrorCode.invalidArgument,
+      'no-supported-files',
       `${options.path} has no supported files`,
-      {
-        reason: 'no-supported-files',
-        path: options.path,
-      },
+      { path: options.path },
     );
   }
   const [template, fetched] = await Promise.all([

@@ -5,6 +5,7 @@ import { extractZip, renameWithRetry } from '@electron/fiddle-core';
 import * as semver from 'semver';
 
 import { ErrorCode, FiddleError } from '../shared/errors';
+import { reasonError } from './error-reasons';
 import type { FileMap } from './files';
 import { readFiddleFolder } from './folder';
 
@@ -94,7 +95,7 @@ async function fetchArchive(
     if (!res.ok) {
       // A 404 is a branch minimal-repro doesn't have (yet), not a failed download.
       const code = res.status === 404 ? ErrorCode.notFound : ErrorCode.network;
-      throw new FiddleError(code, `${url} responded ${res.status}`, {
+      throw reasonError(code, 'template-status', `${url} responded ${res.status}`, {
         status: res.status,
       });
     }
@@ -103,9 +104,14 @@ async function fetchArchive(
     if (error instanceof FiddleError) throw error;
     if (options.signal?.aborted)
       throw new FiddleError(ErrorCode.cancelled, 'The template download was cancelled');
-    throw new FiddleError(ErrorCode.network, `Could not download ${url}`, {
-      cause: error instanceof Error ? error.message : String(error),
-    });
+    throw reasonError(
+      ErrorCode.network,
+      'template-unreachable',
+      `Could not download ${url}`,
+      {
+        cause: error instanceof Error ? error.message : String(error),
+      },
+    );
   }
 }
 

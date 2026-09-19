@@ -6,6 +6,7 @@ import { app } from 'electron';
 
 import { ErrorCode, FiddleError } from '../../shared/errors';
 import { initMainI18n, tm } from '../i18n';
+import { localizeError } from '../localize-error';
 import { helpText, parseCommandLine } from './argv';
 import { runCommand } from './commands';
 import { exitCodeForError, localeFromEnv, Reporter, type Writers } from './output';
@@ -97,7 +98,7 @@ async function main(args: string[]): Promise<number> {
     // Ctrl+C at a prompt cancels the command, like a signal does.
     if (controller.signal.aborted || e.code === ErrorCode.cancelled) return 130;
     if (e.code === ErrorCode.internal) console.error(error);
-    reporter.error(e, t('errorPrefix', { message: e.message }));
+    reporter.error(e, t('errorPrefix', { message: localizeError(e).message }));
     return exitCodeForError(e.code);
   }
 }

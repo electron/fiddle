@@ -1,6 +1,7 @@
 import { z } from 'zod';
 
-import { ErrorCode, FiddleError } from '../shared/errors';
+import { ErrorCode } from '../shared/errors';
+import { reasonError } from './error-reasons';
 import {
   assertCanAddFile,
   assertCanRemoveFile,
@@ -71,8 +72,7 @@ export function createFiddle(input: CreateFiddleInput): Fiddle {
 
 function assertHasFile(fiddle: Fiddle, name: string): void {
   if (!Object.hasOwn(fiddle.files, name)) {
-    throw new FiddleError(ErrorCode.notFound, `No file named "${name}"`, {
-      reason: 'file-not-found',
+    throw reasonError(ErrorCode.notFound, 'file-not-found', `No file named "${name}"`, {
       name,
     });
   }

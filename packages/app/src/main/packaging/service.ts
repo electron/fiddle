@@ -18,10 +18,10 @@ import {
   type PackageManager,
 } from '../../fiddle/modules';
 import { generatePackageJson, osUserName } from '../../fiddle/package-json';
-import { FiddleError } from '../../shared/errors';
 import type { ReleaseRow } from '../../shared/stores';
 import * as documents from '../documents/service';
 import { tm } from '../i18n';
+import { errorMessage } from '../localize-error';
 import { log } from '../log';
 import type { StateHub } from '../state-hub';
 import { makeRunDir } from '../run/process';
@@ -218,7 +218,7 @@ export async function packageFiddle(
   } catch (error) {
     if (!controller.signal.aborted) {
       log.error(`${task} failed`, error);
-      runs.log(windowId, FiddleError.from(error).message, 'error');
+      runs.log(windowId, errorMessage(error), 'error');
     }
     runs.setState(windowId, { result: 'failure' });
     await removeProject(dir);

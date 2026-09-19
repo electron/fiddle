@@ -1,6 +1,7 @@
 import { z } from 'zod';
 
 import { ErrorCode, FiddleError } from '../shared/errors';
+import { reasonError } from './error-reasons';
 import type { FileMap } from './files';
 import { gistUrl, isGistId, isRevisionSha } from './gist-id';
 import { type FiddleOrigin, gistOrigin } from './trust';
@@ -48,12 +49,22 @@ export function assertGistFiles(files: FileMap): void {
   const entries = Object.entries(files);
   if (entries.length === 0) throw invalid('no-files', 'A gist needs at least one file');
   if (entries.length > GIST_MAX_FILES)
-    throw invalid('too-many-files', `A gist can have at most ${GIST_MAX_FILES} files`);
+    throw reasonError(
+      ErrorCode.invalidArgument,
+      'too-many-files',
+      `A gist can have at most ${GIST_MAX_FILES} files`,
+      { max: GIST_MAX_FILES },
+    );
   for (const [name, content] of entries) {
     if (name === '' || /[/\\]/.test(name))
       throw invalid('invalid-file-name', `Invalid gist file name: ${name}`, { name });
     if (Buffer.byteLength(content, 'utf8') > GIST_MAX_FILE_BYTES) {
-      throw invalid('file-too-large', `${name} is larger than 10 MB`, { name });
+      throw reasonError(
+        ErrorCode.invalidArgument,
+        'file-too-large',
+        `${name} is larger than 10 MB`,
+        { name, maxMb: GIST_MAX_FILE_BYTES / (1024 * 1024) },
+      );
     }
   }
 }
@@ -174,7 +185,7 @@ function isLoopback(hostname: string): boolean {
 }
 
 async function toResponseError(res: Response): Promise<FiddleError> {
-  let githubMessage = '';
+  let detail = '';
   try {
     const body: unknown = await res.json();
     if (
@@ -182,7 +193,7 @@ async function toResponseError(res: Response): Promise<FiddleError> {
       typeof body === 'object' &&
       typeof (body as { message?: unknown }).message === 'string'
     ) {
-      githubMessage = (body as { message: string }).message;
+      detail = (body as { message: string }).message;
     }
   } catch {
     // Not JSON.
@@ -207,12 +218,13 @@ async function toResponseError(res: Response): Promise<FiddleError> {
               : res.status >= 500 || res.status === 429
                 ? ErrorCode.unavailable
                 : ErrorCode.internal;
-  const message = `GitHub responded ${res.status}${githubMessage ? `: ${githubMessage}` : ''}`;
-  return new FiddleError(code, message, {
-    status: res.status,
-    githubMessage,
-    ...(rateLimited ? { reason: 'rate-limited' } : {}),
-  });
+  const message = `GitHub responded ${res.status}${detail ? `: ${detail}` : ''}`;
+  const reason = rateLimited
+    ? 'rate-limited'
+    : detail
+      ? 'github-response-detail'
+      : 'github-response';
+  return reasonError(code, reason, message, { status: res.status, detail });
 }
 
 const isAbortError = (error: unknown) =>
@@ -228,11 +240,9 @@ function toFetchError(
     return new FiddleError(ErrorCode.cancelled, 'The request was cancelled');
   }
   if (timeout.aborted) {
-    return new FiddleError(ErrorCode.network, 'GitHub did not respond in time.', {
-      reason: 'timeout',
-    });
+    return reasonError(ErrorCode.network, 'timeout', 'GitHub did not respond in time.');
   }
-  return new FiddleError(ErrorCode.network, 'Could not reach GitHub.', {
+  return reasonError(ErrorCode.network, 'unreachable', 'Could not reach GitHub.', {
     cause: error instanceof Error ? error.message : String(error),
   });
 }
@@ -325,7 +335,11 @@ export class GitHubClient {
       }
       return res;
     }
-    throw new FiddleError(ErrorCode.network, 'Too many redirects from GitHub');
+    throw reasonError(
+      ErrorCode.network,
+      'too-many-redirects',
+      'Too many redirects from GitHub',
+    );
   }
 
   private async json<T>(res: Response, schema: z.ZodType<T>): Promise<T> {
@@ -338,7 +352,11 @@ export class GitHubClient {
     }
     const parsed = schema.safeParse(data);
     if (!parsed.success)
-      throw new FiddleError(ErrorCode.internal, 'Unexpected response from GitHub');
+      throw reasonError(
+        ErrorCode.internal,
+        'unexpected-response',
+        'Unexpected response from GitHub',
+      );
     return parsed.data;
   }
 

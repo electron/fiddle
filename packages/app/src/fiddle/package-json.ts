@@ -2,7 +2,8 @@ import os from 'node:os';
 
 import * as semver from 'semver';
 
-import { ErrorCode, FiddleError } from '../shared/errors';
+import { ErrorCode } from '../shared/errors';
+import { reasonError } from './error-reasons';
 import { DEFAULT_MAIN_ENTRY } from './files';
 import { checkModuleSpec, type ModuleSpecProblem } from './modules';
 
@@ -113,13 +114,11 @@ export function parsePackageJson(text: string): ParsedPackageJson {
     data = undefined;
   }
   if (!isRecord(data)) {
-    throw new FiddleError(
+    throw reasonError(
       ErrorCode.invalidArgument,
+      'invalid-json',
       'Invalid JSON found in package.json',
-      {
-        reason: 'invalid-json',
-        file: 'package.json',
-      },
+      { file: 'package.json' },
     );
   }
 

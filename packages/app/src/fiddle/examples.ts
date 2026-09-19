@@ -1,6 +1,7 @@
 import * as path from 'node:path';
 
-import { ErrorCode, FiddleError } from '../shared/errors';
+import { ErrorCode } from '../shared/errors';
+import { reasonError } from './error-reasons';
 import { SHOW_ME_EXAMPLES, type ShowMeExampleName } from '../shared/examples';
 import type { FileMap } from './files';
 import { readFiddleFolder } from './folder';
@@ -25,6 +26,13 @@ export function findExample(name: string): ExampleInfo | undefined {
 export async function loadExample(staticDir: string, name: string): Promise<FileMap> {
   const example = findExample(name);
   if (!example)
-    throw new FiddleError(ErrorCode.notFound, `No example named "${name}"`, { name });
+    throw reasonError(
+      ErrorCode.notFound,
+      'example-not-found',
+      `No example named "${name}"`,
+      {
+        name,
+      },
+    );
   return (await readFiddleFolder(path.join(staticDir, 'show-me', example.dir))).files;
 }

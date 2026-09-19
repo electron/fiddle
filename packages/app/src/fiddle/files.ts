@@ -1,4 +1,5 @@
-import { ErrorCode, FiddleError } from '../shared/errors';
+import { ErrorCode, type FiddleError } from '../shared/errors';
+import { reasonError } from './error-reasons';
 
 /** A fiddle's files: name → content. Build with `Object.fromEntries`, never by key assignment from untrusted names. */
 export type FileMap = Record<string, string>;
@@ -63,10 +64,7 @@ const SUPPORTED_RE = /\.(cjs|js|mjs|html|css|json)$/i;
 export function fileRuleError(reason: FileRuleViolation, name: string): FiddleError {
   const code =
     reason === 'file-not-found' ? ErrorCode.notFound : ErrorCode.invalidArgument;
-  return new FiddleError(code, `File "${name}" breaks the rule: ${reason}`, {
-    reason,
-    name,
-  });
+  return reasonError(code, reason, `File "${name}" breaks the rule: ${reason}`, { name });
 }
 
 /** The lower-cased extension including the dot, or '' if there is none. */

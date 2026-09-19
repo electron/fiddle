@@ -129,11 +129,6 @@
     "description": "Error detail when a load fails because of the network.",
     "maxLength": 120
   },
-  "noSupportedFiles": {
-    "message": "This gist has no files Electron Fiddle can open.",
-    "description": "Error when a gist contains no supported files.",
-    "maxLength": 120
-  },
   "notAFolder": {
     "message": "“{{path}}” isn't a folder.",
     "description": "Error dialog detail when something that isn't a folder is dropped on a window to open it. {{path}} is the dropped item's path.",

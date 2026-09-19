@@ -631,7 +631,7 @@ describe('writing gists', () => {
     );
     expect(error).toMatchObject({
       code: ErrorCode.notFound,
-      details: { status: 404, githubMessage: 'Not Found' },
+      details: { status: 404, detail: 'Not Found' },
     });
   });
 });

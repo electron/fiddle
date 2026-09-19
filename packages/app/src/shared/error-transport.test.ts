@@ -1,6 +1,11 @@
 import { describe, expect, it, vi } from 'vitest';
 
-import { decodeError, wrapImplementation, wrapRendererApi } from './error-transport';
+import {
+  decodeError,
+  type ErrorTransform,
+  wrapImplementation,
+  wrapRendererApi,
+} from './error-transport';
 import { ErrorCode, FiddleError } from './errors';
 
 /**
@@ -8,8 +13,8 @@ import { ErrorCode, FiddleError } from './errors';
  * a rejected call reaches the renderer only as an Error carrying the message,
  * prefixed the way `ipcRenderer.invoke` prefixes it.
  */
-function overIpc<T extends object>(impl: T, log = vi.fn()) {
-  const main = wrapImplementation(impl, log) as Record<
+function overIpc<T extends object>(impl: T, log = vi.fn(), transform?: ErrorTransform) {
+  const main = wrapImplementation(impl, log, transform) as Record<
     string,
     (...args: unknown[]) => Promise<unknown>
   >;
@@ -39,6 +44,25 @@ describe('FiddleError transport', () => {
     expect(error).toMatchObject({
       code: 'not-found',
       message: 'No such fiddle',
+      details: { id: 'abc' },
+    });
+    expect(log).not.toHaveBeenCalled();
+  });
+
+  it('sends a FiddleError as the transform rewrites it', async () => {
+    const { api, log } = overIpc(
+      {
+        async Load(): Promise<string> {
+          throw new FiddleError(ErrorCode.notFound, 'No such fiddle', { id: 'abc' });
+        },
+      },
+      undefined,
+      (e) => new FiddleError(e.code, 'Kein solches Fiddle', e.details),
+    );
+
+    await expect(api.Load()).rejects.toMatchObject({
+      code: 'not-found',
+      message: 'Kein solches Fiddle',
       details: { id: 'abc' },
     });
     expect(log).not.toHaveBeenCalled();

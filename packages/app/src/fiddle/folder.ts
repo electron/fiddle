@@ -5,7 +5,8 @@ import { fileURLToPath } from 'node:url';
 
 import { renameWithRetry } from '@electron/fiddle-core';
 
-import { ErrorCode, FiddleError } from '../shared/errors';
+import { ErrorCode } from '../shared/errors';
+import { reasonError } from './error-reasons';
 import {
   type FileMap,
   fileRuleError,
@@ -32,9 +33,14 @@ async function listDir(dir: string) {
   } catch (error) {
     const code = (error as NodeJS.ErrnoException).code;
     if (code === 'ENOENT' || code === 'ENOTDIR') {
-      throw new FiddleError(ErrorCode.notFound, `Folder not found: ${dir}`, {
-        path: dir,
-      });
+      throw reasonError(
+        ErrorCode.notFound,
+        'folder-not-found',
+        `Folder not found: ${dir}`,
+        {
+          path: dir,
+        },
+      );
     }
     throw error;
   }

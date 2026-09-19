@@ -6,6 +6,7 @@ import * as semver from 'semver';
 import { z } from 'zod';
 
 import { ErrorCode, FiddleError } from '../shared/errors';
+import { reasonError } from './error-reasons';
 import { envFromEntries, packageManagerEnv } from './env';
 import { killTree } from './kill-tree';
 
@@ -49,14 +50,11 @@ export function checkModuleSpec(name: string, spec: string): ModuleSpecProblem |
 export function assertModuleSpec(name: string, spec: string): void {
   const reason = checkModuleSpec(name, spec);
   if (reason) {
-    throw new FiddleError(
+    throw reasonError(
       ErrorCode.invalidArgument,
+      reason,
       `Unsupported module spec: ${name}@${spec}`,
-      {
-        reason,
-        name,
-        spec,
-      },
+      { name, spec },
     );
   }
 }
@@ -257,13 +255,11 @@ export function runCommand(
     child.once('error', (error: NodeJS.ErrnoException) => {
       signal?.removeEventListener('abort', onAbort);
       reject(
-        new FiddleError(
+        reasonError(
           ErrorCode.unavailable,
+          'command-not-started',
           `Could not start ${line.command}: ${error.message}`,
-          {
-            command: line.command,
-            errno: error.code,
-          },
+          { command: line.command, errno: error.code, detail: error.message },
         ),
       );
     });
@@ -322,10 +318,18 @@ export async function installModules(
     platform: options.platform,
   });
   if (result.code !== 0) {
-    throw new FiddleError(
+    const exit = result.code ?? result.signal;
+    throw reasonError(
       ErrorCode.installFailed,
-      `${options.packageManager} exited with ${result.code ?? result.signal}`,
-      { code: result.code, signal: result.signal, output: result.output.slice(-4000) },
+      'install-failed',
+      `${options.packageManager} exited with ${exit}`,
+      {
+        code: result.code,
+        signal: result.signal,
+        output: result.output.slice(-4000),
+        packageManager: options.packageManager,
+        exit,
+      },
     );
   }
   return result;
@@ -359,8 +363,9 @@ export async function findInstallScripts(
       async ([name, spec]): Promise<InstallScriptPackage | null> => {
         const parsed = PackumentSchema.safeParse(await registryFetch(name, signal));
         if (!parsed.success)
-          throw new FiddleError(
+          throw reasonError(
             ErrorCode.internal,
+            'registry-metadata',
             `Unexpected registry metadata for ${name}`,
             { name },
           );

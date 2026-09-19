@@ -1,6 +1,7 @@
 import * as path from 'node:path';
 
 import { loadDocsExample } from '../../fiddle/docs-examples';
+import { reasonError } from '../../fiddle/error-reasons';
 import { findExample, loadExample } from '../../fiddle/examples';
 import { createFiddle, type Fiddle, type VersionRef } from '../../fiddle/fiddle';
 import { findMainEntry, PACKAGE_JSON, type FileMap } from '../../fiddle/files';
@@ -16,7 +17,7 @@ import {
 } from '../../fiddle/package-json';
 import { pickFiddleFiles } from '../../fiddle/pick';
 import type { TemplateLoader } from '../../fiddle/templates';
-import { ErrorCode, FiddleError } from '../../shared/errors';
+import { ErrorCode } from '../../shared/errors';
 import { DEFAULT_TEMPLATE, TEST_TEMPLATE } from './model';
 
 /** What a load keeps from the fiddle it replaces. */
@@ -73,7 +74,14 @@ export async function loadShowMe(
 ): Promise<LoadedFiddle> {
   const example = findExample(name);
   if (!example)
-    throw new FiddleError(ErrorCode.notFound, `No example named "${name}"`, { name });
+    throw reasonError(
+      ErrorCode.notFound,
+      'example-not-found',
+      `No example named "${name}"`,
+      {
+        name,
+      },
+    );
   const files = await loadExample(staticDir, example.name);
   return {
     fiddle: createFiddle({

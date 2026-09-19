@@ -26,7 +26,6 @@ export default {
   "loadFailed": "[Çöûļðñ'ţ ļöáð ţĥé ƒîððļé one two three]",
   "saveFailed": "[Çöûļðñ'ţ šáṽé ţĥé ƒîððļé one two three]",
   "offline": "[Ýöûŕ çöɱþûţéŕ šééɱš ţö ƀé öƒƒļîñé. one two three]",
-  "noSupportedFiles": "[Ţĥîš ĝîšţ ĥáš ñö ƒîļéš Éļéçţŕöñ Ƒîððļé çáñ öþéñ. one two three four five]",
   "notAFolder": "[“{{path}}” îšñ'ţ á ƒöļðéŕ. one two three]",
   "notAGist": "[“{{input}}” îšñ'ţ á ĝîšţ ÛŔĻ öŕ ÎÐ. one two three]",
   "loadWarnings": "[Ţĥé ƒîððļé ļöáðéð ŵîţĥ ŵáŕñîñĝš one two three]",

@@ -44,6 +44,7 @@ import {
 import { confirm, messageBox, pickFolder } from '../dialogs';
 import type { GitHubService } from '../github/service';
 import { tm } from '../i18n';
+import { localizeError } from '../localize-error';
 import { log } from '../log';
 import type { NpmClient } from '../modules/npm-client';
 import { forgeElectronFor, forgeOptionsFor } from '../packaging/service';
@@ -1440,10 +1441,9 @@ function listOrNone(items: readonly string[]): string {
 
 function errorDetail(error: unknown): string {
   const e = FiddleError.from(error);
-  if (e.code === ErrorCode.network) return td('offline');
-  if ((e.details as { reason?: unknown } | undefined)?.reason === 'no-supported-files')
-    return td('noSupportedFiles');
-  return e.message;
+  const localized = localizeError(e);
+  if (localized !== e) return localized.message;
+  return e.code === ErrorCode.network ? td('offline') : e.message;
 }
 
 async function showError(

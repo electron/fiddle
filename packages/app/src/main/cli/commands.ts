@@ -50,6 +50,7 @@ import {
 import { appTemplateLoader, staticDir } from '../documents/service';
 import { gistFiles, publishGist } from '../github/service';
 import { tm } from '../i18n';
+import { errorMessage } from '../localize-error';
 import { log } from '../log';
 import { forgeOptionsFor, forgeProject, runForgeTask } from '../packaging/service';
 import { sfwEntryPath } from '../platform/sfw';
@@ -698,8 +699,7 @@ const handlers: Handlers = {
           list.versions,
         );
       } catch (error) {
-        if (!ctx.signal.aborted)
-          ctx.reporter.log(FiddleError.from(error).message, 'error');
+        if (!ctx.signal.aborted) ctx.reporter.log(errorMessage(error), 'error');
         return undefined;
       }
       // A refused run or a failed spawn says nothing about the version.

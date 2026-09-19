@@ -26,7 +26,6 @@ export default {
   "loadFailed": "Couldn't load the fiddle",
   "saveFailed": "Couldn't save the fiddle",
   "offline": "Your computer seems to be offline.",
-  "noSupportedFiles": "This gist has no files Electron Fiddle can open.",
   "notAFolder": "“{{path}}” isn't a folder.",
   "notAGist": "“{{input}}” isn't a gist URL or ID.",
   "loadWarnings": "The fiddle loaded with warnings",

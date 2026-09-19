@@ -1,0 +1,134 @@
+{
+  "empty-name": {
+    "message": "A file name can't be empty.",
+    "description": "Error when a file is added or renamed with no name."
+  },
+  "path-separator": {
+    "message": "File names can't contain a slash or a backslash: “{{name}}”.",
+    "description": "Error when a file name contains a slash or a backslash. {{name}} is the file name as typed."
+  },
+  "invalid-character": {
+    "message": "“{{name}}” contains a character that isn't allowed in a file name.",
+    "description": "Error when a file name contains a character the operating systems don't allow, such as a colon or a control character. {{name}} is the file name as typed."
+  },
+  "unsupported-extension": {
+    "message": "Electron Fiddle can't open “{{name}}”, because its file type isn't supported.",
+    "description": "Error when a file name doesn't end in a type the app supports, such as .js, .html or .json. {{name}} is the file name as typed."
+  },
+  "reserved-name": {
+    "message": "“{{name}}” is a reserved name and can't be used for a file.",
+    "description": "Error when a file name is one the app or the operating system reserves, such as package.json or a Windows device name. {{name}} is the file name as typed."
+  },
+  "duplicate-name": {
+    "message": "A file named “{{name}}” already exists.",
+    "description": "Error when a file is added or renamed to a name another file already has. {{name}} is the file name."
+  },
+  "second-main-entry": {
+    "message": "This fiddle already has a main file, so “{{name}}” can't be another one.",
+    "description": "Error when a second main file (main.js, main.cjs or main.mjs) is added. {{name}} is the file name as typed."
+  },
+  "no-main-entry": {
+    "message": "“{{name}}” is the main file and has to stay one.",
+    "description": "Error when the main file is renamed to a name that isn't a main file name. {{name}} is the current file name."
+  },
+  "remove-main-entry": {
+    "message": "“{{name}}” is the main file and can't be removed.",
+    "description": "Error when someone tries to remove the fiddle's main file. {{name}} is the file name."
+  },
+  "file-not-found": {
+    "message": "There's no file named “{{name}}”.",
+    "description": "Error when an action names a file the fiddle doesn't have. {{name}} is the file name."
+  },
+  "folder-not-found": {
+    "message": "The folder “{{path}}” doesn't exist.",
+    "description": "Error when a fiddle folder to open no longer exists. {{path}} is the folder's path; keep it as it is."
+  },
+  "no-supported-files": {
+    "message": "There are no files here that Electron Fiddle can open.",
+    "description": "Error when a folder, gist or example has no files of a supported type."
+  },
+  "invalid-json": {
+    "message": "{{file}} isn't valid JSON.",
+    "description": "Error when a JSON file can't be read. {{file}} is the file name, such as package.json; keep it as it is."
+  },
+  "missing-package-json": {
+    "message": "Packaging needs a package.json file, and this fiddle doesn't have one.",
+    "description": "Error when a fiddle is packaged without a package.json. package.json is a file name; keep it as it is."
+  },
+  "invalid-name": {
+    "message": "“{{name}}” isn't a valid package name.",
+    "description": "Error when a module is added under a name npm doesn't allow. {{name}} is the name as typed. npm is a product name."
+  },
+  "invalid-spec": {
+    "message": "“{{spec}}” isn't a version npm can install for {{name}}. Use a version number, a version range or a tag.",
+    "description": "Error when a module's version is a Git URL, a path or something else npm could fetch from anywhere. {{spec}} is the version as typed, {{name}} the package name. npm is a product name."
+  },
+  "command-not-started": {
+    "message": "Couldn't start {{command}}: {{detail}}",
+    "description": "Error when the package manager can't be started, for example because it isn't installed. {{command}} is the command, such as npm; keep it as it is. {{detail}} is the operating system's own explanation, in English."
+  },
+  "install-failed": {
+    "message": "Installing modules with {{packageManager}} failed (exit {{exit}}).",
+    "description": "Error when npm or Yarn ends with a failure while installing a fiddle's modules. {{packageManager}} is npm or yarn; keep it as it is. {{exit}} is the exit code, or the name of the signal that ended it."
+  },
+  "registry-metadata": {
+    "message": "The npm registry sent unexpected information about {{name}}.",
+    "description": "Error when the npm registry's answer for a package isn't in the expected form. {{name}} is the package name. npm is a product name."
+  },
+  "example-not-found": {
+    "message": "There's no example named “{{name}}”.",
+    "description": "Error when a link or command names a built-in example that doesn't exist. {{name}} is the name as given."
+  },
+  "invalid-path": {
+    "message": "“{{path}}” isn't a valid example path.",
+    "description": "Error when the path of an example from the Electron documentation has empty or relative segments. {{path}} is the path as given; keep it as it is."
+  },
+  "invalid-tag": {
+    "message": "Couldn't tell which Electron version “{{tag}}” belongs to.",
+    "description": "Error when the Git tag of an example from the Electron documentation isn't a release tag, such as v30.0.0. {{tag}} is the tag as given; keep it as it is."
+  },
+  "template-status": {
+    "message": "Couldn't download the template: the server answered with HTTP {{status}}.",
+    "description": "Error when the download of the starter template fails with an error status. {{status}} is the HTTP status code, such as 500; keep it as it is."
+  },
+  "template-unreachable": {
+    "message": "Couldn't download the template. Check your internet connection.",
+    "description": "Error when the starter template can't be downloaded, usually because the computer is offline."
+  },
+  "rate-limited": {
+    "message": "GitHub's rate limit was reached. Try again in a few minutes.",
+    "description": "Error when GitHub refuses requests because too many were sent. GitHub is a product name."
+  },
+  "github-response": {
+    "message": "GitHub answered with HTTP {{status}}.",
+    "description": "Error when GitHub answers with an error status and no explanation. {{status}} is the HTTP status code, such as 500; keep it as it is. GitHub is a product name."
+  },
+  "github-response-detail": {
+    "message": "GitHub answered with HTTP {{status}}: {{detail}}",
+    "description": "Error when GitHub answers with an error status and an explanation. {{status}} is the HTTP status code, such as 404; keep it as it is. {{detail}} is GitHub's own explanation, in English. GitHub is a product name."
+  },
+  "timeout": {
+    "message": "GitHub didn't respond in time.",
+    "description": "Error when a request to GitHub takes too long. GitHub is a product name."
+  },
+  "unreachable": {
+    "message": "Couldn't reach GitHub. Check your internet connection.",
+    "description": "Error when GitHub can't be reached, usually because the computer is offline. GitHub is a product name."
+  },
+  "too-many-redirects": {
+    "message": "GitHub redirected the request too many times.",
+    "description": "Error when GitHub keeps sending the request somewhere else. GitHub is a product name."
+  },
+  "unexpected-response": {
+    "message": "GitHub sent a response that couldn't be read.",
+    "description": "Error when GitHub's answer isn't in the expected form. GitHub is a product name."
+  },
+  "too-many-files": {
+    "message": "A gist can have at most {{max}} files.",
+    "description": "Error when a fiddle has more files than a GitHub gist can hold. {{max}} is the limit, such as 300. Gist is GitHub's name for a shared snippet."
+  },
+  "file-too-large": {
+    "message": "“{{name}}” is larger than {{maxMb}} MB, the most a gist file can hold.",
+    "description": "Error when a file is too big for a GitHub gist. {{name}} is the file name, {{maxMb}} the limit in megabytes, such as 10. Gist is GitHub's name for a shared snippet."
+  }
+}

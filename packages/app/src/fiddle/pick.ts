@@ -1,4 +1,5 @@
 import { ErrorCode, FiddleError } from '../shared/errors';
+import { reasonError } from './error-reasons';
 import {
   ensureMainEntry,
   type FileMap,
@@ -48,10 +49,12 @@ export function pickFiddleFiles(map: FileMap, options: PickOptions = {}): Picked
     else kept.push(name);
   }
   if (kept.length === 0) {
-    throw new FiddleError(ErrorCode.invalidArgument, 'No supported files found', {
-      reason: 'no-supported-files',
-      skipped,
-    });
+    throw reasonError(
+      ErrorCode.invalidArgument,
+      'no-supported-files',
+      'No supported files found',
+      { skipped },
+    );
   }
 
   const result: PickedFiles = {

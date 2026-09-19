@@ -13,17 +13,27 @@ import {
 export const ERROR_MARKER = '@@FiddleError@@';
 
 export type ErrorLogger = (error: unknown) => void;
+/** Rewrites a `FiddleError` (its message, say) before it crosses the boundary. */
+export type ErrorTransform = (error: FiddleError) => FiddleError;
 
-export function serializeError(error: unknown, log: ErrorLogger): SerializedFiddleError {
-  if (error instanceof FiddleError) return error.toJSON();
+export function serializeError(
+  error: unknown,
+  log: ErrorLogger,
+  transform?: ErrorTransform,
+): SerializedFiddleError {
+  if (error instanceof FiddleError) return (transform?.(error) ?? error).toJSON();
   log(error);
   const message = error instanceof Error ? error.message : String(error);
   return { code: ErrorCode.internal, message };
 }
 
 /** The error main throws back to EIPC: its message carries the serialized error. */
-export function encodeError(error: unknown, log: ErrorLogger): Error {
-  const serialized = serializeError(error, log);
+export function encodeError(
+  error: unknown,
+  log: ErrorLogger,
+  transform?: ErrorTransform,
+): Error {
+  const serialized = serializeError(error, log, transform);
   let payload: string;
   try {
     payload = JSON.stringify(serialized);
@@ -68,7 +78,11 @@ function isPromiseLike(value: unknown): value is PromiseLike<unknown> {
  * Main side: wraps every method of an EIPC implementation so that anything it
  * throws (sync or async) reaches the renderer as a serialized `FiddleError`.
  */
-export function wrapImplementation<T extends object>(impl: T, log: ErrorLogger): T {
+export function wrapImplementation<T extends object>(
+  impl: T,
+  log: ErrorLogger,
+  transform?: ErrorTransform,
+): T {
   const wrapped: Record<string, unknown> = {};
   for (const [name, value] of Object.entries(impl)) {
     if (typeof value !== 'function') {
@@ -80,7 +94,7 @@ export function wrapImplementation<T extends object>(impl: T, log: ErrorLogger):
       try {
         return await fn.apply(impl, args);
       } catch (error) {
-        throw encodeError(error, log);
+        throw encodeError(error, log, transform);
       }
     };
   }

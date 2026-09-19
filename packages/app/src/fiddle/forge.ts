@@ -1,4 +1,5 @@
 import { ErrorCode, FiddleError } from '../shared/errors';
+import { reasonError } from './error-reasons';
 import { type FileMap, PACKAGE_JSON } from './files';
 
 export const FORGE_CLI = '@electron-forge/cli';
@@ -25,13 +26,11 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 }
 
 function invalidPackageJson(): FiddleError {
-  return new FiddleError(
+  return reasonError(
     ErrorCode.invalidArgument,
+    'invalid-json',
     'Invalid JSON found in package.json',
-    {
-      reason: 'invalid-json',
-      file: PACKAGE_JSON,
-    },
+    { file: PACKAGE_JSON },
   );
 }
 
@@ -98,12 +97,10 @@ export function forgeTransformPackageJson(
 export function forgeTransform(files: FileMap, options: ForgeTransformOptions): FileMap {
   const text = files[PACKAGE_JSON];
   if (text === undefined) {
-    throw new FiddleError(
+    throw reasonError(
       ErrorCode.invalidArgument,
+      'missing-package-json',
       'The Forge transform needs a package.json',
-      {
-        reason: 'missing-package-json',
-      },
     );
   }
   return { ...files, [PACKAGE_JSON]: forgeTransformPackageJson(text, options) };

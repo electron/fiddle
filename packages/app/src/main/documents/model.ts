@@ -12,9 +12,10 @@ import {
   visibleFileNames,
   type Fiddle,
 } from '../../fiddle/fiddle';
+import { reasonError } from '../../fiddle/error-reasons';
 import type { FileMap } from '../../fiddle/files';
 import { formatOrigin, needsApproval } from '../../fiddle/trust';
-import { ErrorCode, FiddleError } from '../../shared/errors';
+import { ErrorCode } from '../../shared/errors';
 import type { FiddleState } from '../../shared/stores';
 
 /** `templateName` of the default template, the only one that follows version changes. */
@@ -181,8 +182,7 @@ export function docMoveFile(doc: Doc, name: string, before: string | null): Doc 
 /** Focusing a hidden file shows it. */
 export function docSetActiveFile(doc: Doc, name: string): Doc {
   if (!Object.hasOwn(doc.fiddle.files, name)) {
-    throw new FiddleError(ErrorCode.notFound, `No file named "${name}"`, {
-      reason: 'file-not-found',
+    throw reasonError(ErrorCode.notFound, 'file-not-found', `No file named "${name}"`, {
       name,
     });
   }
