@@ -12,7 +12,6 @@
 //   press <key> [--role R --name N | --text T]    e.g. Enter, Escape, CmdOrCtrl+S
 //   run-command <id>                              run a command from the registry
 //   screenshot [file]                             PNG of the window
-//   eval-hook <name> [json-args...]               window.__fiddleTest[name](...)
 //   eval <expression>                             evaluate in the renderer
 //   windows | stores | console | logs | clipboard | dialogs | side-effects | violations
 //   wait-idle                                     no pending IPC, network or frames
@@ -232,12 +231,6 @@ async function command(name: string, args: string[]): Promise<unknown> {
           args[0] ? path.resolve(cwd, args[0]) : undefined,
           window,
         );
-      case 'eval-hook':
-        return await app.call('evalHook', {
-          name: args[0] ?? '',
-          args: args.slice(1).map((a) => json(a)),
-          window,
-        });
       case 'eval':
         return await app.evaluate(args.join(' '), window);
       case 'windows':
@@ -287,7 +280,7 @@ try {
   else if (name === 'launch') await launch();
   else if (!name)
     throw new Error(
-      'Usage: yarn driver <launch|snapshot|click|type|press|screenshot|logs|eval-hook|quit|...>',
+      'Usage: yarn driver <launch|snapshot|click|type|press|screenshot|logs|quit|...>',
     );
   else print(await command(name, args));
 } catch (error) {

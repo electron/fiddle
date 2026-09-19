@@ -24,7 +24,6 @@ import {
 
 import type { CommandRegistry } from '../commands';
 import type { StateHub } from '../state-hub';
-import { registerMainTestHook } from '../test-mode';
 import { configurePages, pageFor } from './page';
 import type { DialogKind, DialogResponse } from './protocol';
 import { startDriverServer } from './server';
@@ -95,24 +94,6 @@ export function installTestHarness(): TestHarness {
     prepareWebContents(contents, state),
   );
   void app.whenReady().then(() => guardSession(session.defaultSession, state));
-
-  // The harness's own hooks, so specs can check the network guard from main.
-  const tryFetch =
-    (doFetch: (url: string) => Promise<Response>) => async (url: unknown) => {
-      try {
-        return { status: (await doFetch(String(url))).status };
-      } catch (error) {
-        return { error: String(error) };
-      }
-    };
-  registerMainTestHook(
-    'harness.fetch',
-    tryFetch((url) => fetch(url)),
-  );
-  registerMainTestHook(
-    'harness.netFetch',
-    tryFetch((url) => net.fetch(url)),
-  );
 
   return {
     attach({ hub, registry }) {

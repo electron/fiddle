@@ -292,17 +292,13 @@ export class FiddleApp {
   waitForIdle(timeout?: number) {
     return this.call('waitForIdle', { timeout });
   }
-  /** Calls `window.__fiddleTest[name](...args)` in the renderer. */
-  evalHook(name: string, ...args: unknown[]) {
-    return this.call('evalHook', { name, args });
-  }
-  /** Evaluates JavaScript in the renderer's main world. Prefer queries and hooks in specs. */
+  /** Evaluates JavaScript in the renderer's main world. Prefer queries in specs. */
   evaluate(expression: string, window?: WindowRef) {
     return this.call('evaluate', { expression, window });
   }
-  /** Calls a hook registered in main with `registerMainTestHook`. */
-  mainHook(name: string, ...args: unknown[]) {
-    return this.call('mainHook', { name, args });
+  /** Makes main request `url` (through Node's `fetch` or `net.fetch`): `{ status }`, or `{ error }` when the network guard blocks it. */
+  mainFetch(url: string, via: 'node' | 'net' = 'node') {
+    return this.call('mainFetch', { url, via });
   }
   /** Scripts the answer to the next native dialog of `kind`. */
   async queueDialog(kind: DialogKind, response: DialogResponse): Promise<void> {

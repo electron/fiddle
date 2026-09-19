@@ -59,7 +59,7 @@ describe('run', () => {
 ```
 
 The rest of the API (`snapshot`, `screenshot`, `console`, `logs`, `clipboard`, `sideEffects`,
-`dialogs`, `evalHook`, `mainHook` and more) is on `FiddleApp` in `e2e/driver.ts`, and the spec
+`dialogs`, `mainFetch` and more) is on `FiddleApp` in `e2e/driver.ts`, and the spec
 glue is in `e2e/harness.ts`.
 
 - **Queries.** `role('button', 'Run')`, `role('heading', /welcome/i)` and `text('Saved')` take
@@ -80,29 +80,6 @@ of a failure screenshot and the tails of the main and renderer logs. When a test
 also prints diagnostics and keeps the temp dir, including `artifacts/` and `app-output.log`.
 Isolation violations fail the file after its last test: a request to a non-loopback host, an
 unscripted dialog, or a crashed renderer.
-
-## Test hooks for features
-
-- **Renderer.** For state that isn't in the stores or the accessibility tree, such as Monaco model
-  content, register a hook in the renderer, and only in test builds, so it's compiled out of
-  releases. Call it with `evalHook('name', ...args)`:
-
-  ```ts
-  if (import.meta.env.MODE === 'test') {
-    (window as { __fiddleTest?: Record<string, unknown> }).__fiddleTest = {
-      ...(window as { __fiddleTest?: Record<string, unknown> }).__fiddleTest,
-      editorText: (file: string) => getModel(file)?.getValue(),
-    };
-  }
-  ```
-
-- **Main.** Guard main-side hooks with `TEST_BUILD`, and call them with `mainHook('name', ...args)`:
-
-  ```ts
-  if (TEST_BUILD) registerMainTestHook('run.output', (id) => getOutput(String(id)));
-  ```
-
-  Both `TEST_BUILD` and `registerMainTestHook` come from `src/main/test-mode.ts`.
 
 ## Fixtures
 

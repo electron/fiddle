@@ -2,11 +2,10 @@ import fs from 'node:fs';
 import net from 'node:net';
 import path from 'node:path';
 
-import { app, BrowserWindow, clipboard } from 'electron';
+import { app, BrowserWindow, clipboard, net as electronNet } from 'electron';
 
 import type { CommandRegistry } from '../commands';
 import type { StateHub } from '../state-hub';
-import { getMainTestHook } from '../test-mode';
 import { windowIdOf } from '../windows';
 import { pageFor, poll, type Page } from './page';
 import type {
@@ -73,7 +72,6 @@ function createHandlers({ hub, registry, state }: DriverContext): Handlers {
   const artifact = (name: string) => path.join(state.testDir, 'artifacts', name);
 
   return {
-    ping: () => ({ pid: process.pid, testDir: state.testDir }),
     windows: () => allWindows().map(windowInfo),
     waitForWindow: ({ window = 0, timeout = 15_000 }) =>
       poll<WindowInfo>(`window ${JSON.stringify(window)}`, timeout, () => {
@@ -134,28 +132,14 @@ function createHandlers({ hub, registry, state }: DriverContext): Handlers {
       });
       return { waitedMs: Date.now() - started };
     },
-    evalHook: async ({ name, args = [], window, timeout = 5000 }) => {
-      const page = pageOf(window);
-      const key = JSON.stringify(name);
-      await poll(`test hook ${name}`, timeout, async () =>
-        (await page.evaluate(`typeof window.__fiddleTest?.[${key}] === 'function'`))
-          ? { value: true }
-          : {
-              reason: `window.__fiddleTest.${name} is not registered; registered: ${String(
-                await page.evaluate(
-                  `Object.keys(window.__fiddleTest ?? {}).join(', ') || 'none'`,
-                ),
-              )}`,
-            },
-      );
-      return page.evaluate(`window.__fiddleTest[${key}](...${JSON.stringify(args)})`);
-    },
     evaluate: ({ expression, window }) => pageOf(window).evaluate(expression),
-    mainHook: async ({ name, args = [] }) => {
-      const hook = getMainTestHook(name);
-      if (!hook)
-        throw new Error(`No main test hook ${JSON.stringify(name)} is registered`);
-      return await hook(...args);
+    mainFetch: async ({ url, via }) => {
+      try {
+        const response = await (via === 'net' ? electronNet.fetch(url) : fetch(url));
+        return { status: response.status };
+      } catch (error) {
+        return { error: String(error) };
+      }
     },
     queueDialog: ({ kind, response }) => {
       state.dialogQueue[kind].push(response);

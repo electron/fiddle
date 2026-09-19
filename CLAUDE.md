@@ -47,7 +47,7 @@ The full guide, with a template spec, is in `packages/app/e2e/README.md`.
   - Run it outside the Bash sandbox (on macOS, in the Terminal panel: Electron can't start in the sandbox).
   - `yarn test:e2e smoke` runs one file. `FIDDLE_E2E_SKIP_BUILD=1` reuses the last build, and `FIDDLE_E2E_VERBOSE=1` echoes the app's output.
   - `FIDDLE_E2E_WORKERS=<n>` sets the parallelism. On macOS the app runs in the background and never takes focus. `FIDDLE_E2E_FOREGROUND=1` shows the windows in front.
-- **Explore.** Start with `yarn driver launch`, then run `snapshot`, `click button Settings`, `type`, `press Enter`, `screenshot`, `logs` or `eval-hook`, and finish with `yarn driver quit`. Every command prints JSON, and the app stays up between commands. The full list is in the header of `packages/app/tools/driver.ts`.
+- **Explore.** Start with `yarn driver launch`, then run `snapshot`, `click button Settings`, `type`, `press Enter`, `screenshot` or `logs`, and finish with `yarn driver quit`. Every command prints JSON, and the app stays up between commands. The full list is in the header of `packages/app/tools/driver.ts`.
 - **Write a spec.** `const app = useApp()`, from `e2e/harness.ts`:
   - Find elements by role and name, for example `app().click(role('button', 'Run'))`. Queries auto-wait, so never sleep.
   - `runCommand(id)` runs a command, `stores()` reads state, and `queueDialog()` answers the next native dialog.
@@ -59,7 +59,7 @@ The full guide, with a template spec, is in `packages/app/e2e/README.md`.
   - Native dialogs through Electron's `dialog` module, so the driver can script them.
   - `shell`, protocol, recent-document, notification and `Menu.popup` calls through Electron as usual. Test mode records and stubs them.
   - `win.show()` and `win.focus()` for windows, never `app.focus()` or `webContents.focus()`, which would pull the app in front of whoever runs the tests on macOS.
-- **Test hooks.** A renderer hook goes on `window.__fiddleTest` under `import.meta.env.MODE === 'test'`. A main hook uses `registerMainTestHook()` under `TEST_BUILD`. Either way, release builds compile it out. `yarn workspace electron-fiddle driver:release-check` verifies that.
+- **Release builds.** Test-only code is guarded by `TEST_BUILD` and compiled out. `yarn workspace electron-fiddle driver:release-check` verifies that.
 
 ## Dev differences
 

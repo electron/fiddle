@@ -67,15 +67,3 @@ export function getEndpoints(): Endpoints {
     ? fixtureEndpoints(process.env.FIDDLE_TEST_FIXTURE_URL ?? 'http://127.0.0.1:9')
     : DEFAULT_ENDPOINTS;
 }
-
-type MainTestHook = (...args: unknown[]) => unknown;
-const mainTestHooks = new Map<string, MainTestHook>();
-
-/** Exposes main-side data to e2e specs (`app.mainHook`). Guard the call with `if (TEST_BUILD)` so the hook's code is compiled out of other builds. */
-export function registerMainTestHook(name: string, hook: MainTestHook): void {
-  if (TEST_BUILD && isTestMode()) mainTestHooks.set(name, hook);
-}
-
-export function getMainTestHook(name: string): MainTestHook | undefined {
-  return mainTestHooks.get(name);
-}

@@ -19,19 +19,15 @@ describe('isolation', () => {
   });
 
   it('serves loopback fixtures and blocks every other host, from Node and Chromium', async () => {
-    expect(await app.mainHook('harness.fetch', `${fixtures.url}/releases.json`)).toEqual({
+    expect(await app.mainFetch(`${fixtures.url}/releases.json`)).toEqual({
       status: 200,
     });
     expect(fixtures.requests).toContainEqual(
       expect.objectContaining({ method: 'GET', path: '/releases.json', status: 200 }),
     );
 
-    expect(await app.mainHook('harness.fetch', 'https://example.com/')).toHaveProperty(
-      'error',
-    );
-    expect(await app.mainHook('harness.netFetch', 'https://example.org/')).toHaveProperty(
-      'error',
-    );
+    expect(await app.mainFetch('https://example.com/')).toHaveProperty('error');
+    expect(await app.mainFetch('https://example.org/', 'net')).toHaveProperty('error');
     const violations = await app.violations();
     expect(violations).toEqual(
       expect.arrayContaining([

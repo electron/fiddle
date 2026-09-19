@@ -87,7 +87,6 @@ type NoParams = Record<string, never>;
 
 /** Method name -> [params, result]. */
 export interface DriverMethods {
-  ping: [NoParams, { pid: number; testDir: string }];
   windows: [NoParams, WindowInfo[]];
   waitForWindow: [{ window?: WindowRef; timeout?: number }, WindowInfo];
   /** The accessibility tree as indented `role "name"` lines. */
@@ -111,15 +110,13 @@ export interface DriverMethods {
   ];
   /** No pending IPC, network or animation frames, twice in a row. */
   waitForIdle: [{ timeout?: number; window?: WindowRef }, { waitedMs: number }];
-  /** Calls `window.__fiddleTest[name](...args)` in the renderer, waiting for it to be registered. */
-  evalHook: [
-    { name: string; args?: unknown[]; window?: WindowRef; timeout?: number },
-    unknown,
-  ];
   /** Evaluates an expression in the renderer's main world (exploration and debugging). */
   evaluate: [{ expression: string; window?: WindowRef }, unknown];
-  /** Calls a hook registered in main with `registerMainTestHook`. */
-  mainHook: [{ name: string; args?: unknown[] }, unknown];
+  /** A request from main, through Node's `fetch` or Electron's `net.fetch`, to check the network guard. */
+  mainFetch: [
+    { url: string; via: 'node' | 'net' },
+    { status: number } | { error: string },
+  ];
   queueDialog: [{ kind: DialogKind; response: DialogResponse }, null];
   dialogs: [NoParams, DialogRecord[]];
   sideEffects: [NoParams, SideEffect[]];
