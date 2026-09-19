@@ -1,0 +1,8 @@
+{
+  "invalidPackageName": "“{{name}}” no es un nombre de paquete válido.",
+  "notOnNpm": "{{name}} no está en npm.",
+  "noPublishedVersions": "{{name}} no tiene versiones publicadas.",
+  "registryUnreachable": "No se pudo conectar con {{host}}.",
+  "registryStatus": "{{host}} respondió con HTTP {{status}}.",
+  "registryInvalidResponse": "{{host}} envió una respuesta que no se pudo leer."
+}

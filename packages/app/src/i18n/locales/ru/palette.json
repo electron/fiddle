@@ -1,0 +1,12 @@
+{
+  "label": "Палитра команд",
+  "placeholder": "Поиск команд, файлов, версий и примеров",
+  "empty": "Нет совпадений",
+  "kindCommand": "Команда",
+  "kindEditor": "Редактор",
+  "kindFile": "Файл",
+  "kindVersion": "Версия",
+  "kindExample": "Пример",
+  "runFailed": "Не удалось выполнить «{{label}}»",
+  "electronVersion": "Electron {{version}}"
+}

@@ -7,6 +7,9 @@ export default {
   "notJson": "{{file}} ist kein gültiges JSON.",
   "notSettings": "{{file}} enthält keine Einstellungen.",
   "notTheme": "{{file}} ist kein Monaco-Design. Ein Design braucht „base“ oder „rules“, mit Farben als Hexwerten.",
+  "unknownSetting": "Es gibt keine Einstellung mit dem Namen „{{key}}“.",
+  "invalidValue": "Der Wert für „{{setting}}“ ist ungültig.",
+  "themeNeedsValues": "Ein integriertes Design kann nicht ohne seine aktuellen Werte kopiert werden.",
   "openFailed": "{{path}} konnte nicht geöffnet werden: {{reason}}",
   "themeCopyName": "{{name}} (Kopie)",
   "lucentDark": "Lucent dunkel",
@@ -16,6 +19,6 @@ export default {
   "importExecutionMessage": "Einstellungen importieren, die ändern, wie Fiddles ausgeführt werden?",
   "importExecutionDetail": "Diese Einstellungen legen fest, woher Electron heruntergeladen wird und womit jede Ausführung startet. Importiere Einstellungen nur aus einer Quelle, der du vertraust.",
   "importEmpty": "keine",
-  "importButton": "Importieren",
-  "cancel": "Abbrechen"
+  "importSettingLine": "{{setting}}: {{value}}",
+  "importButton": "Importieren"
 } as const;

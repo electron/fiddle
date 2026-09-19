@@ -26,11 +26,12 @@ export default {
   "loadFailed": "Fiddle を読み込めませんでした",
   "saveFailed": "Fiddle を保存できませんでした",
   "offline": "コンピューターがオフラインのようです。",
-  "noSupportedFiles": "この Gist には Electron Fiddle で開けるファイルがありません。",
+  "notAFolder": "「{{path}}」はフォルダーではありません。",
+  "notAGist": "「{{input}}」は Gist の URL または ID ではありません。",
   "loadWarnings": "Fiddle を読み込みましたが、警告があります",
-  "warnPackageJson": "package.json が有効な JSON ではないため、指定されたモジュールと Electron のバージョンは無視されました。",
+  "warnPackageJson": "package.json が有効な JSON ではないため、パッケージと Electron のバージョンは無視されました。",
   "warnVersion": "package.json で指定された Electron {{version}} は使用できないため、現在のバージョンを維持しました。",
-  "warnModules": "次のモジュールはスキップされました：{{modules}}。",
+  "warnModules": "次のパッケージはスキップされました：{{modules}}。",
   "linkInvalid": "このリンクは無効です",
   "linkNeedsNewer": "このリンクを開くには、新しいバージョンの Electron Fiddle が必要です",
   "linkGistMessage": "この Gist を読み込みますか？",
@@ -62,5 +63,6 @@ export default {
   "clearRecent": "最近使用した項目をクリア",
   "linkSignInMessage": "この Gist を開くために GitHub にサインインしますか？",
   "linkSignInDetail": "GitHub でこの Gist が見つかりませんでした。非公開の Gist であれば、サインインすると開けます。",
-  "signIn": "サインイン"
+  "signIn": "サインイン",
+  "signInRequired": "先に GitHub にサインインしてください。"
 } as const;

@@ -1,0 +1,12 @@
+{
+  "bisectDone": "Bisección terminada",
+  "bisectFailed": "Error en la bisección",
+  "packageDone": "Empaquetado terminado",
+  "packageFailed": "Error al empaquetar",
+  "downloadsDone": "Descargas terminadas",
+  "downloadsFailed": "Error en una descarga",
+  "runDone": "El fiddle terminó",
+  "runFailed": "El fiddle terminó con un error",
+  "notificationBody": "{{name}}",
+  "recent": "Recientes"
+}

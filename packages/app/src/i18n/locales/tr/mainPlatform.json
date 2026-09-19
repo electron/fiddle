@@ -1,0 +1,17 @@
+{
+  "updateReadyTitle": "Güncelleme hazır",
+  "updateReadyDetail": "Electron Fiddle'ın yeni bir sürümü indirildi. Kullanmak için uygulamayı yeniden başlatın.",
+  "restart": "Yeniden başlat",
+  "later": "Daha sonra",
+  "moveMessage": "Electron Fiddle Uygulamalar klasörüne taşınsın mı?",
+  "moveDetail": "Güncellemeler yalnızca uygulama Uygulamalar klasöründeyken güvenilir biçimde yüklenir.",
+  "moveButton": "Uygulamalar'a taşı",
+  "dontMove": "Taşıma",
+  "aboutVersion": "{{version}} (Electron {{electron}})",
+  "aboutCopyright": "© Electron yazarları",
+  "resetPrivacyMessage": "Tüm gizlilik izinleri sıfırlansın mı?",
+  "resetPrivacyDetail": "Electron Fiddle ve çalıştırdığı fiddle'lar kamera, mikrofon, kişiler ve diğer korumalı verilere erişimi kaybeder. Fiddle'lar standart Electron uygulaması olarak çalıştığından, düz bir Electron indirmesiyle çalışan diğer uygulamalar da erişimi kaybeder. macOS, gerek duyduklarında yeniden sorar.",
+  "resetPrivacyButton": "Sıfırla",
+  "resetPrivacyFailed": "Gizlilik izinleri sıfırlanamadı.",
+  "resetPrivacyUnavailable": "Gizlilik izinleri yalnızca macOS'ta sıfırlanabilir."
+}

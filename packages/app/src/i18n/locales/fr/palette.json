@@ -1,0 +1,12 @@
+{
+  "label": "Palette de commandes",
+  "placeholder": "Rechercher des commandes, fichiers, versions et exemples",
+  "empty": "Aucun résultat",
+  "kindCommand": "Commande",
+  "kindEditor": "Éditeur",
+  "kindFile": "Fichier",
+  "kindVersion": "Version",
+  "kindExample": "Exemple",
+  "runFailed": "Impossible d’exécuter {{label}}",
+  "electronVersion": "Electron {{version}}"
+}

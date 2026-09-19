@@ -1,0 +1,12 @@
+{
+  "bisectDone": "Бинарный поиск завершён",
+  "bisectFailed": "Ошибка бинарного поиска",
+  "packageDone": "Упаковка завершена",
+  "packageFailed": "Ошибка упаковки",
+  "downloadsDone": "Скачивание завершено",
+  "downloadsFailed": "Ошибка скачивания",
+  "runDone": "Выполнение fiddle завершено",
+  "runFailed": "Выполнение fiddle завершилось с ошибкой",
+  "notificationBody": "{{name}}",
+  "recent": "Недавние"
+}

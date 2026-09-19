@@ -73,7 +73,5 @@ export default {
   "accountSignedInAs": "{{login}} としてサインイン中",
   "accountSignedOut": "サインインしていません",
   "accountSignOut": "サインアウト",
-  "accountSignIn": "サインイン",
-  "asRevisionLabel": "リビジョンとして公開",
-  "asRevisionHelp": "最初に既定のテンプレートから Gist を作成し、その後ファイルで更新します。これにより、Gist の履歴に変更内容が表示されます。"
+  "accountSignIn": "サインイン"
 } as const;

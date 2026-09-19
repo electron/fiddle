@@ -12,5 +12,6 @@
   "resetPrivacyMessage": "すべてのプライバシー権限をリセットしますか？",
   "resetPrivacyDetail": "Electron Fiddle と、それが実行する Fiddle は、カメラ、マイク、連絡先などの保護されたデータにアクセスできなくなります。Fiddle は標準の Electron アプリとして実行されるため、素の Electron を実行している他のアプリもアクセスできなくなります。次に必要になったときに macOS が再度確認します。",
   "resetPrivacyButton": "リセット",
-  "resetPrivacyFailed": "プライバシー権限をリセットできませんでした。"
+  "resetPrivacyFailed": "プライバシー権限をリセットできませんでした。",
+  "resetPrivacyUnavailable": "プライバシー権限をリセットできるのは macOS のみです。"
 }

@@ -1,0 +1,8 @@
+{
+  "invalidPackageName": "«{{name}}» — недопустимое имя пакета.",
+  "notOnNpm": "Пакета {{name}} нет в npm.",
+  "noPublishedVersions": "У пакета {{name}} нет опубликованных версий.",
+  "registryUnreachable": "Не удалось подключиться к {{host}}.",
+  "registryStatus": "{{host}} ответил HTTP {{status}}.",
+  "registryInvalidResponse": "{{host}} прислал ответ, который не удалось прочитать."
+}

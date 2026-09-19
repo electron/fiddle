@@ -55,11 +55,14 @@ export function namespacesOf(locale, dir = localesDir) {
   }
 }
 
-/** Every locale folder except English, sorted. */
+/** Every locale folder except English, sorted. Hidden folders are not locales. */
 export function translatedLocales(dir = localesDir) {
   return fs
     .readdirSync(dir, { withFileTypes: true })
-    .filter((entry) => entry.isDirectory() && entry.name !== 'en')
+    .filter(
+      (entry) =>
+        entry.isDirectory() && entry.name !== 'en' && !entry.name.startsWith('.'),
+    )
     .map((entry) => entry.name)
     .sort();
 }

@@ -6,7 +6,10 @@ export default {
   "jsonFiles": "JSON ファイル",
   "notJson": "{{file}} は有効な JSON ではありません。",
   "notSettings": "{{file}} には設定が含まれていません。",
-  "notTheme": "{{file}} は Monaco テーマではありません。テーマには \"base\" または \"rules\" が必要で、色は 16 進数の値で指定します。",
+  "notTheme": "{{file}} は Monaco テーマではありません。テーマには「base」または「rules」が必要で、色は 16 進数の値で指定します。",
+  "unknownSetting": "「{{key}}」という名前の設定はありません。",
+  "invalidValue": "「{{setting}}」の値が無効です。",
+  "themeNeedsValues": "現在の値がないと、組み込みテーマのコピーは作成できません。",
   "openFailed": "{{path}} を開けませんでした：{{reason}}",
   "themeCopyName": "{{name}} のコピー",
   "lucentDark": "Lucent ダーク",
@@ -16,6 +19,6 @@ export default {
   "importExecutionMessage": "Fiddle の実行方法を変更する設定をインポートしますか？",
   "importExecutionDetail": "これらの設定は、Electron のダウンロード元と、毎回の実行で使われる起動時の設定を決めます。信頼できる提供元の設定だけをインポートしてください。",
   "importEmpty": "なし",
-  "importButton": "インポート",
-  "cancel": "キャンセル"
+  "importSettingLine": "{{setting}}：{{value}}",
+  "importButton": "インポート"
 } as const;

@@ -4,7 +4,6 @@ export default {
   "hideSidebar": "Seitenleiste ausblenden",
   "showSidebar": "Seitenleiste einblenden",
   "edited": "Bearbeitet",
-  "windowTitleEdited": "{{name}} (bearbeitet)",
   "settings": "Einstellungen",
   "menuBar": "Anwendungsmenü",
   "menuBarMore": "Mehr",

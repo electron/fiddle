@@ -1,0 +1,7 @@
+{
+  "searchVersions": "Поиск версий",
+  "noMatches": "Нет подходящих версий",
+  "copyVersion": "Копировать номер версии",
+  "copied": "Скопировано: {{version}}",
+  "versionChangeFailed": "Не удалось изменить версию Electron"
+}

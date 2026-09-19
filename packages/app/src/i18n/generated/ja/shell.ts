@@ -4,7 +4,6 @@ export default {
   "hideSidebar": "サイドバーを非表示",
   "showSidebar": "サイドバーを表示",
   "edited": "編集済み",
-  "windowTitleEdited": "{{name}}（編集済み）",
   "settings": "設定",
   "menuBar": "アプリケーションメニュー",
   "menuBarMore": "その他",

@@ -12,6 +12,7 @@ import {
   pseudoLocalize,
   pseudoMessages,
   sourceHash,
+  translatedLocales,
   unitsOf,
   validateUnit,
 } from './i18n-shared.mjs';
@@ -464,4 +465,15 @@ test('pseudo-locales keep placeholders; en-XA is ~40% longer, ar-XB forces RTL',
     assert.match(messages[`errorCount_${category}`], /errors/);
   }
   assert.match(messages.errorCount_one, /error\u202C/);
+});
+
+test('translatedLocales lists locale folders and skips English and hidden folders', () => {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'fiddle-locales-'));
+  for (const name of ['en', 'de', 'zh-TW', '.claude']) fs.mkdirSync(path.join(dir, name));
+  fs.writeFileSync(path.join(dir, 'README.md'), '');
+  try {
+    assert.deepEqual(translatedLocales(dir), ['de', 'zh-TW']);
+  } finally {
+    fs.rmSync(dir, { recursive: true, force: true });
+  }
 });

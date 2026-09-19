@@ -1,0 +1,9 @@
+{
+  "updateAvailableTitle": "Actualización disponible",
+  "updateAvailableDescription": "Electron Fiddle {{version}} está listo para descargar.",
+  "download": "Descargar",
+  "crashNoticeTitle": "Los informes de fallos están activados",
+  "crashNoticeDescription": "Si Electron Fiddle falla, envía un informe para que se pueda corregir el error. Los informes nunca incluyen tu código. Puedes desactivarlos en Configuración.",
+  "crashNoticeAction": "Privacidad",
+  "openSettingsFailed": "No se pudo abrir la configuración"
+}

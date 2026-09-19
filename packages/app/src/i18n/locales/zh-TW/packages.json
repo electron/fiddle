@@ -1,0 +1,17 @@
+{
+  "title": "套件",
+  "addPlaceholder": "加入套件",
+  "addLabel": "從 npm 加入套件",
+  "searching": "正在搜尋…",
+  "noResults": "找不到套件",
+  "searchFailed": "目前無法連線到 npm",
+  "latest": "最新",
+  "version": "{{name}} 的版本",
+  "remove": "移除 {{name}}",
+  "addFailed": "無法加入 {{name}}",
+  "changeFailed": "無法變更 {{name}}",
+  "list": "此 fiddle 中的套件",
+  "searchVersions": "搜尋版本",
+  "noVersions": "沒有符合的版本",
+  "moreVersions": "顯示 {{total}} 個中的 {{shown}} 個。輸入文字即可找到其他版本。"
+}

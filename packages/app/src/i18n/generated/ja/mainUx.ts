@@ -6,8 +6,8 @@ export default {
   "packageFailed": "パッケージ化に失敗",
   "downloadsDone": "ダウンロードが完了",
   "downloadsFailed": "ダウンロードに失敗",
-  "runDone": "Fiddle が終了",
-  "runFailed": "Fiddle がエラーで終了",
+  "runDone": "Fiddle が終了しました",
+  "runFailed": "Fiddle がエラーで終了しました",
   "notificationBody": "{{name}}",
   "recent": "最近使用した項目"
 } as const;

@@ -1,0 +1,7 @@
+{
+  "searchVersions": "搜尋版本",
+  "noMatches": "沒有符合的版本",
+  "copyVersion": "複製版本號碼",
+  "copied": "已複製 {{version}}",
+  "versionChangeFailed": "無法變更 Electron 版本"
+}

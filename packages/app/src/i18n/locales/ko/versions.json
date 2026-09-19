@@ -1,0 +1,7 @@
+{
+  "searchVersions": "버전 검색",
+  "noMatches": "일치하는 버전 없음",
+  "copyVersion": "버전 번호 복사",
+  "copied": "{{version}} 복사됨",
+  "versionChangeFailed": "Electron 버전을 변경할 수 없습니다"
+}

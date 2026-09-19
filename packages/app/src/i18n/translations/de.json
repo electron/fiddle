@@ -59,16 +59,6 @@
     "translation": "545f8be33bf0",
     "reviewed": false
   },
-  "gists:asRevisionHelp": {
-    "source": "fb75fd83247e",
-    "translation": "1f85de95d0f7",
-    "reviewed": false
-  },
-  "gists:asRevisionLabel": {
-    "source": "c7ffab0e4758",
-    "translation": "b5c764b1196e",
-    "reviewed": false
-  },
   "gists:cancel": {
     "source": "19766ed6ccb2",
     "translation": "f7ff1178af20",
@@ -233,6 +223,11 @@
     "source": "53b3231b9bd7",
     "translation": "a966b640aae9",
     "reviewed": false
+  },
+  "gists:openGist": {
+    "source": "8c76b5c3fb7c",
+    "translation": "80d79e55238e",
+    "reviewed": true
   },
   "gists:openInvalid": {
     "source": "62a4243fc705",
@@ -445,9 +440,9 @@
     "reviewed": false
   },
   "main:closeWindow": {
-    "source": "7d9eb7acb13e",
-    "translation": "b808f6e97075",
-    "reviewed": false
+    "source": "8b9de9c0c0a0",
+    "translation": "5680f4c53e18",
+    "reviewed": true
   },
   "main:commandPalette": {
     "source": "6b1c93dbdb99",
@@ -469,10 +464,30 @@
     "translation": "b07403190e1b",
     "reviewed": false
   },
+  "main:develop": {
+    "source": "7576b5e7f210",
+    "translation": "bc16e4284311",
+    "reviewed": true
+  },
   "main:edit": {
     "source": "464c4ffd019e",
     "translation": "84e45ee73411",
     "reviewed": false
+  },
+  "main:enterFullScreen": {
+    "source": "5a74219758ed",
+    "translation": "55b2aa822134",
+    "reviewed": true
+  },
+  "main:exit": {
+    "source": "d17d84a60499",
+    "translation": "60935a92d7da",
+    "reviewed": true
+  },
+  "main:exitFullScreen": {
+    "source": "897e0cf78b80",
+    "translation": "a4174a9b7ea6",
+    "reviewed": true
   },
   "main:file": {
     "source": "50009ce1da4d",
@@ -514,10 +529,20 @@
     "translation": "b6c13823450d",
     "reviewed": false
   },
+  "main:hideConsole": {
+    "source": "f5a456ddc181",
+    "translation": "d177576dedb0",
+    "reviewed": true
+  },
   "main:hideOthers": {
     "source": "74376e4337d2",
     "translation": "88b7ec9a250f",
     "reviewed": false
+  },
+  "main:hideSidebar": {
+    "source": "d1db29ebc76d",
+    "translation": "c2ddfa967cf1",
+    "reviewed": true
   },
   "main:inspectElement": {
     "source": "f6493a99c5a3",
@@ -534,6 +559,16 @@
     "translation": "7efe2cbb94d0",
     "reviewed": false
   },
+  "main:moveTabLeft": {
+    "source": "6a55f1c38458",
+    "translation": "af47578639bd",
+    "reviewed": true
+  },
+  "main:moveTabRight": {
+    "source": "a0f125fa0a29",
+    "translation": "cbad9f753a79",
+    "reviewed": true
+  },
   "main:newFiddle": {
     "source": "6b5b3e4227c2",
     "translation": "f01ad00effed",
@@ -547,6 +582,11 @@
   "main:newWindow": {
     "source": "f84ca1459cc4",
     "translation": "6eaa8d611014",
+    "reviewed": false
+  },
+  "main:openComponentGallery": {
+    "source": "4208cdcd8bc4",
+    "translation": "7461a1f0ebcb",
     "reviewed": false
   },
   "main:openElectronRepository": {
@@ -634,6 +674,11 @@
     "translation": "69f76bd57560",
     "reviewed": false
   },
+  "main:run": {
+    "source": "00d60e31a4e6",
+    "translation": "e8a9c7dd73bc",
+    "reviewed": true
+  },
   "main:runMenu": {
     "source": "00d60e31a4e6",
     "translation": "e8a9c7dd73bc",
@@ -674,6 +719,11 @@
     "translation": "ce03e0c8ce88",
     "reviewed": false
   },
+  "main:showConsole": {
+    "source": "a909083f778f",
+    "translation": "fde7cbe70aeb",
+    "reviewed": true
+  },
   "main:showGistHistory": {
     "source": "65500a5e3d8d",
     "translation": "eeb3980f61e6",
@@ -684,10 +734,25 @@
     "translation": "147790983143",
     "reviewed": false
   },
+  "main:showSidebar": {
+    "source": "9e8197ce9e5f",
+    "translation": "5191ce5f26aa",
+    "reviewed": true
+  },
   "main:showTour": {
     "source": "36ce477486f9",
     "translation": "4c0b176bef44",
     "reviewed": false
+  },
+  "main:stop": {
+    "source": "cae7d57bc067",
+    "translation": "39ff84785ea9",
+    "reviewed": true
+  },
+  "main:stopBisect": {
+    "source": "0ddac35c0ea8",
+    "translation": "157f0c952287",
+    "reviewed": true
   },
   "main:toggleBisect": {
     "source": "76a0570abde3",
@@ -703,6 +768,11 @@
     "source": "cf08ce6b4afe",
     "translation": "6b22483c94e1",
     "reviewed": false
+  },
+  "main:toggleMenuBar": {
+    "source": "fb1de89a7cbf",
+    "translation": "bbdc61768e17",
+    "reviewed": true
   },
   "main:toggleMinimap": {
     "source": "357182e8ff71",
@@ -725,9 +795,9 @@
     "reviewed": false
   },
   "main:toggleTabFocus": {
-    "source": "49d9cea5d567",
-    "translation": "69938b8b5ada",
-    "reviewed": false
+    "source": "84656ff09464",
+    "translation": "fb9c57c4c892",
+    "reviewed": true
   },
   "main:undo": {
     "source": "a8283ade3185",
@@ -830,8 +900,8 @@
     "reviewed": false
   },
   "mainCli:argModule": {
-    "source": "552bc53dc2d9",
-    "translation": "1b3a19013c4e",
+    "source": "d9fc7a402780",
+    "translation": "6fcb0e3d64fd",
     "reviewed": false
   },
   "mainCli:argObsolete": {
@@ -845,8 +915,8 @@
     "reviewed": false
   },
   "mainCli:argPm": {
-    "source": "3d8e8cb3f308",
-    "translation": "55e2a04829b7",
+    "source": "ed581c0ba17e",
+    "translation": "83005dfd2fcc",
     "reviewed": false
   },
   "mainCli:argPublic": {
@@ -860,8 +930,8 @@
     "reviewed": false
   },
   "mainCli:argTrust": {
-    "source": "b4a7cd50848b",
-    "translation": "48e999fc44ca",
+    "source": "7dc0d124bd20",
+    "translation": "c6ffc9a241cf",
     "reviewed": false
   },
   "mainCli:argVersion": {
@@ -954,11 +1024,6 @@
     "translation": "a194099d676f",
     "reviewed": false
   },
-  "mainCli:errorGoodNotOlder": {
-    "source": "a49cc30b31b9",
-    "translation": "6ead5d847c86",
-    "reviewed": false
-  },
   "mainCli:errorHelpHint": {
     "source": "441fa1e788df",
     "translation": "6cdca68fde2c",
@@ -970,8 +1035,8 @@
     "reviewed": false
   },
   "mainCli:errorInvalidModule": {
-    "source": "9bf49cdd664a",
-    "translation": "d9dabddb6f56",
+    "source": "b8b8c88b708a",
+    "translation": "46ea9c6387fd",
     "reviewed": false
   },
   "mainCli:errorInvalidValue": {
@@ -1064,6 +1129,11 @@
     "translation": "0af50b8055a9",
     "reviewed": false
   },
+  "mainCli:invalidVersion": {
+    "source": "36ec078defc4",
+    "translation": "e9d8717d7f79",
+    "reviewed": false
+  },
   "mainCli:resultDownloaded": {
     "source": "fde8f4d3430b",
     "translation": "7597bcf6a22f",
@@ -1125,8 +1195,8 @@
     "reviewed": false
   },
   "mainCli:trustQuestion": {
-    "source": "4d2e9b117c0f",
-    "translation": "3611280f3652",
+    "source": "adcc02cafca0",
+    "translation": "3be55565920b",
     "reviewed": false
   },
   "mainCli:warnGistPartial": {
@@ -1140,8 +1210,8 @@
     "reviewed": false
   },
   "mainCli:warnRejectedModules": {
-    "source": "c96b29cc9373",
-    "translation": "7b57f4066d10",
+    "source": "d0a25a8953eb",
+    "translation": "cc4e75501448",
     "reviewed": false
   },
   "mainCli:warnUnusableVersion": {
@@ -1309,9 +1379,14 @@
     "translation": "274016c07285",
     "reviewed": false
   },
-  "mainDocuments:noSupportedFiles": {
-    "source": "47ef5991cd2e",
-    "translation": "bcfcece275f0",
+  "mainDocuments:notAFolder": {
+    "source": "5bfe03a58acb",
+    "translation": "b85c37c837e8",
+    "reviewed": false
+  },
+  "mainDocuments:notAGist": {
+    "source": "053309281ee7",
+    "translation": "3e907c2f8cb4",
     "reviewed": false
   },
   "mainDocuments:offline": {
@@ -1380,12 +1455,12 @@
     "reviewed": false
   },
   "mainDocuments:restoreFailedDetail": {
-    "source": "62556a003538",
+    "source": "2caa730c5874",
     "translation": "4a98f1b412d2",
     "reviewed": false
   },
   "mainDocuments:restoreFailedMessage": {
-    "source": "d43045656631",
+    "source": "5a41104e0294",
     "translation": "008f8ce496e1",
     "reviewed": false
   },
@@ -1412,6 +1487,11 @@
   "mainDocuments:signIn": {
     "source": "bfd402b2f6f3",
     "translation": "a329a32263a4",
+    "reviewed": false
+  },
+  "mainDocuments:signInRequired": {
+    "source": "79b2ad9b6d15",
+    "translation": "0fe33309d640",
     "reviewed": false
   },
   "mainDocuments:skip": {
@@ -1450,18 +1530,213 @@
     "reviewed": false
   },
   "mainDocuments:warnModules": {
-    "source": "3d5b470fe9ec",
-    "translation": "14a631e6b0c3",
+    "source": "f6ea77a7795f",
+    "translation": "cd669800f738",
     "reviewed": false
   },
   "mainDocuments:warnPackageJson": {
-    "source": "17d9c77fefab",
-    "translation": "46125f1145ef",
+    "source": "c3b6061f2d93",
+    "translation": "66d39fc68b5e",
     "reviewed": false
   },
   "mainDocuments:warnVersion": {
     "source": "fcc52719d62f",
     "translation": "a8a7972d36d6",
+    "reviewed": false
+  },
+  "mainErrors:command-not-started": {
+    "source": "cb6c918a8ec3",
+    "translation": "709584761fac",
+    "reviewed": false
+  },
+  "mainErrors:duplicate-name": {
+    "source": "8c8b75988e48",
+    "translation": "b8272912f4f7",
+    "reviewed": false
+  },
+  "mainErrors:empty-name": {
+    "source": "7b5ad702b446",
+    "translation": "9a8d43e86355",
+    "reviewed": false
+  },
+  "mainErrors:example-not-found": {
+    "source": "bc1449e98023",
+    "translation": "b2169f2cbdea",
+    "reviewed": false
+  },
+  "mainErrors:file-not-found": {
+    "source": "e2039866f001",
+    "translation": "c2b05c0254d0",
+    "reviewed": false
+  },
+  "mainErrors:file-too-large": {
+    "source": "042c9ce76a36",
+    "translation": "b604ffe61494",
+    "reviewed": false
+  },
+  "mainErrors:folder-not-found": {
+    "source": "28cae74d0793",
+    "translation": "bbb3736a845f",
+    "reviewed": false
+  },
+  "mainErrors:github-response": {
+    "source": "ce646c12b11f",
+    "translation": "e5ab6bf80325",
+    "reviewed": false
+  },
+  "mainErrors:github-response-detail": {
+    "source": "82b886913c6e",
+    "translation": "fa474f7b1755",
+    "reviewed": false
+  },
+  "mainErrors:install-failed": {
+    "source": "81188bc7e77f",
+    "translation": "f88b150c79df",
+    "reviewed": false
+  },
+  "mainErrors:invalid-character": {
+    "source": "60edec4eae90",
+    "translation": "a738b4b1ceb0",
+    "reviewed": false
+  },
+  "mainErrors:invalid-json": {
+    "source": "59ab3a23a4bd",
+    "translation": "3d3d1cc0a73d",
+    "reviewed": false
+  },
+  "mainErrors:invalid-name": {
+    "source": "85aeacc29198",
+    "translation": "2f6b2d55c71c",
+    "reviewed": false
+  },
+  "mainErrors:invalid-path": {
+    "source": "664ebfe5ec0d",
+    "translation": "c1c95e19f265",
+    "reviewed": false
+  },
+  "mainErrors:invalid-spec": {
+    "source": "8404d2e10584",
+    "translation": "c505b6e49727",
+    "reviewed": false
+  },
+  "mainErrors:invalid-tag": {
+    "source": "f1a6ec36c43e",
+    "translation": "eca9d048b53c",
+    "reviewed": false
+  },
+  "mainErrors:missing-package-json": {
+    "source": "5dadac8c6b43",
+    "translation": "0f8b232fcfc1",
+    "reviewed": false
+  },
+  "mainErrors:no-main-entry": {
+    "source": "101d93cf9920",
+    "translation": "1ecbd9af9ea3",
+    "reviewed": false
+  },
+  "mainErrors:no-supported-files": {
+    "source": "aad0bd01a7f0",
+    "translation": "e5639704ed30",
+    "reviewed": false
+  },
+  "mainErrors:path-separator": {
+    "source": "84e0f622eef6",
+    "translation": "c988fa56526e",
+    "reviewed": false
+  },
+  "mainErrors:rate-limited": {
+    "source": "df574eebff64",
+    "translation": "0095c1c97d1d",
+    "reviewed": false
+  },
+  "mainErrors:registry-metadata": {
+    "source": "bc2e3d8ae8fa",
+    "translation": "6311c0ccaed1",
+    "reviewed": false
+  },
+  "mainErrors:remove-main-entry": {
+    "source": "2a8e6fc25e65",
+    "translation": "b26a550a4518",
+    "reviewed": false
+  },
+  "mainErrors:reserved-name": {
+    "source": "de3dfbcba73b",
+    "translation": "389707bc15b5",
+    "reviewed": false
+  },
+  "mainErrors:second-main-entry": {
+    "source": "c46911707ed8",
+    "translation": "67081d6fedbd",
+    "reviewed": false
+  },
+  "mainErrors:template-status": {
+    "source": "07787ed79a3a",
+    "translation": "a35d660acde6",
+    "reviewed": false
+  },
+  "mainErrors:template-unreachable": {
+    "source": "9c322939b6f9",
+    "translation": "1afda86c16c5",
+    "reviewed": false
+  },
+  "mainErrors:timeout": {
+    "source": "54387ec942f0",
+    "translation": "75d7b72f2f90",
+    "reviewed": false
+  },
+  "mainErrors:too-many-files": {
+    "source": "d6d02cd43fe0",
+    "translation": "ce15285a1241",
+    "reviewed": false
+  },
+  "mainErrors:too-many-redirects": {
+    "source": "de62e5204cea",
+    "translation": "1353d06dc9a5",
+    "reviewed": false
+  },
+  "mainErrors:unexpected-response": {
+    "source": "0ddb99100145",
+    "translation": "341da889dc9c",
+    "reviewed": false
+  },
+  "mainErrors:unreachable": {
+    "source": "e774e9279948",
+    "translation": "71a9a9c8dee4",
+    "reviewed": false
+  },
+  "mainErrors:unsupported-extension": {
+    "source": "94d07fb07733",
+    "translation": "bbbdbee3b2cf",
+    "reviewed": false
+  },
+  "mainModules:invalidPackageName": {
+    "source": "85aeacc29198",
+    "translation": "2f6b2d55c71c",
+    "reviewed": false
+  },
+  "mainModules:noPublishedVersions": {
+    "source": "ba30f6eb3a01",
+    "translation": "6ac0852d0937",
+    "reviewed": false
+  },
+  "mainModules:notOnNpm": {
+    "source": "93a0021eade6",
+    "translation": "307dc75a7833",
+    "reviewed": false
+  },
+  "mainModules:registryInvalidResponse": {
+    "source": "6ae1575c6e00",
+    "translation": "a6ac5c5ce4e7",
+    "reviewed": false
+  },
+  "mainModules:registryStatus": {
+    "source": "e5ee057f42dd",
+    "translation": "2bb7c0e3b62e",
+    "reviewed": false
+  },
+  "mainModules:registryUnreachable": {
+    "source": "f5df5f3b478f",
+    "translation": "0cf651723c6d",
     "reviewed": false
   },
   "mainPlatform:aboutCopyright": {
@@ -1499,6 +1774,31 @@
     "translation": "5ae883d61106",
     "reviewed": false
   },
+  "mainPlatform:resetPrivacyButton": {
+    "source": "daee7606b339",
+    "translation": "1ba0463c46e6",
+    "reviewed": true
+  },
+  "mainPlatform:resetPrivacyDetail": {
+    "source": "3194af1a98de",
+    "translation": "82b0801e191f",
+    "reviewed": true
+  },
+  "mainPlatform:resetPrivacyFailed": {
+    "source": "5babbeda481a",
+    "translation": "773e400df883",
+    "reviewed": true
+  },
+  "mainPlatform:resetPrivacyMessage": {
+    "source": "bc5d0817c4a9",
+    "translation": "ad25cc5acb61",
+    "reviewed": true
+  },
+  "mainPlatform:resetPrivacyUnavailable": {
+    "source": "eac316267bdc",
+    "translation": "f31a3a55550a",
+    "reviewed": false
+  },
   "mainPlatform:restart": {
     "source": "6b983a81e5e8",
     "translation": "3611a239a952",
@@ -1527,6 +1827,11 @@
   "mainRun:bisectDone": {
     "source": "8f009e55d71f",
     "translation": "890b2c613434",
+    "reviewed": false
+  },
+  "mainRun:bisectGoodNotOlder": {
+    "source": "a49cc30b31b9",
+    "translation": "6ead5d847c86",
     "reviewed": false
   },
   "mainRun:bisectInvalid": {
@@ -1620,13 +1925,13 @@
     "reviewed": false
   },
   "mainRun:installingModules": {
-    "source": "064fcb9493f1",
-    "translation": "c771ec71c36c",
+    "source": "f6d03b444659",
+    "translation": "793c20582394",
     "reviewed": false
   },
   "mainRun:installingModulesNoScripts": {
-    "source": "7bd2393648ed",
-    "translation": "7a195b75cec6",
+    "source": "5d2cbc7959c4",
+    "translation": "4e1902b1af37",
     "reviewed": false
   },
   "mainRun:localBuildMissing": {
@@ -1640,13 +1945,13 @@
     "reviewed": false
   },
   "mainRun:modulesFailed": {
-    "source": "c0ca46f97a7a",
-    "translation": "03a618d0b3c2",
+    "source": "2cbed1af5e88",
+    "translation": "ff43feacb7cf",
     "reviewed": false
   },
   "mainRun:noBinaryDetail": {
-    "source": "8985e8cf3672",
-    "translation": "9dbbdfba5de8",
+    "source": "c29f6fa12a95",
+    "translation": "f1f8d2fef12f",
     "reviewed": false
   },
   "mainRun:noBinaryTitle": {
@@ -1655,8 +1960,8 @@
     "reviewed": false
   },
   "mainRun:noSocketFirewall": {
-    "source": "f931c8445852",
-    "translation": "deb6831f3961",
+    "source": "26c133bd6967",
+    "translation": "13118a21387f",
     "reviewed": false
   },
   "mainRun:openCompareButton": {
@@ -1680,8 +1985,18 @@
     "reviewed": false
   },
   "mainRun:pmMissing": {
-    "source": "891e068e295a",
-    "translation": "e947a8203512",
+    "source": "8c33a48abbf7",
+    "translation": "3d16e21421fc",
+    "reviewed": false
+  },
+  "mainRun:privacyHelperMissing": {
+    "source": "e8d27b861b82",
+    "translation": "b7a383b90557",
+    "reviewed": true
+  },
+  "mainRun:runFailed": {
+    "source": "24c8d3e320af",
+    "translation": "26be7a6a887b",
     "reviewed": false
   },
   "mainRun:scriptsRequired": {
@@ -1714,11 +2029,6 @@
     "translation": "21fd7eec09e5",
     "reviewed": false
   },
-  "mainSettings:cancel": {
-    "source": "19766ed6ccb2",
-    "translation": "f7ff1178af20",
-    "reviewed": false
-  },
   "mainSettings:exportSettingsTitle": {
     "source": "4431ea74c184",
     "translation": "7883316907c2",
@@ -1744,6 +2054,11 @@
     "translation": "2d826c452cd2",
     "reviewed": false
   },
+  "mainSettings:importSettingLine": {
+    "source": "9d356e78069b",
+    "translation": "9d356e78069b",
+    "reviewed": false
+  },
   "mainSettings:importSettingsTitle": {
     "source": "72f01a736575",
     "translation": "aa9ec8532c61",
@@ -1752,6 +2067,11 @@
   "mainSettings:importThemeTitle": {
     "source": "32bb2ed98de6",
     "translation": "fbed01fac177",
+    "reviewed": false
+  },
+  "mainSettings:invalidValue": {
+    "source": "e5354ffdd87e",
+    "translation": "7e8f68658f17",
     "reviewed": false
   },
   "mainSettings:jsonFiles": {
@@ -1763,6 +2083,16 @@
     "source": "e7fd5bf6ab2d",
     "translation": "1c9809be4424",
     "reviewed": false
+  },
+  "mainSettings:lucentHcDark": {
+    "source": "12e682d711c4",
+    "translation": "46c055e721a9",
+    "reviewed": true
+  },
+  "mainSettings:lucentHcLight": {
+    "source": "510c02c874b2",
+    "translation": "0b288c7e4c3a",
+    "reviewed": true
   },
   "mainSettings:lucentLight": {
     "source": "d79cdcb99ff3",
@@ -1780,7 +2110,7 @@
     "reviewed": false
   },
   "mainSettings:notTheme": {
-    "source": "888eea9dc62a",
+    "source": "1a38700535f6",
     "translation": "c5128c9407be",
     "reviewed": false
   },
@@ -1792,6 +2122,16 @@
   "mainSettings:themeCopyName": {
     "source": "6305eb6721a4",
     "translation": "7343f927167e",
+    "reviewed": false
+  },
+  "mainSettings:themeNeedsValues": {
+    "source": "37d39534b079",
+    "translation": "50c87d66de5a",
+    "reviewed": false
+  },
+  "mainSettings:unknownSetting": {
+    "source": "9189e9bffffd",
+    "translation": "925e9f8f2299",
     "reviewed": false
   },
   "mainUx:bisectDone": {
@@ -1835,12 +2175,12 @@
     "reviewed": false
   },
   "mainUx:runDone": {
-    "source": "6b5e527bffe6",
+    "source": "b089e971d3bb",
     "translation": "0f030daabae3",
     "reviewed": false
   },
   "mainUx:runFailed": {
-    "source": "22b156bed4aa",
+    "source": "443ccc276c7d",
     "translation": "cc8bd45760e9",
     "reviewed": false
   },
@@ -1872,6 +2212,16 @@
   "mainVersions:localBuildUnknown": {
     "source": "0b2917b84827",
     "translation": "b18335fa806d",
+    "reviewed": true
+  },
+  "mainVersions:refreshFailed": {
+    "source": "cb64a9b4e2e9",
+    "translation": "ad2373f49b0e",
+    "reviewed": true
+  },
+  "mainVersions:removeFailed": {
+    "source": "c368072bc66f",
+    "translation": "0eef18462583",
     "reviewed": true
   },
   "mainVersions:showBetaTitle": {
@@ -2015,8 +2365,8 @@
     "reviewed": false
   },
   "onboarding:publishBody": {
-    "source": "bf724aad0d99",
-    "translation": "0ddc26e72ef7",
+    "source": "161dffa5869a",
+    "translation": "2f50c72f3429",
     "reviewed": false
   },
   "onboarding:publishTitle": {
@@ -2070,8 +2420,8 @@
     "reviewed": false
   },
   "onboarding:versionBody": {
-    "source": "4a73fecd57b8",
-    "translation": "d9b858ff87f4",
+    "source": "e0e6ca22b059",
+    "translation": "e1dfa5d2bb96",
     "reviewed": false
   },
   "onboarding:versionTitle": {
@@ -2220,8 +2570,8 @@
     "reviewed": false
   },
   "run:announceInstalling": {
-    "source": "1e67a10d3cd1",
-    "translation": "c8ee0e7a9405",
+    "source": "5b1ba0587995",
+    "translation": "1e164d68ee14",
     "reviewed": true
   },
   "run:announceReady": {
@@ -2269,6 +2619,11 @@
     "translation": "3f8f67417531",
     "reviewed": false
   },
+  "run:bisectFailed": {
+    "source": "e18d564df0e1",
+    "translation": "70f6b40561f2",
+    "reviewed": true
+  },
   "run:bisectGood": {
     "source": "c939327ca16d",
     "translation": "7a26d266bf0c",
@@ -2280,8 +2635,8 @@
     "reviewed": false
   },
   "run:bisectIntro": {
-    "source": "7c5df1c29e3f",
-    "translation": "69c0dea33fba",
+    "source": "b31e2a8b8510",
+    "translation": "648fdd6d407d",
     "reviewed": false
   },
   "run:bisectRangeInvalid": {
@@ -2475,8 +2830,8 @@
     "reviewed": false
   },
   "run:installingModules": {
-    "source": "1e67a10d3cd1",
-    "translation": "48bae497a0f9",
+    "source": "5b1ba0587995",
+    "translation": "154c6b0d3a22",
     "reviewed": true
   },
   "run:newError": {
@@ -2560,7 +2915,7 @@
     "reviewed": false
   },
   "run:stateInstalling": {
-    "source": "88332ba58a2b",
+    "source": "88eb20c03626",
     "translation": "af5c66a0f305",
     "reviewed": false
   },
@@ -2715,8 +3070,8 @@
     "reviewed": false
   },
   "settings:crashReports.description": {
-    "source": "d3fd22b71c6c",
-    "translation": "689dd1b01280",
+    "source": "1e7a46a01b5b",
+    "translation": "c1f19714d732",
     "reviewed": false
   },
   "settings:crashReports.title": {
@@ -2789,6 +3144,11 @@
     "translation": "dfbea145f8e2",
     "reviewed": false
   },
+  "settings:electronFlags.invalid": {
+    "source": "1a246a87a740",
+    "translation": "64b29d757834",
+    "reviewed": false
+  },
   "settings:electronFlags.title": {
     "source": "d7e28129b403",
     "translation": "98b33556561a",
@@ -2825,12 +3185,12 @@
     "reviewed": false
   },
   "settings:gistPublishAsRevision.description": {
-    "source": "4058719688fe",
-    "translation": "25ca90779ed0",
+    "source": "fb75fd83247e",
+    "translation": "1f85de95d0f7",
     "reviewed": false
   },
   "settings:gistPublishAsRevision.title": {
-    "source": "68303f60411d",
+    "source": "c7ffab0e4758",
     "translation": "b5c764b1196e",
     "reviewed": false
   },
@@ -2944,6 +3304,21 @@
     "translation": "2dd190814a7a",
     "reviewed": false
   },
+  "settings:locale.relaunch": {
+    "source": "8bd85e54db81",
+    "translation": "3611a239a952",
+    "reviewed": true
+  },
+  "settings:locale.relaunchDescription": {
+    "source": "59801a7c274c",
+    "translation": "ccdaf5fa04f2",
+    "reviewed": true
+  },
+  "settings:locale.relaunchTitle": {
+    "source": "996b13ea9c9e",
+    "translation": "69705920e23b",
+    "reviewed": true
+  },
   "settings:locale.system": {
     "source": "b0459211f9f7",
     "translation": "db6cf71cd034",
@@ -3005,8 +3380,8 @@
     "reviewed": false
   },
   "settings:notice.corrupt.description": {
-    "source": "26e62f966465",
-    "translation": "eb71b1017237",
+    "source": "e5fdf281af68",
+    "translation": "3789f520f03e",
     "reviewed": false
   },
   "settings:notice.corrupt.title": {
@@ -3020,18 +3395,18 @@
     "reviewed": false
   },
   "settings:notice.newer.description": {
-    "source": "92d9da72f301",
-    "translation": "f3599aa88664",
+    "source": "1e98978cd1b3",
+    "translation": "61768fc371a6",
     "reviewed": false
   },
   "settings:notice.newer.title": {
-    "source": "c449ee53697a",
-    "translation": "0f3352eec57f",
+    "source": "8d3447102a5f",
+    "translation": "df9f02d1b36a",
     "reviewed": false
   },
   "settings:notifications.description": {
-    "source": "f3676fc353c2",
-    "translation": "4a303dc05e24",
+    "source": "ebf094d93eb9",
+    "translation": "33277b9c4e28",
     "reviewed": false
   },
   "settings:notifications.title": {
@@ -3049,20 +3424,45 @@
     "translation": "0d7158a140ca",
     "reviewed": false
   },
+  "settings:packageAuthor.invalid": {
+    "source": "49b758cb3784",
+    "translation": "1d3da9d20d8b",
+    "reviewed": false
+  },
   "settings:packageAuthor.title": {
     "source": "3ed7a3815580",
     "translation": "2abd1151d65a",
     "reviewed": false
   },
   "settings:packageManager.description": {
-    "source": "3b0cadb1207f",
-    "translation": "98ee9bd98bc5",
+    "source": "e4e298c66d57",
+    "translation": "9d74787be4c0",
     "reviewed": false
   },
   "settings:packageManager.title": {
     "source": "087de11becaa",
     "translation": "7f192553f14c",
     "reviewed": false
+  },
+  "settings:privacyReset.button": {
+    "source": "f6027ace5b0f",
+    "translation": "d740b24090ca",
+    "reviewed": true
+  },
+  "settings:privacyReset.description": {
+    "source": "e6adf9963e41",
+    "translation": "ed2652c788e0",
+    "reviewed": true
+  },
+  "settings:privacyReset.done": {
+    "source": "619cd189d35f",
+    "translation": "4138a0a44770",
+    "reviewed": true
+  },
+  "settings:privacyReset.title": {
+    "source": "de2f2bf465a5",
+    "translation": "6d9a53d89187",
+    "reviewed": true
   },
   "settings:reset": {
     "source": "daee7606b339",
@@ -3209,6 +3609,16 @@
     "translation": "9f691dc61e7c",
     "reviewed": false
   },
+  "settings:theme.highContrastDark": {
+    "source": "12e682d711c4",
+    "translation": "46c055e721a9",
+    "reviewed": true
+  },
+  "settings:theme.highContrastLight": {
+    "source": "510c02c874b2",
+    "translation": "0b288c7e4c3a",
+    "reviewed": true
+  },
   "settings:theme.importMonaco": {
     "source": "3018a4f5e083",
     "translation": "45cbb39b66b0",
@@ -3249,6 +3659,26 @@
     "translation": "2a50bcebba7a",
     "reviewed": false
   },
+  "shell:addMainFile": {
+    "source": "94f75a6de52c",
+    "translation": "8ed77c92babd",
+    "reviewed": true
+  },
+  "shell:addOtherFile": {
+    "source": "293d7ca21bf9",
+    "translation": "aeb79c90539c",
+    "reviewed": true
+  },
+  "shell:addPreloadFile": {
+    "source": "96b72adcdb58",
+    "translation": "da3819d8bab3",
+    "reviewed": true
+  },
+  "shell:addRendererFile": {
+    "source": "b76201692c1f",
+    "translation": "90a552320fd5",
+    "reviewed": true
+  },
   "shell:cancel": {
     "source": "19766ed6ccb2",
     "translation": "f7ff1178af20",
@@ -3268,6 +3698,11 @@
     "source": "b9295ef7f3fd",
     "translation": "e1932a061ba4",
     "reviewed": false
+  },
+  "shell:closeTab": {
+    "source": "50a3f9523122",
+    "translation": "9b2768675139",
+    "reviewed": true
   },
   "shell:create": {
     "source": "4759498ac2a7",
@@ -3325,9 +3760,9 @@
     "reviewed": false
   },
   "shell:emptyText": {
-    "source": "43cccbae8b68",
-    "translation": "e80a77d729e1",
-    "reviewed": false
+    "source": "92f473d3d19a",
+    "translation": "4d0ab2dc6858",
+    "reviewed": true
   },
   "shell:emptyTitle": {
     "source": "a334ca2cacfc",
@@ -3369,10 +3804,25 @@
     "translation": "538d062b2d0b",
     "reviewed": false
   },
-  "shell:hideFile": {
-    "source": "ac20a57bfde0",
-    "translation": "042fae8a9e4a",
-    "reviewed": false
+  "shell:groupHintMain": {
+    "source": "cea339e2f592",
+    "translation": "2f9dbaaf90b4",
+    "reviewed": true
+  },
+  "shell:groupHintOther": {
+    "source": "d0f933350f35",
+    "translation": "9849e3f91368",
+    "reviewed": true
+  },
+  "shell:groupHintPreload": {
+    "source": "a5da54596e64",
+    "translation": "25c31fedb65f",
+    "reviewed": true
+  },
+  "shell:groupHintRenderer": {
+    "source": "37d15dcfde80",
+    "translation": "f75ccce83df3",
+    "reviewed": true
   },
   "shell:hideSidebar": {
     "source": "d1db29ebc76d",
@@ -3429,6 +3879,21 @@
     "translation": "c8e1c18da7db",
     "reviewed": false
   },
+  "shell:menuBar": {
+    "source": "d79194552215",
+    "translation": "3d466374d0da",
+    "reviewed": true
+  },
+  "shell:menuBarMenu": {
+    "source": "99af6606ff9d",
+    "translation": "a314bd0b56a3",
+    "reviewed": true
+  },
+  "shell:menuBarMore": {
+    "source": "d47d7cb0e4f8",
+    "translation": "80dc77bcf4ca",
+    "reviewed": true
+  },
   "shell:noNotifications": {
     "source": "37ecf3603dbf",
     "translation": "c92087f5842d",
@@ -3449,10 +3914,20 @@
     "translation": "7c45e80c3354",
     "reviewed": false
   },
+  "shell:openTab": {
+    "source": "ed077f3d8125",
+    "translation": "bc385a30b537",
+    "reviewed": true
+  },
   "shell:processMain": {
-    "source": "8d1a09cfd347",
-    "translation": "7d414469ffd8",
-    "reviewed": false
+    "source": "eb814be3ca3b",
+    "translation": "eb814be3ca3b",
+    "reviewed": true
+  },
+  "shell:processOther": {
+    "source": "f97e9da0e3b8",
+    "translation": "6039471db5f4",
+    "reviewed": true
   },
   "shell:processPreload": {
     "source": "b39edfe3bc54",
@@ -3463,6 +3938,21 @@
     "source": "9deb780b4331",
     "translation": "9deb780b4331",
     "reviewed": false
+  },
+  "shell:regionErrorBody": {
+    "source": "833cad4ae351",
+    "translation": "ad89a06101db",
+    "reviewed": true
+  },
+  "shell:regionErrorReload": {
+    "source": "bdc090ec61e3",
+    "translation": "55786148a69b",
+    "reviewed": true
+  },
+  "shell:regionErrorTitle": {
+    "source": "ab827e3fe17d",
+    "translation": "6c52e3f2ffd7",
+    "reviewed": true
   },
   "shell:rename": {
     "source": "6fa62b3dba2f",
@@ -3504,11 +3994,6 @@
     "translation": "f5750a5d7231",
     "reviewed": false
   },
-  "shell:showFile": {
-    "source": "0df6f1cad36c",
-    "translation": "aac14035c002",
-    "reviewed": false
-  },
   "shell:showSidebar": {
     "source": "9e8197ce9e5f",
     "translation": "5191ce5f26aa",
@@ -3544,11 +4029,6 @@
     "translation": "dfe81adf92aa",
     "reviewed": true
   },
-  "shell:windowTitleEdited": {
-    "source": "805efedfe877",
-    "translation": "060eea1e80ff",
-    "reviewed": false
-  },
   "versions:copied": {
     "source": "886e05896e1b",
     "translation": "14610cc9fdff",
@@ -3567,6 +4047,11 @@
   "versions:searchVersions": {
     "source": "2af5bdafa2e7",
     "translation": "9667b44ee816",
+    "reviewed": true
+  },
+  "versions:versionChangeFailed": {
+    "source": "346b33d1fce1",
+    "translation": "1c0bd1f294b6",
     "reviewed": true
   }
 }

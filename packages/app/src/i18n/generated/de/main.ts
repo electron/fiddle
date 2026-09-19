@@ -38,6 +38,7 @@ export default {
   "toggleDevTools": "Entwicklertools ein-/ausblenden",
   "develop": "Entwickler",
   "toggleMenuBar": "Titelleisten-Menüleiste ein-/ausblenden",
+  "openComponentGallery": "Komponentengalerie öffnen",
   "undo": "Rückgängig",
   "redo": "Wiederholen",
   "cut": "Ausschneiden",

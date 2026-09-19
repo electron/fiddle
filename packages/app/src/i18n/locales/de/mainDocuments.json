@@ -25,11 +25,12 @@
   "loadFailed": "Fiddle konnte nicht geladen werden",
   "saveFailed": "Fiddle konnte nicht gespeichert werden",
   "offline": "Dein Computer scheint offline zu sein.",
-  "noSupportedFiles": "Dieser Gist enthält keine Dateien, die Electron Fiddle öffnen kann.",
+  "notAFolder": "„{{path}}“ ist kein Ordner.",
+  "notAGist": "„{{input}}“ ist weder eine Gist-URL noch eine Gist-ID.",
   "loadWarnings": "Das Fiddle wurde mit Warnungen geladen",
-  "warnPackageJson": "package.json ist kein gültiges JSON, daher wurden die Module und die Electron-Version darin ignoriert.",
+  "warnPackageJson": "package.json ist kein gültiges JSON, daher wurden die Pakete und die Electron-Version darin ignoriert.",
   "warnVersion": "Electron {{version}} aus package.json kann nicht verwendet werden, daher wurde die aktuelle Version beibehalten.",
-  "warnModules": "Diese Module wurden übersprungen: {{modules}}.",
+  "warnModules": "Diese Pakete wurden übersprungen: {{modules}}.",
   "linkInvalid": "Dieser Link ist ungültig",
   "linkNeedsNewer": "Für diesen Link brauchst du eine neuere Version von Electron Fiddle",
   "linkGistMessage": "Diesen Gist laden?",
@@ -61,5 +62,6 @@
   "clearRecent": "Liste leeren",
   "linkSignInMessage": "Bei GitHub anmelden, um diesen Gist zu öffnen?",
   "linkSignInDetail": "GitHub hat diesen Gist nicht gefunden. Wenn er privat ist, wird er nach der Anmeldung geöffnet.",
-  "signIn": "Anmelden"
+  "signIn": "Anmelden",
+  "signInRequired": "Melde dich zuerst bei GitHub an."
 }

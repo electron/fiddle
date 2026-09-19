@@ -73,7 +73,5 @@ export default {
   "accountSignedInAs": "Angemeldet als {{login}}",
   "accountSignedOut": "Nicht angemeldet",
   "accountSignOut": "Abmelden",
-  "accountSignIn": "Anmelden",
-  "asRevisionLabel": "Als Revision veröffentlichen",
-  "asRevisionHelp": "Erstellt den Gist zuerst aus der Standardvorlage und aktualisiert ihn dann mit deinen Dateien, sodass der Verlauf des Gists deine Änderungen zeigt."
+  "accountSignIn": "Anmelden"
 } as const;

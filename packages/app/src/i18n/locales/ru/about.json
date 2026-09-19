@@ -1,0 +1,9 @@
+{
+  "updateAvailableTitle": "Доступно обновление",
+  "updateAvailableDescription": "Electron Fiddle {{version}} готов к скачиванию.",
+  "download": "Скачать",
+  "crashNoticeTitle": "Отчёты о сбоях включены",
+  "crashNoticeDescription": "Если Electron Fiddle аварийно завершится, приложение отправит отчёт, чтобы ошибку можно было исправить. Отчёты никогда не содержат ваш код. Их можно отключить в параметрах.",
+  "crashNoticeAction": "Конфиденциальность",
+  "openSettingsFailed": "Не удалось открыть параметры"
+}

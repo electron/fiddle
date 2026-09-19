@@ -1,0 +1,23 @@
+{
+  "importSettingsTitle": "匯入設定",
+  "exportSettingsTitle": "匯出設定",
+  "importThemeTitle": "匯入 Monaco 佈景主題",
+  "jsonFiles": "JSON 檔案",
+  "notJson": "{{file}} 不是有效的 JSON。",
+  "notSettings": "{{file}} 不包含設定。",
+  "notTheme": "{{file}} 不是 Monaco 佈景主題。佈景主題需要「base」或「rules」，且色彩須為十六進位值。",
+  "unknownSetting": "沒有名為「{{key}}」的設定。",
+  "invalidValue": "「{{setting}}」的值無效。",
+  "themeNeedsValues": "沒有內建佈景主題目前的值，就無法複製該佈景主題。",
+  "openFailed": "無法開啟 {{path}}：{{reason}}",
+  "themeCopyName": "{{name}} 複本",
+  "lucentDark": "Lucent 深色",
+  "lucentLight": "Lucent 淺色",
+  "lucentHcDark": "Lucent 高對比深色",
+  "lucentHcLight": "Lucent 高對比淺色",
+  "importExecutionMessage": "要匯入會變更 fiddle 執行方式的設定嗎？",
+  "importExecutionDetail": "這些設定會控制 Electron 的下載來源，以及每次執行時的啟動內容。請只匯入來自您信任來源的設定。",
+  "importEmpty": "無",
+  "importSettingLine": "{{setting}}：{{value}}",
+  "importButton": "匯入"
+}
