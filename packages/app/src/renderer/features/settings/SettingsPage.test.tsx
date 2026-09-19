@@ -16,6 +16,24 @@ const mocks = vi.hoisted(() => ({
   },
   app: {} as Record<string, unknown>,
   showToast: vi.fn(),
+  // Enough of i18next to announce a language change and to word text in that language.
+  i18n: (() => {
+    const listeners = new Set<(language: string) => void>();
+    return {
+      listeners,
+      on: (_event: string, listener: (language: string) => void) =>
+        listeners.add(listener),
+      off: (_event: string, listener: (language: string) => void) =>
+        listeners.delete(listener),
+      getFixedT: (language: string) => (key: string) => `${language}:${key}`,
+      switchTo: (language: string) => listeners.forEach((listener) => listener(language)),
+    };
+  })(),
+  t: (key: string) => key,
+}));
+
+vi.mock('react-i18next', () => ({
+  useTranslation: () => ({ t: mocks.t, i18n: mocks.i18n }),
 }));
 
 vi.mock('../../../ui', async (importOriginal) => ({
@@ -43,12 +61,13 @@ vi.mock('../../shell/window-state', () => ({ setView: vi.fn() }));
 import { openSettingsSection } from './sections';
 import { SettingsPage } from './SettingsPage';
 
-// Without an i18next instance, `t` returns the key, so text below is keys.
+// `t` returns the key, so text below is keys.
 // Pending changes outlive a test (they are per window), so each test starts at a later store rev, which drops them.
 let storeRev = 0;
 
 beforeEach(() => {
   vi.clearAllMocks();
+  mocks.i18n.listeners.clear();
   storeRev += 10;
   mocks.settingsApi.SetSetting.mockImplementation(() => Promise.resolve(storeRev + 1));
   mocks.settingsApi.ResetSetting.mockImplementation(() => Promise.resolve(storeRev + 1));
@@ -177,15 +196,38 @@ describe('General settings', () => {
     expect(names.some((name) => /Pseudo|XA|XB/.test(name ?? ''))).toBe(false);
   });
 
-  it('offers the relaunch once main has accepted the language', async () => {
+  it('offers the relaunch, worded in the new language, once the language has switched', async () => {
     render(<SettingsPage />);
     pickLanguage();
     await waitFor(() =>
-      expect(mocks.showToast).toHaveBeenCalledWith(
-        expect.objectContaining({ title: 'locale.relaunchTitle' }),
-      ),
+      expect(mocks.settingsApi.SetSetting).toHaveBeenCalledWith('locale', 'de'),
     );
-    expect(mocks.settingsApi.SetSetting).toHaveBeenCalledWith('locale', 'de');
+    await act(async () => {});
+    expect(mocks.showToast).not.toHaveBeenCalled();
+
+    act(() => mocks.i18n.switchTo('de'));
+    expect(mocks.showToast).toHaveBeenCalledTimes(1);
+    expect(mocks.showToast).toHaveBeenCalledWith(
+      expect.objectContaining({
+        title: 'de:locale.relaunchTitle',
+        description: 'de:locale.relaunchDescription',
+        actionLabel: 'de:locale.relaunch',
+      }),
+    );
+    expect(mocks.i18n.listeners.size).toBe(0);
+  });
+
+  it('offers no relaunch for a choice that switches nothing, and only one for the next choice', async () => {
+    render(<SettingsPage />);
+    pickLanguage();
+    await act(async () => {});
+    fireEvent.click(screen.getByRole('button', { name: /^(?!reset).*locale\.title/ }));
+    fireEvent.click(screen.getByRole('option', { name: 'English' }));
+    await act(async () => {});
+    expect(mocks.i18n.listeners.size).toBe(1);
+
+    act(() => mocks.i18n.switchTo('en'));
+    expect(mocks.showToast).toHaveBeenCalledTimes(1);
   });
 
   it('does not offer the relaunch when main rejects the language', async () => {
@@ -197,8 +239,10 @@ describe('General settings', () => {
         expect.objectContaining({ description: 'nope' }),
       ),
     );
+    expect(mocks.i18n.listeners.size).toBe(0);
+    act(() => mocks.i18n.switchTo('de'));
     expect(mocks.showToast).not.toHaveBeenCalledWith(
-      expect.objectContaining({ title: 'locale.relaunchTitle' }),
+      expect.objectContaining({ title: expect.stringContaining('relaunchTitle') }),
     );
   });
 });

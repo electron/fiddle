@@ -1,6 +1,6 @@
 .page {
   display: grid;
-  grid-template-columns: 220px minmax(0, 1fr);
+  grid-template-columns: var(--page-nav-width, 220px) minmax(0, 1fr);
   height: 100%;
   min-height: 0;
   background: var(--lu-surface);

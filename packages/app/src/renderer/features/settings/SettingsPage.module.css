@@ -1,3 +1,8 @@
+/* Wide enough for the longest translated section name and search placeholder, narrower in small windows. */
+.page {
+  --page-nav-width: clamp(220px, 24vw, 288px);
+}
+
 .aside {
   display: flex;
   flex: 1;

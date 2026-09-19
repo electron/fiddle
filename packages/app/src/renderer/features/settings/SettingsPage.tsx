@@ -199,6 +199,7 @@ export function SettingsPage() {
 
   return (
     <Page
+      className={styles.page}
       title={t('title')}
       nav={nav}
       onClose={() => void setView('editor', t('actionFailed'))}
@@ -237,8 +238,11 @@ function languageName(code: string): string {
   }
 }
 
+/** The listener of the last language change that is waiting for its toast, so a choice that switches nothing can't leave one behind. */
+let stopWaitingForLanguage: (() => void) | undefined;
+
 function GeneralSection() {
-  const { t } = useTranslation('settings');
+  const { t, i18n } = useTranslation('settings');
   const { app, settings, set } = useSettings();
   const run = useSettingsAction();
   const themes = app?.themes ?? [];
@@ -251,14 +255,28 @@ function GeneralSection() {
   const fixedBy = custom?.name ?? highContrastNames[settings.theme];
 
   const changeLocale = async (id: string) => {
-    if (id === settings.locale || !(await set('locale', id))) return;
-    // The editor's own strings and Chromium's follow after a relaunch.
-    showToast({
-      title: t('locale.relaunchTitle'),
-      description: t('locale.relaunchDescription'),
-      actionLabel: t('locale.relaunch'),
-      onAction: () => run(() => appPlatformApi.Relaunch()),
-    });
+    if (id === settings.locale) return;
+    stopWaitingForLanguage?.();
+    // The language switches a moment after main accepts the setting, and only if it differs from the one in
+    // use. The toast is worded once it has, so it comes out in the new language.
+    const stop = () => {
+      i18n.off('languageChanged', announce);
+      if (stopWaitingForLanguage === stop) stopWaitingForLanguage = undefined;
+    };
+    const announce = (language: string) => {
+      stop();
+      // The editor's own strings and Chromium's follow after a relaunch.
+      const tNew = i18n.getFixedT(language, 'settings');
+      showToast({
+        title: tNew('locale.relaunchTitle'),
+        description: tNew('locale.relaunchDescription'),
+        actionLabel: tNew('locale.relaunch'),
+        onAction: () => run(() => appPlatformApi.Relaunch()),
+      });
+    };
+    stopWaitingForLanguage = stop;
+    i18n.on('languageChanged', announce);
+    if (!(await set('locale', id))) stop();
   };
 
   const themeItems: SelectOption[] = [
