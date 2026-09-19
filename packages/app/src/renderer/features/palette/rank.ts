@@ -20,11 +20,31 @@ const isWordStart = (text: string, index: number) =>
   /[\s._\-/:@()]/.test(text[index - 1] ?? '') ||
   /[a-z][A-Z]/.test(text.slice(index - 1, index + 1));
 
+const LATIN = /\p{Script=Latin}/u;
+
+/**
+ * Lowercases and strips accents from Latin letters, so `fenetre` finds `Fenêtre` and `i` finds
+ * both `İ` and `I`. Other scripts are only lowercased: decomposing kana or Hangul would change
+ * what matches. Expects NFC text (macOS file names arrive decomposed) and returns a string of the
+ * same length.
+ */
+function fold(text: string): string {
+  let out = '';
+  for (const char of text) {
+    let base = LATIN.test(char) ? (char.normalize('NFD')[0] ?? char) : char;
+    if (base === 'ı') base = 'i';
+    const lower = base.toLowerCase();
+    out += lower.length === char.length ? lower : char;
+  }
+  return out;
+}
+
 /** Substrings beat scattered letters; matches at a word start and near the front score higher. Null if it doesn't match. */
-export function matchScore(query: string, text: string): number | null {
-  const q = query.trim().toLowerCase();
+export function matchScore(query: string, rawText: string): number | null {
+  const q = fold(query.trim().normalize('NFC'));
   if (q === '') return 0;
-  const lower = text.toLowerCase();
+  const text = rawText.normalize('NFC');
+  const lower = fold(text);
 
   const index = lower.indexOf(q);
   if (index !== -1) {

@@ -68,14 +68,17 @@ export interface Mnemonic {
   key: string;
 }
 
-/** The first letter or digit of each label that no earlier label took, so translated labels get mnemonics too. */
+/** Characters a keyboard types directly. Han, kana and Hangul need an input method, so Alt plus them can never fire. */
+const TYPEABLE = /[\p{Script=Latin}\p{Script=Cyrillic}\p{Script=Greek}0-9]/u;
+
+/** The first typeable letter or digit of each label that no earlier label took; a title in Chinese, Japanese or Korean gets none. */
 export function deriveMnemonics(labels: readonly string[]): (Mnemonic | undefined)[] {
   const used = new Set<string>();
   return labels.map((label) => {
     let index = 0;
     for (const char of label) {
       const key = char.toLowerCase();
-      if (/[\p{L}\p{N}]/u.test(char) && !used.has(key)) {
+      if (TYPEABLE.test(char) && !used.has(key)) {
         used.add(key);
         return { index, key };
       }

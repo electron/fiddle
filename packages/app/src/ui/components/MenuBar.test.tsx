@@ -303,6 +303,21 @@ describe('MenuBar', () => {
     expect(focused()).toBe(title('File'));
   });
 
+  it('underlines nothing and opens nothing by Alt for a title in Chinese', () => {
+    setup({
+      menus: [
+        submenu('menu:file', '文件', [item('file.save', '保存')]),
+        submenu('menu:help', 'Help', [item('help.about', 'About')]),
+      ],
+    });
+    expect(title('文件').querySelector('span span')).toBeNull();
+    expect(title('Help').querySelector('span span')).not.toBeNull();
+    press('文', { altKey: true });
+    expect(openMenus()).toEqual([]);
+    press('h', { altKey: true });
+    expect(openMenus()).toEqual(['Help']);
+  });
+
   it('treats Alt with a click, or with another key, as no tap', () => {
     const { editor } = setup();
     fireEvent.keyDown(editor, { key: 'Alt', altKey: true });
@@ -549,13 +564,26 @@ describe('deriveMnemonics', () => {
     expect(german[3]).toEqual({ index: 1, key: 'u' });
   });
 
-  it('skips punctuation, works on any script, and gives up when every letter is taken', () => {
-    expect(deriveMnemonics(['…More', 'ファイル', 'AB', 'BA', 'ab'])).toEqual([
+  it('skips punctuation, and gives up when every letter is taken', () => {
+    expect(deriveMnemonics(['…More', 'AB', 'BA', 'ab'])).toEqual([
       { index: 1, key: 'm' },
-      { index: 0, key: 'フ' },
       { index: 0, key: 'a' },
       { index: 0, key: 'b' },
       undefined,
+    ]);
+  });
+
+  it('marks accented Latin and Cyrillic letters, but never Han, kana or Hangul', () => {
+    expect(deriveMnemonics(['Édition', 'Файл', 'Ξ']).map((m) => m?.key)).toEqual([
+      'é',
+      'ф',
+      'ξ',
+    ]);
+    expect(deriveMnemonics(['文件', 'ファイル', '파일', '編集(E)'])).toEqual([
+      undefined,
+      undefined,
+      undefined,
+      { index: 3, key: 'e' },
     ]);
   });
 });

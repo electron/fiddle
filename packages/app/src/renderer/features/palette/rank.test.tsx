@@ -33,6 +33,40 @@ describe('matchScore', () => {
     expect(matchScore('xyz', 'Toggle developer tools')).toBeNull();
   });
 
+  it.each([
+    ['fenetre', 'Fenêtre'],
+    ['FENETRE', 'Fenêtre'],
+    ['cafe', 'café'],
+    ['cafe', 'cafe\u0301'],
+    ['cafe\u0301', 'Café'],
+    ['ninos', 'Niños'],
+    ['acao', 'Ação'],
+    ['istanbul', 'İstanbul'],
+    ['İstanbul', 'istanbul'],
+    ['isik', 'Işık'],
+    ['ısık', 'Isik'],
+    ['guncelle', 'Güncelle'],
+    ['ファイル', 'ファイルを開く'],
+    ['파일', '새 파일'],
+    ['窗口', '新建窗口'],
+  ])('matches %s against %s regardless of case and accents', (query, text) => {
+    expect(matchScore(query, text)).not.toBeNull();
+  });
+
+  it.each([
+    ['か', 'が'],
+    ['は', 'ぱ'],
+    ['파', '팔'],
+    ['е', 'ё'],
+  ])('keeps non-Latin characters distinct: %s vs %s', (query, text) => {
+    expect(matchScore(query, text)).toBeNull();
+  });
+
+  it('scores an accented text like its plain spelling', () => {
+    expect(matchScore('fenetre', 'Fenêtre')).toBe(matchScore('fenetre', 'Fenetre'));
+    expect(matchScore('istanbul', 'İstanbul')).toBe(matchScore('istanbul', 'Istanbul'));
+  });
+
   it('ranks exact, then word-start, then later substrings', () => {
     const exact = matchScore('save', 'Save')!;
     const start = matchScore('save', 'Save as')!;
@@ -83,6 +117,11 @@ describe('rankItems', () => {
   it('matches keywords below labels', () => {
     expect(labels(rankItems(items, 'inspect', []))).toEqual(['Toggle developer tools']);
     expect(labels(rankItems(items, 'stable', []))).toEqual(['44.0.0']);
+  });
+
+  it('finds accented labels from unaccented queries', () => {
+    const french = [command('window', 'Fenêtre'), command('save', 'Enregistrer')];
+    expect(labels(rankItems(french, 'fenetre', []))).toEqual(['Fenêtre']);
   });
 
   it('respects the limit', () => {
