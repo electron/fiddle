@@ -2,10 +2,9 @@ import os from 'node:os';
 import path from 'node:path';
 
 import * as Sentry from '@sentry/electron/main';
-import { app, dialog } from 'electron';
+import { app } from 'electron';
 
 import { defaultSettings, parseSetting } from '../../shared/settings';
-import { tm } from '../i18n';
 import { log } from '../log';
 import { readJsonObjectSync } from '../persistence/json-store';
 import { testFlags } from '../test-mode';
@@ -37,42 +36,6 @@ function readCrashReportsSetting(userData: string): boolean {
   );
 }
 
-let resolveUiReady: () => void = () => undefined;
-const uiReady = new Promise<void>((resolve) => {
-  resolveUiReady = resolve;
-});
-
-/** Main's i18n is ready, so crash-report prompts can be shown. */
-export function markCrashUiReady(): void {
-  resolveUiReady();
-}
-
-let consentQueue: Promise<unknown> = Promise.resolve();
-
-/** Asks whether to send one renderer crash report. Prompts are shown one at a time. */
-function askToSendRendererCrash(): Promise<boolean> {
-  const answer = consentQueue.then(async () => {
-    await app.whenReady();
-    await uiReady;
-    const tp = tm('mainPlatform');
-    const { response } = await dialog.showMessageBox({
-      type: 'warning',
-      message: tp('crashConsentMessage'),
-      detail: tp('crashConsentDetail'),
-      buttons: [tp('sendReport'), tp('dontSend')],
-      defaultId: 1,
-      cancelId: 1,
-      noLink: true,
-    });
-    return response === 0;
-  });
-  consentQueue = answer.catch(() => undefined);
-  return answer.catch((error: unknown) => {
-    log.error('crash report prompt failed', error);
-    return false;
-  });
-}
-
 /** Starts Sentry in main if it's allowed. Call before `ready`, after Squirrel handling. Headless CLI runs never send reports. */
 export function initCrashReporting(headless = false): void {
   const off = !app.isPackaged
@@ -98,7 +61,7 @@ export function initCrashReporting(headless = false): void {
     // An explicit allowlist: no console, network or local-variable integrations, so those never collect anything.
     defaultIntegrations: false,
     integrations: [
-      // Native crashes. What is sent is decided in prepareEvent.
+      // Native crashes: the dumps are dropped in prepareEvent.
       Sentry.sentryMinidumpIntegration(),
       Sentry.electronBreadcrumbsIntegration(),
       Sentry.electronContextIntegration(),
@@ -115,7 +78,7 @@ export function initCrashReporting(headless = false): void {
       Sentry.nodeContextIntegration({ cloudResource: false }),
       Sentry.normalizePathsIntegration(),
     ],
-    beforeSend: (event) => prepareEvent(event, home, askToSendRendererCrash),
+    beforeSend: (event) => prepareEvent(event, home),
     beforeBreadcrumb: (crumb) => scrubBreadcrumb(crumb, home),
   });
   enabled = true;

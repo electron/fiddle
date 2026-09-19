@@ -1,4 +1,4 @@
-import { applyCrashReportsSetting, markCrashUiReady } from '../crash/sentry';
+import { applyCrashReportsSetting } from '../crash/sentry';
 import { importElectronVersionsInBackground } from '../migration';
 import type { StateHub } from '../state-hub';
 import { startUpdates } from '../updates';
@@ -14,7 +14,6 @@ export { installQuitOnLastWindowClosed } from './lifecycle';
 export async function startPlatform(hub: StateHub, firstLaunch: boolean): Promise<void> {
   finishStartup();
   installRelaunchOnQuit();
-  markCrashUiReady();
   setupAboutPanel();
   registerProtocolClient();
   hub.onChange(() => applyCrashReportsSetting(hub.app.settings.crashReports));

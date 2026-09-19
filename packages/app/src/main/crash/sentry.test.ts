@@ -10,7 +10,6 @@ const mocks = vi.hoisted(() => ({
   userData: '',
   init: vi.fn(),
   close: vi.fn(async () => true),
-  showMessageBox: vi.fn(),
 }));
 
 vi.mock('electron', () => ({
@@ -23,7 +22,6 @@ vi.mock('electron', () => ({
     getVersion: () => '1.0.0',
     whenReady: async () => undefined,
   },
-  dialog: { showMessageBox: mocks.showMessageBox },
 }));
 vi.mock('@sentry/electron/main', () => {
   const integration = () => ({});
@@ -47,7 +45,6 @@ vi.mock('@sentry/electron/main', () => {
     normalizePathsIntegration: integration,
   };
 });
-vi.mock('../i18n', () => ({ tm: () => (key: string) => key }));
 vi.mock('../log', () => ({
   log: { debug: vi.fn(), info: vi.fn(), warn: vi.fn(), error: vi.fn() },
 }));
@@ -57,7 +54,7 @@ const rendererCrash = {
   tags: { 'event.environment': 'native', 'event.process': 'renderer' },
 };
 
-/** A fresh module per test: `enabled` and the consent queue are module state. */
+/** A fresh module per test: `enabled` is module state. */
 async function load() {
   vi.resetModules();
   return import('./sentry');
@@ -67,7 +64,7 @@ function writeSettings(text: string): void {
   fs.writeFileSync(path.join(mocks.userData, 'settings.json'), text);
 }
 
-type BeforeSend = (event: object) => Promise<object | null>;
+type BeforeSend = (event: object) => object | null;
 
 function beforeSend(): BeforeSend {
   return (mocks.init.mock.calls[0]![0] as { beforeSend: BeforeSend }).beforeSend;
@@ -79,7 +76,6 @@ beforeEach(() => {
   mocks.sentryFlag = true;
   mocks.init.mockClear();
   mocks.close.mockClear();
-  mocks.showMessageBox.mockReset().mockResolvedValue({ response: 1 });
 });
 
 afterEach(() => {
@@ -165,51 +161,10 @@ describe('applyCrashReportsSetting', () => {
   });
 });
 
-describe('renderer crash consent', () => {
-  it('sends the dump only after the user agrees, once the UI is ready', async () => {
-    const { initCrashReporting, markCrashUiReady } = await load();
+describe('native crash dumps', () => {
+  it('are never sent: they hold process memory, which can contain fiddle code', async () => {
+    const { initCrashReporting } = await load();
     initCrashReporting();
-    mocks.showMessageBox.mockResolvedValue({ response: 0 });
-
-    const sent = beforeSend()(rendererCrash);
-    await new Promise((resolve) => setTimeout(resolve, 0));
-    expect(mocks.showMessageBox).not.toHaveBeenCalled();
-    markCrashUiReady();
-    expect(await sent).not.toBeNull();
-    expect(mocks.showMessageBox).toHaveBeenCalledOnce();
-  });
-
-  it('does not send when the user declines', async () => {
-    const { initCrashReporting, markCrashUiReady } = await load();
-    initCrashReporting();
-    markCrashUiReady();
-    expect(await beforeSend()(rendererCrash)).toBeNull();
-  });
-
-  it('does not send when the prompt itself fails', async () => {
-    const { initCrashReporting, markCrashUiReady } = await load();
-    initCrashReporting();
-    markCrashUiReady();
-    mocks.showMessageBox.mockRejectedValue(new Error('no window'));
-    expect(await beforeSend()(rendererCrash)).toBeNull();
-  });
-
-  it('asks one crash at a time', async () => {
-    const { initCrashReporting, markCrashUiReady } = await load();
-    initCrashReporting();
-    markCrashUiReady();
-    let release: (value: { response: number }) => void = () => undefined;
-    mocks.showMessageBox.mockReturnValueOnce(
-      new Promise((resolve) => (release = resolve)),
-    );
-    mocks.showMessageBox.mockResolvedValue({ response: 1 });
-
-    const first = beforeSend()(rendererCrash);
-    const second = beforeSend()(rendererCrash);
-    await vi.waitFor(() => expect(mocks.showMessageBox).toHaveBeenCalledOnce());
-    release({ response: 0 });
-    expect(await first).not.toBeNull();
-    expect(await second).toBeNull();
-    expect(mocks.showMessageBox).toHaveBeenCalledTimes(2);
+    expect(beforeSend()(rendererCrash)).toBeNull();
   });
 });

@@ -1,6 +1,6 @@
 import vm from 'node:vm';
 
-import { describe, expect, it, vi } from 'vitest';
+import { describe, expect, it } from 'vitest';
 
 import {
   prepareEvent,
@@ -200,34 +200,16 @@ describe('prepareEvent', () => {
     message: `${home}/dump`,
   });
 
-  it('never sends native dumps from main or other processes, and does not ask', async () => {
-    const ask = vi.fn(async () => true);
-    expect(await prepareEvent(native('browser'), home, ask)).toBeNull();
-    expect(await prepareEvent(native('GPU'), home, ask)).toBeNull();
-    expect(await prepareEvent(native('unknown'), home, ask)).toBeNull();
-    expect(ask).not.toHaveBeenCalled();
+  it('never sends a native dump, whichever process crashed', () => {
+    for (const process of ['renderer', 'browser', 'GPU', 'unknown'])
+      expect(prepareEvent(native(process), home)).toBeNull();
   });
 
-  it('sends a renderer dump only with consent, crash by crash', async () => {
-    const ask = vi
-      .fn<() => Promise<boolean>>()
-      .mockResolvedValueOnce(true)
-      .mockResolvedValueOnce(false);
-    expect(await prepareEvent(native('renderer'), home, ask)).toMatchObject({
-      message: '~/dump',
-    });
-    expect(await prepareEvent(native('renderer'), home, ask)).toBeNull();
-    expect(ask).toHaveBeenCalledTimes(2);
-  });
-
-  it('sends JavaScript errors without asking, scrubbed', async () => {
-    const ask = vi.fn(async () => false);
-    const out = await prepareEvent(
+  it('sends JavaScript errors, scrubbed', () => {
+    const out = prepareEvent(
       { tags: { 'event.process': 'renderer' }, message: token },
       home,
-      ask,
     );
     expect(out).toEqual({ tags: { 'event.process': 'renderer' }, message: '[redacted]' });
-    expect(ask).not.toHaveBeenCalled();
   });
 });

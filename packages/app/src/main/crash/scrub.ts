@@ -177,18 +177,10 @@ interface CrashTags {
 }
 
 /**
- * `beforeSend`. A native crash dump from any process but a renderer is
- * dropped; a renderer dump is sent only when `askConsent` resolves true.
- * Everything that is sent is scrubbed.
+ * `beforeSend`. A native crash dump holds a snapshot of the process's memory,
+ * which can contain fiddle code, so no dump is ever sent. Everything else is scrubbed.
  */
-export async function prepareEvent<E extends CrashTags>(
-  event: E,
-  home: string,
-  askConsent: () => Promise<boolean>,
-): Promise<E | null> {
-  if (event.tags?.['event.environment'] === 'native') {
-    if (event.tags['event.process'] !== 'renderer') return null;
-    if (!(await askConsent())) return null;
-  }
+export function prepareEvent<E extends CrashTags>(event: E, home: string): E | null {
+  if (event.tags?.['event.environment'] === 'native') return null;
   return scrubEvent(event, home);
 }
