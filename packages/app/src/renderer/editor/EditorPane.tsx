@@ -140,6 +140,8 @@ export function EditorPane({ file, primary = false, onFocus }: EditorPaneProps) 
     shown.current = next ? file : null;
     const saved = getViewState(file);
     if (next && saved) editor.restoreViewState(saved);
+    // Draws now, not on the next frame: a window that is still hidden may not get one for a second.
+    editor.render();
   }, [editor, model, file]);
 
   // The focused pane's cursor shows in the status bar, also when focus came from the tab row.

@@ -66,19 +66,15 @@ export function App() {
 
   useSyncLocale(locale);
 
-  // Main shows the window once we report ready: after both stores and the editor text are in, plus two frames
-  // so Monaco (which paints on its own animation frame) has drawn.
+  // Main shows the window once we report ready. No frames are awaited: a window that has never been shown gets few
+  // or none, so this waits on state alone (EditorPane draws its first text without a frame).
   const reported = useRef(false);
   useEffect(() => {
     if (!ready || reported.current) return;
     reported.current = true;
-    requestAnimationFrame(() =>
-      requestAnimationFrame(() => {
-        windowApi.ReportReady().catch((error: unknown) => {
-          log.error('ReportReady failed', error);
-        });
-      }),
-    );
+    windowApi.ReportReady().catch((error: unknown) => {
+      log.error('ReportReady failed', error);
+    });
   }, [ready]);
 
   // react-aria's built-in strings (hidden dismiss buttons and the like) follow the UI locale.

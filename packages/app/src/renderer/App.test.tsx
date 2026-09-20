@@ -50,10 +50,6 @@ const app = {
 
 beforeEach(() => {
   vi.clearAllMocks();
-  vi.stubGlobal('requestAnimationFrame', (frame: () => void) => {
-    frame();
-    return 0;
-  });
   mocks.app = app;
   mocks.win = {};
   mocks.storeError = undefined;
@@ -66,6 +62,12 @@ describe('App', () => {
   it('reports ready once both stores and the editor text are in', () => {
     render(<App />);
     expect(screen.getByText('the shell')).toBeTruthy();
+    expect(mocks.ReportReady).toHaveBeenCalledOnce();
+  });
+
+  it('does not wait for an animation frame, which a hidden window may never run', () => {
+    vi.stubGlobal('requestAnimationFrame', () => 0);
+    render(<App />);
     expect(mocks.ReportReady).toHaveBeenCalledOnce();
   });
 

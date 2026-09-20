@@ -251,6 +251,8 @@ export async function openGalleryWindow(): Promise<void> {
 async function devScreenshot(win: BrowserWindow): Promise<void> {
   const file = process.env.FIDDLE_DEV_SCREENSHOT;
   if (import.meta.env.MODE === 'production' || app.isPackaged || !file) return;
+  // Just shown: the page's first frames take a moment to reach the screen.
+  await new Promise((resolve) => setTimeout(resolve, 300));
   const image = await win.webContents.capturePage();
   await fs.writeFile(file, image.toPNG());
   log.info('dev screenshot saved', file, image.getSize());

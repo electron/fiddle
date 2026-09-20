@@ -25,6 +25,43 @@ function bundleManifest(mode: string): Plugin {
   };
 }
 
+// main.tsx imports App, and with it Monaco, once the App store has answered. Preloading that chunk graph from the
+// page overlaps its fetch with the entry chunk's.
+function preloadApp(): Plugin {
+  return {
+    name: 'fiddle:preload-app',
+    apply: 'build',
+    transformIndexHtml: {
+      order: 'post',
+      handler(_html, { bundle, chunk }) {
+        if (!bundle || chunk?.name !== 'index') return [];
+        const app = Object.values(bundle).find(
+          (item) =>
+            item.type === 'chunk' && item.facadeModuleId?.endsWith('/renderer/App.tsx'),
+        );
+        if (!app) return [];
+        const seen = new Set<string>();
+        const walk = (file: string) => {
+          if (seen.has(file)) return;
+          seen.add(file);
+          const item = bundle[file];
+          if (item?.type === 'chunk') item.imports.forEach(walk);
+        };
+        walk(chunk.fileName);
+        const loaded = new Set(seen);
+        walk(app.fileName);
+        return [...seen]
+          .filter((file) => !loaded.has(file))
+          .map((file) => ({
+            tag: 'link',
+            attrs: { rel: 'modulepreload', crossorigin: true, href: `./${file}` },
+            injectTo: 'head' as const,
+          }));
+      },
+    },
+  };
+}
+
 // The component gallery (Develop > Open component gallery) is a second page, left out of release builds.
 const galleryPage = fileURLToPath(
   new URL('./src/ui/gallery/index.html', import.meta.url),
@@ -33,7 +70,7 @@ const appPage = fileURLToPath(new URL('./index.html', import.meta.url));
 
 export default defineConfig(({ mode }) => ({
   base: './',
-  plugins: [react(), bundleManifest(mode)],
+  plugins: [react(), bundleManifest(mode), preloadApp()],
   build: {
     outDir: '.vite/renderer/main_window',
     emptyOutDir: true,
