@@ -27,6 +27,9 @@ const RENDERER_NAME = 'main_window';
 const TITLE_BAR_HEIGHT = 56;
 /** How long a loaded page may take to report ready before the window is shown anyway. */
 const READY_TIMEOUT_MS = 5000;
+/** A crashed renderer is reloaded at most this many times per `CRASH_RELOAD_WINDOW_MS`; a page that crashes on load would loop. */
+const MAX_CRASH_RELOADS = 3;
+const CRASH_RELOAD_WINDOW_MS = 60_000;
 const INK = { light: '#1b1c26', dark: '#eef1f8' } as const;
 
 export function detectPlatform(): Platform {
@@ -172,8 +175,22 @@ export async function createAppWindow({
     contents.on('did-fail-load', (_event, code, description, failedUrl) => {
       log.error('window failed to load', failedUrl, code, description);
     });
+    // Main owns the document and both stores, so a reload brings the window back as it was.
+    const reloads: number[] = [];
     contents.on('render-process-gone', (_event, details) => {
       log.error('renderer process gone', windowId, details.reason);
+      if (details.reason === 'clean-exit' || contents.isDestroyed()) return;
+      const now = Date.now();
+      while (reloads[0] !== undefined && now - reloads[0] >= CRASH_RELOAD_WINDOW_MS)
+        reloads.shift();
+      if (reloads.length >= MAX_CRASH_RELOADS) {
+        log.error('the renderer keeps crashing; leaving the window as it is', windowId);
+        // A window that never got shown would stay hidden and keep the app alive.
+        show();
+        return;
+      }
+      reloads.push(now);
+      contents.reload();
     });
 
     if (platform === 'win32') {

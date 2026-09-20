@@ -17,6 +17,8 @@ vi.mock('electron', async () => {
     readonly options: unknown;
     readonly webContents = Object.assign(new EventEmitter(), {
       getURL: () => 'app://main/index.html',
+      isDestroyed: () => false,
+      reload: vi.fn(),
     });
     destroyed = false;
     show = vi.fn();
@@ -61,7 +63,7 @@ import { createAppWindow, openGalleryWindow, windowOptions } from './window';
 
 interface FakeWindow extends EventEmitter {
   options: { webPreferences: Record<string, unknown> };
-  webContents: EventEmitter;
+  webContents: EventEmitter & { reload: Mock<() => void> };
   show: ReturnType<typeof vi.fn>;
   close: Mock<() => void>;
   destroy: ReturnType<typeof vi.fn>;
@@ -150,6 +152,43 @@ describe('createAppWindow', () => {
       await vi.advanceTimersByTimeAsync(10_000);
       expect(win.show).toHaveBeenCalledOnce();
       expect(log.error).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('a renderer that crashes', () => {
+    const crash = (win: FakeWindow, reason = 'crashed') =>
+      win.webContents.emit('render-process-gone', {}, { reason });
+
+    it('is reloaded, unless it exited cleanly', async () => {
+      await createAppWindow(args);
+      const win = lastWindow();
+      crash(win, 'clean-exit');
+      expect(win.webContents.reload).not.toHaveBeenCalled();
+      crash(win, 'oom');
+      expect(win.webContents.reload).toHaveBeenCalledOnce();
+    });
+
+    it('is left as it is once it crashes three times in a minute, and shown if it never was', async () => {
+      await createAppWindow(args);
+      const win = lastWindow();
+      for (let i = 0; i < 3; i++) crash(win);
+      expect(win.webContents.reload).toHaveBeenCalledTimes(3);
+      expect(win.show).not.toHaveBeenCalled();
+
+      crash(win);
+      expect(win.webContents.reload).toHaveBeenCalledTimes(3);
+      expect(win.show).toHaveBeenCalledOnce();
+      expect(log.error).toHaveBeenCalledWith(
+        expect.stringContaining('keeps crashing'),
+        'w',
+      );
+
+      await vi.advanceTimersByTimeAsync(59_999);
+      crash(win);
+      expect(win.webContents.reload).toHaveBeenCalledTimes(3);
+      await vi.advanceTimersByTimeAsync(1);
+      crash(win);
+      expect(win.webContents.reload).toHaveBeenCalledTimes(4);
     });
   });
 

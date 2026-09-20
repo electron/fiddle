@@ -12,7 +12,7 @@ import {
   startDocuments,
 } from './documents/service';
 import { initMainI18n } from './i18n';
-import { flushLog, initLogFile, log, logsDir } from './log';
+import { flushLog, initLogFile, log, logProcessErrors, logsDir } from './log';
 import { installMenu } from './menu';
 import { runMigration } from './migration';
 import { installFlushOnExit } from './persistence/lifecycle';
@@ -41,6 +41,7 @@ const testHarness =
   __FIDDLE_TEST_BUILD__ && isTestMode() ? installTestHarness() : undefined;
 
 if (!squirrelEvent) initCrashReporting(headless !== undefined);
+if (!squirrelEvent && !headless) logProcessErrors();
 
 // Both must happen before `ready`.
 registerAppScheme();

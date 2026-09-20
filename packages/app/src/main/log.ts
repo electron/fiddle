@@ -123,6 +123,18 @@ export class LogFile {
     while (this.#writing) await this.#writing;
   }
 
+  /** Writes the pending lines now, without rotating, for a process that may not run another tick. */
+  flushSync(): void {
+    const chunk = this.#pending.splice(0).join('');
+    if (!chunk) return;
+    try {
+      fs.appendFileSync(this.file(0), chunk, { mode: 0o600 });
+      this.#size += Buffer.byteLength(chunk);
+    } catch (error) {
+      console.error(PREFIX, 'failed to write the log file', error);
+    }
+  }
+
   async #drain(): Promise<void> {
     // Let a synchronous burst of entries land first: it becomes one append.
     await Promise.resolve();
@@ -187,6 +199,20 @@ export function initLogFile(dir: string): void {
 /** Resolves once everything logged so far is on disk. Call before `app.exit()`, which doesn't wait. */
 export async function flushLog(): Promise<void> {
   await sink?.flush();
+}
+
+/**
+ * Logs uncaught exceptions and unhandled rejections. The monitor only observes, so Electron's error box
+ * (or Sentry) still runs; the box blocks the thread, so the line is written synchronously first.
+ * Electron runs Node with unhandled rejections in `warn` mode: no exception is raised, so they need
+ * a listener of their own.
+ */
+export function logProcessErrors(): void {
+  process.on('uncaughtExceptionMonitor', (error) => {
+    log.error('uncaught exception', error);
+    sink?.flushSync();
+  });
+  process.on('unhandledRejection', (reason) => log.error('unhandled rejection', reason));
 }
 
 /** The logs folder, once `initLogFile()` has run. */

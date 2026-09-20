@@ -1,3 +1,4 @@
+import { readFileSync } from 'node:fs';
 import { mkdtemp, readdir, readFile, rm, stat } from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
@@ -5,7 +6,14 @@ import path from 'node:path';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { FiddleError } from '../shared/errors';
-import { flushLog, formatEntry, initLogFile, log, LogFile } from './log';
+import {
+  flushLog,
+  formatEntry,
+  initLogFile,
+  log,
+  logProcessErrors,
+  LogFile,
+} from './log';
 
 const home = os.homedir();
 const token = `ghp_${'Zz09'.repeat(9)}`;
@@ -168,5 +176,47 @@ describe('flushLog', () => {
     expect(await readFile(path.join(dir, 'main.log'), 'utf8')).toContain(
       'startup failed',
     );
+  });
+});
+
+describe('logProcessErrors', () => {
+  let dir: string;
+
+  beforeEach(async () => {
+    dir = await mkdtemp(path.join(os.tmpdir(), 'fiddle-log-'));
+    vi.spyOn(console, 'error').mockImplementation(() => undefined);
+  });
+
+  afterEach(async () => {
+    vi.restoreAllMocks();
+    await rm(dir, { recursive: true, force: true });
+  });
+
+  it('logs an uncaught exception straight to the file, and an unhandled rejection', async () => {
+    const handlers = new Map<string, (...args: unknown[]) => void>();
+    vi.spyOn(process, 'on').mockImplementation(((event: string, handler: never) => {
+      handlers.set(event, handler);
+      return process;
+    }) as never);
+    initLogFile(dir);
+    logProcessErrors();
+
+    handlers.get('uncaughtExceptionMonitor')!(new Error(`boom in ${home}`), 'x');
+    const file = path.join(dir, 'main.log');
+    const [entry] = readFileSync(file, 'utf8').trim().split('\n');
+    expect(JSON.parse(entry!)).toMatchObject({
+      level: 'error',
+      msg: 'uncaught exception',
+      details: [{ name: 'Error', message: 'boom in ~' }],
+    });
+
+    handlers.get('unhandledRejection')!(new Error('nobody caught this'));
+    await flushLog();
+    const lines = readFileSync(file, 'utf8').trim().split('\n');
+    expect(lines).toHaveLength(2);
+    expect(JSON.parse(lines[1]!)).toMatchObject({
+      msg: 'unhandled rejection',
+      details: [{ message: 'nobody caught this' }],
+    });
   });
 });
