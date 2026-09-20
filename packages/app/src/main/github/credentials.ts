@@ -30,6 +30,11 @@ export type LoadResult =
 /** Encryption on these Linux backends is only obfuscation: the token stays in memory unless the user accepts plaintext. */
 const WEAK_LINUX_BACKENDS = new Set(['basic_text', 'unknown']);
 
+/** Where the previous Electron Fiddle kept the token. */
+export function legacyTokenFile(userData: string): string {
+  return path.join(userData, '.github-credentials');
+}
+
 interface CredentialStoreOptions {
   file: string;
   safeStorage: SafeStorageLike;

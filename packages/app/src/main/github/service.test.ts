@@ -1,4 +1,8 @@
-import { afterEach, beforeAll, describe, expect, it, vi } from 'vitest';
+import { mkdir, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
+import os from 'node:os';
+import path from 'node:path';
+
+import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { GitHubClient } from '../../fiddle/github';
 import { ErrorCode, FiddleError } from '../../shared/errors';
@@ -145,6 +149,8 @@ function setup(
     user?: () => Response;
     fiddle?: Partial<GistFiddle>;
     asRevision?: boolean;
+    legacyFile?: string;
+    warn?: (...args: unknown[]) => void;
   } = {},
 ) {
   const github = fakeGitHub({ remote: options.remote, user: options.user });
@@ -154,11 +160,12 @@ function setup(
   const logins: Array<string | undefined> = [];
   const service = new GitHubService({
     store,
+    legacyFile: options.legacyFile,
     createClient: (token) => new GitHubClient({ token, fetch: github.fetchFn }),
     documents,
     prefs,
     setLogin: (login) => logins.push(login),
-    log: { warn: () => undefined, error: () => undefined },
+    log: { warn: options.warn ?? (() => undefined), error: () => undefined },
   });
   return { service, github, store, documents, prefs, logins };
 }
@@ -361,6 +368,38 @@ describe('sign-in', () => {
     await service.signOut();
     expect(store.delete).toHaveBeenCalledOnce();
     expect(service.login).toBeUndefined();
+  });
+
+  describe('old token file', () => {
+    let dir: string;
+    beforeEach(async () => {
+      dir = await mkdtemp(path.join(os.tmpdir(), 'gh-signout-'));
+    });
+    afterEach(() => rm(dir, { recursive: true, force: true }));
+
+    it('is removed on sign-out, and nothing else in its folder', async () => {
+      const legacyFile = path.join(dir, '.github-credentials');
+      await writeFile(legacyFile, 'old');
+      await writeFile(path.join(dir, 'state.json'), '{}');
+      const { service, store } = setup({ stored, legacyFile });
+      await service.signOut();
+      await expect(readFile(legacyFile)).rejects.toMatchObject({ code: 'ENOENT' });
+      expect(await readFile(path.join(dir, 'state.json'), 'utf8')).toBe('{}');
+      expect(store.delete).toHaveBeenCalledOnce();
+      // A file that is already gone is fine.
+      await service.signOut();
+    });
+
+    it('does not make sign-out fail when it cannot be removed', async () => {
+      const legacyFile = path.join(dir, '.github-credentials');
+      await mkdir(path.join(legacyFile, 'inner'), { recursive: true });
+      const warn = vi.fn();
+      const { service, store, logins } = setup({ stored, legacyFile, warn });
+      await service.signOut();
+      expect(warn).toHaveBeenCalledOnce();
+      expect(store.delete).toHaveBeenCalledOnce();
+      expect(logins.at(-1)).toBeUndefined();
+    });
   });
 });
 

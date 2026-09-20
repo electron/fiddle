@@ -18,7 +18,11 @@ import semver from 'semver';
 
 import { GITHUB_TOKEN_PATTERN } from '../../fiddle/github';
 import { BUILTIN_THEME } from '../../shared/settings';
-import { CredentialStore, type SafeStorageLike } from '../github/credentials';
+import {
+  CredentialStore,
+  legacyTokenFile,
+  type SafeStorageLike,
+} from '../github/credentials';
 import { log } from '../log';
 import { writeAtomic } from '../persistence/json-store';
 import { SETTINGS_VERSION } from '../settings/service';
@@ -178,7 +182,7 @@ async function importGitHubToken(
   deps: ImportDeps,
   login: string | undefined,
 ): Promise<string> {
-  const oldFile = path.join(deps.userData, '.github-credentials');
+  const oldFile = legacyTokenFile(deps.userData);
   const newFile = path.join(deps.userData, 'credentials', 'github');
   if (!fs.existsSync(oldFile)) return 'none';
   if (fs.existsSync(newFile)) return 'kept';

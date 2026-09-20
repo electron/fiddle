@@ -1,3 +1,5 @@
+import { rm } from 'node:fs/promises';
+
 import {
   findMainEntry,
   PACKAGE_JSON,
@@ -30,6 +32,8 @@ interface GistHistory {
 
 interface GitHubServiceOptions {
   store: Pick<CredentialStore, 'kind' | 'load' | 'save' | 'delete'>;
+  /** The previous app's token file, which sign-out removes too. */
+  legacyFile?: string;
   createClient: (token?: string) => GitHubClient;
   documents: GistDocuments;
   prefs: GistPrefs;
@@ -144,6 +148,13 @@ export class GitHubService {
     this.#token = undefined;
     this.#login = undefined;
     this.#options.setLogin(undefined);
+    const { legacyFile } = this.#options;
+    if (legacyFile) {
+      // Otherwise the old token stays valid on disk after the user signed out.
+      await rm(legacyFile, { force: true }).catch((error: unknown) =>
+        this.#options.log.warn('could not remove the old GitHub token file', error),
+      );
+    }
     await this.#options.store.delete();
   }
 

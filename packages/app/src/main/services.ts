@@ -14,7 +14,7 @@ import {
   setFiddleModules,
   setFiddleVersion,
 } from './documents/service';
-import { CredentialStore } from './github/credentials';
+import { CredentialStore, legacyTokenFile } from './github/credentials';
 import { createDocumentsBridge } from './github/documents-bridge';
 import { createGistPrefs } from './github/prefs';
 import { GitHubService } from './github/service';
@@ -173,6 +173,7 @@ export async function createServices({
       safeStorage,
       platform: process.platform,
     }),
+    legacyFile: legacyTokenFile(userData),
     createClient: (token) => {
       const endpoints = getEndpoints();
       return new GitHubClient({
