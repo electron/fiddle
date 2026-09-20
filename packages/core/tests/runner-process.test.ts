@@ -113,18 +113,27 @@ describe('Runner with a real child process', () => {
     await expect.poll(text).toContain('second');
   });
 
-  it('starts the inspector on a random local port', async () => {
+  it('starts the inspector on a random local port and does not list it over HTTP', async () => {
     const { out, text } = collector();
-    const child = await runner.spawn(electron, fiddle('setTimeout(() => {}, 100);'), {
+    const child = await runner.spawn(electron, fiddle('setTimeout(() => {}, 5000);'), {
       out,
       showConfig: false,
       inspect: {},
     });
-    await new Promise((resolve) => child.once('close', resolve));
+    const closed = new Promise((resolve) => child.once('close', resolve));
+    try {
+      const banner = /Debugger listening on ws:\/\/127\.0\.0\.1:(\d+)\/[\w-]+/;
+      await expect.poll(text, { timeout: 10_000 }).toMatch(banner);
+      const port = Number(banner.exec(text())![1]);
+      expect(port).toBeGreaterThan(0);
 
-    const match = /Debugger listening on ws:\/\/127\.0\.0\.1:(\d+)\//.exec(text());
-    expect(match).not.toBeNull();
-    expect(Number(match![1])).toBeGreaterThan(0);
+      // Without the id from the child's output, another process cannot attach.
+      const listed = await fetch(`http://127.0.0.1:${port}/json/list`);
+      expect(listed.status).toBe(404);
+    } finally {
+      child.kill();
+      await closed;
+    }
   });
 
   it.skipIf(process.platform === 'win32')(

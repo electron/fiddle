@@ -17,14 +17,14 @@ interface ParserOptions {
 export interface ParseResult {
   lines: ParsedLine[];
   errors: RuntimeErrorValue[];
-  /** Set when the inspector banner announced its port. */
-  inspectorPort?: number;
+  /** Set when the inspector banner announced its address: `port/id`, the id being what authorises an attach. */
+  inspectorAddress?: string;
 }
 
 const MAX_LINE = 10_000;
 const MAX_CONTINUATION = 200;
 
-const INSPECTOR_LISTENING = /^Debugger listening on ws:\/\/[^:\s]+:(\d+)\//;
+const INSPECTOR_LISTENING = /^Debugger listening on ws:\/\/[^:\s]+:(\d+\/\S+)/;
 const INSPECTOR_NOISE = [
   /^For help, see: https:\/\/nodejs\.org\//,
   /^Debugger attached\.?$/,
@@ -145,7 +145,7 @@ export class OutputParser {
 
     const listening = INSPECTOR_LISTENING.exec(line);
     if (listening) {
-      result.inspectorPort = Number(listening[1]);
+      result.inspectorAddress = listening[1];
       return result;
     }
     if (INSPECTOR_NOISE.some((re) => re.test(line))) return result;
@@ -267,5 +267,5 @@ export class OutputParser {
 function merge(into: ParseResult, from: ParseResult): void {
   into.lines.push(...from.lines);
   into.errors.push(...from.errors);
-  if (from.inspectorPort !== undefined) into.inspectorPort = from.inspectorPort;
+  if (from.inspectorAddress !== undefined) into.inspectorAddress = from.inspectorAddress;
 }

@@ -47,13 +47,13 @@ describe('OutputParser', () => {
     expect(lines.map((line) => line.text)).toEqual([`${'x'.repeat(10_000)}…`, 'next']);
   });
 
-  it('drops the inspector banner and reports its port', () => {
+  it('drops the inspector banner and reports its address', () => {
     const result = parser().push(
       'stderr',
       'Debugger listening on ws://127.0.0.1:43127/7a2c-11\nFor help, see: https://nodejs.org/en/docs/inspector\n',
     );
     expect(result.lines).toEqual([]);
-    expect(result.inspectorPort).toBe(43127);
+    expect(result.inspectorAddress).toBe('43127/7a2c-11');
     // Newer Node points somewhere else.
     expect(
       parser().push(

@@ -92,7 +92,7 @@ interface SpawnElectronOptions {
   /** Parsed user variables; core drops `LD_*` and `DYLD_*`. */
   env: Readonly<Record<string, string>>;
   advancedLogging: boolean;
-  /** The Node inspector on 127.0.0.1:0. */
+  /** The Node inspector on 127.0.0.1:0, reachable only with the id printed on stderr. */
   inspect: boolean;
   /** core's Runner echoes the child's output to `process.stdout` unless this is set. */
   quiet?: boolean;

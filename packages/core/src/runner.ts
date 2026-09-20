@@ -53,7 +53,11 @@ export interface RunnerOptions {
    * environment is passed through unchanged.
    */
   childEnv?: ChildEnvOptions;
-  /** Start Electron with `--inspect=host:port`. */
+  /**
+   * Start Electron with `--inspect=host:port`. The debugger URL, with its
+   * random id, is published only on the child's stderr, not at `/json/list`,
+   * so a process that cannot read the child's output cannot attach.
+   */
   inspect?: InspectOptions;
   /**
    * An executable to spawn in place of Electron, which becomes its first
@@ -99,8 +103,11 @@ export interface BisectResult {
   status: 'bisect_succeeded' | 'test_error' | 'system_error';
 }
 
-function inspectArg({ host = '127.0.0.1', port = 0 }: InspectOptions): string {
-  return `--inspect=${host.includes(':') ? `[${host}]` : host}:${port}`;
+function inspectArgs({ host = '127.0.0.1', port = 0 }: InspectOptions): string[] {
+  return [
+    `--inspect=${host.includes(':') ? `[${host}]` : host}:${port}`,
+    '--inspect-publish-uid=stderr',
+  ];
 }
 
 /**
@@ -240,7 +247,7 @@ export class Runner {
         ? MSIX_EXEC_ALIAS
         : electronExec;
     let args = [...(opts.args || []), fiddle.mainPath];
-    if (opts.inspect) args.unshift(inspectArg(opts.inspect));
+    if (opts.inspect) args.unshift(...inspectArgs(opts.inspect));
     if (opts.headless) ({ exec, args } = Runner.headless(exec, args));
     if (opts.launcher) ({ exec, args } = { exec: opts.launcher, args: [exec, ...args] });
 

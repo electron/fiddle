@@ -584,8 +584,9 @@ export class RunService {
   #consume(windowId: string, result: ParseResult): void {
     const entry = this.#entry(windowId);
     for (const line of result.lines) entry.buffer.push(line);
-    if (result.inspectorPort !== undefined) {
-      this.log(windowId, tm('mainRun')('inspector', { port: result.inspectorPort }));
+    if (result.inspectorAddress !== undefined) {
+      // The catalog line reads `127.0.0.1:{{port}}`; the id after the port is what authorises an attach.
+      this.log(windowId, tm('mainRun')('inspector', { port: result.inspectorAddress }));
     }
     if (result.errors.length > 0) {
       this.setState(windowId, {

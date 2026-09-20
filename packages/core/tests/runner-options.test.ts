@@ -57,11 +57,15 @@ afterEach(() => {
 
 describe('Runner options', () => {
   describe('inspect', () => {
-    it('passes --inspect=127.0.0.1:0 by default', async () => {
+    it('passes --inspect=127.0.0.1:0 by default, published only on stderr', async () => {
       const { runner } = await createRunner();
       fakeChild();
       await runner.spawn('12.0.1', 'fiddle', { ...quiet, inspect: {} });
-      expect(spawnCall().args).toStrictEqual(['--inspect=127.0.0.1:0', mainPath]);
+      expect(spawnCall().args).toStrictEqual([
+        '--inspect=127.0.0.1:0',
+        '--inspect-publish-uid=stderr',
+        mainPath,
+      ]);
     });
 
     it('puts the inspector flag before user args and the fiddle', async () => {
@@ -74,6 +78,7 @@ describe('Runner options', () => {
       });
       expect(spawnCall().args).toStrictEqual([
         '--inspect=[::1]:9229',
+        '--inspect-publish-uid=stderr',
         '--enable-logging',
         mainPath,
       ]);
