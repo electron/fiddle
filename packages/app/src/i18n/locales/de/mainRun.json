@@ -12,7 +12,6 @@
   "installingModules": "Pakete werden mit {{pm}} installiert …",
   "installingModulesNoScripts": "Pakete werden mit {{pm}} installiert. Installationsskripte sind deaktiviert, weil diesem Fiddle nicht vertraut wird.",
   "modulesFailed": "Installation der Pakete fehlgeschlagen: {{message}}",
-  "noSocketFirewall": "Socket Firewall ist nicht verfügbar, daher werden die Pakete ohne sie installiert.",
   "pmMissing": "{{pm}} wurde nicht gefunden. Installiere es, um Pakete zu verwenden: {{url}}",
   "versionUnavailable": "Electron {{version}} kann auf diesem Computer nicht ausgeführt werden.",
   "versionUnknown": "Electron {{version}} ist kein bekanntes Release.",

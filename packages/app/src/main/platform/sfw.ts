@@ -8,6 +8,8 @@ import path from 'node:path';
 
 import { app } from 'electron';
 
+import { ErrorCode, FiddleError } from '../../shared/errors';
+
 /** The file name in packaged resources. */
 export const SFW_ENTRY = 'sfw.mjs';
 /** The entry inside the `sfw` package. */
@@ -53,4 +55,19 @@ export function sfwEntryPath(): string | undefined {
     }),
   };
   return cached.path;
+}
+
+/**
+ * `sfw.mjs` to wrap an install with, or undefined when Socket Firewall is off.
+ * Throws when it's on but the script is missing: nothing installs unprotected.
+ */
+export function sfwPathFor(enabled: boolean, find = sfwEntryPath): string | undefined {
+  if (!enabled) return undefined;
+  const file = find();
+  if (!file)
+    throw new FiddleError(
+      ErrorCode.unavailable,
+      "Socket Firewall isn't available, so packages can't be installed.",
+    );
+  return file;
 }

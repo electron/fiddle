@@ -180,6 +180,7 @@ export async function packageFiddle(
       return;
     }
 
+    const sfwPath = runs.sfwPath();
     runs.setState(windowId, { status: 'running' });
     const project = forgeProject(
       {
@@ -202,7 +203,7 @@ export async function packageFiddle(
       signal: controller.signal,
       onOutput: (text) => runs.logText(windowId, text),
       ignoreScripts: !trust.allowScripts,
-      sfwPath: runs.sfwPath(windowId),
+      sfwPath,
     });
     if (failedCommand) {
       runs.log(windowId, t('commandFailed', failedCommand), 'error');

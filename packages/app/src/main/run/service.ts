@@ -14,7 +14,7 @@ import * as documents from '../documents/service';
 import { tm } from '../i18n';
 import { errorMessage } from '../localize-error';
 import { log } from '../log';
-import { sfwEntryPath } from '../platform/sfw';
+import { sfwPathFor } from '../platform/sfw';
 import type { StateHub } from '../state-hub';
 import type { VersionsService } from '../versions/service';
 import {
@@ -182,14 +182,11 @@ export class RunService {
 
   /**
    * `sfw.mjs`, to wrap an install with when the Socket Firewall setting is on,
-   * for runs, package and make alike. Undefined when the setting is off, and,
-   * with a console warning, when it's on but `sfw.mjs` is missing.
+   * for runs, package and make alike. Undefined when the setting is off, and
+   * throws when it's on but `sfw.mjs` is missing.
    */
-  sfwPath(windowId: string): string | undefined {
-    const enabled = this.#hub.app.settings.socketFirewall;
-    const file = enabled ? sfwEntryPath() : undefined;
-    if (enabled && !file) this.log(windowId, tm('mainRun')('noSocketFirewall'), 'warn');
-    return file;
+  sfwPath(): string | undefined {
+    return sfwPathFor(this.#hub.app.settings.socketFirewall);
   }
 
   /**
@@ -456,8 +453,8 @@ export class RunService {
           ? t('installingModules', { pm })
           : t('installingModulesNoScripts', { pm }),
       );
-      const sfwPath = this.sfwPath(windowId);
       try {
+        const sfwPath = this.sfwPath();
         await installModules({
           dir: appDir,
           tempRoot: dir,

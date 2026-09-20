@@ -13,7 +13,6 @@ export default {
   "installingModules": "Instalando paquetes con {{pm}}…",
   "installingModulesNoScripts": "Instalando paquetes con {{pm}}. Los scripts de instalación están desactivados porque este fiddle no es de confianza.",
   "modulesFailed": "Error al instalar los paquetes: {{message}}",
-  "noSocketFirewall": "Socket Firewall no está disponible, así que los paquetes se instalan sin él.",
   "pmMissing": "No se encontró {{pm}}. Instálalo para usar paquetes: {{url}}",
   "versionUnavailable": "Electron {{version}} no se puede ejecutar en este equipo.",
   "versionUnknown": "Electron {{version}} no es una versión conocida.",

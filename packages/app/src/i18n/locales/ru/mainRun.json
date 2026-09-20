@@ -12,7 +12,6 @@
   "installingModules": "Установка пакетов с помощью {{pm}}…",
   "installingModulesNoScripts": "Установка пакетов с помощью {{pm}}. Скрипты установки отключены, так как этому fiddle не доверяют.",
   "modulesFailed": "Не удалось установить пакеты: {{message}}",
-  "noSocketFirewall": "Socket Firewall недоступен, поэтому пакеты устанавливаются без него.",
   "pmMissing": "{{pm}} не найден. Установите его, чтобы использовать пакеты: {{url}}",
   "versionUnavailable": "Electron {{version}} не может работать на этом компьютере.",
   "versionUnknown": "Electron {{version}} — неизвестный выпуск.",

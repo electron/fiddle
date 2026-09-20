@@ -13,7 +13,6 @@ export default {
   "installingModules": "Installing packages with {{pm}}…",
   "installingModulesNoScripts": "Installing packages with {{pm}}. Install scripts are off because this fiddle isn't trusted.",
   "modulesFailed": "Installing packages failed: {{message}}",
-  "noSocketFirewall": "Socket Firewall isn't available, so packages install without it.",
   "pmMissing": "{{pm}} wasn't found. Install it to use packages: {{url}}",
   "versionUnavailable": "Electron {{version}} can't run on this computer.",
   "versionUnknown": "Electron {{version}} isn't a known release.",

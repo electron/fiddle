@@ -12,7 +12,6 @@
   "installingModules": "正在使用 {{pm}} 安装包…",
   "installingModulesNoScripts": "正在使用 {{pm}} 安装包。由于此 fiddle 不受信任，已关闭安装脚本。",
   "modulesFailed": "安装包失败：{{message}}",
-  "noSocketFirewall": "Socket Firewall 不可用，因此将在没有它的情况下安装包。",
   "pmMissing": "未找到 {{pm}}。请先安装它，才能使用包：{{url}}",
   "versionUnavailable": "Electron {{version}} 无法在此计算机上运行。",
   "versionUnknown": "Electron {{version}} 不是已知的发行版。",

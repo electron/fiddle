@@ -13,7 +13,6 @@ export default {
   "installingModules": "Paketler {{pm}} ile yükleniyor…",
   "installingModulesNoScripts": "Paketler {{pm}} ile yükleniyor. Bu fiddle güvenilir olmadığından yükleme betikleri kapalı.",
   "modulesFailed": "Paketler yüklenemedi: {{message}}",
-  "noSocketFirewall": "Socket Firewall kullanılamıyor; bu nedenle paketler onsuz yükleniyor.",
   "pmMissing": "{{pm}} bulunamadı. Paketleri kullanmak için yükleyin: {{url}}",
   "versionUnavailable": "Electron {{version}} bu bilgisayarda çalışamaz.",
   "versionUnknown": "Electron {{version}} bilinen bir sürüm değil.",

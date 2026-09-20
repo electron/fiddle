@@ -51,10 +51,6 @@
     "message": "Installing packages failed: {{message}}",
     "description": "Console line when the package install fails. {{message}} is the error."
   },
-  "noSocketFirewall": {
-    "message": "Socket Firewall isn't available, so packages install without it.",
-    "description": "Console warning when the Socket Firewall setting is on but its binary is missing."
-  },
   "pmMissing": {
     "message": "{{pm}} wasn't found. Install it to use packages: {{url}}",
     "description": "Console error when the package manager is missing. {{pm}} is npm or yarn, {{url}} explains how to install it."

@@ -6,7 +6,8 @@ import { describe, expect, it, vi } from 'vitest';
 
 vi.mock('electron', () => ({ app: { isPackaged: false } }));
 
-const { resolveSfwEntry, SFW_ENTRY, SFW_PACKAGE_ENTRY } = await import('./sfw');
+const { resolveSfwEntry, sfwPathFor, SFW_ENTRY, SFW_PACKAGE_ENTRY } =
+  await import('./sfw');
 
 describe('resolveSfwEntry', () => {
   const noResolve = () => {
@@ -62,5 +63,22 @@ describe('resolveSfwEntry', () => {
   const installed = resolveSfwEntry({ packaged: false, resourcesPath: '', resolve });
   it.skipIf(installed === undefined)('finds the real sfw.mjs in node_modules', () => {
     expect(fs.readFileSync(installed!, 'utf8')).toMatch(/^#!\/usr\/bin\/env node/);
+  });
+});
+
+describe('sfwPathFor', () => {
+  it('is undefined when Socket Firewall is off, found or not', () => {
+    expect(sfwPathFor(false, () => undefined)).toBeUndefined();
+    expect(sfwPathFor(false, () => '/res/sfw.mjs')).toBeUndefined();
+  });
+
+  it('is the script when Socket Firewall is on', () => {
+    expect(sfwPathFor(true, () => '/res/sfw.mjs')).toBe('/res/sfw.mjs');
+  });
+
+  it('throws instead of installing unprotected when the script is missing', () => {
+    expect(() => sfwPathFor(true, () => undefined)).toThrow(
+      expect.objectContaining({ code: 'unavailable' }),
+    );
   });
 });

@@ -13,7 +13,6 @@ export default {
   "installingModules": "[Îñšţáļļîñĝ þáçķáĝéš ŵîţĥ {{pm}}… one two three]",
   "installingModulesNoScripts": "[Îñšţáļļîñĝ þáçķáĝéš ŵîţĥ {{pm}}. Îñšţáļļ šçŕîþţš áŕé öƒƒ ƀéçáûšé ţĥîš ƒîððļé îšñ'ţ ţŕûšţéð. one two three four five six seven eight]",
   "modulesFailed": "[Îñšţáļļîñĝ þáçķáĝéš ƒáîļéð: {{message}} one two three]",
-  "noSocketFirewall": "[Šöçķéţ Ƒîŕéŵáļļ îšñ'ţ áṽáîļáƀļé, šö þáçķáĝéš îñšţáļļ ŵîţĥöûţ îţ. one two three four five six]",
   "pmMissing": "[{{pm}} ŵášñ'ţ ƒöûñð. Îñšţáļļ îţ ţö ûšé þáçķáĝéš: {{url}} one two three four five]",
   "versionUnavailable": "[Éļéçţŕöñ {{version}} çáñ'ţ ŕûñ öñ ţĥîš çöɱþûţéŕ. one two three four]",
   "versionUnknown": "[Éļéçţŕöñ {{version}} îšñ'ţ á ķñöŵñ ŕéļéášé. one two three]",

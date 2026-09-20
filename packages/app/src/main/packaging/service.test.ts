@@ -104,7 +104,7 @@ describe('packageFiddle', () => {
     await rm(tmp, { recursive: true, force: true });
   });
 
-  function setup(sfwPath?: string) {
+  function setup(sfwPath?: string | Error) {
     const run = { status: 'ready' as string, task: 'run' as string };
     const events: string[] = [];
     const runs = {
@@ -116,7 +116,10 @@ describe('packageFiddle', () => {
       log: (_id: string, text: string) => events.push(text),
       logText: () => undefined,
       toolEnv: async () => process.env,
-      sfwPath: () => sfwPath,
+      sfwPath: () => {
+        if (sfwPath instanceof Error) throw sfwPath;
+        return sfwPath;
+      },
     };
     const hub = {
       getWindow: () => ({ fiddle: { name: 'My fiddle' } }),
@@ -172,5 +175,20 @@ describe('packageFiddle', () => {
       (await readdir(tmp)).filter((name) => name.startsWith('electron-fiddle-')),
     ).toEqual([]);
     expect(run.status).toBe('ready');
+  });
+
+  it('fails before creating the project when Socket Firewall is on but missing', async () => {
+    const { run, events, call } = setup(new Error('no firewall'));
+    vi.mocked(documents.ensureTrusted).mockResolvedValue({
+      approved: true,
+      allowScripts: false,
+      fiddle,
+    } as never);
+
+    await call();
+
+    expect(events).toEqual(['no firewall', 'release']);
+    expect(await readdir(tmp)).toEqual([]);
+    expect(run).toMatchObject({ status: 'ready', result: 'failure' });
   });
 });

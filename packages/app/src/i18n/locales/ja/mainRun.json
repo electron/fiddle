@@ -12,7 +12,6 @@
   "installingModules": "{{pm}} でパッケージをインストールしています…",
   "installingModulesNoScripts": "{{pm}} でパッケージをインストールしています。この Fiddle は信頼されていないため、インストールスクリプトは無効です。",
   "modulesFailed": "パッケージのインストールに失敗しました：{{message}}",
-  "noSocketFirewall": "Socket Firewall を利用できないため、Socket Firewall を使わずにパッケージをインストールします。",
   "pmMissing": "{{pm}} が見つかりません。パッケージを使用するには、{{pm}} をインストールしてください：{{url}}",
   "versionUnavailable": "Electron {{version}} はこのコンピューターでは実行できません。",
   "versionUnknown": "Electron {{version}} は既知のリリースではありません。",

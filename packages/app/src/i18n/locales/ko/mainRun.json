@@ -12,7 +12,6 @@
   "installingModules": "{{pm}}으로 패키지 설치 중…",
   "installingModulesNoScripts": "{{pm}}으로 패키지를 설치하는 중입니다. 이 Fiddle을 신뢰하지 않으므로 설치 스크립트는 실행하지 않습니다.",
   "modulesFailed": "패키지 설치 실패: {{message}}",
-  "noSocketFirewall": "Socket Firewall을 사용할 수 없어 Socket Firewall 없이 패키지를 설치합니다.",
   "pmMissing": "{{pm}}을 찾을 수 없습니다. 패키지를 사용하려면 설치하세요: {{url}}",
   "versionUnavailable": "이 컴퓨터에서 실행할 수 없는 Electron 버전입니다: {{version}}",
   "versionUnknown": "알 수 없는 Electron 버전입니다: {{version}}",

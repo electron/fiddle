@@ -53,7 +53,7 @@ import { tm } from '../i18n';
 import { errorMessage } from '../localize-error';
 import { log } from '../log';
 import { forgeOptionsFor, forgeProject, runForgeTask } from '../packaging/service';
-import { sfwEntryPath } from '../platform/sfw';
+import { sfwPathFor } from '../platform/sfw';
 import {
   bisectVerdict,
   classifyRun,
@@ -389,11 +389,8 @@ async function releaseExec(ctx: Ctx, version: string): Promise<string> {
 }
 
 /** `sfw.mjs`, to wrap installs with, as the app does when Socket Firewall is on (its default). */
-function sfwPath(ctx: Ctx): string | undefined {
-  if (!defaultSettings.socketFirewall) return undefined;
-  const file = sfwEntryPath();
-  if (!file) ctx.reporter.log(tm('mainRun')('noSocketFirewall'), 'warn');
-  return file;
+function sfwPath(): string | undefined {
+  return sfwPathFor(defaultSettings.socketFirewall);
 }
 
 async function chooseElectron(
@@ -476,7 +473,7 @@ async function runOnce(
           ? tr('installingModules', { pm })
           : tr('installingModulesNoScripts', { pm }),
       );
-      const sfw = sfwPath(ctx);
+      const sfw = sfwPath();
       await installModules({
         dir: appDir,
         tempRoot: dir,
@@ -577,7 +574,7 @@ async function packageOrMake(
     ctx.reporter.log(
       task === 'package' ? tr('packaging', { path: dir }) : tr('making', { path: dir }),
     );
-    const sfw = sfwPath(ctx);
+    const sfw = sfwPath();
     const failed = await runForgeTask(dir, input.pm, task, {
       env,
       signal: ctx.signal,
