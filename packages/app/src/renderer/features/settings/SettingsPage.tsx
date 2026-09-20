@@ -7,6 +7,7 @@ import {
 } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import notices from '../../../../../../THIRD_PARTY_NOTICES.md?raw';
 import contributors from '../../../../static/contributors.json';
 import { getReleaseChannel } from '../../../fiddle/versions';
 import { shippedLocales } from '../../../i18n';
@@ -564,6 +565,10 @@ function AboutSection() {
           </p>
         </div>
       )}
+      <details className={styles.notices}>
+        <summary>{t('about.notices')}</summary>
+        <pre tabIndex={0}>{notices}</pre>
+      </details>
       <h3 className={styles.subTitle}>{t('about.contributors')}</h3>
       <ul className={styles.contributors}>
         {contributors.contributors.map((person) => (

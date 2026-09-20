@@ -127,6 +127,7 @@
   "about.electron": "Electron {{version}}",
   "about.contributors": "コントリビューター",
   "about.contributions_other": "{{count}} 件のコントリビューション",
+  "about.notices": "サードパーティの通知",
   "notice.corrupt.title": "{{file}} が破損していました",
   "notice.corrupt.description": "Electron Fiddle はこのファイルを退避し、バックアップまたは既定値を使用しています。",
   "notice.newer.title": "{{file}} は新しいバージョンの Electron Fiddle で作成されています",

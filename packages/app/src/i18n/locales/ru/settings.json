@@ -130,6 +130,7 @@
   "about.contributions_few": "{{count}} вклада",
   "about.contributions_many": "{{count}} вкладов",
   "about.contributions_other": "{{count}} вклада",
+  "about.notices": "Уведомления о стороннем ПО",
   "notice.corrupt.title": "Файл {{file}} повреждён",
   "notice.corrupt.description": "Electron Fiddle отложил его в сторону и использует резервную копию или значения по умолчанию.",
   "notice.newer.title": "Файл {{file}} создан в более новой версии",

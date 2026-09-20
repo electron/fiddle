@@ -129,6 +129,7 @@
   "about.contributions_one": "{{count}} contribution",
   "about.contributions_many": "{{count}} de contributions",
   "about.contributions_other": "{{count}} contributions",
+  "about.notices": "Avis sur les logiciels tiers",
   "notice.corrupt.title": "{{file}} était endommagé",
   "notice.corrupt.description": "Electron Fiddle l’a mis de côté et utilise une sauvegarde ou les valeurs par défaut.",
   "notice.newer.title": "{{file}} provient d’une version plus récente",

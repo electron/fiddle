@@ -128,6 +128,7 @@ export default {
   "about.electron": "Electron {{version}}",
   "about.contributors": "贡献者",
   "about.contributions_other": "{{count}} 次贡献",
+  "about.notices": "第三方声明",
   "notice.corrupt.title": "{{file}} 已损坏",
   "notice.corrupt.description": "Electron Fiddle 已将其另存备查，并改用备份或默认值。",
   "notice.newer.title": "{{file}} 来自较新的版本",

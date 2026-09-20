@@ -128,6 +128,7 @@ export default {
   "about.electron": "Electron {{version}}",
   "about.contributors": "기여자",
   "about.contributions_other": "기여 {{count}}회",
+  "about.notices": "서드파티 고지 사항",
   "notice.corrupt.title": "{{file}} 파일이 손상되었습니다",
   "notice.corrupt.description": "Electron Fiddle에서 해당 파일을 따로 보관하고 백업 또는 기본값을 사용하고 있습니다.",
   "notice.newer.title": "{{file}} 파일이 더 최신 버전에서 생성되었습니다",

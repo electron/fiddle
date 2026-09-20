@@ -129,6 +129,7 @@
   "about.contributions_one": "{{count}} contribución",
   "about.contributions_many": "{{count}} de contribuciones",
   "about.contributions_other": "{{count}} contribuciones",
+  "about.notices": "Avisos de terceros",
   "notice.corrupt.title": "{{file}} estaba dañado",
   "notice.corrupt.description": "Electron Fiddle lo apartó y está usando una copia de seguridad o los valores predeterminados.",
   "notice.newer.title": "{{file}} es de una versión más reciente",

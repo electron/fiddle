@@ -2974,6 +2974,11 @@
     "translation": "8c69cff12cea",
     "reviewed": false
   },
+  "settings:about.notices": {
+    "source": "8fadbc8de273",
+    "translation": "2766571a19b2",
+    "reviewed": false
+  },
   "settings:about.version": {
     "source": "c6b6b4b58937",
     "translation": "fa19843311dd",

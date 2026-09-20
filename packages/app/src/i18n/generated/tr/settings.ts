@@ -129,6 +129,7 @@ export default {
   "about.contributors": "Katkıda bulunanlar",
   "about.contributions_one": "{{count}} katkı",
   "about.contributions_other": "{{count}} katkı",
+  "about.notices": "Üçüncü taraf bildirimleri",
   "notice.corrupt.title": "{{file}} bozuldu",
   "notice.corrupt.description": "Electron Fiddle dosyayı kenara ayırdı ve bir yedeği ya da varsayılanları kullanıyor.",
   "notice.newer.title": "{{file}} daha yeni bir sürüme ait",

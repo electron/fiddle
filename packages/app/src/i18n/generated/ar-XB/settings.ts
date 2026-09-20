@@ -133,6 +133,7 @@ export default {
   "about.contributions_few": "{{count}} \u200f\u202econtributions\u202c\u200f",
   "about.contributions_many": "{{count}} \u200f\u202econtributions\u202c\u200f",
   "about.contributions_other": "{{count}} \u200f\u202econtributions\u202c\u200f",
+  "about.notices": "\u200f\u202eThird-party\u202c\u200f \u200f\u202enotices\u202c\u200f",
   "notice.corrupt.title": "{{file}} \u200f\u202ewas\u202c\u200f \u200f\u202edamaged\u202c\u200f",
   "notice.corrupt.description": "\u200f\u202eElectron\u202c\u200f \u200f\u202eFiddle\u202c\u200f \u200f\u202eset\u202c\u200f \u200f\u202eit\u202c\u200f \u200f\u202easide\u202c\u200f \u200f\u202eand\u202c\u200f \u200f\u202eis\u202c\u200f \u200f\u202eusing\u202c\u200f \u200f\u202ea\u202c\u200f \u200f\u202ebackup\u202c\u200f \u200f\u202eor\u202c\u200f \u200f\u202ethe\u202c\u200f \u200f\u202edefaults.\u202c\u200f",
   "notice.newer.title": "{{file}} \u200f\u202eis\u202c\u200f \u200f\u202efrom\u202c\u200f \u200f\u202ea\u202c\u200f \u200f\u202enewer\u202c\u200f \u200f\u202eversion\u202c\u200f",

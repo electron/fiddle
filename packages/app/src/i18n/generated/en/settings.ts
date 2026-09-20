@@ -129,6 +129,7 @@ export default {
   "about.contributors": "Contributors",
   "about.contributions_one": "{{count}} contribution",
   "about.contributions_other": "{{count}} contributions",
+  "about.notices": "Third-party notices",
   "notice.corrupt.title": "{{file}} was damaged",
   "notice.corrupt.description": "Electron Fiddle set it aside and is using a backup or the defaults.",
   "notice.newer.title": "{{file}} is from a newer version",

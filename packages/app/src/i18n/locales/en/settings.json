@@ -573,6 +573,11 @@
     "message": "{{count}} contributions",
     "description": "A contributor's commit count, plural."
   },
+  "about.notices": {
+    "message": "Third-party notices",
+    "description": "Toggle in the about section that shows the license notices of third-party software and fonts the app includes.",
+    "maxLength": 40
+  },
 
   "notice.corrupt.title": {
     "message": "{{file}} was damaged",

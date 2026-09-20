@@ -129,6 +129,7 @@ export default {
   "about.contributors": "Mitwirkende",
   "about.contributions_one": "{{count}} Beitrag",
   "about.contributions_other": "{{count}} Beiträge",
+  "about.notices": "Hinweise zu Drittanbieter-Software",
   "notice.corrupt.title": "{{file}} war beschädigt",
   "notice.corrupt.description": "Electron Fiddle hat die Datei beiseitegelegt und verwendet eine Sicherung oder die Standardwerte.",
   "notice.newer.title": "{{file}} stammt aus einer neueren Version",

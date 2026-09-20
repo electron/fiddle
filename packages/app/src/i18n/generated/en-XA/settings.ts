@@ -129,6 +129,7 @@ export default {
   "about.contributors": "[Çöñţŕîƀûţöŕš one two]",
   "about.contributions_one": "[{{count}} çöñţŕîƀûţîöñ one two]",
   "about.contributions_other": "[{{count}} çöñţŕîƀûţîöñš one two]",
+  "about.notices": "[Ţĥîŕð-þáŕţý ñöţîçéš one two]",
   "notice.corrupt.title": "[{{file}} ŵáš ðáɱáĝéð one two]",
   "notice.corrupt.description": "[Éļéçţŕöñ Ƒîððļé šéţ îţ ášîðé áñð îš ûšîñĝ á ƀáçķûþ öŕ ţĥé ðéƒáûļţš. one two three four five six]",
   "notice.newer.title": "[{{file}} îš ƒŕöɱ á ñéŵéŕ ṽéŕšîöñ one two three]",

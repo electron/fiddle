@@ -130,6 +130,7 @@ export default {
   "about.contributions_one": "{{count}} contribuição",
   "about.contributions_many": "{{count}} de contribuições",
   "about.contributions_other": "{{count}} contribuições",
+  "about.notices": "Avisos de terceiros",
   "notice.corrupt.title": "{{file}} estava danificado",
   "notice.corrupt.description": "O Electron Fiddle o separou e está usando um backup ou os padrões.",
   "notice.newer.title": "{{file}} é de uma versão mais recente",

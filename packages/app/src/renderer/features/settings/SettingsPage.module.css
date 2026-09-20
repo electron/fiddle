@@ -259,3 +259,25 @@
   letter-spacing: var(--lu-type-caption-tracking);
   color: var(--lu-ink-faint);
 }
+
+.notices summary {
+  width: fit-content;
+  color: var(--lu-accent);
+  font: var(--lu-type-body);
+  cursor: pointer;
+}
+
+.notices pre {
+  max-height: 360px;
+  margin: var(--lu-space-2) 0 0;
+  padding: var(--lu-space-3);
+  overflow: auto;
+  border-radius: var(--lu-radius-code);
+  corner-shape: squircle;
+  background: var(--lu-surface-sunken);
+  color: var(--lu-ink-muted);
+  font: var(--lu-type-code);
+  letter-spacing: var(--lu-type-code-tracking);
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
