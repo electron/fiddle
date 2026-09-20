@@ -2,12 +2,18 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { githubApi } from '../../../ipc/renderer';
+import { FiddleError } from '../../../shared/errors';
 import { Button, Dialog, Radio, RadioGroup, TextField } from '../../../ui';
 import { reportGistError, showGistSaved } from './actions';
 import styles from './gists.module.css';
 import { useGistSettings } from './state';
 
 const MAX_DESCRIPTION = 256;
+
+function gistWasCreated(error: unknown): boolean {
+  const details = FiddleError.from(error).details as { gistId?: unknown } | undefined;
+  return typeof details?.gistId === 'string';
+}
 
 /** Description and visibility for a new gist. Mount it only while it's open. */
 export function PublishDialog({ onClose }: { onClose: () => void }) {
@@ -32,6 +38,12 @@ export function PublishDialog({ onClose }: { onClose: () => void }) {
       onClose();
       showGistSaved(t, 'published', link.id);
     } catch (error) {
+      if (gistWasCreated(error)) {
+        // The window is linked to the new gist: another Publish would create a second one.
+        onClose();
+        reportGistError(t, 'publish', error);
+        return;
+      }
       setBusy(false);
       reportGistError(t, 'publish', error, () => void publish());
     }

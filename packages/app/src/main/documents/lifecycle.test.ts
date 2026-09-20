@@ -348,9 +348,14 @@ describe('markPublished', () => {
     const sent = {
       files: { 'main.js': 'sent' },
       modules: {},
-      fiddleRev: documents.getDoc(W).fiddleRev,
+      loadRev: documents.getDoc(W).loadRev,
     };
-    documents.editFile(W, 'main.js', 'typed during the upload', sent.fiddleRev);
+    documents.editFile(
+      W,
+      'main.js',
+      'typed during the upload',
+      documents.getDoc(W).fiddleRev,
+    );
 
     documents.markPublished(
       W,
@@ -365,13 +370,31 @@ describe('markPublished', () => {
     expect(doc.gistOwner).toBe('octocat');
   });
 
+  it('links the gist when a file was added while publishing, and keeps the fiddle unsaved', async () => {
+    const { documents, model, open } = await setup();
+    await open({ 'main.js': 'sent' });
+    const sent = {
+      files: { 'main.js': 'sent' },
+      modules: {},
+      loadRev: documents.getDoc(W).loadRev,
+    };
+    documents.updateDoc(W, (doc) => model.docAddFile(doc, 'extra.js'));
+
+    documents.markPublished(W, { id: ID }, sent);
+
+    const doc = documents.getDoc(W);
+    expect(doc.fiddle.source).toEqual({ gistId: ID });
+    expect(doc.baseline).toEqual({ 'main.js': 'sent' });
+    expect(model.isDirty(doc)).toBe(true);
+  });
+
   it('does not link the gist to another fiddle that took the window’s place', async () => {
     const { documents, model, open } = await setup();
     await open({ 'main.js': 'sent' });
     const sent = {
       files: { 'main.js': 'sent' },
       modules: {},
-      fiddleRev: documents.getDoc(W).fiddleRev,
+      loadRev: documents.getDoc(W).loadRev,
     };
     documents.updateDoc(W, (doc) =>
       model.createDoc(createFiddle({ files: { 'main.js': 'other' }, version }), 'other', {

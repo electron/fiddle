@@ -21,20 +21,15 @@ export interface PickedFiles {
   skipped: string[];
   /** Supported names outside `KNOWN_FILES`. They're in `files`; ask the user before keeping them. */
   unknown: string[];
-  /** `package.json`'s modules, or `previousModules` when there's no valid `package.json`. */
+  /** `package.json`'s modules; none without a valid `package.json`. */
   modules: Record<string, string>;
-}
-
-export interface PickOptions {
-  /** Kept when there's no valid `package.json`, as for gists. Default: none. */
-  previousModules?: Readonly<Record<string, string>>;
 }
 
 /**
  * Turns a loaded folder, gist, template or docs example (every file it has)
  * into a fiddle's files. Throws `no-supported-files` if nothing is left.
  */
-export function pickFiddleFiles(map: FileMap, options: PickOptions = {}): PickedFiles {
+export function pickFiddleFiles(map: FileMap): PickedFiles {
   const kept: string[] = [];
   const skipped: string[] = [];
   let packageJsonText: string | undefined;
@@ -61,7 +56,7 @@ export function pickFiddleFiles(map: FileMap, options: PickOptions = {}): Picked
     files: ensureMainEntry(Object.fromEntries(kept.map((name) => [name, map[name]!]))),
     skipped,
     unknown: kept.filter((name) => !isKnownFile(name)),
-    modules: { ...options.previousModules },
+    modules: {},
   };
   if (packageJsonText !== undefined) {
     try {

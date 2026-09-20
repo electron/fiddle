@@ -12,10 +12,9 @@ import { getProjectName } from '../../fiddle/names';
 import {
   generatePackageJson,
   parsePackageJson,
-  type ParsedPackageJson,
   type RejectedModule,
 } from '../../fiddle/package-json';
-import { pickFiddleFiles } from '../../fiddle/pick';
+import { type PickedFiles, pickFiddleFiles } from '../../fiddle/pick';
 import type { TemplateLoader } from '../../fiddle/templates';
 import { ErrorCode } from '../../shared/errors';
 import { DEFAULT_TEMPLATE, TEST_TEMPLATE } from './model';
@@ -95,15 +94,27 @@ export async function loadShowMe(
   };
 }
 
-/** A loaded `package.json`'s modules and usable Electron version replace the current ones; without one both are kept. */
+/**
+ * A loaded `package.json` sets the modules and, if usable, the Electron version. Without one the fiddle
+ * has no modules and the version stays; an invalid one is a warning and keeps both.
+ */
 function applyPackageJson(
   context: LoadContext,
-  pkg: ParsedPackageJson | undefined,
+  {
+    packageJson: pkg,
+    packageJsonError,
+  }: Pick<PickedFiles, 'packageJson' | 'packageJsonError'>,
   isUsableVersion: (version: string) => boolean,
 ): { version: VersionRef; modules: Record<string, string>; warnings: LoadWarning[] } {
   const warnings: LoadWarning[] = [];
-  if (!pkg)
-    return { version: context.version, modules: { ...context.modules }, warnings };
+  if (!pkg) {
+    if (packageJsonError) warnings.push({ kind: 'invalid-package-json' });
+    return {
+      version: context.version,
+      modules: packageJsonError ? { ...context.modules } : {},
+      warnings,
+    };
+  }
   let version = context.version;
   if (pkg.electronVersion) {
     if (isUsableVersion(pkg.electronVersion))
@@ -123,10 +134,7 @@ export async function loadFolder(
   context: LoadContext,
 ): Promise<LoadedFiddle> {
   const read = await readFiddleFolder(dir);
-  const applied = applyPackageJson(context, read.packageJson, () => true);
-  const warnings = read.packageJsonError
-    ? [{ kind: 'invalid-package-json' } as const, ...applied.warnings]
-    : applied.warnings;
+  const applied = applyPackageJson(context, read, () => true);
   return {
     fiddle: createFiddle({
       files: read.files,
@@ -135,7 +143,7 @@ export async function loadFolder(
       source: { localPath: dir },
     }),
     name: getProjectName(dir),
-    warnings,
+    warnings: applied.warnings,
   };
 }
 
@@ -152,19 +160,14 @@ export async function fiddleFromGist(
   gist: GistLoadResult,
   options: GistRulesOptions,
 ): Promise<LoadedFiddle> {
-  const picked = pickFiddleFiles(gist.files, {
-    previousModules: options.context.modules,
-  });
+  const picked = pickFiddleFiles(gist.files);
   const declined = new Set<string>();
   for (const name of picked.unknown)
     if (!(await options.confirmAddFile(name))) declined.add(name);
 
-  const warnings: LoadWarning[] = picked.packageJsonError
-    ? [{ kind: 'invalid-package-json' }]
-    : [];
   const applied = applyPackageJson(
     options.context,
-    picked.packageJson,
+    picked,
     options.isUsableVersion ?? (() => true),
   );
 
@@ -179,7 +182,7 @@ export async function fiddleFromGist(
       source: { gistId: gist.id, gistRevision: gist.revision },
     }),
     name: getProjectName(),
-    warnings: [...warnings, ...applied.warnings],
+    warnings: applied.warnings,
     ...(gist.owner ? { gistOwner: gist.owner } : {}),
   };
 }

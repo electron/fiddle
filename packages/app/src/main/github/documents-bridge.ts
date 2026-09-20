@@ -18,7 +18,7 @@ export interface GistFiddle {
   /** The files the fiddle held when it was loaded or last saved. An update deletes only remote files with these names. */
   savedNames: string[];
   /** Tells `markGistSaved` whether the window still holds the fiddle these files came from. */
-  fiddleRev: number;
+  loadRev: number;
 }
 
 interface GistSaved {
@@ -38,7 +38,7 @@ export interface GistDocuments {
   markGistSaved(
     windowId: string,
     gist: GistSaved,
-    sent: Pick<GistFiddle, 'files' | 'modules' | 'fiddleRev'>,
+    sent: Pick<GistFiddle, 'files' | 'modules' | 'loadRev'>,
   ): void;
   /** Deleted: forget the gist and mark the fiddle unsaved. */
   markGistDeleted(windowId: string): void;
@@ -47,7 +47,7 @@ export interface GistDocuments {
 export function createDocumentsBridge(hub: StateHub): GistDocuments {
   return {
     getFiddle: async (windowId) => {
-      const { fiddle, baseline, fiddleRev } = getDoc(windowId);
+      const { fiddle, baseline, loadRev } = getDoc(windowId);
       return {
         files: { ...fiddle.files },
         name: hub.getWindow(windowId)?.fiddle.name ?? '',
@@ -58,7 +58,7 @@ export function createDocumentsBridge(hub: StateHub): GistDocuments {
           gistRevision: fiddle.source.gistRevision,
         },
         savedNames: Object.keys(baseline),
-        fiddleRev,
+        loadRev,
       };
     },
     getTemplate: (windowId) => getTemplate(getDoc(windowId).fiddle.version),

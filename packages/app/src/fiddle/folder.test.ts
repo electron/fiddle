@@ -85,12 +85,11 @@ describe('readFiddleFolder', () => {
     expect(result.unknown).toEqual(['Index.HTML']);
   });
 
-  it('still loads the folder when package.json is invalid, keeping the previous modules', async () => {
+  it('still loads the folder when package.json is invalid', async () => {
     await put({ 'main.js': 'main', 'package.json': '{ nope' });
-    const result = await readFiddleFolder(dir, { previousModules: { old: '1.0.0' } });
+    const result = await readFiddleFolder(dir);
     expect(result.files).toEqual({ 'main.js': 'main' });
     expect(result.packageJson).toBeUndefined();
-    expect(result.modules).toEqual({ old: '1.0.0' });
     expect(result.packageJsonError).toMatchObject({
       code: ErrorCode.invalidArgument,
       details: { reason: 'invalid-json' },

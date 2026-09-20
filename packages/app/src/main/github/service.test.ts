@@ -119,7 +119,7 @@ function fakeDocuments(
       modules: { lodash: '^4.17.21' },
       source: {},
       savedNames: ['main.js', 'index.html', 'removed.css'],
-      fiddleRev: 3,
+      loadRev: 3,
       ...fiddle,
     }),
     getTemplate: async () => ({
@@ -411,7 +411,7 @@ describe('publish', () => {
       { id: ID, owner: 'octocat', url: link.url, revision: SHA2 },
     ]);
     expect(documents.sent).toMatchObject([
-      { files: { 'main.js': 'console.log(1)', 'index.html': '<p>hi</p>' }, fiddleRev: 3 },
+      { files: { 'main.js': 'console.log(1)', 'index.html': '<p>hi</p>' }, loadRev: 3 },
     ]);
   });
 
@@ -451,6 +451,7 @@ describe('publish', () => {
       failing.publish('w', { description: 'Demo', isPublic: false }),
     ).rejects.toMatchObject({
       code: ErrorCode.unavailable,
+      details: { gistId: ID },
     });
     expect(patched).toBe(true);
     expect(documents.saved).toMatchObject([{ id: ID, revision: SHA1 }]);

@@ -30,6 +30,8 @@ export interface Doc {
   baselineModules: Readonly<Record<string, string>>;
   /** Increases whenever a new fiddle, or a new set of names, replaces the mirror. */
   fiddleRev: number;
+  /** Increases whenever a different fiddle replaces the current one; adding, renaming and removing files keep it. */
+  loadRev: number;
   activeFile: string | null;
   /** The project name: the folder name, the example name, or a random name. */
   name: string;
@@ -79,6 +81,7 @@ export function createDoc(
     baseline: options.baseline ?? fiddle.files,
     baselineModules: options.baselineModules ?? fiddle.modules,
     fiddleRev: (options.previous?.fiddleRev ?? 0) + 1,
+    loadRev: (options.previous?.loadRev ?? 0) + 1,
     activeFile:
       options.activeFile && Object.hasOwn(fiddle.files, options.activeFile)
         ? options.activeFile

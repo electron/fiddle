@@ -740,16 +740,17 @@ export function setFiddleModules(
   return updateDoc(windowId, (doc) => docSetModules(doc, modules, normalized));
 }
 
-/** What was sent to the gist, and the `fiddleRev` it came from. */
+/** What was sent to the gist, and the `loadRev` of the fiddle it came from. */
 export interface PublishedSnapshot {
   files: FileMap;
   modules: Readonly<Record<string, string>>;
-  fiddleRev: number;
+  loadRev: number;
 }
 
 /**
  * After publishing: links the gist, unlinks the folder, and makes what was sent the saved state, so an
- * edit made while the request was in flight stays unsaved. Does nothing if another fiddle has taken the window.
+ * edit made while the request was in flight (a file added, renamed or removed too) stays unsaved.
+ * Does nothing if another fiddle has taken the window.
  */
 export function markPublished(
   windowId: string,
@@ -757,7 +758,7 @@ export function markPublished(
   sent: PublishedSnapshot,
 ): number {
   const doc = docs.get(windowId);
-  if (!doc || doc.fiddleRev !== sent.fiddleRev) return revOf(windowId);
+  if (!doc || doc.loadRev !== sent.loadRev) return revOf(windowId);
   return commit(windowId, {
     ...doc,
     baseline: sent.files,

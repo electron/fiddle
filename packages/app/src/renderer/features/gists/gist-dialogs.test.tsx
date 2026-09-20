@@ -185,7 +185,7 @@ describe('PublishDialog', () => {
     expect(mocks.githubApi.Publish).not.toHaveBeenCalled();
   });
 
-  it('stays open and reports the error when GitHub refuses', async () => {
+  it('stays open and reports the error when GitHub refuses before a gist exists', async () => {
     mocks.githubApi.Publish.mockRejectedValue(
       new FiddleError(ErrorCode.forbidden, 'GitHub responded 403'),
     );
@@ -201,5 +201,20 @@ describe('PublishDialog', () => {
     );
     expect(onClose).not.toHaveBeenCalled();
     expect(screen.getByRole('button', { name: 'publishSubmit' })).toBeTruthy();
+  });
+
+  it('closes and reports the error when the gist was created but its files could not be uploaded', async () => {
+    mocks.githubApi.Publish.mockRejectedValue(
+      new FiddleError(ErrorCode.unavailable, 'GitHub responded 500', { gistId: 'abc' }),
+    );
+    const onClose = vi.fn();
+    render(<PublishDialog onClose={onClose} />);
+    submit();
+
+    await waitFor(() => expect(onClose).toHaveBeenCalled());
+    expect(mocks.showToast).toHaveBeenCalledWith(
+      expect.objectContaining({ tone: 'error', title: 'publishFailed' }),
+      expect.anything(),
+    );
   });
 });

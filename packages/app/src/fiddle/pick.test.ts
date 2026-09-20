@@ -56,28 +56,22 @@ describe('pickFiddleFiles', () => {
       dependencies: { lodash: '4.17.21' },
       devDependencies: { electron: '^30.0.0' },
     });
-    const result = pickFiddleFiles(
-      { 'main.js': 'x', 'package.json': packageJson },
-      { previousModules: { old: '1.0.0' } },
-    );
+    const result = pickFiddleFiles({ 'main.js': 'x', 'package.json': packageJson });
     expect(result.modules).toEqual({ lodash: '4.17.21' });
-    expect(result.packageJson).toMatchObject({ electronVersion: '30.0.0' });
+    expect(result.packageJson).toMatchObject({
+      modules: { lodash: '4.17.21' },
+      electronVersion: '30.0.0',
+    });
     expect(result.files).toEqual({ 'main.js': 'x' });
     expect(result.skipped).toEqual([]);
   });
 
-  it('keeps the previous modules without a valid package.json', () => {
-    const previousModules = { old: '1.0.0' };
-    expect(pickFiddleFiles({ 'main.js': 'x' }, { previousModules }).modules).toEqual(
-      previousModules,
-    );
-    const invalid = pickFiddleFiles(
-      { 'main.js': 'x', 'package.json': '{ nope' },
-      { previousModules },
-    );
-    expect(invalid.modules).toEqual(previousModules);
-    expect(invalid.packageJson).toBeUndefined();
-    expect(invalid.packageJsonError).toMatchObject({
+  it('still picks the files when package.json is invalid', () => {
+    const result = pickFiddleFiles({ 'main.js': 'x', 'package.json': '{ nope' });
+    expect(result.files).toEqual({ 'main.js': 'x' });
+    expect(result.packageJson).toBeUndefined();
+    expect(result.modules).toEqual({});
+    expect(result.packageJsonError).toMatchObject({
       code: ErrorCode.invalidArgument,
       details: { reason: 'invalid-json' },
     });

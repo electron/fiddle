@@ -97,13 +97,14 @@ describe('fiddleFromGist', () => {
     expect(loaded.warnings).toEqual([]);
   });
 
-  it('keeps the previous modules and version without a package.json', async () => {
+  it('has no modules without a package.json, and keeps the current version', async () => {
     const loaded = await fiddleFromGist(gist({ 'main.js': '' }), {
       context: current,
       confirmAddFile: async () => true,
     });
-    expect(loaded.fiddle.modules).toEqual(current.modules);
+    expect(loaded.fiddle.modules).toEqual({});
     expect(loaded.fiddle.version).toEqual(current.version);
+    expect(loaded.warnings).toEqual([]);
   });
 
   it('keeps the current version with a warning when package.json asks for an unusable one', async () => {
@@ -161,6 +162,16 @@ describe('folders', () => {
     expect(loaded.fiddle.source).toEqual({ localPath: dir });
     expect(loaded.name).toBe(path.basename(dir));
     expect(loaded.warnings).toEqual([{ kind: 'invalid-package-json' }]);
+    expect(loaded.fiddle.modules).toEqual(current.modules);
+    expect(loaded.fiddle.version).toEqual(current.version);
+  });
+
+  it('has no modules when the folder has no package.json', async () => {
+    await writeFile(path.join(dir, 'main.js'), 'm');
+    const loaded = await loadFolder(dir, current);
+    expect(loaded.fiddle.modules).toEqual({});
+    expect(loaded.fiddle.version).toEqual(current.version);
+    expect(loaded.warnings).toEqual([]);
   });
 
   it('saves the files with a generated package.json and .gitignore', async () => {

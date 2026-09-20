@@ -17,7 +17,7 @@ import {
   isWindowsReservedName,
   PACKAGE_JSON,
 } from './files';
-import { type PickedFiles, pickFiddleFiles, type PickOptions } from './pick';
+import { type PickedFiles, pickFiddleFiles } from './pick';
 
 /** Windows refuses to delete a file another process has open, for a moment. */
 const RM_OPTIONS = { force: true, maxRetries: 5 };
@@ -50,10 +50,7 @@ async function listDir(dir: string) {
  * Reads a fiddle folder's top-level regular files (never symlinks or
  * folders) through `pickFiddleFiles`. Unsupported files aren't read.
  */
-export async function readFiddleFolder(
-  dir: string,
-  options: PickOptions = {},
-): Promise<FolderReadResult> {
+export async function readFiddleFolder(dir: string): Promise<FolderReadResult> {
   const names: string[] = [];
   const skipped: string[] = [];
   for (const entry of await listDir(dir)) {
@@ -67,7 +64,6 @@ export async function readFiddleFolder(
   );
   const picked = pickFiddleFiles(
     Object.fromEntries(names.map((name, i) => [name, contents[i]!])),
-    options,
   );
   return { ...picked, skipped: [...skipped, ...picked.skipped] };
 }

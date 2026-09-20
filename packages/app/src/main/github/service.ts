@@ -167,12 +167,25 @@ export class GitHubService {
       ? await this.#options.documents.getTemplate(windowId)
       : undefined;
     // If the update fails, the gist exists with the template: link it, still unsaved, so Update can finish the job.
-    const saved = await publishGist(client, input, files, template, (created) =>
-      this.#options.documents.markGistSaved(windowId, created, {
-        ...fiddle,
-        files: template ?? {},
-      }),
-    );
+    let createdId = '';
+    let saved: GistWriteResult;
+    try {
+      saved = await publishGist(client, input, files, template, (partial) => {
+        createdId = partial.id;
+        this.#options.documents.markGistSaved(windowId, partial, {
+          ...fiddle,
+          files: template ?? {},
+        });
+      });
+    } catch (error) {
+      // `gistId` tells the renderer the gist exists, so it doesn't offer another Publish.
+      if (!createdId) throw error;
+      const { code, message, details } = FiddleError.from(error);
+      throw new FiddleError(code, message, {
+        ...(details as Record<string, unknown> | undefined),
+        gistId: createdId,
+      });
+    }
     this.#options.documents.markGistSaved(windowId, saved, fiddle);
     return { id: saved.id, url: saved.url };
   }
@@ -246,7 +259,7 @@ function loadedGistId(fiddle: GistFiddle): string {
 
 /** The fiddle's files plus a generated package.json. */
 export function gistFiles(
-  fiddle: Omit<GistFiddle, 'savedNames' | 'fiddleRev'>,
+  fiddle: Omit<GistFiddle, 'savedNames' | 'loadRev'>,
   author?: string,
 ): FileMap {
   const files = ensureMainEntry(fiddle.files);
