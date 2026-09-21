@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { useFormat } from '../../../i18n/renderer';
 import { documentsApi, githubApi } from '../../../ipc/renderer';
 import { FiddleError } from '../../../shared/errors';
 import { Button, Dialog, List, ListRow, showToast, Spinner, Tag } from '../../../ui';
@@ -14,7 +15,8 @@ type State =
 
 /** The gist's revisions, newest first. Choosing one loads it. Mount it only while it's open. */
 export function HistoryDialog({ onClose }: { onClose: () => void }) {
-  const { t, i18n } = useTranslation('gists');
+  const { t } = useTranslation('gists');
+  const { formatDate } = useFormat();
   const [state, setState] = useState<State>({ status: 'loading' });
 
   useEffect(() => {
@@ -41,11 +43,6 @@ export function HistoryDialog({ onClose }: { onClose: () => void }) {
       }),
     );
   };
-
-  const date = new Intl.DateTimeFormat(i18n.language, {
-    dateStyle: 'medium',
-    timeStyle: 'short',
-  });
 
   return (
     <Dialog
@@ -94,7 +91,7 @@ export function HistoryDialog({ onClose }: { onClose: () => void }) {
               }
               meta={t('historyMeta', {
                 sha: revision.sha.slice(0, 7),
-                date: date.format(new Date(revision.date)),
+                date: formatDate(new Date(revision.date)),
               })}
               tags={
                 <>

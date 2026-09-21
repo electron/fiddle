@@ -6,6 +6,7 @@ import {
   createDoc,
   DEFAULT_TEMPLATE,
   docAddFile,
+  docMoveActiveTab,
   docMoveFile,
   docRemoveFile,
   docRenameFile,
@@ -167,6 +168,23 @@ describe('toFiddleState', () => {
       visible: false,
     });
     expect(docMoveFile(doc, 'main.js', 'index.html')).toBe(doc);
+  });
+
+  it('moves the active tab one place along the visible tabs, and no further than the ends', () => {
+    const doc = docSetFileVisible(templateDoc(), 'styles.css', true);
+    const names = (d: typeof doc) => toFiddleState(d).files.map((file) => file.name);
+    const right = docMoveActiveTab(doc, 1);
+    expect(names(right)).toEqual(['index.html', 'main.js', 'styles.css']);
+    expect(names(docMoveActiveTab(right, 1))).toEqual([
+      'index.html',
+      'styles.css',
+      'main.js',
+    ]);
+    expect(names(docMoveActiveTab(right, -1))).toEqual(names(doc));
+    expect(docMoveActiveTab(doc, -1)).toBe(doc);
+    // Hidden files have no tab: `main.js` is already the last tab here.
+    const last = docMoveFile(templateDoc(), 'main.js', 'styles.css');
+    expect(docMoveActiveTab(last, 1)).toBe(last);
   });
 
   it('lists the files that differ from the last save, new files included', () => {

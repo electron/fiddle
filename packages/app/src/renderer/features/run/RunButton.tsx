@@ -49,53 +49,31 @@ export function RunButton({ compact = false }: { compact?: boolean } = {}) {
     running: t('announceRunning', { version }),
   };
 
+  const idle = status === 'ready' || status === 'running';
+  const busy = !idle && status !== 'downloading';
+  const wide = status === 'downloading' || status === 'installing';
+
   return (
     <>
-      {status === 'running' ? (
-        <Button
-          data-tour="run"
-          variant="stop"
-          icon="stop"
-          kbd={kbd}
-          onPress={toggle}
-          className={runClass}
-        >
-          {t('stop')}
-        </Button>
-      ) : status === 'downloading' ? (
-        <Button
-          data-tour="run"
-          variant="primary"
-          progress={percent}
-          onPress={toggle}
-          className={compact ? runClass : styles.wide}
-        >
-          {t('downloadingPercent', { percent })}
-        </Button>
-      ) : status === 'ready' ? (
-        <Button
-          data-tour="run"
-          variant="primary"
-          icon="play"
-          kbd={kbd}
-          onPress={toggle}
-          className={runClass}
-        >
-          {t('run')}
-        </Button>
-      ) : (
-        <Button
-          data-tour="run"
-          variant="primary"
-          loading
-          isDisabled
-          className={
-            compact ? runClass : status === 'installing' ? styles.wide : styles.run
-          }
-        >
-          {t(STATUS_LABEL[status])}
-        </Button>
-      )}
+      <Button
+        data-tour="run"
+        variant={status === 'running' ? 'stop' : 'primary'}
+        icon={status === 'running' ? 'stop' : status === 'ready' ? 'play' : undefined}
+        kbd={idle ? kbd : undefined}
+        progress={status === 'downloading' ? percent : undefined}
+        loading={busy}
+        isDisabled={busy}
+        onPress={busy ? undefined : toggle}
+        className={wide && !compact ? styles.wide : runClass}
+      >
+        {status === 'running'
+          ? t('stop')
+          : status === 'downloading'
+            ? t('downloadingPercent', { percent })
+            : status === 'ready'
+              ? t('run')
+              : t(STATUS_LABEL[status])}
+      </Button>
       <span role="status" className={srOnly}>
         {announcement[status]}
       </span>

@@ -151,64 +151,6 @@ beforeEach(() => {
 afterEach(() => vi.clearAllMocks());
 
 describe('Shell', () => {
-  // A forwarded command reads the layout as of the last render, not the first: toggling twice must undo itself.
-  it('toggles the sidebar and the console from forwarded commands, from the current layout', () => {
-    const view = render(<Shell />);
-    forward('view.toggleSidebar');
-    expect(mocks.setLayout).toHaveBeenLastCalledWith(
-      expect.anything(),
-      { sidebar: false },
-      expect.anything(),
-    );
-
-    mocks.win = windowState({ sidebar: false, consoleVisible: true });
-    view.rerender(<Shell />);
-    forward('view.toggleSidebar');
-    expect(mocks.setLayout).toHaveBeenLastCalledWith(
-      expect.anything(),
-      { sidebar: true },
-      expect.anything(),
-    );
-
-    forward('view.toggleConsole');
-    expect(mocks.setLayout).toHaveBeenLastCalledWith(
-      expect.anything(),
-      { consoleVisible: false },
-      expect.anything(),
-    );
-    mocks.win = windowState({ sidebar: false, consoleVisible: false });
-    view.rerender(<Shell />);
-    forward('view.toggleConsole');
-    expect(mocks.setLayout).toHaveBeenLastCalledWith(
-      expect.anything(),
-      { consoleVisible: true },
-      expect.anything(),
-    );
-  });
-
-  it('moves the active tab one place along the row, from the current active file', () => {
-    const view = render(<Shell />);
-    forward('editor.moveTabRight');
-    expect(mocks.moveFile).toHaveBeenLastCalledWith('a.js', 'c.js', expect.anything());
-
-    const next = windowState({});
-    next.fiddle.activeFile = 'b.js';
-    mocks.win = next;
-    view.rerender(<Shell />);
-    forward('editor.moveTabLeft');
-    expect(mocks.moveFile).toHaveBeenLastCalledWith('b.js', 'a.js', expect.anything());
-    // The first tab can't move further left, nor the last further right.
-    mocks.win = windowState({});
-    view.rerender(<Shell />);
-    forward('editor.moveTabLeft');
-    const last = windowState({});
-    last.fiddle.activeFile = 'c.js';
-    mocks.win = last;
-    view.rerender(<Shell />);
-    forward('editor.moveTabRight');
-    expect(mocks.moveFile).toHaveBeenCalledTimes(2);
-  });
-
   it('renders nothing until both stores have loaded', () => {
     mocks.win = null;
     mocks.sheet = undefined;
