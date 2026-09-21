@@ -2,7 +2,7 @@
  * Binds the EIPC interfaces for one window, each closing over its `windowId` so
  * renderers never send one. The bindings live on the webContents and survive reloads.
  */
-import type { WebContents } from 'electron';
+import { systemPreferences, type WebContents } from 'electron';
 
 import { App, implement, Window } from '../ipc/main';
 import { ErrorCode, FiddleError } from '../shared/errors';
@@ -16,7 +16,6 @@ import { bindRunIpc } from './run/ipc';
 import type { Services } from './services';
 import { bindSettingsIpc } from './settings/ipc';
 import type { WindowInit } from './state-hub';
-import { titleBarDoubleClick } from './title-bar';
 import { getWindow } from './windows';
 
 export interface IpcContext {
@@ -42,7 +41,20 @@ export function bindWindowIpc(
     },
     ReportReady: () => onReady(),
     RunCommand: (id) => registry.run(id, { windowId }),
-    DoubleClickTitleBar: () => titleBarDoubleClick(getWindow(windowId)),
+    // macOS: a double-click on empty title bar space does what System Settings > Desktop & Dock says.
+    DoubleClickTitleBar: () => {
+      const win = getWindow(windowId);
+      if (!win || process.platform !== 'darwin') return;
+      const action = systemPreferences.getUserDefault(
+        'AppleActionOnDoubleClick',
+        'string',
+      );
+      if (action === 'Minimize') win.minimize();
+      else if (action === 'None') return;
+      // "Maximize" (zoom) is also the default when the preference was never set.
+      else if (win.isMaximized()) win.unmaximize();
+      else win.maximize();
+    },
     ReportContextMenu: (context) => reportContextMenu(windowId, context),
     ActivateMenuItem: (id) => activateWindowMenuItem(windowId, id),
   });

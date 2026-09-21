@@ -304,7 +304,6 @@ export async function startDocuments(): Promise<void> {
       defaultId: 0,
       // Escape or closing the dialog keeps the drafts.
       cancelId: 0,
-      noLink: true,
     });
     for (const draft of orphans) {
       if (response === 0)
@@ -485,7 +484,6 @@ export function attachWindow(windowId: string, contents: WebContents): void {
         buttons: [td('save'), td('dontSave'), td('cancel')],
         defaultId: 0,
         cancelId: 2,
-        noLink: true,
       });
       if (response === 2) return;
       if (response === 0 && !(await saveIn(windowId, 'save'))) return;
@@ -555,7 +553,6 @@ async function askToQuit(): Promise<boolean> {
     buttons: [td('quit'), td('cancel')],
     defaultId: 0,
     cancelId: 1,
-    noLink: true,
   });
   return response === 0;
 }
@@ -877,7 +874,6 @@ export async function ensureTrusted(
     buttons: [td('trustContinue'), td('cancel')],
     defaultId: 1,
     cancelId: 1,
-    noLink: true,
     ...(packages.length > 0
       ? {
           checkboxLabel: td('trustAllowScripts', { packages: packages.join(', ') }),
@@ -1004,7 +1000,6 @@ function askAddFile(windowId: string | undefined): (name: string) => Promise<boo
       buttons: [td('add'), td('skip')],
       defaultId: 1,
       cancelId: 1,
-      noLink: true,
     });
     return response === 0;
   };
