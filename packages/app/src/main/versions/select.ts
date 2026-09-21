@@ -94,6 +94,9 @@ export class VersionSelector {
     const current = deps.getVersion(windowId);
     if (!current || !sameVersion(current, ref)) {
       rev = await deps.setVersion(windowId, ref);
+      // Another pick got in while this one's template loaded, or the window closed.
+      const now = deps.getVersion(windowId);
+      if (!now || !sameVersion(now, ref)) return rev;
       deps.typesChanged(windowId);
     }
     if (options.remember) deps.remember(ref);
