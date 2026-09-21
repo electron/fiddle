@@ -8,6 +8,9 @@ const mocks = vi.hoisted(() => ({
   fetch: vi.fn(),
   updateElectronApp: vi.fn(),
   dispatchUpdateAvailable: vi.fn(),
+  showMessageBox: vi.fn(),
+  confirmQuit: vi.fn(),
+  quitAndInstall: vi.fn(),
   windowCreated: undefined as ((event: unknown, win: unknown) => void) | undefined,
 }));
 
@@ -21,12 +24,13 @@ vi.mock('electron', () => ({
       if (event === 'browser-window-created') mocks.windowCreated = listener;
     },
   },
+  autoUpdater: { quitAndInstall: mocks.quitAndInstall },
   BrowserWindow: { getAllWindows: () => [] },
+  dialog: { showMessageBox: mocks.showMessageBox },
   net: { fetch: mocks.fetch },
 }));
 vi.mock('update-electron-app', () => ({
   updateElectronApp: mocks.updateElectronApp,
-  makeUserNotifier: () => undefined,
   UpdateSourceType: { ElectronPublicUpdateService: 1 },
 }));
 vi.mock('../../ipc/main', () => ({
@@ -37,6 +41,7 @@ vi.mock('../../ipc/main', () => ({
     }),
   },
 }));
+vi.mock('../documents/service', () => ({ confirmQuit: mocks.confirmQuit }));
 vi.mock('../i18n', () => ({ tm: () => (key: string) => key }));
 vi.mock('../log', () => ({
   log: { debug: vi.fn(), info: vi.fn(), warn: vi.fn(), error: vi.fn() },
@@ -83,6 +88,7 @@ beforeEach(async () => {
   mocks.fetch.mockReset();
   mocks.updateElectronApp.mockClear();
   mocks.dispatchUpdateAvailable.mockClear();
+  mocks.quitAndInstall.mockClear();
   mocks.windowCreated = undefined;
 });
 
@@ -101,6 +107,26 @@ describe('startUpdates', () => {
     await vi.advanceTimersByTimeAsync(60_000);
     expect(mocks.fetch).not.toHaveBeenCalled();
     expect(mocks.updateElectronApp).not.toHaveBeenCalled();
+  });
+
+  it('installs a downloaded update only after the usual unsaved-changes check', async () => {
+    setPlatform('darwin');
+    startUpdates();
+    await vi.advanceTimersByTimeAsync(10_000);
+    const [{ onNotifyUser }] = mocks.updateElectronApp.mock.lastCall as [
+      { onNotifyUser: () => void },
+    ];
+    mocks.showMessageBox.mockResolvedValue({ response: 0 });
+
+    mocks.confirmQuit.mockResolvedValueOnce(false);
+    onNotifyUser();
+    await vi.advanceTimersByTimeAsync(0);
+    expect(mocks.quitAndInstall).not.toHaveBeenCalled();
+
+    mocks.confirmQuit.mockResolvedValueOnce(true);
+    onNotifyUser();
+    await vi.advanceTimersByTimeAsync(0);
+    expect(mocks.quitAndInstall).toHaveBeenCalledOnce();
   });
 
   describe('Linux', () => {

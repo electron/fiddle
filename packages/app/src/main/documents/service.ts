@@ -555,38 +555,57 @@ export function flushDraftsAndSession(): void {
   saveSessionNow();
 }
 
+/** From here on, closing windows keeps their drafts and their place in the session. */
+function finishQuit(): void {
+  quitting = true;
+  flushDraftsAndSession();
+  sessionFrozen = true;
+}
+
+const hasDirty = (): boolean => [...docs.values()].some(isDirty);
+
+async function askToQuit(): Promise<boolean> {
+  const { response } = await messageBox(lastFocused, {
+    type: 'warning',
+    message: td('quitMessage'),
+    detail: td('quitDetail'),
+    buttons: [td('quit'), td('cancel')],
+    defaultId: 0,
+    cancelId: 1,
+    noLink: true,
+  });
+  return response === 0;
+}
+
 function onBeforeQuit(event: Electron.Event): void {
   if (quitting) return;
-  const dirty = [...docs].filter(([, doc]) => isDirty(doc));
-  const finish = () => {
-    quitting = true;
-    flushDraftsAndSession();
-    sessionFrozen = true;
-  };
-  if (dirty.length === 0) {
-    finish();
+  if (!hasDirty()) {
+    finishQuit();
     return;
   }
   event.preventDefault();
   void (async () => {
-    const { response } = await messageBox(lastFocused, {
-      type: 'warning',
-      message: td('quitMessage'),
-      detail: td('quitDetail'),
-      buttons: [td('quit'), td('cancel')],
-      defaultId: 0,
-      cancelId: 1,
-      noLink: true,
-    });
-    if (response !== 0) {
+    if (!(await askToQuit())) {
       cancelRelaunch();
       return;
     }
-    finish();
+    finishQuit();
     // A later turn: a prompt answered at once would otherwise quit inside this
     // `before-quit` dispatch, which Electron then treats as cancelled.
     setImmediate(() => app.quit());
   })();
+}
+
+/**
+ * The unsaved-changes check of a normal quit, for a quit that closes the
+ * windows before `before-quit` (`autoUpdater.quitAndInstall()`). False if the
+ * user cancelled.
+ */
+export async function confirmQuit(): Promise<boolean> {
+  if (quitting) return true;
+  if (hasDirty() && !(await askToQuit())) return false;
+  finishQuit();
+  return true;
 }
 
 export function closeWindow(windowId: string | undefined): void {

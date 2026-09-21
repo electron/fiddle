@@ -311,6 +311,37 @@ describe('a dropped file URL', () => {
   });
 });
 
+describe('confirmQuit', () => {
+  it('asks about unsaved changes once, then keeps the window in the session and its draft as it closes', async () => {
+    const { documents, model, open } = await setup();
+    await documents.startDocuments();
+    await open({ 'main.js': 'main' });
+    const contents = new EventEmitter();
+    documents.attachWindow(W, contents as never);
+    documents.updateDoc(
+      W,
+      (doc) => model.applyEdit(doc, 'main.js', 'edited', doc.fiddleRev) ?? doc,
+    );
+
+    expect(await documents.confirmQuit()).toBe(false);
+    messageBox.mockResolvedValue({ response: 0, checkboxChecked: false });
+    expect(await documents.confirmQuit()).toBe(true);
+    expect(messageBox).toHaveBeenCalledTimes(2);
+
+    // `autoUpdater.quitAndInstall()` closes the windows before `before-quit`.
+    contents.emit('destroyed');
+    expect(
+      documents
+        .getStateStore()
+        .get()
+        .sessions.map((s) => s.windowId),
+    ).toContain(W);
+    await vi.waitFor(() =>
+      expect(fs.readdirSync(path.join(userData, 'drafts'))).toContain(`${W}.json`),
+    );
+  });
+});
+
 describe('replacing the fiddle while a load is running', () => {
   it('asks again when text was typed in the meantime, and keeps it if the user says no', async () => {
     let finish!: (gist: unknown) => void;

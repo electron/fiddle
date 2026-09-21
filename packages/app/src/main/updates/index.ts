@@ -1,11 +1,8 @@
-import { app, BrowserWindow, net } from 'electron';
-import {
-  makeUserNotifier,
-  updateElectronApp,
-  UpdateSourceType,
-} from 'update-electron-app';
+import { app, autoUpdater, BrowserWindow, dialog, net } from 'electron';
+import { updateElectronApp, UpdateSourceType } from 'update-electron-app';
 
 import { AppPlatform } from '../../ipc/main';
+import { confirmQuit } from '../documents/service';
 import { tm } from '../i18n';
 import { log } from '../log';
 import { openExternalLink } from '../security';
@@ -42,7 +39,6 @@ export function startUpdates(): void {
 }
 
 function startAutoUpdates(): void {
-  const tp = tm('mainPlatform');
   updateElectronApp({
     updateSource: {
       type: UpdateSourceType.ElectronPublicUpdateService,
@@ -57,13 +53,26 @@ function startAutoUpdates(): void {
       error: (message) => log.error(message),
     },
     notifyUser: true,
-    onNotifyUser: makeUserNotifier({
-      title: tp('updateReadyTitle'),
-      detail: tp('updateReadyDetail'),
-      restartButtonText: tp('restart'),
-      laterButtonText: tp('later'),
-    }),
+    onNotifyUser: () => void promptRestart(),
   });
+}
+
+/**
+ * `quitAndInstall()` closes every window before `before-quit`, so the
+ * unsaved-changes check of a normal quit runs first.
+ */
+async function promptRestart(): Promise<void> {
+  const tp = tm('mainPlatform');
+  const { response } = await dialog.showMessageBox({
+    type: 'info',
+    message: tp('updateReadyTitle'),
+    detail: tp('updateReadyDetail'),
+    buttons: [tp('restart'), tp('later')],
+    defaultId: 0,
+    cancelId: 1,
+    noLink: true,
+  });
+  if (response === 0 && (await confirmQuit())) autoUpdater.quitAndInstall();
 }
 
 function announce(win: BrowserWindow): void {
