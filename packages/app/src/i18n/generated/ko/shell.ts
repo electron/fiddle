@@ -61,7 +61,6 @@ export default {
   "lensProcessMain": "메인 프로세스",
   "lensProcessPreload": "프리로드",
   "lensProcessRenderer": "렌더러",
-  "lensErrorTitle": "오류",
   "cursorPosition": "줄 {{line}}, 열 {{column}}",
   "languageJavascript": "JavaScript",
   "languageHtml": "HTML",

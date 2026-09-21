@@ -64,7 +64,6 @@ export default {
   "lensProcessMain": "[ɱáîñ þŕöçéšš one two]",
   "lensProcessPreload": "[þŕéļöáð one]",
   "lensProcessRenderer": "[ŕéñðéŕéŕ one]",
-  "lensErrorTitle": "[Éŕŕöŕ one]",
   "cursorPosition": "[Ļñ {{line}}, Çöļ {{column}} one two]",
   "languageJavascript": "[ĴáṽáŠçŕîþţ one]",
   "languageHtml": "[ĤŢṀĻ one]",

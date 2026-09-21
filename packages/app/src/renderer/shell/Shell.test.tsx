@@ -67,7 +67,6 @@ vi.mock('../editor/models', () => ({
 vi.mock('../editor/runtime-errors', () => ({
   claimReveal: mocks.claimReveal,
   setRuntimeErrors: vi.fn(),
-  toEditorErrors: () => [],
   useRevealRequest: () => mocks.reveal,
 }));
 vi.mock('../editor/types', () => ({ useEditorTypes: () => undefined }));

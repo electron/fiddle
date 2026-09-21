@@ -61,7 +61,6 @@ export default {
   "lensProcessMain": "主處理序",
   "lensProcessPreload": "預先載入指令碼",
   "lensProcessRenderer": "轉譯器",
-  "lensErrorTitle": "錯誤",
   "cursorPosition": "行 {{line}}，欄 {{column}}",
   "languageJavascript": "JavaScript",
   "languageHtml": "HTML",

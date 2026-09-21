@@ -6,7 +6,6 @@ import {
   getRuntimeErrors,
   revealLocation,
   setRuntimeErrors,
-  splitErrorMessage,
   useRevealRequest,
   type RuntimeError,
 } from './runtime-errors';
@@ -15,7 +14,8 @@ const error = (file: string, line = 1): RuntimeError => ({
   file,
   line,
   column: 1,
-  message: 'TypeError: nope',
+  name: 'TypeError',
+  message: 'nope',
   process: 'renderer',
 });
 
@@ -25,24 +25,6 @@ describe('runtime errors', () => {
     expect(getRuntimeErrors()).toHaveLength(1);
     setRuntimeErrors([]);
     expect(getRuntimeErrors()).toEqual([]);
-  });
-
-  it('splits the error type from the message', () => {
-    expect(
-      splitErrorMessage(
-        "Uncaught TypeError: Cannot read properties of undefined (reading 'x')",
-      ),
-    ).toEqual({
-      title: 'TypeError',
-      text: "Cannot read properties of undefined (reading 'x')",
-    });
-    expect(splitErrorMessage('ReferenceError: foo is not defined').title).toBe(
-      'ReferenceError',
-    );
-    expect(splitErrorMessage('something broke')).toEqual({
-      title: null,
-      text: 'something broke',
-    });
   });
 
   it('lets one pane act on each reveal request', () => {

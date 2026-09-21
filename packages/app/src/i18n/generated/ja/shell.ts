@@ -61,7 +61,6 @@ export default {
   "lensProcessMain": "メインプロセス",
   "lensProcessPreload": "プリロード",
   "lensProcessRenderer": "レンダラー",
-  "lensErrorTitle": "エラー",
   "cursorPosition": "行 {{line}}、列 {{column}}",
   "languageJavascript": "JavaScript",
   "languageHtml": "HTML",

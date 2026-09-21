@@ -202,17 +202,15 @@ export function applyRuntimeErrors(errors: readonly RuntimeError[]): void {
       model,
       RUNTIME_OWNER,
       mine.map((error) => {
-        const word = model.getWordAtPosition({
-          lineNumber: error.line,
-          column: error.column,
-        });
+        const column = error.column ?? 1;
+        const word = model.getWordAtPosition({ lineNumber: error.line, column });
         return {
           severity: monaco.MarkerSeverity.Error,
-          message: error.message,
+          message: error.message ? `${error.name}: ${error.message}` : error.name,
           startLineNumber: error.line,
-          startColumn: word?.startColumn ?? error.column,
+          startColumn: word?.startColumn ?? column,
           endLineNumber: error.line,
-          endColumn: word?.endColumn ?? error.column + 1,
+          endColumn: word?.endColumn ?? column + 1,
         };
       }),
     );

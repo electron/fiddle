@@ -67,7 +67,6 @@ export default {
   "lensProcessMain": "le processus principal",
   "lensProcessPreload": "le script de préchargement",
   "lensProcessRenderer": "le processus de rendu",
-  "lensErrorTitle": "Erreur",
   "cursorPosition": "Ln {{line}}, Col {{column}}",
   "languageJavascript": "JavaScript",
   "languageHtml": "HTML",

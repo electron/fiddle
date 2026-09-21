@@ -19,12 +19,7 @@ import {
   toggleSoftWrap,
 } from '../editor/editor-state';
 import { applyRuntimeErrors, markModelsSynced, syncModels } from '../editor/models';
-import {
-  claimReveal,
-  setRuntimeErrors,
-  toEditorErrors,
-  useRevealRequest,
-} from '../editor/runtime-errors';
+import { claimReveal, setRuntimeErrors, useRevealRequest } from '../editor/runtime-errors';
 import { useEditorTypes } from '../editor/types';
 import { log } from '../features/about/log';
 import { useDocumentDrop } from '../features/documents/useDocumentDrop';
@@ -81,9 +76,8 @@ const ShellView = memo(function ShellView({
   // runtime-errors.ts, and the models draw them as markers.
   const runErrors = state.run?.errors;
   useEffect(() => {
-    const errors = toEditorErrors(runErrors ?? []);
-    setRuntimeErrors(errors);
-    applyRuntimeErrors(errors);
+    setRuntimeErrors(runErrors ?? []);
+    applyRuntimeErrors(runErrors ?? []);
   }, [runErrors]);
 
   const dropping = useDocumentDrop();

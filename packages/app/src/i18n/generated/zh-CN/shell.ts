@@ -61,7 +61,6 @@ export default {
   "lensProcessMain": "主进程",
   "lensProcessPreload": "预加载脚本",
   "lensProcessRenderer": "渲染器进程",
-  "lensErrorTitle": "错误",
   "cursorPosition": "行 {{line}}，列 {{column}}",
   "languageJavascript": "JavaScript",
   "languageHtml": "HTML",

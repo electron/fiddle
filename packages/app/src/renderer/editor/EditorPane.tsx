@@ -19,7 +19,6 @@ import { useModel } from './models';
 import { monaco, monoFontFamily } from './monaco';
 import {
   claimReveal,
-  splitErrorMessage,
   useRevealRequest,
   useRuntimeErrors,
   type RuntimeError,
@@ -241,7 +240,6 @@ export function EditorPane({ file, primary = false, onFocus }: EditorPaneProps) 
 
 function Lens({ error }: { error: RuntimeError }) {
   const { t } = useTranslation('shell');
-  const { title, text } = splitErrorMessage(error.message);
   const process = t(
     error.process === 'main'
       ? 'lensProcessMain'
@@ -254,14 +252,14 @@ function Lens({ error }: { error: RuntimeError }) {
       <Icon name="warning" className="lu-lens-icon" />
       <div>
         <div>
-          <span className="lu-lens-title">{title ?? t('lensErrorTitle')}</span> {text}
+          <span className="lu-lens-title">{error.name}</span> {error.message}
         </div>
         <div className="lu-lens-hint">
           {t('lensHint', {
             process,
             file: error.file,
             line: error.line,
-            column: error.column,
+            column: error.column ?? 1,
           })}
         </div>
       </div>

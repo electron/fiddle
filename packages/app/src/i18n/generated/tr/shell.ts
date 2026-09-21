@@ -64,7 +64,6 @@ export default {
   "lensProcessMain": "ana işlem",
   "lensProcessPreload": "preload",
   "lensProcessRenderer": "renderer",
-  "lensErrorTitle": "Hata",
   "cursorPosition": "Sat {{line}}, Süt {{column}}",
   "languageJavascript": "JavaScript",
   "languageHtml": "HTML",

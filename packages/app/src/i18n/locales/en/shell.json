@@ -294,10 +294,6 @@
     "message": "renderer",
     "description": "Inserted into the error hint: 'Thrown in the renderer at …'. Lower case."
   },
-  "lensErrorTitle": {
-    "message": "Error",
-    "description": "Title of a runtime error shown in the editor when the error has no type name such as TypeError."
-  },
   "cursorPosition": {
     "message": "Ln {{line}}, Col {{column}}",
     "description": "Status bar: the cursor's line and column in the current editor.",

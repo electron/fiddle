@@ -1,18 +1,8 @@
 import type { RuntimeErrorValue } from '../../shared/stores';
 import { createStore, useStore } from '../store';
 
-export interface RuntimeError {
-  /** A fiddle file name, such as `renderer.js`. */
-  file: string;
-  /** 1-based. */
-  line: number;
-  /** 1-based. */
-  column: number;
-  /** As thrown, such as "TypeError: Cannot read properties of undefined". */
-  message: string;
-  /** The Electron process it was thrown in (main's report, not the file's sidebar group). */
-  process: RuntimeErrorValue['process'];
-}
+/** Main's report of an uncaught error: 1-based, in the Electron process it was thrown in (not the file's sidebar group). */
+export type RuntimeError = RuntimeErrorValue;
 
 export interface RevealRequest {
   file: string;
@@ -27,21 +17,11 @@ const errors = createStore(EMPTY);
 const reveal = createStore<RevealRequest | null>(null);
 let claimedSeq = 0;
 
-/** Main's runtime errors in the shape the editor uses. */
-export function toEditorErrors(errors: readonly RuntimeErrorValue[]): RuntimeError[] {
-  return errors.map((error) => ({
-    file: error.file,
-    line: error.line,
-    column: error.column ?? 1,
-    message: error.message ? `${error.name}: ${error.message}` : error.name,
-    process: error.process,
-  }));
-}
-
 const sameError = (a: RuntimeError, b: RuntimeError) =>
   a.file === b.file &&
   a.line === b.line &&
   a.column === b.column &&
+  a.name === b.name &&
   a.message === b.message &&
   a.process === b.process;
 
@@ -71,17 +51,4 @@ export function claimReveal(seq: number): boolean {
   if (seq <= claimedSeq) return false;
   claimedSeq = seq;
   return true;
-}
-
-export function splitErrorMessage(message: string): {
-  title: string | null;
-  text: string;
-} {
-  const match =
-    /^(?:Uncaught\s+)?([A-Za-z_$][\w$]*(?:Error|Exception)):\s*([\s\S]*)$/.exec(
-      message.trim(),
-    );
-  return match
-    ? { title: match[1] ?? null, text: match[2] ?? '' }
-    : { title: null, text: message.trim() };
 }

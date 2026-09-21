@@ -76,7 +76,6 @@ export default {
   "lensProcessMain": "\u200f\u202emain\u202c\u200f \u200f\u202eprocess\u202c\u200f",
   "lensProcessPreload": "\u200f\u202epreload\u202c\u200f",
   "lensProcessRenderer": "\u200f\u202erenderer\u202c\u200f",
-  "lensErrorTitle": "\u200f\u202eError\u202c\u200f",
   "cursorPosition": "\u200f\u202eLn\u202c\u200f {{line}}\u200f\u202e,\u202c\u200f \u200f\u202eCol\u202c\u200f {{column}}",
   "languageJavascript": "\u200f\u202eJavaScript\u202c\u200f",
   "languageHtml": "\u200f\u202eHTML\u202c\u200f",

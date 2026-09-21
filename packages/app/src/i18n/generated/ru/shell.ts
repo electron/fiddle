@@ -70,7 +70,6 @@ export default {
   "lensProcessMain": "основном процессе",
   "lensProcessPreload": "preload-скрипте",
   "lensProcessRenderer": "процессе рендерера",
-  "lensErrorTitle": "Ошибка",
   "cursorPosition": "Стр. {{line}}, стлб. {{column}}",
   "languageJavascript": "JavaScript",
   "languageHtml": "HTML",
