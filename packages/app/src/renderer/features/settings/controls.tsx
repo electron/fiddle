@@ -24,16 +24,19 @@ export function matchesQuery(query: string, ...texts: string[]): boolean {
   return needle === '' || texts.some((text) => text.toLocaleLowerCase().includes(needle));
 }
 
-export function useSettingText(key: SettingKey): { title: string; description: string } {
+/** A setting, or the macOS privacy reset: a row with a title and description in the catalog but no value. */
+export type RowKey = SettingKey | 'privacyReset';
+
+export function useSettingText(key: RowKey): { title: string; description: string } {
   const { t } = useTranslation('settings');
   return { title: t(`${key}.title`), description: t(`${key}.description`) };
 }
 
-export const titleId = (setting: SettingKey) => `setting-${setting}`;
-export const descriptionId = (setting: SettingKey) => `setting-${setting}-description`;
+export const titleId = (setting: RowKey) => `setting-${setting}`;
+export const descriptionId = (setting: RowKey) => `setting-${setting}-description`;
 
 export interface RowProps {
-  setting: SettingKey;
+  setting: RowKey;
   /** Text on the left, a compact control on the right. */
   inline?: boolean;
   /** Extra status text under the description. */
@@ -49,7 +52,7 @@ export function Row({ setting, inline, note, children }: RowProps) {
   if (!search.showAll && !matchesQuery(search.query, title, description, setting))
     return null;
 
-  const modified = isModified(settings, setting);
+  const modified = setting !== 'privacyReset' && isModified(settings, setting);
   return (
     <div className={styles.row} data-inline={inline || undefined} data-setting={setting}>
       <div className={styles.rowText}>
