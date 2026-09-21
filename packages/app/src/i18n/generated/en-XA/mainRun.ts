@@ -9,14 +9,10 @@ export default {
   "runFailed": "[Çöûļðñ'ţ ŕûñ ţĥé ƒîððļé: {{message}} one two three]",
   "privacyHelperMissing": "[Ţĥé þŕîṽáçý ĥéļþéŕ ({{path}}) îš ɱîššîñĝ öŕ çáñ'ţ ŕûñ, šö ƒîððļéš çáñ'ţ šţáŕţ: ţĥéý ŵöûļð šĥáŕé Éļéçţŕöñ Ƒîððļé'š çáɱéŕá, ɱîçŕöþĥöñé áñð öţĥéŕ þéŕɱîššîöñš. Ŕéîñšţáļļ Éļéçţŕöñ Ƒîððļé. one two three four five six seven eight nine ten one two three four five]",
   "downloading": "[Ðöŵñļöáðîñĝ Éļéçţŕöñ {{version}}… one two three]",
-  "downloadFailed": "[Çöûļðñ'ţ ðöŵñļöáð Éļéçţŕöñ {{version}}: {{message}} one two three]",
   "installingModules": "[Îñšţáļļîñĝ þáçķáĝéš ŵîţĥ {{pm}}… one two three]",
   "installingModulesNoScripts": "[Îñšţáļļîñĝ þáçķáĝéš ŵîţĥ {{pm}}. Îñšţáļļ šçŕîþţš áŕé öƒƒ ƀéçáûšé ţĥîš ƒîððļé îšñ'ţ ţŕûšţéð. one two three four five six seven eight]",
   "modulesFailed": "[Îñšţáļļîñĝ þáçķáĝéš ƒáîļéð: {{message}} one two three]",
   "pmMissing": "[{{pm}} ŵášñ'ţ ƒöûñð. Îñšţáļļ îţ ţö ûšé þáçķáĝéš: {{url}} one two three four five]",
-  "versionUnavailable": "[Éļéçţŕöñ {{version}} çáñ'ţ ŕûñ öñ ţĥîš çöɱþûţéŕ. one two three four]",
-  "versionUnknown": "[Éļéçţŕöñ {{version}} îšñ'ţ á ķñöŵñ ŕéļéášé. one two three]",
-  "localBuildMissing": "[Ţĥé ļöçáļ ƀûîļð “{{name}}” îš ɱîššîñĝ îţš Éļéçţŕöñ ƀîñáŕý. one two three four five]",
   "esmNeeds28": "[ɱáîñ.ɱĵš ñééðš Éļéçţŕöñ 28 öŕ ļáţéŕ. one two three four]",
   "envInvalid": "[Šķîþþéð éñṽîŕöñɱéñţ éñţŕîéš ţĥáţ çöûļðñ'ţ ƀé ŕéáð: {{entries}} one two three four five]",
   "envBlocked": "[Šķîþþéð éñṽîŕöñɱéñţ ṽáŕîáƀļéš ţĥáţ ƒîððļéš çáñ'ţ šéţ, ƀéçáûšé ţĥéý ļöáð çöðé îñţö Éļéçţŕöñ öŕ çĥáñĝé ĥöŵ îţ šţáŕţš: {{keys}} one two three four five six seven eight nine ten]",
@@ -40,6 +36,5 @@ export default {
   "bisectTooFew": "[Ɓîšéçţ ñééðš áţ ļéášţ ţŵö ṽéŕšîöñš ƀéţŵééñ ţĥé ĝööð áñð ƀáð öñéš. one two three four five six]",
   "bisectGoodNotOlder": "[Ţĥé ĝööð ṽéŕšîöñ ɱûšţ ƀé öļðéŕ ţĥáñ ţĥé ƀáð öñé. one two three four five]",
   "openCompareMessage": "[Öþéñ ţĥé çöɱþáŕîšöñ öñ ĜîţĤûƀ? one two three]",
-  "openCompareButton": "[Öþéñ one]",
-  "cancel": "[Çáñçéļ one]"
+  "openCompareButton": "[Öþéñ one]"
 } as const;

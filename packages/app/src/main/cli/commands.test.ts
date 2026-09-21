@@ -33,7 +33,6 @@ vi.mock('../documents/service', async () => {
     staticDir: () => fileURLToPath(new URL('../../../static', import.meta.url)),
   };
 });
-vi.mock('../run/service', () => ({ PM_INSTALL_URLS: { npm: '', yarn: '' } }));
 vi.mock('../packaging/service', () => ({
   forgeOptionsFor: vi.fn(),
   forgeProject: vi.fn(),

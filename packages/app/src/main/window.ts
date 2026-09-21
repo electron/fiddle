@@ -141,9 +141,14 @@ export async function createAppWindow({
   // Documents' `destroyed` handler must run before the one below, while the window is still registered.
   attachWindow(windowId, contents);
   attachContextMenu(windowId, contents, services);
+  const unwatchVersion = services.versionSelector.watch(windowId);
   contents.once('destroyed', () => {
+    unwatchVersion();
     hub.unregisterWindow(windowId);
     untrackWindow(windowId);
+    // Closing a window aborts its operations (but not downloads).
+    services.bisect.stop(windowId);
+    services.runs.disposeWindow(windowId);
     // Open only while a fiddle window is: it must not keep the app running after the last one closes.
     if (hub.windowIds.length === 0) gallery?.close();
   });

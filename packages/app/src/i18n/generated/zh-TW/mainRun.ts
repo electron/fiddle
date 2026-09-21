@@ -9,14 +9,10 @@ export default {
   "runFailed": "無法執行 fiddle：{{message}}",
   "privacyHelperMissing": "隱私權協助程式（{{path}}）遺失或無法執行，因此無法啟動 fiddle：它們會共用 Electron Fiddle 的相機、麥克風與其他權限。請重新安裝 Electron Fiddle。",
   "downloading": "正在下載 Electron {{version}}…",
-  "downloadFailed": "無法下載 Electron {{version}}：{{message}}",
   "installingModules": "正在使用 {{pm}} 安裝套件…",
   "installingModulesNoScripts": "正在使用 {{pm}} 安裝套件。由於此 fiddle 不受信任，安裝指令碼已停用。",
   "modulesFailed": "安裝套件失敗：{{message}}",
   "pmMissing": "找不到 {{pm}}。請先安裝才能使用套件：{{url}}",
-  "versionUnavailable": "Electron {{version}} 無法在此電腦上執行。",
-  "versionUnknown": "Electron {{version}} 不是已知的版本。",
-  "localBuildMissing": "本機組建「{{name}}」缺少 Electron 二進位檔。",
   "esmNeeds28": "main.mjs 需要 Electron 28 或更新版本。",
   "envInvalid": "已略過無法讀取的環境項目：{{entries}}",
   "envBlocked": "已略過 fiddle 無法設定的環境變數，因為它們會將程式碼載入 Electron 或變更其啟動方式：{{keys}}",
@@ -40,6 +36,5 @@ export default {
   "bisectTooFew": "二分搜尋在正常版本與異常版本之間至少需要兩個版本。",
   "bisectGoodNotOlder": "正常版本必須比異常版本更舊。",
   "openCompareMessage": "要在 GitHub 上開啟比較結果嗎？",
-  "openCompareButton": "開啟",
-  "cancel": "取消"
+  "openCompareButton": "開啟"
 } as const;

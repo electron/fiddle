@@ -9,14 +9,10 @@ export default {
   "runFailed": "Fiddle を実行できませんでした：{{message}}",
   "privacyHelperMissing": "プライバシーヘルパー（{{path}}）が見つからないか実行できないため、Fiddle を起動できません。起動すると Electron Fiddle のカメラやマイクなどの権限が共有されてしまいます。Electron Fiddle を再インストールしてください。",
   "downloading": "Electron {{version}} をダウンロードしています…",
-  "downloadFailed": "Electron {{version}} をダウンロードできませんでした：{{message}}",
   "installingModules": "{{pm}} でパッケージをインストールしています…",
   "installingModulesNoScripts": "{{pm}} でパッケージをインストールしています。この Fiddle は信頼されていないため、インストールスクリプトは無効です。",
   "modulesFailed": "パッケージのインストールに失敗しました：{{message}}",
   "pmMissing": "{{pm}} が見つかりません。パッケージを使用するには、{{pm}} をインストールしてください：{{url}}",
-  "versionUnavailable": "Electron {{version}} はこのコンピューターでは実行できません。",
-  "versionUnknown": "Electron {{version}} は既知のリリースではありません。",
-  "localBuildMissing": "ローカルビルド「{{name}}」に Electron のバイナリがありません。",
   "esmNeeds28": "main.mjs には Electron 28 以降が必要です。",
   "envInvalid": "読み取れなかった環境変数のエントリをスキップしました：{{entries}}",
   "envBlocked": "Electron にコードを読み込んだり起動方法を変えたりするため、Fiddle では設定できない環境変数をスキップしました：{{keys}}",
@@ -40,6 +36,5 @@ export default {
   "bisectTooFew": "二分探索には、正常なバージョンと問題のあるバージョンの間に少なくとも 2 つのバージョンが必要です。",
   "bisectGoodNotOlder": "正常なバージョンには、問題のあるバージョンより古いものを指定してください。",
   "openCompareMessage": "GitHub で比較を開きますか？",
-  "openCompareButton": "開く",
-  "cancel": "キャンセル"
+  "openCompareButton": "開く"
 } as const;

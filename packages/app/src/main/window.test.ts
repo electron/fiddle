@@ -84,7 +84,13 @@ const hub = {
   windowIds: [] as string[],
   unregisterWindow: vi.fn(),
 };
-const services = { hub, platform: 'linux' } as never;
+const unwatchVersion = vi.fn();
+const perWindow = {
+  versionSelector: { watch: () => unwatchVersion },
+  bisect: { stop: vi.fn() },
+  runs: { disposeWindow: vi.fn() },
+};
+const services = { hub, platform: 'linux', ...perWindow } as never;
 const args = {
   services,
   url: 'app://main/index.html',
@@ -172,7 +178,10 @@ describe('createAppWindow', () => {
     const dark = vi
       .spyOn(nativeTheme, 'shouldUseDarkColors', 'get')
       .mockReturnValue(false);
-    await createAppWindow({ ...args, services: { hub, platform: 'win32' } as never });
+    await createAppWindow({
+      ...args,
+      services: { hub, platform: 'win32', ...perWindow } as never,
+    });
     const win = lastWindow();
     dark.mockReturnValue(true);
     nativeTheme.emit('updated');
@@ -257,6 +266,10 @@ describe('createAppWindow', () => {
       win.webContents.emit('destroyed');
       expect(hub.unregisterWindow).toHaveBeenCalledWith('w');
       expect(mocks.untrackWindow).toHaveBeenCalledWith('w');
+      // Closing a window ends its version watch, bisect and run.
+      expect(unwatchVersion).toHaveBeenCalled();
+      expect(perWindow.bisect.stop).toHaveBeenCalledWith('w');
+      expect(perWindow.runs.disposeWindow).toHaveBeenCalledWith('w');
     });
 
     it('is destroyed and forgotten when its IPC cannot be bound', async () => {

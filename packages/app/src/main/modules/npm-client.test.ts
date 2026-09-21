@@ -97,8 +97,8 @@ describe('toVersionList', () => {
 
 describe('NpmClient', () => {
   const endpoints = {
-    searchUrl: 'http://fixture.test/search',
-    registryUrl: 'http://fixture.test/npm',
+    algolia: 'http://fixture.test',
+    npmRegistry: 'http://fixture.test/npm',
   };
 
   it('queries the search endpoint and caches by query', async () => {
@@ -113,7 +113,7 @@ describe('NpmClient', () => {
     expect(fetch).toHaveBeenCalledTimes(1);
 
     const [url, init] = fetch.mock.calls[0]!;
-    expect(url).toBe(endpoints.searchUrl);
+    expect(url).toBe('http://fixture.test/1/indexes/npm-search/query');
     expect(JSON.parse(String(init?.body))).toMatchObject({
       query: 'lodash',
       hitsPerPage: 5,

@@ -7,24 +7,17 @@ import { Installer, InstallState } from '@electron/fiddle-core';
 import { app } from 'electron';
 
 import { bisectCompareUrl } from '../../fiddle/bisect';
-import { parseEnvEntries } from '../../fiddle/env';
 import { findExample, listExamples } from '../../fiddle/examples';
-import {
-  findMainEntry,
-  isSupportedFileName,
-  PACKAGE_JSON,
-  type FileMap,
-} from '../../fiddle/files';
+import { isSupportedFileName, PACKAGE_JSON, type FileMap } from '../../fiddle/files';
 import { writeFiddleFolder } from '../../fiddle/folder';
 import { getGistId } from '../../fiddle/gist-id';
 import { DEFAULT_GIST_DESCRIPTION, GitHubClient } from '../../fiddle/github';
 import {
   checkModuleSpec,
   findPackageManager,
-  installModules,
-  type PackageManager,
+  PM_INSTALL_URLS,
 } from '../../fiddle/modules';
-import { osUserName, toPackageName } from '../../fiddle/package-json';
+import { osUserName } from '../../fiddle/package-json';
 import type { TemplateLoader } from '../../fiddle/templates';
 import { formatOrigin, isUntrustedOrigin } from '../../fiddle/trust';
 import {
@@ -55,22 +48,9 @@ import { log } from '../log';
 import { netFetch } from '../net-fetch';
 import { forgeOptionsFor, forgeProject, runForgeTask } from '../packaging/service';
 import { sfwPathFor } from '../platform/sfw';
-import {
-  bisectVerdict,
-  classifyRun,
-  esmNeedsNewerElectron,
-  type RunOutcome,
-} from '../run/logic';
-import {
-  makeRunDir,
-  spawnElectron,
-  stopChild,
-  toolEnv,
-  waitForExit,
-  writeRunApp,
-  writeRunPackageJson,
-} from '../run/process';
-import { PM_INSTALL_URLS } from '../run/service';
+import { executeRun, type RunJob } from '../run/execute';
+import { bisectVerdict, classifyRun, type RunOutcome } from '../run/logic';
+import { makeRunDir, removeDir, toolEnv } from '../run/process';
 import { getCacheRoot, getEndpoints } from '../test-mode';
 import { cachePaths, type CachePaths } from '../versions/paths';
 import { visibleVersions } from '../versions/releases';
@@ -79,7 +59,6 @@ import {
   fetchReleaseList,
   installedExecPath,
   installRelease,
-  loadReleases,
   mirrorsFor,
   readReleaseList,
 } from '../versions/service';
@@ -107,13 +86,13 @@ interface Ctx {
 
 /** The cached or bundled release list, as the app starts with. */
 function cachedReleases(ctx: Ctx): Promise<ReleaseRow[]> {
-  return (ctx.memo.cached ??= readReleaseList(ctx.cache).then(loadReleases));
+  return (ctx.memo.cached ??= readReleaseList(ctx.cache).then((list) => list.rows));
 }
 
 /** The release list refreshed from the network, or the cached one if that fails. */
 function freshReleases(ctx: Ctx): Promise<ReleaseRow[]> {
   return (ctx.memo.fresh ??= fetchReleaseList(ctx.cache, ctx.releasesUrl, netFetch).then(
-    loadReleases,
+    (list) => list.rows,
     (error: unknown) => {
       log.warn('refreshing the release list failed', error);
       return cachedReleases(ctx);
@@ -126,16 +105,10 @@ async function requireRelease(ctx: Ctx, version: string): Promise<ReleaseRow[]> 
   let rows = await cachedReleases(ctx);
   if (!rows.some((r) => r.version === version)) rows = await freshReleases(ctx);
   const row = rows.find((r) => r.version === version);
-  if (!row)
-    throw new FiddleError(
-      ErrorCode.notFound,
-      tm('mainRun')('versionUnknown', { version }),
-    );
+  const tv = tm('mainVersions');
+  if (!row) throw new FiddleError(ErrorCode.notFound, tv('versionUnknown', { version }));
   if (!row.supported)
-    throw new FiddleError(
-      ErrorCode.unavailable,
-      tm('mainRun')('versionUnavailable', { version }),
-    );
+    throw new FiddleError(ErrorCode.unavailable, tv('versionUnsupported', { version }));
   return rows;
 }
 
@@ -298,11 +271,7 @@ function terminalPrompt(signal: AbortSignal): TrustPrompt {
   };
 }
 
-interface ElectronChoice {
-  exec: string;
-  label: string;
-  release?: string;
-}
+type ElectronChoice = RunJob['electron'];
 
 /** The build folder of an executable: `<folder>/Electron.app/Contents/MacOS/Electron` on macOS, its folder elsewhere. */
 function buildFolderOf(exec: string): string {
@@ -343,21 +312,10 @@ async function releaseExec(ctx: Ctx, version: string): Promise<string> {
   if (installed) return installed;
   ctx.reporter.log(tm('mainRun')('downloading', { version }));
   const mirror = mirrorsFor(defaultSettings, app.getSystemLocale());
-  try {
-    return await installRelease(ctx.installer, ctx.cache, version, {
-      mirror,
-      signal: ctx.signal,
-    });
-  } catch (error) {
-    if (ctx.signal.aborted) throw error;
-    throw new FiddleError(
-      ErrorCode.network,
-      tm('mainRun')('downloadFailed', {
-        version,
-        message: FiddleError.from(error).message,
-      }),
-    );
-  }
+  return installRelease(ctx.installer, ctx.cache, version, {
+    mirror,
+    signal: ctx.signal,
+  });
 }
 
 async function chooseElectron(
@@ -374,121 +332,45 @@ async function chooseElectron(
   return { exec: await releaseExec(ctx, version), label: version, release: version };
 }
 
-interface RunSpec {
-  loaded: LoadedFiddle;
-  modules: Record<string, string>;
-  options: {
-    flag: readonly string[];
-    env: readonly string[];
-    pm: PackageManager;
-    logging: boolean;
-  };
-}
-
-/** One run through the app's run pieces (see RunService), with output streamed to the reporter. */
+/** One run through the app's run executor, with output streamed to the reporter. */
 async function runOnce(
   ctx: Ctx,
-  spec: RunSpec,
+  loaded: LoadedFiddle,
+  modules: Record<string, string>,
+  options: Pick<CommandInput<'run'>, 'flag' | 'env' | 'pm' | 'logging'>,
   electron: ElectronChoice,
 ): Promise<RunOutcome> {
-  const tr = tm('mainRun');
-  const { loaded, modules, options } = spec;
-  const files = loaded.fiddle.files;
-  const mainEntry = findMainEntry(Object.keys(files)) ?? 'main.js';
-  if (esmNeedsNewerElectron(mainEntry, electron.release))
-    throw new FiddleError(ErrorCode.invalidArgument, tr('esmNeeds28'));
-  const pm = options.pm;
-  const hasModules = Object.keys(modules).length > 0;
-  const env = hasModules ? await toolEnv() : undefined;
-  if (hasModules && !(await findPackageManager(pm, { env }))) {
-    throw new FiddleError(
-      ErrorCode.unavailable,
-      tr('pmMissing', { pm, url: PM_INSTALL_URLS[pm] }),
-    );
-  }
-  const userEnv = parseEnvEntries(options.env);
-  if (userEnv.invalid.length > 0)
-    ctx.reporter.log(tr('envInvalid', { entries: userEnv.invalid.join(', ') }), 'warn');
-  if (userEnv.blocked.length > 0)
-    ctx.reporter.log(tr('envBlocked', { keys: userEnv.blocked.join(', ') }), 'warn');
-  const allowScripts = !isUntrustedOrigin(loaded.fiddle.origin);
-
-  ctx.signal.throwIfAborted();
+  const { reporter, signal } = ctx;
+  signal.throwIfAborted();
   const dir = await makeRunDir();
   try {
-    const packageJson = {
-      name: toPackageName(loaded.name),
-      main: mainEntry,
-      author: osUserName(),
-      modules,
-    };
-    // devDependencies.electron goes in after the module install, or npm and
-    // yarn would install Electron as well.
-    const withElectron = electron.release
-      ? { ...packageJson, electronVersion: electron.release }
-      : packageJson;
-    const appDir = await writeRunApp(dir, files, hasModules ? packageJson : withElectron);
-    if (hasModules) {
-      ctx.reporter.log(
-        allowScripts
-          ? tr('installingModules', { pm })
-          : tr('installingModulesNoScripts', { pm }),
-      );
-      // Wrapped in Socket Firewall when the app's default setting has it on.
-      const sfw = await sfwPathFor(defaultSettings.socketFirewall);
-      await installModules({
-        dir: appDir,
-        tempRoot: dir,
-        packageManager: pm,
+    return await executeRun(
+      {
+        dir,
+        files: loaded.fiddle.files,
         modules,
-        ignoreScripts: !allowScripts,
-        ...(sfw ? { sfwPath: sfw } : {}),
-        ...(env ? { env } : {}),
-        signal: ctx.signal,
-        onOutput: (text) => ctx.reporter.output('stderr', text),
-      });
-      await writeRunPackageJson(appDir, withElectron);
-    }
-    const child = spawnElectron({
-      exec: electron.exec,
-      appDir,
-      runDir: dir,
-      flags: options.flag,
-      keepUserDataDirs: defaultSettings.keepUserDataDirs,
-      // Always log: renderer console messages reach stderr, for runtime errors.
-      env: { ELECTRON_ENABLE_LOGGING: 'true', ...userEnv.env },
-      advancedLogging: options.logging,
-      // Output goes straight to the terminal, so there's no console to show the inspector port in.
-      inspect: false,
-    });
-    const stop = () => stopChild(child);
-    ctx.signal.addEventListener('abort', stop);
-    // An abort that came while Electron was starting has already fired.
-    if (ctx.signal.aborted) stop();
-    ctx.reporter.log(
-      tr('started', { version: electron.label, name: toPackageName(loaded.name) }),
+        name: loaded.name,
+        electron,
+        allowScripts: !isUntrustedOrigin(loaded.fiddle.origin),
+        // The app's defaults, Socket Firewall included, with the command's options.
+        settings: {
+          ...defaultSettings,
+          packageManager: options.pm,
+          environmentVariables: [...options.env],
+          electronFlags: [...options.flag],
+          electronLogging: options.logging,
+        },
+        signal,
+      },
+      {
+        log: (text, level) => reporter.log(text, level),
+        tool: (text) => reporter.output('stderr', text),
+        output: (stream, chunk) => reporter.output(stream, chunk),
+        flush: () => reporter.flush(),
+      },
     );
-    child.stdout?.setEncoding('utf8');
-    child.stderr?.setEncoding('utf8');
-    child.stdout?.on('data', (chunk: string) => ctx.reporter.output('stdout', chunk));
-    child.stderr?.on('data', (chunk: string) => ctx.reporter.output('stderr', chunk));
-    const outcome = await waitForExit(child, (error) =>
-      ctx.reporter.log(tr('spawnFailed', { message: error.message }), 'error'),
-    );
-    ctx.signal.removeEventListener('abort', stop);
-    ctx.reporter.flush();
-    if (!outcome.spawnFailed) {
-      ctx.reporter.log(
-        outcome.signal
-          ? tr('exitedSignal', { signal: outcome.signal })
-          : tr('exitedCode', { code: outcome.code ?? 0 }),
-      );
-    }
-    return outcome;
   } finally {
-    await fsp
-      .rm(dir, { recursive: true, force: true })
-      .catch((error: unknown) => log.warn('cleanup failed', dir, error));
+    await removeDir(dir);
   }
 }
 
@@ -541,9 +423,7 @@ async function packageOrMake(
       throw new FiddleError(CliErrorCode.taskFailed, tr('commandFailed', failed), failed);
   } catch (error) {
     // The project of a failed or cancelled build is no use: don't leave its `node_modules` in the temp folder.
-    await fsp
-      .rm(dir, { recursive: true, force: true })
-      .catch((rmError: unknown) => log.warn('cleanup failed', dir, rmError));
+    await removeDir(dir);
     throw error;
   }
   const out = path.join(dir, 'out');
@@ -589,7 +469,7 @@ const handlers: Handlers = {
     const modules = withModules(loaded, input.module);
     await ensureTrusted(loaded.fiddle, modules, input.trust, terminalPrompt(ctx.signal));
     const electron = await chooseElectron(ctx, input, loaded);
-    const outcome = await runOnce(ctx, { loaded, modules, options: input }, electron);
+    const outcome = await runOnce(ctx, loaded, modules, input, electron);
     return {
       data: {
         name: loaded.name,
@@ -639,7 +519,7 @@ const handlers: Handlers = {
           label: version,
           release: version,
         };
-        outcome = await runOnce(ctx, { loaded, modules, options: input }, electron);
+        outcome = await runOnce(ctx, loaded, modules, input, electron);
       } catch (error) {
         if (!ctx.signal.aborted) ctx.reporter.log(errorMessage(error), 'error');
         return undefined;

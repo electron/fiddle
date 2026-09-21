@@ -1,44 +1,19 @@
 import { clipboard } from 'electron';
 
 import { implement, Versions } from '../../ipc/main';
-import { ErrorCode, FiddleError } from '../../shared/errors';
-import type { VersionRefValue } from '../../shared/stores';
 import * as documents from '../documents/service';
-import { tm } from '../i18n';
 import type { IpcContext } from '../ipc';
-import { log } from '../log';
-import { sameVersion } from './selection';
 
 export function bindVersionsIpc(ctx: IpcContext): void {
   const { contents, windowId, services } = ctx;
-  const { hub, versions, types, versionSelector: selector } = services;
-  const known = (version: string) => {
-    if (!versions.release(version))
-      throw new FiddleError(ErrorCode.notFound, `Unknown version ${version}`);
-  };
+  const { versions, types, versionSelector: selector } = services;
 
   implement(Versions, contents, {
     GetReleases: () => versions.releases(),
     RefreshReleases: () => versions.refresh(),
-    SetVersion: async (ref) =>
-      (await selector.select(windowId, ref, { remember: true })) ??
-      hub.getWindow(windowId)?.rev ??
-      0,
+    SetVersion: (ref) => selector.select(windowId, ref, { remember: true }),
     Download: async (version) => {
-      known(version);
-      try {
-        await versions.install(version);
-      } catch (error) {
-        // The installer's errors aren't FiddleErrors, so say what failed rather than "internal".
-        log.warn(`downloading ${version} failed`, error);
-        throw new FiddleError(
-          ErrorCode.network,
-          tm('mainVersions')('downloadFailed', {
-            version,
-            message: FiddleError.from(error).message,
-          }),
-        );
-      }
+      await versions.install(version);
     },
     Remove: (version) => versions.remove(version),
     DownloadAll: (list) => {
@@ -46,13 +21,7 @@ export function bindVersionsIpc(ctx: IpcContext): void {
     },
     StopDownloadAll: () => versions.stopDownloadAll(),
     DeleteAll: () => versions.deleteAll(),
-    AddLocalBuild: async () => {
-      // A folder that's already registered asks "Switch to …?" first.
-      const id = await versions.addLocalBuild(windowId);
-      if (!id) return false;
-      await selector.select(windowId, { kind: 'local', id }, { remember: true });
-      return true;
-    },
+    AddLocalBuild: () => selector.addLocalBuild(windowId),
     RemoveLocalBuild: (id) => versions.removeLocalBuild(id),
     GetTypes: async () => {
       const ref = documents.getFiddle(windowId).version;
@@ -64,24 +33,6 @@ export function bindVersionsIpc(ctx: IpcContext): void {
     CopyVersion: () => {
       clipboard.writeText(versions.label(documents.getFiddle(windowId).version));
     },
-    DismissNotice: (id) => {
-      if (hub.getWindow(windowId)?.versionNotice?.id === id)
-        hub.updateWindow(windowId, { versionNotice: null });
-    },
-  });
-
-  // A restore, a folder load or a draft can bring a version this window can't use.
-  let seen: VersionRefValue | undefined;
-  const stop = hub.onChange((change) => {
-    if (change.store !== 'window' || change.windowId !== windowId) return;
-    const ref = hub.getWindow(windowId)?.fiddle.versionRef;
-    if (!ref || (seen && sameVersion(seen, ref))) return;
-    seen = ref;
-    selector
-      .validate(windowId)
-      .catch((error: unknown) => log.warn('checking the window version failed', error));
-  });
-  contents.once('destroyed', () => {
-    stop();
+    DismissNotice: (id) => selector.dismissNotice(windowId, id),
   });
 }

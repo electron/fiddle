@@ -42,8 +42,10 @@ vi.mock('./process', async (importOriginal) => ({
   ...(await importOriginal<typeof import('./process')>()),
   spawnElectron: (...args: unknown[]) => spawnElectron(...args),
   sweepStaleDirs: async () => undefined,
-  // The fake child has no pid for a process-tree kill. That is tested in kill-tree.test.ts.
-  stopChild: (child: { kill(signal: string): boolean }) => child.kill('SIGTERM'),
+}));
+// The fake child has no pid for a process-tree kill. That is tested in kill-tree.test.ts.
+vi.mock('../../fiddle/kill-tree', () => ({
+  killTree: (child: { kill(signal: string): boolean }) => child.kill('SIGTERM'),
 }));
 
 const { app } = await import('electron');
@@ -548,7 +550,7 @@ describe('RunService.run with a local build or a missing version', () => {
       release: (version) => ({ version, supported: false }),
     });
     expect(await runs.run('w')).toEqual({ invalid: true });
-    expect(texts().at(-1)).toBe('versionUnavailable:{"version":"30.0.0"}');
+    expect(texts().at(-1)).toBe('versionUnsupported:{"version":"30.0.0"}');
   });
 
   it('downloads a missing version first, showing the download and unzip as they happen', async () => {
@@ -586,11 +588,9 @@ describe('RunService.run with a local build or a missing version', () => {
 
   it('refuses the run when the download fails, with the reason', async () => {
     const { runs, texts, versions, state } = setup({ execPath: () => undefined });
-    versions.install.mockRejectedValue(new Error('HTTP 404'));
+    versions.install.mockRejectedValue(new Error("Couldn't download 30.0.0 (HTTP 404)"));
     expect(await runs.run('w')).toEqual({ invalid: true });
-    expect(texts().at(-1)).toBe(
-      'downloadFailed:{"version":"30.0.0","message":"HTTP 404"}',
-    );
+    expect(texts().at(-1)).toBe("Couldn't download 30.0.0 (HTTP 404)");
     expect(state()).toMatchObject({ status: 'ready', result: 'invalid' });
     expect(versions.installer.listenerCount('state-changed')).toBe(0);
   });

@@ -10,7 +10,8 @@ vi.mock('electron', () => ({ app: { isPackaged: false } }));
 const launcher = vi.fn<() => string | undefined>(() => undefined);
 vi.mock('../platform/disclaim', () => ({ disclaimLauncher: launcher }));
 
-const { makeRunDir, spawnElectron, stopChild, sweepStaleDirs, waitForExit, writeRunApp } =
+const { killTree } = await import('../../fiddle/kill-tree');
+const { makeRunDir, spawnElectron, sweepStaleDirs, waitForExit, writeRunApp } =
   await import('./process');
 
 const node = (script: string) =>
@@ -49,7 +50,7 @@ describe('waitForExit', () => {
   });
 });
 
-describe('stopChild', () => {
+describe('killTree on a run', () => {
   it.skipIf(process.platform === 'win32')(
     'ends a child that handles SIGTERM with SIGTERM alone',
     async () => {
@@ -57,7 +58,7 @@ describe('stopChild', () => {
         'process.on("SIGTERM", () => process.exit(7)); setInterval(() => {}, 1000); console.log("up")',
       );
       await ready(child);
-      stopChild(child);
+      killTree(child);
       expect(await waitForExit(child)).toMatchObject({ code: 7 });
     },
   );
@@ -71,7 +72,7 @@ describe('stopChild', () => {
       await ready(child);
       vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] });
       try {
-        stopChild(child);
+        killTree(child);
         await vi.advanceTimersByTimeAsync(999);
         expect(child.signalCode).toBeNull();
         await vi.advanceTimersByTimeAsync(1);
