@@ -59,7 +59,7 @@ The full guide, with a template spec, is in `packages/app/e2e/README.md`.
   - Native dialogs through Electron's `dialog` module, so the driver can script them.
   - `shell`, protocol, recent-document, notification and `Menu.popup` calls through Electron as usual. Test mode records and stubs them.
   - `win.show()` and `win.focus()` for windows, never `app.focus()` or `webContents.focus()`, which would pull the app in front of whoever runs the tests on macOS.
-- **Release builds.** Test-only code is guarded by `TEST_BUILD` and compiled out. `yarn workspace electron-fiddle driver:release-check` verifies that.
+- **Release builds.** Test-only code is guarded by `TEST_BUILD` and compiled out. `node tools/release-check-asar.mjs` verifies that after `yarn package`, and after `yarn test:e2e` also that the test build still has every marker.
 
 ## Dev differences
 
