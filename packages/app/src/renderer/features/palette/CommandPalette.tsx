@@ -17,6 +17,7 @@ import { cx, Icon, Kbd, type IconName } from '../../../ui';
 import menu from '../../../ui/components/Menu.module.css';
 import { useAppState, useWindowState } from '../../state';
 import { toastError } from '../../toast-error';
+import { useCommand } from '../../hooks';
 import { OnboardingTour } from '../onboarding/OnboardingTour';
 import { useReleases } from '../run/use-run';
 import styles from './CommandPalette.module.css';
@@ -151,16 +152,12 @@ export function CommandPalette() {
   const listId = useId();
   const list = useRef<HTMLUListElement>(null);
 
-  useEffect(
-    () =>
-      windowApi.onCommand((id) => {
-        if (id !== 'app.commandPalette') return;
-        setQuery('');
-        setActive(0);
-        setOpen((current) => !current);
-      }),
-    [],
-  );
+  useCommand((id) => {
+    if (id !== 'app.commandPalette') return;
+    setQuery('');
+    setActive(0);
+    setOpen((current) => !current);
+  });
 
   const releases = useReleases();
   const entries = useEntries(app, win, releases, open);

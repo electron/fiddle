@@ -1,7 +1,6 @@
-import { memo, useEffect, useLayoutEffect, useRef } from 'react';
+import { memo, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { windowApi } from '../../ipc/renderer';
 import { DEFAULT_LAYOUT, type Platform, type WindowState } from '../../shared/stores';
 import { SplitHandle } from '../../ui';
 import {
@@ -23,6 +22,7 @@ import { TitleBar } from './TitleBar';
 import { ErrorBoundary } from './ErrorBoundary';
 import { useDraft } from './use-draft';
 import { useAppState, useWindowState } from '../state';
+import { useCommand } from '../hooks';
 
 const SIDEBAR_MIN = 200;
 const SIDEBAR_MAX = 320;
@@ -80,19 +80,13 @@ const ShellView = memo(function ShellView({
     actions.focusPane(reveal.file);
   });
 
-  // Window.Command handlers that act on view state and Monaco. Kept in a ref, not `useEffectEvent`: React never
-  // updates the effect events of a memo component, so it would keep the first render's state.
-  const onCommand = (id: string) => {
+  // The commands that act on view state and Monaco.
+  useCommand((id) => {
     if (id === 'view.toggleSplit') actions.toggleSplit();
     else if (id === 'editor.toggleSoftWrap') toggleSoftWrap();
     else if (id === 'editor.toggleMinimap') toggleMinimap();
     else if (id === 'editor.format') void formatFocusedEditor();
-  };
-  const latestOnCommand = useRef(onCommand);
-  useLayoutEffect(() => {
-    latestOnCommand.current = onCommand;
   });
-  useEffect(() => windowApi.onCommand((id) => latestOnCommand.current(id)), []);
   useEditorTypes();
 
   useEffect(() => {

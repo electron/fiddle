@@ -1,7 +1,7 @@
-import { useEffect, useEffectEvent } from 'react';
+import { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { githubApi, windowApi } from '../../../ipc/renderer';
+import { githubApi } from '../../../ipc/renderer';
 import {
   Menu,
   MenuItem,
@@ -12,7 +12,7 @@ import {
   showToast,
   ToolbarButton,
 } from '../../../ui';
-import { useShortcut } from '../../use-shortcut';
+import { useCommand, useShortcut } from '../../hooks';
 import { copyShareLink, deleteGist, setGistVisibility, updateGist } from './actions';
 import { GistDialogs } from './GistDialogs';
 import {
@@ -41,12 +41,11 @@ export function PublishButton({ compact = false }: { compact?: boolean } = {}) {
     !!gist?.owner && !!login && gist.owner.toLowerCase() !== login.toLowerCase();
   const openKbd = useShortcut('gist.open');
 
-  const onCommand = useEffectEvent((id: string) => {
+  useCommand((id) => {
     if (id === 'gist.publish') requestPublish(login);
     else if (Object.hasOwn(DIALOGS, id))
       showGistDialog({ kind: DIALOGS[id as keyof typeof DIALOGS] });
   });
-  useEffect(() => windowApi.onCommand((id) => onCommand(id)), []);
 
   useEffect(() => {
     githubApi.TakeNotice().then(
@@ -62,34 +61,6 @@ export function PublishButton({ compact = false }: { compact?: boolean } = {}) {
       () => undefined,
     );
   }, [t]);
-
-  const onAction = (key: string) => {
-    if (!gist) return;
-    switch (key) {
-      case 'update':
-        withSignIn(login, () => void updateGist(t));
-        break;
-      case 'publish':
-        requestPublish(login);
-        break;
-      case 'copy':
-        copyShareLink(t, gist.id);
-        break;
-      case 'history':
-        showGistDialog({ kind: 'history' });
-        break;
-      case 'open':
-        showGistDialog({ kind: 'open' });
-        break;
-      case 'secret':
-      case 'public':
-        setGistVisibility(key === 'public');
-        break;
-      case 'delete':
-        withSignIn(login, () => void deleteGist(t));
-        break;
-    }
-  };
 
   const button = (
     <ToolbarButton
@@ -109,23 +80,37 @@ export function PublishButton({ compact = false }: { compact?: boolean } = {}) {
         <MenuTrigger>
           {button}
           <MenuPopover placement="bottom end" offset={10}>
-            <Menu aria-label={t('menuLabel')} onAction={(key) => onAction(String(key))}>
-              <MenuItem id="update" icon="upload" isDisabled={foreign}>
+            <Menu aria-label={t('menuLabel')}>
+              <MenuItem
+                id="update"
+                icon="upload"
+                isDisabled={foreign}
+                onAction={() => withSignIn(login, () => void updateGist(t))}
+              >
                 {t('menuUpdate')}
               </MenuItem>
-              <MenuItem id="publish" icon="plus">
+              <MenuItem id="publish" icon="plus" onAction={() => requestPublish(login)}>
                 {t('menuPublishNew')}
               </MenuItem>
-              <MenuItem id="copy" icon="link">
+              <MenuItem id="copy" icon="link" onAction={() => copyShareLink(t, gist.id)}>
                 {t('menuCopyLink')}
               </MenuItem>
               {showHistory && (
-                <MenuItem id="history" icon="history">
+                <MenuItem
+                  id="history"
+                  icon="history"
+                  onAction={() => showGistDialog({ kind: 'history' })}
+                >
                   {t('menuHistory')}
                 </MenuItem>
               )}
               <MenuSeparator />
-              <MenuItem id="open" icon="link" kbd={openKbd}>
+              <MenuItem
+                id="open"
+                icon="link"
+                kbd={openKbd}
+                onAction={() => showGistDialog({ kind: 'open' })}
+              >
                 {t('openGist')}
               </MenuItem>
               <MenuSeparator />
@@ -134,6 +119,9 @@ export function PublishButton({ compact = false }: { compact?: boolean } = {}) {
                 selectionMode="single"
                 disallowEmptySelection
                 selectedKeys={[isPublic ? 'public' : 'secret']}
+                onSelectionChange={(keys) =>
+                  setGistVisibility(new Set(keys).has('public'))
+                }
               >
                 <MenuItem id="secret" icon="lock">
                   {t('visibilitySecret')}
@@ -143,7 +131,13 @@ export function PublishButton({ compact = false }: { compact?: boolean } = {}) {
                 </MenuItem>
               </MenuSection>
               <MenuSeparator />
-              <MenuItem id="delete" icon="trash" isDanger isDisabled={foreign}>
+              <MenuItem
+                id="delete"
+                icon="trash"
+                isDanger
+                isDisabled={foreign}
+                onAction={() => withSignIn(login, () => void deleteGist(t))}
+              >
                 {t('menuDelete')}
               </MenuItem>
             </Menu>

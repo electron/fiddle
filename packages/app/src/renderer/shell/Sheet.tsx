@@ -18,7 +18,7 @@ import { badgeOf, useDiagnostics } from '../editor/diagnostics';
 import { EditorPane } from '../editor/EditorPane';
 import { ConsolePane } from '../features/run/ConsolePane';
 import { SettingsPage } from '../features/settings/SettingsPage';
-import { useShortcut } from '../use-shortcut';
+import { useShortcut } from '../hooks';
 import type { PaneActions } from './pane-actions';
 import { processOf, type FileProcess } from './processes';
 import styles from './Sheet.module.css';

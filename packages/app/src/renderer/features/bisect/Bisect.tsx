@@ -1,15 +1,16 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { bisectCompareUrl } from '../../../fiddle/bisect';
 import { getDefaultBisectRange, compareVersions } from '../../../fiddle/versions';
-import { runApi, windowApi } from '../../../ipc/renderer';
+import { runApi } from '../../../ipc/renderer';
 import type { RunState } from '../../../shared/stores';
 import { visibleVersions } from '../../../main/versions/releases';
 import { Button, Dialog, InlineCode, Select } from '../../../ui';
 import styles from '../run/Run.module.css';
 import { useAppState } from '../../state';
 import { toastError } from '../../toast-error';
+import { useCommand } from '../../hooks';
 import { useReleases } from '../run/use-run';
 
 const attempt = (promise: Promise<unknown>, failedTitle: string) =>
@@ -47,13 +48,9 @@ export function BisectControls({ run }: { run: RunState }) {
 export function BisectDialogs({ run }: { run: RunState }) {
   const { t } = useTranslation('run');
   const [open, setOpen] = useState(false);
-  useEffect(
-    () =>
-      windowApi.onCommand((id) => {
-        if (id === 'bisect.toggle') setOpen(true);
-      }),
-    [],
-  );
+  useCommand((id) => {
+    if (id === 'bisect.toggle') setOpen(true);
+  });
   const result = run.bisect?.result ?? null;
   const call = (promise: Promise<unknown>) => attempt(promise, t('bisectFailed'));
 

@@ -1,10 +1,9 @@
-import { useEffect } from 'react';
-
-import { runApi, windowApi } from '../../../ipc/renderer';
+import { runApi } from '../../../ipc/renderer';
 import { formatText, PRETTIER_PARSERS, type FormatLanguage } from '../../editor/format';
 import { monaco } from '../../editor/monaco';
 import { createStore, useStore } from '../../store';
 import { toastError } from '../../toast-error';
+import { useCommand } from '../../hooks';
 import { focusContextOf } from './keybindings';
 
 type Editor = monaco.editor.ICodeEditor;
@@ -114,15 +113,11 @@ function editorAction(id: string, action: string): void {
 }
 
 export function useWindowCommands(): void {
-  useEffect(
-    () =>
-      windowApi.onCommand((id) => {
-        const action = EDITOR_ACTIONS[id];
-        if (action !== undefined) editorAction(id, action);
-        else if (id === 'editor.formatAll') void formatAllFiles();
-        else if (id === 'editor.toggleTabFocus') setTabFocus(!tabFocus.get());
-        else if (id === 'console.clear') runApi.ClearOutput().catch(toastError);
-      }),
-    [],
-  );
+  useCommand((id) => {
+    const action = EDITOR_ACTIONS[id];
+    if (action !== undefined) editorAction(id, action);
+    else if (id === 'editor.formatAll') void formatAllFiles();
+    else if (id === 'editor.toggleTabFocus') setTabFocus(!tabFocus.get());
+    else if (id === 'console.clear') runApi.ClearOutput().catch(toastError);
+  });
 }
