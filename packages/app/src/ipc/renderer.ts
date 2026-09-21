@@ -3,31 +3,25 @@ import { ErrorCode, FiddleError } from '../shared/errors';
 import { wrapRendererApi } from '../shared/error-transport';
 import {
   App as GeneratedApp,
+  AppPlatform as GeneratedAppPlatform,
   Documents as GeneratedDocuments,
+  GitHub as GeneratedGitHub,
   Modules as GeneratedModules,
   Onboarding as GeneratedOnboarding,
   Run as GeneratedRun,
+  Settings as GeneratedSettings,
   Versions as GeneratedVersions,
   Window as GeneratedWindow,
-  type IRunRenderer,
-  type IVersionsRenderer,
+  type IAppPlatformRenderer,
   type IAppRenderer,
   type IDocumentsRenderer,
+  type IGitHubRenderer,
   type IModulesRenderer,
   type IOnboardingRenderer,
-  type IWindowRenderer,
-} from './generated/renderer/fiddle';
-import {
-  Settings as GeneratedSettings,
+  type IRunRenderer,
   type ISettingsRenderer,
-} from './generated/renderer/fiddle';
-import {
-  GitHub as GeneratedGitHub,
-  type IGitHubRenderer,
-} from './generated/renderer/fiddle';
-import {
-  AppPlatform as GeneratedAppPlatform,
-  type IAppPlatformRenderer,
+  type IVersionsRenderer,
+  type IWindowRenderer,
 } from './generated/renderer/fiddle';
 
 export type { AppInfo, IAppRenderer, IWindowRenderer } from './generated/renderer/fiddle';
