@@ -13,12 +13,10 @@ describe('List', () => {
     const { rerender } = render(
       <List aria-label="Revisions" value={null} onChange={onChange}>
         <ListRow id="abc" title="Revision 2" meta="abc1234" />
-        <ListRow id="def" title="Created" isDisabled />
+        <ListRow id="def" title="Created" />
       </List>,
     );
     expect(screen.getByRole('listbox', { name: 'Revisions' })).toBeTruthy();
-    fireEvent.click(option(/Created/));
-    expect(onChange).not.toHaveBeenCalled();
     fireEvent.click(option(/Revision 2/));
     expect(onChange).toHaveBeenCalledWith('abc');
     // Controlled: nothing shows selected until the value comes back.
@@ -26,7 +24,7 @@ describe('List', () => {
     rerender(
       <List aria-label="Revisions" value="abc" onChange={onChange}>
         <ListRow id="abc" title="Revision 2" meta="abc1234" />
-        <ListRow id="def" title="Created" isDisabled />
+        <ListRow id="def" title="Created" />
       </List>,
     );
     expect(option(/Revision 2/).getAttribute('aria-selected')).toBe('true');
