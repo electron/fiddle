@@ -15,7 +15,6 @@ vi.mock('../ipc/renderer', () => ({
     ReportReady: mocks.ReportReady,
     RunCommand: vi.fn(() => Promise.resolve()),
   },
-  settingsApi: { GetTheme: vi.fn(() => Promise.resolve(null)) },
 }));
 vi.mock('react-i18next', () => ({
   useTranslation: () => ({

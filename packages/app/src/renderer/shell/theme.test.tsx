@@ -7,12 +7,15 @@ import type { AppState } from '../../shared/stores';
 
 const mocks = vi.hoisted(() => ({
   applyEditorTheme: vi.fn((_theme?: unknown) => undefined),
+  GetTheme: vi.fn((_id: string): Promise<unknown> => Promise.resolve(null)),
   app: undefined as Partial<AppState> | undefined,
   /** The OS says dark; `change` listeners hear it flip. */
   media: { matches: true, listeners: new Set<() => void>() },
 }));
 
 vi.mock('../editor/monaco', () => ({ applyEditorTheme: mocks.applyEditorTheme }));
+vi.mock('../../ipc/renderer', () => ({ settingsApi: { GetTheme: mocks.GetTheme } }));
+vi.mock('../features/about/log', () => ({ log: { error: vi.fn() } }));
 vi.mock('../state', () => ({ useAppState: () => mocks.app }));
 vi.stubGlobal('matchMedia', () => ({
   get matches() {
@@ -95,19 +98,15 @@ describe('applyAppearance', () => {
 });
 
 describe('useAppearance', () => {
-  type Custom = Pick<ThemeData, 'isDark' | 'common' | 'editor'>;
-  function Probe({
-    appearance,
-    custom,
-  }: {
-    appearance: Settings['appearance'];
-    custom?: Custom | null;
-  }) {
-    useAppearance(appearance, custom);
+  function Probe() {
+    useAppearance();
     return null;
   }
-  const appWith = (theme: string, highContrast = false) =>
-    ({ settings: { theme } as Settings, highContrast }) as Partial<AppState>;
+  const appWith = (
+    theme: string,
+    appearance: Settings['appearance'] = 'system',
+    highContrast = false,
+  ) => ({ settings: { theme, appearance } as Settings, highContrast }) as Partial<AppState>;
   const root = document.documentElement;
   const lastEditorTheme = () => mocks.applyEditorTheme.mock.calls.at(-1)?.[0];
 
@@ -120,33 +119,40 @@ describe('useAppearance', () => {
   });
 
   it('sets a fixed appearance on <html> and gives Monaco the stock Lucent theme', () => {
-    mocks.app = appWith('lucent');
-    render(<Probe appearance="dark" />);
+    mocks.app = appWith('lucent', 'dark');
+    render(<Probe />);
     expect(root.dataset.theme).toBe('dark');
     expect(root.dataset.contrast).toBeUndefined();
     expect(mocks.applyEditorTheme).toHaveBeenCalledWith();
+    expect(mocks.GetTheme).not.toHaveBeenCalled();
   });
 
-  it('hands a custom theme to <html> and to Monaco, and takes it away again', () => {
-    mocks.app = appWith('night');
-    const custom: Custom = {
+  it('fetches a custom theme, hands it to <html> and to Monaco, and takes it away again', async () => {
+    const custom: ThemeData = {
+      id: 'night',
+      name: 'Night',
       isDark: true,
       common: { surface: '#101010' },
       editor: { base: 'vs-dark', inherit: true, rules: [], colors: {} },
     };
-    const view = render(<Probe appearance="light" custom={custom} />);
+    mocks.GetTheme.mockResolvedValueOnce(custom);
+    mocks.app = appWith('night', 'light');
+    const view = render(<Probe />);
+    await act(async () => {});
+    expect(mocks.GetTheme).toHaveBeenCalledWith('night');
     expect(root.dataset.theme).toBe('dark');
     expect(root.style.getPropertyValue('--lu-surface')).toBe('#101010');
     expect(lastEditorTheme()).toBe(custom.editor);
-    view.rerender(<Probe appearance="light" custom={null} />);
+    mocks.app = appWith('lucent', 'light');
+    view.rerender(<Probe />);
     expect(root.dataset.theme).toBe('light');
     expect(root.style.getPropertyValue('--lu-surface')).toBe('');
     expect(mocks.applyEditorTheme).toHaveBeenLastCalledWith();
   });
 
   it('draws OS high contrast for Lucent with a high-contrast Monaco base that follows the OS appearance', () => {
-    mocks.app = appWith('lucent', true);
-    render(<Probe appearance="system" />);
+    mocks.app = appWith('lucent', 'system', true);
+    render(<Probe />);
     expect(root.dataset.contrast).toBe('high');
     expect(root.dataset.theme).toBeUndefined();
     expect(lastEditorTheme()).toMatchObject({ base: 'hc-black' });
@@ -157,19 +163,19 @@ describe('useAppearance', () => {
   });
 
   it('lets a built-in high-contrast theme fix light or dark over the appearance setting', () => {
-    mocks.app = appWith('lucent-hc-light');
-    const view = render(<Probe appearance="dark" />);
+    mocks.app = appWith('lucent-hc-light', 'dark');
+    const view = render(<Probe />);
     expect(root.dataset).toMatchObject({ theme: 'light', contrast: 'high' });
     expect(lastEditorTheme()).toMatchObject({ base: 'hc-light' });
-    mocks.app = appWith('lucent-hc-dark');
-    view.rerender(<Probe appearance="light" />);
+    mocks.app = appWith('lucent-hc-dark', 'light');
+    view.rerender(<Probe />);
     expect(root.dataset).toMatchObject({ theme: 'dark', contrast: 'high' });
     expect(lastEditorTheme()).toMatchObject({ base: 'hc-black' });
   });
 
   it('stops listening to the OS appearance when unmounted', () => {
     mocks.app = appWith('lucent');
-    const view = render(<Probe appearance="system" />);
+    const view = render(<Probe />);
     expect(mocks.media.listeners.size).toBe(1);
     view.unmount();
     expect(mocks.media.listeners.size).toBe(0);
