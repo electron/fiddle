@@ -1,4 +1,6 @@
-/* It clips its content, so the console follows the bottom corners. */
+/* It clips its content, so the console follows the bottom corners. The corners
+   stay round: a squircle clip over the editor's composited layers makes the
+   compositor draw every frame through a mask, which costs ~10x per keystroke. */
 .sheet {
   position: relative;
   flex: 1;
@@ -8,7 +10,6 @@
   min-height: 0;
   background: var(--lu-surface);
   border-radius: var(--lu-radius-sheet);
-  corner-shape: squircle;
   box-shadow: var(--lu-shadow-sheet);
   overflow: hidden;
 }

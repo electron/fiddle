@@ -76,7 +76,7 @@
     --lu-radius-menu: 17px;
     --lu-radius-panel: 24px;
     --lu-radius-dialog: 28px;
-    --lu-radius-sheet: 26px;
+    /* The sheet keeps its round 16px corner: see Sheet.module.css. */
     --lu-radius-float: 40px;
   }
   .lu-squircle {

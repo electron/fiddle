@@ -105,7 +105,6 @@
   min-width: 0;
   margin-right: var(--lu-size-sheet-inset);
   border-radius: var(--lu-radius-sheet);
-  corner-shape: squircle;
   background: var(--lu-surface);
   box-shadow: var(--lu-shadow-sheet);
 }
