@@ -37,7 +37,7 @@ describe('rename()', () => {
   });
 });
 
-describe('with a folder on disk', () => {
+describe('renameIntoPlace()', () => {
   let tmpdir: string;
 
   beforeEach(async () => {
@@ -49,30 +49,28 @@ describe('with a folder on disk', () => {
     fs.rmSync(tmpdir, { recursive: true, force: true });
   });
 
-  describe('renameIntoPlace()', () => {
-    it('keeps a destination that got there first and deletes the temporary folder', async () => {
-      const tmp = path.join(tmpdir, 'download.tmp');
-      const dest = path.join(tmpdir, '30.0.0');
-      fs.mkdirSync(tmp);
-      fs.mkdirSync(dest);
-      fs.writeFileSync(path.join(dest, 'electron'), 'theirs');
-      vi.spyOn(fs.promises, 'rename').mockRejectedValue(fail('ENOTEMPTY'));
+  it('keeps a destination that got there first and deletes the temporary folder', async () => {
+    const tmp = path.join(tmpdir, 'download.tmp');
+    const dest = path.join(tmpdir, '30.0.0');
+    fs.mkdirSync(tmp);
+    fs.mkdirSync(dest);
+    fs.writeFileSync(path.join(dest, 'electron'), 'theirs');
+    vi.spyOn(fs.promises, 'rename').mockRejectedValue(fail('ENOTEMPTY'));
 
-      await renameIntoPlace(tmp, dest);
+    await renameIntoPlace(tmp, dest);
 
-      expect(fs.readFileSync(path.join(dest, 'electron'), 'utf8')).toBe('theirs');
-      expect(fs.existsSync(tmp)).toBe(false);
-    });
+    expect(fs.readFileSync(path.join(dest, 'electron'), 'utf8')).toBe('theirs');
+    expect(fs.existsSync(tmp)).toBe(false);
+  });
 
-    it('throws when the rename fails and nothing is at the destination', async () => {
-      const tmp = path.join(tmpdir, 'download.tmp');
-      fs.mkdirSync(tmp);
-      vi.spyOn(fs.promises, 'rename').mockRejectedValue(fail('EXDEV'));
+  it('throws when the rename fails and nothing is at the destination', async () => {
+    const tmp = path.join(tmpdir, 'download.tmp');
+    fs.mkdirSync(tmp);
+    vi.spyOn(fs.promises, 'rename').mockRejectedValue(fail('EXDEV'));
 
-      await expect(
-        renameIntoPlace(tmp, path.join(tmpdir, '30.0.0')),
-      ).rejects.toHaveProperty('code', 'EXDEV');
-      expect(fs.existsSync(tmp)).toBe(true);
-    });
+    await expect(
+      renameIntoPlace(tmp, path.join(tmpdir, '30.0.0')),
+    ).rejects.toHaveProperty('code', 'EXDEV');
+    expect(fs.existsSync(tmp)).toBe(true);
   });
 });

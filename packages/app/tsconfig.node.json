@@ -22,5 +22,5 @@
     "*.config.mts",
     "tools/*.test.ts"
   ],
-  "exclude": ["src/i18n/renderer.ts", "src/i18n/renderer.test.tsx"]
+  "exclude": ["src/i18n/renderer.ts", "src/**/*.tsx"]
 }

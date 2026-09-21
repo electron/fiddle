@@ -17,7 +17,9 @@ describe('initRendererI18n', () => {
   it('picks the nearest shipped locale, loads the shell strings and marks <html> with it', async () => {
     const instance = await initRendererI18n('fr-CA');
     expect(instance.language).toBe('fr');
-    expect(instance.t('shell:hideSidebar')).toBe('Masquer la barre latérale');
+    // Translated, whatever the French wording is today: a missing key falls back to English.
+    expect(instance.hasResourceBundle('fr', 'shell')).toBe(true);
+    expect(instance.t('shell:hideSidebar')).not.toBe('Hide sidebar');
     expect(document.documentElement.lang).toBe('fr');
     expect(document.documentElement.dir).toBe('ltr');
     // A right-to-left language flips the document with it.
@@ -35,8 +37,10 @@ describe('useSyncLocale', () => {
     });
     expect(instance.language).toBe('en');
     rerender('de-AT');
-    await vi.waitFor(() => expect(instance.language).toBe('de'));
-    expect(instance.t('shell:hideSidebar')).toBe('Seitenleiste ausblenden');
+    // Loading a catalog is a dynamic import, slow on a cold CI runner.
+    await vi.waitFor(() => expect(instance.language).toBe('de'), { timeout: 5000 });
+    expect(instance.hasResourceBundle('de', 'shell')).toBe(true);
+    expect(instance.t('shell:hideSidebar')).not.toBe('Hide sidebar');
     expect(document.documentElement.lang).toBe('de');
   });
 });

@@ -108,9 +108,10 @@ describe('FiddleError transport', () => {
     });
   });
 
-  it('passes plain values and synchronous results through on both sides', () => {
+  it('passes plain values and synchronous results through on both sides', async () => {
     const main = wrapImplementation({ version: 3, Ping: () => 'pong' }, vi.fn());
     expect(main.version).toBe(3);
+    await expect(main.Ping()).resolves.toBe('pong');
     const api = wrapRendererApi({
       version: 3,
       AppStore: { getStateSync: () => ({ locale: 'en' }) },
