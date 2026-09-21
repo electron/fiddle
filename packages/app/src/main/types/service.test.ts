@@ -166,6 +166,40 @@ describe('TypesService.forRelease', () => {
     const types = await service({ routes: {}, urls: [] }, '').forRelease('30.0.0');
     expect(types).toEqual({ version: '30.0.0', electron: null, node: {} });
   });
+
+  it('treats a network error or a garbled listing like a missing file', async () => {
+    const offline = new TypesService({
+      dir,
+      fetch: () => Promise.reject(new Error('net::ERR_INTERNET_DISCONNECTED')),
+      nodeVersionOf: () => '20.9.0',
+      onLocalChange: () => undefined,
+    });
+    expect(await offline.forRelease('30.0.0')).toEqual({
+      version: '30.0.0',
+      electron: null,
+      node: {},
+    });
+    const garbled: Fake = {
+      routes: { '/@types/node@20.9.0/?meta': 'not json', '/@types/node@20/?meta': '{' },
+      urls: [],
+    };
+    expect((await service(garbled).forRelease('30.0.0')).node).toEqual({});
+  });
+
+  it('forgets a removed version’s electron.d.ts, so it is fetched again if the version comes back', async () => {
+    const fake: Fake = {
+      routes: { '/electron@30.0.0/electron.d.ts': 'declare module "electron" {}' },
+      urls: [],
+    };
+    const types = service(fake, '');
+    await types.forRelease('30.0.0');
+    await types.forRelease('30.0.0');
+    expect(fake.urls).toHaveLength(1);
+    await types.removeVersion('30.0.0');
+    expect(await readdir(path.join(dir, 'electron'))).toEqual([]);
+    await types.forRelease('30.0.0');
+    expect(fake.urls).toHaveLength(2);
+  });
 });
 
 describe('TypesService.forLocal', () => {
@@ -204,7 +238,12 @@ describe('TypesService.forLocal', () => {
   });
 
   describe('watching', () => {
-    afterEach(() => vi.restoreAllMocks());
+    afterEach(() => {
+      vi.useRealTimers();
+      vi.restoreAllMocks();
+    });
+
+    type WatchListener = (event: 'rename' | 'change', filename: string | null) => void;
 
     async function watched() {
       const build = path.join(dir, 'build');
@@ -212,21 +251,47 @@ describe('TypesService.forLocal', () => {
       await mkdir(typings, { recursive: true });
       await writeFile(path.join(typings, 'electron.d.ts'), 'local');
       const closed = vi.fn();
-      const watchers: EventEmitter[] = [];
-      vi.spyOn(fs, 'watch').mockImplementation(() => {
-        const watcher = Object.assign(new EventEmitter(), { close: closed });
+      const watchers: Array<EventEmitter & { listener: WatchListener }> = [];
+      vi.spyOn(fs, 'watch').mockImplementation((_file, listener) => {
+        const watcher = Object.assign(new EventEmitter(), {
+          close: closed,
+          listener: listener as WatchListener,
+        });
         watchers.push(watcher);
         return watcher as never;
       });
+      const onLocalChange = vi.fn();
       const types = new TypesService({
         dir,
         fetch: fakeFetch({ routes: {}, urls: [] }),
         nodeVersionOf: () => undefined,
-        onLocalChange: () => undefined,
+        onLocalChange,
       });
       const open = () => types.forLocal({ id: 'b', name: 'B', path: build } as never);
-      return { types, open, closed, watchers };
+      return { types, open, closed, watchers, onLocalChange };
     }
+
+    it('reports a rebuilt electron.d.ts once per burst of changes, and follows a replaced file', async () => {
+      const { open, closed, watchers, onLocalChange } = await watched();
+      await open();
+      vi.useFakeTimers();
+      const first = watchers[0]!;
+      first.listener('change', 'electron.d.ts');
+      first.listener('change', 'electron.d.ts');
+      vi.advanceTimersByTime(299);
+      expect(onLocalChange).not.toHaveBeenCalled();
+      vi.advanceTimersByTime(1);
+      expect(onLocalChange).toHaveBeenCalledTimes(1);
+      expect(onLocalChange).toHaveBeenCalledWith('b');
+      expect(closed).not.toHaveBeenCalled();
+
+      // A build that writes a new file and renames it over the old one.
+      first.listener('rename', 'electron.d.ts');
+      vi.advanceTimersByTime(300);
+      expect(closed).toHaveBeenCalledOnce();
+      expect(fs.watch).toHaveBeenCalledTimes(2);
+      expect(onLocalChange).toHaveBeenCalledTimes(2);
+    });
 
     it('watches a build once, and stops when the build is gone', async () => {
       const { types, open, closed } = await watched();

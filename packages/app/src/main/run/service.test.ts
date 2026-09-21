@@ -6,17 +6,30 @@ import path from 'node:path';
 import { PassThrough } from 'node:stream';
 import { pathToFileURL } from 'node:url';
 
+import { Installer } from '@electron/fiddle-core';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import type { OutputLine, RunState } from '../../shared/stores';
+import type { OutputLine, RunState, VersionRefValue } from '../../shared/stores';
 
 const spawnElectron = vi.fn();
 const ensureTrusted = vi.fn();
+const modules = vi.hoisted(() => ({
+  findPackageManager: vi.fn<() => Promise<string | undefined>>(),
+  installModules: vi.fn<(options: { onOutput(text: string): void }) => Promise<void>>(),
+}));
+const setLayout = vi.hoisted(() => vi.fn());
 
 vi.mock('electron', () => ({ app: { on: vi.fn(), quit: vi.fn(), isPackaged: false } }));
 vi.mock('../documents/service', () => ({
   ensureTrusted: (...args: unknown[]) => ensureTrusted(...args),
-  setLayout: vi.fn(),
+  setLayout,
+}));
+vi.mock('../../fiddle/modules', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('../../fiddle/modules')>()),
+  findPackageManager: modules.findPackageManager,
+  installModules: modules.installModules,
+  // `toolEnv()` would otherwise spawn the real login shell for its PATH.
+  loadLoginShellPath: async () => undefined,
 }));
 vi.mock('../i18n', () => ({
   tm: () => (key: string, options?: Record<string, unknown>) =>
@@ -69,7 +82,15 @@ function fakeChild(exitCodeOnKill: number | null = 0): FakeChild {
   return child;
 }
 
-function setup(overrides: { release?: (version: string) => unknown } = {}) {
+function setup(
+  overrides: {
+    release?: (version: string) => unknown;
+    /** The installed executable; undefined means the version needs a download. */
+    execPath?: () => string | undefined;
+    localBuild?: (id: string) => unknown;
+    environmentVariables?: string[];
+  } = {},
+) {
   const windows = new Map<string, Record<string, unknown>>();
   windows.set('w', {
     fiddle: { name: 'Test', source: {}, fiddleRev: 0, versionRef: ref },
@@ -83,7 +104,7 @@ function setup(overrides: { release?: (version: string) => unknown } = {}) {
       settings: {
         packageManager: 'npm',
         packageAuthor: '',
-        environmentVariables: [],
+        environmentVariables: overrides.environmentVariables ?? [],
         electronFlags: [],
         clearConsoleOnRun: false,
       },
@@ -99,11 +120,12 @@ function setup(overrides: { release?: (version: string) => unknown } = {}) {
     },
   };
   const versions = {
-    installer: {},
+    installer: new EventEmitter(),
     electronVersions: {},
     release: overrides.release ?? ((version: string) => ({ version, supported: true })),
-    execPath: () => '/fake/electron',
-    localBuild: () => undefined,
+    execPath: overrides.execPath ?? (() => '/fake/electron'),
+    install: vi.fn<(version: string, signal?: AbortSignal) => Promise<string>>(),
+    localBuild: overrides.localBuild ?? (() => undefined),
     label: (version: { version: string }) => version.version,
   };
   const sent: OutputLine[] = [];
@@ -112,7 +134,13 @@ function setup(overrides: { release?: (version: string) => unknown } = {}) {
   );
   const state = () => (windows.get('w') as { run: RunState }).run;
   const texts = () => runs.output('w').map((line) => line.text);
-  return { runs, state, texts, hub };
+  /** Every status the Run control went through, in order. */
+  const statuses: string[] = [];
+  hub.onChange(() => {
+    const status = state()?.status;
+    if (status && statuses.at(-1) !== status) statuses.push(status);
+  });
+  return { runs, state, texts, hub, versions, windows, statuses };
 }
 
 const runDirs: string[] = [];
@@ -125,7 +153,23 @@ beforeEach(() => {
     allowScripts: false,
     fiddle: { files: { 'main.js': 'console.log(1)' }, modules: {}, version: ref },
   });
+  setLayout.mockReset();
+  modules.findPackageManager.mockReset().mockResolvedValue('/bin/npm');
+  modules.installModules.mockReset().mockResolvedValue(undefined);
 });
+
+/** Approves a fiddle that depends on lodash, for the module install. */
+function trustWithModules(allowScripts = false): void {
+  ensureTrusted.mockResolvedValue({
+    approved: true,
+    allowScripts,
+    fiddle: {
+      files: { 'main.js': 'require("lodash")' },
+      modules: { lodash: '*' },
+      version: ref,
+    },
+  });
+}
 
 afterEach(() => {
   vi.restoreAllMocks();
@@ -299,6 +343,272 @@ describe('RunService.run', () => {
     expect(updateWindow).not.toHaveBeenCalled();
     child.exit(0);
     await result;
+  });
+
+  it('shows the console when a run starts with it hidden or too small to read', async () => {
+    const { runs, windows } = setup();
+    runs.openConsole('w');
+    expect(setLayout).not.toHaveBeenCalled();
+    windows.set('w', {
+      ...windows.get('w'),
+      layout: { consoleVisible: false, consoleHeight: 200 },
+    });
+    runs.openConsole('w');
+    expect(setLayout).toHaveBeenLastCalledWith('w', {
+      consoleVisible: true,
+      consoleHeight: 200,
+    });
+    windows.set('w', {
+      ...windows.get('w'),
+      layout: { consoleVisible: true, consoleHeight: 40 },
+    });
+    runs.openConsole('w');
+    expect(setLayout).toHaveBeenLastCalledWith('w', {
+      consoleVisible: true,
+      consoleHeight: 160,
+    });
+  });
+
+  it('lets Stop cancel a claimed operation until it is released', () => {
+    const { runs } = setup();
+    const claimed = runs.claim('w');
+    runs.stop('w');
+    expect(claimed.signal.aborted).toBe(true);
+    const next = runs.claim('w');
+    runs.release('w');
+    runs.stop('w');
+    expect(next.signal.aborted).toBe(false);
+  });
+
+  it('adds tool output one console line per non-blank line, and clears the backlog on request', () => {
+    const { runs, texts, state } = setup();
+    runs.logText('w', 'added 3 packages\r\n\n  audited 4 packages\n');
+    expect(texts().slice(1)).toEqual(['added 3 packages', '  audited 4 packages']);
+    runs.clear('w');
+    expect(texts()).toEqual([]);
+    expect(state().clearedSeq).toBeGreaterThan(0);
+    runs.log('w', 'after');
+    expect(texts()).toEqual(['after']);
+  });
+
+  it('starts a different fiddle with an empty console, but not a rename or an added file', () => {
+    const { runs, texts, hub, state } = setup();
+    const load = (fiddle: { name: string; fiddleRev: number }) =>
+      hub.updateWindow('w', { fiddle: { ...fiddle, source: {}, versionRef: ref } });
+    load({ name: 'Test', fiddleRev: 0 });
+    runs.log('w', 'hello');
+    runs.setState('w', {
+      errors: [
+        { process: 'main', name: 'Error', message: 'boom', file: 'main.js', line: 1 },
+      ],
+    });
+    // A file added: same fiddle, new rev.
+    load({ name: 'Test', fiddleRev: 1 });
+    // Saved under another name: new identity, same rev.
+    load({ name: 'Renamed', fiddleRev: 1 });
+    expect(texts()).toEqual(['consoleReady:{"version":"30.0.0"}', 'hello']);
+    expect(state().errors).toHaveLength(1);
+    // Another fiddle opened: both change.
+    load({ name: 'Other', fiddleRev: 2 });
+    expect(texts()).toEqual(['consoleReady:{"version":"30.0.0"}']);
+    expect(state()).toMatchObject({ errors: [], result: undefined });
+  });
+
+  describe('with modules', () => {
+    it('installs them without scripts before Electron starts, then adds Electron to package.json', async () => {
+      trustWithModules();
+      modules.installModules.mockImplementation(async ({ onOutput }) => {
+        onOutput('added 1 package\n');
+      });
+      const child = fakeChild();
+      spawnReturns(child);
+      const { runs, state, texts, statuses } = setup();
+      const result = runs.run('w');
+      await running(state);
+      expect(modules.installModules).toHaveBeenCalledWith(
+        expect.objectContaining({
+          packageManager: 'npm',
+          modules: { lodash: '*' },
+          ignoreScripts: true,
+        }),
+      );
+      expect(texts()).toContain('installingModulesNoScripts:{"pm":"npm"}');
+      expect(texts()).toContain('added 1 package');
+      expect(statuses).toEqual(['checking', 'installing', 'starting', 'running']);
+      const { appDir } = spawnElectron.mock.calls[0]![0] as { appDir: string };
+      const packageJson = JSON.parse(
+        fs.readFileSync(path.join(appDir, 'package.json'), 'utf8'),
+      ) as { devDependencies?: Record<string, string> };
+      expect(packageJson.devDependencies?.electron).toBe(VERSION);
+      child.exit(0);
+      await result;
+      await runs.shutdown();
+    });
+
+    it('refuses to run when the package manager is not installed, pointing at its download page', async () => {
+      trustWithModules();
+      modules.findPackageManager.mockResolvedValue(undefined);
+      const { runs, texts, state } = setup();
+      expect(await runs.run('w')).toEqual({ invalid: true });
+      expect(texts().at(-1)).toBe(
+        `pmMissing:${JSON.stringify({ pm: 'npm', url: 'https://docs.npmjs.com/downloading-and-installing-node-js-and-npm' })}`,
+      );
+      expect(state()).toMatchObject({ status: 'ready', result: 'invalid' });
+      expect(spawnElectron).not.toHaveBeenCalled();
+    });
+
+    it('reports a failed install in the console and ends the run as a failure', async () => {
+      trustWithModules(true);
+      modules.installModules.mockRejectedValue(new Error('E404 lodash'));
+      const { runs, texts, state } = setup();
+      expect(await runs.run('w')).toEqual({ installFailed: true });
+      expect(texts()).toContain('installingModules:{"pm":"npm"}');
+      expect(texts().at(-1)).toBe('modulesFailed:{"message":"E404 lodash"}');
+      expect(state()).toMatchObject({ status: 'ready', result: 'failure' });
+      expect(spawnElectron).not.toHaveBeenCalled();
+      await runs.shutdown();
+    });
+  });
+
+  it('passes the user environment on, warning about entries it drops', async () => {
+    const child = fakeChild();
+    spawnReturns(child);
+    const { runs, state, texts } = setup({
+      environmentVariables: ['GOOD=1', 'no equals sign', 'NODE_OPTIONS=--inspect'],
+    });
+    const result = runs.run('w');
+    await running(state);
+    expect(texts()).toContain('envInvalid:{"entries":"no equals sign"}');
+    expect(texts()).toContain('envBlocked:{"keys":"NODE_OPTIONS"}');
+    const { env } = spawnElectron.mock.calls[0]![0] as { env: Record<string, string> };
+    expect(env).toMatchObject({ GOOD: '1', ELECTRON_ENABLE_LOGGING: 'true' });
+    expect(env).not.toHaveProperty('NODE_OPTIONS');
+    child.exit(0);
+    await result;
+    await runs.shutdown();
+  });
+
+  it('tells the user where the inspector listens', async () => {
+    const child = fakeChild();
+    spawnReturns(child);
+    const { runs, state, texts } = setup();
+    const result = runs.run('w');
+    await running(state);
+    child.stderr.write('Debugger listening on ws://127.0.0.1:9229/8c5e0dc2\n');
+    await vi.waitFor(() =>
+      expect(texts()).toContain('inspector:{"port":"9229/8c5e0dc2"}'),
+    );
+    child.exit(0);
+    await result;
+    await runs.shutdown();
+  });
+});
+
+describe('RunService.run with a local build or a missing version', () => {
+  const local: VersionRefValue = { kind: 'local', id: 'b1' };
+
+  it('runs a local build from its folder, and refuses one whose binary is gone', async () => {
+    const child = fakeChild();
+    spawnReturns(child);
+    const buildPath = path.join('builds', 'testing');
+    const available = setup({
+      localBuild: () => ({
+        id: 'b1',
+        name: 'My build',
+        path: buildPath,
+        available: true,
+      }),
+    });
+    const result = available.runs.run('w', { versionRef: local });
+    await running(available.state);
+    expect(spawnElectron.mock.calls[0]![0]).toMatchObject({
+      exec: Installer.getExecPath(buildPath),
+    });
+    expect(available.state().version).toBe('My build');
+    expect(available.texts()).toContain('started:{"version":"My build","name":"test"}');
+    child.exit(0);
+    await result;
+    await available.runs.shutdown();
+
+    const gone = setup({
+      localBuild: () => ({
+        id: 'b1',
+        name: 'My build',
+        path: buildPath,
+        available: false,
+      }),
+    });
+    expect(await gone.runs.run('w', { versionRef: local })).toEqual({ invalid: true });
+    expect(gone.texts().at(-1)).toBe('localBuildMissing:{"name":"My build"}');
+    expect(spawnElectron).toHaveBeenCalledOnce();
+  });
+
+  it('refuses a release that has no build for this platform', async () => {
+    const { runs, texts } = setup({
+      release: (version) => ({ version, supported: false }),
+    });
+    expect(await runs.run('w')).toEqual({ invalid: true });
+    expect(texts().at(-1)).toBe('versionUnavailable:{"version":"30.0.0"}');
+  });
+
+  it('downloads a missing version first, showing the download and unzip as they happen', async () => {
+    const child = fakeChild();
+    spawnReturns(child);
+    const { runs, state, texts, versions, statuses } = setup({
+      execPath: () => undefined,
+    });
+    versions.install.mockImplementation(async (version) => {
+      versions.installer.emit('state-changed', { version, state: 'downloading' });
+      versions.installer.emit('state-changed', { version: '1.0.0', state: 'installing' });
+      versions.installer.emit('state-changed', { version, state: 'installing' });
+      return '/downloaded/electron';
+    });
+    const result = runs.run('w');
+    await running(state);
+    expect(versions.install).toHaveBeenCalledWith(VERSION, expect.any(AbortSignal));
+    expect(versions.installer.listenerCount('state-changed')).toBe(0);
+    expect(statuses).toEqual([
+      'checking',
+      'downloading',
+      'unzipping',
+      'checking',
+      'starting',
+      'running',
+    ]);
+    expect(texts()).toContain('downloading:{"version":"30.0.0"}');
+    expect(spawnElectron.mock.calls[0]![0]).toMatchObject({
+      exec: '/downloaded/electron',
+    });
+    child.exit(0);
+    await result;
+    await runs.shutdown();
+  });
+
+  it('refuses the run when the download fails, with the reason', async () => {
+    const { runs, texts, versions, state } = setup({ execPath: () => undefined });
+    versions.install.mockRejectedValue(new Error('HTTP 404'));
+    expect(await runs.run('w')).toEqual({ invalid: true });
+    expect(texts().at(-1)).toBe(
+      'downloadFailed:{"version":"30.0.0","message":"HTTP 404"}',
+    );
+    expect(state()).toMatchObject({ status: 'ready', result: 'invalid' });
+    expect(versions.installer.listenerCount('state-changed')).toBe(0);
+  });
+
+  it('records a stop during the download as stopped, not as a failed download', async () => {
+    const { runs, texts, versions, state } = setup({ execPath: () => undefined });
+    versions.install.mockImplementation(
+      (_version, signal) =>
+        new Promise<string>((_resolve, reject) => {
+          signal?.addEventListener('abort', () => reject(new Error('aborted')));
+        }),
+    );
+    const result = runs.run('w');
+    await vi.waitFor(() => expect(state().status).toBe('downloading'));
+    runs.stop('w');
+    expect(await result).toEqual({ signal: 'SIGTERM', stopped: true });
+    expect(texts().some((text) => text.startsWith('downloadFailed'))).toBe(false);
+    expect(spawnElectron).not.toHaveBeenCalled();
   });
 });
 

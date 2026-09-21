@@ -7,6 +7,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 const mocks = vi.hoisted(() => ({
   importOldApp: vi.fn(),
   importElectronVersions: vi.fn(),
+  cacheRoot: vi.fn(() => '/cache'),
   userData: '/user-data',
   testMode: false,
 }));
@@ -20,7 +21,7 @@ vi.mock('../log', () => ({
 }));
 vi.mock('../test-mode', () => ({
   isTestMode: () => mocks.testMode,
-  getCacheRoot: () => '/cache',
+  getCacheRoot: mocks.cacheRoot,
 }));
 vi.mock('./import', () => ({
   importOldApp: mocks.importOldApp,
@@ -65,15 +66,29 @@ describe('importElectronVersionsInBackground', () => {
     expect(mocks.importElectronVersions).not.toHaveBeenCalled();
   });
 
+  it('leaves the copy for another launch when there is no cache folder', () => {
+    mocks.cacheRoot.mockImplementationOnce(() => {
+      throw new Error('no home directory');
+    });
+    importElectronVersionsInBackground();
+    expect(mocks.importElectronVersions).not.toHaveBeenCalled();
+    expect(fs.existsSync(marker())).toBe(false);
+  });
+
   it('runs on every launch until a copy has finished, then stops', async () => {
     mocks.importElectronVersions.mockRejectedValueOnce(new Error('cut short'));
     importElectronVersionsInBackground();
     await vi.waitFor(() => expect(log.warn).toHaveBeenCalledOnce());
     expect(fs.existsSync(marker())).toBe(false);
 
+    mocks.importElectronVersions.mockResolvedValueOnce(['30.0.0']);
     importElectronVersionsInBackground();
     await vi.waitFor(() => expect(fs.existsSync(marker())).toBe(true));
     expect(mocks.importElectronVersions).toHaveBeenCalledTimes(2);
+    expect(mocks.importElectronVersions).toHaveBeenCalledWith(
+      path.join(mocks.userData, 'electron-bin'),
+      path.join('/cache', 'electron'),
+    );
 
     importElectronVersionsInBackground();
     expect(mocks.importElectronVersions).toHaveBeenCalledTimes(2);
