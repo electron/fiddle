@@ -27,14 +27,8 @@
   <rect x="128" y="112" width="768" height="760" rx="140" fill="url(#navy)"/>
   <clipPath id="body"><rect x="128" y="112" width="768" height="760" rx="140"/></clipPath>
   <g clip-path="url(#body)"><g transform="translate(512 492) scale(.93) translate(-512 -512)">
-  <rect x="196" y="214" width="632" height="470" rx="44" fill="#15161f"/>
-  <rect x="199" y="217" width="626" height="464" rx="41" fill="none" stroke="#fff" stroke-opacity="0.12" stroke-width="6"/>
-  <rect x="256" y="284" width="110" height="36" rx="18" fill="#9feaf9" fill-opacity="1"/><rect x="386" y="284" width="190" height="36" rx="18" fill="#86b4ff" fill-opacity="1"/>
-  <rect x="306" y="354" width="150" height="36" rx="18" fill="#aeb4c9" fill-opacity="0.55"/><rect x="476" y="354" width="170" height="36" rx="18" fill="#ffb38a" fill-opacity="1"/>
-  <rect x="306" y="424" width="90" height="36" rx="18" fill="#ff9a9a" fill-opacity="1"/><rect x="416" y="424" width="130" height="36" rx="18" fill="#aeb4c9" fill-opacity="0.55"/>
-  <rect x="256" y="494" width="60" height="36" rx="18" fill="#aeb4c9" fill-opacity="0.55"/>
-  <g filter="url(#soft)">
-    <rect x="472" y="622" width="300" height="150" rx="75" fill="#9feaf9"/>
-    <path d="M596 664 L596 730 Q596 742 607 736 L662 705 Q672 697 662 689 L607 658 Q596 652 596 664 Z" fill="#0d2a31"/>
-  </g></g></g>
+  <circle cx="434" cy="714" r="200" fill="url(#glow)"/>
+  <g filter="url(#soft)" transform="translate(512 512) scale(1.22) translate(-160 -252)">
+  <path d="M72,315.02442 L72,24 C72,10.745166 82.745166,0 96,0 L336,0 C349.254834,0 360,10.745166 360,24 C360,37.254834 349.254834,48 336,48 L120,48 L120,168 L219.428571,168 C230.789858,168 240,178.745166 240,192 C240,205.254834 230.789858,216 219.428571,216 L120,216 L120,315.02442 C161.405453,325.681447 192,363.267854 192,408 C192,461.019336 149.019336,504 96,504 C42.980664,504 0,461.019336 0,408 C0,363.267854 30.5945469,325.681447 72,315.02442 Z" fill="url(#paper)"/>
+  <circle cx="96" cy="408" r="48" fill="#9feaf9"/></g></g></g>
   <rect x="131" y="115" width="762" height="754" rx="137" fill="none" stroke="url(#rim)" stroke-width="6"/></svg>

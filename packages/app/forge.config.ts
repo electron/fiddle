@@ -268,8 +268,9 @@ const config: ForgeConfig = {
       name: 'electron-fiddle',
       authors: 'Electron Community',
       exe: 'electron-fiddle.exe',
+      // Control Panel's Programs list fetches this, so it must be a public URL.
       iconUrl:
-        'https://raw.githubusercontent.com/electron/fiddle/0119f0ce697f5ff7dec4fe51f17620c78cfd488b/assets/icons/fiddle.ico',
+        'https://raw.githubusercontent.com/electron/fiddle/fiddle-2027/packages/app/assets/icons/fiddle.ico',
       loadingGif: path.join(appDir, 'assets', 'loading.gif'),
       noMsi: true,
       setupExe: `electron-fiddle-${packageJson.version}-win32-${arch}-setup.exe`,
