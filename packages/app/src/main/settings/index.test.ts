@@ -52,7 +52,8 @@ beforeEach(() => {
 afterEach(async () => {
   vi.useRealTimers();
   await flushAll();
-  fs.rmSync(dir, { recursive: true, force: true });
+  // The settings watcher may still hold the folder for a moment on Windows.
+  fs.rmSync(dir, { recursive: true, force: true, maxRetries: 5 });
 });
 
 function writeSettings(sparse: Partial<Settings>, version = SETTINGS_VERSION): void {
