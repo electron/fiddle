@@ -18,7 +18,7 @@ import {
 import semver from 'semver';
 
 import { GITHUB_TOKEN_PATTERN } from '../../fiddle/github';
-import { BUILTIN_THEME } from '../../shared/settings';
+import { BUILTIN_THEME, SETTINGS_VERSION } from '../../shared/settings';
 import {
   CredentialStore,
   legacyTokenFile,
@@ -26,7 +26,6 @@ import {
 } from '../github/credentials';
 import { log } from '../log';
 import { readJsonObjectSync } from '../persistence/json-store';
-import { SETTINGS_VERSION } from '../settings/service';
 import type { StoredBuild } from '../versions/service';
 import { themeFromMonaco, themeId, writeTheme } from '../themes/themes';
 import {
