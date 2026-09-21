@@ -1,4 +1,6 @@
+/** App windows: their locked-down options, when they show, crash reloads, the Windows title bar overlay and the gallery window. */
 import { EventEmitter } from 'node:events';
+import os from 'node:os';
 
 import { beforeEach, describe, expect, it, vi, type Mock } from 'vitest';
 
@@ -58,8 +60,15 @@ vi.mock('./windows', () => ({
   untrackWindow: mocks.untrackWindow,
 }));
 
+import { nativeTheme } from 'electron';
+
 import { log } from './log';
-import { createAppWindow, openGalleryWindow, windowOptions } from './window';
+import {
+  createAppWindow,
+  detectMaterial,
+  openGalleryWindow,
+  windowOptions,
+} from './window';
 
 interface FakeWindow extends EventEmitter {
   options: { webPreferences: Record<string, unknown> };
@@ -67,6 +76,7 @@ interface FakeWindow extends EventEmitter {
   show: ReturnType<typeof vi.fn>;
   close: Mock<() => void>;
   destroy: ReturnType<typeof vi.fn>;
+  setTitleBarOverlay: Mock<(overlay: { symbolColor: string }) => void>;
 }
 
 const hub = {
@@ -102,7 +112,36 @@ beforeEach(() => {
   vi.mocked(log.error).mockClear();
 });
 
+describe('detectMaterial', () => {
+  it('gives macOS vibrancy, Windows 11 acrylic, and older Windows and Linux nothing', () => {
+    expect(detectMaterial('darwin')).toBe('vibrancy');
+    expect(detectMaterial('linux')).toBe('none');
+    const release = vi.spyOn(os, 'release');
+    release.mockReturnValue('10.0.22631');
+    expect(detectMaterial('win32')).toBe('acrylic');
+    release.mockReturnValue('10.0.19045');
+    expect(detectMaterial('win32')).toBe('none');
+    release.mockRestore();
+  });
+});
+
 describe('windowOptions', () => {
+  it('draws the Windows caption buttons over a hidden title bar, in the ink colour of the theme', () => {
+    const dark = vi.spyOn(nativeTheme, 'shouldUseDarkColors', 'get');
+    dark.mockReturnValue(false);
+    expect(windowOptions('win32', 'acrylic')).toMatchObject({
+      titleBarStyle: 'hidden',
+      titleBarOverlay: { symbolColor: '#1b1c26', height: 56 },
+      backgroundMaterial: 'acrylic',
+    });
+    dark.mockReturnValue(true);
+    expect(windowOptions('win32', 'none').titleBarOverlay).toMatchObject({
+      symbolColor: '#eef1f8',
+    });
+    expect(windowOptions('win32', 'none')).not.toHaveProperty('backgroundMaterial');
+    dark.mockRestore();
+  });
+
   it.each(['darwin', 'win32', 'linux'] as const)(
     'locks the renderer down on %s',
     (platform) => {
@@ -127,6 +166,22 @@ describe('createAppWindow', () => {
     reportReady();
     reportReady();
     expect(win.show).toHaveBeenCalledOnce();
+  });
+
+  it('recolours the Windows caption buttons with the theme while the window is open', async () => {
+    const dark = vi
+      .spyOn(nativeTheme, 'shouldUseDarkColors', 'get')
+      .mockReturnValue(false);
+    await createAppWindow({ ...args, services: { hub, platform: 'win32' } as never });
+    const win = lastWindow();
+    dark.mockReturnValue(true);
+    nativeTheme.emit('updated');
+    expect(win.setTitleBarOverlay).toHaveBeenLastCalledWith({ symbolColor: '#eef1f8' });
+    win.close();
+    nativeTheme.emit('updated');
+    expect(win.setTitleBarOverlay).toHaveBeenCalledOnce();
+    expect(nativeTheme.listenerCount('updated')).toBe(0);
+    dark.mockRestore();
   });
 
   describe('a page that loads but never reports ready', () => {
@@ -238,6 +293,19 @@ describe('openGalleryWindow', () => {
     await openGalleryWindow();
     expect(mocks.windows).toHaveLength(1);
     win.close();
+  });
+
+  it('is destroyed when its page cannot load, and the next attempt opens a new one', async () => {
+    mocks.loadURL.mockRejectedValueOnce(new Error('ERR_FAILED'));
+    await expect(openGalleryWindow()).rejects.toThrow('ERR_FAILED');
+    const failed = lastWindow();
+    expect(failed.destroy).toHaveBeenCalledOnce();
+    expect(failed.show).not.toHaveBeenCalled();
+
+    await openGalleryWindow();
+    expect(mocks.windows).toHaveLength(2);
+    expect(lastWindow().show).toHaveBeenCalledOnce();
+    lastWindow().close();
   });
 
   it('closes with the last fiddle window, so it never keeps the app running', async () => {

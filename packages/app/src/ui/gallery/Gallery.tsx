@@ -52,7 +52,7 @@ import {
   Tooltip,
   Tree,
   TreeRow,
-  type SelectItems,
+  type SelectOption,
   type TableColumn,
   type TableSection,
 } from '../index';
@@ -60,22 +60,13 @@ import styles from './Gallery.module.css';
 
 type Appearance = 'dark' | 'light';
 
-const VERSIONS: SelectItems = [
-  {
-    title: 'Stable',
-    options: [
-      { id: '43.0.0', label: 'Electron 43.0.0', hint: 'latest' },
-      { id: '42.4.1', label: 'Electron 42.4.1' },
-      { id: '41.6.2', label: 'Electron 41.6.2' },
-    ],
-  },
-  {
-    title: 'Pre-release',
-    options: [
-      { id: '44.0.0-beta.3', label: 'Electron 44.0.0-beta.3', hint: 'beta' },
-      { id: '45.0.0-nightly', label: 'Electron 45.0.0-nightly', hint: 'nightly' },
-    ],
-  },
+const noop = () => {};
+
+const VERSIONS: SelectOption[] = [
+  { id: '43.0.0', label: 'Electron 43.0.0', hint: 'latest' },
+  { id: '42.4.1', label: 'Electron 42.4.1' },
+  { id: '44.0.0-beta.3', label: 'Electron 44.0.0-beta.3', hint: 'beta' },
+  { id: '45.0.0-nightly', label: 'Electron 45.0.0-nightly', hint: 'nightly' },
 ];
 
 interface VersionRow {
@@ -176,7 +167,7 @@ function RunCapsule({
       <Select
         aria-label="Electron version"
         items={VERSIONS}
-        defaultValue="43.0.0"
+        value="43.0.0"
         style={{ width: 180 }}
       />
       {state === 'ready' && (
@@ -420,30 +411,15 @@ export function Gallery({
         <div className={styles.body}>
           <aside className={styles.sidebar}>
             <div className={styles.sideHead}>Main process</div>
-            <Tree
-              aria-label="Main process files"
-              variant="sidebar"
-              value={file}
-              onChange={setFile}
-            >
+            <Tree aria-label="Main process files" value={file} onChange={setFile}>
               <TreeRow id="main" label="main.js" />
             </Tree>
             <div className={styles.sideHead}>Preload</div>
-            <Tree
-              aria-label="Preload files"
-              variant="sidebar"
-              value={file}
-              onChange={setFile}
-            >
+            <Tree aria-label="Preload files" value={file} onChange={setFile}>
               <TreeRow id="preload" label="preload.js" />
             </Tree>
             <div className={styles.sideHead}>Renderer</div>
-            <Tree
-              aria-label="Renderer files"
-              variant="sidebar"
-              value={file}
-              onChange={setFile}
-            >
+            <Tree aria-label="Renderer files" value={file} onChange={setFile}>
               <TreeRow id="html" label="index.html" />
               <TreeRow
                 id="renderer"
@@ -531,7 +507,7 @@ export function Gallery({
                     </Button>
                   </Row>
                 </Specimen>
-                <Specimen label="Button · states: disabled, loading, progress, toggled, fill">
+                <Specimen label="Button · states: disabled, loading, progress, toggled">
                   <Row>
                     <Button variant="primary" icon="upload" isDisabled>
                       Publish
@@ -544,11 +520,6 @@ export function Gallery({
                       Console
                     </Button>
                   </Row>
-                  <div style={{ maxWidth: 280 }}>
-                    <Button icon="download" fill>
-                      Download Electron 43.0.0
-                    </Button>
-                  </div>
                 </Specimen>
                 <Specimen label="Icon button · ghost, pressed, secondary, primary, small, disabled">
                   <Row>
@@ -616,7 +587,7 @@ export function Gallery({
                     />
                   </Col>
                 </Specimen>
-                <Specimen label="Text field · small, suffix, on glass">
+                <Specimen label="Text field · small, on glass">
                   <Col>
                     <TextField
                       aria-label="Filter output"
@@ -624,13 +595,6 @@ export function Gallery({
                       icon="search"
                       placeholder="Filter output"
                       style={{ width: 220 }}
-                    />
-                    <TextField
-                      label="Add module"
-                      icon="search"
-                      placeholder="lodash, three, zod…"
-                      suffix={<Kbd keys={['⌘', 'K']} />}
-                      style={{ width: 300 }}
                     />
                     <GlassWell>
                       <TextField
@@ -644,52 +608,18 @@ export function Gallery({
                     </GlassWell>
                   </Col>
                 </Specimen>
-                <Specimen label="Form field · stacked, inline, disabled">
-                  <Col>
-                    <FormField
-                      label="Electron flags"
-                      helper="Passed to Electron when a fiddle runs."
-                    >
-                      <TextField
-                        aria-label="Electron flags"
-                        defaultValue="--enable-logging"
-                        mono
-                        style={{ width: 260 }}
-                      />
-                    </FormField>
-                    <FormField
-                      label="Autosave"
-                      inline
-                      helper="Saves to disk after 2 seconds without typing."
-                    >
-                      <Switch defaultSelected>On</Switch>
-                    </FormField>
-                    <FormField
-                      label="Telemetry"
-                      isDisabled
-                      helper="Managed by your organization."
-                    >
-                      <Switch>Off</Switch>
-                    </FormField>
-                  </Col>
+                <Specimen label="Form field">
+                  <FormField label="Autosave">
+                    <Switch defaultSelected>On</Switch>
+                  </FormField>
                 </Specimen>
-                <Specimen label="Select · md, small, placeholder, invalid, disabled">
+                <Specimen label="Select · hints, placeholder, invalid, disabled">
                   <Col>
                     <Select
                       label="Electron version"
                       items={VERSIONS}
-                      defaultValue="43.0.0"
+                      value="43.0.0"
                       style={{ width: 240 }}
-                    />
-                    <Select
-                      label="Architecture"
-                      size="sm"
-                      items={[
-                        { id: 'arm64', label: 'arm64' },
-                        { id: 'x64', label: 'x64' },
-                      ]}
-                      defaultValue="arm64"
-                      style={{ width: 140 }}
                     />
                     <Select
                       label="Example"
@@ -700,7 +630,7 @@ export function Gallery({
                     <Select
                       label="Theme"
                       items={[{ id: 'x', label: 'Solarized' }]}
-                      defaultValue="x"
+                      value="x"
                       isInvalid
                       errorMessage="This theme failed to load."
                       style={{ width: 240 }}
@@ -708,31 +638,11 @@ export function Gallery({
                     <Select
                       label="Mirror"
                       items={[{ id: 'd', label: 'Default' }]}
-                      defaultValue="d"
+                      value="d"
                       isDisabled
                       style={{ width: 240 }}
                     />
                   </Col>
-                </Specimen>
-                <Specimen label="Select · open menu, groups and right-aligned hints">
-                  <Menu
-                    aria-label="Electron version"
-                    selectionMode="single"
-                    defaultSelectedKeys={['43.0.0']}
-                  >
-                    <MenuSection title="Stable">
-                      <MenuItem id="43.0.0" hint="latest">
-                        Electron 43.0.0
-                      </MenuItem>
-                      <MenuItem id="42.4.1">Electron 42.4.1</MenuItem>
-                    </MenuSection>
-                    <MenuSeparator />
-                    <MenuSection title="Pre-release">
-                      <MenuItem id="44.0.0-beta.3" hint="beta">
-                        Electron 44.0.0-beta.3
-                      </MenuItem>
-                    </MenuSection>
-                  </Menu>
                 </Specimen>
                 <Specimen label="Menu · icons, key caps, sections, selected, disabled, danger">
                   <Row>
@@ -764,7 +674,7 @@ export function Gallery({
                       </MenuItem>
                     </Menu>
                     <MenuTrigger>
-                      <Button iconEnd="chevron-down">More</Button>
+                      <Button>More</Button>
                       <MenuPopover>
                         <Menu aria-label="More" onAction={() => {}}>
                           <MenuItem id="dup" icon="copy">
@@ -778,11 +688,10 @@ export function Gallery({
                     </MenuTrigger>
                   </Row>
                 </Specimen>
-                <Specimen label="Checkbox · on, off, mixed, disabled, invalid">
+                <Specimen label="Checkbox · on, off, disabled, invalid">
                   <Col>
                     <Checkbox defaultSelected>Show welcome screen</Checkbox>
                     <Checkbox>Hide Electron logs</Checkbox>
-                    <Checkbox isIndeterminate>All modules</Checkbox>
                     <Checkbox isDisabled>Signed builds only</Checkbox>
                     <Checkbox isDisabled defaultSelected>
                       Managed by your organization
@@ -820,10 +729,12 @@ export function Gallery({
                     </Switch>
                   </Col>
                 </Specimen>
-                <Specimen label="Segmented control · two, three, small, icons, disabled">
+                <Specimen label="Segmented control · two, three, small, disabled">
                   <Col>
                     <SegmentedControl
                       label="Layout"
+                      value="split"
+                      onChange={noop}
                       options={[
                         { value: 'split', label: 'Split' },
                         { value: 'tabs', label: 'Tabs' },
@@ -831,7 +742,8 @@ export function Gallery({
                     />
                     <SegmentedControl
                       label="Process"
-                      defaultValue="both"
+                      value="both"
+                      onChange={noop}
                       options={[
                         { value: 'main', label: 'Main' },
                         { value: 'renderer', label: 'Renderer' },
@@ -841,6 +753,8 @@ export function Gallery({
                     <SegmentedControl
                       label="Console filter"
                       size="sm"
+                      value="all"
+                      onChange={noop}
                       options={[
                         { value: 'all', label: 'All' },
                         { value: 'main', label: 'Main' },
@@ -848,15 +762,10 @@ export function Gallery({
                       ]}
                     />
                     <SegmentedControl
-                      label="Theme"
-                      options={[
-                        { value: 'dark', icon: 'eye', 'aria-label': 'Dark' },
-                        { value: 'light', icon: 'maximize', 'aria-label': 'Light' },
-                      ]}
-                    />
-                    <SegmentedControl
                       label="Disabled"
                       isDisabled
+                      value="a"
+                      onChange={noop}
                       options={[
                         { value: 'a', label: 'On' },
                         { value: 'b', label: 'Off' },
@@ -895,35 +804,6 @@ export function Gallery({
                     </TabPanel>
                   </Tabs>
                 </Specimen>
-                <Specimen label="Tree · on the sheet, nested, pill, unsaved">
-                  <div style={{ width: 240 }}>
-                    <Tree
-                      aria-label="Fiddle files"
-                      defaultValue="renderer-2"
-                      defaultExpandedKeys={['root']}
-                    >
-                      <TreeRow id="root" label="my-first-fiddle" icon="folder">
-                        <TreeRow id="main-2" label="main.js" />
-                        <TreeRow
-                          id="preload-2"
-                          label="preload.js"
-                          unsaved="Unsaved changes"
-                        />
-                        <TreeRow id="renderer-2" label="renderer.js" pill="1 error" />
-                        <TreeRow id="html-2" label="index.html" />
-                      </TreeRow>
-                      <TreeRow id="modules" label="node_modules" icon="folder">
-                        <TreeRow id="lodash" label="lodash" icon="package" />
-                      </TreeRow>
-                      <TreeRow
-                        id="locked"
-                        label="package-lock.json"
-                        icon="lock"
-                        isDisabled
-                      />
-                    </Tree>
-                  </div>
-                </Specimen>
                 <Specimen label="Split handle · drag, arrow keys, Home and End, double-click to reset">
                   <SplitDemo />
                 </Specimen>
@@ -937,7 +817,8 @@ export function Gallery({
                       nav={
                         <SideNav
                           aria-label="Settings"
-                          defaultValue="exec"
+                          value="exec"
+                          onChange={noop}
                           items={[
                             { id: 'general', label: 'General', icon: 'settings' },
                             { id: 'appearance', label: 'Appearance', icon: 'eye' },
@@ -946,9 +827,7 @@ export function Gallery({
                               id: 'versions',
                               label: 'Electron versions',
                               icon: 'download',
-                              badge: '3',
                             },
-                            { heading: 'Account' },
                             { id: 'accounts', label: 'GitHub', icon: 'user' },
                             { id: 'keys', label: 'Keyboard', icon: 'keyboard' },
                           ]}
@@ -956,10 +835,7 @@ export function Gallery({
                       }
                     >
                       <h2 className={styles.pageTitle}>Execution</h2>
-                      <FormField
-                        label="Electron flags"
-                        helper="Passed to Electron when a fiddle runs."
-                      >
+                      <FormField label="Electron flags">
                         <TextField
                           aria-label="Electron flags"
                           defaultValue="--js-flags=--expose-gc"
@@ -981,20 +857,13 @@ export function Gallery({
               </Section>
 
               <Section title="Labels">
-                <Specimen label="Tag · tones, removable">
+                <Specimen label="Tag · tones">
                   <Row>
                     <Tag>arm64</Tag>
                     <Tag tone="accent">beta</Tag>
                     <Tag tone="success">stable</Tag>
                     <Tag tone="warning">draft</Tag>
                     <Tag tone="danger">unsupported</Tag>
-                    <Tag
-                      tone="accent"
-                      onRemove={() => {}}
-                      removeLabel="Remove electron-store"
-                    >
-                      electron-store
-                    </Tag>
                   </Row>
                 </Specimen>
                 <Specimen label="Kbd">
@@ -1026,48 +895,18 @@ export function Gallery({
               </Section>
 
               <Section title="Feedback and overlays">
-                <Specimen label="Tooltip · with shortcut, on a disabled control">
-                  <div className={styles.tooltipRow}>
-                    <Tooltip label="Split editor" kbd="⌘\" isOpen>
-                      <IconButton icon="columns" label="Split editor" />
-                    </Tooltip>
-                    <Tooltip label="Sign in to GitHub to publish" isOpen triggerDisabled>
-                      <Button icon="upload" isDisabled>
-                        Publish
-                      </Button>
-                    </Tooltip>
-                  </div>
-                </Specimen>
-                <Specimen label="Progress ring and spinner · 14 and 24">
+                <Specimen label="Progress ring and spinner">
                   <div className={styles.rings}>
-                    <ProgressRing value={35} label="Downloading" />
-                    <ProgressRing value={72} size={24} label="Downloading" />
-                    <Spinner label="Loading" />
-                    <Spinner size={24} label="Loading" />
+                    <ProgressRing value={35} />
+                    <ProgressRing value={72} />
+                    <Spinner />
                   </div>
                 </Specimen>
-                <Specimen label="Callout · default, primary, danger">
-                  <Col>
-                    <Callout title="Sandboxed by default">
-                      Renderers have no Node.js access. Use preload.js to expose what they
-                      need.
-                    </Callout>
-                    <Callout
-                      intent="primary"
-                      title="New in Electron 43"
-                      action={
-                        <Button size="sm" variant="ghost" iconEnd="external">
-                          See what changed
-                        </Button>
-                      }
-                    >
-                      The Tray API supports template images on Windows.
-                    </Callout>
-                    <Callout intent="danger" title="Electron 40 is no longer supported">
-                      It stops receiving security fixes. Pick a newer version to keep
-                      testing.
-                    </Callout>
-                  </Col>
+                <Specimen label="Callout">
+                  <Callout>
+                    Renderers have no Node.js access. Use preload.js to expose what they
+                    need.
+                  </Callout>
                 </Specimen>
                 <Specimen label="Popover · anchored with an arrow">
                   <div className={styles.popoverRoom}>
@@ -1104,8 +943,8 @@ export function Gallery({
               </Section>
 
               <Section title="Content">
-                <Specimen label="List row · selected, meta, tags, disabled">
-                  <List aria-label="Fiddles" defaultValue="vib">
+                <Specimen label="List row · selected, meta, tags">
+                  <List aria-label="Fiddles" value="vib" onChange={noop}>
                     <ListRow
                       id="vib"
                       icon="file"
@@ -1127,24 +966,13 @@ export function Gallery({
                       meta="not saved"
                       tags={<Tag tone="warning">draft</Tag>}
                     />
-                    <ListRow
-                      id="old"
-                      icon="file"
-                      title="archived-demo"
-                      meta="read only"
-                      isDisabled
-                    />
                   </List>
                 </Specimen>
-                <Specimen
-                  label="Table · sections, mono, right-aligned, selected row, empty"
-                  wide
-                >
+                <Specimen label="Table · sections, mono, right-aligned, empty" wide>
                   <Table
                     aria-label="Electron versions"
                     columns={TABLE_COLUMNS}
                     rows={TABLE_ROWS}
-                    selectedIds={['42.4.1']}
                   />
                   <Table
                     aria-label="Filtered versions"

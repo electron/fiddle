@@ -57,13 +57,6 @@
   gap: 2px;
 }
 
-.heading {
-  padding: 14px 10px 5px;
-  font: var(--lu-type-caption);
-  letter-spacing: var(--lu-type-caption-tracking);
-  color: var(--lu-ink-muted);
-}
-
 .item {
   appearance: none;
   display: flex;
@@ -106,12 +99,6 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-}
-
-.badge {
-  flex: none;
-  font: 500 11px/14px var(--lu-font-sans);
-  color: var(--lu-ink-muted);
 }
 
 /* Forced colors drops the fill that marks the current section. */

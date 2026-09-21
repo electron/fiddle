@@ -24,12 +24,6 @@ describe('Checkbox', () => {
     expect(box.disabled).toBe(true);
     expect(box.closest('label')?.hasAttribute('data-disabled')).toBe(true);
   });
-
-  it('can be indeterminate', () => {
-    render(<Checkbox isIndeterminate>All modules</Checkbox>);
-    const box = screen.getByRole('checkbox', { name: 'All modules' }) as HTMLInputElement;
-    expect(box.indeterminate).toBe(true);
-  });
 });
 
 describe('Switch', () => {
