@@ -7,9 +7,11 @@ const mocks = vi.hoisted(() => ({
     RenameFile: vi.fn(() => Promise.resolve()),
     RemoveFile: vi.fn(() => Promise.resolve()),
   },
+  toastError: vi.fn(),
 }));
 
 vi.mock('../../../ipc/renderer', () => ({ documentsApi: mocks.documentsApi }));
+vi.mock('../../toast-error', () => ({ toastError: mocks.toastError }));
 vi.mock('../packages/PackagesSection', () => ({ PackagesSection: () => null }));
 // Sheet pulls in Monaco; the sidebar only needs its label keys.
 vi.mock('../../shell/Sheet', () => ({
@@ -172,15 +174,20 @@ describe('Sidebar add in group', () => {
     expect(mocks.documentsApi.AddFile).not.toHaveBeenCalled();
   });
 
-  it('checks the name before asking main', async () => {
-    renderSidebar();
+  it("shows main's words when it refuses the name, and doesn't open the file", async () => {
+    const refusal = new Error('Zweite Hauptdatei');
+    mocks.documentsApi.AddFile.mockRejectedValueOnce(refusal);
+    const onOpen = renderSidebar();
     fireEvent.click(screen.getByRole('button', { name: 'addRendererFile' }));
     const input = await nameField();
     expect(input.value).toBe('renderer-2.js');
-    // A second main entry breaks the file rules.
     fireEvent.change(input, { target: { value: 'main.mjs' } });
     fireEvent.click(screen.getByRole('button', { name: 'create' }));
     await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull());
-    expect(mocks.documentsApi.AddFile).not.toHaveBeenCalled();
+    expect(mocks.documentsApi.AddFile).toHaveBeenCalledWith('main.mjs');
+    await waitFor(() =>
+      expect(mocks.toastError).toHaveBeenCalledWith(refusal, 'fileChangeFailed'),
+    );
+    expect(onOpen).not.toHaveBeenCalled();
   });
 });

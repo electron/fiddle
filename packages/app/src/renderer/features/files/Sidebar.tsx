@@ -1,11 +1,7 @@
 import { useRef, useState, type MouseEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import {
-  assertCanAddFile,
-  assertCanRenameFile,
-  isMainEntry,
-} from '../../../fiddle/files';
+import { isMainEntry } from '../../../fiddle/files';
 import { documentsApi } from '../../../ipc/renderer';
 import {
   Button,
@@ -103,8 +99,8 @@ export function Sidebar({
       })
     )?.trim();
     if (!name) return;
+    // Main checks the name against the file rules, and words a refusal in the user's language.
     try {
-      assertCanAddFile(names, name);
       await documentsApi.AddFile(name);
       onOpen(name);
     } catch (error) {
@@ -125,7 +121,6 @@ export function Sidebar({
     )?.trim();
     if (!next || next === name) return;
     try {
-      assertCanRenameFile(names, name, next);
       await renameFileInEditor(name, next);
     } catch (error) {
       fail(error);
