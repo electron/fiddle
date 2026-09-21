@@ -16,7 +16,10 @@ import { Icon } from '../icons/Icon';
 import field from './Field.module.css';
 import styles from './Choice.module.css';
 
-export interface CheckboxProps extends Omit<AriaCheckboxProps, 'children' | 'className'> {
+export interface CheckboxProps extends Omit<
+  AriaCheckboxProps,
+  'children' | 'className' | 'isIndeterminate'
+> {
   children?: ReactNode;
   className?: string;
 }
@@ -24,14 +27,10 @@ export interface CheckboxProps extends Omit<AriaCheckboxProps, 'children' | 'cla
 export function Checkbox({ children, className, ...rest }: CheckboxProps) {
   return (
     <AriaCheckbox {...rest} className={cx(styles.choice, className)}>
-      {({ isSelected, isIndeterminate }) => (
+      {({ isSelected }) => (
         <>
           <span className={styles.box} aria-hidden="true">
-            {isIndeterminate ? (
-              <Icon name="minus" size={12} />
-            ) : isSelected ? (
-              <Icon name="check" size={12} />
-            ) : null}
+            {isSelected && <Icon name="check" size={12} />}
           </span>
           {children != null && <span className={styles.text}>{children}</span>}
         </>

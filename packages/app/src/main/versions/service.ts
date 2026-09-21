@@ -55,19 +55,14 @@ export type StoredBuild = z.infer<typeof storedBuildSchema>;
 const localBuildsFileSchema = z.object({ builds: z.array(storedBuildSchema) });
 type LocalBuildsFile = z.infer<typeof localBuildsFileSchema>;
 
-/** core's installer on the shared cache. The `per-version` layout always takes cross-process locks. */
+/** core's installer on the shared cache. It takes cross-process locks. */
 export function createInstaller(
   cache: CachePaths,
   options: Pick<InstallerOptions, 'downloader'> = {},
 ): Installer {
   return new Installer(
-    {
-      electronDownloads: cache.downloads,
-      electronInstall: path.join(cache.root, 'current'),
-      electronVersions: cache.electron,
-      versionsCache: cache.releases,
-    },
-    { layout: 'per-version', errors: 'typed', ...options },
+    { electronDownloads: cache.downloads, electronVersions: cache.electron },
+    options,
   );
 }
 
@@ -143,17 +138,11 @@ export async function fetchReleaseList(
   return data;
 }
 
-export async function loadReleases(
-  data: unknown[],
-  cache: CachePaths,
-  url: string,
-): Promise<{ versions: ElectronVersions; rows: ReleaseRow[] }> {
-  const versions = await ElectronVersions.create({
-    initialVersions: data,
-    ignoreCache: true,
-    paths: { versionsCache: cache.releases },
-    releasesUrl: url,
-  });
+export function loadReleases(data: unknown[]): {
+  versions: ElectronVersions;
+  rows: ReleaseRow[];
+} {
+  const versions = new ElectronVersions(data);
   const rows = isReleaseList(data)
     ? toReleaseRows(data, {
         stableMajors: versions.stableMajors,
@@ -503,11 +492,7 @@ export class VersionsService {
   }
 
   async #setReleases(data: unknown[], text: string): Promise<void> {
-    const { versions, rows } = await loadReleases(
-      data,
-      this.#options.cache,
-      this.#options.releasesUrl,
-    );
+    const { versions, rows } = loadReleases(data);
     this.#versions = versions;
     this.#rows = rows;
     this.#releasesText = text;

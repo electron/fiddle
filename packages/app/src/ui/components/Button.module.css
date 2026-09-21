@@ -40,10 +40,6 @@
   outline-offset: 1px;
 }
 
-.button[data-fill] {
-  width: 100%;
-}
-
 /* The leading icon sits 2px into the padding so the label looks centred. */
 .lead {
   margin-left: -2px;

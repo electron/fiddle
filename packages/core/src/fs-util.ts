@@ -83,17 +83,6 @@ export async function removeBestEffort(target: string): Promise<void> {
   }
 }
 
-export async function writeFileAtomic(file: string, data: string): Promise<void> {
-  const tmp = `${file}.${process.pid}.${Date.now()}.tmp`;
-  try {
-    await fs.writeFile(tmp, data, 'utf8');
-    await rename(tmp, file);
-  } catch (err) {
-    await fs.rm(tmp, { force: true });
-    throw err;
-  }
-}
-
 /** `os.hostname()`, made safe for a file name. It never contains `_`. */
 export function safeHostname(): string {
   return os.hostname().replace(/[^A-Za-z0-9.-]/g, '-');

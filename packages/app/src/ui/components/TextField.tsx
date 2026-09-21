@@ -24,8 +24,6 @@ export interface TextFieldProps extends Omit<
   /** For fields that sit on the chrome, such as the sidebar search. */
   onGlass?: boolean;
   icon?: IconName;
-  /** Trailing content inside the field, such as a Kbd. */
-  suffix?: ReactNode;
   mono?: boolean;
   /** The `<input>`, e.g. to select its text. */
   inputRef?: Ref<HTMLInputElement>;
@@ -41,7 +39,6 @@ export function TextField({
   size = 'md',
   onGlass,
   icon,
-  suffix,
   mono,
   inputRef,
   className,
@@ -66,7 +63,6 @@ export function TextField({
           className={cx(styles.input, mono && styles.mono)}
           placeholder={placeholder}
         />
-        {suffix && <span className={styles.suffix}>{suffix}</span>}
       </div>
       {description && (
         <Text slot="description" className={styles.help}>
@@ -79,43 +75,19 @@ export function TextField({
 }
 
 export interface FormFieldProps {
-  label?: string;
-  helper?: ReactNode;
-  /** Label on the left, control on the right. */
-  inline?: boolean;
-  isDisabled?: boolean;
+  label: string;
   children: ReactNode;
-  className?: string;
 }
 
-/** A caption label, a control and helper text, for controls that don't carry their own label. */
-export function FormField({
-  label,
-  helper,
-  inline,
-  isDisabled,
-  children,
-  className,
-}: FormFieldProps) {
+/** A caption label on the left of a control that doesn't carry its own label. */
+export function FormField({ label, children }: FormFieldProps) {
   const id = useId();
   return (
-    <div
-      role="group"
-      aria-labelledby={label ? id : undefined}
-      aria-disabled={isDisabled || undefined}
-      className={cx(styles.formField, className)}
-      data-inline={inline || undefined}
-      data-disabled={isDisabled || undefined}
-    >
-      {label && (
-        <div id={id} className={styles.label}>
-          {label}
-        </div>
-      )}
-      <div className={styles.control} inert={isDisabled}>
-        {children}
+    <div role="group" aria-labelledby={id} className={styles.formField}>
+      <div id={id} className={styles.label}>
+        {label}
       </div>
-      {helper && <div className={styles.help}>{helper}</div>}
+      <div className={styles.control}>{children}</div>
     </div>
   );
 }
