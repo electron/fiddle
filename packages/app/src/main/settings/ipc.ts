@@ -18,7 +18,7 @@ import { dialogText } from '../documents/deep-link-queue';
 import { tm } from '../i18n';
 import type { IpcContext } from '../ipc';
 import { log } from '../log';
-import { writeAtomic } from '../persistence/json-store';
+import { writeAtomic } from '@electron/fiddle-core';
 import { themeFromMonaco, themeId, writeTheme } from '../themes/themes';
 import type { SettingsContext } from './index';
 import { sanitizeSettings, SETTINGS_VERSION } from './service';

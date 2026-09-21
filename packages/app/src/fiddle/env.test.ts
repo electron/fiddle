@@ -168,6 +168,36 @@ describe('fiddleProcessEnv', () => {
     });
   });
 
+  it('drops secrets, loader variables and Node options from the parent, ignoring case', () => {
+    const secrets = {
+      GH_TOKEN: 'gh',
+      my_token: 'x',
+      NODE_AUTH_TOKEN: 'node',
+      OPENAI_API_KEY: 'key',
+      CLIENT_SECRET: 'secret',
+      DB_PASSWORD: 'password',
+      DJANGO_SECRET_KEY: 'django',
+      TLS_PRIVATE_KEY: 'pem',
+      MINIO_ACCESS_KEY: 'minio',
+      GOOGLE_CREDENTIALS: '{}',
+      GPG_PASSPHRASE: 'phrase',
+      DATABASE_URL: 'postgres://user:pass@host/db',
+      AWS_PROFILE: 'p',
+      SSH_AUTH_SOCK: '/tmp/agent.sock',
+      'npm_config_//registry.npmjs.org/:_authToken': 'npm-token',
+      npm_config__auth: 'npm-auth',
+      Sentry_Release: 'y',
+      NODE_OPTIONS: '--require /evil.js',
+      ELECTRON_RUN_AS_NODE: '1',
+      LD_PRELOAD: '/evil.so',
+      DYLD_INSERT_LIBRARIES: '/evil.dylib',
+    };
+    const env = withPlatform('linux', () =>
+      fiddleProcessEnv({}, { HOME: '/home/me', ...secrets }),
+    );
+    expect(env).toEqual({ HOME: '/home/me' });
+  });
+
   it('adds advanced logging, then the user variables, except blocked ones', () => {
     const env = withPlatform('linux', () =>
       fiddleProcessEnv(

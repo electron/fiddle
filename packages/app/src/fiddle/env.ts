@@ -1,5 +1,3 @@
-import { buildChildEnv } from '@electron/fiddle-core';
-
 /** Set when "Advanced Electron logging" is on. */
 export const ADVANCED_LOGGING_ENV: Readonly<Record<string, string>> = {
   ELECTRON_ENABLE_LOGGING: 'true',
@@ -7,8 +5,34 @@ export const ADVANCED_LOGGING_ENV: Readonly<Record<string, string>> = {
   ELECTRON_ENABLE_STACK_DUMPING: 'true',
 };
 
-/** App-internal parent-environment variables, the e2e driver's included, that no child process gets. */
-export const FIDDLE_EXTRA_ENV_DENYLIST: readonly string[] = ['ELECTRON_FIDDLE_*'];
+/**
+ * Parent-environment variables no child process gets: secrets, the app's own
+ * (`ELECTRON_FIDDLE_*`, the e2e driver's included), and the ones users can't
+ * set either (see {@link isBlockedUserEnvKey}). `*` matches any run of
+ * characters, and case is ignored.
+ */
+const PARENT_ENV_DENYLIST = [
+  '*_TOKEN',
+  '*_API_KEY',
+  '*_SECRET',
+  '*_SECRET_KEY',
+  '*_PRIVATE_KEY',
+  '*_ACCESS_KEY',
+  '*_PASSWORD',
+  '*_PASSPHRASE',
+  '*_CREDENTIALS',
+  'DATABASE_URL',
+  'NPM_CONFIG_*_AUTH',
+  'NPM_CONFIG_*_AUTHTOKEN',
+  'AWS_*',
+  'SSH_AUTH_SOCK',
+  'SENTRY_*',
+  'ELECTRON_FIDDLE_*',
+  'NODE_OPTIONS',
+  'ELECTRON_RUN_AS_NODE',
+  'LD_*',
+  'DYLD_*',
+].map((pattern) => new RegExp(`^${pattern.replaceAll('*', '.*')}$`, 'i'));
 
 export interface ParsedEnvEntries {
   env: Record<string, string>;
@@ -103,26 +127,36 @@ export function cleanFlags(flags: readonly string[]): string[] {
 }
 
 export interface FiddleEnvOptions {
-  /** Already-parsed user variables. `LD_*` and `DYLD_*` are dropped. */
+  /** Already-parsed user variables. Blocked keys are dropped. */
   userEnv?: Readonly<Record<string, string>>;
   advancedLogging?: boolean;
 }
 
-/**
- * The environment for fiddle processes, through core's `buildChildEnv`:
- * `parent` minus core's denylist and {@link FIDDLE_EXTRA_ENV_DENYLIST}, then
- * the advanced-logging variables, then the user's. On Windows a variable
- * replaces any differently-cased copy.
- */
+/** `parent` minus {@link PARENT_ENV_DENYLIST}, then `vars` minus the blocked keys. On Windows a variable replaces any differently-cased copy. */
+function childEnv(
+  vars: Iterable<readonly [string, string | undefined]>,
+  parent: NodeJS.ProcessEnv,
+): NodeJS.ProcessEnv {
+  return envFromEntries([
+    ...Object.entries(parent).filter(
+      ([name]) => !PARENT_ENV_DENYLIST.some((re) => re.test(name)),
+    ),
+    ...[...vars].filter(([name]) => !isBlockedUserEnvKey(name)),
+  ]);
+}
+
+/** The environment for fiddle processes: the filtered parent's, then the advanced-logging variables, then the user's. */
 export function fiddleProcessEnv(
   options: FiddleEnvOptions = {},
   parent: NodeJS.ProcessEnv = process.env,
 ): NodeJS.ProcessEnv {
-  const vars = envFromEntries([
-    ...Object.entries(options.advancedLogging ? ADVANCED_LOGGING_ENV : {}),
-    ...Object.entries(options.userEnv ?? {}),
-  ]);
-  return buildChildEnv({ extraDenylist: FIDDLE_EXTRA_ENV_DENYLIST, vars }, parent);
+  return childEnv(
+    [
+      ...Object.entries(options.advancedLogging ? ADVANCED_LOGGING_ENV : {}),
+      ...Object.entries(options.userEnv ?? {}),
+    ],
+    parent,
+  );
 }
 
 /** Where `.npmrc` and Yarn read registry credentials from. */
@@ -137,11 +171,8 @@ const PACKAGE_MANAGER_AUTH_ENV =
 export function packageManagerEnv(
   parent: NodeJS.ProcessEnv = process.env,
 ): NodeJS.ProcessEnv {
-  const auth = Object.entries(parent).filter(([name]) =>
-    PACKAGE_MANAGER_AUTH_ENV.test(name),
-  );
-  return buildChildEnv(
-    { extraDenylist: FIDDLE_EXTRA_ENV_DENYLIST, vars: Object.fromEntries(auth) },
+  return childEnv(
+    Object.entries(parent).filter(([name]) => PACKAGE_MANAGER_AUTH_ENV.test(name)),
     parent,
   );
 }

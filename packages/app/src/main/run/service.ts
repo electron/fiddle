@@ -491,9 +491,7 @@ export class RunService {
       files: Object.keys(files),
       chromiumLogs: settings.electronLogging,
     });
-    const child = await spawnElectron({
-      installer: this.#versions.installer,
-      versions: this.#versions.electronVersions,
+    const child = spawnElectron({
       exec,
       appDir,
       runDir: dir,
@@ -503,7 +501,6 @@ export class RunService {
       env: { ELECTRON_ENABLE_LOGGING: 'true', ...userEnv.env },
       advancedLogging: settings.electronLogging,
       inspect: true,
-      quiet: true,
     });
     // A failed spawn is an `error` event on the next tick, then `close`, so
     // nothing may be awaited between the spawn and these listeners.

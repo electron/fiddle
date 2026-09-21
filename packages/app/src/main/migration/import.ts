@@ -13,6 +13,7 @@ import {
   Installer,
   removeBestEffort,
   renameWithRetry,
+  writeAtomic,
 } from '@electron/fiddle-core';
 import semver from 'semver';
 
@@ -24,7 +25,7 @@ import {
   type SafeStorageLike,
 } from '../github/credentials';
 import { log } from '../log';
-import { readJsonObjectSync, writeAtomic } from '../persistence/json-store';
+import { readJsonObjectSync } from '../persistence/json-store';
 import { SETTINGS_VERSION } from '../settings/service';
 import type { StoredBuild } from '../versions/service';
 import { themeFromMonaco, themeId, writeTheme } from '../themes/themes';

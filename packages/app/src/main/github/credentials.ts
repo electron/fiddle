@@ -1,7 +1,7 @@
 import { mkdir, readFile, rm } from 'node:fs/promises';
 import path from 'node:path';
 
-import { writeAtomic } from '../persistence/json-store';
+import { writeAtomic } from '@electron/fiddle-core';
 
 /** The subset of Electron's `safeStorage` used here, injected so tests need no Electron. */
 export interface SafeStorageLike {

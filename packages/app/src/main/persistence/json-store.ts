@@ -3,12 +3,9 @@
  * its schema is dropped in memory. It stays on disk only if it has no default:
  * the next write replaces one that has. No Electron imports.
  */
-import { randomUUID } from 'node:crypto';
 import fs from 'node:fs';
-import fsp from 'node:fs/promises';
-import path from 'node:path';
 
-import { renameWithRetry } from '@electron/fiddle-core';
+import { writeAtomic } from '@electron/fiddle-core';
 
 import { log } from '../log';
 
@@ -333,52 +330,4 @@ export function corruptName(file: string, now = new Date()): string {
   const suffix = file.endsWith('.bak') ? '.bak' : '';
   const stamp = now.toISOString().replace(/[:.]/g, '-');
   return `${base}${suffix}.corrupt-${stamp}.json`;
-}
-
-/**
- * Replaces `file` atomically: a temp file in the same folder (created with
- * `mode`), fsync, rename (retried on Windows), then fsync the folder on POSIX.
- * `backup` first copies the current file to `<file>.bak`.
- */
-export async function writeAtomic(
-  file: string,
-  data: string | Uint8Array,
-  { mode, backup = false }: { mode?: number; backup?: boolean } = {},
-): Promise<void> {
-  const dir = path.dirname(file);
-  await fsp.mkdir(dir, { recursive: true });
-  const temp = path.join(dir, `.${path.basename(file)}.${randomUUID()}.tmp`);
-  try {
-    const handle = await fsp.open(temp, 'w', mode);
-    try {
-      await handle.writeFile(data);
-      await handle.sync();
-    } finally {
-      await handle.close();
-    }
-    if (backup) {
-      try {
-        await fsp.copyFile(file, `${file}.bak`);
-      } catch (error) {
-        if ((error as NodeJS.ErrnoException).code !== 'ENOENT') throw error;
-      }
-    }
-    await renameWithRetry(temp, file);
-  } catch (error) {
-    await fsp.rm(temp, { force: true });
-    throw error;
-  }
-  if (process.platform !== 'win32') await syncDir(dir);
-}
-
-async function syncDir(dir: string): Promise<void> {
-  let handle: fsp.FileHandle | undefined;
-  try {
-    handle = await fsp.open(dir, 'r');
-    await handle.sync();
-  } catch {
-    // Some file systems can't fsync a directory; the rename is still atomic.
-  } finally {
-    await handle?.close();
-  }
 }

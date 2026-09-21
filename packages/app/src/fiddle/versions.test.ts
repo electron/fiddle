@@ -84,14 +84,12 @@ describe('obsolete versions', () => {
   });
 
   it('finds the oldest supported major, with the NUM_STABLE_BRANCHES override', () => {
-    const input = {
-      stableMajors: [26, 27, 28, 29, 30],
-      supportedMajors: [28, 29, 30, 31],
-    };
-    expect(getOldestSupportedMajor(input)).toBe(28);
-    expect(getOldestSupportedMajor({ ...input, numStableBranches: '2' })).toBe(29);
-    expect(getOldestSupportedMajor({ ...input, numStableBranches: 'x' })).toBe(28);
-    expect(getOldestSupportedMajor({ ...input, numStableBranches: '0' })).toBe(28);
+    const stableMajors = [26, 27, 28, 29, 30];
+    expect(getOldestSupportedMajor(stableMajors)).toBe(28);
+    expect(getOldestSupportedMajor(stableMajors, '2')).toBe(29);
+    expect(getOldestSupportedMajor(stableMajors, 'x')).toBe(28);
+    expect(getOldestSupportedMajor(stableMajors, '0')).toBe(28);
+    expect(getOldestSupportedMajor([1, 2])).toBe(1);
   });
 });
 

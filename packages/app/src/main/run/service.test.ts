@@ -178,7 +178,7 @@ afterEach(() => {
 
 /** Makes `spawnElectron` return `child`, and remembers the run directory. */
 function spawnReturns(child: FakeChild): void {
-  spawnElectron.mockImplementation(async (options: { runDir: string }) => {
+  spawnElectron.mockImplementation((options: { runDir: string }) => {
     runDirs.push(options.runDir);
     return child;
   });
@@ -230,7 +230,7 @@ describe('RunService.run', () => {
   });
 
   it('reports a spawn failure that arrives on the next tick, instead of hanging', async () => {
-    spawnElectron.mockImplementation(async (options: { runDir: string }) => {
+    spawnElectron.mockImplementation((options: { runDir: string }) => {
       runDirs.push(options.runDir);
       const child = fakeChild();
       process.nextTick(() => {

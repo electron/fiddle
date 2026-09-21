@@ -145,10 +145,7 @@ export type AppStateFile = z.infer<typeof stateSchema>;
 interface Deps {
   hub: StateHub;
   platform: Platform;
-  versions: Pick<
-    VersionsService,
-    'releases' | 'release' | 'localBuild' | 'electronVersions'
-  >;
+  versions: Pick<VersionsService, 'releases' | 'release' | 'localBuild'>;
   /** Gists load with the signed-in user's client, so private gists work, once the stored token is restored. */
   github: Pick<GitHubService, 'client' | 'whenReady'>;
   npm: Pick<NpmClient, 'packument'>;

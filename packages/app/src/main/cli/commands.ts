@@ -3,7 +3,7 @@ import fsp from 'node:fs/promises';
 import path from 'node:path';
 import readline from 'node:readline/promises';
 
-import { type ElectronVersions, Installer, InstallState } from '@electron/fiddle-core';
+import { Installer, InstallState } from '@electron/fiddle-core';
 import { app } from 'electron';
 
 import { bisectCompareUrl } from '../../fiddle/bisect';
@@ -92,11 +92,6 @@ import { ensureTrusted, type TrustPrompt } from './trust';
 const EXAMPLE_PREFIX = 'example:';
 const ELECTRON_PREFIX = 'electron:';
 
-interface Releases {
-  versions: ElectronVersions;
-  rows: ReleaseRow[];
-}
-
 interface Ctx {
   reporter: Reporter;
   signal: AbortSignal;
@@ -104,19 +99,19 @@ interface Ctx {
   installer: Installer;
   releasesUrl: string;
   memo: {
-    cached?: Promise<Releases>;
-    fresh?: Promise<Releases>;
+    cached?: Promise<ReleaseRow[]>;
+    fresh?: Promise<ReleaseRow[]>;
     templates?: TemplateLoader;
   };
 }
 
 /** The cached or bundled release list, as the app starts with. */
-function cachedReleases(ctx: Ctx): Promise<Releases> {
+function cachedReleases(ctx: Ctx): Promise<ReleaseRow[]> {
   return (ctx.memo.cached ??= readReleaseList(ctx.cache).then(loadReleases));
 }
 
 /** The release list refreshed from the network, or the cached one if that fails. */
-function freshReleases(ctx: Ctx): Promise<Releases> {
+function freshReleases(ctx: Ctx): Promise<ReleaseRow[]> {
   return (ctx.memo.fresh ??= fetchReleaseList(ctx.cache, ctx.releasesUrl, netFetch).then(
     loadReleases,
     (error: unknown) => {
@@ -127,10 +122,10 @@ function freshReleases(ctx: Ctx): Promise<Releases> {
 }
 
 /** A known release that runs here. A version the cached list lacks refreshes it once. */
-async function requireRelease(ctx: Ctx, version: string): Promise<Releases> {
-  let list = await cachedReleases(ctx);
-  if (!list.rows.some((r) => r.version === version)) list = await freshReleases(ctx);
-  const row = list.rows.find((r) => r.version === version);
+async function requireRelease(ctx: Ctx, version: string): Promise<ReleaseRow[]> {
+  let rows = await cachedReleases(ctx);
+  if (!rows.some((r) => r.version === version)) rows = await freshReleases(ctx);
+  const row = rows.find((r) => r.version === version);
   if (!row)
     throw new FiddleError(
       ErrorCode.notFound,
@@ -141,7 +136,7 @@ async function requireRelease(ctx: Ctx, version: string): Promise<Releases> {
       ErrorCode.unavailable,
       tm('mainRun')('versionUnavailable', { version }),
     );
-  return list;
+  return rows;
 }
 
 /** The version new fiddles get in the app: the latest stable that runs here. */
@@ -157,7 +152,7 @@ const isUsable = (rows: readonly ReleaseRow[]) => (version: string) =>
   rows.find((r) => r.version === version)?.supported ?? true;
 
 async function templates(ctx: Ctx): Promise<TemplateLoader> {
-  const { rows } = await cachedReleases(ctx);
+  const rows = await cachedReleases(ctx);
   return (ctx.memo.templates ??= appTemplateLoader(() => rows, { signal: ctx.signal }));
 }
 
@@ -199,7 +194,7 @@ function report(ctx: Ctx, loaded: LoadedFiddle): LoadedFiddle {
 }
 
 async function newContext(ctx: Ctx): Promise<LoadContext> {
-  const { rows } = await cachedReleases(ctx);
+  const rows = await cachedReleases(ctx);
   return { version: { kind: 'release', version: defaultVersion(rows) }, modules: {} };
 }
 
@@ -249,7 +244,7 @@ async function loadFiddle(
   const id = getGistId(spec);
   if (!id)
     throw new FiddleError(ErrorCode.notFound, t('errorFiddleNotFound', { fiddle: spec }));
-  const { rows } = await cachedReleases(ctx);
+  const rows = await cachedReleases(ctx);
   const options = {
     context,
     confirmAddFile: async () => true,
@@ -369,19 +364,14 @@ async function chooseElectron(
   ctx: Ctx,
   input: { version?: string | undefined; electronPath?: string | undefined },
   loaded: LoadedFiddle,
-): Promise<ElectronChoice & { versions: ElectronVersions }> {
+): Promise<ElectronChoice> {
   if (input.electronPath) {
     const { exec } = await localElectron(input.electronPath);
-    return { exec, label: exec, versions: (await cachedReleases(ctx)).versions };
+    return { exec, label: exec };
   }
-  const version = releaseFor(input.version, loaded, (await cachedReleases(ctx)).rows);
-  const list = await requireRelease(ctx, version);
-  return {
-    exec: await releaseExec(ctx, version),
-    label: version,
-    release: version,
-    versions: list.versions,
-  };
+  const version = releaseFor(input.version, loaded, await cachedReleases(ctx));
+  await requireRelease(ctx, version);
+  return { exec: await releaseExec(ctx, version), label: version, release: version };
 }
 
 interface RunSpec {
@@ -400,7 +390,6 @@ async function runOnce(
   ctx: Ctx,
   spec: RunSpec,
   electron: ElectronChoice,
-  versions: ElectronVersions,
 ): Promise<RunOutcome> {
   const tr = tm('mainRun');
   const { loaded, modules, options } = spec;
@@ -460,9 +449,7 @@ async function runOnce(
       });
       await writeRunPackageJson(appDir, withElectron);
     }
-    const child = await spawnElectron({
-      installer: ctx.installer,
-      versions,
+    const child = spawnElectron({
       exec: electron.exec,
       appDir,
       runDir: dir,
@@ -473,7 +460,6 @@ async function runOnce(
       advancedLogging: options.logging,
       // Output goes straight to the terminal, so there's no console to show the inspector port in.
       inspect: false,
-      quiet: true,
     });
     const stop = () => stopChild(child);
     ctx.signal.addEventListener('abort', stop);
@@ -522,23 +508,18 @@ async function packageOrMake(
       tr('pmMissing', { pm: input.pm, url: PM_INSTALL_URLS[input.pm] }),
     );
   }
-  let list = await cachedReleases(ctx);
+  let releases = await cachedReleases(ctx);
   let release: string | undefined;
   let localPath: string | undefined;
   if (input.electronPath) {
     localPath = (await localElectron(input.electronPath)).folder;
   } else {
-    release = releaseFor(input.version, loaded, list.rows);
-    list = await requireRelease(ctx, release);
+    release = releaseFor(input.version, loaded, releases);
+    releases = await requireRelease(ctx, release);
   }
   const project = forgeProject(
     { files: loaded.fiddle.files, modules, name: loaded.name, author: osUserName() },
-    {
-      ...(release ? { release } : {}),
-      ...(localPath ? { localPath } : {}),
-      releases: list.rows,
-      electronVersions: list.versions,
-    },
+    { ...(release ? { release } : {}), ...(localPath ? { localPath } : {}), releases },
   );
   ctx.signal.throwIfAborted();
   const dir = await makeRunDir(`electron-fiddle-${task}-`);
@@ -607,13 +588,8 @@ const handlers: Handlers = {
     const loaded = await loadFiddle(ctx, input.fiddle);
     const modules = withModules(loaded, input.module);
     await ensureTrusted(loaded.fiddle, modules, input.trust, terminalPrompt(ctx.signal));
-    const { versions, ...electron } = await chooseElectron(ctx, input, loaded);
-    const outcome = await runOnce(
-      ctx,
-      { loaded, modules, options: input },
-      electron,
-      versions,
-    );
+    const electron = await chooseElectron(ctx, input, loaded);
+    const outcome = await runOnce(ctx, { loaded, modules, options: input }, electron);
     return {
       data: {
         name: loaded.name,
@@ -635,7 +611,7 @@ const handlers: Handlers = {
     if (compareVersions(good, bad) >= 0)
       throw new FiddleError(ErrorCode.invalidArgument, tr('bisectGoodNotOlder'));
     await requireRelease(ctx, good);
-    const list = await requireRelease(ctx, bad);
+    const releases = await requireRelease(ctx, bad);
     const filter = {
       channels: input.channel,
       showObsolete: input.obsolete,
@@ -644,7 +620,7 @@ const handlers: Handlers = {
     const range = getVersionRange(
       good,
       bad,
-      visibleVersions(list.rows, filter, () => true, [good, bad]),
+      visibleVersions(releases, filter, () => true, [good, bad]),
     );
     if (range.length < 2)
       throw new FiddleError(ErrorCode.invalidArgument, tr('bisectTooFew'));
@@ -663,12 +639,7 @@ const handlers: Handlers = {
           label: version,
           release: version,
         };
-        outcome = await runOnce(
-          ctx,
-          { loaded, modules, options: input },
-          electron,
-          list.versions,
-        );
+        outcome = await runOnce(ctx, { loaded, modules, options: input }, electron);
       } catch (error) {
         if (!ctx.signal.aborted) ctx.reporter.log(errorMessage(error), 'error');
         return undefined;
@@ -698,7 +669,7 @@ const handlers: Handlers = {
   },
 
   async 'versions list'(ctx, input) {
-    const { rows } = await freshReleases(ctx);
+    const rows = await freshReleases(ctx);
     const installed = (version: string) =>
       ctx.installer.state(version) === InstallState.installed;
     const filter = {
@@ -825,13 +796,11 @@ const handlers: Handlers = {
   async export(ctx, input) {
     const loaded = await loadFiddle(ctx, input.fiddle, input.revision);
     const dir = path.resolve(input.out);
-    const { rows, versions } = await cachedReleases(ctx);
     const ref = loaded.fiddle.version;
     const forge = input.forge
       ? forgeOptionsFor({
           ...(ref.kind === 'release' ? { release: ref.version } : {}),
-          releases: rows,
-          electronVersions: versions,
+          releases: await cachedReleases(ctx),
         })
       : undefined;
     const save = { name: loaded.name, author: osUserName(), ...(forge ? { forge } : {}) };

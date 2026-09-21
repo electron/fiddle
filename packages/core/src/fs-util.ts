@@ -1,5 +1,7 @@
+import { randomUUID } from 'node:crypto';
 import nodeFs from 'node:fs/promises';
 import os from 'node:os';
+import path from 'node:path';
 import { setTimeout as sleep } from 'node:timers/promises';
 
 // In Electron, `fs` reads `.asar` files as folders, so the asar files inside an
@@ -60,6 +62,47 @@ export async function renameIntoPlace(tmp: string, dest: string): Promise<void> 
     if (!(await exists(dest))) throw err;
     await removeBestEffort(tmp);
   }
+}
+
+/**
+ * Replaces `file` atomically: an exclusive temp file in the same folder
+ * (created with `mode`), fsync, {@link rename} over `file`, then fsync the
+ * folder on POSIX. A rename replaces a symlink at `file` instead of writing
+ * through it. `backup` first copies the current file to `<file>.bak`.
+ */
+export async function writeAtomic(
+  file: string,
+  data: string | Uint8Array,
+  { mode, backup = false }: { mode?: number; backup?: boolean } = {},
+): Promise<void> {
+  const dir = path.dirname(file);
+  await fs.mkdir(dir, { recursive: true });
+  const temp = path.join(dir, `.${path.basename(file)}.${randomUUID()}.tmp`);
+  try {
+    const handle = await fs.open(temp, 'wx', mode);
+    try {
+      await handle.writeFile(data);
+      await handle.sync();
+    } finally {
+      await handle.close();
+    }
+    if (backup) {
+      await fs.copyFile(file, `${file}.bak`).catch((err: unknown) => {
+        if (errorCode(err) !== 'ENOENT') throw err;
+      });
+    }
+    await rename(temp, file);
+  } catch (err) {
+    await fs.rm(temp, { force: true });
+    throw err;
+  }
+  if (process.platform === 'win32') return;
+  // Some file systems can't fsync a directory; the rename is still atomic.
+  const handle = await fs.open(dir, 'r').catch(() => undefined);
+  await handle
+    ?.sync()
+    .catch(() => undefined)
+    .finally(() => handle.close());
 }
 
 /** Copies a folder, treating `.asar` files inside it as plain files. */
