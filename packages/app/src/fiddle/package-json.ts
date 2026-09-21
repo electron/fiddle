@@ -87,8 +87,26 @@ export function generatePackageJson(input: PackageJsonInput): string {
   return JSON.stringify(pkg, null, 2);
 }
 
-function isRecord(value: unknown): value is Record<string, unknown> {
+export function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null && !Array.isArray(value);
+}
+
+/** The object in a `package.json` text. Throws `invalid-json` for anything else. */
+export function parsePackageJsonObject(text: string): Record<string, unknown> {
+  let data: unknown;
+  try {
+    // Windows editors add a byte order mark, which JSON.parse refuses.
+    data = JSON.parse(text.replace(/^\uFEFF/, ''));
+  } catch {
+    data = undefined;
+  }
+  if (isRecord(data)) return data;
+  throw reasonError(
+    ErrorCode.invalidArgument,
+    'invalid-json',
+    'Invalid JSON found in package.json',
+    { file: 'package.json' },
+  );
 }
 
 function stringEntries(value: unknown): [string, string][] {
@@ -106,22 +124,7 @@ export function stripRangePrefix(spec: string): string {
 
 /** Reads modules and the Electron version from a loaded `package.json`. Throws on invalid JSON. */
 export function parsePackageJson(text: string): ParsedPackageJson {
-  let data: unknown;
-  try {
-    // Windows editors add a byte order mark, which JSON.parse refuses.
-    data = JSON.parse(text.replace(/^\uFEFF/, ''));
-  } catch {
-    data = undefined;
-  }
-  if (!isRecord(data)) {
-    throw reasonError(
-      ErrorCode.invalidArgument,
-      'invalid-json',
-      'Invalid JSON found in package.json',
-      { file: 'package.json' },
-    );
-  }
-
+  const data = parsePackageJsonObject(text);
   const result: ParsedPackageJson = { modules: {}, rejectedModules: [] };
   const modules: [string, string][] = [];
   for (const [name, spec] of [

@@ -62,43 +62,31 @@ export const windowStateSchema = z.object({
 });
 export type WindowState = z.infer<typeof windowStateSchema>;
 
-/** One entry of a menu, as the renderer draws it. `id` is what `Window.ActivateMenuItem` takes; `accelerator` is display text for the platform. */
-export type MenuNode =
-  | { kind: 'submenu'; id: string; label: string; enabled: boolean; children: MenuNode[] }
-  | {
-      kind: 'item';
-      id: string;
-      label: string;
-      enabled: boolean;
-      checked?: boolean;
-      radio?: boolean;
-      accelerator?: string;
-    }
-  | { kind: 'separator' };
-
 export const menuItemIdSchema = z.string().min(1).max(300);
 
-export const menuNodeSchema: z.ZodType<MenuNode> = z.lazy(() =>
-  z.discriminatedUnion('kind', [
-    z.object({
-      kind: z.literal('submenu'),
-      id: menuItemIdSchema,
-      label: z.string(),
-      enabled: z.boolean(),
-      children: z.array(menuNodeSchema),
-    }),
-    z.object({
-      kind: z.literal('item'),
-      id: menuItemIdSchema,
-      label: z.string(),
-      enabled: z.boolean(),
-      checked: z.boolean().optional(),
-      radio: z.boolean().optional(),
-      accelerator: z.string().optional(),
-    }),
-    z.object({ kind: z.literal('separator') }),
-  ]),
-);
+/** One entry of a menu, as the renderer draws it. `id` is what `Window.ActivateMenuItem` takes; `accelerator` is display text for the platform. */
+export const menuNodeSchema = z.discriminatedUnion('kind', [
+  z.object({
+    kind: z.literal('submenu'),
+    id: menuItemIdSchema,
+    label: z.string(),
+    enabled: z.boolean(),
+    get children() {
+      return z.array(menuNodeSchema);
+    },
+  }),
+  z.object({
+    kind: z.literal('item'),
+    id: menuItemIdSchema,
+    label: z.string(),
+    enabled: z.boolean(),
+    checked: z.boolean().optional(),
+    radio: z.boolean().optional(),
+    accelerator: z.string().optional(),
+  }),
+  z.object({ kind: z.literal('separator') }),
+]);
+export type MenuNode = z.infer<typeof menuNodeSchema>;
 export const menuBarSchema = z.array(menuNodeSchema);
 export type MenuBarModel = z.infer<typeof menuBarSchema>;
 

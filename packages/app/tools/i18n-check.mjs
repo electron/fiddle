@@ -91,17 +91,15 @@ export function checkLocale(english, locale, messages, meta = {}) {
   return { errors, warnings };
 }
 
+/** The non-test .ts/.tsx files under `dir`, outside generated/ and locales/. */
 function sourceFiles(dir) {
-  const files = [];
-  for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
-    const file = path.join(dir, entry.name);
-    if (entry.isDirectory()) {
-      if (entry.name !== 'generated' && entry.name !== 'locales')
-        files.push(...sourceFiles(file));
-    } else if (/\.tsx?$/.test(entry.name) && !/\.test\.tsx?$/.test(entry.name))
-      files.push(file);
-  }
-  return files;
+  return fs
+    .readdirSync(dir, { recursive: true })
+    .filter((rel) => /\.tsx?$/.test(rel) && !/\.test\.tsx?$/.test(rel))
+    .filter(
+      (rel) => !rel.split(path.sep).some((p) => p === 'generated' || p === 'locales'),
+    )
+    .map((rel) => path.join(dir, rel));
 }
 
 /** English keys (plural groups by their base key) that no source text seems to use. */

@@ -1,6 +1,7 @@
-import { ErrorCode, FiddleError } from '../shared/errors';
+import { ErrorCode } from '../shared/errors';
 import { reasonError } from './error-reasons';
 import { type FileMap, PACKAGE_JSON } from './files';
+import { isRecord, parsePackageJsonObject } from './package-json';
 
 export const FORGE_CLI = '@electron-forge/cli';
 export const FORGE_PLUGIN_LOCAL_ELECTRON = '@electron-forge/plugin-local-electron';
@@ -21,31 +22,12 @@ export interface ForgeTransformOptions {
   latestStableVersion?: string;
 }
 
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === 'object' && value !== null && !Array.isArray(value);
-}
-
-function invalidPackageJson(): FiddleError {
-  return reasonError(
-    ErrorCode.invalidArgument,
-    'invalid-json',
-    'Invalid JSON found in package.json',
-    { file: PACKAGE_JSON },
-  );
-}
-
 /** Turns a generated `package.json` into an Electron Forge project's. */
 export function forgeTransformPackageJson(
   text: string,
   options: ForgeTransformOptions,
 ): string {
-  let pkg: unknown;
-  try {
-    pkg = JSON.parse(text);
-  } catch {
-    throw invalidPackageJson();
-  }
-  if (!isRecord(pkg)) throw invalidPackageJson();
+  const pkg = parsePackageJsonObject(text);
 
   if (!pkg.license) pkg.license = 'MIT';
   const devDependencies = isRecord(pkg.devDependencies) ? pkg.devDependencies : {};

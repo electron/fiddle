@@ -257,25 +257,9 @@ export function parseSetting<K extends SettingKey>(
   return result.success ? { value: result.data as Settings[K] } : undefined;
 }
 
-/** Structural equality for JSON values; object key order doesn't matter. */
+/** Equality for setting values. Every object default is empty, so key order never differs. */
 export function sameValue(a: unknown, b: unknown): boolean {
-  if (a === b) return true;
-  if (typeof a !== 'object' || typeof b !== 'object' || a === null || b === null)
-    return false;
-  if (Array.isArray(a) !== Array.isArray(b)) return false;
-  const aKeys = Object.keys(a);
-  const bKeys = Object.keys(b);
-  return (
-    aKeys.length === bKeys.length &&
-    aKeys.every(
-      (key) =>
-        Object.hasOwn(b, key) &&
-        sameValue(
-          (a as Record<string, unknown>)[key],
-          (b as Record<string, unknown>)[key],
-        ),
-    )
-  );
+  return a === b || JSON.stringify(a) === JSON.stringify(b);
 }
 
 export function isModified(settings: Settings, key: SettingKey): boolean {
