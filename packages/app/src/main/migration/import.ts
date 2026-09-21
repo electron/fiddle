@@ -327,14 +327,10 @@ export async function importElectronVersions(
     if (semver.valid(version) && !folders.has(version)) folders.set(version, dir);
   }
 
-  const installer = new Installer(
-    {
-      electronDownloads: oldBin,
-      electronInstall: path.join(oldBin, 'current'),
-      electronVersions: versionsDir,
-    },
-    { layout: 'per-version' },
-  );
+  const installer = new Installer({
+    electronDownloads: oldBin,
+    electronVersions: versionsDir,
+  });
   // A copy cut short by a quit leaves its temp folder behind.
   for (const name of await fsp.readdir(versionsDir).catch(() => [] as string[])) {
     if (name.startsWith(IMPORT_TMP_PREFIX))
