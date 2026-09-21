@@ -116,7 +116,7 @@ describe('packageFiddle', () => {
       log: (_id: string, text: string) => events.push(text),
       logText: () => undefined,
       toolEnv: async () => process.env,
-      sfwPath: () => {
+      sfwPath: async () => {
         if (sfwPath instanceof Error) throw sfwPath;
         return sfwPath;
       },

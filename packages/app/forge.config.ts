@@ -174,10 +174,20 @@ async function copyNativeModules(buildPath: string, platform: string, arch: stri
   }
 }
 
-// Module installs spawn `node sfw.mjs npm …` from `<resources>/sfw.mjs`, outside
-// the asar (src/main/platform/sfw.ts). `resolve` throws when the package is
-// missing, so packaging fails rather than shipping without Socket Firewall.
-const sfwEntry = () => createRequire(import.meta.url).resolve('sfw/dist/sfw.mjs');
+// Module installs spawn `node sfw.mjs npm …` from a per-user copy of
+// `<resources>/sfw/` (src/main/platform/sfw.ts), so the script and the
+// package.json it reads ship outside the asar. `resolve` throws when the package
+// is missing, so packaging fails rather than shipping without Socket Firewall.
+function stageSfw(): string {
+  const root = path.dirname(createRequire(import.meta.url).resolve('sfw/package.json'));
+  const staged = path.join(appDir, 'out', '.sfw', 'sfw');
+  fs.rmSync(staged, { recursive: true, force: true });
+  for (const name of ['package.json', path.join('dist', 'sfw.mjs')]) {
+    fs.mkdirSync(path.dirname(path.join(staged, name)), { recursive: true });
+    fs.copyFileSync(path.join(root, name), path.join(staged, name));
+  }
+  return staged;
+}
 
 // releases.json and contributors.json are compiled into main, so the copy of
 // `static/` in `<resources>` leaves them out.
@@ -210,7 +220,7 @@ const config: ForgeConfig = {
       // `static/` holds Show Me, the quick-start template and
       // import-local-storage.html (`staticDir()` in src/main/documents/service.ts).
       // fiddle.png is the Linux About panel icon, which GTK reads from disk.
-      const extraResource = [stageStatic(), path.join(iconDir, 'fiddle.png'), sfwEntry()];
+      const extraResource = [stageStatic(), path.join(iconDir, 'fiddle.png'), stageSfw()];
       if (platform === 'darwin') {
         if (process.platform !== 'darwin') {
           throw new Error('The macOS privacy helper can only be built on macOS.');
