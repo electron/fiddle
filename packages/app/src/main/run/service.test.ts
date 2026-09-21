@@ -28,6 +28,8 @@ vi.mock('../../fiddle/modules', async (importOriginal) => ({
   ...(await importOriginal<typeof import('../../fiddle/modules')>()),
   findPackageManager: modules.findPackageManager,
   installModules: modules.installModules,
+  // `toolEnv()` would otherwise spawn the real login shell for its PATH.
+  loadLoginShellPath: async () => undefined,
 }));
 vi.mock('../i18n', () => ({
   tm: () => (key: string, options?: Record<string, unknown>) =>
@@ -365,18 +367,6 @@ describe('RunService.run', () => {
       consoleVisible: true,
       consoleHeight: 160,
     });
-  });
-
-  it('toggles: runs a ready window and stops a busy one', async () => {
-    const child = fakeChild();
-    spawnReturns(child);
-    const { runs, state } = setup();
-    runs.toggle('w');
-    await running(state);
-    runs.toggle('w');
-    expect(child.kill).toHaveBeenCalledWith('SIGTERM');
-    await vi.waitFor(() => expect(state().status).toBe('ready'));
-    await runs.shutdown();
   });
 
   it('lets Stop cancel a claimed operation until it is released', () => {

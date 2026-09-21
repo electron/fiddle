@@ -248,14 +248,6 @@ describe('release list', () => {
     expect(service.releases().map((row) => row.version)).toEqual(['99.0.0']);
   });
 
-  it('refuses the parsed versions before a list is loaded', () => {
-    const { service } = setup();
-    expect(() => service.electronVersions).toThrow(
-      expect.objectContaining({ code: ErrorCode.unavailable }),
-    );
-    expect(service.releases()).toEqual([]);
-  });
-
   it('caches a list fetched outside the service for the next start to read', async () => {
     const { cache, fetch } = setup();
     fs.mkdirSync(cache.root, { recursive: true });

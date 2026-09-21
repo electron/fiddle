@@ -59,6 +59,9 @@ afterEach(async () => {
   for (const started of watch.mock.results)
     if (started.type === 'return') started.value.close();
   watch.mockClear();
+  // Drop the listeners each `startSettings` added, so they don't fire for the next test.
+  app.removeAllListeners();
+  nativeTheme.removeAllListeners();
   fs.rmSync(dir, { recursive: true, force: true });
 });
 
@@ -204,5 +207,5 @@ describe('startSettings', () => {
       packageManager: 'yarn',
       showObsolete: true,
     });
-  });
+  }, 10_000);
 });

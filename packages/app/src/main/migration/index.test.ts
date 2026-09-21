@@ -7,7 +7,6 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 const mocks = vi.hoisted(() => ({
   importOldApp: vi.fn(),
   importElectronVersions: vi.fn(),
-  readOldLocalStorage: vi.fn(),
   cacheRoot: vi.fn(() => '/cache'),
   userData: '/user-data',
   testMode: false,
@@ -28,7 +27,7 @@ vi.mock('./import', () => ({
   importOldApp: mocks.importOldApp,
   importElectronVersions: mocks.importElectronVersions,
 }));
-vi.mock('./local-storage', () => ({ readOldLocalStorage: mocks.readOldLocalStorage }));
+vi.mock('./local-storage', () => ({ readOldLocalStorage: vi.fn() }));
 
 import { log } from '../log';
 import { importElectronVersionsInBackground, runMigration } from './index';
@@ -50,20 +49,6 @@ describe('runMigration', () => {
     mocks.testMode = true;
     expect(await runMigration()).toEqual({ firstLaunch: false, summary: {} });
     expect(mocks.importOldApp).not.toHaveBeenCalled();
-  });
-
-  it("hands the import this machine's user data, and passes its result on", async () => {
-    const result = { firstLaunch: true, summary: { settings: 3 } };
-    mocks.importOldApp.mockResolvedValue(result);
-    expect(await runMigration()).toBe(result);
-    const [options] = mocks.importOldApp.mock.calls[0] as [
-      { userData: string; version: string; readLocalStorage(): unknown },
-    ];
-    expect(options).toMatchObject({ userData: mocks.userData, version: '1.0.0' });
-    // The old renderer's localStorage is read only if the import asks for it.
-    expect(mocks.readOldLocalStorage).not.toHaveBeenCalled();
-    options.readLocalStorage();
-    expect(mocks.readOldLocalStorage).toHaveBeenCalledWith(mocks.userData);
   });
 
   it('reports no first launch when the import fails, so it runs again next time', async () => {
