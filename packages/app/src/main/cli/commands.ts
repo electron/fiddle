@@ -160,8 +160,9 @@ function defaultVersion(rows: readonly ReleaseRow[]): string {
   );
 }
 
+/** A gist's Electron version is kept unless it's known not to run here: one the cached list lacks is looked up afresh when it's needed. */
 const isUsable = (rows: readonly ReleaseRow[]) => (version: string) =>
-  rows.some((r) => r.version === version && r.supported);
+  rows.find((r) => r.version === version)?.supported ?? true;
 
 async function templates(ctx: Ctx): Promise<TemplateLoader> {
   const { rows } = await cachedReleases(ctx);
