@@ -1,6 +1,7 @@
 import type { FileMap } from '../../fiddle/files';
 import { formatOrigin, isUntrustedOrigin, type FiddleOrigin } from '../../fiddle/trust';
 import { FiddleError } from '../../shared/errors';
+import { trustDetail } from '../documents/deep-link-queue';
 import { tm } from '../i18n';
 import { t } from './argv';
 import { CliErrorCode } from './output';
@@ -24,17 +25,11 @@ export async function ensureTrusted(
     throw new FiddleError(CliErrorCode.untrusted, t('errorUntrusted', { origin }));
 
   const td = tm('mainDocuments');
-  const list = (items: string[]) => (items.length > 0 ? items.join(', ') : td('none'));
-  const dependencies = Object.entries(modules).map(([name, spec]) => `${name}@${spec}`);
-  const detail = [
-    td('trustMessage'),
-    td('trustDetail'),
-    '',
-    td('detailOrigin', { origin }),
-    td('detailFiles', { files: list(Object.keys(fiddle.files)) }),
-    td('detailDependencies', { dependencies: list(dependencies) }),
-  ].join('\n');
-  const answer = await prompt.ask(detail, `${t('trustQuestion')} `);
+  const detail = trustDetail(fiddle.origin, Object.keys(fiddle.files), modules, td);
+  const answer = await prompt.ask(
+    `${td('trustMessage')}\n${detail}`,
+    `${t('trustQuestion')} `,
+  );
   if (!/^y(es)?$/i.test(answer.trim()))
     throw new FiddleError(CliErrorCode.untrusted, tm('mainRun')('untrusted'));
 }

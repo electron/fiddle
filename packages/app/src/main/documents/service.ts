@@ -61,6 +61,7 @@ import {
   gistLinkDetail,
   gistUrlToDeepLink,
   shouldOfferSignIn,
+  trustDetail,
 } from './deep-link-queue';
 import {
   DraftScheduler,
@@ -860,21 +861,11 @@ export async function ensureTrusted(
   const packages =
     options.packagesWithInstallScripts ??
     (await modulesWithInstallScripts(doc.fiddle.modules));
-  const dependencies = Object.entries(doc.fiddle.modules).map(
-    ([name, spec]) => `${name}@${spec}`,
-  );
+  const files = Object.keys(doc.fiddle.files).map((name) => dialogText(name));
   const result = await messageBox(windowId, {
     type: 'warning',
     message: td('trustMessage'),
-    detail: [
-      td('trustDetail'),
-      '',
-      td('detailOrigin', { origin: formatOrigin(origin) }),
-      td('detailFiles', {
-        files: listOrNone(Object.keys(doc.fiddle.files).map((name) => dialogText(name))),
-      }),
-      td('detailDependencies', { dependencies: listOrNone(dependencies) }),
-    ].join('\n'),
+    detail: trustDetail(origin, files, doc.fiddle.modules, td),
     buttons: [td('trustContinue'), td('cancel')],
     defaultId: 1,
     cancelId: 1,
@@ -1427,10 +1418,6 @@ function saveSessionNow(): void {
 function scheduleSessionSave(): void {
   if (!sessionReady || sessionFrozen || sessionTimer) return;
   sessionTimer = setTimeout(saveSessionNow, 1000);
-}
-
-function listOrNone(items: readonly string[]): string {
-  return items.length > 0 ? items.join(', ') : td('none');
 }
 
 function errorDetail(error: unknown): string {

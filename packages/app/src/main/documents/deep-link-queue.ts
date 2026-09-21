@@ -1,6 +1,7 @@
 import type { TFunction } from 'i18next';
 
 import type { GistLoadResult } from '../../fiddle/github';
+import { formatOrigin, type FiddleOrigin } from '../../fiddle/trust';
 import { ErrorCode, FiddleError } from '../../shared/errors';
 
 /** How much of one untrusted value a confirmation shows. */
@@ -18,6 +19,25 @@ export function dialogText(text: string, max = DIALOG_TEXT_MAX): string {
       .trim(),
   );
   return chars.length > max ? `${chars.slice(0, max - 1).join('')}…` : chars.join('');
+}
+
+/** The trust prompt's detail: why it asks, then where the code comes from, its files and its dependencies. */
+export function trustDetail(
+  origin: FiddleOrigin,
+  files: readonly string[],
+  modules: Readonly<Record<string, string>>,
+  t: TFunction<'mainDocuments'>,
+): string {
+  const list = (items: readonly string[]) =>
+    items.length > 0 ? items.join(', ') : t('none');
+  const dependencies = Object.entries(modules).map(([name, spec]) => `${name}@${spec}`);
+  return [
+    t('trustDetail'),
+    '',
+    t('detailOrigin', { origin: formatOrigin(origin) }),
+    t('detailFiles', { files: list(files) }),
+    t('detailDependencies', { dependencies: list(dependencies) }),
+  ].join('\n');
 }
 
 /** Every gist-controlled value is one sanitized line, and the free-text description comes last. */
