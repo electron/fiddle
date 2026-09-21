@@ -106,7 +106,8 @@ describe('useAppearance', () => {
     theme: string,
     appearance: Settings['appearance'] = 'system',
     highContrast = false,
-  ) => ({ settings: { theme, appearance } as Settings, highContrast }) as Partial<AppState>;
+  ) =>
+    ({ settings: { theme, appearance } as Settings, highContrast }) as Partial<AppState>;
   const root = document.documentElement;
   const lastEditorTheme = () => mocks.applyEditorTheme.mock.calls.at(-1)?.[0];
 

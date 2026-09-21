@@ -35,7 +35,12 @@ vi.mock('../settings/sections', () => ({
 
 import { showCrashReportsNotice, UpdateNotice } from './index';
 
-type Toast = { title: string; description: string; actionLabel: string; onAction: () => void };
+type Toast = {
+  title: string;
+  description: string;
+  actionLabel: string;
+  onAction: () => void;
+};
 const toast = (index: number) => mocks.showToast.mock.calls[index]![0] as Toast;
 
 beforeEach(() => vi.clearAllMocks());

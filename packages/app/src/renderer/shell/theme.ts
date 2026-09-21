@@ -69,7 +69,9 @@ export function useAppearance(): void {
   const themeId = app?.settings.theme ?? BUILTIN_THEME;
   const osHighContrast = app?.highContrast ?? false;
 
-  const [loaded, setLoaded] = useState<{ id: string; data: ThemeData | null } | null>(null);
+  const [loaded, setLoaded] = useState<{ id: string; data: ThemeData | null } | null>(
+    null,
+  );
   useEffect(() => {
     if (themeId === BUILTIN_THEME) return;
     let current = true;

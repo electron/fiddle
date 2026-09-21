@@ -136,9 +136,7 @@ export function SignInDialog({ onClose, onSignedIn }: SignInDialogProps) {
           size="sm"
           icon="external"
           className={styles.tokenLink}
-          onPress={() =>
-            githubApi.OpenNewTokenPage().catch((e: unknown) => toastError(e))
-          }
+          onPress={() => githubApi.OpenNewTokenPage().catch(toastError)}
         >
           {t('signInCreateToken')}
         </Button>

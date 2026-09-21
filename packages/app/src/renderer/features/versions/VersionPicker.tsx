@@ -140,7 +140,7 @@ function useVersionNotice(notice: VersionNotice | null | undefined) {
 function useRetryWhenOnline() {
   useEffect(() => {
     const retry = () => {
-      versionsApi.RetryDownload().catch((error: unknown) => toastError(error));
+      versionsApi.RetryDownload().catch(toastError);
     };
     window.addEventListener('online', retry);
     return () => window.removeEventListener('online', retry);
@@ -207,10 +207,13 @@ export function VersionPicker({ className }: { className?: string } = {}) {
     ref?.kind === 'release' && known ? t('electronVersion', { version: known }) : known;
 
   const copy = useCallback(() => {
-    versionsApi.CopyVersion().then(
-      () => showToast({ tone: 'success', title: tv('copied', { version: known ?? '' }) }),
-      (error: unknown) => toastError(error),
-    );
+    versionsApi
+      .CopyVersion()
+      .then(
+        () =>
+          showToast({ tone: 'success', title: tv('copied', { version: known ?? '' }) }),
+        toastError,
+      );
   }, [tv, known]);
   const setVersion = useCallback(
     (id: string) => {

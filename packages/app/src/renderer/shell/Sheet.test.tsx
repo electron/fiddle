@@ -246,7 +246,10 @@ describe('Sheet tab row', () => {
     expect(on.toggleSplit).toHaveBeenCalledOnce();
 
     rerender(
-      <Sheet {...props} actions={{ ...props.actions, panes: ['main.js', 'renderer.js'] }} />,
+      <Sheet
+        {...props}
+        actions={{ ...props.actions, panes: ['main.js', 'renderer.js'] }}
+      />,
     );
     const close = screen.getByRole('button', { name: 'closeSplit' });
     expect(close.getAttribute('aria-pressed')).toBe('true');

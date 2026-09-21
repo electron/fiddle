@@ -17,7 +17,7 @@ import {
   type TableSection,
 } from '../../../ui';
 import { useAppState } from '../../state';
-import { toastError } from '../../toast-error';
+import { attempt as report } from '../../toast-error';
 import { useReleases } from '../run/use-run';
 import styles from './Versions.module.css';
 
@@ -34,9 +34,6 @@ type Row =
   | { id: string; kind: 'local'; build: LocalBuild };
 
 type InstallState = VersionsState['installs'][string]['state'];
-
-const report = (promise: Promise<unknown>) =>
-  promise.catch((error: unknown) => toastError(error));
 
 // Memoized on primitives: a download's progress re-renders only its own row's cells.
 const LocalStatus = memo(function LocalStatus({ available }: { available: boolean }) {

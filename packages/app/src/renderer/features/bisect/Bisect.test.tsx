@@ -45,7 +45,10 @@ vi.mock('../../state', () => ({
     }) as unknown as AppState,
 }));
 vi.mock('../run/use-run', () => ({ useReleases: () => mocks.rows }));
-vi.mock('../../toast-error', () => ({ toastError: mocks.toastError }));
+vi.mock('../../toast-error', () => ({
+  attempt: (promise: Promise<unknown>, title?: string) =>
+    promise.catch((error: unknown) => mocks.toastError(error, title)),
+}));
 
 import { BisectControls, BisectDialogs } from './Bisect';
 

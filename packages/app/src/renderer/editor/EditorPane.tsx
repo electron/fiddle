@@ -107,7 +107,8 @@ export function EditorPane({ file, primary = false, onFocus }: EditorPaneProps) 
         setFocusedEditor(instance);
         latest.current.onFocus?.();
         const position = instance.getPosition();
-        if (position) setCursor(latest.current.file, position.lineNumber, position.column);
+        if (position)
+          setCursor(latest.current.file, position.lineNumber, position.column);
       }),
       instance.onDidChangeCursorPosition(({ position }) => {
         if (instance.hasTextFocus() || latest.current.primary)

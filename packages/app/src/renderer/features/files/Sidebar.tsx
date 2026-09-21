@@ -83,12 +83,7 @@ export function Sidebar({
     )?.trim();
     if (!name) return;
     // Main checks the name against the file rules, and words a refusal in the user's language.
-    try {
-      await documentsApi.AddFile(name);
-      onOpen(name);
-    } catch (error) {
-      fail(error);
-    }
+    await documentsApi.AddFile(name).then(() => onOpen(name), fail);
   };
 
   const renameFile = async (name: string) => {
@@ -102,12 +97,7 @@ export function Sidebar({
         cancelLabel: t('cancel'),
       })
     )?.trim();
-    if (!next || next === name) return;
-    try {
-      await renameFileInEditor(name, next);
-    } catch (error) {
-      fail(error);
-    }
+    if (next && next !== name) await renameFileInEditor(name, next).catch(fail);
   };
 
   const removeFile = async (name: string) => {

@@ -98,7 +98,11 @@ export function Sheet(props: SheetProps) {
   );
 }
 
-function EditorArea({ state, actions, sheetHeight }: SheetProps & { sheetHeight: number }) {
+function EditorArea({
+  state,
+  actions,
+  sheetHeight,
+}: SheetProps & { sheetHeight: number }) {
   const { t, i18n } = useTranslation('shell');
   const rtl = i18n.dir() === 'rtl';
   const { fiddle, layout } = state;
@@ -255,32 +259,30 @@ function EditorArea({ state, actions, sheetHeight }: SheetProps & { sheetHeight:
           <div className={styles.tabs}>
             <TabList aria-label={t('openFiles')}>
               {visible.map((file, index) => (
-                  <Tab
-                    key={file.name}
-                    id={file.name}
-                    // A file showing in another pane than the focused one carries the split glyph.
-                    icon={
-                      split && file.name !== active && panes.includes(file.name)
-                        ? 'columns'
-                        : undefined
-                    }
-                    onClose={() => actions.closeFile(file.name)}
-                    drag={{ type: TAB_DRAG_TYPE, data: file.name }}
-                    dropIndicator={indicatorFor(file.name, index === visible.length - 1)}
-                    error={badge(file.name)}
-                    unsaved={
-                      fiddle.dirtyFiles.includes(file.name) ? t('unsaved') : undefined
-                    }
-                  >
-                    <span dir="ltr">{file.name}</span>
-                  </Tab>
+                <Tab
+                  key={file.name}
+                  id={file.name}
+                  // A file showing in another pane than the focused one carries the split glyph.
+                  icon={
+                    split && file.name !== active && panes.includes(file.name)
+                      ? 'columns'
+                      : undefined
+                  }
+                  onClose={() => actions.closeFile(file.name)}
+                  drag={{ type: TAB_DRAG_TYPE, data: file.name }}
+                  dropIndicator={indicatorFor(file.name, index === visible.length - 1)}
+                  error={badge(file.name)}
+                  unsaved={
+                    fiddle.dirtyFiles.includes(file.name) ? t('unsaved') : undefined
+                  }
+                >
+                  <span dir="ltr">{file.name}</span>
+                </Tab>
               ))}
             </TabList>
           </div>
           {!split && (
-            <span className={styles.process}>
-              {t(`process.${processOf(active)}`)}
-            </span>
+            <span className={styles.process}>{t(`process.${processOf(active)}`)}</span>
           )}
           <IconButton
             icon="columns"
@@ -338,7 +340,9 @@ function EditorArea({ state, actions, sheetHeight }: SheetProps & { sheetHeight:
                     {dragged && (
                       <PaneDropZones
                         zones={dropZonesFor(index)}
-                        onDrop={(file, position) => actions.dropTab(file, index, position)}
+                        onDrop={(file, position) =>
+                          actions.dropTab(file, index, position)
+                        }
                       />
                     )}
                   </div>

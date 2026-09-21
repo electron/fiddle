@@ -9,7 +9,11 @@ import {
   toggleSoftWrap,
 } from '../editor/editor-state';
 import { applyRuntimeErrors, markModelsSynced, syncModels } from '../editor/models';
-import { claimReveal, setRuntimeErrors, useRevealRequest } from '../editor/runtime-errors';
+import {
+  claimReveal,
+  setRuntimeErrors,
+  useRevealRequest,
+} from '../editor/runtime-errors';
 import { useEditorTypes } from '../editor/types';
 import { log } from '../features/about/log';
 import { useDocumentDrop } from '../features/documents/useDocumentDrop';

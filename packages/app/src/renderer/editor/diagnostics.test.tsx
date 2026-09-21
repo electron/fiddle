@@ -30,8 +30,16 @@ describe('diagnostics', () => {
       ]),
     );
     // Without an i18next instance, `t` returns the key.
-    expect(result.current('a.js')).toEqual({ count: 2, tone: 'error', label: 'errorCount' });
-    expect(result.current('b.js')).toEqual({ count: 1, tone: 'warning', label: 'warningCount' });
+    expect(result.current('a.js')).toEqual({
+      count: 2,
+      tone: 'error',
+      label: 'errorCount',
+    });
+    expect(result.current('b.js')).toEqual({
+      count: 1,
+      tone: 'warning',
+      label: 'warningCount',
+    });
     expect(result.current('c.js')).toBeUndefined();
     act(() => setEditorMarkers([]));
   });

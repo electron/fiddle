@@ -9,12 +9,9 @@ import { visibleVersions } from '../../../main/versions/releases';
 import { Button, Dialog, InlineCode, Select } from '../../../ui';
 import styles from '../run/Run.module.css';
 import { useAppState } from '../../state';
-import { toastError } from '../../toast-error';
+import { attempt } from '../../toast-error';
 import { useCommand } from '../../hooks';
 import { useReleases } from '../run/use-run';
-
-const attempt = (promise: Promise<unknown>, failedTitle: string) =>
-  promise.catch((error: unknown) => toastError(error, failedTitle));
 
 export function BisectControls({ run }: { run: RunState }) {
   const { t } = useTranslation('run');

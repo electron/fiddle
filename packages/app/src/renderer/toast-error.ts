@@ -10,3 +10,7 @@ export function toastError(error: unknown, title?: string): void {
       : { tone: 'error', title: message },
   );
 }
+
+/** Toasts `promise`'s failure instead of leaving it unhandled. */
+export const attempt = (promise: Promise<unknown>, title?: string): Promise<unknown> =>
+  promise.catch((error: unknown) => toastError(error, title));

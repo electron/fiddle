@@ -34,7 +34,9 @@ describe('titleBarFit', () => {
       ['win32', 612, false, noLabel],
       ['win32', MIN_WIDTH, false, bare],
     ] as const)
-      expect(titleBarFit(platform, width, menuBar), `${platform} at ${width}`).toEqual(fit);
+      expect(titleBarFit(platform, width, menuBar), `${platform} at ${width}`).toEqual(
+        fit,
+      );
   });
 
   it('gives things up in order: the Publish label before the Open gist button and the Run hint', () => {
