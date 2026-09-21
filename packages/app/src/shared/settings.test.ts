@@ -163,6 +163,14 @@ describe('keybindings', () => {
     expect(normalizeAccelerator('CommandOrControl+P', 'darwin')).toBe('Cmd+P');
     expect(normalizeAccelerator('Option+Command+I', 'darwin')).toBe('Alt+Cmd+I');
     expect(normalizeAccelerator('CmdOrCtrl++', 'linux')).toBe('Ctrl++');
+    // Super is Cmd on a Mac; Escape and Return are Esc and Enter everywhere.
+    expect(normalizeAccelerator('Meta+Escape', 'linux')).toBe('Super+esc');
+    expect(normalizeAccelerator('Super+Escape', 'darwin')).toBe(
+      normalizeAccelerator('Cmd+Esc', 'darwin'),
+    );
+    expect(normalizeAccelerator('AltGr+Return', 'win32')).toBe(
+      normalizeAccelerator('altgr+enter', 'win32'),
+    );
   });
 
   it('finds commands that share an accelerator', () => {

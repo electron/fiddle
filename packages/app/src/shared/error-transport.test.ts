@@ -108,6 +108,17 @@ describe('FiddleError transport', () => {
     });
   });
 
+  it('passes plain values and synchronous results through on both sides', () => {
+    const main = wrapImplementation({ version: 3, Ping: () => 'pong' }, vi.fn());
+    expect(main.version).toBe(3);
+    const api = wrapRendererApi({
+      version: 3,
+      AppStore: { getStateSync: () => ({ locale: 'en' }) },
+    });
+    expect(api.version).toBe(3);
+    expect(api.AppStore.getStateSync()).toEqual({ locale: 'en' });
+  });
+
   it('wraps nested objects and synchronous throws on the renderer side', () => {
     const api = wrapRendererApi({
       AppStore: {
