@@ -1,3 +1,4 @@
+import { execFile } from 'node:child_process';
 import { mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import * as path from 'node:path';
@@ -9,7 +10,6 @@ import {
   buildInstallCommand,
   buildRunScriptCommand,
   checkModuleSpec,
-  type ExecFn,
   findInstallScripts,
   findPackageManager,
   IGNORE_SCRIPTS_ENV,
@@ -193,77 +193,83 @@ describe('versions', () => {
   });
 });
 
-function fakeExec(result: string | Error) {
-  const calls: { file: string; args: readonly string[]; env?: NodeJS.ProcessEnv }[] = [];
-  const exec: ExecFn = async (file, args, options) => {
-    calls.push({ file, args, env: options.env });
-    if (result instanceof Error) throw result;
-    return result;
-  };
-  return { exec, calls };
+vi.mock('node:child_process', async (original) => {
+  const actual = await original<typeof import('node:child_process')>();
+  return { ...actual, execFile: vi.fn(actual.execFile) };
+});
+
+/** Makes the next `execFile` call print `result`, or fail with it. */
+function fakeExec(result: string | Error): void {
+  vi.mocked(execFile).mockImplementationOnce(((...args: unknown[]) => {
+    const callback = args.at(-1) as (error: Error | null, stdout: string) => void;
+    if (result instanceof Error) callback(result, '');
+    else callback(null, result);
+  }) as never);
+}
+
+const lastExec = () => vi.mocked(execFile).mock.lastCall as unknown[] | undefined;
+
+/** Runs `fn` with `process.platform` set to `platform`. */
+async function withPlatform<T>(
+  platform: NodeJS.Platform,
+  fn: () => T,
+): Promise<Awaited<T>> {
+  const original = Object.getOwnPropertyDescriptor(process, 'platform')!;
+  Object.defineProperty(process, 'platform', { ...original, value: platform });
+  try {
+    return await fn();
+  } finally {
+    Object.defineProperty(process, 'platform', original);
+  }
 }
 
 describe('host lookups', () => {
   it('finds the package manager with which or where.exe', async () => {
-    const posix = fakeExec('/usr/local/bin/npm\n');
-    expect(
-      await findPackageManager('npm', { platform: 'darwin', exec: posix.exec }),
-    ).toBe('/usr/local/bin/npm');
-    expect(posix.calls[0]).toMatchObject({ file: 'which', args: ['npm'] });
+    fakeExec('/usr/local/bin/npm\n');
+    expect(await withPlatform('darwin', () => findPackageManager('npm'))).toBe(
+      '/usr/local/bin/npm',
+    );
+    expect(lastExec()?.slice(0, 2)).toEqual(['which', ['npm']]);
 
-    const win = fakeExec(
+    fakeExec(
       'C:\\Program Files\\nodejs\\yarn\r\nC:\\Program Files\\nodejs\\yarn.cmd\r\n',
     );
-    expect(await findPackageManager('yarn', { platform: 'win32', exec: win.exec })).toBe(
+    expect(await withPlatform('win32', () => findPackageManager('yarn'))).toBe(
       'C:\\Program Files\\nodejs\\yarn',
     );
-    expect(win.calls[0]).toMatchObject({ file: 'where.exe', args: ['yarn'] });
+    expect(lastExec()?.slice(0, 2)).toEqual(['where.exe', ['yarn']]);
 
-    expect(
-      await findPackageManager('npm', {
-        platform: 'linux',
-        exec: fakeExec(new Error('not found')).exec,
-      }),
-    ).toBeNull();
-    expect(
-      await findPackageManager('npm', { platform: 'linux', exec: fakeExec('').exec }),
-    ).toBeNull();
+    fakeExec(new Error('not found'));
+    expect(await findPackageManager('npm')).toBeNull();
+    fakeExec('');
+    expect(await findPackageManager('npm')).toBeNull();
   });
 
   it('loads PATH from the login shell', async () => {
-    const shell = fakeExec(
+    fakeExec(
       'Welcome!\n\u001b[1m__FIDDLE_SHELL_PATH__\n/opt/homebrew/bin:/usr/bin\n__FIDDLE_SHELL_PATH__bye',
     );
-    const result = await loadLoginShellPath({
-      platform: 'darwin',
-      env: { SHELL: '/bin/fish', HOME: '/h' },
-      exec: shell.exec,
-    });
+    const result = await withPlatform('darwin', () =>
+      loadLoginShellPath({ SHELL: '/bin/fish', HOME: '/h' }),
+    );
     expect(result).toBe('/opt/homebrew/bin:/usr/bin');
-    expect(shell.calls[0]!.file).toBe('/bin/fish');
-    expect(shell.calls[0]!.args[0]).toBe('-ilc');
-    expect(shell.calls[0]!.env).toMatchObject({
-      HOME: '/h',
-      DISABLE_AUTO_UPDATE: 'true',
-    });
+    expect(lastExec()?.slice(0, 3)).toMatchObject([
+      '/bin/fish',
+      ['-ilc', expect.any(String)],
+      { env: { SHELL: '/bin/fish', HOME: '/h', DISABLE_AUTO_UPDATE: 'true' } },
+    ]);
   });
 
   it('defaults the shell and gives up quietly', async () => {
-    const shell = fakeExec('nothing useful');
-    expect(
-      await loadLoginShellPath({ platform: 'linux', env: {}, exec: shell.exec }),
-    ).toBeUndefined();
-    expect(shell.calls[0]!.file).toBe('/bin/sh');
-    const mac = fakeExec(new Error('timeout'));
-    expect(
-      await loadLoginShellPath({ platform: 'darwin', env: {}, exec: mac.exec }),
-    ).toBeUndefined();
-    expect(mac.calls[0]!.file).toBe('/bin/zsh');
-    const win = fakeExec('x');
-    expect(
-      await loadLoginShellPath({ platform: 'win32', exec: win.exec }),
-    ).toBeUndefined();
-    expect(win.calls).toHaveLength(0);
+    fakeExec('nothing useful');
+    expect(await withPlatform('linux', () => loadLoginShellPath({}))).toBeUndefined();
+    expect(lastExec()?.[0]).toBe('/bin/sh');
+    fakeExec(new Error('timeout'));
+    expect(await withPlatform('darwin', () => loadLoginShellPath({}))).toBeUndefined();
+    expect(lastExec()?.[0]).toBe('/bin/zsh');
+    vi.mocked(execFile).mockClear();
+    expect(await withPlatform('win32', () => loadLoginShellPath())).toBeUndefined();
+    expect(execFile).not.toHaveBeenCalled();
   });
 
   it.skipIf(process.platform === 'win32')(
@@ -278,9 +284,7 @@ describe('host lookups', () => {
           '#!/bin/sh\necho "Welcome"\necho __FIDDLE_SHELL_PATH__\necho /fake/bin:/usr/bin\necho __FIDDLE_SHELL_PATH__\necho bye\n',
           { mode: 0o755 },
         );
-        expect(await loadLoginShellPath({ env: { SHELL: shell } })).toBe(
-          '/fake/bin:/usr/bin',
-        );
+        expect(await loadLoginShellPath({ SHELL: shell })).toBe('/fake/bin:/usr/bin');
       } finally {
         await rm(dir, { recursive: true, force: true });
       }
@@ -377,16 +381,11 @@ describe('runCommand', () => {
   });
 
   it('refuses shell-special arguments on Windows', async () => {
-    await expect(
-      runCommand({ command: 'npm', args: ['a"b'] }, { platform: 'win32' }),
-    ).rejects.toMatchObject({
-      code: ErrorCode.invalidArgument,
-    });
-    await expect(
-      runCommand({ command: 'npm', args: ['%PATH%'] }, { platform: 'win32' }),
-    ).rejects.toMatchObject({
-      code: ErrorCode.invalidArgument,
-    });
+    for (const arg of ['a"b', '%PATH%']) {
+      await expect(
+        runCommand({ command: 'npm', args: [arg] }, { platform: 'win32' }),
+      ).rejects.toMatchObject({ code: ErrorCode.invalidArgument });
+    }
   });
 });
 

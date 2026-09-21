@@ -68,7 +68,7 @@ export async function executeRun(job: RunJob, on: RunSink): Promise<RunOutcome> 
     throw new RunRefused(ErrorCode.invalidArgument, t('esmNeeds28'));
   const hasModules = Object.keys(modules).length > 0;
   const env = hasModules ? await toolEnv() : undefined;
-  if (hasModules && !(await findPackageManager(pm, { env }))) {
+  if (hasModules && !(await findPackageManager(pm, env))) {
     throw new RunRefused(
       ErrorCode.unavailable,
       t('pmMissing', { pm, url: PM_INSTALL_URLS[pm] }),

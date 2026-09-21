@@ -118,39 +118,34 @@ export function buildRunScriptCommand(
   return { command: packageManager === 'yarn' ? 'yarn' : 'npm', args: ['run', script] };
 }
 
-export type ExecFn = (
+function exec(
   file: string,
-  args: readonly string[],
-  options: { env?: NodeJS.ProcessEnv; timeout?: number },
-) => Promise<string>;
-
-const defaultExec: ExecFn = (file, args, options) =>
-  new Promise((resolve, reject) => {
+  args: string[],
+  options: { env: NodeJS.ProcessEnv; timeout?: number },
+): Promise<string> {
+  return new Promise((resolve, reject) => {
     execFile(
       file,
-      [...args],
+      args,
       { ...options, encoding: 'utf8', windowsHide: true, maxBuffer: 10 * 1024 * 1024 },
       (error, stdout) => (error ? reject(error) : resolve(stdout)),
     );
   });
-
-export interface HostOptions {
-  platform?: NodeJS.Platform;
-  env?: NodeJS.ProcessEnv;
-  exec?: ExecFn;
 }
 
 /** The package manager's path via `which` (`where.exe` on Windows), or null if it isn't on PATH. */
 export async function findPackageManager(
   pm: PackageManager,
-  options: HostOptions = {},
+  env: NodeJS.ProcessEnv = process.env,
 ): Promise<string | null> {
-  const win = (options.platform ?? process.platform) === 'win32';
-  const exec = options.exec ?? defaultExec;
   try {
-    const stdout = await exec(win ? 'where.exe' : 'which', [pm], {
-      env: options.env ?? process.env,
-    });
+    const stdout = await exec(
+      process.platform === 'win32' ? 'where.exe' : 'which',
+      [pm],
+      {
+        env,
+      },
+    );
     return stdout.split(/\r?\n/)[0]?.trim() || null;
   } catch {
     return null;
@@ -161,21 +156,15 @@ const PATH_MARKER = '__FIDDLE_SHELL_PATH__';
 
 /** The PATH from the user's login shell, so npm and yarn set up in shell profiles are found. Undefined on Windows or failure. */
 export async function loadLoginShellPath(
-  options: HostOptions & { timeoutMs?: number } = {},
+  env: NodeJS.ProcessEnv = process.env,
 ): Promise<string | undefined> {
-  const platform = options.platform ?? process.platform;
-  if (platform === 'win32') return undefined;
-  const env = options.env ?? process.env;
-  const shell = env.SHELL || (platform === 'darwin' ? '/bin/zsh' : '/bin/sh');
-  const exec = options.exec ?? defaultExec;
+  if (process.platform === 'win32') return undefined;
+  const shell = env.SHELL || (process.platform === 'darwin' ? '/bin/zsh' : '/bin/sh');
   try {
     const stdout = await exec(
       shell,
       ['-ilc', `echo ${PATH_MARKER}; printenv PATH; echo ${PATH_MARKER}`],
-      {
-        env: { ...env, DISABLE_AUTO_UPDATE: 'true' },
-        timeout: options.timeoutMs ?? 10_000,
-      },
+      { env: { ...env, DISABLE_AUTO_UPDATE: 'true' }, timeout: 10_000 },
     );
     const value = stdout
       .split(PATH_MARKER)[1]
@@ -299,7 +288,6 @@ export interface InstallModulesOptions extends InstallCommandOptions {
   env?: NodeJS.ProcessEnv;
   signal?: AbortSignal;
   onOutput?: (text: string) => void;
-  platform?: NodeJS.Platform;
 }
 
 /** Runs the install in `dir`. Throws `install-failed` on a non-zero exit and `cancelled` on abort. */
@@ -308,19 +296,15 @@ export async function installModules(
 ): Promise<CommandResult> {
   await assertInsideDir(options.tempRoot, options.dir);
   const line = buildInstallCommand(options);
-  const env = envFromEntries(
-    [
-      ...Object.entries(options.env ?? packageManagerEnv()),
-      ...Object.entries(line.env ?? {}),
-    ],
-    options.platform,
-  );
+  const env = envFromEntries([
+    ...Object.entries(options.env ?? packageManagerEnv()),
+    ...Object.entries(line.env ?? {}),
+  ]);
   const result = await runCommand(line, {
     cwd: options.dir,
     env,
     signal: options.signal,
     onOutput: options.onOutput,
-    platform: options.platform,
   });
   if (result.code !== 0) {
     const exit = result.code ?? result.signal;

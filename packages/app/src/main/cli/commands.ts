@@ -384,7 +384,7 @@ async function packageOrMake(
   const modules = withModules(loaded, input.module);
   await ensureTrusted(loaded.fiddle, modules, input.trust, terminalPrompt(ctx.signal));
   const env = await toolEnv();
-  if (!(await findPackageManager(input.pm, { env }))) {
+  if (!(await findPackageManager(input.pm, env))) {
     throw new FiddleError(
       ErrorCode.unavailable,
       tr('pmMissing', { pm: input.pm, url: PM_INSTALL_URLS[input.pm] }),
