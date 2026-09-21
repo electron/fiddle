@@ -21,7 +21,8 @@ export default defineConfig(({ mode }) => ({
     lib: {
       entry: 'src/main/index.ts',
       formats: ['cjs'],
-      fileName: () => 'main.js',
+      // `.cjs`, so Node's ESM entry loader doesn't parse the whole bundle to detect its format.
+      fileName: () => 'main.cjs',
     },
     rollupOptions: {
       // Native modules stay external; forge.config.ts copies them into the app.

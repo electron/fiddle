@@ -41,7 +41,7 @@ export async function buildTestApp(): Promise<string> {
     };
     await fs.writeFile(
       path.join(staging, 'package.json'),
-      `${JSON.stringify({ name: pkg.name, productName: pkg.productName, version: pkg.version, main: 'build/main.js' }, null, 2)}\n`,
+      `${JSON.stringify({ name: pkg.name, productName: pkg.productName, version: pkg.version, main: 'build/main.cjs' }, null, 2)}\n`,
     );
     // Main reads app-root folders through app.getAppPath() (static/ templates and
     // examples, assets/ icons, native/ helpers), so the test build's app dir links to the real ones.

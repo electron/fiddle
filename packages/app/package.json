@@ -8,7 +8,7 @@
   "homepage": "https://electronjs.org/fiddle",
   "author": "Electron Community",
   "license": "MIT",
-  "main": ".vite/build/main.js",
+  "main": ".vite/build/main.cjs",
   "scripts": {
     "postinstall": "install-electron",
     "generate": "node tools/generate.mjs",
