@@ -1,3 +1,4 @@
+import { act, renderHook } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 class FakeModel {
@@ -21,8 +22,23 @@ class FakeModel {
     this.disposed = true;
   };
   getLineCount = () => this.value.split('\n').length;
-  getWordAtPosition = () => null;
-  deltaDecorations = () => [];
+  /** The identifier around the column, on the fake's single-word lines. */
+  getWordAtPosition = ({ lineNumber }: { lineNumber: number }) => {
+    const word = /\w+/.exec(this.value.split('\n')[lineNumber - 1] ?? '');
+    return word
+      ? { startColumn: word.index + 1, endColumn: word.index + 1 + word[0].length }
+      : null;
+  };
+  decorations: unknown[] = [];
+  deltaDecorations = (_old: string[], next: unknown[]) => {
+    this.decorations = next;
+    return next.map((_, i) => `d${i}`);
+  };
+}
+
+interface Marker {
+  owner: string;
+  severity: number;
 }
 
 const mocks = vi.hoisted(() => ({
@@ -31,22 +47,40 @@ const mocks = vi.hoisted(() => ({
   GetFiles: vi.fn(),
   EditFile: vi.fn((_name: string, _text: string, _rev: number) => Promise.resolve(0)),
   RenameFile: vi.fn(() => Promise.resolve(0)),
+  markersChanged: undefined as (() => void) | undefined,
+  markers: {} as Record<string, Marker[]>,
+  setModelMarkers: vi.fn(
+    (_model: unknown, _owner: string, _markers: unknown[]) => undefined,
+  ),
+  setEditorMarkers: vi.fn((_markers: unknown[]) => undefined),
 }));
 
 vi.mock('../../ipc/renderer', () => ({ documentsApi: mocks }));
 vi.mock('../toast-error', () => ({ toastError: mocks.toastError }));
 vi.mock('../features/about/log', () => ({ log: { error: mocks.logError } }));
+vi.mock('./diagnostics', () => ({ setEditorMarkers: mocks.setEditorMarkers }));
 vi.mock('./monaco', () => ({
   monaco: {
     Uri: { from: ({ path }: { path: string }) => ({ path }) },
-    Range: class {},
+    Range: class {
+      constructor(
+        readonly startLineNumber: number,
+        readonly startColumn: number,
+        readonly endLineNumber: number,
+        readonly endColumn: number,
+      ) {}
+    },
     MarkerSeverity: { Error: 8, Warning: 4 },
     editor: {
       createModel: (text: string, _language: string, uri: { path: string }) =>
         new FakeModel(text, uri),
-      onDidChangeMarkers: () => ({ dispose: () => undefined }),
-      getModelMarkers: () => [],
-      setModelMarkers: () => undefined,
+      onDidChangeMarkers: (listener: () => void) => {
+        mocks.markersChanged = listener;
+        return { dispose: () => undefined };
+      },
+      getModelMarkers: ({ resource }: { resource: { path: string } }) =>
+        mocks.markers[resource.path] ?? [],
+      setModelMarkers: mocks.setModelMarkers,
     },
   },
 }));
@@ -55,6 +89,7 @@ type Models = typeof import('./models');
 
 let models: Models;
 let editorState: typeof import('./editor-state');
+let runtimeErrors: typeof import('./runtime-errors');
 /** Lets the pending send go: a first edit after a pause is sent at once, later ones within 250 ms wait. */
 const settle = (ms = 250) => vi.advanceTimersByTime(ms);
 const files = (texts: Record<string, string>) => Promise.resolve(texts);
@@ -63,8 +98,10 @@ beforeEach(async () => {
   vi.useFakeTimers();
   vi.resetModules();
   vi.clearAllMocks();
+  mocks.markers = {};
   models = await import('./models');
   editorState = await import('./editor-state');
+  runtimeErrors = await import('./runtime-errors');
 });
 
 describe('editor models', () => {
@@ -198,5 +235,79 @@ describe('editor models', () => {
     expect(editorState.getViewState('new.js')).toEqual(state('old'));
     expect(editorState.getViewState('old.js')).toBeUndefined();
     expect(editorState.getViewState('gone.js')).toBeUndefined();
+  });
+});
+
+describe('useModel', () => {
+  it('follows a file as its model comes and goes, and the first sync marks the models ready', async () => {
+    const model = renderHook(() => models.useModel('main.js'));
+    const ready = renderHook(() => models.useModelsSynced());
+    expect(model.result.current).toBeUndefined();
+    expect(ready.result.current).toBe(false);
+
+    mocks.GetFiles.mockReturnValue(files({ 'main.js': 'a' }));
+    await act(() => models.syncModels(['main.js'], 1));
+    act(() => models.markModelsSynced());
+    expect(model.result.current?.getValue()).toBe('a');
+    expect(ready.result.current).toBe(true);
+
+    await act(() => models.syncModels([], 1));
+    expect(model.result.current).toBeUndefined();
+  });
+});
+
+describe('markers', () => {
+  it("reports Monaco's own errors and warnings by file, leaving the runtime markers to the console", async () => {
+    mocks.GetFiles.mockReturnValue(files({ 'main.js': '', 'styles.css': '' }));
+    await models.syncModels(['main.js', 'styles.css'], 1);
+    mocks.markers = {
+      '/main.js': [
+        { owner: 'typescript', severity: 8 },
+        { owner: 'fiddle-runtime', severity: 8 },
+        { owner: 'typescript', severity: 2 },
+      ],
+      '/styles.css': [{ owner: 'css', severity: 4 }],
+    };
+    mocks.markersChanged?.();
+    expect(mocks.setEditorMarkers).toHaveBeenLastCalledWith([
+      { file: 'main.js', severity: 'error' },
+      { file: 'styles.css', severity: 'warning' },
+    ]);
+  });
+
+  it('underlines the word where a runtime error was thrown and highlights its line, in the file it names', async () => {
+    mocks.GetFiles.mockReturnValue(
+      files({ 'main.js': 'first\n  second()\nthird', 'renderer.js': 'x' }),
+    );
+    await models.syncModels(['main.js', 'renderer.js'], 1);
+    const error = (file: string, line: number) => ({
+      file,
+      line,
+      column: 3,
+      message: `boom at ${line}`,
+      process: 'main' as const,
+    });
+    // Line 9 is past the end of main.js (an error from an older text): it is left out.
+    runtimeErrors.setRuntimeErrors([error('main.js', 2), error('main.js', 9)]);
+    models.applyRuntimeErrors(runtimeErrors.getRuntimeErrors());
+
+    const main = models.getModel('main.js') as unknown as FakeModel;
+    const [, owner, markers] = mocks.setModelMarkers.mock.calls
+      .filter(([model]) => model === main)
+      .at(-1)!;
+    expect(owner).toBe('fiddle-runtime');
+    expect(markers).toEqual([
+      expect.objectContaining({
+        message: 'boom at 2',
+        startLineNumber: 2,
+        startColumn: 3,
+        endColumn: 9,
+      }),
+    ]);
+    expect(main.decorations).toEqual([
+      expect.objectContaining({ range: expect.objectContaining({ startLineNumber: 2 }) }),
+    ]);
+    const renderer = models.getModel('renderer.js') as unknown as FakeModel;
+    expect(renderer.decorations).toEqual([]);
   });
 });

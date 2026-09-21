@@ -5,15 +5,21 @@ const mocks = vi.hoisted(() => ({
   githubApi: {
     ReadClipboardGist: vi.fn<() => Promise<string | null>>(() => Promise.resolve(null)),
   },
-  documentsApi: { LoadGist: vi.fn(() => Promise.resolve(1)) },
+  documentsApi: { LoadGist: vi.fn((_id: string, _sha: null) => Promise.resolve(1)) },
+  loaded: undefined as { id: string } | undefined,
 }));
 
 vi.mock('../../../ipc/renderer', () => ({
   githubApi: mocks.githubApi,
   documentsApi: mocks.documentsApi,
 }));
-vi.mock('./state', () => ({ useLoadedGist: () => undefined }));
-vi.mock('react-i18next', () => ({ useTranslation: () => ({ t: (key: string) => key }) }));
+vi.mock('./state', () => ({ useLoadedGist: () => mocks.loaded }));
+vi.mock('react-i18next', () => ({
+  useTranslation: () => ({
+    t: (key: string, options?: Record<string, string>) =>
+      options ? `${key} ${Object.values(options).join(' ')}` : key,
+  }),
+}));
 
 import { OpenGistDialog } from './OpenGistDialog';
 
@@ -23,7 +29,9 @@ const field = () =>
 
 beforeEach(() => {
   vi.clearAllMocks();
+  mocks.loaded = undefined;
   mocks.githubApi.ReadClipboardGist.mockResolvedValue(null);
+  mocks.documentsApi.LoadGist.mockResolvedValue(1);
 });
 
 describe('OpenGistDialog', () => {
@@ -61,5 +69,38 @@ describe('OpenGistDialog', () => {
     await act(async () => undefined);
     expect(field().value).toBe('');
     expect(mocks.githubApi.ReadClipboardGist).toHaveBeenCalledTimes(1);
+  });
+
+  it('flags something that is not a gist once the field is left, and never sends it', () => {
+    render(<OpenGistDialog onClose={vi.fn()} />);
+    fireEvent.change(field(), { target: { value: 'not a gist' } });
+    expect(screen.queryByText('openInvalid')).toBeNull();
+    fireEvent.blur(field());
+    expect(screen.getByText('openInvalid')).toBeTruthy();
+    fireEvent.submit(field().closest('form')!);
+    expect(mocks.documentsApi.LoadGist).not.toHaveBeenCalled();
+  });
+
+  it('opens the gist on Enter, and stays open saying why when it could not be loaded', async () => {
+    mocks.documentsApi.LoadGist.mockRejectedValueOnce(new Error('rate limited'));
+    const onClose = vi.fn();
+    render(<OpenGistDialog onClose={onClose} />);
+    fireEvent.change(field(), { target: { value: LINK } });
+    fireEvent.submit(field().closest('form')!);
+    expect(await screen.findByText('loadFailed rate limited')).toBeTruthy();
+    expect(onClose).not.toHaveBeenCalled();
+
+    fireEvent.submit(field().closest('form')!);
+    await waitFor(() => expect(onClose).toHaveBeenCalled());
+    expect(mocks.documentsApi.LoadGist).toHaveBeenLastCalledWith(LINK, null);
+  });
+
+  it('names the gist that is already open, and closes from Cancel', () => {
+    mocks.loaded = { id: '8c5fc0c6a5153d49b5a4a56d3ed9da8f' };
+    const onClose = vi.fn();
+    render(<OpenGistDialog onClose={onClose} />);
+    expect(screen.getByText(/^openCurrent https:\/\/gist\.github\.com\//)).toBeTruthy();
+    fireEvent.click(screen.getByRole('button', { name: 'cancel' }));
+    expect(onClose).toHaveBeenCalledTimes(1);
   });
 });
