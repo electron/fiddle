@@ -52,75 +52,26 @@ const MODIFIERS: Record<string, Modifier | 'cmdOrCtrl'> = {
 // The printable keys of a US keyboard: what they type plain and with Shift, and their codes, in one order.
 const PLAIN = "`1234567890-=qwertyuiop[]\\asdfghjkl;'zxcvbnm,./ ";
 const SHIFTED = '~!@#$%^&*()_+QWERTYUIOP{}|ASDFGHJKL:"ZXCVBNM<>? ';
-const CODES = [
-  ...[
-    'Backquote',
-    'Digit1',
-    'Digit2',
-    'Digit3',
-    'Digit4',
-    'Digit5',
-    'Digit6',
-    'Digit7',
-    'Digit8',
-    'Digit9',
-    'Digit0',
-    'Minus',
-    'Equal',
-  ],
-  ...[
-    'KeyQ',
-    'KeyW',
-    'KeyE',
-    'KeyR',
-    'KeyT',
-    'KeyY',
-    'KeyU',
-    'KeyI',
-    'KeyO',
-    'KeyP',
-    'BracketLeft',
-    'BracketRight',
-    'Backslash',
-  ],
-  ...[
-    'KeyA',
-    'KeyS',
-    'KeyD',
-    'KeyF',
-    'KeyG',
-    'KeyH',
-    'KeyJ',
-    'KeyK',
-    'KeyL',
-    'Semicolon',
-    'Quote',
-  ],
-  ...[
-    'KeyZ',
-    'KeyX',
-    'KeyC',
-    'KeyV',
-    'KeyB',
-    'KeyN',
-    'KeyM',
-    'Comma',
-    'Period',
-    'Slash',
-    'Space',
-  ],
-];
+const CODES = (
+  'Backquote Digit1 Digit2 Digit3 Digit4 Digit5 Digit6 Digit7 Digit8 Digit9 Digit0 Minus Equal ' +
+  'KeyQ KeyW KeyE KeyR KeyT KeyY KeyU KeyI KeyO KeyP BracketLeft BracketRight Backslash ' +
+  'KeyA KeyS KeyD KeyF KeyG KeyH KeyJ KeyK KeyL Semicolon Quote ' +
+  'KeyZ KeyX KeyC KeyV KeyB KeyN KeyM Comma Period Slash Space'
+).split(' ');
 /** keyCodes of the keys that are neither letters (the upper-case letter's code) nor digits (the digit's code). */
 const OTHER_KEY_CODES: Record<string, number> = {
-  ...{
-    Backquote: 192,
-    Minus: 189,
-    Equal: 187,
-    BracketLeft: 219,
-    BracketRight: 221,
-    Backslash: 220,
-  },
-  ...{ Semicolon: 186, Quote: 222, Comma: 188, Period: 190, Slash: 191, Space: 32 },
+  Backquote: 192,
+  Minus: 189,
+  Equal: 187,
+  BracketLeft: 219,
+  BracketRight: 221,
+  Backslash: 220,
+  Semicolon: 186,
+  Quote: 222,
+  Comma: 188,
+  Period: 190,
+  Slash: 191,
+  Space: 32,
 };
 
 /** Every printable US-layout character, shifted or not, to its key. */
