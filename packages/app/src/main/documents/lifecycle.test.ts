@@ -444,6 +444,26 @@ describe('markPublished', () => {
   });
 });
 
+describe('markGistDeleted', () => {
+  it('does not unlink another fiddle that took the window’s place', async () => {
+    const { documents, model, open } = await setup();
+    await open({ 'main.js': 'deleted' });
+    const loadRev = documents.getDoc(W).loadRev;
+    documents.updateDoc(W, (doc) =>
+      model.createDoc(
+        createFiddle({ files: { 'main.js': 'other' }, version, source: { gistId: ID } }),
+        'other',
+        { previous: doc },
+      ),
+    );
+
+    documents.markGistDeleted(W, loadRev);
+
+    expect(documents.getFiddle(W).source).toEqual({ gistId: ID });
+    expect(model.isDirty(documents.getDoc(W))).toBe(false);
+  });
+});
+
 describe('session restore', () => {
   /** A window ID for a one-letter (hex) name. */
   const wid = (c: string) =>

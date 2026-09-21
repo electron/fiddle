@@ -68,20 +68,23 @@ function gist(files: Record<string, unknown>, extra: Record<string, unknown> = {
 }
 
 describe('token format', () => {
-  it('accepts classic and fine-grained tokens', () => {
-    expect(isValidTokenFormat(TOKEN)).toBe(true);
-    expect(isValidTokenFormat(`github_pat_${'A'.repeat(22)}_${'b'.repeat(59)}`)).toBe(
-      true,
-    );
-  });
+  it.each([
+    TOKEN,
+    `gho_${'a'.repeat(36)}`,
+    `ghu_${'a'.repeat(36)}`,
+    `ghs_${'a'.repeat(36)}`,
+    `ghr_${'a'.repeat(76)}`,
+    `ghp_${'a'.repeat(40)}`,
+    `github_pat_${'A'.repeat(22)}_${'b'.repeat(59)}`,
+  ])('accepts %j', (token) => expect(isValidTokenFormat(token)).toBe(true));
 
   it.each([
     `ghp_${'a'.repeat(35)}`,
-    `ghp_${'a'.repeat(37)}`,
-    `gho_${'a'.repeat(36)}`,
-    `github_pat_${'A'.repeat(21)}_${'b'.repeat(59)}`,
-    `github_pat_${'A'.repeat(22)}${'b'.repeat(60)}`,
+    `ghx_${'a'.repeat(36)}`,
+    `github_pat_${'A'.repeat(21)}`,
     `ghp_${'a'.repeat(35)}!`,
+    `ghp_${'a'.repeat(36)} and more text`,
+    'ghp_',
     '',
   ])('rejects %j', (token) => expect(isValidTokenFormat(token)).toBe(false));
 });

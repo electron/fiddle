@@ -786,8 +786,13 @@ export function markPublished(
   });
 }
 
-/** Deleting the gist unlinks it and marks the fiddle unsaved. */
-export function markGistDeleted(windowId: string): number {
+/**
+ * Deleting the gist unlinks it and marks the fiddle unsaved. Does nothing if another fiddle
+ * has taken the window.
+ */
+export function markGistDeleted(windowId: string, loadRev: number): number {
+  const current = docs.get(windowId);
+  if (!current || current.loadRev !== loadRev) return revOf(windowId);
   return updateDoc(windowId, (doc) => {
     const { localPath } = doc.fiddle.source;
     return {

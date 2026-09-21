@@ -8,8 +8,9 @@ import { type FiddleOrigin, gistOrigin } from './trust';
 
 export const GITHUB_API_URL = 'https://api.github.com';
 export const GIST_RAW_ORIGIN = 'https://gist.githubusercontent.com';
+/** Classic, OAuth (`gh auth token`), user-to-server, server-to-server and refresh tokens; fine-grained PATs. */
 export const GITHUB_TOKEN_PATTERN =
-  /^(ghp_[a-zA-Z0-9]{36}|github_pat_[a-zA-Z0-9]{22}_[a-zA-Z0-9]{59})$/;
+  /^(gh[pousr]_[A-Za-z0-9]{36,251}|github_pat_[A-Za-z0-9_]{22,255})$/;
 export const GIST_MAX_FILES = 300;
 export const GIST_MAX_FILE_BYTES = 10 * 1024 * 1024;
 export const GIST_DESCRIPTION_MAX = 256;

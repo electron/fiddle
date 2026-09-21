@@ -219,7 +219,7 @@ export class GitHubService {
     const client = this.#authedClient();
     const fiddle = await this.#options.documents.getFiddle(windowId);
     await client.deleteGist(loadedGistId(fiddle));
-    this.#options.documents.markGistDeleted(windowId);
+    this.#options.documents.markGistDeleted(windowId, fiddle.loadRev);
   }
 
   /** Works signed out for public gists. */

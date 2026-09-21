@@ -40,8 +40,8 @@ export interface GistDocuments {
     gist: GistSaved,
     sent: Pick<GistFiddle, 'files' | 'modules' | 'loadRev'>,
   ): void;
-  /** Deleted: forget the gist and mark the fiddle unsaved. */
-  markGistDeleted(windowId: string): void;
+  /** Deleted: forget the gist and mark the fiddle unsaved, if the window still holds that fiddle. */
+  markGistDeleted(windowId: string, loadRev: number): void;
 }
 
 export function createDocumentsBridge(hub: StateHub): GistDocuments {
@@ -69,8 +69,8 @@ export function createDocumentsBridge(hub: StateHub): GistDocuments {
         sent,
       );
     },
-    markGistDeleted: (windowId) => {
-      markGistDeleted(windowId);
+    markGistDeleted: (windowId, loadRev) => {
+      markGistDeleted(windowId, loadRev);
     },
   };
 }
