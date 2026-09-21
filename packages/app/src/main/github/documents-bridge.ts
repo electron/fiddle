@@ -62,15 +62,7 @@ export function createDocumentsBridge(hub: StateHub): GistDocuments {
       };
     },
     getTemplate: (windowId) => getTemplate(getDoc(windowId).fiddle.version),
-    markGistSaved: (windowId, gist, sent) => {
-      markPublished(
-        windowId,
-        { id: gist.id, revision: gist.revision, owner: gist.owner },
-        sent,
-      );
-    },
-    markGistDeleted: (windowId, loadRev) => {
-      markGistDeleted(windowId, loadRev);
-    },
+    markGistSaved: markPublished,
+    markGistDeleted,
   };
 }

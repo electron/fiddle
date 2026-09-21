@@ -12,7 +12,6 @@ import { ErrorCode, FiddleError } from '../../shared/errors';
 import { tm } from '../i18n';
 import type { CredentialStorageKind, CredentialStore } from './credentials';
 import type { GistDocuments, GistFiddle } from './documents-bridge';
-import type { GistPrefs } from './prefs';
 
 /** `decrypt-failed`: the user was signed out and the file was kept. */
 type GitHubNotice = 'decrypt-failed';
@@ -28,6 +27,18 @@ interface GistHistory {
   activeSha: string | undefined;
   /** Oldest first. */
   revisions: GistRevision[];
+}
+
+export interface PublishOptions {
+  asRevision: boolean;
+  /** The "Package author" setting, for the gist's package.json. Unset when empty. */
+  author?: string;
+}
+
+export interface GistPrefs {
+  get(): PublishOptions;
+  /** Remembers the last visibility choice for the next publish. */
+  setVisibility(isPublic: boolean): void;
 }
 
 interface GitHubServiceOptions {

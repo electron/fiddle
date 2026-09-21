@@ -2,37 +2,15 @@ import path from 'node:path';
 
 import { app } from 'electron';
 
+import contributors from '../../../static/contributors.json';
 import { tm } from '../i18n';
 
 const WEBSITE = 'https://electronjs.org/fiddle';
 const CONTRIBUTORS_PAGE = 'https://github.com/electron/fiddle/graphs/contributors';
 
-const contributorFiles = import.meta.glob<unknown>('../../../static/contributors.json', {
-  eager: true,
-  import: 'default',
-});
-
-/** Names from contributors.json: `{ contributors: [...] }` or a bare array. An entry's `name` wins over its `login`. */
-export function contributorNames(data: unknown): string[] {
-  const list = Array.isArray(data)
-    ? data
-    : (data as { contributors?: unknown } | null | undefined)?.contributors;
-  if (!Array.isArray(list)) return [];
-  return list.flatMap((entry: unknown) => {
-    const { name, login } = (entry ?? {}) as { name?: unknown; login?: unknown };
-    const label =
-      typeof name === 'string' && name.trim()
-        ? name.trim()
-        : typeof login === 'string'
-          ? login
-          : '';
-    return label ? [label] : [];
-  });
-}
-
 export function setupAboutPanel(): void {
   const tp = tm('mainPlatform');
-  const names = contributorNames(Object.values(contributorFiles)[0]);
+  const names = contributors.contributors.map((person) => person.login);
   // Linux only, and read from disk: forge.config.ts ships the file in `extraResource`.
   const icon = app.isPackaged
     ? path.join(process.resourcesPath, 'fiddle.png')

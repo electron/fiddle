@@ -18,6 +18,16 @@ export interface OldLocalVersion {
   name?: string;
 }
 
+/** The entries of an old local-version list that name a version and a folder. */
+export function parseOldLocalVersions(list: unknown): OldLocalVersion[] {
+  return (Array.isArray(list) ? list : []).flatMap((entry: unknown) => {
+    const { version, localPath, name } = (entry ?? {}) as Record<string, unknown>;
+    return typeof version === 'string' && typeof localPath === 'string'
+      ? [{ version, localPath, ...(typeof name === 'string' ? { name } : {}) }]
+      : [];
+  });
+}
+
 interface MappedOldSettings {
   settings: SparseSettings;
   /** The old `hasShownTour`: the onboarding tour was already seen. */
@@ -209,20 +219,9 @@ export function mapOldSettings(
       case 'gitHubLogin':
         if (raw) result.gitHubLogin = raw;
         break;
-      case 'local-electron-versions': {
-        const list = parseJson(raw);
-        for (const entry of Array.isArray(list) ? list : []) {
-          const { version, localPath, name } = (entry ?? {}) as Record<string, unknown>;
-          if (typeof version === 'string' && typeof localPath === 'string') {
-            result.localVersions.push({
-              version,
-              localPath,
-              ...(typeof name === 'string' ? { name } : {}),
-            });
-          }
-        }
+      case 'local-electron-versions':
+        result.localVersions.push(...parseOldLocalVersions(parseJson(raw)));
         break;
-      }
       // The plaintext token of very old versions (the token is imported from
       // `.github-credentials` instead), the cached release list and the last
       // selected version.

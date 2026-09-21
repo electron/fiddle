@@ -4,19 +4,12 @@ import path from 'node:path';
 
 import { app, safeStorage } from 'electron';
 
+import { osUserName } from '../../fiddle/package-json';
 import { log } from '../log';
 import { writeAtomic } from '../persistence/json-store';
 import { getCacheRoot, isTestMode } from '../test-mode';
 import { importElectronVersions, importOldApp, type ImportResult } from './import';
 import { readOldLocalStorage } from './local-storage';
-
-function osUserName(): string {
-  try {
-    return os.userInfo().username;
-  } catch {
-    return '';
-  }
-}
 
 /** Runs right after `ready`, before any store (settings.json, state.json, …) is created. */
 export async function runMigration(): Promise<ImportResult> {

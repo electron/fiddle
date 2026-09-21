@@ -24,10 +24,16 @@ import {
   type SafeStorageLike,
 } from '../github/credentials';
 import { log } from '../log';
-import { writeAtomic } from '../persistence/json-store';
+import { readJsonObjectSync, writeAtomic } from '../persistence/json-store';
 import { SETTINGS_VERSION } from '../settings/service';
+import type { StoredBuild } from '../versions/service';
 import { themeFromMonaco, themeId, writeTheme } from '../themes/themes';
-import { mapOldSettings, oldThemeKey, type OldLocalVersion } from './old-settings';
+import {
+  mapOldSettings,
+  oldThemeKey,
+  parseOldLocalVersions,
+  type OldLocalVersion,
+} from './old-settings';
 
 // The `version` of the stores that own these files (documents/service.ts, versions/service.ts).
 const STATE_VERSION = 1;
@@ -43,13 +49,6 @@ interface ImportedFrom {
   at: string;
   /** Set when the old settings could not be read and were not imported. */
   localStorage?: 'unreadable';
-}
-
-export interface LocalBuild {
-  id: string;
-  name: string;
-  path: string;
-  addedAt: string;
 }
 
 export interface ImportDeps {
@@ -72,17 +71,6 @@ export interface ImportResult {
   firstLaunch: boolean;
   /** What was imported, for the log. */
   summary: Record<string, unknown>;
-}
-
-function readJsonObject(file: string): Record<string, unknown> | undefined {
-  try {
-    const data: unknown = JSON.parse(fs.readFileSync(file, 'utf8'));
-    return typeof data === 'object' && data !== null && !Array.isArray(data)
-      ? (data as Record<string, unknown>)
-      : undefined;
-  } catch {
-    return undefined;
-  }
 }
 
 /** state.json's object; undefined when there is no file. Throws when it exists but can't be read as an object. */
@@ -148,20 +136,9 @@ async function importThemes(
   return ids;
 }
 
-function readOldLocalVersions(file: string): OldLocalVersion[] {
-  const data = readJsonObject(file);
-  const list = Array.isArray(data?.versions) ? data.versions : [];
-  return list.flatMap((entry: unknown) => {
-    const { version, localPath, name } = (entry ?? {}) as Record<string, unknown>;
-    return typeof version === 'string' && typeof localPath === 'string'
-      ? [{ version, localPath, ...(typeof name === 'string' ? { name } : {}) }]
-      : [];
-  });
-}
-
 /** Old local versions → local builds, one per folder. */
-function toLocalBuilds(versions: readonly OldLocalVersion[], now: Date): LocalBuild[] {
-  const byPath = new Map<string, LocalBuild>();
+function toLocalBuilds(versions: readonly OldLocalVersion[], now: Date): StoredBuild[] {
+  const byPath = new Map<string, StoredBuild>();
   for (const { version, localPath, name } of versions) {
     if (byPath.has(localPath)) continue;
     // The old app named local versions `0.0.0-local.<Date.now()>`.
@@ -266,7 +243,9 @@ export async function importOldApp(deps: ImportDeps): Promise<ImportResult> {
 
   const builds = toLocalBuilds(
     [
-      ...readOldLocalVersions(path.join(userData, 'local-versions.json')),
+      ...parseOldLocalVersions(
+        readJsonObjectSync(path.join(userData, 'local-versions.json'))?.versions,
+      ),
       ...mapped.localVersions,
     ],
     now,
