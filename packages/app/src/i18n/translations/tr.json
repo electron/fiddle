@@ -959,11 +959,6 @@
     "translation": "3ca2f76c6c12",
     "reviewed": false
   },
-  "mainCli:cmdGistLoad": {
-    "source": "e4c6d548ad54",
-    "translation": "b461387117e1",
-    "reviewed": false
-  },
   "mainCli:cmdGistPublish": {
     "source": "2add9206ca4c",
     "translation": "9e62337dbbe7",
@@ -1147,11 +1142,6 @@
   "mainCli:resultGistDeleted": {
     "source": "d25a7f6cba1a",
     "translation": "6f4a58051b6b",
-    "reviewed": false
-  },
-  "mainCli:resultGistLoaded": {
-    "source": "50f407274c1d",
-    "translation": "f24e8bfc9eb2",
     "reviewed": false
   },
   "mainCli:resultGistPublished": {
