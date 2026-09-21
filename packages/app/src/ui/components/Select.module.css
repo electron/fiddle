@@ -62,10 +62,6 @@
   opacity: var(--lu-disabled-opacity);
 }
 
-.icon {
-  color: var(--lu-ink-faint);
-}
-
 .value {
   flex: 1;
   min-width: 0;

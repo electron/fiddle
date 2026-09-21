@@ -43,8 +43,7 @@
   stroke-width: 2;
 }
 
-.choice[data-selected] .box,
-.choice[data-indeterminate] .box {
+.choice[data-selected] .box {
   border-color: transparent;
   background: var(--lu-sheen-check), var(--lu-action);
   box-shadow: var(--lu-shadow-check);
