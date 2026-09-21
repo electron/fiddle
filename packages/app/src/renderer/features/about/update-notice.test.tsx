@@ -21,17 +21,24 @@ vi.mock('../../../ui/components/Toast', () => ({ showToast: mocks.showToast }));
 
 import { listenForUpdateNotices } from './update-notice';
 
+let loaded: () => void = () => undefined;
 const i18n = {
-  loadNamespaces: vi.fn((_ns: string) => Promise.resolve()),
+  loadNamespaces: vi.fn(
+    (_ns: string) => new Promise<void>((resolve) => (loaded = resolve)),
+  ),
   getFixedT: (_lng: null, ns: string) => (key: string, options?: { version?: string }) =>
     `${ns}:${key}${options?.version ? ` ${options.version}` : ''}`,
 };
 
 describe('listenForUpdateNotices', () => {
   it('listens before it loads its strings, then names the new version and opens its download page', async () => {
-    await listenForUpdateNotices(i18n as never);
+    const listening = listenForUpdateNotices(i18n as never);
     expect(mocks.onUpdateAvailable).toHaveBeenCalledTimes(1);
+    expect(i18n.loadNamespaces).toHaveBeenCalledTimes(1);
+    loaded();
+    await listening;
     mocks.announce?.('0.40.0');
+    loaded();
     await vi.waitFor(() => expect(mocks.showToast).toHaveBeenCalledTimes(1));
     const toast = mocks.showToast.mock.calls[0]![0] as {
       description: string;

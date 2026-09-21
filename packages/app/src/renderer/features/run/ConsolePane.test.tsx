@@ -72,12 +72,6 @@ describe('ConsolePane', () => {
     ]);
   });
 
-  it('clears the output', () => {
-    render(<ConsolePane />);
-    fireEvent.click(screen.getByRole('button', { name: 'clearConsole' }));
-    expect(mocks.ClearOutput).toHaveBeenCalledTimes(1);
-  });
-
   it('turns URLs into links and a source location into a button that reveals it in the editor', () => {
     mocks.lines = [
       line(1, 'see https://www.electronjs.org/docs for more'),

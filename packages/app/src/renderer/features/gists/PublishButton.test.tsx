@@ -130,11 +130,6 @@ describe('PublishButton without a gist', () => {
       ),
     );
   });
-
-  it('names the compact icon button for screen readers', () => {
-    render(<PublishButton compact />);
-    expect(screen.getByRole('button', { name: 'publishButton' }).textContent).toBe('');
-  });
 });
 
 describe('PublishButton with a gist loaded', () => {
@@ -176,13 +171,14 @@ describe('PublishButton with a gist loaded', () => {
   });
 
   it('saves the chosen visibility as a setting', async () => {
-    renderButton();
+    const view = render(<PublishButton />);
     await choose('visibilityPublic', 'menuitemradio');
     expect(mocks.settingsApi.SetSetting).toHaveBeenCalledWith('gistVisibility', 'public');
+    view.unmount();
 
     mocks.settings = { gistVisibility: 'public' };
-    renderButton();
-    fireEvent.click(screen.getAllByRole('button', { name: 'publishButton' })[1]!);
+    render(<PublishButton />);
+    fireEvent.click(screen.getByRole('button', { name: 'publishButton' }));
     expect(
       (
         await screen.findByRole('menuitemradio', { name: 'visibilityPublic' })

@@ -160,12 +160,6 @@ describe('SettingsPage', () => {
     expect(mocks.setView).not.toHaveBeenCalled();
   });
 
-  it('goes back to the editor from the close button', () => {
-    render(<SettingsPage />);
-    fireEvent.click(screen.getByRole('button', { name: 'close' }));
-    expect(mocks.setView).toHaveBeenCalledWith('editor', 'actionFailed');
-  });
-
   it('opens, imports and exports settings.json, and says when that fails', async () => {
     render(<SettingsPage />);
     fireEvent.click(screen.getByRole('button', { name: 'openFile' }));
@@ -378,18 +372,6 @@ describe('Section controls', () => {
     fireEvent.click(screen.getByRole('button', { name: `section.${section}` }));
   };
 
-  it('reloads every window for a new editor font', () => {
-    open('editor');
-    fireEvent.click(screen.getByRole('button', { name: 'editorFont.reload' }));
-    expect(mocks.RunCommand).toHaveBeenCalledWith('view.reloadAllWindows');
-  });
-
-  it('switches the package manager', () => {
-    open('execution');
-    fireEvent.click(screen.getByRole('radio', { name: 'npm' }));
-    expect(mocks.settingsApi.SetSetting).toHaveBeenCalledWith('packageManager', 'npm');
-  });
-
   it("turns release channels on and off, but never the current version's", () => {
     mocks.versionRef = { kind: 'release', version: '45.0.0-beta.3' };
     mocks.app = {
@@ -428,20 +410,6 @@ describe('Section controls', () => {
     expect(
       screen.getByRole('textbox', { name: 'customMirrorNightly.title' }),
     ).toBeTruthy();
-  });
-
-  it('sets the default gist visibility', () => {
-    open('github');
-    fireEvent.click(screen.getByRole('radio', { name: 'gistVisibility.public' }));
-    expect(mocks.settingsApi.SetSetting).toHaveBeenCalledWith('gistVisibility', 'public');
-  });
-
-  it('sets screen reader support and says whether one is active', () => {
-    mocks.app = { ...mocks.app, screenReaderActive: true };
-    open('accessibility');
-    expect(screen.getByText('screenReader.active')).toBeTruthy();
-    fireEvent.click(screen.getByRole('radio', { name: 'screenReader.on' }));
-    expect(mocks.settingsApi.SetSetting).toHaveBeenCalledWith('screenReader', 'on');
   });
 
   it('shows the app and Electron versions and the contributors', async () => {

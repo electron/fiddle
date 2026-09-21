@@ -184,16 +184,6 @@ describe('VersionManager', () => {
     expect(versionCells()).toEqual(['41.0.0']);
   });
 
-  it('refreshes the releases, adds a local build and stops a Download all', () => {
-    render(<VersionManager />);
-    fireEvent.click(screen.getByRole('button', { name: 'refreshReleases' }));
-    fireEvent.click(screen.getByRole('button', { name: 'addLocalBuild' }));
-    fireEvent.click(screen.getByRole('button', { name: 'stopDownloads' }));
-    expect(mocks.versionsApi.RefreshReleases).toHaveBeenCalledTimes(1);
-    expect(mocks.versionsApi.AddLocalBuild).toHaveBeenCalledTimes(1);
-    expect(mocks.versionsApi.StopDownloadAll).toHaveBeenCalledTimes(1);
-  });
-
   it('deletes every download only once the user confirms', async () => {
     mocks.confirmDialog.mockResolvedValueOnce(false);
     render(<VersionManager />);

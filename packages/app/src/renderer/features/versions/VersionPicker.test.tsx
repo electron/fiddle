@@ -202,8 +202,11 @@ describe('VersionPicker', () => {
     expect(mocks.versionsApi.DismissNotice).toHaveBeenCalledWith(7);
   });
 
-  it('retries the download when the network comes back', () => {
-    render(<VersionPicker />);
+  it('retries the download when the network comes back, until it unmounts', () => {
+    const view = render(<VersionPicker />);
+    window.dispatchEvent(new Event('online'));
+    expect(mocks.versionsApi.RetryDownload).toHaveBeenCalledTimes(1);
+    view.unmount();
     window.dispatchEvent(new Event('online'));
     expect(mocks.versionsApi.RetryDownload).toHaveBeenCalledTimes(1);
   });

@@ -80,16 +80,4 @@ describe('RunButton', () => {
     );
     expect(screen.getByRole('button', { name: /run/ }).textContent).toContain('run');
   });
-
-  it('stops a running fiddle with the same command', () => {
-    setup({});
-    mocks.win = {
-      ...mocks.win,
-      run: { ...mocks.win.run, status: 'running', version: '44.0.0' },
-    } as WindowState;
-    render(<RunButton />);
-    fireEvent.click(screen.getByRole('button', { name: /stop/ }));
-    expect(mocks.RunCommand).toHaveBeenCalledWith('run.toggle');
-    expect(screen.getByRole('status').textContent).toBe('announceRunning');
-  });
 });

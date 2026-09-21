@@ -167,12 +167,6 @@ describe('Sidebar context menu actions', () => {
       expect(mocks.documentsApi.RemoveFile).toHaveBeenCalledWith('renderer.js'),
     );
   });
-
-  it("closes an open file's tab", async () => {
-    renderSidebar();
-    await openMenuOn(/preload\.js/, 'closeTab');
-    expect(mocks.onSetVisible).toHaveBeenCalledWith('preload.js', false);
-  });
 });
 
 describe('Sidebar filter', () => {

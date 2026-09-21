@@ -116,8 +116,10 @@ describe('useReleases', () => {
   }
   afterEach(() => {
     versions.length = 0;
+    vi.restoreAllMocks();
   });
 
+  // These share the module-level releasesCache, so each test uses its own revisions.
   it('waits for the first release list, then shares one request between components per revision', async () => {
     mocks.GetReleases.mockResolvedValue([release('44.0.0')]);
     const view = render(<Releases />);

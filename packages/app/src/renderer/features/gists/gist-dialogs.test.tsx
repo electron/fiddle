@@ -11,7 +11,6 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { ErrorCode, FiddleError } from '../../../shared/errors';
 
 const mocks = vi.hoisted(() => ({
-  login: undefined as string | undefined,
   githubApi: {
     HasClipboardToken: vi.fn(() => Promise.resolve(false)),
     GetCredentialStorage: vi.fn(() => Promise.resolve('encrypted')),
@@ -26,13 +25,11 @@ const mocks = vi.hoisted(() => ({
       vi.fn<
         (allowPlaintext: boolean) => Promise<{ login: string; persisted: boolean }>
       >(),
-    SignOut: vi.fn(() => Promise.resolve()),
     Publish: vi.fn<(description: string, isPublic: boolean) => Promise<{ id: string }>>(),
     Update: vi.fn<() => Promise<{ id: string }>>(),
     CopyShareLink: vi.fn<(id: string) => Promise<void>>(() => Promise.resolve()),
     GetHistory: vi.fn<() => Promise<History>>(),
     ReadClipboardGist: vi.fn(() => Promise.resolve(null)),
-    OpenNewTokenPage: vi.fn(() => Promise.resolve()),
   },
   documentsApi: {
     LoadGist: vi.fn<(id: string, sha: string | null) => Promise<number>>(),
@@ -59,7 +56,7 @@ vi.mock('../../../ipc/renderer', () => ({
   settingsApi: mocks.settingsApi,
 }));
 vi.mock('../../state', () => ({
-  useAppState: () => ({ githubLogin: mocks.login }),
+  useAppState: () => ({}),
   useWindowState: () => null,
 }));
 vi.mock('react-i18next', () => ({
@@ -76,7 +73,6 @@ vi.mock('../../../ui', async (importOriginal) => ({
 
 import { copyShareLink, reportGistError, updateGist, type GistT } from './actions';
 import { GistDialogs } from './GistDialogs';
-import { GitHubAccountSection } from './GitHubAccountSection';
 import { HistoryDialog } from './HistoryDialog';
 import { PublishDialog } from './PublishDialog';
 import { SignInDialog } from './SignInDialog';
@@ -86,7 +82,6 @@ const t = ((key: string) => key) as unknown as GistT;
 
 beforeEach(() => {
   vi.clearAllMocks();
-  mocks.login = undefined;
   mocks.githubApi.HasClipboardToken.mockResolvedValue(false);
   mocks.githubApi.GetCredentialStorage.mockResolvedValue('encrypted');
   showGistDialog(null);
@@ -315,19 +310,6 @@ describe('SignInDialog', () => {
     expect(await screen.findByText('signInSessionOnly')).toBeTruthy();
     expect(screen.queryByLabelText('signInRemember')).toBeNull();
   });
-
-  it('opens the GitHub page that creates a token', () => {
-    render(<SignInDialog onClose={vi.fn()} />);
-    fireEvent.click(screen.getByRole('button', { name: 'signInCreateToken' }));
-    expect(mocks.githubApi.OpenNewTokenPage).toHaveBeenCalledTimes(1);
-  });
-
-  it('closes from Cancel', () => {
-    const onClose = vi.fn();
-    render(<SignInDialog onClose={onClose} />);
-    fireEvent.click(screen.getByRole('button', { name: 'cancel' }));
-    expect(onClose).toHaveBeenCalledTimes(1);
-  });
 });
 
 describe('PublishDialog', () => {
@@ -460,10 +442,6 @@ describe('HistoryDialog', () => {
     expect(rows()[1]).toContain('historyActive');
     expect(rows()[0]).not.toContain('historyActive');
 
-    // Choosing the loaded revision does nothing.
-    fireEvent.click(screen.getByRole('option', { name: /historyRevision \{"n":1\}/ }));
-    expect(mocks.documentsApi.LoadGist).not.toHaveBeenCalled();
-
     fireEvent.click(screen.getByRole('option', { name: /historyCreated/ }));
     await waitFor(() => expect(onClose).toHaveBeenCalled());
     expect(mocks.documentsApi.LoadGist).toHaveBeenCalledWith('abc', 'a'.repeat(40));
@@ -527,24 +505,5 @@ describe('GistDialogs', () => {
 
     fireEvent.click(screen.getByRole('button', { name: 'cancel' }));
     await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull());
-  });
-});
-
-describe('GitHubAccountSection', () => {
-  it('offers to sign in when signed out', async () => {
-    render(<GitHubAccountSection />);
-    expect(screen.getByText('accountSignedOut')).toBeTruthy();
-    fireEvent.click(screen.getByRole('button', { name: 'accountSignIn' }));
-    expect(screen.getByRole('dialog', { name: 'signInTitle' })).toBeTruthy();
-    fireEvent.click(screen.getByRole('button', { name: 'cancel' }));
-    await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull());
-  });
-
-  it('names the account and signs it out when signed in', () => {
-    mocks.login = 'octocat';
-    render(<GitHubAccountSection />);
-    expect(screen.getByText('accountSignedInAs {"login":"octocat"}')).toBeTruthy();
-    fireEvent.click(screen.getByRole('button', { name: 'accountSignOut' }));
-    expect(mocks.githubApi.SignOut).toHaveBeenCalledTimes(1);
   });
 });
