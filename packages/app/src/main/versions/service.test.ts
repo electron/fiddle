@@ -7,6 +7,7 @@ import { InstallState } from '@electron/fiddle-core';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { ErrorCode } from '../../shared/errors';
+import type { VersionsState } from '../../shared/stores';
 import { MIRRORS } from '../../shared/settings';
 
 vi.mock('electron', () => ({
@@ -26,9 +27,12 @@ vi.mock('../log', () => ({
   log: { debug: vi.fn(), info: vi.fn(), warn: vi.fn(), error: vi.fn() },
 }));
 
-const { VersionsService, mirrorsFor, readReleaseList } = await import('./service');
+const { Installer } = await import('@electron/fiddle-core');
+const { VersionsService, fetchReleaseList, mirrorsFor, readReleaseList } =
+  await import('./service');
 const { cachePaths } = await import('./paths');
 const { flushAll } = await import('../persistence/json-store');
+const dialogs = vi.mocked(await import('../dialogs'));
 
 const DEFAULT_ELECTRON = 'https://github.com/electron/electron/releases/download/';
 const DEFAULT_NIGHTLY = 'https://github.com/electron/nightlies/releases/download/';
@@ -132,6 +136,8 @@ const listText = (...versions: string[]) => JSON.stringify(versions.map(release)
 
 function setup(options: { active?: string[]; cached?: string } = {}) {
   const cache = cachePaths(path.join(dir, 'cache'));
+  /** Local build IDs some window uses. */
+  const activeBuilds = new Set<string>();
   if (options.cached !== undefined) {
     fs.mkdirSync(cache.root, { recursive: true });
     fs.writeFileSync(cache.releases, options.cached);
@@ -153,14 +159,24 @@ function setup(options: { active?: string[]; cached?: string } = {}) {
     fetch,
     activeVersions: () => ({
       releases: new Set(options.active ?? []),
-      builds: new Set(),
+      builds: activeBuilds,
     }),
     onRemoved,
   });
-  const rev = () =>
-    (updateApp.mock.calls.at(-1)?.[0] as { versions: { releasesRev: number } }).versions
-      .releasesRev;
-  return { service, cache, fetch, updateApp, onRemoved, rev };
+  /** What each `updateApp` published. */
+  const published = () =>
+    updateApp.mock.calls.map((call) => (call[0] as { versions: VersionsState }).versions);
+  const rev = () => published().at(-1)?.releasesRev;
+  return { service, cache, fetch, updateApp, onRemoved, rev, published, activeBuilds };
+}
+
+/** A folder under the temp dir with an Electron binary in it, like a local build. */
+function makeBuild(...segments: string[]): string {
+  const folder = path.join(dir, ...segments);
+  const exec = Installer.getExecPath(folder);
+  fs.mkdirSync(path.dirname(exec), { recursive: true });
+  fs.writeFileSync(exec, '');
+  return folder;
 }
 
 const respond = (text: string) => async () => new Response(text);
@@ -232,6 +248,23 @@ describe('release list', () => {
     expect(service.releases().map((row) => row.version)).toEqual(['99.0.0']);
   });
 
+  it('refuses the parsed versions before a list is loaded', () => {
+    const { service } = setup();
+    expect(() => service.electronVersions).toThrow(
+      expect.objectContaining({ code: ErrorCode.unavailable }),
+    );
+    expect(service.releases()).toEqual([]);
+  });
+
+  it('caches a list fetched outside the service for the next start to read', async () => {
+    const { cache, fetch } = setup();
+    fs.mkdirSync(cache.root, { recursive: true });
+    fetch.mockImplementation(respond(listText('40.0.0')));
+    const data = await fetchReleaseList(cache, 'https://example.test/r.json', fetch);
+    expect(data).toEqual([release('40.0.0')]);
+    expect(await readReleaseList(cache)).toEqual([release('40.0.0')]);
+  });
+
   it('reports a failed refresh to the caller, and keeps the list it has', async () => {
     const { service, fetch } = setup({ cached: listText('30.0.0') });
     fetch.mockRejectedValue(new Error('offline'));
@@ -265,6 +298,147 @@ describe('downloads', () => {
           .versions.installs['30.0.0']?.percent,
     );
     expect(percents).toEqual([20]);
+  });
+
+  it('downloads every listed release that is missing, notes a failure and carries on', async () => {
+    const { service, published } = setup({
+      cached: listText('31.0.0', '30.0.0', '29.0.0'),
+    });
+    await service.init();
+    vi.spyOn(service.installer, 'state').mockImplementation((version) =>
+      version === '31.0.0' ? InstallState.installed : InstallState.missing,
+    );
+    const install = vi
+      .spyOn(service.installer, 'install')
+      .mockImplementation(async (version) => {
+        if (version === '30.0.0') throw new Error('offline');
+        return '/electron';
+      });
+    await service.downloadAll(['31.0.0', '30.0.0', '29.0.0', '0.0.1-unlisted']);
+    expect(install.mock.calls.map(([version]) => version)).toEqual(['30.0.0', '29.0.0']);
+    const flags = published().map((v) => [v.downloadingAll, v.downloadAllFailed]);
+    expect(flags.at(-2)).toEqual([true, false]);
+    expect(flags.at(-1)).toEqual([false, true]);
+  });
+
+  it('stops downloading all at the version in flight, without calling that a failure', async () => {
+    const { service, published } = setup({ cached: listText('30.0.0', '29.0.0') });
+    await service.init();
+    vi.spyOn(service.installer, 'state').mockReturnValue(InstallState.missing);
+    const install = vi.spyOn(service.installer, 'install').mockImplementation(
+      (_version, options) =>
+        new Promise<string>((_resolve, reject) => {
+          options?.signal?.addEventListener('abort', () => reject(new Error('aborted')));
+        }),
+    );
+    const all = service.downloadAll(['30.0.0', '29.0.0']);
+    await vi.waitFor(() => expect(install).toHaveBeenCalledTimes(1));
+    // A second request while one runs starts nothing.
+    await service.downloadAll(['29.0.0']);
+    expect(install).toHaveBeenCalledTimes(1);
+
+    service.stopDownloadAll();
+    await all;
+    expect(install).toHaveBeenCalledTimes(1);
+    expect(published().at(-1)).toMatchObject({
+      downloadingAll: false,
+      downloadAllFailed: false,
+    });
+  });
+});
+
+describe('local builds', () => {
+  beforeEach(() => {
+    dialogs.pickFolder.mockReset();
+    dialogs.confirm.mockReset();
+    dialogs.messageBox.mockReset();
+  });
+
+  it('registers a folder once, publishes it, and names a window after it', () => {
+    const { service, published } = setup();
+    const folder = makeBuild('electron', 'src', 'out', 'Testing');
+    const id = service.registerLocalBuild(folder);
+    expect(service.registerLocalBuild(`${folder}${path.sep}`)).toBe(id);
+    expect(published().at(-1)?.localBuilds).toEqual([
+      { id, name: 'electron - Testing', path: folder, available: true },
+    ]);
+    expect(service.label({ kind: 'local', id })).toBe('electron - Testing');
+    expect(service.label({ kind: 'local', id: 'gone' })).toBe('gone');
+    expect(service.label({ kind: 'release', version: '30.0.0' })).toBe('30.0.0');
+  });
+
+  it('reports a build whose binary has gone as unavailable', () => {
+    const { service } = setup();
+    const folder = makeBuild('electron', 'src', 'out', 'Testing');
+    const id = service.registerLocalBuild(folder);
+    fs.rmSync(folder, { recursive: true, force: true });
+    expect(service.localBuild(id)).toMatchObject({ available: false });
+  });
+
+  it('adds the folder the user picks, and refuses one without an Electron binary', async () => {
+    const { service } = setup();
+    dialogs.pickFolder.mockResolvedValueOnce(undefined);
+    expect(await service.addLocalBuild('w')).toBeUndefined();
+
+    const empty = path.join(dir, 'empty');
+    fs.mkdirSync(empty);
+    dialogs.pickFolder.mockResolvedValueOnce(empty);
+    expect(await service.addLocalBuild('w')).toBeUndefined();
+    expect(dialogs.messageBox).toHaveBeenCalledWith(
+      'w',
+      expect.objectContaining({ type: 'error', message: 'noBinaryTitle' }),
+    );
+    expect(service.localBuilds()).toEqual([]);
+
+    const folder = makeBuild('electron', 'src', 'out', 'Release');
+    dialogs.pickFolder.mockResolvedValueOnce(folder);
+    const id = await service.addLocalBuild('w');
+    expect(service.localBuild(id!)).toMatchObject({ path: folder, available: true });
+  });
+
+  it('offers to switch to a folder that is already registered instead of adding it twice', async () => {
+    const { service } = setup();
+    const folder = makeBuild('electron', 'src', 'out', 'Testing');
+    const id = service.registerLocalBuild(folder);
+    dialogs.pickFolder.mockResolvedValue(folder);
+
+    dialogs.confirm.mockResolvedValueOnce(true);
+    expect(await service.addLocalBuild('w')).toBe(id);
+    expect(dialogs.confirm).toHaveBeenCalledWith(
+      'w',
+      expect.objectContaining({ message: 'switchToBuild:{"name":"electron - Testing"}' }),
+    );
+    dialogs.confirm.mockResolvedValueOnce(false);
+    expect(await service.addLocalBuild('w')).toBeUndefined();
+    expect(service.localBuilds()).toHaveLength(1);
+  });
+
+  it('refuses to remove a build a window uses, naming it, and removes the others', () => {
+    const { service, activeBuilds, published } = setup();
+    const used = service.registerLocalBuild(makeBuild('a', 'src', 'out', 'Testing'));
+    const other = service.registerLocalBuild(makeBuild('b', 'src', 'out', 'Release'));
+    activeBuilds.add(used);
+    expect(() => service.removeLocalBuild(used)).toThrow(
+      expect.objectContaining({
+        code: ErrorCode.conflict,
+        message: 'cannotRemoveActive:{"version":"a - Testing"}',
+      }),
+    );
+    service.removeLocalBuild(other);
+    expect(
+      published()
+        .at(-1)
+        ?.localBuilds.map((b) => b.id),
+    ).toEqual([used]);
+  });
+
+  it('keeps only the builds in use when everything is deleted', async () => {
+    const { service, activeBuilds } = setup();
+    const used = service.registerLocalBuild(makeBuild('a', 'src', 'out', 'Testing'));
+    service.registerLocalBuild(makeBuild('b', 'src', 'out', 'Release'));
+    activeBuilds.add(used);
+    await service.deleteAll();
+    expect(service.localBuilds().map((b) => b.id)).toEqual([used]);
   });
 });
 
