@@ -7,18 +7,28 @@ import { cx } from '../cx';
 import { Icon, type IconName } from '../icons/Icon';
 import { useInCapsule } from './capsule';
 import { ProgressRing, Spinner } from './Progress';
+import { Tooltip } from './Tooltip';
 import styles from './Button.module.css';
 
-/** stop is the running Run button; link is inline accent text with an underline, such as a console location. */
+/**
+ * stop is the running Run button; link is inline accent text with an underline, such as a console location;
+ * toolbar is a standalone 36px glass capsule on the chrome.
+ */
 export type ButtonVariant =
-  'primary' | 'secondary' | 'ghost' | 'danger' | 'stop' | 'link';
+  'primary' | 'secondary' | 'ghost' | 'danger' | 'stop' | 'link' | 'toolbar';
 
-type BaseProps = Omit<AriaButtonProps, 'children' | 'className' | 'style' | 'isPending'>;
-
-export interface ButtonProps extends BaseProps {
+export interface ButtonProps extends Omit<
+  AriaButtonProps,
+  'children' | 'className' | 'style' | 'isPending'
+> {
+  /** Secondary by default, or ghost for an icon-only button. */
   variant?: ButtonVariant;
   size?: 'md' | 'sm';
   icon?: IconName;
+  /** Accessible name when there's no visible label. The button is then a square icon button. */
+  label?: string;
+  /** Shows `label` in a tooltip while the button is icon-only, with an optional shortcut. */
+  tooltip?: boolean | { kbd?: string };
   /** Key-cap hint after the label, such as "⌘R". Hidden while loading or in progress. */
   kbd?: string;
   /** Shows a spinner in place of the icon and ignores presses. Stays focusable. */
@@ -27,15 +37,18 @@ export interface ButtonProps extends BaseProps {
   progress?: number;
   /** Toggled-on look (aria-pressed). */
   isPressed?: boolean;
+  /** Visible label. Leave out for an icon-only button named by `label`. */
   children?: ReactNode;
   className?: string;
   style?: CSSProperties;
 }
 
 export function Button({
-  variant = 'secondary',
+  variant,
   size = 'md',
   icon,
+  label,
+  tooltip,
   kbd,
   loading = false,
   progress,
@@ -43,34 +56,39 @@ export function Button({
   children,
   className,
   style,
+  'aria-label': ariaLabel,
   ...rest
 }: ButtonProps) {
   const inCapsule = useInCapsule();
-  const iconSize = size === 'sm' ? 14 : 16;
+  const iconOnly = children == null;
   const busy = loading || progress !== undefined;
+  // The leading icon sits 2px into the padding so the label looks centred.
+  const leadClass = iconOnly ? undefined : styles.lead;
+  const iconSize = size === 'sm' && !iconOnly ? 14 : 16;
   const lead =
     progress !== undefined ? (
-      <ProgressRing value={progress} className={styles.lead} />
+      <ProgressRing value={progress} className={leadClass} />
     ) : loading ? (
-      <Spinner className={styles.lead} />
+      <Spinner className={leadClass} />
     ) : icon ? (
-      <Icon name={icon} size={iconSize} className={styles.lead} />
+      <Icon name={icon} size={iconSize} className={leadClass} />
     ) : null;
 
-  return (
+  const button = (
     <AriaButton
       {...rest}
       isPending={loading}
+      aria-label={ariaLabel ?? (iconOnly ? label : undefined)}
       aria-pressed={isPressed}
-      className={cx(styles.button, className)}
+      className={cx(styles.button, iconOnly && styles.iconOnly, className)}
       style={style}
-      data-variant={variant}
+      data-variant={variant ?? (iconOnly ? 'ghost' : 'secondary')}
       data-size={size}
       data-capsule={inCapsule || undefined}
       data-busy={busy || undefined}
     >
       {lead}
-      {children != null && <span className={styles.label}>{children}</span>}
+      {!iconOnly && <span className={styles.label}>{children}</span>}
       {kbd && !busy && (
         <span className={styles.kbd} aria-hidden="true">
           {kbd}
@@ -78,43 +96,29 @@ export function Button({
       )}
     </AriaButton>
   );
-}
-
-export interface IconButtonProps extends BaseProps {
-  icon: IconName;
-  /** Accessible name. Pair with a Tooltip to show it. */
-  label: string;
-  variant?: ButtonVariant;
-  size?: 'md' | 'sm';
-  isPressed?: boolean;
-  className?: string;
-  style?: CSSProperties;
-}
-
-/** A square button with only an icon. Ghost by default. */
-export function IconButton({
-  icon,
-  label,
-  variant = 'ghost',
-  size = 'md',
-  isPressed,
-  className,
-  style,
-  ...rest
-}: IconButtonProps) {
-  const inCapsule = useInCapsule();
+  if (!tooltip) return button;
   return (
-    <AriaButton
-      {...rest}
-      aria-label={label}
-      aria-pressed={isPressed}
-      className={cx(styles.button, styles.iconOnly, className)}
-      style={style}
-      data-variant={variant}
-      data-size={size}
-      data-capsule={inCapsule || undefined}
+    <Tooltip
+      label={label}
+      kbd={tooltip === true ? undefined : tooltip.kbd}
+      isDisabled={!iconOnly}
     >
-      <Icon name={icon} />
-    </AriaButton>
+      {button}
+    </Tooltip>
   );
 }
+
+export type IconButtonProps = Omit<ButtonProps, 'children'> & {
+  icon: IconName;
+  label: string;
+};
+
+/** A square button with only an icon, named by `label`. Ghost by default. */
+export const IconButton = (props: IconButtonProps) => <Button {...props} />;
+
+export type ToolbarButtonProps = Omit<ButtonProps, 'variant'> & { label: string };
+
+/** A standalone 36px glass capsule button on the chrome. Icon-only without children. */
+export const ToolbarButton = (props: ToolbarButtonProps) => (
+  <Button {...props} variant="toolbar" />
+);

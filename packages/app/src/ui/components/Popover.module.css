@@ -1,17 +1,9 @@
 .popover {
+  composes: lu-overlay-glass from global;
   z-index: var(--lu-z-popover);
   min-width: 200px;
   padding: 14px 16px;
   border-radius: var(--lu-radius-panel);
-  corner-shape: squircle;
-  background: var(--lu-material-overlay);
-  -webkit-backdrop-filter: var(--lu-blur-overlay);
-  backdrop-filter: var(--lu-blur-overlay);
-  box-shadow: var(--lu-shadow-overlay);
-  color: var(--lu-ink);
-  font: var(--lu-type-body);
-  letter-spacing: var(--lu-type-body-tracking);
-  outline: none;
 }
 
 .popover[data-entering] {

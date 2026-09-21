@@ -6,6 +6,7 @@ import {
   VisuallyHidden,
 } from 'react-aria-components';
 import { Icon } from '../icons/Icon';
+import { singleSelection } from './Content';
 import styles from './Tree.module.css';
 
 export interface TreeProps {
@@ -25,11 +26,7 @@ export function Tree({ children, value, onChange, ...rest }: TreeProps) {
       selectionBehavior="replace"
       disallowEmptySelection
       selectedKeys={value === null ? [] : [value]}
-      onSelectionChange={(keys) => {
-        if (keys === 'all') return;
-        const [key] = [...keys];
-        if (key != null) onChange(String(key));
-      }}
+      onSelectionChange={singleSelection(onChange)}
       className={styles.tree}
     >
       {children}

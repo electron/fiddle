@@ -63,7 +63,7 @@ export interface MenuBarProps {
 }
 
 /** A title's mnemonic: the letter Alt opens it with, and where it is in the label. */
-export interface Mnemonic {
+interface Mnemonic {
   index: number;
   key: string;
 }
@@ -604,22 +604,17 @@ export function MenuBar({
     closeAll(false);
   });
   useEffect(() => {
-    const keyDown = (event: KeyboardEvent) => onGlobalKeyDown(event);
-    const keyUp = (event: KeyboardEvent) => onGlobalKeyUp(event);
-    const pointer = (event: Event) => onGlobalPointer(event);
-    const blur = () => onWindowBlur();
-    window.addEventListener('keydown', keyDown, true);
-    window.addEventListener('keyup', keyUp, true);
-    window.addEventListener('mousedown', pointer, true);
-    window.addEventListener('wheel', pointer, { capture: true, passive: true });
-    window.addEventListener('blur', blur);
-    return () => {
-      window.removeEventListener('keydown', keyDown, true);
-      window.removeEventListener('keyup', keyUp, true);
-      window.removeEventListener('mousedown', pointer, true);
-      window.removeEventListener('wheel', pointer, true);
-      window.removeEventListener('blur', blur);
-    };
+    const listeners = new AbortController();
+    const capture = { capture: true, signal: listeners.signal };
+    window.addEventListener('keydown', (event) => onGlobalKeyDown(event), capture);
+    window.addEventListener('keyup', (event) => onGlobalKeyUp(event), capture);
+    window.addEventListener('mousedown', (event) => onGlobalPointer(event), capture);
+    window.addEventListener('wheel', (event) => onGlobalPointer(event), {
+      ...capture,
+      passive: true,
+    });
+    window.addEventListener('blur', () => onWindowBlur(), { signal: listeners.signal });
+    return () => listeners.abort();
   }, []);
   useEffect(() => () => window.clearTimeout(hoverTimer.current), []);
 

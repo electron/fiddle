@@ -12,7 +12,6 @@ import {
   MenuPopover,
   promptDialog,
   TextField,
-  Tooltip,
   Tree,
   TreeRow,
 } from '../../../ui';
@@ -189,15 +188,14 @@ export function Sidebar({
           <section key={process} className={styles.section}>
             <div className={styles.header}>
               <h2 className={styles.head}>{label}</h2>
-              <Tooltip label={addLabel}>
-                <IconButton
-                  icon="plus"
-                  size="sm"
-                  label={addLabel}
-                  className={styles.groupAdd}
-                  onPress={() => void addFile(process)}
-                />
-              </Tooltip>
+              <IconButton
+                icon="plus"
+                size="sm"
+                label={addLabel}
+                tooltip
+                className={styles.groupAdd}
+                onPress={() => void addFile(process)}
+              />
             </div>
             {group.length > 0 && (
               <Tree

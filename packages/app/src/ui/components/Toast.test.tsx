@@ -1,14 +1,12 @@
 import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
-import { UNSTABLE_ToastQueue as ToastQueue } from 'react-aria-components';
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { showToast, Toaster, toastQueue, type ToastContent } from './Toast';
+import { showToast, Toaster, toastQueue } from './Toast';
 
 describe('Toaster', () => {
   it('shows queued toasts and closes them', async () => {
-    const queue = new ToastQueue<ToastContent>();
-    render(<Toaster closeLabel="Dismiss" aria-label="Notifications" queue={queue} />);
+    render(<Toaster closeLabel="Dismiss" aria-label="Notifications" />);
     act(() => {
-      queue.add({
+      toastQueue.add({
         tone: 'success',
         title: 'Published',
         description: 'gist.github.com/8f3a2c',
@@ -20,11 +18,10 @@ describe('Toaster', () => {
   });
 
   it('runs a toast action and closes the toast', async () => {
-    const queue = new ToastQueue<ToastContent>();
     let ran = false;
-    render(<Toaster closeLabel="Dismiss" aria-label="Notifications" queue={queue} />);
+    render(<Toaster closeLabel="Dismiss" aria-label="Notifications" />);
     act(() => {
-      queue.add({
+      toastQueue.add({
         title: 'Electron 44.0.0-beta.3 is ready',
         actionLabel: 'Switch',
         onAction: () => (ran = true),

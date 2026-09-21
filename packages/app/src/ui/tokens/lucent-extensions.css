@@ -77,6 +77,13 @@
   --lu-z-tooltip: 400;
 }
 
+/* The sheet keeps its round 16px corner where the tokens go squircle: see Sheet.module.css. */
+@supports (corner-shape: squircle) {
+  :root {
+    --lu-radius-sheet: 16px;
+  }
+}
+
 /* Sheet shadow: shadow-island, plus a 0.5px top rim at 8% white in dark. */
 :root {
   --lu-shadow-sheet: var(--lu-shadow-island);
