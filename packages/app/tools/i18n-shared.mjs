@@ -8,7 +8,7 @@ import path from 'node:path';
 export const appDir = path.resolve(import.meta.dirname, '..');
 export const i18nDir = path.join(appDir, 'src/i18n');
 export const localesDir = path.join(i18nDir, 'locales');
-/** Translation state per locale: source hashes and reviewed flags (see i18n-translate.mjs). */
+/** Per locale, the hash of the English each key was translated from (see i18n-translate.mjs). */
 export const metaDir = path.join(i18nDir, 'translations');
 export const glossaryFile = path.join(i18nDir, 'glossary.json');
 
@@ -174,16 +174,10 @@ export function hashText(text) {
   return createHash('sha256').update(text).digest('hex').slice(0, 12);
 }
 
-/** Hash of a translation value (string or forms), stable across key order. */
-export function hashValue(value) {
-  if (typeof value === 'string') return hashText(value);
-  const ordered = CATEGORIES.filter((c) => c in value).map((c) => [c, value[c]]);
-  return hashText(JSON.stringify(ordered));
-}
-
 /** Hash of a unit's English text: when it changes, translations are out of date. */
 export function sourceHash(unit) {
-  return hashValue(unit.plural ? englishForms(unit) : unit.message);
+  if (!unit.plural) return hashText(unit.message);
+  return hashText(JSON.stringify(Object.entries(englishForms(unit))));
 }
 
 const PLACEHOLDER = /\{\{\s*([^},\s]+)[^}]*\}\}|\$t\(([^)]*)\)/g;

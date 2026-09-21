@@ -3,10 +3,8 @@
 // translates new and changed English strings into each shipped locale with an
 // LLM (ANTHROPIC_API_KEY; FIDDLE_TRANSLATE_MODEL overrides the model).
 //
-// src/i18n/translations/<locale>.json records { source, translation, reviewed } per
-// key. A translation with no entry, or edited since the script wrote it, is
-// human-reviewed and never overwritten; i18n:check warns when English changes under it.
-// To keep a reviewed translation after such a change, set its `source` to the new hash.
+// src/i18n/translations/<locale>.json records, per key, a hash of the English it was
+// translated from. A key whose English has changed since is translated again.
 import fs from 'node:fs';
 import path from 'node:path';
 import { parseArgs } from 'node:util';
@@ -16,7 +14,6 @@ import {
   appDir,
   categoriesFor,
   glossaryFile,
-  hashValue,
   keysFor,
   loadEnglish,
   loadMessages,
@@ -38,9 +35,9 @@ const BATCH_SIZE = 40;
 const REQUEST_TIMEOUT_MS = 5 * 60 * 1000;
 export const DEFAULT_MODEL = 'claude-opus-5';
 
-/** Compares a locale with English and its state: what to translate, flag and remove. */
+/** Compares a locale with English and its state: what to translate and what to remove. */
 export function planLocale(english, locale, messages, meta) {
-  const plan = { todo: [], review: [], removed: [], humanEdits: [] };
+  const plan = { todo: [], removed: [] };
   const nextMessages = {};
   const nextMeta = {};
   for (const [ns, entries] of Object.entries(english)) {
@@ -55,18 +52,12 @@ export function planLocale(english, locale, messages, meta) {
       }
       writeUnit(unit, locale, out, value);
       const source = sourceHash(unit);
-      let entry = meta[id];
-      const translation = hashValue(value);
-      if (!entry || entry.translation !== translation) {
-        // Written or edited by a human, which counts as reviewing today's English.
-        entry = { source, translation, reviewed: true };
-        plan.humanEdits.push(id);
-      }
-      if (entry.source !== source) {
-        if (entry.reviewed) plan.review.push({ ns, unit, source });
-        else plan.todo.push({ ns, unit, reason: 'changed', previous: value });
-      }
-      nextMeta[id] = entry;
+      // A translation with no recorded source (added by hand) counts as current.
+      const recorded = meta[id] ?? source;
+      if (recorded !== source)
+        plan.todo.push({ ns, unit, reason: 'changed', previous: value });
+      // Still the old hash for a changed key, so a failed retranslation is retried.
+      nextMeta[id] = recorded;
     }
     for (const key of Object.keys(current))
       if (!(key in out)) plan.removed.push(`${ns}:${key}`);
@@ -162,11 +153,7 @@ export async function translateLocale({
           continue;
         }
         writeUnit(unit, locale, out[ns], value);
-        nextMeta[id] = {
-          source: sourceHash(unit),
-          translation: hashValue(value),
-          reviewed: false,
-        };
+        nextMeta[id] = sourceHash(unit);
       }
     }
   }
@@ -267,18 +254,12 @@ function describe(locale, { plan, failed }, dryRun) {
   const counts = (reason) => plan.todo.filter((item) => item.reason === reason).length;
   const lines = [
     `${locale}: ${plan.todo.length} to translate (${counts('new')} new, ${counts('changed')} changed), ` +
-      `${plan.review.length} flagged for re-review, ${plan.removed.length} removed, ` +
-      `${plan.humanEdits.length} human edit(s) recorded` +
+      `${plan.removed.length} removed` +
       (dryRun ? '' : `, ${failed.length} failed`),
   ];
   if (dryRun) {
     for (const item of plan.todo)
       lines.push(`  ${item.reason.padEnd(8)} ${item.ns}:${item.unit.key}`);
-  }
-  for (const item of plan.review) {
-    lines.push(
-      `  review   ${item.ns}:${item.unit.key} (English changed; source is now ${item.source})`,
-    );
   }
   if (dryRun) for (const id of plan.removed) lines.push(`  remove   ${id}`);
   for (const { id, problems } of failed)
