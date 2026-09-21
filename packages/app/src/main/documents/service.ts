@@ -158,6 +158,8 @@ let templates: TemplateLoader;
 let stateStore: JsonStore<AppStateFile> | undefined;
 let draftStore: DraftStore;
 const docs = new Map<string, Doc>();
+/** The latest `setFiddleVersion` call per window, so a slow template load never lands over a newer pick. */
+const versionSwitches = new Map<string, object>();
 const draftsOnDisk = new Set<string>();
 const drafts = new DraftScheduler((windowId) => writeDraft(windowId));
 const deepLinks = new DeepLinkQueue(handleDeepLink, () =>
@@ -541,6 +543,7 @@ function onDestroyed(windowId: string): void {
     void removeDraft(windowId);
   }
   docs.delete(windowId);
+  versionSwitches.delete(windowId);
   if (lastFocused === windowId) lastFocused = docs.keys().next().value;
   scheduleSessionSave();
 }
@@ -715,14 +718,17 @@ export async function setFiddleVersion(
   versionRef: VersionRef,
 ): Promise<number> {
   const doc = requireDoc(windowId);
+  const token = {};
+  versionSwitches.set(windowId, token);
   if (isUneditedTemplate(doc)) {
-    try {
-      const loaded = await newFiddle(templates, versionRef);
-      if (docs.get(windowId) === doc)
-        return commit(windowId, createDoc(loaded.fiddle, doc.name, { previous: doc }));
-    } catch (error) {
+    const loaded = await newFiddle(templates, versionRef).catch((error: unknown) => {
       log.warn('could not load the template for the new version', error);
-    }
+      return undefined;
+    });
+    if (versionSwitches.get(windowId) !== token)
+      return hub().getWindow(windowId)?.rev ?? 0;
+    if (loaded && docs.get(windowId) === doc)
+      return commit(windowId, createDoc(loaded.fiddle, doc.name, { previous: doc }));
   }
   const current = requireDoc(windowId);
   return commit(windowId, {

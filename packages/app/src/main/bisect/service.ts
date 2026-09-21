@@ -16,6 +16,8 @@ interface Session {
   auto: boolean;
   bisector?: Bisector;
   stopped: boolean;
+  /** A version is loading: a verdict now would be for the version before it. */
+  stepping?: boolean;
 }
 
 export class BisectService {
@@ -87,7 +89,7 @@ export class BisectService {
   async mark(windowId: string, verdict: 'good' | 'bad' | 'skip'): Promise<void> {
     const session = this.#sessions.get(windowId);
     const bisector = session?.bisector;
-    if (!session || !bisector) return;
+    if (!session || !bisector || session.stepping) return;
     const step =
       verdict === 'good'
         ? bisector.good()
@@ -122,10 +124,15 @@ export class BisectService {
       return;
     }
     this.#runs.stop(windowId);
-    await documents.setFiddleVersion(windowId, {
-      kind: 'release',
-      version: step.version,
-    });
+    session.stepping = true;
+    try {
+      await documents.setFiddleVersion(windowId, {
+        kind: 'release',
+        version: step.version,
+      });
+    } finally {
+      session.stepping = false;
+    }
     if (this.#sessions.get(windowId) !== session) return;
     this.#typesChanged(windowId);
     this.#setBisect(windowId, { ...current, current: step.version });

@@ -177,6 +177,21 @@ describe('BisectService (manual)', () => {
     expect(ctx.bisect()?.result).toEqual({ good: '3.0.0', bad: '4.0.0' });
   });
 
+  it('ignores a verdict while the next version is still loading', async () => {
+    const documents = await import('../documents/service');
+    await ctx.service.start('w', '1.0.0', '5.0.0', false);
+    let finish: () => void = () => {};
+    vi.mocked(documents.setFiddleVersion).mockImplementationOnce(
+      () => new Promise((resolve) => (finish = () => resolve(1))),
+    );
+    const first = ctx.service.mark('w', 'good');
+    // A double-click: 4.0.0 is not on screen yet, so this is not its verdict.
+    await ctx.service.mark('w', 'good');
+    finish();
+    await first;
+    expect(ctx.bisect()).toMatchObject({ current: '4.0.0', result: null });
+  });
+
   it('does not bring a stopped bisect back', async () => {
     const documents = await import('../documents/service');
     let finish: () => void = () => {};

@@ -341,6 +341,41 @@ describe('replacing the fiddle while a load is running', () => {
   });
 });
 
+describe('setFiddleVersion', () => {
+  it('keeps the last version picked when an earlier pick loads its template late', async () => {
+    const { net } = await import('electron');
+    let failDownload!: () => void;
+    vi.mocked(net.fetch).mockImplementation(
+      () =>
+        new Promise((_, reject) => (failDownload = () => reject(new Error('offline')))),
+    );
+    const { documents, model } = await setup();
+    await documents.openFiddleWindow({
+      windowId: W,
+      doc: model.createDoc(
+        createFiddle({
+          files: { 'main.js': 'tpl' },
+          version: { kind: 'release', version: '29.0.0' },
+          templateName: model.DEFAULT_TEMPLATE,
+        }),
+        'fiddle',
+      ),
+    });
+
+    // 30 has a template to download; 31 has none, so it uses the bundled one at once.
+    const slow = documents.setFiddleVersion(W, version);
+    await documents.setFiddleVersion(W, { kind: 'release', version: '31.0.0' });
+    await vi.waitFor(() => expect(failDownload).toBeTypeOf('function'));
+    failDownload();
+    await slow;
+
+    expect(documents.getFiddle(W).version).toEqual({
+      kind: 'release',
+      version: '31.0.0',
+    });
+  });
+});
+
 describe('markPublished', () => {
   it('saves what was sent, so an edit made while publishing stays unsaved', async () => {
     const { documents, model, open } = await setup();
