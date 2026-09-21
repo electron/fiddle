@@ -2,7 +2,7 @@
 // `yarn i18n:check`: missing or extra keys, placeholder, tag and plural mismatches,
 // translations over maxLength, and English keys no source file seems to use (a
 // heuristic: a key counts as used if it appears as a string literal or matches a
-// template literal). Warns about reviewed translations whose English changed.
+// template literal). Warns about translations whose English has changed since.
 import fs from 'node:fs';
 import path from 'node:path';
 import { pathToFileURL } from 'node:url';
@@ -69,12 +69,10 @@ export function checkLocale(english, locale, messages, meta = {}) {
       for (const problem of validateUnit(unit, locale, readUnit(unit, locale, current))) {
         errors.push(`${where}: ${unit.key}: ${problem}`);
       }
-      const entry = meta[`${ns}:${unit.key}`];
-      const source = sourceHash(unit);
-      if (entry?.reviewed && entry.source !== source) {
+      const recorded = meta[`${ns}:${unit.key}`];
+      if (recorded !== undefined && recorded !== sourceHash(unit)) {
         warnings.push(
-          `${where}: ${unit.key}: English changed since review. Update the translation, ` +
-            `or set its "source" to "${source}" in translations/${locale}.json to keep it.`,
+          `${where}: ${unit.key}: English changed since it was translated; run \`yarn i18n:translate\``,
         );
       }
     }
