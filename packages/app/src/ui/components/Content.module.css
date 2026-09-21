@@ -36,10 +36,6 @@
   background: var(--lu-accent-soft);
 }
 
-.row[data-disabled] {
-  opacity: var(--lu-disabled-opacity);
-}
-
 .row[data-focus-visible] {
   outline: var(--lu-focus-outline);
   outline-offset: -3px;
@@ -132,10 +128,6 @@
   background: var(--lu-hover);
 }
 
-.tr[aria-selected='true'] {
-  background: var(--lu-accent-soft);
-}
-
 .mono {
   font-family: var(--lu-font-mono);
   font-size: 12px;
@@ -184,8 +176,7 @@
 
 /* Forced colors drops the fill that marks a selected row. */
 @media (forced-colors: active) {
-  .row[data-selected],
-  .tr[aria-selected='true'] {
+  .row[data-selected] {
     outline: 2px solid var(--lu-ink);
     outline-offset: -2px;
   }

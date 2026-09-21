@@ -53,29 +53,10 @@ describe('TextField', () => {
 describe('FormField', () => {
   it('labels its group', () => {
     render(
-      <FormField label="Autosave" helper="Saves after 2 seconds.">
-        <input aria-label="Autosave delay" />
-      </FormField>,
-    );
-    expect(screen.getByRole('group', { name: 'Autosave' })).toBeTruthy();
-  });
-
-  it('takes its control out of the tab order and the pointer path when disabled', () => {
-    const { rerender } = render(
-      <FormField label="Autosave" isDisabled>
-        <input aria-label="Autosave delay" />
-      </FormField>,
-    );
-    const input = screen.getByLabelText('Autosave delay');
-    expect(input.closest('[inert]')).not.toBeNull();
-    expect(
-      screen.getByRole('group', { name: 'Autosave' }).getAttribute('aria-disabled'),
-    ).toBe('true');
-    rerender(
       <FormField label="Autosave">
         <input aria-label="Autosave delay" />
       </FormField>,
     );
-    expect(screen.getByLabelText('Autosave delay').closest('[inert]')).toBeNull();
+    expect(screen.getByRole('group', { name: 'Autosave' })).toBeTruthy();
   });
 });

@@ -13,7 +13,7 @@
   align-items: center;
   gap: 6px;
   height: var(--lu-size-row);
-  padding: 0 8px 0 calc(8px + (var(--tree-item-level, 1) - 1) * 14px);
+  padding: 0 8px;
   border-radius: var(--lu-radius-item);
   corner-shape: squircle;
   user-select: none;
@@ -26,10 +26,12 @@
 }
 
 .row[data-hovered] {
-  background: color-mix(in srgb, var(--lu-hover) 60%, transparent);
+  background: var(--lu-capsule);
 }
 
 .row[data-selected] {
+  background: var(--lu-chip);
+  box-shadow: var(--lu-shadow-lift);
   font-weight: 500;
 }
 
@@ -37,39 +39,9 @@
   color: var(--lu-accent);
 }
 
-.row[data-disabled] {
-  opacity: var(--lu-disabled-opacity);
-}
-
 .row[data-focus-visible] {
   outline: var(--lu-focus-outline);
   outline-offset: -3px;
-}
-
-.tree[data-variant='sidebar'] .row[data-hovered] {
-  background: var(--lu-capsule);
-}
-
-.tree[data-variant='sidebar'] .row[data-selected] {
-  background: var(--lu-chip);
-  box-shadow: var(--lu-shadow-lift);
-}
-
-.tree[data-variant='sidebar'] .dot {
-  background: var(--lu-ink-muted);
-}
-
-.chevron {
-  appearance: none;
-  display: inline-flex;
-  flex: none;
-  width: 12px;
-  margin-left: -2px;
-  padding: 0;
-  border: 0;
-  background: none;
-  color: var(--lu-ink-faint);
-  cursor: default;
 }
 
 .icon {
@@ -102,7 +74,7 @@
   width: 6px;
   height: 6px;
   border-radius: var(--lu-radius-round);
-  background: var(--lu-ink-faint);
+  background: var(--lu-ink-muted);
 }
 
 /* Forced colors drops the fill that marks the selected row. */
