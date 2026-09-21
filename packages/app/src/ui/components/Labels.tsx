@@ -6,24 +6,6 @@ import styles from './Labels.module.css';
 
 export type Tone = 'neutral' | 'accent' | 'success' | 'warning' | 'danger';
 
-export interface BadgeProps {
-  tone?: Tone;
-  /** A leading dot with a 2.5px halo. */
-  dot?: boolean;
-  children: ReactNode;
-  className?: string;
-}
-
-/** One or two words of status. */
-export function Badge({ tone = 'neutral', dot, children, className }: BadgeProps) {
-  return (
-    <span className={cx(styles.badge, className)} data-tone={tone}>
-      {dot && <span className={styles.dot} aria-hidden="true" />}
-      {children}
-    </span>
-  );
-}
-
 interface TagBaseProps {
   tone?: Tone;
   children: ReactNode;
@@ -40,7 +22,7 @@ export type TagProps = TagBaseProps &
     | { onRemove?: undefined; removeLabel?: undefined }
   );
 
-/** A short label like Badge, neutral by default and optionally removable. */
+/** A short label, neutral by default and optionally removable. */
 export function Tag({
   tone = 'neutral',
   children,

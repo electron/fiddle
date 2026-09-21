@@ -93,11 +93,9 @@ export {
 export { SplitHandle, type SplitHandleProps } from './components/SplitHandle';
 
 export {
-  Badge,
   InlineCode,
   Kbd,
   Tag,
-  type BadgeProps,
   type InlineCodeProps,
   type KbdProps,
   type TagProps,
@@ -106,10 +104,8 @@ export {
 
 export { Tooltip, type TooltipProps } from './components/Tooltip';
 export {
-  ProgressBar,
   ProgressRing,
   Spinner,
-  type ProgressBarProps,
   type ProgressRingProps,
   type SpinnerProps,
 } from './components/Progress';
@@ -140,12 +136,10 @@ export {
 } from './components/Callout';
 
 export {
-  Card,
   List,
   ListRow,
   StatusPill,
   Table,
-  type CardProps,
   type ListProps,
   type ListRowProps,
   type StatusPillProps,
