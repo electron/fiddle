@@ -277,60 +277,10 @@ export function validateUnit(unit, locale, value, { checkLength = true } = {}) {
 }
 
 // Pseudo-locales, as Chromium and Android define them.
-const ACCENTS = {
-  a: 'á',
-  b: 'ƀ',
-  c: 'ç',
-  d: 'ð',
-  e: 'é',
-  f: 'ƒ',
-  g: 'ĝ',
-  h: 'ĥ',
-  i: 'î',
-  j: 'ĵ',
-  k: 'ķ',
-  l: 'ļ',
-  m: 'ɱ',
-  n: 'ñ',
-  o: 'ö',
-  p: 'þ',
-  q: 'ǫ',
-  r: 'ŕ',
-  s: 'š',
-  t: 'ţ',
-  u: 'û',
-  v: 'ṽ',
-  w: 'ŵ',
-  x: 'ẋ',
-  y: 'ý',
-  z: 'ž',
-  A: 'Å',
-  B: 'Ɓ',
-  C: 'Ç',
-  D: 'Ð',
-  E: 'É',
-  F: 'Ƒ',
-  G: 'Ĝ',
-  H: 'Ĥ',
-  I: 'Î',
-  J: 'Ĵ',
-  K: 'Ķ',
-  L: 'Ļ',
-  M: 'Ṁ',
-  N: 'Ñ',
-  O: 'Ö',
-  P: 'Þ',
-  Q: 'Ǫ',
-  R: 'Ŕ',
-  S: 'Š',
-  T: 'Ţ',
-  U: 'Û',
-  V: 'Ṽ',
-  W: 'Ŵ',
-  X: 'Ẋ',
-  Y: 'Ý',
-  Z: 'Ž',
-};
+const ACCENTED_LOWER = 'áƀçðéƒĝĥîĵķļɱñöþǫŕšţûṽŵẋýž';
+const ACCENTED_UPPER = 'ÅƁÇÐÉƑĜĤÎĴĶĻṀÑÖÞǪŔŠŢÛṼŴẊÝŽ';
+const accent = (c) =>
+  c < 'a' ? ACCENTED_UPPER[c.charCodeAt(0) - 65] : ACCENTED_LOWER[c.charCodeAt(0) - 97];
 const PADDING = 'one two three four five six seven eight nine ten'.split(' ');
 // Placeholders, $t() references and tags pass through untouched.
 const PROTECTED = /(\{\{[^}]*\}\}|\$t\([^)]*\)|<[^>]+>)/;
@@ -344,7 +294,7 @@ export function pseudoLocalize(locale, text) {
   const parts = text.split(PROTECTED);
   const mapText = (fn) => parts.map((part, i) => (i % 2 ? part : fn(part))).join('');
   if (locale === 'en-XA') {
-    const accented = mapText((part) => part.replace(/[A-Za-z]/g, (c) => ACCENTS[c]));
+    const accented = mapText((part) => part.replace(/[A-Za-z]/g, accent));
     const target = Math.ceil(visibleLength(text) * 0.4);
     let pad = '';
     for (let i = 0; pad.length < target; i++) pad += ` ${PADDING[i % PADDING.length]}`;
