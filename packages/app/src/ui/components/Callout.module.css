@@ -10,46 +10,15 @@
   letter-spacing: var(--lu-type-body-tracking);
 }
 
-.callout[data-intent='primary'] {
-  background: var(--lu-accent-soft);
-}
-
-.callout[data-intent='danger'] {
-  background: var(--lu-spark-soft);
-}
-
 .icon {
   margin-top: 1px;
   color: var(--lu-ink-muted);
 }
 
-.callout[data-intent='primary'] .icon {
-  color: var(--lu-accent);
-}
-
-.callout[data-intent='danger'] .icon,
-.callout[data-intent='danger'] .title {
-  color: var(--lu-spark);
-}
-
-.body {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  min-width: 0;
-}
-
-.title {
-  font-weight: 600;
-}
-
 .text {
+  min-width: 0;
   color: var(--lu-ink-muted);
   text-wrap: pretty;
-}
-
-.action {
-  margin-top: 6px;
 }
 
 .empty {

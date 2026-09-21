@@ -27,37 +27,6 @@
   --tone: var(--lu-spark);
 }
 
-.tag {
-  gap: 4px;
-}
-
-.remove {
-  appearance: none;
-  display: grid;
-  place-items: center;
-  width: 14px;
-  height: 14px;
-  margin-right: -3px;
-  padding: 0;
-  border: 0;
-  border-radius: var(--lu-radius-round);
-  background: transparent;
-  color: inherit;
-  opacity: 0.75;
-  cursor: default;
-  transition:
-    opacity var(--lu-dur-fast) var(--lu-ease),
-    background-color var(--lu-dur-fast) var(--lu-ease);
-}
-.remove[data-hovered] {
-  opacity: 1;
-  background: color-mix(in srgb, currentColor 18%, transparent);
-}
-.remove[data-focus-visible] {
-  outline: var(--lu-focus-outline);
-  outline-offset: 1px;
-}
-
 .kbds {
   display: inline-flex;
   gap: 3px;
