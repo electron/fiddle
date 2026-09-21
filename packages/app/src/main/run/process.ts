@@ -119,7 +119,6 @@ export async function spawnElectron(
   const runner = await Runner.create({
     installer: options.installer,
     versions: options.versions,
-    errors: 'typed',
   });
   return runner.spawn(options.exec, new Fiddle(options.appDir, 'fiddle'), {
     args,

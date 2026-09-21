@@ -116,22 +116,17 @@ const netFetch: typeof fetch = (input, init) =>
 
 /** The cached or bundled release list, as the app starts with. */
 function cachedReleases(ctx: Ctx): Promise<Releases> {
-  return (ctx.memo.cached ??= readReleaseList(ctx.cache).then((data) =>
-    loadReleases(data, ctx.cache, ctx.releasesUrl),
-  ));
+  return (ctx.memo.cached ??= readReleaseList(ctx.cache).then(loadReleases));
 }
 
 /** The release list refreshed from the network, or the cached one if that fails. */
 function freshReleases(ctx: Ctx): Promise<Releases> {
   return (ctx.memo.fresh ??= fetchReleaseList(ctx.cache, ctx.releasesUrl, (url, init) =>
     net.fetch(url, init),
-  ).then(
-    (data) => loadReleases(data, ctx.cache, ctx.releasesUrl),
-    (error: unknown) => {
-      log.warn('refreshing the release list failed', error);
-      return cachedReleases(ctx);
-    },
-  ));
+  ).then(loadReleases, (error: unknown) => {
+    log.warn('refreshing the release list failed', error);
+    return cachedReleases(ctx);
+  }));
 }
 
 /** A known release that runs here. A version the cached list lacks refreshes it once. */

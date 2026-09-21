@@ -7,38 +7,25 @@
   "type": "module",
   "exports": {
     ".": {
-      "fiddle-source": "./src/index.ts",
-      "types": "./dist/index.d.ts",
-      "default": "./dist/index.js"
+      "fiddle-source": "./src/index.ts"
     },
     "./package.json": "./package.json"
   },
-  "types": "./dist/index.d.ts",
-  "bin": "./dist/cli.js",
-  "files": [
-    "dist",
-    "static",
-    "README.md"
-  ],
   "scripts": {
-    "build": "tsc -p tsconfig.build.json",
     "typecheck": "tsc -p tsconfig.json --noEmit",
-    "test": "vitest run",
-    "start": "node dist/cli.js"
+    "test": "vitest run"
   },
   "dependencies": {
     "@electron-internal/extract-zip": "^1.0.1",
-    "@electron/asar": "^4.0.0",
     "@electron/get": "^5.0.0",
     "debug": "^4.4.3",
-    "env-paths": "^3.0.0",
     "semver": "^7.5.4"
   },
   "devDependencies": {
     "@types/debug": "^4.1.12",
     "@types/node": "^22.10.7",
     "@types/semver": "^7.5.6",
-    "nock": "^14.0.1",
+    "env-paths": "^3.0.0",
     "typescript": "^6.0.2",
     "vite": "8.2.2",
     "vitest": "^5.0.0"

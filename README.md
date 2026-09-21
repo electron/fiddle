@@ -14,10 +14,10 @@ around. Then save your fiddle as a GitHub Gist or to a local folder, so anyone c
 
 This is a Yarn workspaces monorepo.
 
-| Package                 | Path                             | What it is                                                                                                                       |
-| ----------------------- | -------------------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
-| `electron-fiddle`       | [`packages/app`](packages/app)   | The Electron app: main process, preload, renderer, packaging (`forge.config.ts`).                                                |
-| `@electron/fiddle-core` | [`packages/core`](packages/core) | Downloads Electron versions, runs fiddles and bisects. A drop-in port of [fiddle-core](https://github.com/electron/fiddle-core). |
+| Package                 | Path                             | What it is                                                                                                                |
+| ----------------------- | -------------------------------- | ------------------------------------------------------------------------------------------------------------------------- |
+| `electron-fiddle`       | [`packages/app`](packages/app)   | The Electron app: main process, preload, renderer, packaging (`forge.config.ts`).                                         |
+| `@electron/fiddle-core` | [`packages/core`](packages/core) | Downloads Electron versions and spawns fiddles. A trimmed port of [fiddle-core](https://github.com/electron/fiddle-core). |
 
 ## Development
 
