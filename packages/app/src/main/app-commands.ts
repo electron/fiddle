@@ -2,12 +2,15 @@ import { app, BrowserWindow, Menu, shell, webContents } from 'electron';
 
 import type { CommandId } from '../shared/commands';
 import type { CommandRegistry } from './commands';
+import { docMoveActiveTab } from './documents/model';
 import {
   closeWindow,
   newFiddleIn,
   openFiddleWindow,
   openFolderIn,
   saveIn,
+  setLayout,
+  updateDoc,
   withErrorDialog,
 } from './documents/service';
 import { log, logsDir } from './log';
@@ -22,10 +25,6 @@ import { getWindow, sendWindowCommand, windowIdOf } from './windows';
 /** Handlers that act on Monaco, view state or a dialog in the window: sent there as `Window.Command`. */
 const FORWARDED = [
   'view.toggleSplit',
-  'editor.moveTabLeft',
-  'editor.moveTabRight',
-  'view.toggleSidebar',
-  'view.toggleConsole',
   'editor.toggleSoftWrap',
   'editor.toggleMinimap',
   'editor.format',
@@ -78,6 +77,23 @@ export function registerCommands(registry: CommandRegistry, services: Services):
   registry.register('app.preferences', ({ windowId }) => {
     if (windowId) hub.updateWindow(windowId, { view: 'settings' });
   });
+  for (const [id, key] of [
+    ['view.toggleSidebar', 'sidebar'],
+    ['view.toggleConsole', 'consoleVisible'],
+  ] as const) {
+    registry.register(id, ({ windowId }) => {
+      const layout = windowId ? hub.getWindow(windowId)?.layout : undefined;
+      if (layout) setLayout(windowId!, { ...layout, [key]: !layout[key] });
+    });
+  }
+  for (const [id, direction] of [
+    ['editor.moveTabLeft', -1],
+    ['editor.moveTabRight', 1],
+  ] as const) {
+    registry.register(id, ({ windowId }) => {
+      if (windowId) updateDoc(windowId, (doc) => docMoveActiveTab(doc, direction));
+    });
+  }
   registry.register('view.reload', ({ windowId }) =>
     getWindow(windowId)?.webContents.reload(),
   );
