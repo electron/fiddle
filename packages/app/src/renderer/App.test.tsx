@@ -24,7 +24,6 @@ vi.mock('react-i18next', () => ({
   }),
 }));
 vi.mock('../i18n/renderer', () => ({ useSyncLocale: () => undefined }));
-vi.mock('./features/about/log', () => ({ log: { error: mocks.logError } }));
 vi.mock('./state', () => ({
   useAppState: () => mocks.app,
   useWindowState: () => mocks.win,
@@ -37,7 +36,10 @@ vi.mock('./features/commands/window-commands', () => ({
 }));
 vi.mock('./features/palette/CommandPalette', () => ({ CommandPalette: () => null }));
 vi.mock('./features/settings/StorageNotices', () => ({ StorageNotices: () => null }));
-vi.mock('./features/about/UpdateNotice', () => ({ UpdateNotice: () => null }));
+vi.mock('./features/about', () => ({
+  log: { error: mocks.logError },
+  UpdateNotice: () => null,
+}));
 vi.mock('./shell/theme', () => ({ useAppearance: () => undefined }));
 vi.mock('./shell/Shell', () => ({ Shell: () => <p>the shell</p> }));
 
