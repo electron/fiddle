@@ -14,7 +14,6 @@ import {
   localePreference,
   matchKeybinding,
   monacoThemeSchema,
-  normalizeAccelerator,
   parseSetting,
   resolveKeybindings,
   resolveScreenReader,
@@ -23,6 +22,7 @@ import {
   toSparse,
   type KeyInput,
 } from './settings';
+import { normalizeAccelerator } from './accelerators';
 import type { KeyContext } from './commands';
 
 describe('execution settings', () => {

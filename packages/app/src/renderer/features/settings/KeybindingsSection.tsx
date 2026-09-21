@@ -12,9 +12,8 @@ import {
   acceleratorFromKey,
   effectiveAccelerators,
   findConflicts,
-  normalizeAccelerator,
 } from '../../../shared/settings';
-import { acceleratorKeys } from '../../../shared/accelerators';
+import { acceleratorKeys, normalizeAccelerator } from '../../../shared/accelerators';
 import type { Platform } from '../../../shared/stores';
 import { Button, Icon, IconButton, Kbd, TextField } from '../../../ui';
 import { matchesQuery, Row } from './controls';

@@ -1,24 +1,48 @@
 /** Electron accelerators as people read them, so every surface writes a shortcut the same way. */
 import type { Platform } from './stores';
 
-const MAC_KEYS: Record<string, string> = {
-  cmdorctrl: '⌘',
-  commandorcontrol: '⌘',
-  cmd: '⌘',
-  command: '⌘',
-  super: '⌘',
-  meta: '⌘',
-  ctrl: '⌃',
-  control: '⌃',
-  alt: '⌥',
-  option: '⌥',
-  altgr: '⌥',
-  shift: '⇧',
+type Modifier = 'Ctrl' | 'Alt' | 'AltGr' | 'Shift' | 'Cmd' | 'Super';
+const MODIFIER_ORDER: readonly Modifier[] = [
+  'Ctrl',
+  'Alt',
+  'AltGr',
+  'Shift',
+  'Cmd',
+  'Super',
+];
+
+/** Modifier names in lower case → the modifier, or `[macOS, elsewhere]` where they differ. */
+const MODIFIERS: Record<string, Modifier | readonly [Modifier, Modifier]> = {
+  cmdorctrl: ['Cmd', 'Ctrl'],
+  commandorcontrol: ['Cmd', 'Ctrl'],
+  cmd: 'Cmd',
+  command: 'Cmd',
+  super: ['Cmd', 'Super'],
+  meta: ['Cmd', 'Super'],
+  ctrl: 'Ctrl',
+  control: 'Ctrl',
+  alt: 'Alt',
+  option: 'Alt',
+  altgr: 'AltGr',
+  shift: 'Shift',
+};
+
+/** Electron's synonyms for the same key. */
+const KEY_SYNONYMS: Record<string, string> = {
+  plus: '+',
+  escape: 'esc',
+  return: 'enter',
+};
+
+const MAC_CAPS: Record<string, string> = {
+  Cmd: '⌘',
+  Ctrl: '⌃',
+  Alt: '⌥',
+  AltGr: '⌥',
+  Shift: '⇧',
   enter: '↵',
-  return: '↵',
   backspace: '⌫',
   delete: '⌦',
-  escape: 'Esc',
   esc: 'Esc',
   tab: '⇥',
   up: '↑',
@@ -28,36 +52,48 @@ const MAC_KEYS: Record<string, string> = {
   pageup: '⇞',
   pagedown: '⇟',
   space: 'Space',
-  plus: '+',
 };
 
-/** Off macOS, Command and Super are both the Windows (or Super) key. */
-const superKey = (platform: Platform) => (platform === 'win32' ? 'Win' : 'Super');
-
-const OTHER_KEYS: Record<string, string | ((platform: Platform) => string)> = {
-  cmdorctrl: 'Ctrl',
-  commandorcontrol: 'Ctrl',
-  ctrl: 'Ctrl',
-  control: 'Ctrl',
-  cmd: superKey,
-  command: superKey,
-  super: superKey,
-  meta: superKey,
-  alt: 'Alt',
-  option: 'Alt',
-  altgr: 'AltGr',
-  shift: 'Shift',
-  return: 'Enter',
+/** Off macOS, Command and Super are both the Windows (or Super) key, named by platform. */
+const OTHER_CAPS: Record<string, string> = {
+  Ctrl: 'Ctrl',
+  Alt: 'Alt',
+  AltGr: 'AltGr',
+  Shift: 'Shift',
   enter: 'Enter',
-  escape: 'Esc',
   esc: 'Esc',
   up: '↑',
   down: '↓',
   left: '←',
   right: '→',
   space: 'Space',
-  plus: '+',
 };
+
+/** The accelerator's parts in order: a modifier for this platform, or a key with synonyms folded. */
+function parts(accelerator: string, platform: Platform): (Modifier | { key: string })[] {
+  // Split on a `+` that isn't the last character: `CmdOrCtrl++` ends in the plus key.
+  return accelerator.split(/\+(?!$)/).map((part) => {
+    const modifier = MODIFIERS[part.toLowerCase()];
+    if (modifier === undefined) return { key: KEY_SYNONYMS[part.toLowerCase()] ?? part };
+    return typeof modifier === 'string'
+      ? modifier
+      : modifier[platform === 'darwin' ? 0 : 1];
+  });
+}
+
+/**
+ * A canonical form for comparing accelerators on one platform:
+ * `CmdOrCtrl+Shift+p` and `Shift+Ctrl+P` are the same on Windows.
+ */
+export function normalizeAccelerator(accelerator: string, platform: Platform): string {
+  const modifiers = new Set<string>();
+  let key = '';
+  for (const part of parts(accelerator, platform)) {
+    if (typeof part === 'string') modifiers.add(part);
+    else key = part.key.length === 1 ? part.key.toUpperCase() : part.key.toLowerCase();
+  }
+  return [...MODIFIER_ORDER.filter((m) => modifiers.has(m)), key].join('+');
+}
 
 /** An accelerator's key caps: `CmdOrCtrl+Shift+P` → ⌘ ⇧ P on macOS, Ctrl Shift P elsewhere. `CmdOrCtrl++` is Plus. */
 export function acceleratorKeys(
@@ -65,13 +101,14 @@ export function acceleratorKeys(
   platform: Platform,
 ): string[] {
   if (!accelerator) return [];
-  const names = platform === 'darwin' ? MAC_KEYS : OTHER_KEYS;
-  // Split on a `+` that isn't the last character: `CmdOrCtrl++` ends in the plus key.
-  return accelerator.split(/\+(?!$)/).map((part) => {
-    const name = names[part.toLowerCase()];
-    if (typeof name === 'function') return name(platform);
-    if (name) return name;
-    return part.length === 1 ? part.toUpperCase() : part;
+  const caps = platform === 'darwin' ? MAC_CAPS : OTHER_CAPS;
+  return parts(accelerator, platform).map((part) => {
+    if (typeof part === 'string')
+      return caps[part] ?? (platform === 'win32' ? 'Win' : 'Super');
+    return (
+      caps[part.key.toLowerCase()] ??
+      (part.key.length === 1 ? part.key.toUpperCase() : part.key)
+    );
   });
 }
 
