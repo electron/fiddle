@@ -91,8 +91,8 @@ jobs:
       - name: Package smoke test
         run: yarn package
       # Also checks that the e2e test build (out/test-build) still has every test-only marker.
-      - name: Check that the e2e driver is not packaged
-        run: node tools/release-check-asar.mjs packages/app/out
+      - name: Test-only code stays out of the package and in the test build
+        run: node tools/release-check-asar.mjs packages/app/out --test-build
       - name: Check the privacy helper in the package (macOS)
         if: runner.os == 'macOS'
         run: |

@@ -1,8 +1,9 @@
 #!/usr/bin/env node
-// `node tools/release-check-asar.mjs [outDir]` (default packages/app/out) fails if
+// `node tools/release-check-asar.mjs [outDir] [--test-build]` (default packages/app/out) fails if
 // test-only code was packaged. Asar archives store files uncompressed, so a byte
 // search finds any bundled string. When outDir/test-build exists (after `yarn test:e2e`),
-// it also fails for a marker the test build lacks, which would leave it guarding nothing.
+// it also fails for a marker the test build lacks, which would leave it guarding nothing;
+// `--test-build` makes a missing test build a failure too.
 import fs from 'node:fs';
 import path from 'node:path';
 
@@ -21,8 +22,9 @@ const MARKERS = [
   'Lucent gallery',
 ];
 
+const args = process.argv.slice(2).filter((arg) => arg !== '--test-build');
 const outDir = path.resolve(
-  process.argv[2] ?? path.join(import.meta.dirname, '..', 'packages', 'app', 'out'),
+  args[0] ?? path.join(import.meta.dirname, '..', 'packages', 'app', 'out'),
 );
 
 function* find(dir, keep) {
@@ -68,6 +70,9 @@ if (fs.existsSync(testBuild)) {
   } else {
     console.log(`ok   ${testBuild}: has all ${MARKERS.length} markers`);
   }
+} else if (process.argv.includes('--test-build')) {
+  failed = true;
+  console.error(`FAIL ${testBuild}: no test build to check the markers against`);
 } else {
   console.log(`skip ${testBuild}: no test build to check the markers against`);
 }

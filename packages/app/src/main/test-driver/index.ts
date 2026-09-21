@@ -108,6 +108,24 @@ function captureMainLog(state: TestState): void {
       original(...args);
     };
   }
+  // An unexpected quit is hard to trace from a test, so log who asked for it.
+  const caller = () =>
+    new Error().stack
+      ?.split('\n')
+      .slice(3, 7)
+      .map((line) => line.trim())
+      .join(' <- ');
+  const quit = app.quit.bind(app);
+  const exit = app.exit.bind(app);
+  app.quit = () => {
+    console.log('[fiddle-test] app.quit() from', caller());
+    quit();
+  };
+  app.exit = (code?: number) => {
+    console.log(`[fiddle-test] app.exit(${code ?? 0}) from`, caller());
+    exit(code);
+  };
+  app.on('will-quit', () => console.log('[fiddle-test] will-quit'));
 }
 
 function applySwitches(locale: string): void {
