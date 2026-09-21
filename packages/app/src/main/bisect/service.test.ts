@@ -1,6 +1,7 @@
 /** The bisect lifecycle: how each run ends the bisect or gives a verdict, and Stop. */
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
+import { ErrorCode } from '../../shared/errors';
 import type { BisectState } from '../../shared/stores';
 import type { RunOutcome } from '../run/logic';
 
@@ -57,8 +58,8 @@ function setup() {
         obsolete: false,
         supported: true,
       })),
-    isInstalled: () => true,
-    install: vi.fn(async () => ''),
+    isInstalled: vi.fn((_version: string) => true),
+    install: vi.fn(async (_version: string) => ''),
   };
   const hub = {
     app: {
@@ -86,7 +87,16 @@ function setup() {
       await new Promise((resolve) => setTimeout(resolve, 0));
     } while (bisect !== null && !bisect.result);
   };
-  return { service, runs, logs, nextRun, answerRuns, typesChanged, bisect: () => bisect };
+  return {
+    service,
+    runs,
+    versions,
+    logs,
+    nextRun,
+    answerRuns,
+    typesChanged,
+    bisect: () => bisect,
+  };
 }
 
 const exit = (code: number): RunOutcome => ({ code, signal: null });
@@ -97,6 +107,32 @@ beforeEach(() => {
 });
 afterEach(() => {
   vi.useRealTimers();
+});
+
+describe('BisectService.start', () => {
+  it('refuses a good version that is not older than the bad one, and a range of fewer than two versions', async () => {
+    await expect(ctx.service.start('w', '5.0.0', '1.0.0', true)).rejects.toMatchObject({
+      code: ErrorCode.invalidArgument,
+      message: 'bisectGoodNotOlder',
+    });
+    await expect(ctx.service.start('w', '1.0.0', '1.5.0', false)).rejects.toMatchObject({
+      code: ErrorCode.invalidArgument,
+      message: 'bisectTooFew',
+    });
+    expect(ctx.bisect()).toBeNull();
+    expect(ctx.runs.run).not.toHaveBeenCalled();
+  });
+
+  it('does not start an auto bisect on a fiddle the user will not trust', async () => {
+    const documents = await import('../documents/service');
+    vi.mocked(documents.ensureTrusted).mockResolvedValueOnce({
+      approved: false,
+    } as never);
+    await ctx.service.start('w', '1.0.0', '5.0.0', true);
+    expect(ctx.logs).toEqual(['untrusted']);
+    expect(ctx.bisect()).toBeNull();
+    expect(ctx.runs.run).not.toHaveBeenCalled();
+  });
 });
 
 describe('BisectService (auto)', () => {
@@ -169,12 +205,28 @@ describe('BisectService (auto)', () => {
 
 describe('BisectService (manual)', () => {
   it('steps through versions and reports the result, telling the editor about each version', async () => {
+    expect(ctx.service.isActive('w')).toBe(false);
     await ctx.service.start('w', '1.0.0', '5.0.0', false);
     expect(ctx.bisect()).toMatchObject({ auto: false, current: '3.0.0' });
+    expect(ctx.service.isActive('w')).toBe(true);
+    expect(ctx.service.compareUrl('w')).toBeUndefined();
     expect(ctx.typesChanged).toHaveBeenCalledWith('w');
     await ctx.service.mark('w', 'good');
     await ctx.service.mark('w', 'bad');
     expect(ctx.bisect()?.result).toEqual({ good: '3.0.0', bad: '4.0.0' });
+    expect(ctx.service.isActive('w')).toBe(false);
+    expect(ctx.service.compareUrl('w')).toBe(
+      'https://github.com/electron/electron/compare/v3.0.0...v4.0.0',
+    );
+  });
+
+  it('starts downloading a step the user does not have yet, so Run is quick', async () => {
+    ctx.versions.isInstalled.mockImplementation((version) => version !== '4.0.0');
+    await ctx.service.start('w', '1.0.0', '5.0.0', false);
+    expect(ctx.versions.install).not.toHaveBeenCalled();
+    await ctx.service.mark('w', 'good');
+    expect(ctx.bisect()).toMatchObject({ current: '4.0.0' });
+    expect(ctx.versions.install).toHaveBeenCalledWith('4.0.0');
   });
 
   it('ignores a verdict while the next version is still loading', async () => {

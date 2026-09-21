@@ -7,6 +7,8 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 const mocks = vi.hoisted(() => ({
   importOldApp: vi.fn(),
   importElectronVersions: vi.fn(),
+  readOldLocalStorage: vi.fn(),
+  cacheRoot: vi.fn(() => '/cache'),
   userData: '/user-data',
   testMode: false,
 }));
@@ -20,13 +22,13 @@ vi.mock('../log', () => ({
 }));
 vi.mock('../test-mode', () => ({
   isTestMode: () => mocks.testMode,
-  getCacheRoot: () => '/cache',
+  getCacheRoot: mocks.cacheRoot,
 }));
 vi.mock('./import', () => ({
   importOldApp: mocks.importOldApp,
   importElectronVersions: mocks.importElectronVersions,
 }));
-vi.mock('./local-storage', () => ({ readOldLocalStorage: vi.fn() }));
+vi.mock('./local-storage', () => ({ readOldLocalStorage: mocks.readOldLocalStorage }));
 
 import { log } from '../log';
 import { importElectronVersionsInBackground, runMigration } from './index';
@@ -50,6 +52,20 @@ describe('runMigration', () => {
     expect(mocks.importOldApp).not.toHaveBeenCalled();
   });
 
+  it("hands the import this machine's user data, and passes its result on", async () => {
+    const result = { firstLaunch: true, summary: { settings: 3 } };
+    mocks.importOldApp.mockResolvedValue(result);
+    expect(await runMigration()).toBe(result);
+    const [options] = mocks.importOldApp.mock.calls[0] as [
+      { userData: string; version: string; readLocalStorage(): unknown },
+    ];
+    expect(options).toMatchObject({ userData: mocks.userData, version: '1.0.0' });
+    // The old renderer's localStorage is read only if the import asks for it.
+    expect(mocks.readOldLocalStorage).not.toHaveBeenCalled();
+    options.readLocalStorage();
+    expect(mocks.readOldLocalStorage).toHaveBeenCalledWith(mocks.userData);
+  });
+
   it('reports no first launch when the import fails, so it runs again next time', async () => {
     mocks.importOldApp.mockRejectedValue(new Error('unreadable'));
     expect(await runMigration()).toEqual({ firstLaunch: false, summary: {} });
@@ -65,15 +81,29 @@ describe('importElectronVersionsInBackground', () => {
     expect(mocks.importElectronVersions).not.toHaveBeenCalled();
   });
 
+  it('leaves the copy for another launch when there is no cache folder', () => {
+    mocks.cacheRoot.mockImplementationOnce(() => {
+      throw new Error('no home directory');
+    });
+    importElectronVersionsInBackground();
+    expect(mocks.importElectronVersions).not.toHaveBeenCalled();
+    expect(fs.existsSync(marker())).toBe(false);
+  });
+
   it('runs on every launch until a copy has finished, then stops', async () => {
     mocks.importElectronVersions.mockRejectedValueOnce(new Error('cut short'));
     importElectronVersionsInBackground();
     await vi.waitFor(() => expect(log.warn).toHaveBeenCalledOnce());
     expect(fs.existsSync(marker())).toBe(false);
 
+    mocks.importElectronVersions.mockResolvedValueOnce(['30.0.0']);
     importElectronVersionsInBackground();
     await vi.waitFor(() => expect(fs.existsSync(marker())).toBe(true));
     expect(mocks.importElectronVersions).toHaveBeenCalledTimes(2);
+    expect(mocks.importElectronVersions).toHaveBeenCalledWith(
+      path.join(mocks.userData, 'electron-bin'),
+      path.join('/cache', 'electron'),
+    );
 
     importElectronVersionsInBackground();
     expect(mocks.importElectronVersions).toHaveBeenCalledTimes(2);

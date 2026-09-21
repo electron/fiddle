@@ -206,6 +206,20 @@ describe('corruption', () => {
     expect(await readJson()).toMatchObject({ count: 6 });
   });
 
+  it('ignores a reload while the file is gone, unchanged or half-written', async () => {
+    await writeFile(file, JSON.stringify({ schemaVersion: 2, name: 'disk', count: 1 }));
+    const store = open();
+    expect(store.reload()).toBe(false);
+    await rm(file);
+    expect(store.reload()).toBe(false);
+    await writeFile(file, '{ "name": ');
+    expect(store.reload()).toBe(false);
+    expect(store.get()).toEqual({ name: 'disk', count: 1 });
+    await writeFile(file, JSON.stringify({ schemaVersion: 2, name: 'edited', count: 1 }));
+    expect(store.reload()).toBe(true);
+    expect(store.get()).toEqual({ name: 'edited', count: 1 });
+  });
+
   it('treats JSON that is not an object as corrupt', async () => {
     await writeFile(file, '[1, 2]');
     expect(open().get()).toEqual(defaults);

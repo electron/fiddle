@@ -13,9 +13,12 @@ vi.mock('../documents/service', () => ({
   ensureTrusted: vi.fn(),
 }));
 vi.mock('../run/service', () => ({ PM_INSTALL_URLS: { npm: '', yarn: '' } }));
+const findPackageManager = vi.hoisted(() =>
+  vi.fn(async (): Promise<string | undefined> => '/bin/npm'),
+);
 vi.mock('../../fiddle/modules', async (importOriginal) => ({
   ...(await importOriginal<typeof import('../../fiddle/modules')>()),
-  findPackageManager: async () => '/bin/npm',
+  findPackageManager,
 }));
 
 const documents = await import('../documents/service');
@@ -175,6 +178,41 @@ describe('packageFiddle', () => {
       (await readdir(tmp)).filter((name) => name.startsWith('electron-fiddle-')),
     ).toEqual([]);
     expect(run.status).toBe('ready');
+  });
+
+  it('will not build with install scripts off when a dependency needs them', async () => {
+    const { events, call } = setup();
+    vi.mocked(documents.installScriptPackages).mockResolvedValue(['electron', 'esbuild']);
+    vi.mocked(documents.ensureTrusted).mockResolvedValue({
+      approved: true,
+      allowScripts: false,
+      fiddle,
+    } as never);
+
+    await call();
+
+    expect(documents.ensureTrusted).toHaveBeenLastCalledWith('w', 'package', {
+      packagesWithInstallScripts: ['electron', 'esbuild'],
+      requireScripts: true,
+    });
+    expect(events).toEqual(['scriptsRequired', 'release']);
+    expect(await readdir(tmp)).toEqual([]);
+  });
+
+  it('points at the package manager’s install page when it is not installed', async () => {
+    const { run, events, call } = setup();
+    findPackageManager.mockResolvedValueOnce(undefined);
+    vi.mocked(documents.ensureTrusted).mockResolvedValue({
+      approved: true,
+      allowScripts: false,
+      fiddle,
+    } as never);
+
+    await call();
+
+    expect(events).toEqual(['pmMissing', 'release']);
+    expect(await readdir(tmp)).toEqual([]);
+    expect(run).toMatchObject({ status: 'ready', task: 'run' });
   });
 
   it('fails before creating the project when Socket Firewall is on but missing', async () => {
