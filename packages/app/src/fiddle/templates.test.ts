@@ -311,10 +311,11 @@ describe('createTemplateLoader', () => {
       cacheDir,
       isReleasedMajor: released,
       fetch: slow,
-      waitMs: 20,
+      waitMs: 60_000,
     });
 
-    expect(await loader.getTemplate('30.0.0')).toEqual(quickStart);
+    // A call's own waitMs overrides the loader's.
+    expect(await loader.getTemplate('30.0.0', 20)).toEqual(quickStart);
     release!();
     // The same download finishes in the background: a later call gets the real template.
     await expect.poll(() => loader.getTemplate('30.0.0')).toEqual(FIXTURE_FILES);

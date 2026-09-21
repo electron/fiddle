@@ -41,8 +41,11 @@ export interface TemplateLoaderOptions {
 }
 
 export interface TemplateLoader {
-  /** The template for a version. Local builds pass no version and get the bundled quick-start. */
-  getTemplate(version?: string): Promise<FileMap>;
+  /**
+   * The template for a version. Local builds pass no version and get the
+   * bundled quick-start. `waitMs` overrides the loader's for this call.
+   */
+  getTemplate(version?: string, waitMs?: number): Promise<FileMap>;
   getTestTemplate(): Promise<FileMap>;
   getQuickStart(): Promise<FileMap>;
 }
@@ -205,7 +208,7 @@ export function createTemplateLoader(options: TemplateLoaderOptions): TemplateLo
   const pending = new Map<string, Promise<FileMap>>();
   const getQuickStart = () => readQuickStart(options.staticDir);
 
-  const load = async (branch: string): Promise<FileMap> => {
+  const load = async (branch: string, waitMs = options.waitMs): Promise<FileMap> => {
     let promise = pending.get(branch);
     if (!promise) {
       promise = downloadTemplate(options, branch).catch((error: unknown) => {
@@ -217,15 +220,15 @@ export function createTemplateLoader(options: TemplateLoaderOptions): TemplateLo
       pending.set(branch, promise);
     }
     return {
-      ...((await withinWait(promise, options.waitMs)) ?? (await getQuickStart())),
+      ...((await withinWait(promise, waitMs)) ?? (await getQuickStart())),
     };
   };
 
   return {
-    getTemplate(version) {
+    getTemplate(version, waitMs) {
       const branch =
         version === undefined ? null : templateBranch(version, options.isReleasedMajor);
-      return branch ? load(branch) : getQuickStart();
+      return branch ? load(branch, waitMs) : getQuickStart();
     },
     getTestTemplate: () => load(TEST_TEMPLATE_BRANCH),
     getQuickStart,
