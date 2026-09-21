@@ -29,14 +29,18 @@ describe('versions', () => {
 
   it('lists stable releases newest first, then pre-releases, and searches them', async () => {
     await app().click(picker);
-    const names = (await app().query(role('option'))).map((option) => option.name);
-    expect(names).toEqual([
-      expect.stringMatching(/^Electron 44\.3\.0\b.*latest$/),
-      expect.stringMatching(/^Electron 43\.7\.0\b/),
-      expect.stringMatching(/^Electron 42\.11\.3\b/),
-      expect.stringMatching(/^Electron 45\.0\.0-alpha\.6\b.*beta$/),
-      'Copy version number',
-    ]);
+    const names = async () =>
+      (await app().query(role('option'))).map((option) => option.name);
+    // Until the fixture list arrives, a slow start still shows the bundled one.
+    await expect
+      .poll(names)
+      .toEqual([
+        expect.stringMatching(/^Electron 44\.3\.0\b.*latest$/),
+        expect.stringMatching(/^Electron 43\.7\.0\b/),
+        expect.stringMatching(/^Electron 42\.11\.3\b/),
+        expect.stringMatching(/^Electron 45\.0\.0-alpha\.6\b.*beta$/),
+        'Copy version number',
+      ]);
     // Each row shows its install state.
     expect(await app().query(role('StaticText', 'Not downloaded'))).toHaveLength(4);
 
