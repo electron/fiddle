@@ -13,9 +13,6 @@ import type { GitHubClient } from './github';
 import { type PickedFiles, pickFiddleFiles } from './pick';
 import type { FiddleOrigin } from './trust';
 
-export const ELECTRON_OWNER = 'electron';
-export const ELECTRON_REPO = 'electron';
-
 export interface DocsExampleOptions {
   /** e.g. `v30.0.0` */
   tag: string;
@@ -57,8 +54,8 @@ export async function loadDocsExample(options: DocsExampleOptions): Promise<Docs
   assertExamplePath(options.path);
 
   const entries = await options.github.listRepoDirectory(
-    ELECTRON_OWNER,
-    ELECTRON_REPO,
+    'electron',
+    'electron',
     options.path,
     options.tag,
     options.signal,
