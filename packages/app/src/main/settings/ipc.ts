@@ -4,6 +4,7 @@ import path from 'node:path';
 
 import { app, shell } from 'electron';
 
+import { isRecord } from '../../fiddle/package-json';
 import { implement, Settings } from '../../ipc/main';
 import { ErrorCode, FiddleError } from '../../shared/errors';
 import {
@@ -52,10 +53,6 @@ async function readJson(file: string): Promise<unknown> {
       t('notJson', { file: path.basename(file) }),
     );
   }
-}
-
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === 'object' && value !== null && !Array.isArray(value);
 }
 
 /** Asks before an import changes flags, environment variables or mirrors, listing each with its new value. */

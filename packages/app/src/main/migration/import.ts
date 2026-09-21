@@ -18,6 +18,7 @@ import {
 import semver from 'semver';
 
 import { GITHUB_TOKEN_PATTERN } from '../../fiddle/github';
+import { isRecord } from '../../fiddle/package-json';
 import { BUILTIN_THEME, SETTINGS_VERSION } from '../../shared/settings';
 import {
   CredentialStore,
@@ -83,9 +84,8 @@ function readStateFile(file: string): Record<string, unknown> | undefined {
     throw error;
   }
   const data: unknown = JSON.parse(text);
-  if (typeof data !== 'object' || data === null || Array.isArray(data))
-    throw new Error(`${file} is not an object`);
-  return data as Record<string, unknown>;
+  if (!isRecord(data)) throw new Error(`${file} is not an object`);
+  return data;
 }
 
 /** Creates `file` with `data`, never overwriting. Returns false when it already exists. */

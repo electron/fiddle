@@ -35,8 +35,6 @@ interface MappedOldSettings {
   gitHubLogin?: string;
   /** Local builds from the old `local-electron-versions` key (older app versions). */
   localVersions: OldLocalVersion[];
-  /** Known old keys the new app has no use for. */
-  ignored: string[];
   /** Keys the old app never wrote. Logged and ignored. */
   unknown: string[];
   /** Known keys whose value didn't fit the new schema. */
@@ -49,6 +47,18 @@ interface MapOldSettingsOptions {
   /** The OS user name. An old author equal to it stays unset, which means the same thing. */
   osUser: string;
 }
+
+/** Old keys that held a boolean → the new setting. */
+const BOOLEANS: Record<string, SettingKey> = {
+  isClearingConsoleOnRun: 'clearConsoleOnRun',
+  isPublishingGistAsRevision: 'gistPublishAsRevision',
+  isShowingGistHistory: 'gistShowHistory',
+  showUndownloadedVersions: 'showNotDownloaded',
+  showObsoleteVersions: 'showObsolete',
+  isKeepingUserDataDirs: 'keepUserDataDirs',
+  isEnablingElectronLogging: 'electronLogging',
+  isUsingSocketFirewall: 'socketFirewall',
+};
 
 /** Old `BlockableAccelerator` values → the commands they blocked. */
 const BLOCKABLE: Record<string, string> = { save: 'file.save', saveAs: 'file.saveAs' };
@@ -90,7 +100,6 @@ export function mapOldSettings(
     settings: {},
     tourDone: false,
     localVersions: [],
-    ignored: [],
     unknown: [],
     invalid: [],
   };
@@ -109,6 +118,11 @@ export function mapOldSettings(
   };
 
   for (const [key, raw] of Object.entries(values)) {
+    const boolKey = BOOLEANS[key];
+    if (boolKey) {
+      set(key, boolKey, parseBool(raw));
+      continue;
+    }
     switch (key) {
       case 'fontFamily':
         set(key, 'editorFontFamily', raw);
@@ -118,15 +132,6 @@ export function mapOldSettings(
         set(key, 'editorFontSize', Number.isFinite(size) ? size : undefined);
         break;
       }
-      case 'isClearingConsoleOnRun':
-        set(key, 'clearConsoleOnRun', parseBool(raw));
-        break;
-      case 'isPublishingGistAsRevision':
-        set(key, 'gistPublishAsRevision', parseBool(raw));
-        break;
-      case 'isShowingGistHistory':
-        set(key, 'gistShowHistory', parseBool(raw));
-        break;
       case 'gitHubPublishAsPublic': {
         const isPublic = parseBool(raw);
         set(
@@ -179,18 +184,6 @@ export function mapOldSettings(
           ) as Settings['channels'],
         );
         break;
-      case 'showUndownloadedVersions':
-        set(key, 'showNotDownloaded', parseBool(raw));
-        break;
-      case 'showObsoleteVersions':
-        set(key, 'showObsolete', parseBool(raw));
-        break;
-      case 'isKeepingUserDataDirs':
-        set(key, 'keepUserDataDirs', parseBool(raw));
-        break;
-      case 'isEnablingElectronLogging':
-        set(key, 'electronLogging', parseBool(raw));
-        break;
       case 'executionFlags':
         set(
           key,
@@ -210,9 +203,6 @@ export function mapOldSettings(
       case 'packageManager':
         set(key, 'packageManager', raw as Settings['packageManager']);
         break;
-      case 'isUsingSocketFirewall':
-        set(key, 'socketFirewall', parseBool(raw));
-        break;
       case 'hasShownTour':
         result.tourDone = raw === 'true';
         break;
@@ -224,13 +214,10 @@ export function mapOldSettings(
         break;
       // The plaintext token of very old versions (the token is imported from
       // `.github-credentials` instead), the cached release list and the last
-      // selected version.
+      // selected version have no use here. The theme keys are read together below.
       case 'gitHubToken':
       case 'known-electron-versions':
       case 'version':
-        result.ignored.push(key);
-        break;
-      // Read together below.
       case 'theme':
       case 'isUsingSystemTheme':
         break;
