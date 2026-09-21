@@ -263,10 +263,32 @@ describe('Installer and ElectronVersions options', () => {
         fs.writeFileSync(versionsDir(name, 'file'), '');
       }
       fs.utimesSync(versionsDir(leftovers.oldRemote), old, old);
+      // Downloads: one a killed process left half done, one still running, and
+      // another host's, which may run for hours, so only a day-old one goes.
+      const downloads = {
+        dead: `.tmp-13.1.7_${host}_${dead}_dl0001`,
+        live: `.tmp-13.1.7_${host}_${process.pid}_dl0002`,
+        slowRemote: `.tmp-13.1.7_other-host_1_dl0003`,
+        deadRemote: `.tmp-13.1.7_other-host_1_dl0004`,
+      };
+      for (const name of Object.values(downloads)) {
+        fs.mkdirSync(path.join(paths.electronDownloads, name), { recursive: true });
+        fs.writeFileSync(path.join(paths.electronDownloads, name, 'partial.zip'), '');
+      }
+      fs.utimesSync(path.join(paths.electronDownloads, downloads.slowRemote), old, old);
+      const dayOld = new Date(Date.now() - 25 * 60 * 60 * 1000);
+      fs.utimesSync(
+        path.join(paths.electronDownloads, downloads.deadRemote),
+        dayOld,
+        dayOld,
+      );
 
       await createInstaller({ layout: 'per-version' }).install('13.1.7');
       expect(ls(paths.electronVersions)).toStrictEqual(
         ['.locks', leftovers.liveTmp, leftovers.freshRemote, '13.1.7'].sort(),
+      );
+      expect(ls(paths.electronDownloads)).toStrictEqual(
+        ['.locks', downloads.live, downloads.slowRemote, zipName('13.1.7')].sort(),
       );
     });
 
@@ -348,7 +370,7 @@ describe('Installer and ElectronVersions options', () => {
     it('is not left installing when the temp folder cannot be created', async () => {
       const mkdtemp = fs.promises.mkdtemp.bind(fs.promises);
       vi.spyOn(fs.promises, 'mkdtemp').mockImplementation(((prefix: string) =>
-        path.basename(prefix).startsWith('.tmp-')
+        prefix.startsWith(versionsDir('.tmp-'))
           ? Promise.reject(new Error('no space left on device'))
           : mkdtemp(prefix)) as never);
       const installer = createInstaller({ layout: 'per-version' });

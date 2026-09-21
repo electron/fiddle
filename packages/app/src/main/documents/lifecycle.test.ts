@@ -44,10 +44,20 @@ vi.mock('../i18n', () => ({
     options ? `${key}:${JSON.stringify(options)}` : key,
   t: (key: string) => key,
 }));
+// Downloaded templates go under the test's userData, not the real cache.
+vi.mock('../test-mode', async (original) => ({
+  ...(await original<typeof import('../test-mode')>()),
+  getCacheRoot: () => path.join(userData, 'cache'),
+}));
+/** A minimal-repro archive whose main.js is `// fixture main`. */
+const templateZip = fs.readFileSync(
+  new URL('../../fiddle/test-fixtures/minimal-repro.zip', import.meta.url),
+);
 
 const ID = '8c5fc0c6a5153d49b5a4a56d3ed9da8f';
 /** Draft file names come from window IDs, which must look like UUIDs. */
 const W = '11111111-1111-4111-8111-111111111111';
+const W2 = '22222222-2222-4222-8222-222222222222';
 const version = { kind: 'release', version: '30.0.0' } as const;
 
 let folder = '';
@@ -369,6 +379,32 @@ describe('replacing the fiddle while a load is running', () => {
     expect(confirm).toHaveBeenCalledTimes(1);
     expect(documents.getFiddle(W).files['main.js']).toBe('typed meanwhile');
     expect(model.isDirty(documents.getDoc(W))).toBe(true);
+  });
+});
+
+describe('a new window', () => {
+  it('opens on the bundled template rather than wait for a slow download, which the next window gets', async () => {
+    const { net } = await import('electron');
+    let arrive!: () => void;
+    vi.mocked(net.fetch).mockImplementation(
+      () =>
+        new Promise((resolve) => {
+          arrive = () => resolve(new Response(new Uint8Array(templateZip)));
+        }),
+    );
+    const { documents } = await setup();
+    await documents.openFiddleWindow({ windowId: W });
+    expect(documents.getFiddle(W).files['main.js']).toBe('// quick start');
+
+    arrive();
+    await vi.waitFor(() =>
+      expect(
+        fs.existsSync(path.join(userData, 'cache', 'templates', 'minimal-repro-30-x-y')),
+      ).toBe(true),
+    );
+    await documents.openFiddleWindow({ windowId: W2 });
+    expect(documents.getFiddle(W2).files['main.js']).toBe('// fixture main');
+    expect(documents.getFiddle(W).files['main.js']).toBe('// quick start');
   });
 });
 

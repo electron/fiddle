@@ -229,11 +229,13 @@ describe('newFiddle', () => {
       getQuickStart: vi.fn(async () => ({ 'main.js': 'qs' })),
     };
     const loaded = await newFiddle(templates, { kind: 'release', version: '31.0.0' });
-    expect(templates.getTemplate).toHaveBeenCalledWith('31.0.0');
+    expect(templates.getTemplate).toHaveBeenCalledWith('31.0.0', undefined);
     expect(loaded.fiddle.templateName).toBe('template');
     expect(loaded.fiddle.modules).toEqual({});
     const local = await newFiddle(templates, { kind: 'local', id: 'x' });
     expect(local.fiddle.files).toEqual({ 'main.js': 'tpl' });
-    expect(templates.getTemplate).toHaveBeenLastCalledWith(undefined);
+    expect(templates.getTemplate).toHaveBeenLastCalledWith(undefined, undefined);
+    await newFiddle(templates, { kind: 'release', version: '31.0.0' }, 10);
+    expect(templates.getTemplate).toHaveBeenLastCalledWith('31.0.0', 10);
   });
 });

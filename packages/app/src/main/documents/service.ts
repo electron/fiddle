@@ -109,6 +109,8 @@ export type CodeExecutingOperation =
 const RESTORE_ATTEMPTS = 3;
 /** How long a new fiddle waits for its template to download before it starts from the bundled one. */
 const TEMPLATE_WAIT_MS = 1500;
+/** A window opening doesn't wait on GitHub: it takes a template already on disk, and a download goes on for the next fiddle. */
+const WINDOW_TEMPLATE_WAIT_MS = 200;
 
 const sessionEntrySchema = z.object({
   windowId: z.string().regex(WINDOW_ID_RE),
@@ -432,7 +434,7 @@ async function docFromSession(entry: SessionEntry): Promise<Doc> {
   } else if (stored.templateName && findExample(stored.templateName)) {
     loaded = await loadShowMe(staticDir(), stored.templateName, context);
   } else {
-    loaded = await newFiddle(templates, stored.version);
+    loaded = await newFiddle(templates, stored.version, WINDOW_TEMPLATE_WAIT_MS);
   }
   // The session keeps the order the user gave the tabs, and which files were hidden.
   const files = orderFiles(loaded.fiddle.files, stored.fileNames);
@@ -462,7 +464,7 @@ export async function openFiddleWindow(options: OpenWindowOptions = {}): Promise
   const windowId = options.windowId ?? randomUUID();
   let doc = options.doc;
   if (!doc) {
-    const loaded = await newFiddle(templates, defaultVersion());
+    const loaded = await newFiddle(templates, defaultVersion(), WINDOW_TEMPLATE_WAIT_MS);
     doc = createDoc(loaded.fiddle, loaded.name);
   }
   docs.set(windowId, doc);

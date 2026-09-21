@@ -160,8 +160,9 @@ function defaultVersion(rows: readonly ReleaseRow[]): string {
   );
 }
 
+/** A gist's Electron version is kept unless it's known not to run here: one the cached list lacks is looked up afresh when it's needed. */
 const isUsable = (rows: readonly ReleaseRow[]) => (version: string) =>
-  rows.some((r) => r.version === version && r.supported);
+  rows.find((r) => r.version === version)?.supported ?? true;
 
 async function templates(ctx: Ctx): Promise<TemplateLoader> {
   const { rows } = await cachedReleases(ctx);
@@ -389,7 +390,7 @@ async function releaseExec(ctx: Ctx, version: string): Promise<string> {
 }
 
 /** `sfw.mjs`, to wrap installs with, as the app does when Socket Firewall is on (its default). */
-function sfwPath(): string | undefined {
+function sfwPath(): Promise<string | undefined> {
   return sfwPathFor(defaultSettings.socketFirewall);
 }
 
@@ -473,7 +474,7 @@ async function runOnce(
           ? tr('installingModules', { pm })
           : tr('installingModulesNoScripts', { pm }),
       );
-      const sfw = sfwPath();
+      const sfw = await sfwPath();
       await installModules({
         dir: appDir,
         tempRoot: dir,
@@ -574,7 +575,7 @@ async function packageOrMake(
     ctx.reporter.log(
       task === 'package' ? tr('packaging', { path: dir }) : tr('making', { path: dir }),
     );
-    const sfw = sfwPath();
+    const sfw = await sfwPath();
     const failed = await runForgeTask(dir, input.pm, task, {
       env,
       signal: ctx.signal,
