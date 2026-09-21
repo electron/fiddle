@@ -58,10 +58,12 @@ export type ExtractFunction = (
 /** Written into `paths.electronInstall` once an install into it is complete. */
 const INSTALLED_MARKER = '.fiddle-core-installed';
 
-// Temp and trash folders in `electronVersions` are named
-// `.tmp-<version>_<host>_<pid>_<random>` and `.rm-…`, so a sweep can tell
-// whether their owner is gone. Neither a version nor a host contains `_`.
+// Temp and trash folders in `electronVersions` and `electronDownloads` are
+// named `.tmp-<version>_<host>_<pid>_<random>` and `.rm-…`, so a sweep can
+// tell whether their owner is gone. Neither a version nor a host contains `_`.
 const LEFTOVER_RE = /^\.(?:tmp|rm)-.+_([A-Za-z0-9.-]+)_(\d+)_[A-Za-z0-9]+$/;
+/** Past this age a leftover goes even if its pid is alive (reused) or its host unknown. */
+const LEFTOVER_MAX_AGE_MS = 24 * 60 * 60 * 1000;
 
 export type ProgressObject = { percent: number };
 
@@ -407,22 +409,22 @@ export class Installer extends EventEmitter {
   }
 
   /**
-   * Deletes temp and trash folders left in `electronVersions` by a process
-   * that has died (on this host) or that are older than {@link LOCK_STALE_MS}
-   * (from other hosts).
+   * Deletes temp and trash folders left in `dir` by a process that has died
+   * (on this host; or a day old, in case its pid was reused) or that are older
+   * than `otherHostAgeMs` (from other hosts).
    */
-  private async sweep(): Promise<void> {
-    const dir = this.paths.electronVersions;
+  private async sweep(dir: string, otherHostAgeMs: number): Promise<void> {
     const host = safeHostname();
     for (const name of await fs.promises.readdir(dir).catch(() => [])) {
       const match = LEFTOVER_RE.exec(name);
       if (!match) continue;
       const entry = path.join(dir, name);
       try {
+        const age = Date.now() - (await fs.promises.stat(entry)).mtimeMs;
         const gone =
           match[1] === host
-            ? !isProcessAlive(Number(match[2]))
-            : Date.now() - (await fs.promises.stat(entry)).mtimeMs > LOCK_STALE_MS;
+            ? !isProcessAlive(Number(match[2])) || age > LEFTOVER_MAX_AGE_MS
+            : age > otherHostAgeMs;
         if (gone) await removeBestEffort(entry);
       } catch {
         // already deleted
@@ -584,10 +586,14 @@ export class Installer extends EventEmitter {
       try {
         // Download next to the zips, so the move is a rename and a failed
         // download leaves nothing behind (@electron/get keeps its temp folder
-        // on failure when it bypasses its cache).
+        // on failure when it bypasses its cache). One a killed process left
+        // behind goes in the sweep.
         await fs.promises.mkdir(electronDownloads, { recursive: true });
+        // A download's folder keeps its creation mtime, so another host's is
+        // only swept once no download could still be running in it.
+        await this.sweep(electronDownloads, LEFTOVER_MAX_AGE_MS);
         const tempDir = await fs.promises.mkdtemp(
-          path.join(electronDownloads, '.download-'),
+          path.join(electronDownloads, `.tmp-${Installer.leftoverTag(version)}`),
         );
         try {
           await rename(await this.download(version, tempDir, opts), zipFile);
@@ -754,7 +760,7 @@ export class Installer extends EventEmitter {
     return withLock(this.installLockPath(version), { signal }, async () => {
       // another process may have installed it while we waited for the lock
       if (fs.existsSync(exec)) return done();
-      await this.sweep();
+      await this.sweep(electronVersions, LOCK_STALE_MS);
 
       const tmp = await fs.promises.mkdtemp(
         path.join(electronVersions, `.tmp-${Installer.leftoverTag(version)}`),

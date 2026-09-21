@@ -38,8 +38,12 @@ export function fetchDownloader(fetchFn: typeof fetch, stallMs = STALL_MS): Down
         : stalled.signal;
       try {
         const response = await fetchFn(url, { signal });
-        if (!response.ok || !response.body)
+        if (!response.ok || !response.body) {
+          await response.body?.cancel().catch(() => undefined);
           throw new Error(`Downloading ${url} failed: HTTP ${response.status}`);
+        }
+        // Headers are in: from here on the clock is on the body.
+        timer.refresh();
         const length = Number(response.headers.get('content-length'));
         const total = Number.isFinite(length) && length > 0 ? length : null;
         const progress = (transferred: number, percent: number) =>

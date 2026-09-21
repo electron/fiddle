@@ -4,6 +4,7 @@ import { implement, Versions } from '../../ipc/main';
 import { ErrorCode, FiddleError } from '../../shared/errors';
 import type { VersionRefValue } from '../../shared/stores';
 import * as documents from '../documents/service';
+import { tm } from '../i18n';
 import type { IpcContext } from '../ipc';
 import { log } from '../log';
 import { sameVersion } from './selection';
@@ -25,7 +26,19 @@ export function bindVersionsIpc(ctx: IpcContext): void {
       0,
     Download: async (version) => {
       known(version);
-      await versions.install(version);
+      try {
+        await versions.install(version);
+      } catch (error) {
+        // The installer's errors aren't FiddleErrors, so say what failed rather than "internal".
+        log.warn(`downloading ${version} failed`, error);
+        throw new FiddleError(
+          ErrorCode.network,
+          tm('mainVersions')('downloadFailed', {
+            version,
+            message: FiddleError.from(error).message,
+          }),
+        );
+      }
     },
     Remove: (version) => versions.remove(version),
     DownloadAll: (list) => {
