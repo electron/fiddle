@@ -4,12 +4,12 @@ import fsp from 'node:fs/promises';
 import path from 'node:path';
 
 import {
-  ElectronVersions,
   Installer,
   InstallState,
   type InstallerOptions,
   type InstallStateEvent,
   type Mirrors,
+  writeAtomic,
 } from '@electron/fiddle-core';
 import { app } from 'electron';
 import { z } from 'zod';
@@ -29,7 +29,7 @@ import { confirm, messageBox, pickFolder, type DialogParent } from '../dialogs';
 import { tm } from '../i18n';
 import { log } from '../log';
 import { netFetch } from '../net-fetch';
-import { createJsonStore, writeAtomic, type JsonStore } from '../persistence/json-store';
+import { createJsonStore, type JsonStore } from '../persistence/json-store';
 import type { StateHub } from '../state-hub';
 import type { CachePaths } from './paths';
 import { isReleaseList, toReleaseRows } from './releases';
@@ -135,21 +135,14 @@ export async function fetchReleaseList(
   return data;
 }
 
-export function loadReleases(data: unknown[]): {
-  versions: ElectronVersions;
-  rows: ReleaseRow[];
-} {
-  const versions = new ElectronVersions(data);
-  const rows = isReleaseList(data)
+export function loadReleases(data: unknown[]): ReleaseRow[] {
+  return isReleaseList(data)
     ? toReleaseRows(data, {
-        stableMajors: versions.stableMajors,
-        supportedMajors: versions.supportedMajors,
         platform: process.platform,
         arch: process.arch,
         numStableBranches: process.env.NUM_STABLE_BRANCHES,
       })
     : [];
-  return { versions, rows };
 }
 
 /** `@electron/get` appends the version folder to a mirror as is, so it needs its trailing slash. */
@@ -241,7 +234,6 @@ export class VersionsService {
   readonly installer: Installer;
   readonly #options: VersionsServiceOptions;
   readonly #builds: JsonStore<LocalBuildsFile>;
-  #versions: ElectronVersions | undefined;
   #rows: ReleaseRow[] = [];
   #releasesRev = 0;
   /** The text `#rows` came from, so a refresh that changes nothing rebuilds nothing. */
@@ -276,12 +268,6 @@ export class VersionsService {
     this.refresh().catch((error: unknown) =>
       log.warn('refreshing the release list failed', error),
     );
-  }
-
-  get electronVersions(): ElectronVersions {
-    if (!this.#versions)
-      throw new FiddleError(ErrorCode.unavailable, 'The release list is not loaded yet');
-    return this.#versions;
   }
 
   releases(): ReleaseRow[] {
@@ -489,9 +475,7 @@ export class VersionsService {
   }
 
   async #setReleases(data: unknown[], text: string): Promise<void> {
-    const { versions, rows } = loadReleases(data);
-    this.#versions = versions;
-    this.#rows = rows;
+    this.#rows = loadReleases(data);
     this.#releasesText = text;
     for (const { version } of this.#rows) {
       const state = this.installer.state(version);

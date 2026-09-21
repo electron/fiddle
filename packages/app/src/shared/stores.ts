@@ -218,6 +218,8 @@ export const releaseRowSchema = z.object({
   date: z.string(),
   /** The bundled Node version. */
   node: z.string(),
+  /** The Node ABI (`process.versions.modules`); Forge needs it for nightlies. */
+  modules: z.string().optional(),
   /** Older than the oldest supported major. */
   obsolete: z.boolean(),
   /** False when this OS or processor can't run it. */

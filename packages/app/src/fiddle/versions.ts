@@ -70,18 +70,19 @@ export function isObsolete(version: string, oldestSupportedMajor: number): boole
   return parsed !== null && parsed.major < oldestSupportedMajor;
 }
 
+/** Electron supports the newest three stable majors. */
+const SUPPORTED_MAJORS = 3;
+
 /**
- * The oldest supported major: the first of `supportedMajors`, unless
- * `NUM_STABLE_BRANCHES=N` asks for the last N stable majors instead.
+ * The oldest supported major, given every major with a stable release in
+ * ascending order. `NUM_STABLE_BRANCHES=N` asks for the last N instead of three.
  */
-export function getOldestSupportedMajor(input: {
-  stableMajors: readonly number[];
-  supportedMajors: readonly number[];
-  numStableBranches?: string;
-}): number | undefined {
-  const n = Number.parseInt(input.numStableBranches ?? '', 10);
-  if (Number.isInteger(n) && n > 0) return input.stableMajors.slice(-n)[0];
-  return input.supportedMajors[0];
+export function getOldestSupportedMajor(
+  stableMajors: readonly number[],
+  numStableBranches?: string,
+): number | undefined {
+  const n = Number.parseInt(numStableBranches ?? '', 10);
+  return stableMajors.slice(-(Number.isInteger(n) && n > 0 ? n : SUPPORTED_MAJORS))[0];
 }
 
 /**
