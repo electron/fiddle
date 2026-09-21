@@ -85,7 +85,7 @@ import {
 } from '../versions/service';
 import { t } from './argv';
 import { fetchDownloader } from './downloader';
-import type { CommandId, CommandInput, CommandOutput } from './descriptors';
+import type { CommandId, CommandInput } from './descriptors';
 import { CliErrorCode, exitCodeForRun, type Reporter } from './output';
 import { ensureTrusted, type TrustPrompt } from './trust';
 
@@ -239,7 +239,11 @@ async function requireFolder(dir: string): Promise<string> {
 }
 
 /** `<fiddle>`: a folder, a gist ID or URL, `example:<name>` or `electron:<tag>/<path>`. */
-async function loadFiddle(ctx: Ctx, spec: string): Promise<LoadedFiddle> {
+async function loadFiddle(
+  ctx: Ctx,
+  spec: string,
+  revision?: string,
+): Promise<LoadedFiddle> {
   const context = await newContext(ctx);
   if (spec.startsWith(EXAMPLE_PREFIX)) {
     const name = spec.slice(EXAMPLE_PREFIX.length);
@@ -279,7 +283,7 @@ async function loadFiddle(ctx: Ctx, spec: string): Promise<LoadedFiddle> {
     confirmAddFile: async () => true,
     isUsableVersion: isUsable(rows),
   };
-  return report(ctx, await loadGist(github(), id, undefined, options, ctx.signal));
+  return report(ctx, await loadGist(github(), id, revision, options, ctx.signal));
 }
 
 /** The fiddle's modules plus each `--module name@version` (no version: `latest`). */
@@ -538,7 +542,7 @@ async function packageOrMake(
   ctx: Ctx,
   task: 'package' | 'make',
   input: CommandInput<'package'>,
-): Promise<{ data: CommandOutput<'package'>; human: string }> {
+): Promise<Result> {
   const tr = tm('mainRun');
   const loaded = await loadFiddle(ctx, input.fiddle);
   const modules = withModules(loaded, input.module);
@@ -617,8 +621,9 @@ async function folderGistFiles(
   return { loaded, files };
 }
 
-interface Result<K extends CommandId> {
-  data: CommandOutput<K>;
+interface Result {
+  /** The `data` of the JSON result. */
+  data: unknown;
   /** The result for people; empty when it was already printed. */
   human: string;
   /** Default 0. */
@@ -626,7 +631,7 @@ interface Result<K extends CommandId> {
 }
 
 type Handlers = {
-  [K in CommandId]: (ctx: Ctx, input: CommandInput<K>) => Promise<Result<K>>;
+  [K in CommandId]: (ctx: Ctx, input: CommandInput<K>) => Promise<Result>;
 };
 
 const handlers: Handlers = {
@@ -778,26 +783,6 @@ const handlers: Handlers = {
     return { data: { version }, human: t('resultRemoved', { version }) };
   },
 
-  async 'gist load'(ctx, input) {
-    const id = gistIdOf(input.id);
-    const { rows } = await cachedReleases(ctx);
-    const options = {
-      context: await newContext(ctx),
-      confirmAddFile: async () => true,
-      isUsableVersion: isUsable(rows),
-    };
-    const loaded = await loadGist(github(), id, input.revision, options, ctx.signal);
-    report(ctx, loaded);
-    const dir = path.resolve(input.out);
-    const save = { name: loaded.name, author: osUserName() };
-    await saveToFolder(dir, loaded.fiddle, save);
-    const files = Object.keys(filesForSave(loaded.fiddle, save)).sort();
-    return {
-      data: { id, revision: loaded.gist.revision, owner: loaded.gist.owner, dir, files },
-      human: t('resultGistLoaded', { id, dir }),
-    };
-  },
-
   async 'gist publish'(ctx, input) {
     const client = authedGithub();
     const { loaded, files } = await folderGistFiles(ctx, input.dir);
@@ -870,7 +855,7 @@ const handlers: Handlers = {
   },
 
   async export(ctx, input) {
-    const loaded = await loadFiddle(ctx, input.fiddle);
+    const loaded = await loadFiddle(ctx, input.fiddle, input.revision);
     const dir = path.resolve(input.out);
     const { rows, versions } = await cachedReleases(ctx);
     const ref = loaded.fiddle.version;
@@ -909,10 +894,7 @@ export async function runCommand(
     releasesUrl: getEndpoints().releasesJson,
     memo: {},
   };
-  const handler = handlers[id] as (
-    ctx: Ctx,
-    input: unknown,
-  ) => Promise<Result<CommandId>>;
+  const handler = handlers[id] as (ctx: Ctx, input: unknown) => Promise<Result>;
   const { data, human, exitCode } = await handler(ctx, input);
   options.reporter.result(data, human);
   return exitCode ?? 0;

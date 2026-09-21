@@ -19,10 +19,6 @@
     "message": "Remove a downloaded Electron release",
     "description": "CLI help: what `versions remove` does."
   },
-  "cmdGistLoad": {
-    "message": "Save a gist as a fiddle folder",
-    "description": "CLI help: what `gist load` does."
-  },
   "cmdGistPublish": {
     "message": "Publish a fiddle folder as a new gist",
     "description": "CLI help: what `gist publish` does."
@@ -51,7 +47,6 @@
     "message": "Make installers for a fiddle with Electron Forge",
     "description": "CLI help: what `make` does."
   },
-
   "argFiddle": {
     "message": "A folder, a gist ID or URL, example:<name> or electron:<tag>/<path>",
     "description": "CLI help for the <fiddle> argument. Keep example:<name> and electron:<tag>/<path> as they are."
@@ -112,7 +107,10 @@
     "message": "A revision SHA of the gist",
     "description": "CLI help for --revision."
   },
-  "argOut": { "message": "The folder to write to", "description": "CLI help for --out." },
+  "argOut": {
+    "message": "The folder to write to",
+    "description": "CLI help for --out."
+  },
   "argDir": {
     "message": "A fiddle folder",
     "description": "CLI help for a <dir> argument."
@@ -133,8 +131,10 @@
     "message": "Print JSON lines with a schemaVersion",
     "description": "CLI help for --json. Keep schemaVersion as it is."
   },
-  "argHelp": { "message": "Show help", "description": "CLI help for --help." },
-
+  "argHelp": {
+    "message": "Show help",
+    "description": "CLI help for --help."
+  },
   "helpUsage": {
     "message": "Usage: {{usage}}",
     "description": "CLI help's first line. {{usage}} is the command syntax."
@@ -163,7 +163,6 @@
     "message": "Default: {{value}}",
     "description": "Appended to an option's help. {{value}} is the default value."
   },
-
   "errorPrefix": {
     "message": "Error: {{message}}",
     "description": "How the CLI prints an error. {{message}} is the error text."
@@ -244,7 +243,6 @@
     "message": "Continue? [y/N]",
     "description": "CLI prompt before a remote fiddle's code runs; a space is added after it. Only y or yes continues, so keep [y/N]."
   },
-
   "warnInvalidPackageJson": {
     "message": "The fiddle's package.json isn't valid JSON, so it was ignored.",
     "description": "CLI warning while loading a fiddle."
@@ -261,7 +259,6 @@
     "message": "Created {{url}} from the template, but adding the fiddle's files failed. Run gist update to finish.",
     "description": "CLI warning when a publish half-succeeds. {{url}} is the new gist's URL. Keep “gist update” as it is."
   },
-
   "stateInstalled": {
     "message": "installed",
     "description": "CLI versions list: the version is downloaded."
@@ -281,10 +278,6 @@
   "resultRemoved": {
     "message": "Removed Electron {{version}}.",
     "description": "CLI result of versions remove."
-  },
-  "resultGistLoaded": {
-    "message": "Saved gist {{id}} to {{dir}}",
-    "description": "CLI result of gist load. {{id}} is the gist ID, {{dir}} the folder it was saved to."
   },
   "resultGistPublished": {
     "message": "Published {{url}}",

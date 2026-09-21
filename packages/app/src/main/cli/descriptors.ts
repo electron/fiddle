@@ -3,29 +3,18 @@
 import { z } from 'zod';
 
 import type mainCli from '../../i18n/generated/en/mainCli';
-import { ErrorCode } from '../../shared/errors';
 import { defaultSettings, releaseChannelSchema } from '../../shared/settings';
 import { tm } from '../i18n';
-import { CliErrorCode } from './output';
 
 export type CliKey = keyof typeof mainCli;
 
-export interface Descriptor<
-  I extends z.ZodObject = z.ZodObject,
-  O extends z.ZodType = z.ZodType,
-> {
+export interface Descriptor<I extends z.ZodObject = z.ZodObject> {
   description: CliKey;
   positionals: readonly (keyof I['shape'] & string)[];
   input: I;
-  /** The `data` of the JSON result. */
-  output: O;
-  /** The error `code`s it can fail with. */
-  errors: readonly string[];
 }
 
-function command<I extends z.ZodObject, O extends z.ZodType>(
-  descriptor: Descriptor<I, O>,
-): Descriptor<I, O> {
+function command<I extends z.ZodObject>(descriptor: Descriptor<I>): Descriptor<I> {
   return descriptor;
 }
 
@@ -56,17 +45,7 @@ const channels = {
   obsolete: z.boolean().default(defaultSettings.showObsolete),
 };
 
-const common = [ErrorCode.invalidArgument, ErrorCode.internal];
-const loading = [...common, ErrorCode.notFound, ErrorCode.network, ErrorCode.unavailable];
-const executing = [
-  ...loading,
-  CliErrorCode.untrusted,
-  ErrorCode.installFailed,
-  ErrorCode.cancelled,
-];
-const github = [...loading, ErrorCode.unauthorized, ErrorCode.forbidden];
-
-/** `package` and `make`: the same inputs and output. */
+/** `package` and `make`: the same inputs. */
 function forgeTask(description: CliKey) {
   return command({
     description,
@@ -78,89 +57,34 @@ function forgeTask(description: CliKey) {
       pm: execution.pm,
       trust: execution.trust,
     }),
-    output: packaged,
-    errors: [...executing, CliErrorCode.taskFailed],
   });
 }
-
-const gistWrite = z.object({
-  id: z.string(),
-  url: z.string(),
-  revision: z.string().nullable(),
-});
-const packaged = z.object({ dir: z.string(), out: z.string() });
 
 export const descriptors = {
   run: command({
     description: 'cmdRun',
     positionals: ['fiddle'],
     input: z.object({ fiddle, ...electron, ...execution }),
-    output: z.object({
-      name: z.string(),
-      origin: z.string(),
-      version: z.string(),
-      result: z.enum(['success', 'failure']),
-      exitCode: z.number().int().nullable(),
-      signal: z.string().nullable(),
-    }),
-    errors: executing,
   }),
   bisect: command({
     description: 'cmdBisect',
     positionals: ['fiddle'],
     input: z.object({ fiddle, good: version, bad: version, ...execution, ...channels }),
-    output: z.object({
-      good: z.string(),
-      bad: z.string(),
-      url: z.string(),
-      steps: z.array(z.object({ version: z.string(), good: z.boolean() })),
-    }),
-    errors: [...executing, CliErrorCode.bisectFailed],
   }),
   'versions list': command({
     description: 'cmdVersionsList',
     positionals: [],
     input: z.object({ ...channels }),
-    output: z.object({
-      versions: z.array(
-        z.object({
-          version: z.string(),
-          channel: releaseChannelSchema,
-          date: z.string(),
-          node: z.string(),
-          obsolete: z.boolean(),
-          installed: z.boolean(),
-        }),
-      ),
-    }),
-    errors: common,
   }),
   'versions download': command({
     description: 'cmdVersionsDownload',
     positionals: ['version'],
     input: z.object({ version }),
-    output: z.object({ version: z.string(), path: z.string() }),
-    errors: [...loading, ErrorCode.cancelled],
   }),
   'versions remove': command({
     description: 'cmdVersionsRemove',
     positionals: ['version'],
     input: z.object({ version }),
-    output: z.object({ version: z.string() }),
-    errors: common,
-  }),
-  'gist load': command({
-    description: 'cmdGistLoad',
-    positionals: ['id'],
-    input: z.object({ id: gistId, revision: z.string().min(1).optional(), out: dir }),
-    output: z.object({
-      id: z.string(),
-      revision: z.string(),
-      owner: z.string().nullable(),
-      dir: z.string(),
-      files: z.array(z.string()),
-    }),
-    errors: github,
   }),
   'gist publish': command({
     description: 'cmdGistPublish',
@@ -170,47 +94,31 @@ export const descriptors = {
       public: z.boolean().default(defaultSettings.gistVisibility === 'public'),
       description: z.string().optional(),
     }),
-    output: gistWrite,
-    errors: github,
   }),
   'gist update': command({
     description: 'cmdGistUpdate',
     positionals: ['id', 'dir'],
     input: z.object({ id: gistId, dir }),
-    output: gistWrite,
-    errors: github,
   }),
   'gist delete': command({
     description: 'cmdGistDelete',
     positionals: ['id'],
     input: z.object({ id: gistId }),
-    output: z.object({ id: z.string() }),
-    errors: github,
   }),
   'gist history': command({
     description: 'cmdGistHistory',
     positionals: ['id'],
     input: z.object({ id: gistId }),
-    output: z.object({
-      id: z.string(),
-      revisions: z.array(
-        z.object({
-          sha: z.string(),
-          date: z.string(),
-          additions: z.number(),
-          deletions: z.number(),
-          total: z.number(),
-        }),
-      ),
-    }),
-    errors: github,
   }),
   export: command({
     description: 'cmdExport',
     positionals: ['fiddle'],
-    input: z.object({ fiddle, out: dir, forge: z.boolean().default(false) }),
-    output: z.object({ name: z.string(), dir: z.string(), files: z.array(z.string()) }),
-    errors: loading,
+    input: z.object({
+      fiddle,
+      revision: z.string().min(1).optional(),
+      out: dir,
+      forge: z.boolean().default(false),
+    }),
   }),
   package: forgeTask('cmdPackage'),
   make: forgeTask('cmdMake'),
@@ -219,9 +127,6 @@ export const descriptors = {
 export type CommandId = keyof typeof descriptors;
 export type CommandInput<K extends CommandId> = z.output<
   (typeof descriptors)[K]['input']
->;
-export type CommandOutput<K extends CommandId> = z.input<
-  (typeof descriptors)[K]['output']
 >;
 
 export const commandIds = Object.keys(descriptors) as CommandId[];
