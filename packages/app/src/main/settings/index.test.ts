@@ -39,6 +39,10 @@ const { flushAll, onJsonStoreNotice } = await import('../persistence/json-store'
 const { SETTINGS_VERSION } = await import('./service');
 const { loadSettings, preferredLocales, startSettings } = await import('./index');
 
+// Each start leaves a watcher on the settings folder. Close it before the
+// folder goes: on Windows, removing a watched folder can crash the process.
+const watch = vi.spyOn(fs, 'watch');
+
 let dir = '';
 beforeEach(() => {
   dir = fs.mkdtempSync(path.join(os.tmpdir(), 'fiddle-settings-'));
@@ -52,8 +56,10 @@ beforeEach(() => {
 afterEach(async () => {
   vi.useRealTimers();
   await flushAll();
-  // The settings watcher may still hold the folder for a moment on Windows.
-  fs.rmSync(dir, { recursive: true, force: true, maxRetries: 5 });
+  for (const started of watch.mock.results)
+    if (started.type === 'return') started.value.close();
+  watch.mockClear();
+  fs.rmSync(dir, { recursive: true, force: true });
 });
 
 function writeSettings(sparse: Partial<Settings>, version = SETTINGS_VERSION): void {
