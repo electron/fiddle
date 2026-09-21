@@ -6,29 +6,29 @@ import type { monaco } from './monaco';
 export interface EditorViewState {
   softWrap: boolean;
   minimap: boolean;
-  /** The file in the most recently focused editor, and its cursor. */
-  cursor: { file: string; line: number; column: number } | null;
 }
 
-const view = createStore<EditorViewState>({
-  softWrap: true,
-  minimap: false,
-  cursor: null,
-});
+/** The file in the most recently focused editor, and its cursor. */
+export type EditorCursor = { file: string; line: number; column: number } | null;
+
+const view = createStore<EditorViewState>({ softWrap: true, minimap: false });
+// Its own store: it changes on every keystroke, and only the status bar's position readout follows it.
+const cursor = createStore<EditorCursor>(null);
 let focused: monaco.editor.IStandaloneCodeEditor | null = null;
 
 const set = (patch: Partial<EditorViewState>) => view.set({ ...view.get(), ...patch });
 
 export const useEditorViewState = (): EditorViewState => useStore(view);
+export const useEditorCursor = (): EditorCursor => useStore(cursor);
 
 export const toggleSoftWrap = () => set({ softWrap: !view.get().softWrap });
 export const toggleMinimap = () => set({ minimap: !view.get().minimap });
 
 export function setCursor(file: string, line: number, column: number): void {
-  const current = view.get().cursor;
+  const current = cursor.get();
   if (current?.file === file && current.line === line && current.column === column)
     return;
-  set({ cursor: { file, line, column } });
+  cursor.set({ file, line, column });
 }
 
 export function setFocusedEditor(editor: monaco.editor.IStandaloneCodeEditor): void {
