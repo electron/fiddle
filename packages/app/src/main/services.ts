@@ -16,7 +16,6 @@ import {
 } from './documents/service';
 import { CredentialStore, legacyTokenFile } from './github/credentials';
 import { createDocumentsBridge } from './github/documents-bridge';
-import { createGistPrefs } from './github/prefs';
 import { GitHubService } from './github/service';
 import { tm } from './i18n';
 import { log } from './log';
@@ -185,7 +184,16 @@ export async function createServices({
       });
     },
     documents: createDocumentsBridge(hub),
-    prefs: createGistPrefs(hub, settings.service),
+    prefs: {
+      get: () => ({
+        asRevision: hub.app.settings.gistPublishAsRevision,
+        ...(hub.app.settings.packageAuthor
+          ? { author: hub.app.settings.packageAuthor }
+          : {}),
+      }),
+      setVisibility: (isPublic) =>
+        settings.service.set('gistVisibility', isPublic ? 'public' : 'secret'),
+    },
     setLogin: (githubLogin) => hub.updateApp({ githubLogin }),
     log,
   });

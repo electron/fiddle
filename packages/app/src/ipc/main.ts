@@ -6,16 +6,18 @@ import { log } from '../main/log';
 import { wrapImplementation } from '../shared/error-transport';
 import type { FiddleError } from '../shared/errors';
 
-export { App, Window } from './generated/browser/fiddle';
-export { Documents } from './generated/browser/fiddle';
-export type { IDocumentsImpl } from './generated/common/fiddle';
-export type { IAppDispatcher, IWindowDispatcher } from './generated/browser/fiddle';
-export type { AppInfo, IAppImpl, IWindowImpl } from './generated/common/fiddle';
-export { Settings } from './generated/browser/fiddle';
-export { Modules, Onboarding } from './generated/browser/fiddle';
-export { GitHub } from './generated/browser/fiddle';
-export { Run, Versions } from './generated/browser/fiddle';
-export { AppPlatform } from './generated/browser/fiddle';
+export {
+  App,
+  AppPlatform,
+  Documents,
+  GitHub,
+  Modules,
+  Onboarding,
+  Run,
+  Settings,
+  Versions,
+  Window,
+} from './generated/browser/fiddle';
 
 interface Bindable<Impl, Dispatcher> {
   for(target: WebContents): { setImplementation(impl: Impl): Dispatcher };

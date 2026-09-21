@@ -2,8 +2,8 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { githubApi } from '../../../ipc/renderer';
-import { FiddleError } from '../../../shared/errors';
-import { Button, FormField, Icon, showToast } from '../../../ui';
+import { Button, FormField, Icon } from '../../../ui';
+import { toastError } from '../../toast-error';
 import styles from './gists.module.css';
 import { SignInDialog } from './SignInDialog';
 import { useGitHubLogin } from './state';
@@ -15,11 +15,7 @@ export function GitHubAccountSection() {
   const [signingIn, setSigningIn] = useState(false);
 
   const signOut = () => {
-    githubApi
-      .SignOut()
-      .catch((error: unknown) =>
-        showToast({ tone: 'error', title: FiddleError.from(error).message }),
-      );
+    githubApi.SignOut().catch(toastError);
   };
 
   return (

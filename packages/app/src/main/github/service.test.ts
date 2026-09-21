@@ -9,7 +9,7 @@ import { ErrorCode, FiddleError } from '../../shared/errors';
 import { initMainI18n } from '../i18n';
 import type { LoadResult } from './credentials';
 import type { GistDocuments, GistFiddle } from './documents-bridge';
-import type { GistPrefs, PublishOptions } from './prefs';
+import type { GistPrefs, PublishOptions } from './service';
 import { gistFiles, GitHubService } from './service';
 
 beforeAll(async () => {

@@ -264,21 +264,6 @@ describe('versions', () => {
     expect(store.get().count).toBe(1);
     expect(await readFile(file, 'utf8')).toBe(text);
   });
-
-  it('runs migrations in order, treating a file without schemaVersion as v1', async () => {
-    await writeFile(file, JSON.stringify({ title: 'old', count: 2 }));
-    const store = open({
-      version: 3,
-      migrations: {
-        1: ({ title, ...rest }) => ({ ...rest, name: String(title) }),
-        2: (data) => ({ ...data, count: Number(data.count) * 10 }),
-      },
-    });
-    expect(store.get()).toEqual({ name: 'old', count: 20 });
-    store.set((prev) => prev);
-    await store.flush();
-    expect(await readJson()).toEqual({ schemaVersion: 3, name: 'old', count: 20 });
-  });
 });
 
 describe('writing', () => {

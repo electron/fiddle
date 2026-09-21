@@ -51,7 +51,7 @@ const storedBuildSchema = z.object({
   path: z.string(),
   addedAt: z.string(),
 });
-type StoredBuild = z.infer<typeof storedBuildSchema>;
+export type StoredBuild = z.infer<typeof storedBuildSchema>;
 const localBuildsFileSchema = z.object({ builds: z.array(storedBuildSchema) });
 type LocalBuildsFile = z.infer<typeof localBuildsFileSchema>;
 

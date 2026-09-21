@@ -20,18 +20,14 @@ interface ObjectSchema {
   >;
 }
 
-type Migration = (data: Record<string, unknown>) => Record<string, unknown>;
-
 interface JsonStoreOptions<T> {
   file: string;
   /** A loose object schema. Keys are validated one by one. */
   schema: ObjectSchema;
   /** Used for missing keys, and for everything when nothing can be read. */
   defaults: T;
-  /** The `schemaVersion` this app writes. */
+  /** The `schemaVersion` this app writes. A file with a higher one is read but never written back. */
   version: number;
-  /** `migrations[n]` turns a version-n file into version n+1. */
-  migrations?: Record<number, Migration>;
   /** Test hook: called with each file content that is written. */
   onWrite?: (content: string) => void;
 }
@@ -222,28 +218,13 @@ function readBackup(file: string): Candidate | undefined {
 }
 
 function decode<T>(
-  { file, schema, defaults, version, migrations = {} }: JsonStoreOptions<T>,
+  { file, schema, defaults, version }: JsonStoreOptions<T>,
   raw: Record<string, unknown>,
 ): Loaded<T> {
-  const { [VERSION_KEY]: fileVersion, ...rest } = raw;
-  let data: Record<string, unknown> = rest;
-  let current =
-    typeof fileVersion === 'number' && Number.isInteger(fileVersion) ? fileVersion : 1;
-  let readOnly = false;
-
-  if (current > version) {
-    readOnly = true;
-    notify({ kind: 'newer-version', file, version: current });
-  }
-  while (current < version) {
-    const migrate = migrations[current];
-    if (!migrate) {
-      log.error(`no migration from v${current} for`, file);
-      break;
-    }
-    data = migrate(data);
-    current++;
-  }
+  const { [VERSION_KEY]: fileVersion, ...data } = raw;
+  // A file without a version is v1. An older file reads as it is until a version needs a migration.
+  const readOnly = typeof fileVersion === 'number' && fileVersion > version;
+  if (readOnly) notify({ kind: 'newer-version', file, version: fileVersion });
 
   const invalid: Record<string, unknown> = {};
   for (const [key, entry] of Object.entries(data)) {

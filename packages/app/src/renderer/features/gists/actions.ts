@@ -3,6 +3,7 @@ import type { TFunction } from 'i18next';
 import { githubApi, settingsApi } from '../../../ipc/renderer';
 import { ErrorCode, FiddleError } from '../../../shared/errors';
 import { confirmDialog, showToast } from '../../../ui';
+import { toastError } from '../../toast-error';
 import { gistErrorHint } from './error-hint';
 import { showGistDialog } from './state';
 
@@ -16,19 +17,15 @@ const failedTitle = {
 } as const;
 
 export function copyShareLink(t: GistT, id: string): void {
-  githubApi.CopyShareLink(id).then(
-    () => showToast({ tone: 'success', title: t('linkCopied') }),
-    (error: unknown) =>
-      showToast({ tone: 'error', title: FiddleError.from(error).message }),
-  );
+  githubApi
+    .CopyShareLink(id)
+    .then(() => showToast({ tone: 'success', title: t('linkCopied') }), toastError);
 }
 
 export function setGistVisibility(isPublic: boolean): void {
   settingsApi
     .SetSetting('gistVisibility', isPublic ? 'public' : 'secret')
-    .catch((error: unknown) =>
-      showToast({ tone: 'error', title: FiddleError.from(error).message }),
-    );
+    .catch(toastError);
 }
 
 export function showGistSaved(
