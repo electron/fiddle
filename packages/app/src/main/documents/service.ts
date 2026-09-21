@@ -325,30 +325,34 @@ export async function startDocuments(): Promise<void> {
 async function restoreSession(unclaimed: Set<string>): Promise<void> {
   const entries = getStateStore().get().sessions;
   for (const entry of entries) unclaimed.delete(entry.windowId);
-  const restored = await Promise.all(
+  const loaded = await Promise.all(
     entries.map(async (entry) => {
-      let doc: Doc;
       try {
         const draft = await readDraft(entry.windowId);
-        doc = draft ? docFromDraft(draft) : await docFromSession(entry);
+        return draft ? docFromDraft(draft) : await docFromSession(entry);
       } catch (error) {
         log.warn('could not reopen a window', entry.windowId, error);
         const failedRestores = (entry.failedRestores ?? 0) + 1;
         if (failedRestores < RESTORE_ATTEMPTS)
           unrestored.push({ ...entry, failedRestores });
-        return false;
+        return undefined;
       }
-      await openFiddleWindow({
-        windowId: entry.windowId,
-        doc,
-        layout: entry.layout,
-      }).catch((error: unknown) =>
-        log.error('could not restore a window', entry.windowId, error),
-      );
-      return true;
     }),
   );
-  const failed = entries.filter((_, i) => !restored[i]).map((entry) => entry.name);
+  // Windows open in session order once every fiddle is loaded.
+  await Promise.all(
+    entries.map((entry, i) => {
+      const doc = loaded[i];
+      return (
+        doc &&
+        openFiddleWindow({ windowId: entry.windowId, doc, layout: entry.layout }).catch(
+          (error: unknown) =>
+            log.error('could not restore a window', entry.windowId, error),
+        )
+      );
+    }),
+  );
+  const failed = entries.filter((_, i) => !loaded[i]).map((entry) => entry.name);
   if (failed.length > 0) {
     void messageBox(lastFocused, {
       type: 'warning',
