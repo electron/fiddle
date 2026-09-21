@@ -100,26 +100,31 @@ describe('run directories', () => {
 });
 
 describe('sweepStaleDirs', () => {
-  it('removes old run and project dirs, and nothing else', async () => {
+  it('removes old run dirs and abandoned projects, and nothing else', async () => {
     const root = fs.mkdtempSync(path.join(os.tmpdir(), 'fiddle-sweep-'));
     dirs.push(root);
     const dayAgo = Date.now() / 1000 - 2 * 24 * 60 * 60;
-    const make = (name: string, old: boolean) => {
+    const make = (name: string, old: boolean, out = false) => {
       const dir = path.join(root, name);
       fs.mkdirSync(dir);
       fs.writeFileSync(path.join(dir, 'file'), 'x');
+      if (out) fs.mkdirSync(path.join(dir, 'out'));
       if (old) fs.utimesSync(dir, dayAgo, dayAgo);
     };
     make('electron-fiddle-aB3dE9', true);
     make('electron-fiddle-package-aB3dE9', true);
     make('electron-fiddle-make-aB3dE9', true);
+    make('electron-fiddle-package-Qw3rTy', true, true);
+    make('electron-fiddle-make-Qw3rTy', true, true);
     make('electron-fiddle-Zz9Yy8', false);
     make('electron-fiddle-notes', true);
     make('other-aB3dE9', true);
     await sweepStaleDirs(root);
     expect(fs.readdirSync(root).sort()).toEqual([
       'electron-fiddle-Zz9Yy8',
+      'electron-fiddle-make-Qw3rTy',
       'electron-fiddle-notes',
+      'electron-fiddle-package-Qw3rTy',
       'other-aB3dE9',
     ]);
   });

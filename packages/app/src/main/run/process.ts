@@ -22,8 +22,8 @@ import { devElectronFlags } from './dev';
 import type { RunOutcome } from './logic';
 
 const STALE_DIR_MS = 24 * 60 * 60 * 1000;
-/** What `makeRunDir` makes: run dirs and package and make projects. */
-const TEMP_DIR_RE = /^electron-fiddle-(?:(?:package|make)-)?[A-Za-z0-9]{6}$/;
+/** What `makeRunDir` makes: run dirs, and package and make projects (group 1). */
+const TEMP_DIR_RE = /^electron-fiddle-((?:package|make)-)?[A-Za-z0-9]{6}$/;
 
 let shellPath: Promise<string | undefined> | undefined;
 
@@ -41,12 +41,18 @@ export function makeRunDir(prefix = 'electron-fiddle-'): Promise<string> {
   return fsp.mkdtemp(path.join(os.tmpdir(), prefix));
 }
 
-/** Deletes the dirs `makeRunDir` made in an earlier session that crashed or was killed, once they are a day old. */
+/**
+ * Deletes the dirs `makeRunDir` made in an earlier session that crashed or was killed, once they are a day old.
+ * A package or make project with an `out` folder holds the user's build, so it stays.
+ */
 export async function sweepStaleDirs(root = os.tmpdir()): Promise<void> {
   for (const entry of await fsp.readdir(root, { withFileTypes: true })) {
-    if (!entry.isDirectory() || !TEMP_DIR_RE.test(entry.name)) continue;
+    const match = entry.isDirectory() && TEMP_DIR_RE.exec(entry.name);
+    if (!match) continue;
     const dir = path.join(root, entry.name);
     try {
+      if (match[1] && (await fsp.stat(path.join(dir, 'out')).catch(() => undefined)))
+        continue;
       if (Date.now() - (await fsp.stat(dir)).mtimeMs > STALE_DIR_MS)
         await fsp.rm(dir, { recursive: true, force: true, maxRetries: 3 });
     } catch (error) {
