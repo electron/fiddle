@@ -1,5 +1,5 @@
 /**
- * Save, replace, quit and session restore, through the real Documents service
+ * Save, replace, close, quit and session restore, through the real Documents service
  * with Electron's dialogs, windows and app faked.
  */
 import { EventEmitter } from 'node:events';
@@ -12,7 +12,12 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { createFiddle } from '../../fiddle/fiddle';
 import { DEFAULT_LAYOUT } from '../../shared/stores';
-import { initFakeDocuments } from './test-helpers';
+import {
+  type FakeWindow,
+  fakeWindow,
+  flushAndRemove,
+  initFakeDocuments,
+} from './test-helpers';
 
 let userData = '';
 const appHandlers = new Map<string, (...args: unknown[]) => void>();
@@ -29,6 +34,8 @@ const app = {
 const messageBox = vi.fn();
 const confirm = vi.fn();
 const pickFolder = vi.fn();
+/** The BrowserWindows of the tests that need one open; the rest run with every window closed. */
+const browserWindows = new Map<string, FakeWindow>();
 vi.mock('electron', () => ({ app, net: { fetch: vi.fn() } }));
 vi.mock('../dialogs', () => ({
   messageBox: (...args: unknown[]) => messageBox(...args),
@@ -36,7 +43,8 @@ vi.mock('../dialogs', () => ({
   pickFolder: (...args: unknown[]) => pickFolder(...args),
 }));
 vi.mock('../windows', () => ({
-  getWindow: () => undefined,
+  getWindow: (id: string | undefined) =>
+    id === undefined ? undefined : browserWindows.get(id),
   sendWindowCommand: () => undefined,
 }));
 vi.mock('../i18n', () => ({
@@ -61,7 +69,7 @@ const W2 = '22222222-2222-4222-8222-222222222222';
 const version = { kind: 'release', version: '30.0.0' } as const;
 
 let folder = '';
-beforeEach(() => {
+beforeEach(async () => {
   userData = fs.mkdtempSync(path.join(os.tmpdir(), 'fiddle-lifecycle-'));
   folder = path.join(userData, 'project');
   fs.mkdirSync(folder);
@@ -74,17 +82,16 @@ beforeEach(() => {
   );
   vi.resetModules();
   appHandlers.clear();
+  browserWindows.clear();
   for (const mock of [messageBox, confirm, pickFolder, app.quit]) mock.mockReset();
   messageBox.mockResolvedValue({ response: 1, checkboxChecked: false });
   confirm.mockResolvedValue(true);
+  // No template downloads unless a test provides them: a pending one makes new windows wait.
+  const { net } = await import('electron');
+  vi.mocked(net.fetch).mockReset();
 });
 
-afterEach(async () => {
-  await import('./service')
-    .then((documents) => documents.getStateStore().flush())
-    .catch(() => undefined);
-  fs.rmSync(userData, { recursive: true, force: true });
-});
+afterEach(() => flushAndRemove(userData));
 
 function put(files: Record<string, string>, into = folder) {
   for (const [name, content] of Object.entries(files))
@@ -92,12 +99,19 @@ function put(files: Record<string, string>, into = folder) {
 }
 
 async function setup(
-  options: { sessionRestore?: boolean; loadGist?: (id: string) => Promise<unknown> } = {},
+  options: {
+    sessionRestore?: boolean;
+    platform?: 'darwin' | 'linux';
+    loadGist?: (id: string) => Promise<unknown>;
+    /** More members of the GitHub client, next to `loadGist`. */
+    client?: object;
+  } = {},
 ) {
   const documents = await import('./service');
   const model = await import('./model');
   const windows = initFakeDocuments(documents, {
     sessionRestore: options.sessionRestore,
+    ...(options.platform ? { platform: options.platform } : {}),
     versions: {
       releases: () => [{ version: '30.0.0', supported: true }],
       release: (v: string) =>
@@ -105,9 +119,12 @@ async function setup(
       localBuild: (id: string) =>
         id === 'build' ? { id, name: 'build', path: '/builds/x' } : undefined,
     },
-    github: { client: () => ({ loadGist: options.loadGist }) },
+    github: { client: () => ({ loadGist: options.loadGist, ...options.client }) },
   });
-  const open = (files: Record<string, string>, source: { localPath?: string } = {}) =>
+  const open = (
+    files: Record<string, string>,
+    source: { localPath?: string; gistId?: string } = {},
+  ) =>
     documents.openFiddleWindow({
       windowId: W,
       doc: model.createDoc(createFiddle({ files, version, source }), 'fiddle'),
@@ -352,6 +369,111 @@ describe('confirmQuit', () => {
   });
 });
 
+describe('closing a window with unsaved changes', () => {
+  async function setupDirty(localPath: string | undefined) {
+    const { documents, model, open } = await setup();
+    const win = fakeWindow();
+    browserWindows.set(W, win);
+    await open({ 'main.js': 'main' }, localPath === undefined ? {} : { localPath });
+    documents.attachWindow(W, new EventEmitter() as never);
+    documents.updateDoc(
+      W,
+      (doc) => model.applyEdit(doc, 'main.js', 'edited', doc.fiddleRev) ?? doc,
+    );
+    /** The user closes the window; the event says whether Electron may go on. */
+    const close = () => {
+      const event = { preventDefault: vi.fn() };
+      win.emit('close', event);
+      return event;
+    };
+    return { win, close };
+  }
+  const answer = (response: number) =>
+    messageBox.mockResolvedValue({ response, checkboxChecked: false });
+
+  it('asks first: cancel keeps the window, and closing without saving does not ask a second time', async () => {
+    const { win, close } = await setupDirty(undefined);
+    answer(2);
+
+    expect(close().preventDefault).toHaveBeenCalled();
+    await vi.waitFor(() =>
+      expect(messageBox).toHaveBeenCalledWith(
+        W,
+        expect.objectContaining({ message: 'closeMessage:{"name":"fiddle"}' }),
+      ),
+    );
+    await new Promise((resolve) => setImmediate(resolve));
+    expect(win.close).not.toHaveBeenCalled();
+
+    answer(1);
+    close();
+    await vi.waitFor(() => expect(win.close).toHaveBeenCalledOnce());
+    expect(close().preventDefault).not.toHaveBeenCalled();
+    expect(messageBox).toHaveBeenCalledTimes(2);
+  });
+
+  it('stays open when the save it was asked for fails', async () => {
+    const blocker = path.join(userData, 'a-file');
+    fs.writeFileSync(blocker, 'not a folder');
+    const { win, close } = await setupDirty(blocker);
+    answer(0);
+
+    close();
+    await vi.waitFor(() =>
+      expect(messageBox).toHaveBeenCalledWith(
+        W,
+        expect.objectContaining({ message: 'saveFailed' }),
+      ),
+    );
+    await new Promise((resolve) => setImmediate(resolve));
+    expect(win.close).not.toHaveBeenCalled();
+  });
+});
+
+describe('closing the last window', () => {
+  async function setupLast(platform: 'darwin' | 'linux') {
+    const { documents, model, open } = await setup({ platform });
+    await open({ 'main.js': 'main' });
+    await documents.startDocuments();
+    const contents = new EventEmitter();
+    documents.attachWindow(W, contents as never);
+    documents.updateDoc(
+      W,
+      (doc) => model.applyEdit(doc, 'main.js', 'edited', doc.fiddleRev) ?? doc,
+    );
+    documents.flushDraftsAndSession();
+    const drafts = path.join(userData, 'drafts');
+    await vi.waitFor(() => expect(fs.readdirSync(drafts)).toEqual([`${W}.json`]));
+    const sessionIds = () =>
+      documents
+        .getStateStore()
+        .get()
+        .sessions.map((s) => s.windowId);
+    return { documents, contents, drafts, sessionIds };
+  }
+
+  it('keeps it in the session where that quits the app, and drops the draft the user chose not to save', async () => {
+    const { documents, contents, drafts, sessionIds } = await setupLast('linux');
+
+    contents.emit('destroyed');
+
+    await vi.waitFor(() => expect(fs.readdirSync(drafts)).toEqual([]));
+    documents.flushDraftsAndSession();
+    expect(sessionIds()).toEqual([W]);
+    expect(() => documents.getFiddle(W)).toThrow();
+  });
+
+  it('takes it out of the session on macOS, where the app stays open', async () => {
+    const { documents, contents, drafts, sessionIds } = await setupLast('darwin');
+
+    contents.emit('destroyed');
+
+    await vi.waitFor(() => expect(fs.readdirSync(drafts)).toEqual([]));
+    documents.flushDraftsAndSession();
+    expect(sessionIds()).toEqual([]);
+  });
+});
+
 describe('replacing the fiddle while a load is running', () => {
   it('asks again when text was typed in the meantime, and keeps it if the user says no', async () => {
     let finish!: (gist: unknown) => void;
@@ -441,6 +563,52 @@ describe('setFiddleVersion', () => {
       version: '31.0.0',
     });
   });
+
+  it('changes only the version once the template was edited', async () => {
+    const { documents, model } = await setup();
+    await documents.openFiddleWindow({
+      windowId: W,
+      doc: model.createDoc(
+        createFiddle({
+          files: { 'main.js': 'tpl' },
+          version: { kind: 'release', version: '29.0.0' },
+          templateName: model.DEFAULT_TEMPLATE,
+        }),
+        'fiddle',
+      ),
+    });
+    documents.editFile(W, 'main.js', 'my repro', documents.getDoc(W).fiddleRev);
+
+    await documents.setFiddleVersion(W, version);
+
+    expect(documents.getFiddle(W)).toMatchObject({
+      version,
+      files: { 'main.js': 'my repro' },
+    });
+  });
+});
+
+describe('editFile', () => {
+  it('pushes the window store when the set of edited files changes, not on every keystroke', async () => {
+    const { documents, windows, open } = await setup();
+    await open({ 'main.js': 'main', 'renderer.js': 'r' });
+    const pushes = vi.spyOn(windows, 'set');
+    const rev = documents.getDoc(W).fiddleRev;
+
+    documents.editFile(W, 'main.js', 'main!', rev);
+    documents.editFile(W, 'main.js', 'main!!', rev);
+    documents.editFile(W, 'renderer.js', 'r!', rev);
+    documents.editFile(W, 'main.js', 'main', rev);
+
+    expect(pushes).toHaveBeenCalledTimes(3);
+    expect(documents.getFiddle(W).files).toEqual({
+      'main.js': 'main',
+      'renderer.js': 'r!',
+    });
+    expect(
+      (windows.get(W) as { fiddle: { dirtyFiles: string[] } }).fiddle.dirtyFiles,
+    ).toEqual(['renderer.js']);
+  });
 });
 
 describe('markPublished', () => {
@@ -512,6 +680,16 @@ describe('markPublished', () => {
 });
 
 describe('markGistDeleted', () => {
+  it('unlinks the gist and marks the fiddle unsaved, keeping its folder', async () => {
+    const { documents, model, open } = await setup();
+    await open({ 'main.js': 'published' }, { gistId: ID, localPath: folder });
+
+    documents.markGistDeleted(W, documents.getDoc(W).loadRev);
+
+    expect(documents.getFiddle(W).source).toEqual({ localPath: folder });
+    expect(model.isDirty(documents.getDoc(W))).toBe(true);
+  });
+
   it('does not unlink another fiddle that took the window’s place', async () => {
     const { documents, model, open } = await setup();
     await open({ 'main.js': 'deleted' });
@@ -565,6 +743,186 @@ describe('session restore', () => {
     sessions: ReturnType<typeof entry>[],
   ) =>
     documents.getStateStore().set((prev) => ({ ...prev, sessions: sessions as never }));
+  /** A clean window's stored fiddle that came from no gist or folder. */
+  const local = {
+    hidden: [],
+    version,
+    modules: {},
+    origin: { kind: 'local' },
+    source: {},
+    fileNames: ['main.js'],
+  };
+  /** A draft on disk for window `name`, holding `text` typed over the gist's main.js. */
+  const writeDraft = (name: string, text: string) => {
+    const drafts = path.join(userData, 'drafts');
+    fs.mkdirSync(drafts, { recursive: true });
+    const { fileNames: _names, ...stored } = entry(name).fiddle;
+    fs.writeFileSync(
+      path.join(drafts, `${wid(name)}.json`),
+      JSON.stringify({
+        schemaVersion: 1,
+        windowId: wid(name),
+        savedAt: '2026-01-01T00:00:00.000Z',
+        name,
+        fiddle: { ...stored, files: { 'main.js': text } },
+        baseline: gistResult.files,
+        activeFile: 'main.js',
+        gistOwner: 'octocat',
+      }),
+    );
+    return drafts;
+  };
+
+  it('reopens a window with the unsaved text its draft holds, without loading its gist again', async () => {
+    const loadGist = vi.fn();
+    const { documents, model } = await setup({ sessionRestore: true, loadGist });
+    seed(documents, [entry('a')]);
+    writeDraft('a', 'typed, not saved');
+
+    await documents.startDocuments();
+
+    expect(loadGist).not.toHaveBeenCalled();
+    const doc = documents.getDoc(wid('a'));
+    expect(doc.fiddle.files['main.js']).toBe('typed, not saved');
+    expect(doc.fiddle.source).toEqual({ gistId: ID });
+    expect(model.isDirty(doc)).toBe(true);
+    expect(doc.gistOwner).toBe('octocat');
+  });
+
+  it('offers a draft whose window is no longer in the session, and reopens it if asked', async () => {
+    const { documents, windows } = await setup();
+    writeDraft('a', 'left behind');
+    messageBox.mockResolvedValueOnce({ response: 0, checkboxChecked: false });
+
+    await documents.startDocuments();
+
+    expect(messageBox).toHaveBeenCalledWith(
+      expect.any(String),
+      expect.objectContaining({
+        message: 'restoreMessage',
+        detail: 'restoreDetail:{"names":"a"}',
+      }),
+    );
+    expect(windows.has(wid('a'))).toBe(true);
+    expect(documents.getFiddle(wid('a')).files['main.js']).toBe('left behind');
+  });
+
+  it('deletes the drafts the user chooses to discard', async () => {
+    const { documents, windows } = await setup();
+    const drafts = writeDraft('a', 'left behind');
+    messageBox.mockResolvedValueOnce({ response: 1, checkboxChecked: false });
+
+    await documents.startDocuments();
+
+    expect(windows.has(wid('a'))).toBe(false);
+    await vi.waitFor(() => expect(fs.readdirSync(drafts)).toEqual([]));
+  });
+
+  it('reloads a clean window from its folder, with the tabs in the order the user left them and hidden files still hidden', async () => {
+    put({ 'main.js': 'on disk', 'renderer.js': 'r', 'index.html': 'h' });
+    const { documents, model } = await setup({ sessionRestore: true });
+    seed(documents, [
+      entry('a', {
+        fiddle: {
+          ...local,
+          hidden: ['index.html', 'gone.css'],
+          source: { localPath: folder },
+          fileNames: ['renderer.js', 'gone.css', 'main.js', 'index.html'],
+        },
+        activeFile: 'renderer.js',
+      }),
+    ]);
+
+    await documents.startDocuments();
+
+    const doc = documents.getDoc(wid('a'));
+    expect(Object.keys(doc.fiddle.files)).toEqual([
+      'renderer.js',
+      'main.js',
+      'index.html',
+    ]);
+    expect(doc.fiddle.files['main.js']).toBe('on disk');
+    expect(doc.fiddle.hidden).toEqual(['index.html']);
+    expect(doc.activeFile).toBe('renderer.js');
+    expect(doc.name).toBe('a');
+    expect(model.isDirty(doc)).toBe(false);
+  });
+
+  it('keeps only the extra gist files the window had, without asking about them again', async () => {
+    const loadGist = vi.fn(async () => ({
+      ...gistResult,
+      files: { 'main.js': 'm', 'keep.js': 'k', 'drop.js': 'd' },
+    }));
+    const { documents } = await setup({ sessionRestore: true, loadGist });
+    seed(documents, [
+      entry('a', { fiddle: { ...entry('a').fiddle, fileNames: ['keep.js', 'main.js'] } }),
+    ]);
+
+    await documents.startDocuments();
+
+    expect(Object.keys(documents.getFiddle(wid('a')).files)).toEqual([
+      'keep.js',
+      'main.js',
+    ]);
+    expect(messageBox).not.toHaveBeenCalled();
+  });
+
+  it('starts clean template, test and example windows from their templates again', async () => {
+    fs.mkdirSync(path.join(userData, 'static', 'show-me', 'clipboard'), {
+      recursive: true,
+    });
+    fs.writeFileSync(
+      path.join(userData, 'static', 'show-me', 'clipboard', 'main.js'),
+      '// clip',
+    );
+    const docsExample = { kind: 'electron', tag: 'v30.0.0', path: 'docs/fiddles/x' };
+    const listRepoDirectory = vi.fn(async () => [
+      {
+        name: 'main.js',
+        path: 'docs/fiddles/x/main.js',
+        type: 'file',
+        downloadUrl: 'https://raw.test/main.js',
+      },
+    ]);
+    const fetchText = vi.fn(async () => '// docs example');
+    const { documents, model } = await setup({
+      sessionRestore: true,
+      client: { listRepoDirectory, fetchText },
+    });
+    seed(documents, [
+      entry('a', { fiddle: { ...local, templateName: model.DEFAULT_TEMPLATE } }),
+      entry('b', { fiddle: { ...local, templateName: model.TEST_TEMPLATE } }),
+      entry('c', {
+        fiddle: { ...local, origin: { kind: 'example' }, templateName: 'Clipboard' },
+      }),
+      entry('d', { fiddle: { ...local, origin: docsExample } }),
+      entry('e', { fiddle: local }),
+    ]);
+
+    await documents.startDocuments();
+
+    expect(documents.getFiddle(wid('a')).files['main.js']).toBe('// quick start');
+    expect(documents.currentTemplateName(wid('a'))).toBe(model.DEFAULT_TEMPLATE);
+    expect(documents.currentTemplateName(wid('b'))).toBe(model.TEST_TEMPLATE);
+    expect(documents.getFiddle(wid('c'))).toMatchObject({
+      files: { 'main.js': '// clip' },
+      origin: { kind: 'example' },
+      templateName: 'Clipboard',
+    });
+    expect(documents.getFiddle(wid('d'))).toMatchObject({
+      files: { 'main.js': '// docs example' },
+      origin: docsExample,
+    });
+    expect(listRepoDirectory).toHaveBeenCalledWith(
+      'electron',
+      'electron',
+      'docs/fiddles/x',
+      'v30.0.0',
+      undefined,
+    );
+    expect(documents.getFiddle(wid('e')).files['main.js']).toBe('// quick start');
+    expect(messageBox).not.toHaveBeenCalled();
+  });
 
   it('does not overwrite the session while windows are still being restored', async () => {
     let finish!: (gist: unknown) => void;

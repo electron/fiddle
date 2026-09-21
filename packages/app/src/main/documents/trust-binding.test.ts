@@ -7,7 +7,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import type { Fiddle } from '../../fiddle/fiddle';
 import { gistOrigin } from '../../fiddle/trust';
-import { initFakeDocuments } from './test-helpers';
+import { flushAndRemove, initFakeDocuments } from './test-helpers';
 
 const W = '11111111-1111-4111-8111-111111111111';
 
@@ -75,9 +75,7 @@ beforeEach(() => {
   showMessageBox.mockReset();
 });
 
-afterEach(() => {
-  fs.rmSync(userData, { recursive: true, force: true });
-});
+afterEach(() => flushAndRemove(userData));
 
 describe('ensureTrusted', () => {
   it('returns the approved fiddle, and asks only once for it', async () => {
@@ -115,6 +113,37 @@ describe('ensureTrusted', () => {
       approved: false,
       allowScripts: false,
     });
+  });
+
+  it('runs a local fiddle without asking', async () => {
+    const { documents } = await setup();
+    documents.updateDoc(W, (doc) => ({
+      ...doc,
+      fiddle: { ...doc.fiddle, origin: { kind: 'local' } },
+    }));
+    expect(await documents.ensureTrusted(W, 'run')).toMatchObject({
+      approved: true,
+      allowScripts: true,
+      fiddle: { files: { 'main.js': 'approved()' } },
+    });
+    expect(showMessageBox).not.toHaveBeenCalled();
+  });
+
+  it('lists where the code comes from, its files and its dependencies in the prompt', async () => {
+    const { documents } = await setup({
+      packument: async () => ({ versions: {} }),
+      modules: { lodash: '^4.17.0' },
+    });
+    showMessageBox.mockResolvedValue({ response: 1, checkboxChecked: false });
+
+    await documents.ensureTrusted(W, 'run');
+
+    const { detail } = showMessageBox.mock.calls[0]![0] as { detail: string };
+    expect(detail).toContain(
+      `detailOrigin:{"origin":"gist:octocat/${ID}@${'a'.repeat(40)}"}`,
+    );
+    expect(detail).toContain('detailFiles:{"files":"main.js"}');
+    expect(detail).toContain('detailDependencies:{"dependencies":"lodash@^4.17.0"}');
   });
 
   it('asks again for install scripts when an operation needs them and the approval left them off', async () => {
@@ -160,6 +189,18 @@ describe('installScriptPackages', () => {
       modules,
     });
     expect(await documents.installScriptPackages(W)).toEqual(['esbuild', 'lodash']);
+  });
+
+  it('lists nothing once an approval allowed install scripts, without asking the registry again', async () => {
+    const packument = vi.fn(async (name: string) => packuments[name]);
+    const { documents } = await setup({ packument, modules });
+    showMessageBox.mockResolvedValue({ response: 0, checkboxChecked: true });
+    await documents.ensureTrusted(W, 'run', {
+      packagesWithInstallScripts: ['esbuild@0.20.0'],
+    });
+
+    expect(await documents.installScriptPackages(W)).toEqual([]);
+    expect(packument).not.toHaveBeenCalled();
   });
 
   it('lists nothing for a trusted fiddle', async () => {

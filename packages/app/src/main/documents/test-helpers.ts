@@ -1,3 +1,8 @@
+import { EventEmitter } from 'node:events';
+import fs from 'node:fs';
+
+import { vi } from 'vitest';
+
 import type { WindowInit } from '../state-hub';
 import type { initDocuments } from './service';
 
@@ -5,6 +10,7 @@ type Deps = Parameters<typeof initDocuments>[0];
 
 interface FakeDocumentsOptions {
   sessionRestore?: boolean;
+  platform?: Deps['platform'];
   /** Members added to (or replacing those of) the fake state hub. */
   hub?: object;
   versions?: object;
@@ -12,7 +18,22 @@ interface FakeDocumentsOptions {
   npm?: object;
   /** Runs after the window is recorded in the returned map. */
   onCreateWindow?: (windowId: string, init: WindowInit) => Promise<void>;
+  onDocsExampleLoaded?: (windowId: string) => void;
 }
+
+/** A BrowserWindow with the members the documents service uses. */
+export function fakeWindow(visible = true) {
+  return Object.assign(new EventEmitter(), {
+    focus: vi.fn(),
+    restore: vi.fn(),
+    isMinimized: (): boolean => false,
+    isVisible: () => visible,
+    setTitle: vi.fn(),
+    setDocumentEdited: vi.fn(),
+    close: vi.fn(),
+  });
+}
+export type FakeWindow = ReturnType<typeof fakeWindow>;
 
 /** Initialises the documents service with a state hub that keeps window state in the returned map. */
 export function initFakeDocuments(
@@ -31,7 +52,7 @@ export function initFakeDocuments(
       onChange: () => () => undefined,
       ...options.hub,
     } as unknown as Deps['hub'],
-    platform: 'linux',
+    platform: options.platform ?? 'linux',
     versions: {
       releases: () => [],
       release: () => undefined,
@@ -52,6 +73,23 @@ export function initFakeDocuments(
       windows.set(windowId, { ...init });
       await options.onCreateWindow?.(windowId, init);
     },
+    ...(options.onDocsExampleLoaded
+      ? { onDocsExampleLoaded: options.onDocsExampleLoaded }
+      : {}),
   });
   return windows;
+}
+
+/**
+ * Writes the drafts and session the service still has on a timer and waits for every JSON store,
+ * then removes `dir`. A write that landed after the removal would recreate the folder or make
+ * `rmSync` fail on a busy file.
+ */
+export async function flushAndRemove(dir: string): Promise<void> {
+  try {
+    (await import('./service')).flushDraftsAndSession();
+    await (await import('../persistence/json-store')).flushAll();
+  } finally {
+    fs.rmSync(dir, { recursive: true, force: true, maxRetries: 5 });
+  }
 }
