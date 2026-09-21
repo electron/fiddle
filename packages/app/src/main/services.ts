@@ -14,7 +14,6 @@ import {
   setFiddleVersion,
 } from './documents/service';
 import { CredentialStore, legacyTokenFile } from './github/credentials';
-import { createDocumentsBridge } from './github/documents-bridge';
 import { GitHubService } from './github/service';
 import { log } from './log';
 import { NpmClient, npmEndpoints } from './modules/npm-client';
@@ -169,7 +168,6 @@ export async function createServices({
         fetch: netFetch,
       });
     },
-    documents: createDocumentsBridge(hub),
     prefs: {
       get: () => ({
         asRevision: hub.app.settings.gistPublishAsRevision,
