@@ -7,7 +7,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import type { Fiddle } from '../../fiddle/fiddle';
 import { gistOrigin } from '../../fiddle/trust';
-import { initFakeDocuments } from './test-helpers';
+import { flushAndRemove, initFakeDocuments } from './test-helpers';
 
 const W = '11111111-1111-4111-8111-111111111111';
 
@@ -75,9 +75,7 @@ beforeEach(() => {
   showMessageBox.mockReset();
 });
 
-afterEach(() => {
-  fs.rmSync(userData, { recursive: true, force: true });
-});
+afterEach(() => flushAndRemove(userData));
 
 describe('ensureTrusted', () => {
   it('returns the approved fiddle, and asks only once for it', async () => {

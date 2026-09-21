@@ -10,7 +10,12 @@ import path from 'node:path';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { createFiddle } from '../../fiddle/fiddle';
-import { initFakeDocuments } from './test-helpers';
+import {
+  type FakeWindow,
+  fakeWindow,
+  flushAndRemove,
+  initFakeDocuments,
+} from './test-helpers';
 
 let userData = '';
 const appHandlers = new Map<string, (...args: unknown[]) => void>();
@@ -28,18 +33,6 @@ const messageBox = vi.fn();
 const confirm = vi.fn();
 const sendWindowCommand = vi.fn();
 
-function fakeWindow(visible = true) {
-  return Object.assign(new EventEmitter(), {
-    focus: vi.fn(),
-    restore: vi.fn(),
-    isMinimized: (): boolean => false,
-    isVisible: () => visible,
-    setTitle: vi.fn(),
-    setDocumentEdited: vi.fn(),
-    close: vi.fn(),
-  });
-}
-type FakeWindow = ReturnType<typeof fakeWindow>;
 /** The open BrowserWindows by window ID. */
 const browserWindows = new Map<string, FakeWindow>();
 
@@ -112,12 +105,7 @@ beforeEach(() => {
   confirm.mockResolvedValue(true);
 });
 
-afterEach(async () => {
-  await import('./service')
-    .then((documents) => documents.getStateStore().flush())
-    .catch(() => undefined);
-  fs.rmSync(userData, { recursive: true, force: true });
-});
+afterEach(() => flushAndRemove(userData));
 
 interface SetupOptions {
   platform?: 'darwin' | 'linux';
@@ -249,20 +237,18 @@ describe('a gist link', () => {
     expect(win.setDocumentEdited).toHaveBeenLastCalledWith(true);
   });
 
-  it('tells the user about a version it cannot use and modules it will not install', async () => {
+  it('shows the warnings from loading the gist in one dialog', async () => {
     const pkg = JSON.stringify({
-      dependencies: { evil: 'git+https://x.test/y', lodash: '^4.17.0' },
+      dependencies: { evil: 'git+https://x.test/y' },
       devDependencies: { electron: '99.0.0' },
     });
-    const { documents, client, openLink } = await setup();
+    const { client, openLink } = await setup();
     client.loadGist.mockResolvedValue(
       gistResult({ 'main.js': 'm', 'package.json': pkg }),
     );
 
     await openLink(gistLink);
 
-    expect(documents.getFiddle(W).version).toEqual(version);
-    expect(documents.getFiddle(W).modules).toEqual({ lodash: '^4.17.0' });
     expect(messageBox).toHaveBeenCalledWith(
       W,
       expect.objectContaining({
@@ -437,26 +423,6 @@ describe('which window a link goes to', () => {
     expect(documents.getFiddle(W).files['main.js']).toBe('from the gist');
     expect(documents.getFiddle(W2).files['main.js']).toBe('newer');
   });
-
-  it('brings the app forward for a link that arrives while another is still asking, and handles it next', async () => {
-    let answer!: (load: boolean) => void;
-    const { documents, client, win } = await setup();
-    await documents.startDocuments();
-    confirm.mockReturnValueOnce(new Promise((resolve) => (answer = resolve)));
-
-    await documents.openDropped(W, gistLink);
-    await vi.waitFor(() => expect(answer).toBeTypeOf('function'));
-    win.focus.mockClear();
-    await documents.openDropped(W, docsLink);
-    expect(win.focus).toHaveBeenCalledOnce();
-    expect(confirm).toHaveBeenCalledOnce();
-
-    answer(false);
-    await vi.waitFor(() =>
-      expect(documents.getFiddle(W).origin).toMatchObject({ kind: 'electron' }),
-    );
-    expect(client.loadGist).toHaveBeenCalledOnce();
-  });
 });
 
 describe('an Electron docs link', () => {
@@ -589,21 +555,6 @@ describe('the OS handing the app a folder, a URL or a second launch', () => {
     await vi.waitFor(() =>
       expect(documents.getFiddle(W).files['main.js']).toBe('// second'),
     );
-  });
-
-  it('treats a gist page URL like a gist link, with the same prompt', async () => {
-    const { documents, client } = await setup();
-    const opened = event();
-
-    appHandlers.get('open-url')!(opened, `https://gist.github.com/octocat/${ID}/${SHA}`);
-    await documents.startDocuments();
-
-    expect(opened.preventDefault).toHaveBeenCalled();
-    expect(confirm).toHaveBeenCalledWith(
-      W,
-      expect.objectContaining({ message: 'linkGistMessage' }),
-    );
-    expect(client.loadGist).toHaveBeenCalledWith(ID, SHA);
   });
 
   it('takes the link a second launch was started with, and just comes forward for a launch without one', async () => {

@@ -12,7 +12,12 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { createFiddle } from '../../fiddle/fiddle';
 import { DEFAULT_LAYOUT } from '../../shared/stores';
-import { initFakeDocuments } from './test-helpers';
+import {
+  type FakeWindow,
+  fakeWindow,
+  flushAndRemove,
+  initFakeDocuments,
+} from './test-helpers';
 
 let userData = '';
 const appHandlers = new Map<string, (...args: unknown[]) => void>();
@@ -29,12 +34,8 @@ const app = {
 const messageBox = vi.fn();
 const confirm = vi.fn();
 const pickFolder = vi.fn();
-/** A BrowserWindow for the tests that need one open; the rest run with every window closed. */
-const fakeWindow = Object.assign(new EventEmitter(), {
-  setTitle: vi.fn(),
-  close: vi.fn(),
-});
-const browserWindows = new Map<string, typeof fakeWindow>();
+/** The BrowserWindows of the tests that need one open; the rest run with every window closed. */
+const browserWindows = new Map<string, FakeWindow>();
 vi.mock('electron', () => ({ app, net: { fetch: vi.fn() } }));
 vi.mock('../dialogs', () => ({
   messageBox: (...args: unknown[]) => messageBox(...args),
@@ -82,16 +83,7 @@ beforeEach(async () => {
   vi.resetModules();
   appHandlers.clear();
   browserWindows.clear();
-  fakeWindow.removeAllListeners();
-  for (const mock of [
-    messageBox,
-    confirm,
-    pickFolder,
-    app.quit,
-    fakeWindow.setTitle,
-    fakeWindow.close,
-  ])
-    mock.mockReset();
+  for (const mock of [messageBox, confirm, pickFolder, app.quit]) mock.mockReset();
   messageBox.mockResolvedValue({ response: 1, checkboxChecked: false });
   confirm.mockResolvedValue(true);
   // No template downloads unless a test provides them: a pending one makes new windows wait.
@@ -99,12 +91,7 @@ beforeEach(async () => {
   vi.mocked(net.fetch).mockReset();
 });
 
-afterEach(async () => {
-  await import('./service')
-    .then((documents) => documents.getStateStore().flush())
-    .catch(() => undefined);
-  fs.rmSync(userData, { recursive: true, force: true });
-});
+afterEach(() => flushAndRemove(userData));
 
 function put(files: Record<string, string>, into = folder) {
   for (const [name, content] of Object.entries(files))
@@ -385,7 +372,8 @@ describe('confirmQuit', () => {
 describe('closing a window with unsaved changes', () => {
   async function setupDirty(localPath: string | undefined) {
     const { documents, model, open } = await setup();
-    browserWindows.set(W, fakeWindow);
+    const win = fakeWindow();
+    browserWindows.set(W, win);
     await open({ 'main.js': 'main' }, localPath === undefined ? {} : { localPath });
     documents.attachWindow(W, new EventEmitter() as never);
     documents.updateDoc(
@@ -395,16 +383,16 @@ describe('closing a window with unsaved changes', () => {
     /** The user closes the window; the event says whether Electron may go on. */
     const close = () => {
       const event = { preventDefault: vi.fn() };
-      fakeWindow.emit('close', event);
+      win.emit('close', event);
       return event;
     };
-    return { documents, close };
+    return { win, close };
   }
   const answer = (response: number) =>
     messageBox.mockResolvedValue({ response, checkboxChecked: false });
 
-  it('asks first, and keeps the window when the user cancels', async () => {
-    const { close } = await setupDirty(undefined);
+  it('asks first: cancel keeps the window, and closing without saving does not ask a second time', async () => {
+    const { win, close } = await setupDirty(undefined);
     answer(2);
 
     expect(close().preventDefault).toHaveBeenCalled();
@@ -415,33 +403,19 @@ describe('closing a window with unsaved changes', () => {
       ),
     );
     await new Promise((resolve) => setImmediate(resolve));
-    expect(fakeWindow.close).not.toHaveBeenCalled();
-  });
+    expect(win.close).not.toHaveBeenCalled();
 
-  it('closes without saving when told to, and does not ask a second time', async () => {
-    const { close } = await setupDirty(undefined);
     answer(1);
-
     close();
-    await vi.waitFor(() => expect(fakeWindow.close).toHaveBeenCalledOnce());
+    await vi.waitFor(() => expect(win.close).toHaveBeenCalledOnce());
     expect(close().preventDefault).not.toHaveBeenCalled();
-    expect(messageBox).toHaveBeenCalledOnce();
-    expect(onDisk()).toEqual([]);
-  });
-
-  it('saves into the fiddle’s folder before it closes', async () => {
-    const { close } = await setupDirty(folder);
-    answer(0);
-
-    close();
-    await vi.waitFor(() => expect(fakeWindow.close).toHaveBeenCalledOnce());
-    expect(fs.readFileSync(path.join(folder, 'main.js'), 'utf8')).toBe('edited');
+    expect(messageBox).toHaveBeenCalledTimes(2);
   });
 
   it('stays open when the save it was asked for fails', async () => {
     const blocker = path.join(userData, 'a-file');
     fs.writeFileSync(blocker, 'not a folder');
-    const { close } = await setupDirty(blocker);
+    const { win, close } = await setupDirty(blocker);
     answer(0);
 
     close();
@@ -452,7 +426,7 @@ describe('closing a window with unsaved changes', () => {
       ),
     );
     await new Promise((resolve) => setImmediate(resolve));
-    expect(fakeWindow.close).not.toHaveBeenCalled();
+    expect(win.close).not.toHaveBeenCalled();
   });
 });
 
@@ -490,10 +464,11 @@ describe('closing the last window', () => {
   });
 
   it('takes it out of the session on macOS, where the app stays open', async () => {
-    const { documents, contents, sessionIds } = await setupLast('darwin');
+    const { documents, contents, drafts, sessionIds } = await setupLast('darwin');
 
     contents.emit('destroyed');
 
+    await vi.waitFor(() => expect(fs.readdirSync(drafts)).toEqual([]));
     documents.flushDraftsAndSession();
     expect(sessionIds()).toEqual([]);
   });

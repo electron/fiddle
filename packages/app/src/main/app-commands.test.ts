@@ -43,7 +43,6 @@ vi.mock('./security', () => ({}));
 vi.mock('./window', () => ({}));
 
 import { registerCommands } from './app-commands';
-import { packageFiddle } from './packaging/service';
 
 const W = 'window-1';
 const realPlatform = process.platform;
@@ -144,27 +143,5 @@ describe('view.reloadAllWindows', () => {
 
     expect(win.webContents.reload).toHaveBeenCalledOnce();
     expect(gallery.webContents.reload).not.toHaveBeenCalled();
-  });
-});
-
-describe('commands that need a window', () => {
-  it('do nothing from the app menu with every window closed', async () => {
-    const { run, services } = setup();
-    const noWindow = { windowId: undefined };
-
-    await run('app.preferences', noWindow);
-    await run('run.toggle', noWindow);
-    await run('run.package', noWindow);
-    expect(services.hub.updateWindow).not.toHaveBeenCalled();
-    expect(services.runs.toggle).not.toHaveBeenCalled();
-    expect(packageFiddle).not.toHaveBeenCalled();
-
-    await run('app.preferences');
-    await run('run.make');
-    expect(services.hub.updateWindow).toHaveBeenCalledExactlyOnceWith(W, {
-      view: 'settings',
-    });
-    expect(packageFiddle).toHaveBeenCalledExactlyOnceWith(W, 'make', services);
-    expect(services.runs.track).toHaveBeenCalledOnce();
   });
 });

@@ -9,7 +9,7 @@ import path from 'node:path';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { createFiddle } from '../../fiddle/fiddle';
-import { initFakeDocuments } from './test-helpers';
+import { flushAndRemove, initFakeDocuments } from './test-helpers';
 
 let userData = '';
 const app = {
@@ -87,12 +87,7 @@ beforeEach(() => {
   confirm.mockResolvedValue(true);
 });
 
-afterEach(async () => {
-  await import('./service')
-    .then((documents) => documents.getStateStore().flush())
-    .catch(() => undefined);
-  fs.rmSync(userData, { recursive: true, force: true });
-});
+afterEach(() => flushAndRemove(userData));
 
 /** A folder under userData holding a `main.js` that names it. */
 function makeFolder(name: string): string {
