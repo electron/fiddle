@@ -4,7 +4,6 @@
 
 :root {
   --lu-disabled-opacity: 0.4;
-  --lu-press-scale-tile: 0.98;
   --lu-focus-outline: 3px solid color-mix(in srgb, var(--lu-focus-ring) 70%, transparent);
   --lu-ring-field: 0 0 0 3.5px color-mix(in srgb, var(--lu-accent) 26%, transparent);
   --lu-ring-invalid: 0 0 0 3.5px color-mix(in srgb, var(--lu-spark) 22%, transparent);
@@ -39,25 +38,12 @@
     0 0 0 0.5px var(--lu-line-strong),
     0 1px 0 0.5px color-mix(in srgb, var(--lu-line-strong) 60%, transparent);
 
-  --lu-shadow-card:
-    inset 0 0 0 0.5px var(--lu-button-edge), 0 1px 2px rgba(0, 0, 0, 0.04);
-  --lu-shadow-card-hover:
-    inset 0 0 0 0.5px var(--lu-button-edge), 0 2px 4px rgba(0, 0, 0, 0.04),
-    0 10px 24px -12px rgba(20, 24, 48, 0.28);
-
   --lu-shadow-overlay:
     var(--lu-shadow-popover), inset 0 0.5px 0 var(--lu-rim),
     inset 0 0 0 0.5px var(--lu-rim-soft);
   --lu-tooltip-rim: rgba(255, 255, 255, 0.14);
 
-  --lu-progress-bar: linear-gradient(
-    90deg,
-    color-mix(in srgb, var(--lu-accent) 75%, #ffffff),
-    var(--lu-accent)
-  );
-
   --lu-halo-spark: 0 0 0 2.5px color-mix(in srgb, var(--lu-spark) 22%, transparent);
-  --lu-halo-current: 0 0 0 2.5px color-mix(in srgb, currentColor 20%, transparent);
 
   --lu-shadow-stop: inset 0 0 0 0.5px color-mix(in srgb, var(--lu-spark) 30%, transparent);
   --lu-shadow-tooltip: 0 0 0 0.5px var(--lu-tooltip-rim), var(--lu-shadow-popover);
@@ -80,12 +66,10 @@
   --lu-radius-tooltip: 8px;
   --lu-radius-switch: 10px;
   --lu-radius-knob: 8px;
-  --lu-radius-track: 3px;
   --lu-radius-round: 50%;
 
-  /* loops: only spinners (and indeterminate bars) */
+  /* loops: only spinners */
   --lu-dur-spin: 800ms;
-  --lu-dur-indeterminate: 1200ms;
 
   --lu-z-popover: 100;
   --lu-z-dialog: 200;

@@ -27,15 +27,6 @@
   --tone: var(--lu-spark);
 }
 
-.dot {
-  width: 6px;
-  height: 6px;
-  flex: none;
-  border-radius: var(--lu-radius-round);
-  background: currentColor;
-  box-shadow: var(--lu-halo-current);
-}
-
 .tag {
   gap: 4px;
 }

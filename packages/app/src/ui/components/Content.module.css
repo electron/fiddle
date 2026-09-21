@@ -1,70 +1,8 @@
-.card {
-  appearance: none;
-  display: flex;
-  align-items: center;
-  gap: var(--lu-space-3);
-  width: 100%;
-  padding: var(--lu-space-3);
-  border: 0;
-  border-radius: var(--lu-radius-panel);
-  corner-shape: squircle;
-  background: var(--lu-surface);
-  box-shadow: var(--lu-shadow-card);
-  color: var(--lu-ink);
-  font: var(--lu-type-body);
-  letter-spacing: var(--lu-type-body-tracking);
-  text-align: left;
-  transition:
-    box-shadow var(--lu-dur-fast) var(--lu-ease),
-    transform var(--lu-dur-base) var(--lu-ease);
-}
-
-.card[data-interactive] {
-  cursor: default;
-}
-.card[data-interactive][data-hovered] {
-  box-shadow: var(--lu-shadow-card-hover);
-}
-.card[data-interactive][data-pressed] {
-  transform: scale(var(--lu-press-scale-tile));
-}
-.card[data-focus-visible] {
-  outline: var(--lu-focus-outline);
-  outline-offset: 1px;
-}
-
-.avatar {
-  display: grid;
-  place-items: center;
-  flex: none;
-  width: 36px;
-  height: 36px;
-  border-radius: var(--lu-radius-control);
-  corner-shape: squircle;
-  background: var(--lu-accent-soft);
-  color: var(--lu-accent);
-  font: 600 13px/1 var(--lu-font-sans);
-}
-
-.cardMain,
 .rowMain {
   display: flex;
   flex: 1;
   flex-direction: column;
   min-width: 0;
-}
-
-.cardTitle {
-  font-weight: 600;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.cardSub {
-  color: var(--lu-ink-muted);
-  font-size: 12px;
-  line-height: 16px;
 }
 
 .list {

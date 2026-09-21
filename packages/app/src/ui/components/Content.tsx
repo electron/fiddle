@@ -1,62 +1,8 @@
 import type { CSSProperties, ReactNode } from 'react';
-import { Button as AriaButton, ListBox, ListBoxItem } from 'react-aria-components';
+import { ListBox, ListBoxItem } from 'react-aria-components';
 import { cx } from '../cx';
 import { Icon, type IconName } from '../icons/Icon';
 import styles from './Content.module.css';
-
-export interface CardProps {
-  title: ReactNode;
-  description?: ReactNode;
-  icon?: IconName;
-  /** A name to show as initials in place of an icon. */
-  avatar?: string;
-  /** Makes the whole card a button. */
-  onPress?: () => void;
-  children?: ReactNode;
-  className?: string;
-}
-
-function initials(name: string): string {
-  return name
-    .split(/\s+/)
-    .filter(Boolean)
-    .map((word) => word[0])
-    .join('')
-    .slice(0, 2)
-    .toUpperCase();
-}
-
-export function Card({
-  title,
-  description,
-  icon,
-  avatar,
-  onPress,
-  children,
-  className,
-}: CardProps) {
-  const content = (
-    <>
-      {(icon || avatar) && (
-        <span className={styles.avatar} aria-hidden={avatar ? true : undefined}>
-          {avatar ? initials(avatar) : <Icon name={icon!} />}
-        </span>
-      )}
-      <span className={styles.cardMain}>
-        <span className={styles.cardTitle}>{title}</span>
-        {description && <span className={styles.cardSub}>{description}</span>}
-      </span>
-      {children}
-    </>
-  );
-  return onPress ? (
-    <AriaButton className={cx(styles.card, className)} onPress={onPress} data-interactive>
-      {content}
-    </AriaButton>
-  ) : (
-    <div className={cx(styles.card, className)}>{content}</div>
-  );
-}
 
 export interface ListProps {
   'aria-label': string;

@@ -3,10 +3,8 @@
    not app strings. */
 import { useEffect, useState, type ReactNode } from 'react';
 import {
-  Badge,
   Button,
   Callout,
-  Card,
   Checkbox,
   confirmDialog,
   Dialog,
@@ -29,7 +27,6 @@ import {
   Page,
   Popover,
   PopoverTrigger,
-  ProgressBar,
   ProgressRing,
   promptDialog,
   Radio,
@@ -106,7 +103,7 @@ const TABLE_COLUMNS: TableColumn<VersionRow>[] = [
     label: 'Status',
     render: (row) =>
       row.state === 'installed' ? (
-        <Badge tone="success">Downloaded</Badge>
+        <Tag tone="success">Downloaded</Tag>
       ) : row.state === 'downloading' ? (
         <span className={styles.inline}>
           <ProgressRing value={62} /> Downloading 62%
@@ -404,8 +401,8 @@ export function Gallery({
               value={appearance}
               onChange={(v) => setAppearance(v as Appearance)}
               options={[
-                { value: 'dark', icon: 'moon', 'aria-label': 'Dark' },
-                { value: 'light', icon: 'sun', 'aria-label': 'Light' },
+                { value: 'dark', label: 'Dark' },
+                { value: 'light', label: 'Light' },
               ]}
             />
             <Switch isSelected={noMaterial} onChange={setNoMaterial}>
@@ -482,7 +479,7 @@ export function Gallery({
                           ? 'Unsaved changes'
                           : undefined
                       }
-                      icon={f.id === 'css' ? 'window' : undefined}
+                      icon={f.id === 'css' ? 'file' : undefined}
                     >
                       {f.label}
                     </Tab>
@@ -508,7 +505,7 @@ export function Gallery({
                     <Button variant="primary" icon="play" kbd="⌘R">
                       Run
                     </Button>
-                    <Button icon="terminal">Console</Button>
+                    <Button icon="code">Console</Button>
                     <Button variant="ghost" icon="link">
                       Share
                     </Button>
@@ -543,7 +540,7 @@ export function Gallery({
                     <Button variant="primary" progress={42} style={{ minWidth: 108 }}>
                       Downloading 42%
                     </Button>
-                    <Button icon="terminal" isPressed>
+                    <Button icon="code" isPressed>
                       Console
                     </Button>
                   </Row>
@@ -773,7 +770,7 @@ export function Gallery({
                           <MenuItem id="dup" icon="copy">
                             Duplicate
                           </MenuItem>
-                          <MenuItem id="win" icon="popout">
+                          <MenuItem id="win" icon="external">
                             Open in a new window
                           </MenuItem>
                         </Menu>
@@ -853,8 +850,8 @@ export function Gallery({
                     <SegmentedControl
                       label="Theme"
                       options={[
-                        { value: 'dark', icon: 'moon', 'aria-label': 'Dark' },
-                        { value: 'light', icon: 'sun', 'aria-label': 'Light' },
+                        { value: 'dark', icon: 'eye', 'aria-label': 'Dark' },
+                        { value: 'light', icon: 'maximize', 'aria-label': 'Light' },
                       ]}
                     />
                     <SegmentedControl
@@ -943,7 +940,7 @@ export function Gallery({
                           defaultValue="exec"
                           items={[
                             { id: 'general', label: 'General', icon: 'settings' },
-                            { id: 'appearance', label: 'Appearance', icon: 'palette' },
+                            { id: 'appearance', label: 'Appearance', icon: 'eye' },
                             { id: 'exec', label: 'Execution', icon: 'play' },
                             {
                               id: 'versions',
@@ -984,17 +981,6 @@ export function Gallery({
               </Section>
 
               <Section title="Labels">
-                <Specimen label="Badge · tones, dot">
-                  <Row>
-                    <Badge tone="success">Stable</Badge>
-                    <Badge tone="accent">Beta</Badge>
-                    <Badge tone="warning">Nightly</Badge>
-                    <Badge tone="danger" dot>
-                      Running
-                    </Badge>
-                    <Badge>arm64</Badge>
-                  </Row>
-                </Specimen>
                 <Specimen label="Tag · tones, removable">
                   <Row>
                     <Tag>arm64</Tag>
@@ -1052,23 +1038,6 @@ export function Gallery({
                     </Tooltip>
                   </div>
                 </Specimen>
-                <Specimen label="Progress bar · determinate, indeterminate, done">
-                  <Col>
-                    <div className={styles.fullWidth}>
-                      <ProgressBar
-                        label="Downloading 44.0.0-beta.3"
-                        detail="62 / 104 MB"
-                        value={60}
-                      />
-                    </div>
-                    <div className={styles.fullWidth}>
-                      <ProgressBar label="Installing modules" />
-                    </div>
-                    <div className={styles.fullWidth}>
-                      <ProgressBar label="Unzipped" detail="done" value={100} />
-                    </div>
-                  </Col>
-                </Specimen>
                 <Specimen label="Progress ring and spinner · 14 and 24">
                   <div className={styles.rings}>
                     <ProgressRing value={35} label="Downloading" />
@@ -1087,7 +1056,7 @@ export function Gallery({
                       intent="primary"
                       title="New in Electron 43"
                       action={
-                        <Button size="sm" variant="ghost" iconEnd="arrow-right">
+                        <Button size="sm" variant="ghost" iconEnd="external">
                           See what changed
                         </Button>
                       }
@@ -1135,41 +1104,18 @@ export function Gallery({
               </Section>
 
               <Section title="Content">
-                <Specimen label="Card · clickable with icon, avatar, static" wide>
-                  <div className={styles.cards}>
-                    <Card
-                      icon="window"
-                      title="Hello World"
-                      description="A window with a preload script"
-                      onPress={() => {}}
-                    />
-                    <Card
-                      icon="bell"
-                      title="Notifications"
-                      description="Native notifications from the renderer"
-                      onPress={() => {}}
-                    />
-                    <Card
-                      avatar="Felix Rieseberg"
-                      title="Felix Rieseberg"
-                      description="Signed in to GitHub"
-                      onPress={() => {}}
-                    />
-                    <Card icon="book" title="Tray" description="From the Electron docs" />
-                  </div>
-                </Specimen>
                 <Specimen label="List row · selected, meta, tags, disabled">
                   <List aria-label="Fiddles" defaultValue="vib">
                     <ListRow
                       id="vib"
-                      icon="window"
+                      icon="file"
                       title="window-vibrancy"
                       meta="gist 8f3a2c · edited 2 min ago"
                       tags={<Tag>secret</Tag>}
                     />
                     <ListRow
                       id="tray"
-                      icon="window"
+                      icon="file"
                       title="tray-menu"
                       meta="gist 1b7e40 · edited yesterday"
                       tags={<Tag tone="accent">public</Tag>}

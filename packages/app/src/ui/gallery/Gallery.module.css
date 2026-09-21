@@ -210,10 +210,6 @@
   color: var(--lu-ink-muted);
 }
 
-.fullWidth {
-  align-self: stretch;
-}
-
 .glassWell {
   overflow: hidden;
   border-radius: var(--lu-radius-panel);
@@ -316,13 +312,6 @@
 
 .prose {
   margin: 0;
-}
-
-.cards {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: var(--lu-space-2);
-  max-width: 640px;
 }
 
 .iconGrid {
