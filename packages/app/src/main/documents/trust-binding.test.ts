@@ -26,6 +26,15 @@ vi.mock('../windows', () => ({ getWindow: () => undefined }));
 vi.mock('../i18n');
 
 const ID = '8c5fc0c6a5153d49b5a4a56d3ed9da8f';
+const modules = { esbuild: '^0.20.0', lodash: '^4.17.0' };
+const packuments: Record<string, unknown> = {
+  esbuild: {
+    'dist-tags': { latest: '0.20.0' },
+    versions: { '0.20.0': { hasInstallScript: true } },
+  },
+  lodash: { 'dist-tags': { latest: '4.17.21' }, versions: { '4.17.21': {} } },
+};
+const packument = async (name: string) => packuments[name];
 
 function gistFiddle(
   owner: string,
@@ -143,38 +152,32 @@ describe('ensureTrusted', () => {
   });
 
   it('asks again for install scripts when an operation needs them and the approval left them off', async () => {
-    const { documents } = await setup();
+    const { documents } = await setup({ packument, modules });
     showMessageBox.mockResolvedValue({ response: 0, checkboxChecked: false });
-    await documents.ensureTrusted(W, 'run', { packagesWithInstallScripts: [] });
+    await documents.ensureTrusted(W, 'run');
 
     showMessageBox.mockResolvedValue({ response: 0, checkboxChecked: true });
-    const result = await documents.ensureTrusted(W, 'package', {
-      packagesWithInstallScripts: ['esbuild@0.25.0'],
-      requireScripts: true,
+    const result = await documents.ensureTrusted(W, 'package', { requireScripts: true });
+    expect(result).toMatchObject({
+      approved: true,
+      allowScripts: true,
+      scripted: ['esbuild@0.20.0'],
     });
-    expect(result).toMatchObject({ approved: true, allowScripts: true });
     expect(showMessageBox).toHaveBeenCalledTimes(2);
     expect(showMessageBox.mock.calls[1]![0]).toMatchObject({
-      checkboxLabel: expect.stringContaining('esbuild@0.25.0'),
+      checkboxLabel: expect.stringContaining('esbuild@0.20.0'),
     });
   });
 });
 
-describe('installScriptPackages', () => {
-  const modules = { esbuild: '^0.20.0', lodash: '^4.17.0' };
-  const packuments: Record<string, unknown> = {
-    esbuild: {
-      'dist-tags': { latest: '0.20.0' },
-      versions: { '0.20.0': { hasInstallScript: true } },
-    },
-    lodash: { 'dist-tags': { latest: '4.17.21' }, versions: { '4.17.21': {} } },
-  };
-
+describe('install scripts', () => {
   it('reads the registry through the injected client and lists the modules with install scripts', async () => {
-    const packument = vi.fn(async (name: string) => packuments[name]);
-    const { documents } = await setup({ packument, modules });
-    expect(await documents.installScriptPackages(W)).toEqual(['esbuild@0.20.0']);
-    expect(packument).toHaveBeenCalledWith('esbuild', expect.any(AbortSignal));
+    const lookup = vi.fn(packument);
+    const { documents } = await setup({ packument: lookup, modules });
+    showMessageBox.mockResolvedValue({ response: 0, checkboxChecked: false });
+    const result = await documents.ensureTrusted(W, 'package', { requireScripts: true });
+    expect(result).toMatchObject({ scripted: ['esbuild@0.20.0'] });
+    expect(lookup).toHaveBeenCalledWith('esbuild', expect.any(AbortSignal));
   });
 
   it('lists every module when the registry cannot be read, so the user is asked about all of them', async () => {
@@ -184,27 +187,37 @@ describe('installScriptPackages', () => {
       },
       modules,
     });
-    expect(await documents.installScriptPackages(W)).toEqual(['esbuild', 'lodash']);
-  });
-
-  it('lists nothing once an approval allowed install scripts, without asking the registry again', async () => {
-    const packument = vi.fn(async (name: string) => packuments[name]);
-    const { documents } = await setup({ packument, modules });
-    showMessageBox.mockResolvedValue({ response: 0, checkboxChecked: true });
-    await documents.ensureTrusted(W, 'run', {
-      packagesWithInstallScripts: ['esbuild@0.20.0'],
+    showMessageBox.mockResolvedValue({ response: 0, checkboxChecked: false });
+    const result = await documents.ensureTrusted(W, 'package', { requireScripts: true });
+    expect(result).toMatchObject({ scripted: ['esbuild', 'lodash'] });
+    expect(showMessageBox.mock.calls[0]![0]).toMatchObject({
+      checkboxLabel: expect.stringContaining('esbuild, lodash'),
     });
-
-    expect(await documents.installScriptPackages(W)).toEqual([]);
-    expect(packument).not.toHaveBeenCalled();
   });
 
-  it('lists nothing for a trusted fiddle', async () => {
-    const { documents } = await setup({ packument: vi.fn(), modules });
+  it('asks nothing once an approval allowed install scripts, without reading the registry again', async () => {
+    const lookup = vi.fn(packument);
+    const { documents } = await setup({ packument: lookup, modules });
+    showMessageBox.mockResolvedValue({ response: 0, checkboxChecked: true });
+    await documents.ensureTrusted(W, 'run');
+    lookup.mockClear();
+
+    const result = await documents.ensureTrusted(W, 'package', { requireScripts: true });
+    expect(result).toMatchObject({ approved: true, allowScripts: true });
+    expect(lookup).not.toHaveBeenCalled();
+    expect(showMessageBox).toHaveBeenCalledTimes(1);
+  });
+
+  it('asks nothing for a trusted fiddle', async () => {
+    const lookup = vi.fn();
+    const { documents } = await setup({ packument: lookup, modules });
     documents.updateDoc(W, (doc) => ({
       ...doc,
       fiddle: { ...doc.fiddle, origin: { kind: 'local' } },
     }));
-    expect(await documents.installScriptPackages(W)).toEqual([]);
+    const result = await documents.ensureTrusted(W, 'package', { requireScripts: true });
+    expect(result).toMatchObject({ approved: true, allowScripts: true });
+    expect(lookup).not.toHaveBeenCalled();
+    expect(showMessageBox).not.toHaveBeenCalled();
   });
 });
