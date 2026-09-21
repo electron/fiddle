@@ -107,24 +107,19 @@ export function registerCommands(registry: CommandRegistry, services: Services):
     registry.register(`edit.${action}`, ({ windowId }) => editCommand(windowId, action));
   }
 
-  registry.register('file.newFiddle', ({ windowId }) =>
-    withErrorDialog(windowId, () => newFiddleIn(windowId, 'template')),
-  );
-  registry.register('file.newTest', ({ windowId }) =>
-    withErrorDialog(windowId, () => newFiddleIn(windowId, 'test')),
-  );
-  registry.register('file.open', ({ windowId }) =>
-    withErrorDialog(windowId, () => openFolderIn(windowId)),
-  );
-  registry.register('file.save', ({ windowId }) =>
-    withErrorDialog(windowId, () => saveIn(windowId!, 'save')),
-  );
-  registry.register('file.saveAs', ({ windowId }) =>
-    withErrorDialog(windowId, () => saveIn(windowId!, 'saveAs')),
-  );
-  registry.register('file.saveAsForge', ({ windowId }) =>
-    withErrorDialog(windowId, () => saveIn(windowId!, 'forge')),
-  );
+  const fileActions: [CommandId, (windowId: string | undefined) => Promise<unknown>][] = [
+    ['file.newFiddle', (id) => newFiddleIn(id, 'template')],
+    ['file.newTest', (id) => newFiddleIn(id, 'test')],
+    ['file.open', (id) => openFolderIn(id)],
+    ['file.save', (id) => saveIn(id!, 'save')],
+    ['file.saveAs', (id) => saveIn(id!, 'saveAs')],
+    ['file.saveAsForge', (id) => saveIn(id!, 'forge')],
+  ];
+  // Their errors show in a dialog over the window.
+  for (const [id, action] of fileActions)
+    registry.register(id, ({ windowId }) =>
+      withErrorDialog(windowId, () => action(windowId)),
+    );
   registry.register('file.close', ({ windowId }) => getWindow(windowId)?.close());
 
   registry.register('run.toggle', ({ windowId }) => {
