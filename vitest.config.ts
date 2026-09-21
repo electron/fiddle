@@ -8,6 +8,17 @@ const browserConditions = ['fiddle-source', ...defaultClientConditions];
 
 export default defineConfig({
   test: {
+    // `yarn test --coverage`. Generated bindings and the e2e driver are left out.
+    coverage: {
+      provider: 'v8',
+      include: ['packages/*/src/**/*.{ts,tsx}'],
+      exclude: [
+        '**/generated/**',
+        '**/*.d.ts',
+        '**/*.test.*',
+        'packages/app/src/main/test-driver/**',
+      ],
+    },
     projects: [
       // packages/core/vitest.config.ts (node environment).
       'packages/core',
