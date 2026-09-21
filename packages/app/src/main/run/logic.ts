@@ -57,5 +57,3 @@ export function esmNeedsNewerElectron(
   const parsed = semver.parse(version);
   return parsed !== null && parsed.major < 28;
 }
-
-export { toPackageName } from '../../fiddle/package-json';

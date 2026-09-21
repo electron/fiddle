@@ -20,4 +20,5 @@ export type { ReleaseInfo } from './versions.js';
 export { buildChildEnv } from './env.js';
 export type { ChildEnvOptions } from './env.js';
 export { copyFolder, removeBestEffort, rename as renameWithRetry } from './fs-util.js';
+export { renameIntoPlace } from './fs-util.js';
 export { extractZip } from './extract.js';

@@ -1,13 +1,12 @@
 import { z } from 'zod';
 
+import { DEFAULT_ENDPOINTS } from '../shared/endpoints';
 import { ErrorCode, FiddleError } from '../shared/errors';
 import { reasonError } from './error-reasons';
 import type { FileMap } from './files';
 import { gistUrl, isGistId, isRevisionSha } from './gist-id';
 import { type FiddleOrigin, gistOrigin } from './trust';
 
-export const GITHUB_API_URL = 'https://api.github.com';
-export const GIST_RAW_ORIGIN = 'https://gist.githubusercontent.com';
 /** Classic, OAuth (`gh auth token`), user-to-server, server-to-server and refresh tokens; fine-grained PATs. */
 export const GITHUB_TOKEN_PATTERN =
   /^(gh[pousr]_[A-Za-z0-9]{36,251}|github_pat_[A-Za-z0-9_]{22,255})$/;
@@ -262,10 +261,10 @@ export class GitHubClient {
 
   constructor(options: GitHubClientOptions = {}) {
     this.token = options.token;
-    this.apiBase = new URL(options.apiBaseUrl ?? GITHUB_API_URL);
+    this.apiBase = new URL(options.apiBaseUrl ?? DEFAULT_ENDPOINTS.githubApi);
     this.trustedOrigins = new Set([
       this.apiBase.origin,
-      ...(options.rawOrigins ?? [GIST_RAW_ORIGIN]),
+      ...(options.rawOrigins ?? [DEFAULT_ENDPOINTS.gistRaw]),
     ]);
     this.fetchFn = options.fetch ?? fetch;
     this.allowLoopbackHttp = options.allowLoopbackHttp ?? false;

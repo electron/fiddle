@@ -17,6 +17,7 @@ import {
 import { type PickedFiles, pickFiddleFiles } from '../../fiddle/pick';
 import type { TemplateLoader } from '../../fiddle/templates';
 import { ErrorCode } from '../../shared/errors';
+import { tm } from '../i18n';
 import { DEFAULT_TEMPLATE, TEST_TEMPLATE } from './model';
 
 /** What a load keeps from the fiddle it replaces. */
@@ -29,6 +30,20 @@ export type LoadWarning =
   | { kind: 'invalid-package-json' }
   | { kind: 'unusable-version'; version: string }
   | { kind: 'rejected-modules'; modules: RejectedModule[] };
+
+export function warningText(warning: LoadWarning): string {
+  const td = tm('mainDocuments');
+  switch (warning.kind) {
+    case 'invalid-package-json':
+      return td('warnPackageJson');
+    case 'unusable-version':
+      return td('warnVersion', { version: warning.version });
+    case 'rejected-modules':
+      return td('warnModules', {
+        modules: warning.modules.map((m) => `${m.name}@${m.spec}`).join(', '),
+      });
+  }
+}
 
 export interface LoadedFiddle {
   fiddle: Fiddle;

@@ -2,6 +2,9 @@ import type { VersionRef } from '../../fiddle/fiddle';
 import type { ReleaseChannel } from '../../fiddle/versions';
 import { ErrorCode, FiddleError } from '../../shared/errors';
 import type { LocalBuild, ReleaseRow } from '../../shared/stores';
+import { confirm } from '../dialogs';
+import { tm } from '../i18n';
+import { log } from '../log';
 import type { VersionFilterSettings } from './releases';
 import {
   firstUsableVersion,
@@ -10,22 +13,6 @@ import {
   versionProblem,
   type VersionProblem,
 } from './selection';
-
-/** Keys in the `mainVersions` namespace. */
-export type SelectorText =
-  | 'cannotChange'
-  | 'versionUnknown'
-  | 'versionUnsupported'
-  | 'localBuildUnknown'
-  | 'localBuildMissing'
-  | 'downloadFailed'
-  | 'fallback'
-  | 'electronVersion'
-  | 'showStableTitle'
-  | 'showBetaTitle'
-  | 'showNightlyTitle'
-  | 'showChannelDetail'
-  | 'showChannelOk';
 
 export interface VersionSelectorDeps {
   versions: {
@@ -51,19 +38,15 @@ export interface VersionSelectorDeps {
   notify: (windowId: string, message: string) => void;
   /** The window's version changed: its editor types did too. */
   typesChanged: (windowId: string) => void;
-  confirm: (
-    windowId: string,
-    options: { message: string; detail: string; ok: string },
-  ) => Promise<boolean>;
-  text: (key: SelectorText, values?: Record<string, string>) => string;
-  warn: (message: string, error?: unknown) => void;
 }
+
+const tv = tm('mainVersions');
 
 const CHANNEL_TITLES = {
   stable: 'showStableTitle',
   beta: 'showBetaTitle',
   nightly: 'showNightlyTitle',
-} as const satisfies Record<ReleaseChannel, SelectorText>;
+} as const satisfies Record<ReleaseChannel, string>;
 
 export class VersionSelector {
   readonly #deps: VersionSelectorDeps;
@@ -83,7 +66,7 @@ export class VersionSelector {
   ): Promise<number | undefined> {
     const deps = this.#deps;
     if (deps.isBusy(windowId))
-      throw new FiddleError(ErrorCode.conflict, deps.text('cannotChange'));
+      throw new FiddleError(ErrorCode.conflict, tv('cannotChange'));
     const problem = versionProblem(ref, deps.versions);
     if (problem) {
       const code =
@@ -139,10 +122,10 @@ export class VersionSelector {
     if (loaded?.kind === 'release' && deps.versions.release(loaded.version)) {
       const channel = hiddenChannel(loaded.version, deps.settings().channels);
       if (channel) {
-        const show = await deps.confirm(windowId, {
-          message: deps.text(CHANNEL_TITLES[channel]),
-          detail: deps.text('showChannelDetail', { version: loaded.version }),
-          ok: deps.text('showChannelOk'),
+        const show = await confirm(windowId, {
+          message: tv(CHANNEL_TITLES[channel]),
+          detail: tv('showChannelDetail', { version: loaded.version }),
+          ok: tv('showChannelOk'),
         });
         if (show) deps.showChannel(channel);
       }
@@ -179,10 +162,7 @@ export class VersionSelector {
     }
     await deps.setVersion(windowId, fallback);
     deps.typesChanged(windowId);
-    deps.notify(
-      windowId,
-      deps.text('fallback', { problem, fallback: this.#label(fallback) }),
-    );
+    deps.notify(windowId, tv('fallback', { problem, fallback: this.#label(fallback) }));
     this.#download(windowId, fallback);
   }
 
@@ -204,10 +184,10 @@ export class VersionSelector {
       },
       (error: unknown) => {
         this.#pending.delete(version);
-        deps.warn(`downloading ${version} failed`, error);
+        log.warn(`downloading ${version} failed`, error);
         for (const id of windows) {
           this.#downloadFailed(id, version, error).catch((failure: unknown) =>
-            deps.warn('falling back after a failed download failed', failure),
+            log.warn('falling back after a failed download failed', failure),
           );
         }
       },
@@ -229,7 +209,7 @@ export class VersionSelector {
       deps.isBusy(windowId)
     )
       return;
-    const problem = deps.text('downloadFailed', {
+    const problem = tv('downloadFailed', {
       version,
       message: FiddleError.from(error).message,
     });
@@ -241,18 +221,17 @@ export class VersionSelector {
     if (ref.kind === 'local') {
       const name = deps.versions.localBuild(ref.id)?.name;
       return problem === 'localMissing' && name
-        ? deps.text('localBuildMissing', { name })
-        : deps.text('localBuildUnknown');
+        ? tv('localBuildMissing', { name })
+        : tv('localBuildUnknown');
     }
-    return deps.text(
-      problem === 'unsupported' ? 'versionUnsupported' : 'versionUnknown',
-      { version: ref.version },
-    );
+    return tv(problem === 'unsupported' ? 'versionUnsupported' : 'versionUnknown', {
+      version: ref.version,
+    });
   }
 
   #label(ref: VersionRef): string {
     return ref.kind === 'release'
-      ? this.#deps.text('electronVersion', { version: ref.version })
+      ? tv('electronVersion', { version: ref.version })
       : (this.#deps.versions.localBuild(ref.id)?.name ?? ref.id);
   }
 }

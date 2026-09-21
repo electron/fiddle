@@ -4,6 +4,7 @@
  */
 import { z } from 'zod';
 
+import { RELEASE_CHANNELS } from '../fiddle/versions';
 import {
   acceleratorsFor,
   commandIds,
@@ -34,8 +35,7 @@ export function isBuiltinTheme(id: string): boolean {
   );
 }
 
-export const releaseChannelSchema = z.enum(['stable', 'beta', 'nightly']);
-export type ReleaseChannel = z.infer<typeof releaseChannelSchema>;
+export const releaseChannelSchema = z.enum(RELEASE_CHANNELS);
 
 /** `auto` picks the China mirror for Chinese system locales, otherwise the default. */
 export const mirrorSchema = z.enum(['auto', 'default', 'china', 'custom']);

@@ -31,12 +31,12 @@ function fakeHub(modules: Record<string, string>) {
 const npm = {
   latestVersion: vi.fn(async (name: string) => (name === 'lodash' ? '4.17.21' : '1.2.3')),
 };
-const log = () => {};
+vi.mock('../log', () => ({ log: { warn: vi.fn() } }));
 
 describe('ModulesService', () => {
   it('adds a module at its latest version', async () => {
     const { hub, modules } = fakeHub({});
-    const service = new ModulesService(hub, npm, log);
+    const service = new ModulesService(hub, npm);
     expect(await service.add('w', 'lodash')).toBe(1);
     expect(modules()).toEqual({ lodash: '4.17.21' });
   });
@@ -44,7 +44,7 @@ describe('ModulesService', () => {
   it('keeps a chosen version, range or tag and resolves only a floating one', async () => {
     npm.latestVersion.mockClear();
     const { hub, modules } = fakeHub({ a: '1.0.0' });
-    const service = new ModulesService(hub, npm, log);
+    const service = new ModulesService(hub, npm);
     await service.add('w', 'b', '2.0.0');
     await service.add('w', 'c', '^4.18.2');
     await service.add('w', 'd', 'next');
@@ -55,7 +55,7 @@ describe('ModulesService', () => {
   });
 
   it('rejects invalid names, specs and unknown modules', async () => {
-    const service = new ModulesService(fakeHub({}).hub, npm, log);
+    const service = new ModulesService(fakeHub({}).hub, npm);
     await expect(service.add('w', '../x')).rejects.toMatchObject({
       code: 'invalid-argument',
     });
@@ -72,7 +72,7 @@ describe('ModulesService', () => {
 
   it('removes a module', () => {
     const { hub, modules } = fakeHub({ a: '1.0.0', b: '2.0.0' });
-    new ModulesService(hub, npm, log).remove('w', 'a');
+    new ModulesService(hub, npm).remove('w', 'a');
     expect(modules()).toEqual({ b: '2.0.0' });
   });
 
@@ -84,7 +84,7 @@ describe('ModulesService', () => {
       range: '^1.0.0',
       tag: 'next',
     });
-    await new ModulesService(hub, npm, log).normalize('w');
+    await new ModulesService(hub, npm).normalize('w');
     expect(modules()).toEqual({
       lodash: '4.17.21',
       tagged: '1.2.3',
@@ -96,7 +96,7 @@ describe('ModulesService', () => {
 
   it('writes user changes as edits and normalization as not', async () => {
     const { hub, writes } = fakeHub({ a: '*' });
-    const service = new ModulesService(hub, npm, log);
+    const service = new ModulesService(hub, npm);
     await service.add('w', 'b', '2.0.0');
     await service.normalize('w');
     service.remove('w', 'b');
@@ -114,7 +114,7 @@ describe('ModulesService', () => {
           }),
       ),
     };
-    const service = new ModulesService(hub, slow, log);
+    const service = new ModulesService(hub, slow);
     const pending = service.normalize('w');
     hub.setModules('w', { a: '1.0.0' }, false);
     release();
@@ -125,7 +125,7 @@ describe('ModulesService', () => {
       latestVersion: vi.fn(async () => Promise.reject(new Error('offline'))),
     };
     const other = fakeHub({ b: 'latest' });
-    const retrying = new ModulesService(other.hub, failing, log);
+    const retrying = new ModulesService(other.hub, failing);
     await retrying.normalize('w');
     await retrying.normalize('w');
     expect(failing.latestVersion).toHaveBeenCalledTimes(1);
