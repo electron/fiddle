@@ -24,19 +24,6 @@ if (!(value.length >= 1)) return false;
 if (!(value.length <= 300)) return false;
   return true;
 }
-export function $eipc_validator$_AppInfo(value: any): boolean {
-  if (!value || typeof value !== 'object') return false;
-
-  // AppInfo.name
-  if (!(typeof value.name === 'string')) return false;
-
-  // AppInfo.version
-  if (!(typeof value.version === 'string')) return false;
-
-  // AppInfo.electronVersion
-  if (!(typeof value.electronVersion === 'string')) return false;
-  return true;
-}
 import { fileMapSchema } from "../../../../shared/stores.js";
 export function $eipc_validator$_FileMapValue(value: unknown) {
   return fileMapSchema.safeParse(value).success;

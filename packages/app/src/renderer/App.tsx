@@ -8,6 +8,7 @@ import { BUILTIN_THEME, type ThemeData } from '../shared/settings';
 import { DialogHost, Toaster } from '../ui';
 import { useModelsSynced } from './editor/models';
 import { log } from './features/about/log';
+import { UpdateNotice } from './features/about/UpdateNotice';
 import { useKeybindings } from './features/commands/keybindings';
 import { useWindowCommands } from './features/commands/window-commands';
 import { CommandPalette } from './features/palette/CommandPalette';
@@ -81,6 +82,7 @@ export function App() {
       <DialogHost />
       <Toaster closeLabel={t('dismiss')} aria-label={t('notifications')} />
       <StorageNotices />
+      <UpdateNotice />
     </I18nProvider>
   );
 }

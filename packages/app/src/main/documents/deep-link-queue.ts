@@ -84,10 +84,12 @@ export function gistUrlToDeepLink(text: string): string | undefined {
   return `electron-fiddle://gist/${owner ? `${owner}/` : ''}${id}${sha ? `?revision=${sha}` : ''}`;
 }
 
+/** Links that arrive before `start()` wait for it; after that they're handled in order, one prompt at a time. */
 export class DeepLinkQueue {
-  #ready = false;
-  #busy = false;
-  readonly #queued: string[] = [];
+  #started = false;
+  #pending = 0;
+  #open!: () => void;
+  #tail = new Promise<void>((resolve) => (this.#open = resolve));
   readonly #handle: (url: string) => Promise<void>;
   readonly #onBusy: (url: string) => void;
 
@@ -103,40 +105,20 @@ export class DeepLinkQueue {
     this.#onBusy = onBusy;
   }
 
-  /** Links that arrive before `start()` wait for it; after that they're handled in order, one prompt at a time. */
   push(url: string): void {
-    this.#queued.push(url);
-    if (!this.#ready) return;
-    if (this.#busy) this.#onBusy(url);
-    else void this.#drain();
+    if (this.#started && this.#pending > 0) this.#onBusy(url);
+    this.#pending++;
+    this.#tail = this.#tail
+      .then(() => this.#handle(url))
+      // The handler shows its own errors; the next link still gets its turn.
+      .catch(() => undefined)
+      .finally(() => this.#pending--);
   }
 
-  async start(): Promise<void> {
-    this.#ready = true;
-    await this.#drain();
-  }
-
-  get busy(): boolean {
-    return this.#busy;
-  }
-
-  get waiting(): number {
-    return this.#queued.length;
-  }
-
-  async #drain(): Promise<void> {
-    if (this.#busy) return;
-    this.#busy = true;
-    try {
-      while (this.#queued.length > 0) {
-        try {
-          await this.#handle(this.#queued.shift()!);
-        } catch {
-          // The handler shows its own errors; the next link still gets its turn.
-        }
-      }
-    } finally {
-      this.#busy = false;
-    }
+  /** Resolves once the links pushed so far are handled. */
+  start(): Promise<void> {
+    this.#started = true;
+    this.#open();
+    return this.#tail;
   }
 }

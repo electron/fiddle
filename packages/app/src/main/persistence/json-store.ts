@@ -1,14 +1,10 @@
 /**
  * Every persisted file is a JSON object with a `schemaVersion`. A key that fails
- * its schema is dropped in memory. It stays on disk only if it has no default:
- * the next write replaces one that has. No Electron imports.
+ * its schema is dropped (and logged); the next write drops it from the file too. No Electron imports.
  */
-import { randomUUID } from 'node:crypto';
 import fs from 'node:fs';
-import fsp from 'node:fs/promises';
-import path from 'node:path';
 
-import { renameWithRetry } from '@electron/fiddle-core';
+import { writeAtomic } from '@electron/fiddle-core';
 
 import { log } from '../log';
 
@@ -28,8 +24,6 @@ interface JsonStoreOptions<T> {
   defaults: T;
   /** The `schemaVersion` this app writes. A file with a higher one is read but never written back. */
   version: number;
-  /** Test hook: called with each file content that is written. */
-  onWrite?: (content: string) => void;
 }
 
 export interface JsonStore<T> {
@@ -93,32 +87,21 @@ export function createJsonStore<T>(options: JsonStoreOptions<T>): JsonStore<T> {
   const loaded = load(options);
   let value = loaded.value;
   let readOnly = loaded.readOnly;
-  // Invalid keys without a default stay on disk until the value gets a valid one.
-  let invalidOnDisk = loaded.invalid;
   // The file text we last read or started writing.
   let lastText = loaded.text;
 
   let writing: Promise<void> | undefined;
   let dirty = false;
 
-  const content = (): string => {
-    const current = value as Record<string, unknown>;
-    const kept = Object.fromEntries(
-      Object.entries(invalidOnDisk).filter(([key]) => !(key in current)),
-    );
-    return `${JSON.stringify({ [VERSION_KEY]: version, ...kept, ...current }, null, 2)}\n`;
-  };
-
   const drain = async (): Promise<void> => {
     // Let a synchronous burst of `set` calls land first: it becomes one write.
     await Promise.resolve();
     while (dirty) {
       dirty = false;
-      const text = content();
+      const text = `${JSON.stringify({ [VERSION_KEY]: version, ...value }, null, 2)}\n`;
       lastText = text;
       try {
         await writeAtomic(file, text, { backup: true });
-        options.onWrite?.(text);
       } catch (error) {
         log.error('failed to write', file, error);
       }
@@ -164,7 +147,6 @@ export function createJsonStore<T>(options: JsonStoreOptions<T>): JsonStore<T> {
       lastText = text;
       const decoded = decode(options, raw);
       value = decoded.value;
-      invalidOnDisk = decoded.invalid;
       readOnly = decoded.readOnly;
       return true;
     },
@@ -181,7 +163,6 @@ export function createJsonStore<T>(options: JsonStoreOptions<T>): JsonStore<T> {
 
 interface Loaded<T> {
   value: T;
-  invalid: Record<string, unknown>;
   readOnly: boolean;
   text?: string;
   /** The values came from `.bak` because the main file was corrupt. */
@@ -190,7 +171,7 @@ interface Loaded<T> {
 
 function load<T>(options: JsonStoreOptions<T>): Loaded<T> {
   const { file, defaults } = options;
-  const empty: Loaded<T> = { value: defaults, invalid: {}, readOnly: false };
+  const empty: Loaded<T> = { value: defaults, readOnly: false };
   // A missing main file means "defaults", not "restore the backup".
   if (!fs.existsSync(file)) return empty;
   let main: Candidate | undefined;
@@ -225,14 +206,7 @@ function decode<T>(
   // A file without a version is v1. An older file reads as it is until a version needs a migration.
   const readOnly = typeof fileVersion === 'number' && fileVersion > version;
   if (readOnly) notify({ kind: 'newer-version', file, version: fileVersion });
-
-  const invalid: Record<string, unknown> = {};
-  for (const [key, entry] of Object.entries(data)) {
-    const field = schema.shape[key];
-    if (field && !field.safeParse(entry).success) invalid[key] = entry;
-  }
-  const valid = validate(schema, data, file);
-  return { value: { ...defaults, ...valid } as T, invalid, readOnly };
+  return { value: { ...defaults, ...validate(schema, data, file) } as T, readOnly };
 }
 
 /** Drops (and logs) keys whose value fails their schema. Unknown keys are kept as they are. */
@@ -333,52 +307,4 @@ export function corruptName(file: string, now = new Date()): string {
   const suffix = file.endsWith('.bak') ? '.bak' : '';
   const stamp = now.toISOString().replace(/[:.]/g, '-');
   return `${base}${suffix}.corrupt-${stamp}.json`;
-}
-
-/**
- * Replaces `file` atomically: a temp file in the same folder (created with
- * `mode`), fsync, rename (retried on Windows), then fsync the folder on POSIX.
- * `backup` first copies the current file to `<file>.bak`.
- */
-export async function writeAtomic(
-  file: string,
-  data: string | Uint8Array,
-  { mode, backup = false }: { mode?: number; backup?: boolean } = {},
-): Promise<void> {
-  const dir = path.dirname(file);
-  await fsp.mkdir(dir, { recursive: true });
-  const temp = path.join(dir, `.${path.basename(file)}.${randomUUID()}.tmp`);
-  try {
-    const handle = await fsp.open(temp, 'w', mode);
-    try {
-      await handle.writeFile(data);
-      await handle.sync();
-    } finally {
-      await handle.close();
-    }
-    if (backup) {
-      try {
-        await fsp.copyFile(file, `${file}.bak`);
-      } catch (error) {
-        if ((error as NodeJS.ErrnoException).code !== 'ENOENT') throw error;
-      }
-    }
-    await renameWithRetry(temp, file);
-  } catch (error) {
-    await fsp.rm(temp, { force: true });
-    throw error;
-  }
-  if (process.platform !== 'win32') await syncDir(dir);
-}
-
-async function syncDir(dir: string): Promise<void> {
-  let handle: fsp.FileHandle | undefined;
-  try {
-    handle = await fsp.open(dir, 'r');
-    await handle.sync();
-  } catch {
-    // Some file systems can't fsync a directory; the rename is still atomic.
-  } finally {
-    await handle?.close();
-  }
 }

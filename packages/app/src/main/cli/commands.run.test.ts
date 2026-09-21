@@ -119,7 +119,7 @@ function electronThat(
   play: (child: FakeChild, options: SpawnOptions) => void,
 ): SpawnOptions[] {
   const spawned: SpawnOptions[] = [];
-  vi.mocked(spawnElectron).mockImplementation(async (options) => {
+  vi.mocked(spawnElectron).mockImplementation((options) => {
     spawned.push(options);
     const stream = () =>
       Object.assign(new EventEmitter(), { setEncoding: () => undefined });

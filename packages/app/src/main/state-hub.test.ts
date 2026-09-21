@@ -5,7 +5,7 @@ import { describe, expect, it, vi } from 'vitest';
 import { ErrorCode, FiddleError } from '../shared/errors';
 import { defaultSettings } from '../shared/settings';
 import { DEFAULT_LAYOUT, type AppState, type WindowState } from '../shared/stores';
-import { emptyFiddleState } from './documents/model';
+import { emptyFiddleState } from './documents/test-helpers';
 import { StateHub, type WindowInit, type WindowSink } from './state-hub';
 
 const nextTick = () => new Promise((resolve) => setTimeout(resolve, 0));

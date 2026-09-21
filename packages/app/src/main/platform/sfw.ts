@@ -13,7 +13,7 @@ import path from 'node:path';
 import { app } from 'electron';
 
 import { ErrorCode, FiddleError } from '../../shared/errors';
-import { writeAtomic } from '../persistence/json-store';
+import { writeAtomic } from '@electron/fiddle-core';
 
 /** The folder in packaged resources and under userData. */
 export const SFW_DIR = 'sfw';

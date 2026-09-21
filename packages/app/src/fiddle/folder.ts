@@ -1,9 +1,8 @@
-import { randomBytes } from 'node:crypto';
-import { mkdir, open, readdir, readFile, rm } from 'node:fs/promises';
+import { mkdir, readdir, readFile, rm } from 'node:fs/promises';
 import * as path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-import { renameWithRetry } from '@electron/fiddle-core';
+import { writeAtomic } from '@electron/fiddle-core';
 
 import { ErrorCode } from '../shared/errors';
 import { reasonError } from './error-reasons';
@@ -85,31 +84,6 @@ function assertWritableNames(names: readonly string[]): void {
 }
 
 /**
- * Writes `target` through an exclusive (`wx`) temp file in the same folder,
- * renamed over `target`. A rename replaces a symlink at `target` instead of
- * following it, so a link created after any check is never written through.
- */
-async function writeRegularFile(target: string, content: string): Promise<void> {
-  const temp = path.join(
-    path.dirname(target),
-    `.${path.basename(target)}.${randomBytes(6).toString('hex')}.tmp`,
-  );
-  try {
-    const handle = await open(temp, 'wx');
-    try {
-      await handle.writeFile(content, 'utf8');
-      await handle.sync();
-    } finally {
-      await handle.close();
-    }
-    await renameWithRetry(temp, target);
-  } catch (error) {
-    await rm(temp, RM_OPTIONS);
-    throw error;
-  }
-}
-
-/**
  * What `writeFiddleFolder(dir, files)` would replace or delete in `dir`, for
  * the overwrite warning: the names in `files` and `.gitignore`, matched
  * ignoring case. Empty if `dir` doesn't exist.
@@ -146,9 +120,8 @@ export async function writeFiddleFolder(
   const names = written.map(([name]) => name);
   const early = remove.filter((name) => hasName(names, name));
   for (const name of early) await rm(path.join(dir, name), RM_OPTIONS);
-  for (const [name, content] of written)
-    await writeRegularFile(path.join(dir, name), content);
-  await writeRegularFile(path.join(dir, GITIGNORE), GITIGNORE_CONTENT);
+  for (const [name, content] of written) await writeAtomic(path.join(dir, name), content);
+  await writeAtomic(path.join(dir, GITIGNORE), GITIGNORE_CONTENT);
   const late = [
     ...remove.filter((name) => !early.includes(name)),
     ...entries

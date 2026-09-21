@@ -9,6 +9,8 @@ import { ErrorCode, FiddleError } from '../../shared/errors';
 import {
   changedExecutionSettings,
   fromSparse,
+  sanitizeSettings,
+  SETTINGS_VERSION,
   type Settings as AppSettings,
   type ThemeFile,
   type ThemeSnapshot,
@@ -18,10 +20,9 @@ import { dialogText } from '../documents/deep-link-queue';
 import { tm } from '../i18n';
 import type { IpcContext } from '../ipc';
 import { log } from '../log';
-import { writeAtomic } from '../persistence/json-store';
+import { writeAtomic } from '@electron/fiddle-core';
 import { themeFromMonaco, themeId, writeTheme } from '../themes/themes';
 import type { SettingsContext } from './index';
-import { sanitizeSettings, SETTINGS_VERSION } from './service';
 
 const t = tm('mainSettings');
 
@@ -98,7 +99,7 @@ async function addTheme(
   const id = themeId(theme.name, taken);
   const file = await writeTheme(settings.themesDir, id, theme);
   await settings.refreshThemes();
-  const rev = settings.service.set('theme', id);
+  const rev = settings.set('theme', id);
   if (reveal) shell.showItemInFolder(file);
   return rev;
 }
@@ -106,12 +107,12 @@ async function addTheme(
 export function bindSettingsIpc({
   contents,
   windowId,
-  services: { settings },
+  services: { hub, settings },
 }: IpcContext): void {
-  const { service, store } = settings;
+  const { store } = settings;
   implement(Settings, contents, {
-    SetSetting: (key, value) => service.set(key, value),
-    ResetSetting: (key) => service.reset(key),
+    SetSetting: (key, value) => settings.set(key, value),
+    ResetSetting: (key) => settings.reset(key),
 
     OpenSettingsFile: async () => {
       await store.flush();
@@ -139,16 +140,16 @@ export function bindSettingsIpc({
       // Export is sparse: a key the file lacks is at its default, except `crashReports`, which must not turn back on unasked.
       const next = {
         ...fromSparse(imported),
-        crashReports: imported.crashReports ?? service.settings.crashReports,
+        crashReports: imported.crashReports ?? hub.app.settings.crashReports,
       };
       // Flags, variables and mirrors decide what runs, so the user sees them first.
-      const changed = changedExecutionSettings(service.settings, next);
+      const changed = changedExecutionSettings(hub.app.settings, next);
       if (
         changed.length > 0 &&
         !(await confirmExecutionSettings(windowId, changed, next))
       )
         return null;
-      return service.replace(next);
+      return settings.replace(next);
     },
 
     ExportSettings: async () => {
@@ -158,10 +159,10 @@ export function bindSettingsIpc({
         filters: [{ name: t('jsonFiles'), extensions: ['json'] }],
       });
       if (!file) return;
-      await writeAtomic(file, `${JSON.stringify(service.exportData(), null, 2)}\n`);
+      await writeAtomic(file, `${JSON.stringify(settings.exportData(), null, 2)}\n`);
     },
 
-    DismissStorageNotice: (id) => service.dismissStorageNotice(id),
+    DismissStorageNotice: (id) => settings.dismissStorageNotice(id),
 
     GetTheme: (id) => settings.themes.find((theme) => theme.id === id) ?? null,
     RefreshThemes: () => settings.refreshThemes(),
@@ -185,7 +186,7 @@ export function bindSettingsIpc({
 
     CreateTheme: async (builtin) => {
       const current = settings.themes.find(
-        (theme) => theme.id === service.settings.theme,
+        (theme) => theme.id === hub.app.settings.theme,
       );
       let base: ThemeFile;
       if (current) {

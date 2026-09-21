@@ -13,17 +13,10 @@ export type CommandId = string;
 import type { FocusContext } from "../../../../shared/settings.js";
 export type { FocusContext };
 export type MenuItemId = string;
-export interface AppInfo {
-  name: string;
-  version: string;
-  electronVersion: string;
-}
 export interface IAppImpl {
-  GetAppInfo(): Promise<AppInfo> | AppInfo;
   getInitialAppState(): Promise<AppState> | AppState;
 }
 export interface IAppRenderer {
-  GetAppInfo(): Promise<AppInfo>;
   AppStore: IPCStore<AppState>
 }
 export interface IWindowImpl {
@@ -137,14 +130,6 @@ export interface IModulesRenderer {
   AddModule(name: PackageName, version: VersionSpec | null): Promise<number>;
   SetModuleVersion(name: PackageName, version: VersionSpec): Promise<number>;
   RemoveModule(name: PackageName): Promise<number>;
-}
-export interface IOnboardingImpl {
-  ShouldOfferTour(): Promise<boolean> | boolean;
-  SetTourDone(): Promise<void> | void;
-}
-export interface IOnboardingRenderer {
-  ShouldOfferTour(): Promise<boolean>;
-  SetTourDone(): Promise<void>;
 }
 import type { ReleaseList } from "../../../../shared/stores.js";
 export type { ReleaseList };
@@ -278,18 +263,19 @@ export enum LogLevel {
 export type LogText = string;
 export interface IAppPlatformImpl {
   Log(level: LogLevel, message: LogText): Promise<void> | void;
-  IsCrashReportingEnabled(): Promise<boolean> | boolean;
   OpenUpdatePage(): Promise<void> | void;
   TakeCrashReportsNotice(): Promise<boolean> | boolean;
   Relaunch(): Promise<void> | void;
   ResetPrivacyPermissions(): Promise<boolean> | boolean;
+  ShouldOfferTour(): Promise<boolean> | boolean;
+  SetTourDone(): Promise<void> | void;
 }
 export interface IAppPlatformRenderer {
   Log(level: LogLevel, message: LogText): Promise<void>;
-  IsCrashReportingEnabled(): Promise<boolean>;
   OpenUpdatePage(): Promise<void>;
   TakeCrashReportsNotice(): Promise<boolean>;
   Relaunch(): Promise<void>;
   ResetPrivacyPermissions(): Promise<boolean>;
-  onUpdateAvailable(fn: (version: string) => void): () => void;
+  ShouldOfferTour(): Promise<boolean>;
+  SetTourDone(): Promise<void>;
 }

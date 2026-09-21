@@ -16,11 +16,7 @@ describe('DraftScheduler', () => {
 
   function scheduler() {
     const writes: number[] = [];
-    const s = new DraftScheduler(() => writes.push(Date.now()), {
-      setTimeout: (fn, ms) => setTimeout(fn, ms),
-      clearTimeout: (h) => clearTimeout(h as NodeJS.Timeout),
-      now: () => Date.now(),
-    });
+    const s = new DraftScheduler(() => writes.push(Date.now()));
     return { s, writes };
   }
 

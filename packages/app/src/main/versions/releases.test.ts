@@ -6,32 +6,35 @@ const data = [
   { version: '40.1.0', date: '2026-01-01', node: '22.1.0' },
   { version: '44.0.0-beta.3', date: '2026-08-01', node: '24.0.0' },
   { version: '43.0.0', date: '2026-07-01', node: '24.0.0' },
-  { version: '10.0.0', date: '2020-01-01', node: '12.0.0' },
+  { version: '41.2.0', date: '2026-03-01', node: '22.1.0' },
+  { version: '10.0.0', date: '2020-01-01', node: '12.0.0', modules: '82' },
 ];
 
 describe('toReleaseRows', () => {
-  const options = {
-    stableMajors: [10, 40, 43],
-    supportedMajors: [40, 43],
-    platform: 'linux',
-    arch: 'x64',
-  };
+  const options = { platform: 'linux', arch: 'x64' };
 
   it('sorts newest first and flags obsolete majors', () => {
     const rows = toReleaseRows(data, options);
     expect(rows.map((r) => r.version)).toEqual([
       '44.0.0-beta.3',
       '43.0.0',
+      '41.2.0',
       '40.1.0',
       '10.0.0',
     ]);
-    expect(rows.find((r) => r.version === '10.0.0')?.obsolete).toBe(true);
+    // The newest three stable majors (40, 41, 43) are supported; a beta doesn't count.
+    expect(rows.find((r) => r.version === '10.0.0')).toMatchObject({
+      obsolete: true,
+      modules: '82',
+    });
     expect(rows.find((r) => r.version === '40.1.0')?.obsolete).toBe(false);
+    expect(toReleaseRows(data.slice(1), options).every((r) => !r.obsolete)).toBe(true);
   });
 
   it('honours NUM_STABLE_BRANCHES', () => {
-    const rows = toReleaseRows(data, { ...options, numStableBranches: '1' });
+    const rows = toReleaseRows(data, { ...options, numStableBranches: '2' });
     expect(rows.find((r) => r.version === '40.1.0')?.obsolete).toBe(true);
+    expect(rows.find((r) => r.version === '41.2.0')?.obsolete).toBe(false);
   });
 
   it('leaves out the 0.2x releases, which cannot be downloaded', () => {

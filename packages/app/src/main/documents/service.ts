@@ -50,7 +50,6 @@ import type { NpmClient } from '../modules/npm-client';
 import { netFetch } from '../net-fetch';
 import { forgeElectronFor, forgeOptionsFor } from '../packaging/service';
 import { createJsonStore, type JsonStore } from '../persistence/json-store';
-import { cancelRelaunch } from '../platform/locale';
 import type { StateHub, WindowInit } from '../state-hub';
 import { getCacheRoot, getEndpoints } from '../test-mode';
 import { defaultVersionFor } from '../versions/selection';
@@ -145,10 +144,7 @@ export type AppStateFile = z.infer<typeof stateSchema>;
 interface Deps {
   hub: StateHub;
   platform: Platform;
-  versions: Pick<
-    VersionsService,
-    'releases' | 'release' | 'localBuild' | 'electronVersions'
-  >;
+  versions: Pick<VersionsService, 'releases' | 'release' | 'localBuild'>;
   /** Gists load with the signed-in user's client, so private gists work, once the stored token is restored. */
   github: Pick<GitHubService, 'client' | 'whenReady'>;
   npm: Pick<NpmClient, 'packument'>;
@@ -157,7 +153,8 @@ interface Deps {
   onDocsExampleLoaded?(windowId: string): void;
 }
 
-let deps: Deps | undefined;
+/** Set by `initDocuments`, before anything else here runs. */
+let deps!: Deps;
 let templates: TemplateLoader;
 let stateStore: JsonStore<AppStateFile> | undefined;
 let draftStore: DraftStore;
@@ -182,21 +179,11 @@ let lastFocused: string | undefined;
 
 const td = tm('mainDocuments');
 
-function requireDeps(): Deps {
-  if (!deps)
-    throw new FiddleError(ErrorCode.unavailable, 'Documents are not initialized');
-  return deps;
-}
-
-function hub(): StateHub {
-  return requireDeps().hub;
-}
-
 const isStable = (version: string): boolean => !version.includes('-');
 
 /** The version new windows start with: the last one the user picked while it's usable, else the latest stable release. */
 function defaultVersion(): VersionRef {
-  const { versions } = requireDeps();
+  const { versions } = deps;
   return (
     defaultVersionFor(versions.releases(), stateStore?.get().lastVersion, versions) ?? {
       kind: 'release',
@@ -207,11 +194,7 @@ function defaultVersion(): VersionRef {
 
 /** False for versions that are unreleased or can't run here (gist `package.json`). */
 function isUsableVersion(version: string): boolean {
-  return requireDeps().versions.release(version)?.supported ?? false;
-}
-
-function github() {
-  return requireDeps().github.client();
+  return deps.versions.release(version)?.supported ?? false;
 }
 
 export function staticDir(): string {
@@ -301,7 +284,7 @@ export async function startDocuments(): Promise<void> {
   for (const id of onDisk) draftsOnDisk.add(id);
   const unclaimed = new Set(onDisk);
 
-  if (hub().app.settings.sessionRestore) await restoreSession(unclaimed);
+  if (deps.hub.app.settings.sessionRestore) await restoreSession(unclaimed);
   sessionReady = true;
   if (docs.size === 0) await openFiddleWindow();
 
@@ -321,7 +304,6 @@ export async function startDocuments(): Promise<void> {
       defaultId: 0,
       // Escape or closing the dialog keeps the drafts.
       cancelId: 0,
-      noLink: true,
     });
     for (const draft of orphans) {
       if (response === 0)
@@ -332,7 +314,7 @@ export async function startDocuments(): Promise<void> {
 
   started = true;
   // A private gist in a link loads with the restored token.
-  await requireDeps().github.whenReady();
+  await deps.github.whenReady();
   await deepLinks.start();
   for (const file of pendingOpenFiles.splice(0)) {
     await withErrorDialog(lastFocused, () => openFolderIn(lastFocused, file));
@@ -343,37 +325,34 @@ export async function startDocuments(): Promise<void> {
 async function restoreSession(unclaimed: Set<string>): Promise<void> {
   const entries = getStateStore().get().sessions;
   for (const entry of entries) unclaimed.delete(entry.windowId);
-  const prepared = await Promise.all(
+  const loaded = await Promise.all(
     entries.map(async (entry) => {
       try {
         const draft = await readDraft(entry.windowId);
-        return { entry, doc: draft ? docFromDraft(draft) : await docFromSession(entry) };
+        return draft ? docFromDraft(draft) : await docFromSession(entry);
       } catch (error) {
         log.warn('could not reopen a window', entry.windowId, error);
         const failedRestores = (entry.failedRestores ?? 0) + 1;
         if (failedRestores < RESTORE_ATTEMPTS)
           unrestored.push({ ...entry, failedRestores });
-        return { entry, failed: true as const };
+        return undefined;
       }
     }),
   );
+  // Windows open in session order once every fiddle is loaded.
   await Promise.all(
-    prepared.map(async (item) => {
-      if ('failed' in item) return;
-      try {
-        await openFiddleWindow({
-          windowId: item.entry.windowId,
-          doc: item.doc,
-          layout: item.entry.layout,
-        });
-      } catch (error) {
-        log.error('could not restore a window', item.entry.windowId, error);
-      }
+    entries.map((entry, i) => {
+      const doc = loaded[i];
+      return (
+        doc &&
+        openFiddleWindow({ windowId: entry.windowId, doc, layout: entry.layout }).catch(
+          (error: unknown) =>
+            log.error('could not restore a window', entry.windowId, error),
+        )
+      );
     }),
   );
-  const failed = prepared
-    .filter((item) => 'failed' in item)
-    .map((item) => item.entry.name);
+  const failed = entries.filter((_, i) => !loaded[i]).map((entry) => entry.name);
   if (failed.length > 0) {
     void messageBox(lastFocused, {
       type: 'warning',
@@ -417,13 +396,23 @@ async function docFromSession(entry: SessionEntry): Promise<Doc> {
     loaded = withFolderTrust(folder, await loadFolder(folder, context), origin);
   } else if (stored.source.gistId) {
     // A private gist loads with the restored token.
-    await requireDeps().github.whenReady();
-    loaded = await loadGist(github(), stored.source.gistId, stored.source.gistRevision, {
-      context,
-      confirmAddFile: (name) => Promise.resolve(stored.fileNames.includes(name)),
-    });
+    await deps.github.whenReady();
+    loaded = await loadGist(
+      deps.github.client(),
+      stored.source.gistId,
+      stored.source.gistRevision,
+      {
+        context,
+        confirmAddFile: (name) => Promise.resolve(stored.fileNames.includes(name)),
+      },
+    );
   } else if (origin.kind === 'electron') {
-    loaded = await loadElectronExample(github(), templates, origin.tag, origin.path);
+    loaded = await loadElectronExample(
+      deps.github.client(),
+      templates,
+      origin.tag,
+      origin.path,
+    );
   } else if (stored.templateName === TEST_TEMPLATE) {
     loaded = await newTest(templates, stored.version);
   } else if (stored.templateName && findExample(stored.templateName)) {
@@ -499,7 +488,6 @@ export function attachWindow(windowId: string, contents: WebContents): void {
         buttons: [td('save'), td('dontSave'), td('cancel')],
         defaultId: 0,
         cancelId: 2,
-        noLink: true,
       });
       if (response === 2) return;
       if (response === 0 && !(await saveIn(windowId, 'save'))) return;
@@ -532,7 +520,7 @@ export function attachWindow(windowId: string, contents: WebContents): void {
 function onDestroyed(windowId: string): void {
   if (!docs.has(windowId)) return;
   // Closing the last window quits the app (except on macOS): keep it in the session.
-  if (!quitting && docs.size === 1 && deps?.platform !== 'darwin') {
+  if (!quitting && docs.size === 1 && deps.platform !== 'darwin') {
     saveSessionNow();
     sessionFrozen = true;
   }
@@ -569,7 +557,6 @@ async function askToQuit(): Promise<boolean> {
     buttons: [td('quit'), td('cancel')],
     defaultId: 0,
     cancelId: 1,
-    noLink: true,
   });
   return response === 0;
 }
@@ -582,10 +569,7 @@ function onBeforeQuit(event: Electron.Event): void {
   }
   event.preventDefault();
   void (async () => {
-    if (!(await askToQuit())) {
-      cancelRelaunch();
-      return;
-    }
+    if (!(await askToQuit())) return;
     finishQuit();
     // A later turn: a prompt answered at once would otherwise quit inside this
     // `before-quit` dispatch, which Electron then treats as cancelled.
@@ -594,19 +578,15 @@ function onBeforeQuit(event: Electron.Event): void {
 }
 
 /**
- * The unsaved-changes check of a normal quit, for a quit that closes the
- * windows before `before-quit` (`autoUpdater.quitAndInstall()`). False if the
- * user cancelled.
+ * The unsaved-changes check of a normal quit, for a quit that must not start unless it goes
+ * through: `autoUpdater.quitAndInstall()` closes the windows before `before-quit`, and
+ * `app.relaunch()` can't be undone. False if the user cancelled.
  */
 export async function confirmQuit(): Promise<boolean> {
   if (quitting) return true;
   if (hasDirty() && !(await askToQuit())) return false;
   finishQuit();
   return true;
-}
-
-export function closeWindow(windowId: string | undefined): void {
-  getWindow(windowId)?.close();
 }
 
 function focusWindow(windowId: string | undefined): void {
@@ -621,7 +601,7 @@ function titleOf(doc: Doc): string {
 }
 
 function revOf(windowId: string): number {
-  return deps?.hub.getWindow(windowId)?.rev ?? 0;
+  return deps.hub.getWindow(windowId)?.rev ?? 0;
 }
 
 function requireDoc(windowId: string | undefined): Doc {
@@ -643,7 +623,7 @@ function commit(
     title,
   };
   // Split view: a newly focused file takes over the focused pane, and hidden or removed files leave theirs.
-  const layout = hub().getWindow(windowId)?.layout;
+  const layout = deps.hub.getWindow(windowId)?.layout;
   if (layout) {
     const panes = followActiveFile(
       renamed ? renamePane(layout.panes, renamed.from, renamed.to) : layout.panes,
@@ -653,11 +633,11 @@ function commit(
     );
     if (panes !== layout.panes) patch.layout = { ...layout, panes: [...panes] };
   }
-  const rev = hub().updateWindow(windowId, patch);
+  const rev = deps.hub.updateWindow(windowId, patch);
   const win = getWindow(windowId);
   if (win) {
     win.setTitle(title);
-    if (deps?.platform === 'darwin') win.setDocumentEdited(isDirty(doc));
+    if (deps.platform === 'darwin') win.setDocumentEdited(isDirty(doc));
   }
   syncDraft(windowId, doc);
   scheduleSessionSave();
@@ -704,13 +684,13 @@ export function editFile(
 }
 
 export function setLayout(windowId: string, layout: WindowLayout): number {
-  const rev = hub().updateWindow(windowId, { layout });
+  const rev = deps.hub.updateWindow(windowId, { layout });
   scheduleSessionSave();
   return rev;
 }
 
 export function setView(windowId: string, view: WindowView): number {
-  return hub().updateWindow(windowId, { view });
+  return deps.hub.updateWindow(windowId, { view });
 }
 
 export function getFiddle(windowId: string): Fiddle {
@@ -744,7 +724,7 @@ export async function setFiddleVersion(
       return undefined;
     });
     if (versionSwitches.get(windowId) !== token)
-      return hub().getWindow(windowId)?.rev ?? 0;
+      return deps.hub.getWindow(windowId)?.rev ?? 0;
     if (loaded && docs.get(windowId) === doc)
       return commit(windowId, createDoc(loaded.fiddle, doc.name, { previous: doc }));
   }
@@ -828,7 +808,7 @@ async function modulesWithInstallScripts(
 ): Promise<string[]> {
   if (Object.keys(modules).length === 0) return [];
   try {
-    const { npm } = requireDeps();
+    const { npm } = deps;
     const found = await findInstallScripts(
       modules,
       (name, signal) => npm.packument(name, signal),
@@ -898,7 +878,6 @@ export async function ensureTrusted(
     buttons: [td('trustContinue'), td('cancel')],
     defaultId: 1,
     cancelId: 1,
-    noLink: true,
     ...(packages.length > 0
       ? {
           checkboxLabel: td('trustAllowScripts', { packages: packages.join(', ') }),
@@ -921,7 +900,7 @@ export async function ensureTrusted(
 
 /** A run, package or make is going, or a bisect: its window keeps its fiddle until it stops. */
 function isBusy(windowId: string): boolean {
-  const run = deps?.hub.getWindow(windowId)?.run;
+  const run = deps.hub.getWindow(windowId)?.run;
   return (
     run !== undefined &&
     (run.status !== 'ready' || (run.bisect !== null && run.bisect.result === null))
@@ -1025,7 +1004,6 @@ function askAddFile(windowId: string | undefined): (name: string) => Promise<boo
       buttons: [td('add'), td('skip')],
       defaultId: 1,
       cancelId: 1,
-      noLink: true,
     });
     return response === 0;
   };
@@ -1042,7 +1020,7 @@ export async function loadGistIn(
       reason: 'invalid-gist-id',
     });
   return replaceIn(windowId, (context) =>
-    loadGist(github(), id, revision, {
+    loadGist(deps.github.client(), id, revision, {
       context,
       confirmAddFile: askAddFile(windowId),
       isUsableVersion,
@@ -1087,7 +1065,7 @@ function samePath(a: string | undefined, b: string): boolean {
   if (a === undefined) return false;
   const x = path.resolve(a);
   const y = path.resolve(b);
-  return deps?.platform === 'linux' ? x === y : x.toLowerCase() === y.toLowerCase();
+  return deps.platform === 'linux' ? x === y : x.toLowerCase() === y.toLowerCase();
 }
 
 /** Opens a folder, from the Open dialog when `dir` is undefined. A folder that's already open focuses its window. */
@@ -1211,7 +1189,7 @@ export async function saveIn(
 
 /** "Save as Forge project": the release, or a local build's path. */
 function forgeOptions(fiddle: Fiddle) {
-  return forgeOptionsFor(forgeElectronFor(fiddle.version, requireDeps().versions));
+  return forgeOptionsFor(forgeElectronFor(fiddle.version, deps.versions));
 }
 
 function untrustedFolderOrigin(dir: string): FiddleOrigin | undefined {
@@ -1254,7 +1232,7 @@ function withFolderTrust(
 }
 
 function packageAuthor(): string | undefined {
-  return deps?.hub.app.settings.packageAuthor || osUserName() || undefined;
+  return deps.hub.app.settings.packageAuthor || osUserName() || undefined;
 }
 
 export function recentFolders(): string[] {
@@ -1303,7 +1281,7 @@ async function handleDeepLink(url: string): Promise<void> {
   try {
     let loaded: LoadedFiddle;
     if (link.kind === 'gist') {
-      const gist = await github().loadGist(link.id, link.revision);
+      const gist = await deps.github.client().loadGist(link.id, link.revision);
       const detail = gistLinkDetail(link, gist, gistDependencies(gist), td);
       if (
         !(await confirm(target, {
@@ -1321,7 +1299,12 @@ async function handleDeepLink(url: string): Promise<void> {
       });
     } else {
       if (!(await confirmDocsExample(target, link.version, link.path))) return;
-      loaded = await loadElectronExample(github(), templates, link.tag, link.path);
+      loaded = await loadElectronExample(
+        deps.github.client(),
+        templates,
+        link.tag,
+        link.path,
+      );
     }
     const current = target === undefined ? undefined : docs.get(target);
     let loadedIn: string;
@@ -1332,11 +1315,11 @@ async function handleDeepLink(url: string): Promise<void> {
       loadedIn = await openFiddleWindow({ doc: docFromLoaded(loaded) });
     }
     showWarnings(loadedIn, loaded.warnings);
-    if (link.kind !== 'gist') requireDeps().onDocsExampleLoaded?.(loadedIn);
+    if (link.kind !== 'gist') deps.onDocsExampleLoaded?.(loadedIn);
   } catch (error) {
     if (
       link.kind === 'gist' &&
-      shouldOfferSignIn(error, Boolean(hub().app.githubLogin))
+      shouldOfferSignIn(error, Boolean(deps.hub.app.githubLogin))
     ) {
       const host = target ?? lastFocused;
       await withErrorDialog(host, () => offerSignIn(host, url));
@@ -1363,8 +1346,8 @@ async function offerSignIn(windowId: string | undefined, url: string): Promise<v
   const id = getWindow(windowId) ? windowId : await openFiddleWindow();
   const win = getWindow(id);
   if (!win) return;
-  const stop = hub().onChange((change) => {
-    if (change.store !== 'app' || !hub().app.githubLogin) return;
+  const stop = deps.hub.onChange((change) => {
+    if (change.store !== 'app' || !deps.hub.app.githubLogin) return;
     stop();
     stopSignInRetry = undefined;
     deepLinks.push(url);
@@ -1425,7 +1408,7 @@ function sessionEntries(): SessionEntry[] {
       name: doc.name,
       fiddle: { ...fiddle, fileNames: Object.keys(files) },
       activeFile: doc.activeFile,
-      layout: deps?.hub.getWindow(windowId)?.layout ?? DEFAULT_LAYOUT,
+      layout: deps.hub.getWindow(windowId)?.layout ?? DEFAULT_LAYOUT,
     };
     if (doc.gistOwner !== undefined) entry.gistOwner = doc.gistOwner;
     return entry;

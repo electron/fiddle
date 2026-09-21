@@ -25,6 +25,14 @@ export const appStateSchema = z.object({
   material: materialSchema,
   /** True in unpackaged (development and test) builds, which have the Develop menu and its dev-only commands. */
   dev: z.boolean().optional(),
+  /** The app's name and version and its Electron version, for Settings > About. */
+  about: z
+    .object({ name: z.string(), version: z.string(), electron: z.string() })
+    .optional(),
+  /** Whether main started Sentry; the renderer starts its SDK only then. */
+  crashReporting: z.boolean().optional(),
+  /** Linux and MSIX: the newer release the daily GitHub check found. Each window shows it as a toast. */
+  updateAvailable: z.string().optional(),
   settings: settingsSchema,
   /** Custom themes in `<userData>/themes/`. The data is fetched with `Settings.GetTheme`. */
   themes: z.array(themeSummarySchema),
@@ -218,6 +226,8 @@ export const releaseRowSchema = z.object({
   date: z.string(),
   /** The bundled Node version. */
   node: z.string(),
+  /** The Node ABI (`process.versions.modules`); Forge needs it for nightlies. */
+  modules: z.string().optional(),
   /** Older than the oldest supported major. */
   obsolete: z.boolean(),
   /** False when this OS or processor can't run it. */

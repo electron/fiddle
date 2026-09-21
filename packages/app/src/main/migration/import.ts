@@ -13,19 +13,19 @@ import {
   Installer,
   removeBestEffort,
   renameWithRetry,
+  writeAtomic,
 } from '@electron/fiddle-core';
 import semver from 'semver';
 
 import { GITHUB_TOKEN_PATTERN } from '../../fiddle/github';
-import { BUILTIN_THEME } from '../../shared/settings';
+import { BUILTIN_THEME, SETTINGS_VERSION } from '../../shared/settings';
 import {
   CredentialStore,
   legacyTokenFile,
   type SafeStorageLike,
 } from '../github/credentials';
 import { log } from '../log';
-import { readJsonObjectSync, writeAtomic } from '../persistence/json-store';
-import { SETTINGS_VERSION } from '../settings/service';
+import { readJsonObjectSync } from '../persistence/json-store';
 import type { StoredBuild } from '../versions/service';
 import { themeFromMonaco, themeId, writeTheme } from '../themes/themes';
 import {
