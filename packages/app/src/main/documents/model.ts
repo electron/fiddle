@@ -182,6 +182,17 @@ export function docMoveFile(doc: Doc, name: string, before: string | null): Doc 
   return fiddle === doc.fiddle ? doc : { ...doc, fiddle };
 }
 
+/** Moves the selected tab (the active file, or the first tab when that is hidden) one place along the row. */
+export function docMoveActiveTab(doc: Doc, direction: -1 | 1): Doc {
+  const visible = visibleFileNames(doc.fiddle);
+  const name = visible.find((n) => n === doc.activeFile) ?? visible[0];
+  if (name === undefined) return doc;
+  const index = visible.indexOf(name);
+  if (direction < 0 ? index === 0 : index === visible.length - 1) return doc;
+  const before = direction < 0 ? visible[index - 1] : visible[index + 2];
+  return docMoveFile(doc, name, before ?? null);
+}
+
 /** Focusing a hidden file shows it. */
 export function docSetActiveFile(doc: Doc, name: string): Doc {
   if (!Object.hasOwn(doc.fiddle.files, name)) {
