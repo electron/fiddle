@@ -8,7 +8,7 @@ import { pathToFileURL } from 'node:url';
 
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from 'vitest';
 
-import { Installer } from '../src/index.js';
+import { InstallState, Installer } from '../src/index.js';
 
 const fixture = (name: string) => path.join(import.meta.dirname, 'fixtures', name);
 const zipName = (version: string) =>
@@ -32,7 +32,6 @@ registerHooks({
 const [source, paths, mirror, version] = process.argv.slice(1);
 const { Installer } = await import(source);
 const installer = new Installer(JSON.parse(paths), {
-  layout: 'per-version',
   mirror: { electronMirror: mirror },
 });
 process.stdout.write('READY\\n');
@@ -74,17 +73,12 @@ afterAll(async () => {
 
 describe('two processes sharing one cache', () => {
   let tmpdir: string;
-  let paths: {
-    electronDownloads: string;
-    electronInstall: string;
-    electronVersions: string;
-  };
+  let paths: { electronDownloads: string; electronVersions: string };
 
   beforeEach(async () => {
     tmpdir = await fs.promises.mkdtemp(path.join(os.tmpdir(), 'fiddle-core-'));
     paths = {
       electronDownloads: path.join(tmpdir, 'downloads'),
-      electronInstall: path.join(tmpdir, 'current'),
       electronVersions: path.join(tmpdir, 'versions'),
     };
     zipHits = 0;
@@ -136,10 +130,7 @@ describe('two processes sharing one cache', () => {
     const version = '13.1.7';
     const child = startChild(version);
     await child.ready;
-    const installer = new Installer(paths, {
-      layout: 'per-version',
-      mirror: { electronMirror: mirror },
-    });
+    const installer = new Installer(paths, { mirror: { electronMirror: mirror } });
 
     const [childExec, exec] = await Promise.all([child.exec, installer.install(version)]);
     const dir = path.join(paths.electronVersions, version);
@@ -161,14 +152,12 @@ describe('two processes sharing one cache', () => {
   it('installs different versions from both at once', async () => {
     const child = startChild('12.0.15');
     await child.ready;
-    const installer = new Installer(paths, {
-      layout: 'per-version',
-      mirror: { electronMirror: mirror },
-    });
+    const installer = new Installer(paths, { mirror: { electronMirror: mirror } });
 
     await Promise.all([child.exec, installer.install('13.1.7')]);
     expect(zipHits).toBe(2);
-    const fresh = new Installer(paths, { layout: 'per-version' });
-    expect(fresh.installedVersions.sort()).toStrictEqual(['12.0.15', '13.1.7']);
+    const fresh = new Installer(paths);
+    expect(fresh.state('12.0.15')).toBe(InstallState.installed);
+    expect(fresh.state('13.1.7')).toBe(InstallState.installed);
   }, 30_000);
 });

@@ -3,7 +3,7 @@ import os from 'node:os';
 import path from 'node:path';
 import { setTimeout as sleep } from 'node:timers/promises';
 
-import { FiddleCoreError, abortError, throwIfAborted } from './errors.js';
+import { abortError, throwIfAborted } from './errors.js';
 
 export interface LockInfo {
   pid: number;
@@ -15,11 +15,6 @@ export interface LockInfo {
 export interface LockOptions {
   /** Stop waiting and reject with an `aborted` error. */
   signal?: AbortSignal;
-  /**
-   * Reject with a `locked` error if the lock is still held after this many
-   * milliseconds. By default, waits until the lock is released or goes stale.
-   */
-  timeoutMs?: number;
   /** How often to retry a held lock. Default: 100 ms. */
   pollMs?: number;
   /**
@@ -187,8 +182,7 @@ export async function acquireLock(
   lockPath: string,
   opts: LockOptions = {},
 ): Promise<Lock> {
-  const { signal, timeoutMs, pollMs = 100, staleMs = LOCK_STALE_MS } = opts;
-  const start = Date.now();
+  const { signal, pollMs = 100, staleMs = LOCK_STALE_MS } = opts;
   await fs.mkdir(path.dirname(lockPath), { recursive: true });
 
   for (;;) {
@@ -209,20 +203,12 @@ export async function acquireLock(
 
     const held = await readLock(lockPath);
     if (!held && !vanishing) continue; // released between our attempt and our read
-    const now = Date.now();
     if (
       held &&
-      isLockStale(held, staleMs, now) &&
+      isLockStale(held, staleMs) &&
       (await removeStaleLock(lockPath, held.text))
     ) {
       continue;
-    }
-
-    if (timeoutMs !== undefined && now - start >= timeoutMs) {
-      const owner = held?.info
-        ? `process ${held.info.pid} on ${held.info.hostname}`
-        : 'another process';
-      throw new FiddleCoreError('locked', `"${lockPath}" is locked by ${owner}`);
     }
 
     try {
