@@ -3,10 +3,26 @@ import fs from 'node:fs';
 
 import { vi } from 'vitest';
 
+import type { FiddleState } from '../../shared/stores';
 import type { WindowInit } from '../state-hub';
 import type { initDocuments } from './service';
 
 type Deps = Parameters<typeof initDocuments>[0];
+
+/** The fiddle part of a window's store before Documents fills it in. */
+export function emptyFiddleState(): FiddleState {
+  return {
+    source: { origin: 'local', trusted: true },
+    name: '',
+    versionRef: { kind: 'release', version: '' },
+    modules: {},
+    files: [],
+    activeFile: null,
+    fiddleRev: 0,
+    dirty: false,
+    dirtyFiles: [],
+  };
+}
 
 interface FakeDocumentsOptions {
   sessionRestore?: boolean;

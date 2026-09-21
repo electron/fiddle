@@ -65,50 +65,36 @@ const EMPTY_DRAFT: Draft = {
 export const WINDOW_ID_RE = /^[0-9a-f-]{36}$/i;
 const DRAFT_FILE_RE = /^([0-9a-f-]{36})\.json$/i;
 
-interface Timers {
-  setTimeout: (fn: () => void, ms: number) => unknown;
-  clearTimeout: (handle: unknown) => void;
-  now: () => number;
-}
-
-const realTimers: Timers = {
-  setTimeout: (fn, ms) => setTimeout(fn, ms),
-  clearTimeout: (handle) => clearTimeout(handle as NodeJS.Timeout),
-  now: () => Date.now(),
-};
-
 /**
  * Calls `write(id)` 500 ms after the last `touch(id)`, but never later than
  * 5 s after the first untouched edit, so continuous typing still saves.
  */
 export class DraftScheduler {
-  readonly #pending = new Map<string, { since: number; handle: unknown }>();
+  readonly #pending = new Map<string, { since: number; handle: NodeJS.Timeout }>();
   readonly #write: (id: string) => void;
-  readonly #timers: Timers;
 
-  constructor(write: (id: string) => void, timers: Timers = realTimers) {
+  constructor(write: (id: string) => void) {
     this.#write = write;
-    this.#timers = timers;
   }
 
   touch(id: string): void {
-    const now = this.#timers.now();
+    const now = Date.now();
     const entry = this.#pending.get(id);
     const since = entry?.since ?? now;
-    if (entry) this.#timers.clearTimeout(entry.handle);
+    if (entry) clearTimeout(entry.handle);
     const wait = Math.max(
       0,
       Math.min(DRAFT_DEBOUNCE_MS, since + DRAFT_MAX_WAIT_MS - now),
     );
     this.#pending.set(id, {
       since,
-      handle: this.#timers.setTimeout(() => this.#fire(id), wait),
+      handle: setTimeout(() => this.#fire(id), wait),
     });
   }
 
   cancel(id: string): void {
     const entry = this.#pending.get(id);
-    if (entry) this.#timers.clearTimeout(entry.handle);
+    if (entry) clearTimeout(entry.handle);
     this.#pending.delete(id);
   }
 

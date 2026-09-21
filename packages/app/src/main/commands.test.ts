@@ -5,7 +5,7 @@ import { describe, expect, it, vi } from 'vitest';
 import { defaultSettings } from '../shared/settings';
 import { DEFAULT_LAYOUT, type AppState } from '../shared/stores';
 import { CommandRegistry } from './commands';
-import { emptyFiddleState } from './documents/model';
+import { emptyFiddleState } from './documents/test-helpers';
 import { StateHub } from './state-hub';
 
 const appInit = (dev: boolean): Omit<AppState, 'rev'> => ({
