@@ -60,8 +60,6 @@ export function Menu<T extends object>({ className, ...rest }: MenuProps<T>) {
 export interface MenuItemProps extends Omit<AriaMenuItemProps, 'children' | 'className'> {
   children: ReactNode;
   icon?: IconName;
-  /** Right-aligned hint in ink-muted, such as "latest". */
-  hint?: string;
   /** Shortcut, such as "⌘R". */
   kbd?: string;
   isDanger?: boolean;
@@ -71,7 +69,6 @@ export interface MenuItemProps extends Omit<AriaMenuItemProps, 'children' | 'cla
 export function MenuItem({
   children,
   icon,
-  hint,
   kbd,
   isDanger,
   className,
@@ -90,15 +87,10 @@ export function MenuItem({
           <span className={styles.lead}>
             {isSelected ? <Icon name="check" /> : icon ? <Icon name={icon} /> : null}
           </span>
-          {/* The label slot names the item, so a hint or shortcut only describes it. */}
+          {/* The label slot names the item, so a shortcut only describes it. */}
           <Text slot="label" className={styles.label}>
             {children}
           </Text>
-          {hint && (
-            <Text slot="description" className={styles.hint}>
-              {hint}
-            </Text>
-          )}
           {kbd && <Keyboard className={styles.kbd}>{kbd}</Keyboard>}
         </>
       )}

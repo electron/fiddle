@@ -202,7 +202,6 @@ export function Sidebar({
             {group.length > 0 && (
               <Tree
                 aria-label={label}
-                variant="sidebar"
                 value={group.some((file) => file.name === activeFile) ? activeFile : null}
                 onChange={onOpen}
               >

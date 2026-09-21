@@ -97,17 +97,9 @@ describe('Menu', () => {
 
 describe('Select', () => {
   const items = [
-    {
-      title: 'Stable',
-      options: [
-        { id: '43.0.0', label: 'Electron 43.0.0', hint: 'latest' },
-        { id: '42.4.1', label: 'Electron 42.4.1' },
-      ],
-    },
-    {
-      title: 'Pre-release',
-      options: [{ id: '44.0.0-beta.3', label: 'Electron 44.0.0-beta.3', hint: 'beta' }],
-    },
+    { id: '43.0.0', label: 'Electron 43.0.0', hint: 'latest' },
+    { id: '42.4.1', label: 'Electron 42.4.1' },
+    { id: '44.0.0-beta.3', label: 'Electron 44.0.0-beta.3', hint: 'beta' },
   ];
 
   it('opens its menu and picks an option', () => {
@@ -116,7 +108,7 @@ describe('Select', () => {
       <Select
         label="Electron version"
         items={items}
-        defaultValue="43.0.0"
+        value="43.0.0"
         onChange={onChange}
       />,
     );
@@ -127,7 +119,6 @@ describe('Select', () => {
     expect(screen.getByText('latest')).toBeTruthy();
     fireEvent.click(screen.getByRole('option', { name: /42\.4\.1/ }));
     expect(onChange).toHaveBeenCalledWith('42.4.1');
-    expect(trigger.textContent).toContain('Electron 42.4.1');
   });
 
   it('opens and picks with the keyboard', () => {
@@ -136,7 +127,7 @@ describe('Select', () => {
       <Select
         label="Electron version"
         items={items}
-        defaultValue="43.0.0"
+        value="43.0.0"
         onChange={onChange}
       />,
     );
@@ -150,22 +141,13 @@ describe('Select', () => {
     expect(onChange).toHaveBeenCalledWith('42.4.1');
   });
 
-  it('groups its options under headings and shows the placeholder until one is chosen', () => {
+  it('shows the placeholder until an option is chosen', () => {
     render(
       <Select label="Electron version" items={items} placeholder="Pick a version" />,
     );
     const trigger = screen.getByRole('button', { name: /Electron version/ });
     expect(trigger.textContent).toContain('Pick a version');
     fireEvent.click(trigger);
-    expect(
-      screen
-        .getAllByRole('group')
-        .map(
-          (group) =>
-            group.getAttribute('aria-labelledby') &&
-            document.getElementById(group.getAttribute('aria-labelledby')!)?.textContent,
-        ),
-    ).toEqual(['Stable', 'Pre-release']);
     fireEvent.click(screen.getByRole('option', { name: /44\.0\.0-beta\.3/ }));
     expect(trigger.textContent).toContain('Electron 44.0.0-beta.3');
   });
@@ -175,7 +157,7 @@ describe('Select', () => {
       <Select
         label="Mirror"
         items={[{ id: 'd', label: 'Default' }]}
-        defaultValue="d"
+        value="d"
         isDisabled
       />,
     );

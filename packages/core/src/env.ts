@@ -1,9 +1,8 @@
 /**
- * Variables removed from the parent environment by default when
- * {@link ChildEnvOptions} are used. `*` matches any run of characters, and
- * matching ignores case.
+ * Variables removed from the parent environment. `*` matches any run of
+ * characters, and matching ignores case.
  */
-export const DEFAULT_ENV_DENYLIST: readonly string[] = Object.freeze([
+const ENV_DENYLIST: readonly string[] = [
   '*_TOKEN',
   '*_API_KEY',
   '*_SECRET',
@@ -24,18 +23,16 @@ export const DEFAULT_ENV_DENYLIST: readonly string[] = Object.freeze([
   'CSC_KEY_PASSWORD',
   'SSH_AUTH_SOCK',
   'SENTRY_*',
-]);
+];
 
 /** Variables that never reach a child process, whatever the options say. */
-export const ALWAYS_BLOCKED_ENV: readonly string[] = Object.freeze(['LD_*', 'DYLD_*']);
+const ALWAYS_BLOCKED_ENV: readonly string[] = ['LD_*', 'DYLD_*'];
 
 /** Variables never inherited from the parent. They can still be set through `vars`. */
 const NEVER_INHERITED_ENV = ['NODE_OPTIONS', 'ELECTRON_RUN_AS_NODE'];
 
 export interface ChildEnvOptions {
-  /** Name patterns removed from the parent environment. Default: {@link DEFAULT_ENV_DENYLIST}. */
-  denylist?: readonly string[];
-  /** More name patterns to remove, on top of `denylist` or the default. */
+  /** More name patterns to remove, on top of the default denylist. */
   extraDenylist?: readonly string[];
   /** Variables added after filtering. `LD_*` and `DYLD_*` are ignored. */
   vars?: Readonly<Record<string, string | undefined>>;
@@ -56,11 +53,7 @@ export function buildChildEnv(
   parent: NodeJS.ProcessEnv = process.env,
 ): NodeJS.ProcessEnv {
   const blocked = ALWAYS_BLOCKED_ENV.map(toRegExp);
-  const denied = [
-    ...(opts.denylist ?? DEFAULT_ENV_DENYLIST),
-    ...(opts.extraDenylist ?? []),
-    ...NEVER_INHERITED_ENV,
-  ]
+  const denied = [...ENV_DENYLIST, ...(opts.extraDenylist ?? []), ...NEVER_INHERITED_ENV]
     .map(toRegExp)
     .concat(blocked);
   const isDenied = (name: string) => denied.some((re) => re.test(name));

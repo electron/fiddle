@@ -35,10 +35,6 @@
     box-shadow var(--lu-dur-base) var(--lu-ease);
 }
 
-.root[data-size='sm'] .trigger {
-  height: var(--lu-size-control-sm);
-}
-
 .trigger[data-hovered] {
   background: color-mix(in srgb, var(--lu-field) 92%, var(--lu-ink));
 }
@@ -60,10 +56,6 @@
 
 .root[data-disabled] {
   opacity: var(--lu-disabled-opacity);
-}
-
-.icon {
-  color: var(--lu-ink-faint);
 }
 
 .value {

@@ -228,13 +228,6 @@
   backdrop-filter: var(--lu-blur-chrome);
 }
 
-.tooltipRow {
-  display: flex;
-  align-items: flex-start;
-  gap: 120px;
-  padding-bottom: 40px;
-}
-
 .rings {
   display: flex;
   align-items: center;
