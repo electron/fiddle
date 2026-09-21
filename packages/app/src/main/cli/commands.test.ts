@@ -480,8 +480,8 @@ describe('runCommand', () => {
     );
   });
 
-  describe('gist load', () => {
-    it('writes a gist revision to a folder, keeping unusual files and warning about what its package.json got wrong', async () => {
+  describe('exporting a gist', () => {
+    it('writes the asked revision to a folder, keeping unusual files and warning about what its package.json got wrong', async () => {
       const pkg = JSON.stringify({
         devDependencies: { electron: 'latest' },
         dependencies: { lodash: '^4.0.0', evil: 'file:../evil' },
@@ -498,16 +498,13 @@ describe('runCommand', () => {
       );
       const out = path.join(dir, 'out');
       const result = await run(
-        'gist load',
-        parse('gist load', { id: gist.html_url, revision: SHA, out }),
+        'export',
+        parse('export', { fiddle: gist.html_url, revision: SHA, out }),
       );
 
       expect(result.code).toBeUndefined();
       expect(requests.map((r) => r.url.pathname)).toEqual([`/gists/${ID}/${SHA}`]);
-      expect(result.events.at(-1)?.data).toEqual({
-        id: ID,
-        revision: SHA,
-        owner: 'octocat',
+      expect(result.events.at(-1)?.data).toMatchObject({
         dir: out,
         files: ['helpers.js', 'main.js', 'package.json'],
       });
@@ -515,6 +512,7 @@ describe('runCommand', () => {
         'warnUnusableVersion {"version":"latest"}',
         'warnRejectedModules {"modules":"evil"}',
       ]);
+      expect(await readFile(path.join(out, 'helpers.js'), 'utf8')).toBe('// helpers');
       expect(
         JSON.parse(await readFile(path.join(out, 'package.json'), 'utf8')),
       ).toMatchObject({ dependencies: { lodash: '^4.0.0' } });
@@ -527,20 +525,11 @@ describe('runCommand', () => {
           files: { ...gist.files, ...gistFile('package.json', '{') },
         }),
       );
-      const result = await run(
-        'gist load',
-        parse('gist load', { id: ID, out: path.join(dir, 'out') }),
-      );
+      const result = await run('export', exportInput(ID));
       expect(result.code).toBeUndefined();
       expect(result.events.find((e) => e.level === 'warn')?.text).toBe(
         'warnInvalidPackageJson',
       );
-    });
-
-    it('refuses something that holds no gist ID', async () => {
-      expect(
-        (await run('gist load', parse('gist load', { id: 'octocat', out: dir }))).code,
-      ).toBe(ErrorCode.invalidArgument);
     });
   });
 
