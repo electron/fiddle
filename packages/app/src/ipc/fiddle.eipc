@@ -44,12 +44,6 @@ subtype MenuItemId = string(
     maxLength: 300
 )
 
-structure AppInfo {
-    name: string
-    version: string
-    electronVersion: string
-}
-
 // Shared state and app-wide methods.
 [RendererAPI]
 [Validator=MainFrame]
@@ -58,8 +52,6 @@ interface App {
     // useAppStore() in the renderer; StateHub pushes it with updateAppStore.
     [Store]
     App() -> AppState
-
-    GetAppInfo() -> AppInfo
 }
 
 // Per-window state and methods. Bound with .for(webContents); handlers close
@@ -268,17 +260,6 @@ interface Modules {
     RemoveModule(name: PackageName) -> number
 }
 
-[RendererAPI]
-[Validator=MainFrame]
-[ContextBridge]
-interface Onboarding {
-    // True if this window should offer the tour: it hasn't been finished or
-    // dismissed, and no other window has offered it since launch.
-    ShouldOfferTour() -> boolean
-    // The tour was finished or dismissed. It stays available from Help.
-    SetTourDone()
-}
-
 // Electron versions, running, bisect and editor types.
 // Install state lives in `App.versions`, run status in `Window.run`.
 
@@ -474,8 +455,6 @@ subtype LogText = string(
 interface AppPlatform {
     // Appends a renderer entry to main's JSON-lines log. Main redacts it.
     Log(level: LogLevel, message: LogText)
-    // Whether main started Sentry; the renderer starts its SDK only then.
-    IsCrashReportingEnabled() -> boolean
     // The update toast's action: opens the release page after confirmation.
     OpenUpdatePage()
     // True once, for the first window to ask: show the first-run notice that
@@ -486,8 +465,9 @@ interface AppPlatform {
     // macOS: forgets every privacy grant (camera, microphone, …) after a
     // confirmation. False when cancelled.
     ResetPrivacyPermissions() -> boolean
-
-    // Linux and MSIX: a newer release is out (daily GitHub releases check).
-    [Event]
-    UpdateAvailable(version: string)
+    // True if this window should offer the tour: it hasn't been finished or
+    // dismissed, and no other window has offered it since launch.
+    ShouldOfferTour() -> boolean
+    // The tour was finished or dismissed. It stays available from Help.
+    SetTourDone()
 }

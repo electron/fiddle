@@ -7,7 +7,6 @@ import {
   Documents as GeneratedDocuments,
   GitHub as GeneratedGitHub,
   Modules as GeneratedModules,
-  Onboarding as GeneratedOnboarding,
   Run as GeneratedRun,
   Settings as GeneratedSettings,
   Versions as GeneratedVersions,
@@ -17,14 +16,13 @@ import {
   type IDocumentsRenderer,
   type IGitHubRenderer,
   type IModulesRenderer,
-  type IOnboardingRenderer,
   type IRunRenderer,
   type ISettingsRenderer,
   type IVersionsRenderer,
   type IWindowRenderer,
 } from './generated/renderer/fiddle';
 
-export type { AppInfo, IAppRenderer, IWindowRenderer } from './generated/renderer/fiddle';
+export type { IAppRenderer, IWindowRenderer } from './generated/renderer/fiddle';
 export {
   useAppStore,
   useWindowStore,
@@ -50,7 +48,6 @@ export const windowApi = bind<IWindowRenderer>(GeneratedWindow, 'Window');
 export const documentsApi = bind<IDocumentsRenderer>(GeneratedDocuments, 'Documents');
 export type { IDocumentsRenderer } from './generated/renderer/fiddle';
 export const modulesApi = bind<IModulesRenderer>(GeneratedModules, 'Modules');
-export const onboardingApi = bind<IOnboardingRenderer>(GeneratedOnboarding, 'Onboarding');
 export const versionsApi = bind<IVersionsRenderer>(GeneratedVersions, 'Versions');
 export const runApi = bind<IRunRenderer>(GeneratedRun, 'Run');
 export const settingsApi = bind<ISettingsRenderer>(GeneratedSettings, 'Settings');

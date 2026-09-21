@@ -1,5 +1,4 @@
 import { AppPlatform, implement } from '../../ipc/main';
-import { isCrashReportingEnabled } from '../crash/sentry';
 import type { IpcContext } from '../ipc';
 import { log, type LogLevel } from '../log';
 import { testFlags } from '../test-mode';
@@ -14,7 +13,6 @@ export function bindAppPlatformIpc({
 }: IpcContext): void {
   implement(AppPlatform, contents, {
     Log: (level, message) => log.fromRenderer(level as LogLevel, message),
-    IsCrashReportingEnabled: () => isCrashReportingEnabled(),
     OpenUpdatePage: () => openUpdatePage(),
     // Never in e2e runs, like the other first-run prompts.
     TakeCrashReportsNotice: () =>
@@ -22,5 +20,7 @@ export function bindAppPlatformIpc({
       onboarding.takeCrashReportsNotice(hub.app.settings.crashReports),
     Relaunch: () => relaunchApp(),
     ResetPrivacyPermissions: () => resetPrivacyPermissions(windowId),
+    ShouldOfferTour: () => onboarding.shouldOfferTour(),
+    SetTourDone: () => onboarding.setTourDone(),
   });
 }

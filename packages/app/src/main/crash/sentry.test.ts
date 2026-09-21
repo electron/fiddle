@@ -84,10 +84,9 @@ afterEach(() => {
 
 describe('initCrashReporting', () => {
   it('starts Sentry when every gate is open, with no settings file', async () => {
-    const { initCrashReporting, isCrashReportingEnabled } = await load();
-    initCrashReporting();
+    const { initCrashReporting } = await load();
+    expect(initCrashReporting()).toBe(true);
     expect(mocks.init).toHaveBeenCalledOnce();
-    expect(isCrashReportingEnabled()).toBe(true);
     expect(mocks.init.mock.calls[0]![0]).toMatchObject({
       sendDefaultPii: false,
       defaultIntegrations: false,
@@ -103,17 +102,15 @@ describe('initCrashReporting', () => {
     ],
   ])('stays off for %s', async (_name, close) => {
     close();
-    const { initCrashReporting, isCrashReportingEnabled } = await load();
-    initCrashReporting();
+    const { initCrashReporting } = await load();
+    expect(initCrashReporting()).toBe(false);
     expect(mocks.init).not.toHaveBeenCalled();
-    expect(isCrashReportingEnabled()).toBe(false);
   });
 
   it('stays off for headless mode', async () => {
-    const { initCrashReporting, isCrashReportingEnabled } = await load();
-    initCrashReporting(true);
+    const { initCrashReporting } = await load();
+    expect(initCrashReporting(true)).toBe(false);
     expect(mocks.init).not.toHaveBeenCalled();
-    expect(isCrashReportingEnabled()).toBe(false);
   });
 
   it('keeps the setting turned off when settings.json is corrupt and only the backup has it', async () => {
@@ -147,15 +144,13 @@ describe('initCrashReporting', () => {
 
 describe('applyCrashReportsSetting', () => {
   it('closes Sentry when the setting is turned off, and ignores turning it on', async () => {
-    const { initCrashReporting, applyCrashReportsSetting, isCrashReportingEnabled } =
-      await load();
+    const { initCrashReporting, applyCrashReportsSetting } = await load();
     initCrashReporting();
-    applyCrashReportsSetting(true);
+    expect(applyCrashReportsSetting(true)).toBe(true);
     expect(mocks.close).not.toHaveBeenCalled();
 
-    applyCrashReportsSetting(false);
+    expect(applyCrashReportsSetting(false)).toBe(false);
     expect(mocks.close).toHaveBeenCalledOnce();
-    expect(isCrashReportingEnabled()).toBe(false);
     applyCrashReportsSetting(false);
     expect(mocks.close).toHaveBeenCalledOnce();
   });

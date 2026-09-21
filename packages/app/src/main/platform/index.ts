@@ -16,8 +16,11 @@ export async function startPlatform(hub: StateHub, firstLaunch: boolean): Promis
   installRelaunchOnQuit();
   setupAboutPanel();
   registerProtocolClient();
-  hub.onChange(() => applyCrashReportsSetting(hub.app.settings.crashReports));
+  hub.onChange(() => {
+    const crashReporting = applyCrashReportsSetting(hub.app.settings.crashReports);
+    if (crashReporting !== hub.app.crashReporting) hub.updateApp({ crashReporting });
+  });
   await offerMoveToApplications(firstLaunch);
-  startUpdates();
+  startUpdates((version) => hub.updateApp({ updateAvailable: version }));
   importElectronVersionsInBackground();
 }

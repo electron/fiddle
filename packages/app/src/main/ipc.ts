@@ -2,7 +2,7 @@
  * Binds the EIPC interfaces for one window, each closing over its `windowId` so
  * renderers never send one. The bindings live on the webContents and survive reloads.
  */
-import { app, type WebContents } from 'electron';
+import type { WebContents } from 'electron';
 
 import { App, implement, Window } from '../ipc/main';
 import { ErrorCode, FiddleError } from '../shared/errors';
@@ -17,7 +17,6 @@ import type { Services } from './services';
 import { bindSettingsIpc } from './settings/ipc';
 import type { WindowInit } from './state-hub';
 import { titleBarDoubleClick } from './title-bar';
-import { bindOnboardingIpc } from './ux/ipc';
 import { getWindow } from './windows';
 
 export interface IpcContext {
@@ -34,14 +33,7 @@ export function bindWindowIpc(
 ): void {
   const { contents, windowId, services } = ctx;
   const { hub, registry } = services;
-  const appDispatcher = implement(App, contents, {
-    getInitialAppState: () => hub.app,
-    GetAppInfo: () => ({
-      name: app.getName(),
-      version: app.getVersion(),
-      electronVersion: process.versions.electron,
-    }),
-  });
+  const appDispatcher = implement(App, contents, { getInitialAppState: () => hub.app });
   const windowDispatcher = implement(Window, contents, {
     getInitialWindowState: () => {
       const state = hub.getWindow(windowId);
@@ -57,7 +49,6 @@ export function bindWindowIpc(
 
   bindDocumentsIpc(ctx);
   bindModulesIpc(ctx);
-  bindOnboardingIpc(ctx);
   bindSettingsIpc(ctx);
   bindGitHubIpc(ctx);
   bindAppPlatformIpc(ctx);
