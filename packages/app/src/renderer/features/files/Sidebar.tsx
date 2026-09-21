@@ -15,7 +15,7 @@ import {
   Tree,
   TreeRow,
 } from '../../../ui';
-import { badgeOf, useDiagnostics } from '../../editor/diagnostics';
+import { useBadges } from '../../editor/diagnostics';
 import { renameFile as renameFileInEditor } from '../../editor/editor-state';
 import { toastError } from '../../toast-error';
 import { PackagesSection } from '../packages/PackagesSection';
@@ -25,25 +25,10 @@ import {
   suggestFileName,
   type FileProcess,
 } from '../../shell/processes';
-import { processLabelKey, useBadgeLabel } from '../../shell/Sheet';
 import styles from './Sidebar.module.css';
 
 /** Past this many files the sidebar offers a filter field. */
 const FILTER_THRESHOLD = 8;
-
-const addInGroupKey = {
-  main: 'addMainFile',
-  preload: 'addPreloadFile',
-  renderer: 'addRendererFile',
-  other: 'addOtherFile',
-} as const satisfies Record<FileProcess, string>;
-
-const groupHintKey = {
-  main: 'groupHintMain',
-  preload: 'groupHintPreload',
-  renderer: 'groupHintRenderer',
-  other: 'groupHintOther',
-} as const satisfies Record<FileProcess, string>;
 
 export interface SidebarProps {
   files: readonly { name: string; visible: boolean }[];
@@ -70,8 +55,7 @@ export function Sidebar({
   onSetVisible,
 }: SidebarProps) {
   const { t } = useTranslation('shell');
-  const diagnostics = useDiagnostics();
-  const badgeLabel = useBadgeLabel();
+  const badge = useBadges();
   const [filter, setFilter] = useState('');
   const [menu, setMenu] = useState<MenuState | null>(null);
   const anchor = useRef<HTMLSpanElement>(null);
@@ -90,7 +74,7 @@ export function Sidebar({
     const name = (
       await promptDialog({
         title: t('addFileTitle'),
-        message: group ? t(groupHintKey[group]) : t('fileNameHint'),
+        message: group ? t(`groupHint.${group}`) : t('fileNameHint'),
         label: t('fileName'),
         defaultValue: group ? suggestFileName(group, names) : undefined,
         confirmLabel: t('create'),
@@ -182,8 +166,8 @@ export function Sidebar({
         // Main, Preload and Renderer always show, so a file can be added to an
         // empty one; Other only lists what it has, and a filter hides empty groups.
         if (group.length === 0 && (process === 'other' || query)) return null;
-        const label = t(processLabelKey[process]);
-        const addLabel = t(addInGroupKey[process]);
+        const label = t(`process.${process}`);
+        const addLabel = t(`addFileIn.${process}`);
         return (
           <section key={process} className={styles.section}>
             <div className={styles.header}>
@@ -203,20 +187,17 @@ export function Sidebar({
                 value={group.some((file) => file.name === activeFile) ? activeFile : null}
                 onChange={onOpen}
               >
-                {group.map((file) => {
-                  const badge = badgeOf(diagnostics.get(file.name));
-                  return (
-                    <TreeRow
-                      key={file.name}
-                      id={file.name}
-                      label={file.name}
-                      labelDir="ltr"
-                      pill={badgeLabel(badge)}
-                      pillTone={badge?.tone}
-                      unsaved={dirtyFiles.includes(file.name) ? t('unsaved') : undefined}
-                    />
-                  );
-                })}
+                {group.map((file) => (
+                  <TreeRow
+                    key={file.name}
+                    id={file.name}
+                    label={file.name}
+                    labelDir="ltr"
+                    pill={badge(file.name)?.label}
+                    pillTone={badge(file.name)?.tone}
+                    unsaved={dirtyFiles.includes(file.name) ? t('unsaved') : undefined}
+                  />
+                ))}
               </Tree>
             )}
           </section>

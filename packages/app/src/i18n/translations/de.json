@@ -3629,30 +3629,30 @@
     "translation": "83dbfce1f15c",
     "reviewed": false
   },
-  "shell:addFileTitle": {
-    "source": "44dedd0f97fe",
-    "translation": "2a50bcebba7a",
-    "reviewed": false
-  },
-  "shell:addMainFile": {
+  "shell:addFileIn.main": {
     "source": "94f75a6de52c",
     "translation": "8ed77c92babd",
     "reviewed": true
   },
-  "shell:addOtherFile": {
+  "shell:addFileIn.other": {
     "source": "293d7ca21bf9",
     "translation": "aeb79c90539c",
     "reviewed": true
   },
-  "shell:addPreloadFile": {
+  "shell:addFileIn.preload": {
     "source": "96b72adcdb58",
     "translation": "da3819d8bab3",
     "reviewed": true
   },
-  "shell:addRendererFile": {
+  "shell:addFileIn.renderer": {
     "source": "b76201692c1f",
     "translation": "90a552320fd5",
     "reviewed": true
+  },
+  "shell:addFileTitle": {
+    "source": "44dedd0f97fe",
+    "translation": "2a50bcebba7a",
+    "reviewed": false
   },
   "shell:cancel": {
     "source": "19766ed6ccb2",
@@ -3779,22 +3779,22 @@
     "translation": "538d062b2d0b",
     "reviewed": false
   },
-  "shell:groupHintMain": {
+  "shell:groupHint.main": {
     "source": "cea339e2f592",
     "translation": "2f9dbaaf90b4",
     "reviewed": true
   },
-  "shell:groupHintOther": {
+  "shell:groupHint.other": {
     "source": "d0f933350f35",
     "translation": "9849e3f91368",
     "reviewed": true
   },
-  "shell:groupHintPreload": {
+  "shell:groupHint.preload": {
     "source": "a5da54596e64",
     "translation": "25c31fedb65f",
     "reviewed": true
   },
-  "shell:groupHintRenderer": {
+  "shell:groupHint.renderer": {
     "source": "37d15dcfde80",
     "translation": "f75ccce83df3",
     "reviewed": true
@@ -3804,22 +3804,22 @@
     "translation": "c2ddfa967cf1",
     "reviewed": false
   },
-  "shell:languageCss": {
+  "shell:language.css": {
     "source": "b581e46042cb",
     "translation": "b581e46042cb",
     "reviewed": false
   },
-  "shell:languageHtml": {
+  "shell:language.html": {
     "source": "07239dbd2a1a",
     "translation": "07239dbd2a1a",
     "reviewed": false
   },
-  "shell:languageJavascript": {
+  "shell:language.javascript": {
     "source": "b27ad06d123c",
     "translation": "b27ad06d123c",
     "reviewed": false
   },
-  "shell:languageJson": {
+  "shell:language.json": {
     "source": "db1a21a0bc2e",
     "translation": "db1a21a0bc2e",
     "reviewed": false
@@ -3829,17 +3829,17 @@
     "translation": "2841585339c1",
     "reviewed": false
   },
-  "shell:lensProcessMain": {
+  "shell:lensProcess.main": {
     "source": "9c96b3aeaba4",
     "translation": "7d414469ffd8",
     "reviewed": false
   },
-  "shell:lensProcessPreload": {
+  "shell:lensProcess.preload": {
     "source": "4261433e1b89",
     "translation": "6ba98eb201da",
     "reviewed": false
   },
-  "shell:lensProcessRenderer": {
+  "shell:lensProcess.renderer": {
     "source": "6bd52b204f5b",
     "translation": "9deb780b4331",
     "reviewed": false
@@ -3889,22 +3889,22 @@
     "translation": "bc385a30b537",
     "reviewed": true
   },
-  "shell:processMain": {
+  "shell:process.main": {
     "source": "eb814be3ca3b",
     "translation": "eb814be3ca3b",
     "reviewed": true
   },
-  "shell:processOther": {
+  "shell:process.other": {
     "source": "f97e9da0e3b8",
     "translation": "6039471db5f4",
     "reviewed": true
   },
-  "shell:processPreload": {
+  "shell:process.preload": {
     "source": "b39edfe3bc54",
     "translation": "b39edfe3bc54",
     "reviewed": false
   },
-  "shell:processRenderer": {
+  "shell:process.renderer": {
     "source": "9deb780b4331",
     "translation": "9deb780b4331",
     "reviewed": false

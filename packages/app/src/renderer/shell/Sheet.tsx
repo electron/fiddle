@@ -14,13 +14,13 @@ import {
   TabPanel,
   Tabs,
 } from '../../ui';
-import { badgeOf, useDiagnostics } from '../editor/diagnostics';
+import { useBadges, type Badge } from '../editor/diagnostics';
 import { EditorPane } from '../editor/EditorPane';
 import { ConsolePane } from '../features/run/ConsolePane';
 import { SettingsPage } from '../features/settings/SettingsPage';
 import { useShortcut } from '../hooks';
 import type { PaneActions } from './pane-actions';
-import { processOf, type FileProcess } from './processes';
+import { processOf } from './processes';
 import styles from './Sheet.module.css';
 import { isTabDrag, TAB_DRAG_TYPE, useTabDrag } from './tab-drag';
 import { useDraft } from './use-draft';
@@ -30,26 +30,6 @@ const CONSOLE_DEFAULT = 160;
 /** Dragging the console's splitter below this closes the console. */
 const CONSOLE_COLLAPSE = CONSOLE_MIN / 2;
 const PANE_MIN = 160;
-
-export const processLabelKey = {
-  main: 'processMain',
-  preload: 'processPreload',
-  renderer: 'processRenderer',
-  other: 'processOther',
-} as const satisfies Record<FileProcess, string>;
-
-type Badge = ReturnType<typeof badgeOf>;
-
-/** A badge's text: "2 errors", or "1 warning" when the file has no errors. */
-export function useBadgeLabel(): (badge: Badge) => string | undefined {
-  const { t } = useTranslation('shell');
-  return (badge) =>
-    badge
-      ? badge.tone === 'error'
-        ? t('errorCount', { count: badge.count })
-        : t('warningCount', { count: badge.count })
-      : undefined;
-}
 
 /** An element's content size, kept current. ResizeObserver reports the first size on `observe`. */
 function useSize(node: HTMLElement | null): { width: number; height: number } {
@@ -123,9 +103,7 @@ function EditorArea({ state, actions, sheetHeight }: SheetProps & { sheetHeight:
   const rtl = i18n.dir() === 'rtl';
   const { fiddle, layout } = state;
   const { active, panes } = actions;
-  const diagnostics = useDiagnostics();
-  const badgeLabel = useBadgeLabel();
-  const badge = (name: string) => badgeOf(diagnostics.get(name));
+  const badge = useBadges();
   const visible = fiddle.files.filter((file) => file.visible);
   const visibleNames = visible.map((file) => file.name);
   const split = panes.length > 1;
@@ -276,10 +254,7 @@ function EditorArea({ state, actions, sheetHeight }: SheetProps & { sheetHeight:
         >
           <div className={styles.tabs}>
             <TabList aria-label={t('openFiles')}>
-              {visible.map((file, index) => {
-                const fileBadge = badge(file.name);
-                const errorLabel = badgeLabel(fileBadge);
-                return (
+              {visible.map((file, index) => (
                   <Tab
                     key={file.name}
                     id={file.name}
@@ -292,28 +267,19 @@ function EditorArea({ state, actions, sheetHeight }: SheetProps & { sheetHeight:
                     onClose={() => actions.closeFile(file.name)}
                     drag={{ type: TAB_DRAG_TYPE, data: file.name }}
                     dropIndicator={indicatorFor(file.name, index === visible.length - 1)}
-                    error={
-                      fileBadge && errorLabel
-                        ? {
-                            count: fileBadge.count,
-                            tone: fileBadge.tone,
-                            label: errorLabel,
-                          }
-                        : undefined
-                    }
+                    error={badge(file.name)}
                     unsaved={
                       fiddle.dirtyFiles.includes(file.name) ? t('unsaved') : undefined
                     }
                   >
                     <span dir="ltr">{file.name}</span>
                   </Tab>
-                );
-              })}
+              ))}
             </TabList>
           </div>
           {!split && (
             <span className={styles.process}>
-              {t(processLabelKey[processOf(active)])}
+              {t(`process.${processOf(active)}`)}
             </span>
           )}
           <IconButton
@@ -438,23 +404,22 @@ function PaneDropZones({
 
 interface PaneHeaderProps {
   name: string;
-  badge: Badge;
+  badge: Badge | undefined;
   onMaximize: () => void;
   onClose: () => void;
 }
 
 function PaneHeader({ name, badge, onMaximize, onClose }: PaneHeaderProps) {
   const { t } = useTranslation('shell');
-  const label = useBadgeLabel()(badge);
   return (
     <div className={styles.paneHeader}>
       <Icon name="grip" className={styles.grip} />
       <span className={styles.paneName} data-tone={badge?.tone}>
         {badge && <Icon name="warning" />}
         <span dir="ltr">{name}</span>
-        {label && <span className={styles.paneErrors}>{label}</span>}
+        {badge && <span className={styles.paneErrors}>{badge.label}</span>}
       </span>
-      <span className={styles.paneProcess}>{t(processLabelKey[processOf(name)])}</span>
+      <span className={styles.paneProcess}>{t(`process.${processOf(name)}`)}</span>
       <span className={styles.paneActions}>
         <IconButton
           icon="maximize"

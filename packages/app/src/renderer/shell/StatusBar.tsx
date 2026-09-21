@@ -1,18 +1,11 @@
 import { useTranslation } from 'react-i18next';
 
-import { getEditorLanguage, type EditorLanguage } from '../../fiddle/files';
+import { getEditorLanguage } from '../../fiddle/files';
 import { useEditorCursor } from '../editor/editor-state';
 import { useTabFocusMode } from '../features/commands/window-commands';
 import { RunStatus } from '../features/run/RunStatus';
 import { NotificationsButton } from './NotificationsButton';
 import styles from './Shell.module.css';
-
-const languageKey = {
-  javascript: 'languageJavascript',
-  html: 'languageHtml',
-  css: 'languageCss',
-  json: 'languageJson',
-} as const satisfies Record<EditorLanguage, string>;
 
 export function StatusBar({ files }: { files: readonly string[] }) {
   const { t } = useTranslation('shell');
@@ -39,7 +32,7 @@ function CursorPosition({ files }: { files: readonly string[] }) {
   return (
     <>
       <span>{t('cursorPosition', { line: current.line, column: current.column })}</span>
-      <span>{t(languageKey[getEditorLanguage(current.file)])}</span>
+      <span>{t(`language.${getEditorLanguage(current.file)}`)}</span>
     </>
   );
 }

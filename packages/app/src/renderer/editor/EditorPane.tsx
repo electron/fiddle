@@ -234,13 +234,6 @@ export function EditorPane({ file, primary = false, onFocus }: EditorPaneProps) 
 
 function Lens({ error }: { error: RuntimeError }) {
   const { t } = useTranslation('shell');
-  const process = t(
-    error.process === 'main'
-      ? 'lensProcessMain'
-      : error.process === 'preload'
-        ? 'lensProcessPreload'
-        : 'lensProcessRenderer',
-  );
   return (
     <div className="lu-lens" role="note">
       <Icon name="warning" className="lu-lens-icon" />
@@ -250,7 +243,7 @@ function Lens({ error }: { error: RuntimeError }) {
         </div>
         <div className="lu-lens-hint">
           {t('lensHint', {
-            process,
+            process: t(`lensProcess.${error.process}`),
             file: error.file,
             line: error.line,
             column: error.column ?? 1,
