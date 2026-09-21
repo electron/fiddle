@@ -102,96 +102,7 @@ export class DriverError extends Error {
   }
 }
 
-interface Pending {
-  resolve(value: unknown): void;
-  reject(error: Error): void;
-  timer: NodeJS.Timeout;
-}
-
-export class DriverClient {
-  readonly #socket: net.Socket;
-  readonly #pending = new Map<number, Pending>();
-  #nextId = 1;
-  #buffer = '';
-
-  private constructor(socket: net.Socket) {
-    this.#socket = socket;
-    socket.setEncoding('utf8');
-    socket.on('data', (chunk: string) => {
-      this.#buffer += chunk;
-      for (
-        let end = this.#buffer.indexOf('\n');
-        end !== -1;
-        end = this.#buffer.indexOf('\n')
-      ) {
-        const line = this.#buffer.slice(0, end);
-        this.#buffer = this.#buffer.slice(end + 1);
-        if (line.trim()) this.#receive(JSON.parse(line) as DriverResponse);
-      }
-    });
-    const fail = () => {
-      for (const pending of this.#pending.values()) {
-        clearTimeout(pending.timer);
-        pending.reject(
-          new Error('The driver connection closed (did the app quit or crash?)'),
-        );
-      }
-      this.#pending.clear();
-    };
-    socket.on('close', fail);
-    socket.on('error', fail);
-  }
-
-  static connect(socketPath: string): Promise<DriverClient> {
-    return new Promise((resolve, reject) => {
-      const socket = net.connect(socketPath);
-      socket.once('error', reject);
-      socket.once('connect', () => {
-        socket.off('error', reject);
-        resolve(new DriverClient(socket));
-      });
-    });
-  }
-
-  #receive(response: DriverResponse): void {
-    const pending = this.#pending.get(response.id);
-    if (!pending) return;
-    this.#pending.delete(response.id);
-    clearTimeout(pending.timer);
-    if (response.ok) pending.resolve(response.result);
-    else pending.reject(new DriverError(response.error));
-  }
-
-  call<M extends DriverMethod>(
-    method: M,
-    params: DriverMethods[M][0],
-    timeoutMs?: number,
-  ): Promise<DriverMethods[M][1]> {
-    const id = this.#nextId++;
-    const stepTimeout = (params as { timeout?: number }).timeout ?? 10_000;
-    const limit = timeoutMs ?? stepTimeout + 20_000;
-    return new Promise((resolve, reject) => {
-      const timer = setTimeout(() => {
-        this.#pending.delete(id);
-        reject(new Error(`driver ${method} got no answer within ${limit} ms`));
-      }, limit);
-      this.#pending.set(id, {
-        resolve: resolve as (value: unknown) => void,
-        reject,
-        timer,
-      });
-      this.#socket.write(`${JSON.stringify({ id, method, params })}\n`);
-    });
-  }
-
-  close(): void {
-    this.#socket.end();
-  }
-}
-
 interface AppParts {
-  client: DriverClient;
-  socketPath: string;
   testDir?: string;
   pid?: number;
   exited?: Promise<number | null>;
@@ -200,46 +111,90 @@ interface AppParts {
   keepArtifacts?: boolean;
 }
 
-/** A running app. Every method is one driver method. */
+const CLOSED = 'The driver connection closed (did the app quit or crash?)';
+
+/** A running app, over its driver socket. Every method is one driver method. */
 export class FiddleApp {
-  readonly client: DriverClient;
   readonly socketPath: string;
   /** The temp dir: userData, cache, logs, `artifacts/` (screenshots) and `app-output.log`. */
   readonly testDir: string | undefined;
   readonly pid: number | undefined;
   /** Resolves with the exit code when a launched app exits. */
   readonly exited: Promise<number | null>;
+  readonly #socket: net.Socket;
+  /** Settles a call by id: an error, or else the result. */
+  readonly #pending = new Map<number, (error?: Error, result?: unknown) => void>();
   readonly #cleanup: AppParts['cleanup'];
   readonly #keep: boolean;
+  #nextId = 1;
   #failed = false;
   #closed = false;
 
-  constructor(parts: AppParts) {
-    this.client = parts.client;
-    this.socketPath = parts.socketPath;
+  private constructor(socket: net.Socket, socketPath: string, parts: AppParts) {
+    this.socketPath = socketPath;
     this.testDir = parts.testDir;
     this.pid = parts.pid;
     this.exited = parts.exited ?? new Promise(() => undefined);
     this.#cleanup = parts.cleanup;
     this.#keep = parts.keepArtifacts ?? false;
+    this.#socket = socket;
+    let buffer = '';
+    socket.setEncoding('utf8');
+    socket.on('data', (chunk: string) => {
+      buffer += chunk;
+      for (let end = buffer.indexOf('\n'); end !== -1; end = buffer.indexOf('\n')) {
+        const line = buffer.slice(0, end);
+        buffer = buffer.slice(end + 1);
+        if (!line.trim()) continue;
+        const response = JSON.parse(line) as DriverResponse;
+        this.#pending.get(response.id)?.(
+          response.ok ? undefined : new DriverError(response.error),
+          response.ok ? response.result : undefined,
+        );
+      }
+    });
+    const fail = () => this.#pending.forEach((settle) => settle(new Error(CLOSED)));
+    socket.on('close', fail);
+    socket.on('error', fail);
   }
 
-  /** Attaches to an app that's already running (for `yarn driver`). */
-  static async connect(socketPath: string): Promise<FiddleApp> {
-    return new FiddleApp({ client: await DriverClient.connect(socketPath), socketPath });
+  /** Attaches to a running app's driver socket (`yarn driver`); `launchApp()` passes the parts it owns. */
+  static connect(socketPath: string, parts: AppParts = {}): Promise<FiddleApp> {
+    return new Promise((resolve, reject) => {
+      const socket = net.connect(socketPath);
+      socket.once('error', reject);
+      socket.once('connect', () => {
+        socket.off('error', reject);
+        resolve(new FiddleApp(socket, socketPath, parts));
+      });
+    });
   }
 
   /** Any driver method. A failed step throws a `DriverError` with the full report. */
-  async call<M extends DriverMethod>(
+  call<M extends DriverMethod>(
     method: M,
     params: DriverMethods[M][0],
+    timeoutMs?: number,
   ): Promise<DriverMethods[M][1]> {
-    try {
-      return await this.client.call(method, params);
-    } catch (error) {
-      this.#failed = true;
-      throw error;
-    }
+    const id = this.#nextId++;
+    const limit =
+      timeoutMs ?? ((params as { timeout?: number }).timeout ?? 10_000) + 20_000;
+    return new Promise((resolve, reject) => {
+      const timer = setTimeout(
+        () => settle(new Error(`driver ${method} got no answer within ${limit} ms`)),
+        limit,
+      );
+      const settle = (error?: Error, result?: unknown) => {
+        this.#pending.delete(id);
+        clearTimeout(timer);
+        if (!error) return resolve(result as DriverMethods[M][1]);
+        // A failed step keeps the temp dir (screenshots, logs), unless it's close() finding the app gone.
+        if (!this.#closed) this.#failed = true;
+        reject(error);
+      };
+      this.#pending.set(id, settle);
+      this.#socket.write(`${JSON.stringify({ id, method, params })}\n`);
+    });
   }
 
   windows() {
@@ -277,12 +232,10 @@ export class FiddleApp {
   stores(window?: WindowRef) {
     return this.call('stores', { window });
   }
-  console(window?: WindowRef) {
-    return this.call('console', { window });
-  }
   clipboard() {
     return this.call('clipboard', {});
   }
+  /** Main's log and the renderers' console messages, newest last. */
   logs(tail?: number) {
     return this.call('logs', { tail });
   }
@@ -328,36 +281,14 @@ export class FiddleApp {
     this.#failed = true;
   }
 
-  /** A screenshot, the accessibility snapshot and log tails, as text. Never throws. */
-  async diagnostics(title = 'failure'): Promise<string> {
-    const parts = [
-      `--- e2e diagnostics: ${title} ---`,
-      `test dir: ${this.testDir ?? '(unknown)'}`,
-    ];
-    const attempt = async (label: string, get: () => Promise<string>) => {
-      try {
-        parts.push(`${label}${await get()}`);
-      } catch (error) {
-        parts.push(
-          `${label}(unavailable: ${error instanceof Error ? error.message.split('\n')[0] : String(error)})`,
-        );
-      }
-    };
-    await attempt(
-      'screenshot: ',
-      async () => (await this.client.call('screenshot', {})).path,
-    );
-    await attempt('accessibility snapshot:\n', async () =>
-      indent(await this.client.call('snapshot', {})),
-    );
-    await attempt('logs:\n', async () => {
-      const logs = await this.client.call('logs', { tail: 40 });
-      return `  main:\n${indent(logs.main.join('\n'))}\n  renderer:\n${indent(logs.renderer.join('\n'))}`;
-    });
-    await attempt('violations: ', async () =>
-      JSON.stringify(await this.client.call('violations', {})),
-    );
-    return parts.join('\n');
+  /** A screenshot, the accessibility snapshot and log tails for a failed test, as text. Never throws. */
+  report(title: string): Promise<string> {
+    return this.call('report', { title }).then(formatFailure, String);
+  }
+
+  /** Closes the connection and leaves the app running (`yarn driver`). */
+  disconnect(): void {
+    this.#socket.end();
   }
 
   /** Quits the app (killing it after 10 s) and cleans up. Keeps the temp dir if anything failed. */
@@ -365,11 +296,7 @@ export class FiddleApp {
     if (this.#closed) return;
     this.#closed = true;
     if (this.#cleanup) {
-      try {
-        await this.client.call('quit', {}, 5000);
-      } catch {
-        // Already gone.
-      }
+      await this.call('quit', {}, 5000).catch(() => undefined); // Rejects when it's already gone.
       let killTimer: NodeJS.Timeout | undefined;
       await Promise.race([
         this.exited,
@@ -383,7 +310,7 @@ export class FiddleApp {
         );
       }
     }
-    this.client.close();
+    this.disconnect();
   }
 }
 
@@ -392,8 +319,6 @@ export interface LaunchOptions {
   env?: Record<string, string>;
   /** Default `en-US`. */
   locale?: string;
-  /** Seeds Math.random and UUIDs in main and Math.random in renderers. Default 1. */
-  seed?: number;
   /** Share a fixture server; by default each app gets its own. */
   fixtures?: FixtureServer;
   /** Keep the temp dir after close even if nothing failed. */
@@ -537,11 +462,11 @@ async function startDisplay(): Promise<Display> {
 }
 
 async function connectWhenReady(
-  socketPath: string,
+  connect: () => Promise<FiddleApp>,
   timeout: number,
   exited: Promise<number | null>,
   crashed: () => boolean,
-): Promise<DriverClient> {
+): Promise<FiddleApp> {
   let exitCode: number | null | undefined;
   void exited.then((code) => {
     exitCode = code;
@@ -553,7 +478,7 @@ async function connectWhenReady(
     }
     if (crashed()) throw new Error('the main process threw during startup');
     try {
-      return await DriverClient.connect(socketPath);
+      return await connect();
     } catch {
       // Not listening yet.
     }
@@ -598,7 +523,6 @@ export async function launchApp(options: LaunchOptions = {}): Promise<FiddleApp>
     FIDDLE_TEST_MODE: '1',
     FIDDLE_TEST_DIR: testDir,
     FIDDLE_TEST_FIXTURE_URL: fixtures.url,
-    FIDDLE_TEST_SEED: String(options.seed ?? 1),
     FIDDLE_TEST_LOCALE: options.locale ?? 'en-US',
     ELECTRON_FIDDLE_DRIVER_SOCKET: socketPath,
     TZ: 'UTC',
@@ -650,23 +574,26 @@ export async function launchApp(options: LaunchOptions = {}): Promise<FiddleApp>
   };
 
   try {
-    const client = await connectWhenReady(socketPath, timeout, exited, () => mainCrashed);
-    const app = new FiddleApp({
-      client,
-      socketPath,
+    const parts = {
       testDir,
       pid: child.pid,
       exited,
       cleanup,
       keepArtifacts: options.keepArtifacts,
-    });
+    };
+    const app = await connectWhenReady(
+      () => FiddleApp.connect(socketPath, parts),
+      timeout,
+      exited,
+      () => mainCrashed,
+    );
     try {
       await app.waitForWindow(0, timeout);
       // Shown is not painted: main shows a window whose page is slow to report ready anyway, and a
       // cold Windows runner has taken 10 s to mount the editor. Specs expect it there.
       await app.query({ role: 'code', timeout });
     } catch (error) {
-      client.close();
+      app.disconnect();
       throw error;
     }
     return app;
