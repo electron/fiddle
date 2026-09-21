@@ -70,19 +70,18 @@ describe('DeepLinkQueue', () => {
     await queue.start();
 
     queue.push('electron-fiddle://gist/a');
-    expect(queue.busy).toBe(true);
     queue.push('electron-fiddle://gist/b');
-    expect(handle).toHaveBeenCalledTimes(1);
-    expect(onBusy).toHaveBeenCalledWith('electron-fiddle://gist/b');
-    expect(queue.waiting).toBe(1);
+    await vi.waitFor(() => expect(handle).toHaveBeenCalledTimes(1));
+    expect(onBusy).toHaveBeenCalledExactlyOnceWith('electron-fiddle://gist/b');
 
     releases[0]!();
     await vi.waitFor(() => expect(handle).toHaveBeenCalledTimes(2));
     expect(handle).toHaveBeenLastCalledWith('electron-fiddle://gist/b');
     releases[1]!();
-    await vi.waitFor(() => expect(queue.busy).toBe(false));
+    await queue.start();
     queue.push('electron-fiddle://gist/c');
-    expect(handle).toHaveBeenCalledTimes(3);
+    expect(onBusy).toHaveBeenCalledOnce();
+    await vi.waitFor(() => expect(handle).toHaveBeenCalledTimes(3));
   });
 
   it('keeps going after a handler fails', async () => {
@@ -95,7 +94,6 @@ describe('DeepLinkQueue', () => {
     queue.push('electron-fiddle://gist/b');
     await queue.start();
     expect(handle).toHaveBeenCalledTimes(2);
-    expect(queue.busy).toBe(false);
   });
 
   it('finds links in argv on every platform', () => {

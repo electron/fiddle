@@ -72,9 +72,7 @@ export function initFakeDocuments(
       windows.set(windowId, { ...init });
       await options.onCreateWindow?.(windowId, init);
     },
-    ...(options.onDocsExampleLoaded
-      ? { onDocsExampleLoaded: options.onDocsExampleLoaded }
-      : {}),
+    onDocsExampleLoaded: options.onDocsExampleLoaded,
   });
   return windows;
 }
