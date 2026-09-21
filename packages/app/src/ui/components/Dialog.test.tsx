@@ -103,6 +103,7 @@ describe('confirmDialog', () => {
     act(() => {
       result = confirmDialog({
         title: 'Delete main.js?',
+        message: 'This cannot be undone.',
         confirmLabel: 'Delete',
         cancelLabel: 'Cancel',
         tone: 'danger',
@@ -118,6 +119,13 @@ describe('confirmDialog', () => {
     ).toBeTruthy();
     fireEvent.click(screen.getByRole('button', { name: 'Delete' }));
     await expect(result).resolves.toBe(true);
+  });
+
+  it('announces its message as the description', async () => {
+    void ask();
+    const dialog = await screen.findByRole('alertdialog');
+    const id = dialog.getAttribute('aria-describedby');
+    expect(id && document.getElementById(id)?.textContent).toBe('This cannot be undone.');
   });
 
   it('starts on Cancel when the action destroys something, so a stray Enter keeps it', async () => {

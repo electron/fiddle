@@ -4,6 +4,7 @@ import {
   Heading,
   Modal,
   ModalOverlay,
+  Text,
 } from 'react-aria-components';
 import { Icon, type IconName } from '../icons/Icon';
 import { Button, IconButton } from './Button';
@@ -67,7 +68,11 @@ export function Dialog({
                   <IconButton icon="close" size="sm" label={closeLabel} onPress={close} />
                 )}
               </div>
-              {description && <div className={styles.description}>{description}</div>}
+              {description && (
+                <Text slot="description" elementType="div" className={styles.description}>
+                  {description}
+                </Text>
+              )}
               {children && <div className={styles.body}>{children}</div>}
               {footer && <div className={styles.footer}>{footer}</div>}
             </>
