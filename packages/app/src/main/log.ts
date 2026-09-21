@@ -7,7 +7,7 @@ import fsp from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
 
-import { isSecretKey, REDACTED, redactSecrets } from './crash/scrub';
+import { redactSecrets, scrubValue } from './crash/scrub';
 
 export type LogLevel = 'debug' | 'info' | 'warn' | 'error';
 type LogSource = 'main' | 'renderer';
@@ -21,47 +21,7 @@ const MAX_EARLY_LINES = 1000;
 
 const home = os.homedir();
 
-/** Makes a detail JSON-safe and redacted. Cycles are cut; an object shared without cycling prints in full each time. */
-function toJson(value: unknown, seen: Set<object>, depth: number): unknown {
-  if (typeof value === 'string') return redactSecrets(value, home);
-  if (typeof value === 'bigint') return value.toString();
-  if (typeof value === 'function' || typeof value === 'symbol') return String(value);
-  if (typeof value !== 'object' || value === null) return value;
-  if (seen.has(value) || depth > 8) return '[circular]';
-  seen.add(value);
-  const json = objectToJson(value, seen, depth);
-  seen.delete(value);
-  return json;
-}
-
-function objectToJson(value: object, seen: Set<object>, depth: number): unknown {
-  if (value instanceof Error) {
-    const { code, details, cause } = value as {
-      code?: unknown;
-      details?: unknown;
-      cause?: unknown;
-    };
-    const extra = (name: string, item: unknown) =>
-      item === undefined ? {} : { [name]: toJson(item, seen, depth + 1) };
-    return {
-      name: value.name,
-      message: redactSecrets(value.message, home),
-      ...(value.stack === undefined ? {} : { stack: redactSecrets(value.stack, home) }),
-      ...extra('code', code),
-      ...extra('details', details),
-      ...extra('cause', cause),
-    };
-  }
-  if (Array.isArray(value)) return value.map((item) => toJson(item, seen, depth + 1));
-  const out: Record<string, unknown> = {};
-  for (const [key, item] of Object.entries(value)) {
-    out[redactSecrets(key, home)] =
-      typeof item === 'string' && isSecretKey(key)
-        ? REDACTED
-        : toJson(item, seen, depth + 1);
-  }
-  return out;
-}
+const redact = (text: string) => redactSecrets(text, home);
 
 /** One JSON-lines entry, redacted. */
 export function formatEntry(
@@ -75,14 +35,14 @@ export function formatEntry(
     t: now.toISOString(),
     level,
     process: source,
-    msg: redactSecrets(message, home),
+    msg: redact(message),
     ...(details.length
-      ? { details: details.map((detail) => toJson(detail, new Set(), 0)) }
+      ? { details: details.map((detail) => scrubValue(detail, redact)) }
       : {}),
   });
 }
 
-/** Appends lines to `<dir>/main.log`, rotating it at `maxBytes`. Writes are serialized and batched. */
+/** Appends lines to `<dir>/main.log`, rotating it once a batch would pass `maxBytes`. Writes are serialized and batched. */
 export class LogFile {
   readonly dir: string;
   readonly #maxBytes: number;
@@ -136,31 +96,17 @@ export class LogFile {
   }
 
   async #drain(): Promise<void> {
-    // Let a synchronous burst of entries land first: it becomes one append.
+    // Let a synchronous burst of entries land first: it becomes one append (and may pass `maxBytes` by a batch).
     await Promise.resolve();
     while (this.#pending.length) {
-      let chunk = '';
-      let chunkBytes = 0;
-      for (const line of this.#pending.splice(0)) {
-        const bytes = Buffer.byteLength(line);
-        if (
-          this.#size + chunkBytes > 0 &&
-          this.#size + chunkBytes + bytes > this.#maxBytes
-        ) {
-          await this.#append(chunk, chunkBytes);
-          await this.#rotate();
-          chunk = '';
-          chunkBytes = 0;
-        }
-        chunk += line;
-        chunkBytes += bytes;
-      }
-      await this.#append(chunk, chunkBytes);
+      const chunk = this.#pending.splice(0).join('');
+      const bytes = Buffer.byteLength(chunk);
+      if (this.#size > 0 && this.#size + bytes > this.#maxBytes) await this.#rotate();
+      await this.#append(chunk, bytes);
     }
   }
 
   async #append(chunk: string, bytes: number): Promise<void> {
-    if (!chunk) return;
     try {
       await fsp.appendFile(this.file(0), chunk, { mode: 0o600 });
       this.#size += bytes;
