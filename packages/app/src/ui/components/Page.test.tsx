@@ -10,10 +10,11 @@ function setup(onClose = vi.fn()) {
         <SideNav
           aria-label="Sections"
           items={[
-            { heading: 'App' },
             { id: 'general', label: 'General' },
             { id: 'editor', label: 'Editor' },
           ]}
+          value="general"
+          onChange={() => {}}
         />
       }
       onClose={onClose}

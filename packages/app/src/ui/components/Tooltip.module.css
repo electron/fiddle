@@ -32,13 +32,3 @@
   letter-spacing: 0.04em;
   opacity: 0.72;
 }
-
-/* A disabled control can't take hover or focus, so a wrapper takes them for it. */
-.disabledTrigger {
-  display: inline-flex;
-  border-radius: var(--lu-radius-control);
-}
-
-.disabledTrigger > * {
-  pointer-events: none;
-}

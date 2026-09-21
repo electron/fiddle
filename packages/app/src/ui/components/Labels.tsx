@@ -1,43 +1,20 @@
 import type { ReactNode } from 'react';
-import { Button as AriaButton } from 'react-aria-components';
 import { cx } from '../cx';
-import { Icon } from '../icons/Icon';
 import styles from './Labels.module.css';
 
 export type Tone = 'neutral' | 'accent' | 'success' | 'warning' | 'danger';
 
-interface TagBaseProps {
+export interface TagProps {
   tone?: Tone;
   children: ReactNode;
   className?: string;
 }
 
-export type TagProps = TagBaseProps &
-  (
-    | {
-        /** Adds a remove button, named by `removeLabel`. */
-        onRemove: () => void;
-        removeLabel: string;
-      }
-    | { onRemove?: undefined; removeLabel?: undefined }
-  );
-
-/** A short label, neutral by default and optionally removable. */
-export function Tag({
-  tone = 'neutral',
-  children,
-  onRemove,
-  removeLabel,
-  className,
-}: TagProps) {
+/** A short label, neutral by default. */
+export function Tag({ tone = 'neutral', children, className }: TagProps) {
   return (
-    <span className={cx(styles.badge, styles.tag, className)} data-tone={tone}>
+    <span className={cx(styles.badge, className)} data-tone={tone}>
       {children}
-      {onRemove && (
-        <AriaButton className={styles.remove} aria-label={removeLabel} onPress={onRemove}>
-          <Icon name="close" size={10} />
-        </AriaButton>
-      )}
     </span>
   );
 }

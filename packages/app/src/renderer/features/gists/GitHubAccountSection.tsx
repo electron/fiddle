@@ -20,7 +20,7 @@ export function GitHubAccountSection() {
 
   return (
     <div className={styles.section}>
-      <FormField label={t('accountLabel')} inline>
+      <FormField label={t('accountLabel')}>
         <div className={styles.account}>
           <Icon name="user" className={styles.accountIcon} />
           <span className={styles.accountName}>

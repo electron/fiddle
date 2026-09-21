@@ -1,4 +1,4 @@
-import type { CSSProperties, ReactNode } from 'react';
+import type { ReactNode } from 'react';
 import { ListBox, ListBoxItem } from 'react-aria-components';
 import { cx } from '../cx';
 import { Icon, type IconName } from '../icons/Icon';
@@ -7,35 +7,23 @@ import styles from './Content.module.css';
 export interface ListProps {
   'aria-label': string;
   children: ReactNode;
-  value?: string | null;
-  defaultValue?: string;
-  onChange?: (id: string) => void;
-  onAction?: (id: string) => void;
+  value: string | null;
+  onChange: (id: string) => void;
   className?: string;
 }
 
 /** A selectable list of rows. Arrow keys move; one Tab stop. */
-export function List({
-  children,
-  value,
-  defaultValue,
-  onChange,
-  onAction,
-  className,
-  ...rest
-}: ListProps) {
+export function List({ children, value, onChange, className, ...rest }: ListProps) {
   return (
     <ListBox
       aria-label={rest['aria-label']}
       selectionMode="single"
-      selectedKeys={value === undefined ? undefined : value === null ? [] : [value]}
-      defaultSelectedKeys={defaultValue !== undefined ? [defaultValue] : undefined}
+      selectedKeys={value === null ? [] : [value]}
       onSelectionChange={(keys) => {
         if (keys === 'all') return;
         const [key] = [...keys];
-        if (key != null) onChange?.(String(key));
+        if (key != null) onChange(String(key));
       }}
-      onAction={onAction ? (key) => onAction(String(key)) : undefined}
       className={cx(styles.list, className)}
     >
       {children}
@@ -50,26 +38,11 @@ export interface ListRowProps {
   icon?: IconName;
   /** Trailing content, usually Tags. */
   tags?: ReactNode;
-  isDisabled?: boolean;
-  className?: string;
 }
 
-export function ListRow({
-  id,
-  title,
-  meta,
-  icon,
-  tags,
-  isDisabled,
-  className,
-}: ListRowProps) {
+export function ListRow({ id, title, meta, icon, tags }: ListRowProps) {
   return (
-    <ListBoxItem
-      id={id}
-      textValue={title}
-      isDisabled={isDisabled}
-      className={cx(styles.row, className)}
-    >
+    <ListBoxItem id={id} textValue={title} className={styles.row}>
       {icon && <Icon name={icon} className={styles.rowIcon} />}
       <span className={styles.rowMain}>
         <span className={styles.rowTitle}>{title}</span>
@@ -100,9 +73,6 @@ export interface TableProps<Row extends { id: string }> {
   'aria-label'?: string;
   /** Shown when there are no rows. */
   emptyMessage?: ReactNode;
-  selectedIds?: string[];
-  className?: string;
-  style?: CSSProperties;
 }
 
 function isSection<Row>(row: Row | TableSection): row is TableSection {
@@ -113,13 +83,10 @@ export function Table<Row extends { id: string }>({
   columns,
   rows,
   emptyMessage,
-  selectedIds = [],
-  className,
-  style,
   ...rest
 }: TableProps<Row>) {
   return (
-    <div className={cx(styles.tableWrap, className)} style={style}>
+    <div className={styles.tableWrap}>
       <table className={styles.table} aria-label={rest['aria-label']}>
         <colgroup>
           {columns.map((column) => (
@@ -154,11 +121,7 @@ export function Table<Row extends { id: string }>({
                   </th>
                 </tr>
               ) : (
-                <tr
-                  key={row.id}
-                  className={styles.tr}
-                  aria-selected={selectedIds.includes(row.id) || undefined}
-                >
+                <tr key={row.id} className={styles.tr}>
                   {columns.map((column) => (
                     <td
                       key={column.key}

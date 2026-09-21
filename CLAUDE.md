@@ -34,7 +34,7 @@ Run from the repo root.
   - In this container, run it outside the Bash sandbox, because Xvfb can't start inside it.
 - `yarn generate`: EIPC bindings and compiled i18n catalogs. It's offline and idempotent, and start, typecheck, lint, test, package and make all run it.
 - `yarn typecheck` (`tsc -b`), `yarn lint`, `yarn format`.
-- `yarn test`: every Vitest project (`core`, `app:node`, `app:jsdom`). For one project: `yarn vitest run --project app:node`.
+- `yarn test`: every Vitest project (`core`, `app:node`, `app:jsdom`). For one project: `yarn vitest run --project app:node`. `yarn test --coverage` adds a line-coverage report.
 - `yarn package`, `yarn make`: Forge 8, output in `packages/app/out/`.
 - `yarn fiddle <command>`: the headless CLI against the dev build. See "Headless CLI" below.
 - `yarn test:e2e`, `yarn driver <command>`: end-to-end tests and the interactive driver. See "E2E" below.
