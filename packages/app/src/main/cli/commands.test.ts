@@ -295,9 +295,9 @@ describe('runCommand', () => {
     expect(await readFile(path.join(dir, 'out', 'index.html'), 'utf8')).toBe(
       '<p>template</p>',
     );
-    // The template loader is told which majors have a stable release, so it can pick a branch.
-    const { isReleasedMajor } = vi.mocked(appTemplateLoader).mock.calls[0]![0];
-    expect([isReleasedMajor(99), isReleasedMajor(100)]).toEqual([true, false]);
+    // The template loader reads the release list the command loaded, so it can pick a branch.
+    const releases = vi.mocked(appTemplateLoader).mock.calls[0]![0];
+    expect(releases().map((r) => r.version)).toContain('99.0.0');
   });
 
   describe('the release list', () => {
@@ -482,8 +482,8 @@ describe('runCommand', () => {
         files: ['helpers.js', 'main.js', 'package.json'],
       });
       expect(result.events.filter((e) => e.level === 'warn').map((e) => e.text)).toEqual([
-        'warnUnusableVersion {"version":"latest"}',
-        'warnRejectedModules {"modules":"evil"}',
+        'warnVersion {"version":"latest"}',
+        'warnModules {"modules":"evil@file:../evil"}',
       ]);
       expect(await readFile(path.join(out, 'helpers.js'), 'utf8')).toBe('// helpers');
       expect(
@@ -500,9 +500,7 @@ describe('runCommand', () => {
       );
       const result = await run('export', exportInput(ID));
       expect(result.code).toBeUndefined();
-      expect(result.events.find((e) => e.level === 'warn')?.text).toBe(
-        'warnInvalidPackageJson',
-      );
+      expect(result.events.find((e) => e.level === 'warn')?.text).toBe('warnPackageJson');
     });
   });
 

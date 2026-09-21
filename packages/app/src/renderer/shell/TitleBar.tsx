@@ -40,7 +40,7 @@ export interface TitleBarProps {
 
 /** Controls in the title bar; a double-click on them isn't a title bar double-click. */
 const CONTROLS =
-  'button, a, input, [role="button"], [role="toolbar"], [role="dialog"], [role="menubar"]';
+  'button, a, input, [role="button"], [role="group"], [role="dialog"], [role="menubar"]';
 const { gap: GAP, padding: PADDING, picker: PICKER } = TITLE_BAR_PARTS;
 /** The name hides below this width rather than show a sliver, and comes back with room to spare (its divider's). */
 const NAME_HIDE_BELOW = 48;

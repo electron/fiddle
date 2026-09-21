@@ -141,6 +141,7 @@ describe('TitleBar', () => {
       setup({ platform: 'darwin' });
       fireEvent.doubleClick(screen.getByRole('button', { name: 'run' }));
       fireEvent.doubleClick(screen.getByRole('button', { name: 'settings' }));
+      fireEvent.doubleClick(screen.getByRole('group', { name: 'toolbar' }));
       expect(mocks.windowApi.DoubleClickTitleBar).not.toHaveBeenCalled();
       fireEvent.doubleClick(screen.getByText('My fiddle'));
       expect(mocks.windowApi.DoubleClickTitleBar).toHaveBeenCalledOnce();
