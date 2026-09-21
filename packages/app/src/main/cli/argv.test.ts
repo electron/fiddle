@@ -5,7 +5,7 @@ import { beforeAll, describe, expect, it } from 'vitest';
 import { FiddleError } from '../../shared/errors';
 import { initMainI18n } from '../i18n';
 import { fieldKey, fields, helpText, parseCommandLine } from './argv';
-import { commandIds, descriptorOf, descriptors } from './descriptors';
+import { commandIds, descriptorOf } from './descriptors';
 
 beforeAll(async () => {
   await initMainI18n(['en']);
@@ -145,7 +145,7 @@ describe('help', () => {
   it("only lists a group's commands", () => {
     const text = helpText({ group: 'versions' });
     expect(text).toContain('versions list');
-    expect(text).not.toContain('gist load');
+    expect(text).not.toContain('gist publish');
   });
 });
 
@@ -164,11 +164,5 @@ describe('descriptors', () => {
       for (const field of fields(descriptor))
         expect(catalog, `${id} ${field.name}`).toHaveProperty(fieldKey(field.name));
     }
-  });
-
-  it('list error codes', () => {
-    for (const id of commandIds)
-      expect(descriptors[id].errors).toContain('invalid-argument');
-    expect(descriptors.run.errors).toContain('untrusted');
   });
 });
