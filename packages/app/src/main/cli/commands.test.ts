@@ -27,9 +27,10 @@ vi.mock('../documents/service', () => ({
   staticDir: () => '/nonexistent/static',
 }));
 vi.mock('../run/service', () => ({ PM_INSTALL_URLS: { npm: '', yarn: '' } }));
-// No package manager: package and make stop right after the trust check instead of looking for npm.
+// No login shell or package manager: package and make stop right after the trust check instead of spawning either.
 vi.mock('../../fiddle/modules', async (importOriginal) => ({
   ...(await importOriginal<typeof import('../../fiddle/modules')>()),
+  loadLoginShellPath: async () => undefined,
   findPackageManager: async () => null,
 }));
 vi.mock('../packaging/service', () => ({

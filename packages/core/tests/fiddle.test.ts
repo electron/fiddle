@@ -9,6 +9,9 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { Fiddle, FiddleFactory } from '../src/index.js';
 
+// Several tests here run git, whose first start on a Windows runner has taken 10 s.
+vi.setConfig({ testTimeout: 30_000 });
+
 describe('FiddleFactory', () => {
   let tmpdir: string;
   let fiddleDir: string;

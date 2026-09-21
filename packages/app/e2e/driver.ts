@@ -671,6 +671,9 @@ export async function launchApp(options: LaunchOptions = {}): Promise<FiddleApp>
     });
     try {
       await app.waitForWindow(0, timeout);
+      // Shown is not painted: main shows a window whose page is slow to report ready anyway, and a
+      // cold Windows runner has taken 10 s to mount the editor. Specs expect it there.
+      await app.query({ role: 'code', timeout });
     } catch (error) {
       client.close();
       throw error;
