@@ -2,7 +2,9 @@
 import { EventEmitter } from 'node:events';
 import fs from 'node:fs';
 import fsp from 'node:fs/promises';
+import path from 'node:path';
 import { PassThrough } from 'node:stream';
+import { pathToFileURL } from 'node:url';
 
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
@@ -276,6 +278,26 @@ describe('RunService.run', () => {
     expect(await result).toMatchObject({ code: 1 });
     expect(state()).toMatchObject({ result: 'failure' });
     expect(runs.versionsInUse()).toEqual([]);
+  });
+
+  it('stops updating the errors once 50 are listed', async () => {
+    const child = fakeChild();
+    spawnReturns(child);
+    const { runs, state, texts, hub } = setup();
+    const result = runs.run('w');
+    await running(state);
+    const { appDir } = spawnElectron.mock.calls[0]![0] as { appDir: string };
+    const source = pathToFileURL(path.join(appDir, 'main.js')).href;
+    const error = `[1:0913/1.2:INFO:CONSOLE:4] "Uncaught Error: boom", source: ${source} (4)\n`;
+    child.stderr.write(error.repeat(50));
+    await vi.waitFor(() => expect(state().errors).toHaveLength(50));
+    const updateWindow = vi.spyOn(hub, 'updateWindow');
+    const before = texts().length;
+    child.stderr.write(error);
+    await vi.waitFor(() => expect(texts()).toHaveLength(before + 1));
+    expect(updateWindow).not.toHaveBeenCalled();
+    child.exit(0);
+    await result;
   });
 });
 

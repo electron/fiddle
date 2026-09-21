@@ -589,9 +589,11 @@ export class RunService {
       // The catalog line reads `127.0.0.1:{{port}}`; the id after the port is what authorises an attach.
       this.log(windowId, tm('mainRun')('inspector', { port: result.inspectorAddress }));
     }
-    if (result.errors.length > 0) {
+    const { errors } = this.state(windowId);
+    // Once the list is full, a fiddle that keeps throwing changes nothing.
+    if (result.errors.length > 0 && errors.length < MAX_ERRORS) {
       this.setState(windowId, {
-        errors: [...this.state(windowId).errors, ...result.errors].slice(0, MAX_ERRORS),
+        errors: [...errors, ...result.errors].slice(0, MAX_ERRORS),
       });
     }
   }
