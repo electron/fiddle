@@ -24,9 +24,14 @@ vi.mock('./argv', () => ({ helpText: vi.fn(() => 'HELP\n'), parseCommandLine: vi
 vi.mock('./commands', () => ({ runCommand: vi.fn() }));
 
 const consoleMethods = { log: console.log, info: console.info, debug: console.debug };
+/** Each launch listens for signals and stream errors: the listeners it added are removed after the test. */
 const signalListeners = {
   SIGINT: process.listeners('SIGINT'),
   SIGTERM: process.listeners('SIGTERM'),
+};
+const streamErrorListeners = {
+  stdout: process.stdout.listeners('error'),
+  stderr: process.stderr.listeners('error'),
 };
 
 afterEach(() => {
@@ -39,6 +44,11 @@ afterEach(() => {
   ][]) {
     for (const listener of process.listeners(signal))
       if (!keep.includes(listener)) process.off(signal, listener);
+  }
+  for (const name of ['stdout', 'stderr'] as const) {
+    for (const listener of process[name].listeners('error'))
+      if (!streamErrorListeners[name].includes(listener))
+        process[name].off('error', listener as (error: Error) => void);
   }
 });
 
@@ -247,6 +257,8 @@ describe('main’s own logs', () => {
   it('are dropped, so stdout is the command’s alone', async () => {
     const error = vi.spyOn(console, 'error').mockImplementation(() => undefined);
     await launch(['--headless', 'run']);
+    for (const name of ['log', 'info', 'debug'] as const)
+      expect(console[name]).not.toBe(consoleMethods[name]);
     console.log('starting');
     console.info('info');
     expect(error).not.toHaveBeenCalled();

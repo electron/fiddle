@@ -8,6 +8,7 @@ import path from 'node:path';
 import { Installer } from '@electron/fiddle-core';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
+import { compareVersions } from '../../fiddle/versions';
 import { ErrorCode, FiddleError } from '../../shared/errors';
 import { descriptors } from './descriptors';
 import { CliErrorCode, Reporter } from './output';
@@ -412,7 +413,10 @@ describe('the trust prompt', () => {
     serveGist();
     electronThat(exitsWith(0));
   });
-  afterEach(() => void vi.mocked(process.stderr.write).mockRestore());
+  afterEach(() => {
+    vi.mocked(process.stderr.write).mockRestore();
+    question.mockReset();
+  });
 
   it('describes the gist on the terminal and runs it on a yes', async () => {
     question.mockResolvedValue(' Yes ');
@@ -457,7 +461,11 @@ describe('bisect', () => {
   /** A fiddle that passes before `firstBad` and fails from it on. */
   const brokenSince = (firstBad: string) =>
     electronThat((child, { exec }) =>
-      child.emit('close', installed.get(exec)! < firstBad ? 0 : 1, null),
+      child.emit(
+        'close',
+        compareVersions(installed.get(exec)!, firstBad) < 0 ? 0 : 1,
+        null,
+      ),
     );
 
   it('finds the first bad release between a good and a bad one', async () => {

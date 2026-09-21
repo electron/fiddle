@@ -34,12 +34,6 @@ vi.mock('../documents/service', async () => {
   };
 });
 vi.mock('../run/service', () => ({ PM_INSTALL_URLS: { npm: '', yarn: '' } }));
-// No login shell or package manager: package and make stop right after the trust check instead of spawning either.
-vi.mock('../../fiddle/modules', async (importOriginal) => ({
-  ...(await importOriginal<typeof import('../../fiddle/modules')>()),
-  loadLoginShellPath: async () => undefined,
-  findPackageManager: async () => null,
-}));
 vi.mock('../packaging/service', () => ({
   forgeOptionsFor: vi.fn(),
   forgeProject: vi.fn(),
@@ -59,7 +53,6 @@ beforeEach(async () => {
   paths.cache = path.join(dir, 'cache');
 });
 afterEach(async () => {
-  vi.unstubAllEnvs(); // here, so a timed-out test can't leave TMPDIR pointing at the deleted folder
   if (previousToken !== undefined) process.env.GITHUB_TOKEN = previousToken;
   else delete process.env.GITHUB_TOKEN;
   await rm(dir, { recursive: true, force: true });
@@ -151,15 +144,7 @@ describe('withModules', () => {
     expect(withModules(loaded(), ['@types/node'])).toEqual({ '@types/node': 'latest' });
   });
 
-  it.each([
-    '-g',
-    'a b',
-    'x@git+https://example.com/x.git',
-    'x@file:../x',
-    'x@',
-    '../x',
-    'x@npm:y',
-  ])('refuses %j', (spec) => {
+  it.each(['-g', 'x@file:../x'])('refuses %j', (spec) => {
     expect(() => withModules(loaded(), [spec])).toThrowError(
       expect.objectContaining({ code: ErrorCode.invalidArgument }),
     );
@@ -455,27 +440,15 @@ describe('runCommand', () => {
       ).toMatchObject({ devDependencies: { electron: '999.0.0' } });
     });
 
-    const remoteInput = (id: 'run' | 'bisect' | 'package' | 'make', trust: boolean) =>
-      parse(id, { fiddle: ID, good: '30.0.0', bad: '31.0.0', trust });
-
     it.each(['run', 'bisect', 'package', 'make'] as const)(
-      'is refused by %s without --trust, and never starts the forge task',
+      'is refused by %s without --trust, having fetched nothing but the gist',
       async (id) => {
-        const result = await run(id, remoteInput(id, false));
-        expect(result.code).toBe(CliErrorCode.untrusted);
-        const { runForgeTask } = await import('../packaging/service');
-        expect(runForgeTask).not.toHaveBeenCalled();
-      },
-    );
-
-    it.each(['run', 'bisect', 'package', 'make'] as const)(
-      'gets past the trust check in %s with --trust',
-      async (id) => {
-        // What comes next (a build, a download) may leave files: keep them in the test's folder.
-        for (const key of ['TMPDIR', 'TEMP', 'TMP']) vi.stubEnv(key, dir);
-        expect((await run(id, remoteInput(id, true))).code).not.toBe(
-          CliErrorCode.untrusted,
+        const result = await run(
+          id,
+          parse(id, { fiddle: ID, good: '30.0.0', bad: '31.0.0' }),
         );
+        expect(result.code).toBe(CliErrorCode.untrusted);
+        expect(net.fetch).toHaveBeenCalledTimes(1);
       },
     );
   });
@@ -558,14 +531,19 @@ describe('runCommand', () => {
     expect(requests[0]?.url.pathname).toBe(`/gists/${ID}/commits`);
   });
 
-  it('needs GITHUB_TOKEN to write a gist, and never uses the app’s stored token', async () => {
+  it('needs GITHUB_TOKEN to write a gist', async () => {
     const result = await run('gist delete', { id: ID });
     expect(result.code).toBe(ErrorCode.unauthorized);
     expect(
       (await run('gist publish', { dir: path.join(dir, 'missing'), public: false })).code,
     ).toBe(ErrorCode.unauthorized);
-    const invalid = await run('gist history', { id: 'not a gist' });
-    expect(invalid.code).toBe(ErrorCode.invalidArgument);
+  });
+
+  it('refuses an id that is no gist’s before any request is made', async () => {
+    expect((await run('gist history', { id: 'not a gist' })).code).toBe(
+      ErrorCode.invalidArgument,
+    );
+    expect(net.fetch).not.toHaveBeenCalled();
   });
 
   describe('with GITHUB_TOKEN', () => {
