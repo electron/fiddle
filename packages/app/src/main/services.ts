@@ -166,13 +166,16 @@ export async function createServices({
   });
 
   // The token stays in this process; the App store only gets the login.
+  // Chromium's mock keychain (unpackaged macOS runs, see index.ts) has another key than the
+  // installed app, so the token goes to a file of its own and the old app's is left alone.
+  const mockKeychain = app.commandLine.hasSwitch('use-mock-keychain');
   const github = new GitHubService({
     store: new CredentialStore({
-      file: path.join(userData, 'credentials', 'github'),
+      file: path.join(userData, 'credentials', mockKeychain ? 'github-dev' : 'github'),
       safeStorage,
       platform: process.platform,
     }),
-    legacyFile: legacyTokenFile(userData),
+    legacyFile: mockKeychain ? undefined : legacyTokenFile(userData),
     createClient: (token) => {
       const endpoints = getEndpoints();
       return new GitHubClient({
