@@ -6,6 +6,7 @@ import {
 import { ErrorCode, FiddleError } from '../../shared/errors';
 import type { FiddleState } from '../../shared/stores';
 import { tm } from '../i18n';
+import { log } from '../log';
 import type { ChangeListener } from '../state-hub';
 
 /** The parts of the StateHub and Documents this service needs. */
@@ -30,18 +31,12 @@ interface LatestVersionSource {
 export class ModulesService {
   readonly #hub: ModulesHub;
   readonly #npm: LatestVersionSource;
-  readonly #log: (message: string, error: unknown) => void;
   /** `windowId name spec` keys being pinned, or that failed to be (not retried). */
   readonly #seen = new Set<string>();
 
-  constructor(
-    hub: ModulesHub,
-    npm: LatestVersionSource,
-    log: (message: string, error: unknown) => void,
-  ) {
+  constructor(hub: ModulesHub, npm: LatestVersionSource) {
     this.#hub = hub;
     this.#npm = npm;
-    this.#log = log;
   }
 
   /** Adds `name` at `version`, or at its latest version. Returns the Window rev. */
@@ -91,7 +86,7 @@ export class ModulesService {
           this.#write(windowId, { ...current, [name]: latest }, true);
           this.#seen.delete(`${windowId} ${name} ${spec}`);
         } catch (error) {
-          this.#log(`could not normalize ${name}@${spec}`, error);
+          log.warn(`could not normalize ${name}@${spec}`, error);
         }
       }),
     );

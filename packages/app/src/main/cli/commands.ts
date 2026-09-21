@@ -4,7 +4,7 @@ import path from 'node:path';
 import readline from 'node:readline/promises';
 
 import { type ElectronVersions, Installer, InstallState } from '@electron/fiddle-core';
-import { app, net } from 'electron';
+import { app } from 'electron';
 
 import { bisectCompareUrl } from '../../fiddle/bisect';
 import { parseEnvEntries } from '../../fiddle/env';
@@ -24,7 +24,7 @@ import {
   installModules,
   type PackageManager,
 } from '../../fiddle/modules';
-import { osUserName } from '../../fiddle/package-json';
+import { osUserName, toPackageName } from '../../fiddle/package-json';
 import type { TemplateLoader } from '../../fiddle/templates';
 import { formatOrigin, isUntrustedOrigin } from '../../fiddle/trust';
 import {
@@ -43,22 +43,22 @@ import {
   loadGist,
   loadShowMe,
   saveToFolder,
+  warningText,
   type LoadContext,
   type LoadedFiddle,
-  type LoadWarning,
 } from '../documents/load';
 import { appTemplateLoader, staticDir } from '../documents/service';
 import { gistFiles, publishGist } from '../github/service';
 import { tm } from '../i18n';
 import { errorMessage } from '../localize-error';
 import { log } from '../log';
+import { netFetch } from '../net-fetch';
 import { forgeOptionsFor, forgeProject, runForgeTask } from '../packaging/service';
 import { sfwPathFor } from '../platform/sfw';
 import {
   bisectVerdict,
   classifyRun,
   esmNeedsNewerElectron,
-  toPackageName,
   type RunOutcome,
 } from '../run/logic';
 import {
@@ -110,10 +110,6 @@ interface Ctx {
   };
 }
 
-/** `fetch` on Chromium's network stack, so the system proxy and certificates apply. */
-const netFetch: typeof fetch = (input, init) =>
-  net.fetch(input instanceof URL ? input.href : input, init as RequestInit);
-
 /** The cached or bundled release list, as the app starts with. */
 function cachedReleases(ctx: Ctx): Promise<Releases> {
   return (ctx.memo.cached ??= readReleaseList(ctx.cache).then(loadReleases));
@@ -121,12 +117,13 @@ function cachedReleases(ctx: Ctx): Promise<Releases> {
 
 /** The release list refreshed from the network, or the cached one if that fails. */
 function freshReleases(ctx: Ctx): Promise<Releases> {
-  return (ctx.memo.fresh ??= fetchReleaseList(ctx.cache, ctx.releasesUrl, (url, init) =>
-    net.fetch(url, init),
-  ).then(loadReleases, (error: unknown) => {
-    log.warn('refreshing the release list failed', error);
-    return cachedReleases(ctx);
-  }));
+  return (ctx.memo.fresh ??= fetchReleaseList(ctx.cache, ctx.releasesUrl, netFetch).then(
+    loadReleases,
+    (error: unknown) => {
+      log.warn('refreshing the release list failed', error);
+      return cachedReleases(ctx);
+    },
+  ));
 }
 
 /** A known release that runs here. A version the cached list lacks refreshes it once. */
@@ -161,14 +158,7 @@ const isUsable = (rows: readonly ReleaseRow[]) => (version: string) =>
 
 async function templates(ctx: Ctx): Promise<TemplateLoader> {
   const { rows } = await cachedReleases(ctx);
-  return (ctx.memo.templates ??= appTemplateLoader({
-    isReleasedMajor: (major) =>
-      rows.some(
-        (r) => !r.version.includes('-') && Number.parseInt(r.version, 10) === major,
-      ),
-    fetch: netFetch,
-    signal: ctx.signal,
-  }));
+  return (ctx.memo.templates ??= appTemplateLoader(() => rows, { signal: ctx.signal }));
 }
 
 /** A GitHub client with `GITHUB_TOKEN`, if set. The app's stored credentials are never used. */
@@ -201,19 +191,6 @@ async function isDirectory(target: string): Promise<boolean> {
     (s) => s.isDirectory(),
     () => false,
   );
-}
-
-function warningText(warning: LoadWarning): string {
-  switch (warning.kind) {
-    case 'invalid-package-json':
-      return t('warnInvalidPackageJson');
-    case 'unusable-version':
-      return t('warnUnusableVersion', { version: warning.version });
-    case 'rejected-modules':
-      return t('warnRejectedModules', {
-        modules: warning.modules.map((m) => m.name).join(', '),
-      });
-  }
 }
 
 function report(ctx: Ctx, loaded: LoadedFiddle): LoadedFiddle {
@@ -388,11 +365,6 @@ async function releaseExec(ctx: Ctx, version: string): Promise<string> {
   }
 }
 
-/** `sfw.mjs`, to wrap installs with, as the app does when Socket Firewall is on (its default). */
-function sfwPath(): Promise<string | undefined> {
-  return sfwPathFor(defaultSettings.socketFirewall);
-}
-
 async function chooseElectron(
   ctx: Ctx,
   input: { version?: string | undefined; electronPath?: string | undefined },
@@ -473,7 +445,8 @@ async function runOnce(
           ? tr('installingModules', { pm })
           : tr('installingModulesNoScripts', { pm }),
       );
-      const sfw = await sfwPath();
+      // Wrapped in Socket Firewall when the app's default setting has it on.
+      const sfw = await sfwPathFor(defaultSettings.socketFirewall);
       await installModules({
         dir: appDir,
         tempRoot: dir,
@@ -574,7 +547,7 @@ async function packageOrMake(
     ctx.reporter.log(
       task === 'package' ? tr('packaging', { path: dir }) : tr('making', { path: dir }),
     );
-    const sfw = await sfwPath();
+    const sfw = await sfwPathFor(defaultSettings.socketFirewall);
     const failed = await runForgeTask(dir, input.pm, task, {
       env,
       signal: ctx.signal,

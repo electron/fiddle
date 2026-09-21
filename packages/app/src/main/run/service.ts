@@ -7,7 +7,7 @@ import { app } from 'electron';
 import { parseEnvEntries } from '../../fiddle/env';
 import { findMainEntry } from '../../fiddle/files';
 import { findPackageManager, installModules } from '../../fiddle/modules';
-import { osUserName } from '../../fiddle/package-json';
+import { osUserName, toPackageName } from '../../fiddle/package-json';
 import { ErrorCode, FiddleError } from '../../shared/errors';
 import type { OutputLine, RunState, VersionRefValue } from '../../shared/stores';
 import * as documents from '../documents/service';
@@ -21,7 +21,6 @@ import {
   classifyRun,
   esmNeedsNewerElectron,
   installRunStatus,
-  toPackageName,
   type RunOutcome,
 } from './logic';
 import { OutputBuffer } from './output-buffer';

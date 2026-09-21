@@ -1,7 +1,7 @@
 import { randomUUID } from 'node:crypto';
 import fs from 'node:fs/promises';
 import path from 'node:path';
-import { app, net, type WebContents } from 'electron';
+import { app, type WebContents } from 'electron';
 import { z } from 'zod';
 
 import { findDeepLinkInArgv, isDeepLink, parseDeepLink } from '../../fiddle/deep-link';
@@ -47,6 +47,7 @@ import { tm } from '../i18n';
 import { localizeError } from '../localize-error';
 import { log } from '../log';
 import type { NpmClient } from '../modules/npm-client';
+import { netFetch } from '../net-fetch';
 import { forgeElectronFor, forgeOptionsFor } from '../packaging/service';
 import { createJsonStore, type JsonStore } from '../persistence/json-store';
 import { cancelRelaunch } from '../platform/locale';
@@ -81,6 +82,7 @@ import {
   newFiddle,
   newTest,
   saveToFolder,
+  warningText,
   type LoadContext,
   type LoadedFiddle,
   type LoadWarning,
@@ -250,16 +252,20 @@ export function installEarlyDocumentHandlers(): boolean {
 }
 
 /** A missing minimal-repro branch is expected; a failed download is worth a warning. */
-export function appTemplateLoader(options: {
-  isReleasedMajor: (major: number) => boolean;
-  fetch: typeof fetch;
-  signal?: AbortSignal;
-  waitMs?: number;
-}): TemplateLoader {
+export function appTemplateLoader(
+  releases: () => readonly { version: string }[],
+  options: { signal?: AbortSignal; waitMs?: number } = {},
+): TemplateLoader {
   return createTemplateLoader({
     staticDir: staticDir(),
     cacheDir: path.join(getCacheRoot(), 'templates'),
     archiveBaseUrl: `${getEndpoints().minimalRepro}/archive`,
+    // Majors with a minimal-repro template branch.
+    isReleasedMajor: (major) =>
+      releases().some(
+        (r) => isStable(r.version) && Number.parseInt(r.version, 10) === major,
+      ),
+    fetch: netFetch,
     onFallback: (branch, error) => {
       if (isMissingTemplate(error))
         log.info(
@@ -278,18 +284,7 @@ export function appTemplateLoader(options: {
 export function initDocuments(options: Deps): void {
   deps = options;
   const userData = app.getPath('userData');
-  templates = appTemplateLoader({
-    // Majors with a minimal-repro template branch.
-    isReleasedMajor: (major) =>
-      options.versions
-        .releases()
-        .some((r) => isStable(r.version) && Number.parseInt(r.version, 10) === major),
-    // Chromium's network stack, so the system proxy applies.
-    fetch: (input, init) =>
-      net.fetch(
-        input instanceof URL ? input.href : (input as string),
-        init as RequestInit,
-      ),
+  templates = appTemplateLoader(() => options.versions.releases(), {
     waitMs: TEMPLATE_WAIT_MS,
   });
   stateStore = createJsonStore<AppStateFile>({
@@ -727,10 +722,6 @@ export function getDoc(windowId: string): Doc {
   return requireDoc(windowId);
 }
 
-export function getFiddleFiles(windowId: string): FileMap {
-  return { ...requireDoc(windowId).fiddle.files };
-}
-
 export function getTemplate(version: VersionRef): Promise<FileMap> {
   return templates.getTemplate(version.kind === 'release' ? version.version : undefined);
 }
@@ -1059,11 +1050,6 @@ export async function loadGistIn(
   );
 }
 
-/** A docs example's version goes through the versions service: the hidden-channel prompt, then `SetVersion`. */
-function docsExampleLoaded(windowId: string): void {
-  requireDeps().onDocsExampleLoaded?.(windowId);
-}
-
 function confirmDocsExample(
   windowId: string | undefined,
   version: string,
@@ -1346,7 +1332,7 @@ async function handleDeepLink(url: string): Promise<void> {
       loadedIn = await openFiddleWindow({ doc: docFromLoaded(loaded) });
     }
     showWarnings(loadedIn, loaded.warnings);
-    if (link.kind !== 'gist') docsExampleLoaded(loadedIn);
+    if (link.kind !== 'gist') requireDeps().onDocsExampleLoaded?.(loadedIn);
   } catch (error) {
     if (
       link.kind === 'gist' &&
@@ -1390,30 +1376,16 @@ async function offerSignIn(windowId: string | undefined, url: string): Promise<v
   else sendWindowCommand(id, 'gist.signIn');
 }
 
+/** `JsonStore.set` copies what it keeps, so the fiddle's own objects can go in. */
 function storeFiddle(fiddle: Fiddle): StoredFiddle {
-  const stored: StoredFiddle = {
-    files: fiddle.files,
-    hidden: [...fiddle.hidden],
-    version: fiddle.version,
-    modules: { ...fiddle.modules },
-    origin: fiddle.origin,
-    source: { ...fiddle.source },
-  };
-  if (fiddle.templateName !== undefined) stored.templateName = fiddle.templateName;
-  return stored;
+  return { ...fiddle, hidden: [...fiddle.hidden] };
 }
 
 function restoreFiddle(stored: StoredFiddle): Fiddle {
-  const fiddle: Fiddle = {
-    files: stored.files,
+  return {
+    ...stored,
     hidden: stored.hidden.filter((name) => Object.hasOwn(stored.files, name)),
-    version: stored.version,
-    modules: stored.modules,
-    origin: stored.origin,
-    source: stored.source,
   };
-  if (stored.templateName !== undefined) fiddle.templateName = stored.templateName;
-  return fiddle;
 }
 
 function writeDraft(windowId: string): void {
@@ -1513,21 +1485,9 @@ export async function withErrorDialog(
 
 function showWarnings(windowId: string, warnings: readonly LoadWarning[]): void {
   if (warnings.length === 0) return;
-  const lines = warnings.map((warning) => {
-    switch (warning.kind) {
-      case 'invalid-package-json':
-        return td('warnPackageJson');
-      case 'unusable-version':
-        return td('warnVersion', { version: warning.version });
-      case 'rejected-modules':
-        return td('warnModules', {
-          modules: warning.modules.map((m) => `${m.name}@${m.spec}`).join(', '),
-        });
-    }
-  });
   void messageBox(windowId, {
     type: 'warning',
     message: td('loadWarnings'),
-    detail: lines.join('\n'),
+    detail: warnings.map(warningText).join('\n'),
   });
 }

@@ -1,13 +1,12 @@
 import path from 'node:path';
 
-import { app, net, safeStorage } from 'electron';
+import { app, safeStorage } from 'electron';
 
 import { GitHubClient } from '../fiddle/github';
 import { Run, Versions } from '../ipc/main';
 import type { Platform } from '../shared/stores';
 import { BisectService } from './bisect/service';
 import { CommandRegistry } from './commands';
-import { confirm } from './dialogs';
 import {
   getStateStore,
   initDocuments,
@@ -17,10 +16,10 @@ import {
 import { CredentialStore, legacyTokenFile } from './github/credentials';
 import { createDocumentsBridge } from './github/documents-bridge';
 import { GitHubService } from './github/service';
-import { tm } from './i18n';
 import { log } from './log';
 import { NpmClient, npmEndpoints } from './modules/npm-client';
 import { ModulesService } from './modules/service';
+import { netFetch } from './net-fetch';
 import { installRunCleanupOnExit, RunService } from './run/service';
 import type { SettingsContext } from './settings';
 import type { StateHub } from './state-hub';
@@ -85,7 +84,6 @@ export async function createServices({
 }): Promise<Services> {
   const userData = app.getPath('userData');
   const cache = cachePaths();
-  const fetch = (url: string, init?: RequestInit) => net.fetch(url, init);
   const contentsOf = (windowId: string) => getWindow(windowId)?.webContents;
 
   const versions: VersionsService = new VersionsService({
@@ -93,7 +91,7 @@ export async function createServices({
     cache,
     userData,
     releasesUrl: getEndpoints().releasesJson,
-    fetch,
+    fetch: netFetch,
     activeVersions: () => activeVersions(hub, runs),
     onRemoved: (version) => {
       types
@@ -103,7 +101,7 @@ export async function createServices({
   });
   const types = new TypesService({
     dir: cache.types,
-    fetch,
+    fetch: netFetch,
     nodeVersionOf: (version) => versions.release(version)?.node,
     onLocalChange: (buildId) => {
       for (const windowId of hub.windowIds) {
@@ -131,11 +129,6 @@ export async function createServices({
   const bisect = new BisectService(hub, runs, versions, typesChanged);
 
   let noticeId = 0;
-  // i18next types each key's own placeholders; the selector passes them as one record.
-  const tv = tm('mainVersions') as (
-    key: string,
-    values?: Record<string, string>,
-  ) => string;
   const versionSelector = new VersionSelector({
     versions,
     settings: () => hub.app.settings,
@@ -144,13 +137,7 @@ export async function createServices({
       if (!channels.includes(channel))
         settings.service.set('channels', [...channels, channel]);
     },
-    isBusy: (windowId) => {
-      const step = hub.getWindow(windowId)?.run?.bisect;
-      return (
-        runs.isBusy(windowId) ||
-        (step !== undefined && step !== null && step.result === null)
-      );
-    },
+    isBusy: (windowId) => runs.isBusy(windowId) || bisect.isActive(windowId),
     getVersion: (windowId) => hub.getWindow(windowId)?.fiddle.versionRef,
     setVersion: (windowId, ref) => setFiddleVersion(windowId, ref),
     remember: (ref) => getStateStore().set((prev) => ({ ...prev, lastVersion: ref })),
@@ -160,9 +147,6 @@ export async function createServices({
         hub.updateWindow(windowId, { versionNotice: { id: noticeId, message } });
     },
     typesChanged,
-    confirm: (windowId, options) => confirm(windowId, options),
-    text: (key, values) => tv(key, values),
-    warn: (message, error) => log.warn(message, error),
   });
 
   // The token stays in this process; the App store only gets the login.
@@ -180,7 +164,7 @@ export async function createServices({
         apiBaseUrl: endpoints.githubApi,
         rawOrigins: [endpoints.gistRaw],
         allowLoopbackHttp: isTestMode(),
-        fetch: (url, init) => net.fetch(url instanceof URL ? url.href : url, init),
+        fetch: netFetch,
       });
     },
     documents: createDocumentsBridge(hub),
@@ -195,11 +179,10 @@ export async function createServices({
         settings.service.set('gistVisibility', isPublic ? 'public' : 'secret'),
     },
     setLogin: (githubLogin) => hub.updateApp({ githubLogin }),
-    log,
   });
 
   const npm = new NpmClient({
-    fetch: (url, init) => net.fetch(url, init),
+    fetch: netFetch,
     endpoints: npmEndpoints(getEndpoints()),
   });
   const modules = new ModulesService(
@@ -209,7 +192,6 @@ export async function createServices({
       setModules: setFiddleModules,
     },
     npm,
-    (message, error) => log.warn(message, error),
   );
 
   initDocuments({

@@ -10,6 +10,7 @@ import type { GistRevision, GistWriteResult, GitHubClient } from '../../fiddle/g
 import { generatePackageJson } from '../../fiddle/package-json';
 import { ErrorCode, FiddleError } from '../../shared/errors';
 import { tm } from '../i18n';
+import { log } from '../log';
 import type { CredentialStorageKind, CredentialStore } from './credentials';
 import type { GistDocuments, GistFiddle } from './documents-bridge';
 
@@ -50,7 +51,6 @@ interface GitHubServiceOptions {
   prefs: GistPrefs;
   /** Publishes the login name (or undefined when signed out) to the `App` store. */
   setLogin: (login: string | undefined) => void;
-  log: { warn(...args: unknown[]): void; error(...args: unknown[]): void };
 }
 
 /** A slow answer keeps the token and lets session restore and deep links go on. */
@@ -117,13 +117,10 @@ export class GitHubService {
       if (this.#token !== token) return;
       const e = FiddleError.from(error);
       if (e.code === ErrorCode.unauthorized || e.code === ErrorCode.forbidden) {
-        this.#options.log.warn(
-          'the stored GitHub token was rejected; signing out',
-          e.code,
-        );
+        log.warn('the stored GitHub token was rejected; signing out', e.code);
         await this.signOut();
       } else {
-        this.#options.log.warn('could not check the GitHub token; keeping it', e.code);
+        log.warn('could not check the GitHub token; keeping it', e.code);
       }
     }
   }
@@ -146,10 +143,7 @@ export class GitHubService {
         { allowPlaintext },
       );
     } catch (error) {
-      this.#options.log.error(
-        'could not store the GitHub token; keeping it for this session',
-        error,
-      );
+      log.error('could not store the GitHub token; keeping it for this session', error);
     }
     this.#setSignedIn(trimmed, login);
     return { login, persisted };
@@ -163,7 +157,7 @@ export class GitHubService {
     if (legacyFile) {
       // Otherwise the old token stays valid on disk after the user signed out.
       await rm(legacyFile, { force: true }).catch((error: unknown) =>
-        this.#options.log.warn('could not remove the old GitHub token file', error),
+        log.warn('could not remove the old GitHub token file', error),
       );
     }
     await this.#options.store.delete();

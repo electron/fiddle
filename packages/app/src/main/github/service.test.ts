@@ -7,10 +7,13 @@ import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vite
 import { GitHubClient } from '../../fiddle/github';
 import { ErrorCode, FiddleError } from '../../shared/errors';
 import { initMainI18n } from '../i18n';
+import { log } from '../log';
 import type { LoadResult } from './credentials';
 import type { GistDocuments, GistFiddle } from './documents-bridge';
 import type { GistPrefs, PublishOptions } from './service';
 import { gistFiles, GitHubService } from './service';
+
+vi.mock('../log', () => ({ log: { warn: vi.fn(), error: vi.fn() } }));
 
 beforeAll(async () => {
   await initMainI18n(['en']);
@@ -150,7 +153,6 @@ function setup(
     fiddle?: Partial<GistFiddle>;
     asRevision?: boolean;
     legacyFile?: string;
-    warn?: (...args: unknown[]) => void;
   } = {},
 ) {
   const github = fakeGitHub({ remote: options.remote, user: options.user });
@@ -165,7 +167,6 @@ function setup(
     documents,
     prefs,
     setLogin: (login) => logins.push(login),
-    log: { warn: options.warn ?? (() => undefined), error: () => undefined },
   });
   return { service, github, store, documents, prefs, logins };
 }
@@ -314,7 +315,6 @@ describe('startup auth check', () => {
       documents: fakeDocuments(),
       prefs: memoryPrefs(),
       setLogin: () => undefined,
-      log: { warn: () => undefined, error: () => undefined },
     });
     const restoring = service.init();
     await vi.waitFor(() => expect(service.login).toBe('octocat'));
@@ -393,10 +393,10 @@ describe('sign-in', () => {
     it('does not make sign-out fail when it cannot be removed', async () => {
       const legacyFile = path.join(dir, '.github-credentials');
       await mkdir(path.join(legacyFile, 'inner'), { recursive: true });
-      const warn = vi.fn();
-      const { service, store, logins } = setup({ stored, legacyFile, warn });
+      vi.mocked(log.warn).mockClear();
+      const { service, store, logins } = setup({ stored, legacyFile });
       await service.signOut();
-      expect(warn).toHaveBeenCalledOnce();
+      expect(log.warn).toHaveBeenCalledOnce();
       expect(store.delete).toHaveBeenCalledOnce();
       expect(logins.at(-1)).toBeUndefined();
     });
@@ -483,7 +483,6 @@ describe('publish', () => {
       documents,
       prefs: memoryPrefs(),
       setLogin: () => undefined,
-      log: { warn: () => undefined, error: () => undefined },
     });
     await failing.init();
     await expect(
@@ -638,7 +637,6 @@ describe('update and delete', () => {
       documents: fakeDocuments(loaded),
       prefs: memoryPrefs(),
       setLogin: () => undefined,
-      log: { warn: () => undefined, error: () => undefined },
     });
     const result = await history.history('w');
     expect(result.activeSha).toBe(SHA1);

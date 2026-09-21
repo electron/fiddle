@@ -16,10 +16,6 @@ export const BUNDLE_ID = 'com.electron.fiddle';
 export const ELECTRON_BUNDLE_ID = 'com.github.Electron';
 export const TCCUTIL = '/usr/bin/tccutil';
 
-export function tccutilArgs(bundleId = BUNDLE_ID): string[] {
-  return ['reset', 'All', bundleId];
-}
-
 /** Resolves false when the user cancels. */
 export async function resetPrivacyPermissions(windowId: string): Promise<boolean> {
   const tp = tm('mainPlatform');
@@ -35,7 +31,7 @@ export async function resetPrivacyPermissions(windowId: string): Promise<boolean
   if (!ok) return false;
   try {
     for (const bundleId of [BUNDLE_ID, ELECTRON_BUNDLE_ID])
-      await promisify(execFile)(TCCUTIL, tccutilArgs(bundleId));
+      await promisify(execFile)(TCCUTIL, ['reset', 'All', bundleId]);
   } catch (error) {
     log.error('tccutil failed', error);
     throw new FiddleError(ErrorCode.internal, tp('resetPrivacyFailed'));

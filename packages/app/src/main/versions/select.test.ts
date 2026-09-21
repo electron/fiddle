@@ -6,6 +6,20 @@ import { ErrorCode } from '../../shared/errors';
 import type { LocalBuild, ReleaseRow } from '../../shared/stores';
 import { VersionSelector, type VersionSelectorDeps } from './select';
 
+const dialog = { prompts: [] as string[], answer: true };
+vi.mock('../dialogs', () => ({
+  confirm: async (_windowId: string, { message }: { message: string }) => {
+    dialog.prompts.push(message);
+    return dialog.answer;
+  },
+}));
+// Keys and values, so tests can see which message was built from what.
+vi.mock('../i18n', () => ({
+  tm: () => (key: string, values?: Record<string, string>) =>
+    values ? `${key}(${Object.values(values).join('|')})` : key,
+}));
+vi.mock('../log', () => ({ log: { warn: vi.fn() } }));
+
 const row = (version: string, extra: Partial<ReleaseRow> = {}): ReleaseRow => ({
   version,
   date: '',
@@ -49,6 +63,7 @@ function setup(options: Options = {}) {
     prompts: [] as string[],
     settings,
   };
+  Object.assign(dialog, { prompts: state.prompts, answer: options.answer ?? true });
   const install = vi.fn(
     options.install ??
       (async (version: string) => {
@@ -78,13 +93,6 @@ function setup(options: Options = {}) {
     remember: (ref) => state.remembered.push(ref),
     notify: (_windowId, message) => state.notices.push(message),
     typesChanged: () => {},
-    confirm: async (_windowId, { message }) => {
-      state.prompts.push(message);
-      return options.answer ?? true;
-    },
-    // Keys and values, so tests can see which message was built from what.
-    text: (key, values) => (values ? `${key}(${Object.values(values).join('|')})` : key),
-    warn: () => {},
   };
   return { selector: new VersionSelector(deps), state, install };
 }

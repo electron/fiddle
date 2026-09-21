@@ -5,7 +5,6 @@ import {
   classifyRun,
   esmNeedsNewerElectron,
   installRunStatus,
-  toPackageName,
 } from './logic';
 
 describe('installRunStatus', () => {
@@ -64,13 +63,5 @@ describe('esmNeedsNewerElectron', () => {
   it('ignores other entries and local builds', () => {
     expect(esmNeedsNewerElectron('main.js', '10.0.0')).toBe(false);
     expect(esmNeedsNewerElectron('main.mjs', undefined)).toBe(false);
-  });
-});
-
-describe('toPackageName', () => {
-  it('makes a valid npm name', () => {
-    expect(toPackageName('Sparkling Pony')).toBe('sparkling-pony');
-    expect(toPackageName('.hidden_Thing!!')).toBe('hidden_thing');
-    expect(toPackageName('★')).toBe('fiddle');
   });
 });

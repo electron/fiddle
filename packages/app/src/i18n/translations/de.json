@@ -1194,21 +1194,6 @@
     "translation": "fbdc81d5c09d",
     "reviewed": false
   },
-  "mainCli:warnInvalidPackageJson": {
-    "source": "27084c4bd773",
-    "translation": "7f1b53b23738",
-    "reviewed": false
-  },
-  "mainCli:warnRejectedModules": {
-    "source": "d0a25a8953eb",
-    "translation": "cc4e75501448",
-    "reviewed": false
-  },
-  "mainCli:warnUnusableVersion": {
-    "source": "5b072b247c86",
-    "translation": "fd9944fce6f7",
-    "reviewed": false
-  },
   "mainDocuments:add": {
     "source": "9fd728c66c9a",
     "translation": "cbb95cf02b7d",

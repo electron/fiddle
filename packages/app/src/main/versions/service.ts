@@ -11,7 +11,7 @@ import {
   type InstallStateEvent,
   type Mirrors,
 } from '@electron/fiddle-core';
-import { app, net } from 'electron';
+import { app } from 'electron';
 import { z } from 'zod';
 
 import { suggestLocalBuildName } from '../../fiddle/versions';
@@ -28,6 +28,7 @@ import { fetchDownloader } from '../cli/downloader';
 import { confirm, messageBox, pickFolder, type DialogParent } from '../dialogs';
 import { tm } from '../i18n';
 import { log } from '../log';
+import { netFetch } from '../net-fetch';
 import { createJsonStore, writeAtomic, type JsonStore } from '../persistence/json-store';
 import type { StateHub } from '../state-hub';
 import type { CachePaths } from './paths';
@@ -40,10 +41,6 @@ const BUILD_CHECK_MS = 2000;
 /** A cached release list this young is used without asking the network. */
 const RELEASES_TTL_MS = 4 * 60 * 60 * 1000;
 const RELEASES_TIMEOUT_MS = 30_000;
-
-/** `fetch` on Chromium's network stack, so the system proxy and certificates apply. */
-const netFetch: typeof fetch = (input, init) =>
-  net.fetch(input instanceof URL ? input.href : input, init as RequestInit);
 
 const storedBuildSchema = z.object({
   id: z.string(),

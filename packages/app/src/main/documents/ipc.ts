@@ -9,7 +9,7 @@ import {
 } from './model';
 import {
   editFile,
-  getFiddleFiles,
+  getFiddle,
   loadGistIn,
   openDropped,
   renameFile,
@@ -21,7 +21,7 @@ import {
 
 export function bindDocumentsIpc({ contents, windowId }: IpcContext): void {
   implement(Documents, contents, {
-    GetFiles: () => getFiddleFiles(windowId),
+    GetFiles: () => getFiddle(windowId).files,
     EditFile: (name, text, fiddleRev) => editFile(windowId, name, text, fiddleRev),
     AddFile: (name) => updateDoc(windowId, (doc) => docAddFile(doc, name)),
     RenameFile: (oldName, newName) => renameFile(windowId, oldName, newName),

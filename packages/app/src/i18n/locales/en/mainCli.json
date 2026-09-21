@@ -243,18 +243,6 @@
     "message": "Continue? [y/N]",
     "description": "CLI prompt before a remote fiddle's code runs; a space is added after it. Only y or yes continues, so keep [y/N]."
   },
-  "warnInvalidPackageJson": {
-    "message": "The fiddle's package.json isn't valid JSON, so it was ignored.",
-    "description": "CLI warning while loading a fiddle."
-  },
-  "warnUnusableVersion": {
-    "message": "Electron {{version}} from the fiddle's package.json can't be used here.",
-    "description": "CLI warning while loading a fiddle. {{version}} is the Electron version named in the fiddle's package.json."
-  },
-  "warnRejectedModules": {
-    "message": "Skipped packages that aren't valid: {{modules}}",
-    "description": "CLI warning while loading a fiddle. {{modules}} is a comma-separated list."
-  },
   "warnGistPartial": {
     "message": "Created {{url}} from the template, but adding the fiddle's files failed. Run gist update to finish.",
     "description": "CLI warning when a publish half-succeeds. {{url}} is the new gist's URL. Keep “gist update” as it is."
