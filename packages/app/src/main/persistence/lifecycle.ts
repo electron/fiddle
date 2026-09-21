@@ -6,7 +6,8 @@ import { flushAll, hasPendingWrites } from './json-store';
 /** A write that hangs (a network drive, say) must not keep the app from quitting. */
 const FLUSH_TIMEOUT_MS = 5000;
 
-export function installFlushOnExit(): void {
+/** `flushDocuments` writes what is still waiting on a timer, such as drafts, before a log off or shutdown. */
+export function installFlushOnExit(flushDocuments: () => void): void {
   let gaveUp = false;
 
   const flushWithinLimit = async (): Promise<void> => {
@@ -43,6 +44,7 @@ export function installFlushOnExit(): void {
   });
   app.on('browser-window-created', (_event, window) => {
     window.on('session-end', () => {
+      flushDocuments();
       void flushAll();
     });
   });
@@ -50,6 +52,7 @@ export function installFlushOnExit(): void {
   // which Electron's typings leave out.
   const onShutdown = (event: { preventDefault(): void }) => {
     event.preventDefault();
+    flushDocuments();
     flushThenQuit();
   };
   powerMonitor.on('shutdown', onShutdown as () => void);

@@ -6,6 +6,7 @@ const mocks = vi.hoisted(() => ({
   flushAll: vi.fn<() => Promise<void>>(),
   hasPendingWrites: vi.fn<() => boolean>(),
   flushLog: vi.fn(async () => undefined),
+  flushDocuments: vi.fn(),
 }));
 
 vi.mock('electron', async () => {
@@ -45,7 +46,8 @@ beforeEach(() => {
   mocks.flushAll.mockReset().mockResolvedValue(undefined);
   mocks.hasPendingWrites.mockReset().mockReturnValue(false);
   mocks.flushLog.mockClear();
-  installFlushOnExit();
+  mocks.flushDocuments.mockClear();
+  installFlushOnExit(mocks.flushDocuments);
 });
 
 afterEach(() => {
@@ -89,10 +91,11 @@ describe('installFlushOnExit', () => {
     expect(willQuit().preventDefault).not.toHaveBeenCalled();
   });
 
-  it('flushes when a window ends its session', () => {
+  it('flushes drafts and stores when a window ends its session', () => {
     const window = new EventEmitter();
     emitter.emit('browser-window-created', {}, window);
     window.emit('session-end');
+    expect(mocks.flushDocuments).toHaveBeenCalledOnce();
     expect(mocks.flushAll).toHaveBeenCalledOnce();
   });
 
@@ -100,6 +103,7 @@ describe('installFlushOnExit', () => {
     const event = { preventDefault: vi.fn() };
     power.emit('shutdown', event);
     expect(event.preventDefault).toHaveBeenCalledOnce();
+    expect(mocks.flushDocuments).toHaveBeenCalledOnce();
     expect(mocks.flushAll).toHaveBeenCalledOnce();
     await vi.advanceTimersByTimeAsync(0);
     expect(emitter.quit).toHaveBeenCalledOnce();

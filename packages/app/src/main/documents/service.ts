@@ -548,13 +548,18 @@ function onDestroyed(windowId: string): void {
   scheduleSessionSave();
 }
 
+/** Writes pending drafts and the session now, for a log off or shutdown that may not wait for a quit. */
+export function flushDraftsAndSession(): void {
+  drafts.flushAll();
+  saveSessionNow();
+}
+
 function onBeforeQuit(event: Electron.Event): void {
   if (quitting) return;
   const dirty = [...docs].filter(([, doc]) => isDirty(doc));
   const finish = () => {
     quitting = true;
-    drafts.flushAll();
-    saveSessionNow();
+    flushDraftsAndSession();
     sessionFrozen = true;
   };
   if (dirty.length === 0) {

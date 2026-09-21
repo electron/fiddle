@@ -194,7 +194,7 @@ export class RunService {
    * run in a busy window is `invalid`.
    */
   run(windowId: string, options: RunOptions = {}): Promise<RunOutcome> {
-    return this.#track(this.#run(windowId, options));
+    return this.track(this.#run(windowId, options));
   }
 
   async #run(windowId: string, options: RunOptions): Promise<RunOutcome> {
@@ -329,7 +329,8 @@ export class RunService {
     this.#fiddles.delete(windowId);
   }
 
-  #track<T>(work: Promise<T>): Promise<T> {
+  /** Adds work that a quit waits for, such as a package or make. */
+  track<T>(work: Promise<T>): Promise<T> {
     this.#tasks.add(work);
     const done = () => this.#tasks.delete(work);
     work.then(done, done);
@@ -337,7 +338,7 @@ export class RunService {
   }
 
   #removeRunDir(dir: string): void {
-    this.#track(
+    this.track(
       fsp
         .rm(dir, { recursive: true, force: true, maxRetries: 5, retryDelay: 200 })
         .catch((error: unknown) => log.warn('cleanup failed', dir, error)),
@@ -601,12 +602,17 @@ export function installRunCleanupOnExit(runs: RunService): void {
   sweepStaleDirs().catch((error: unknown) =>
     log.warn('sweeping old run dirs failed', error),
   );
-  let held = false;
+  let phase: 'idle' | 'stopping' | 'done' = 'idle';
   app.on('will-quit', (event) => {
-    if (held || !runs.hasWork()) return;
-    held = true;
+    if (phase === 'done' || !runs.hasWork()) return;
+    // Held again when another handler's `app.quit()` comes before the shutdown ends.
     event.preventDefault();
+    if (phase === 'stopping') return;
+    phase = 'stopping';
     // `app.quit()` runs on a later turn, never inside a quit event's own dispatch.
-    void runs.shutdown().finally(() => setImmediate(() => app.quit()));
+    void runs.shutdown().finally(() => {
+      phase = 'done';
+      setImmediate(() => app.quit());
+    });
   });
 }

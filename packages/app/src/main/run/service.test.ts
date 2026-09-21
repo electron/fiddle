@@ -11,7 +11,7 @@ import type { OutputLine, RunState } from '../../shared/stores';
 const spawnElectron = vi.fn();
 const ensureTrusted = vi.fn();
 
-vi.mock('electron', () => ({ app: { on: vi.fn(), isPackaged: false } }));
+vi.mock('electron', () => ({ app: { on: vi.fn(), quit: vi.fn(), isPackaged: false } }));
 vi.mock('../documents/service', () => ({
   ensureTrusted: (...args: unknown[]) => ensureTrusted(...args),
   setLayout: vi.fn(),
@@ -26,11 +26,13 @@ vi.mock('../log', () => ({
 vi.mock('./process', async (importOriginal) => ({
   ...(await importOriginal<typeof import('./process')>()),
   spawnElectron: (...args: unknown[]) => spawnElectron(...args),
+  sweepStaleDirs: async () => undefined,
   // The fake child has no pid for a process-tree kill. That is tested in kill-tree.test.ts.
   stopChild: (child: { kill(signal: string): boolean }) => child.kill('SIGTERM'),
 }));
 
-const { RunService } = await import('./service');
+const { app } = await import('electron');
+const { RunService, installRunCleanupOnExit } = await import('./service');
 
 const VERSION = '30.0.0';
 const ref = { kind: 'release' as const, version: VERSION };
@@ -332,5 +334,35 @@ describe('RunService.shutdown and stopAndWait', () => {
     await result;
     await runs.stopAndWait('w');
     await runs.shutdown();
+  });
+});
+
+describe('installRunCleanupOnExit', () => {
+  it('holds every quit until the shutdown has ended', async () => {
+    let finish: () => void = () => {};
+    const runs = {
+      hasWork: () => true,
+      shutdown: vi.fn(() => new Promise<void>((resolve) => (finish = resolve))),
+    };
+    installRunCleanupOnExit(runs as never);
+    const calls = vi.mocked(app.on).mock.calls as unknown as [
+      string,
+      (e: unknown) => void,
+    ][];
+    const onWillQuit = calls.find(([name]) => name === 'will-quit')![1];
+    const willQuit = () => {
+      const event = { preventDefault: vi.fn() };
+      onWillQuit(event);
+      return event.preventDefault;
+    };
+    expect(willQuit()).toHaveBeenCalled();
+    // Another handler's `app.quit()` comes while the runs are still stopping.
+    expect(willQuit()).toHaveBeenCalled();
+    expect(runs.shutdown).toHaveBeenCalledOnce();
+    expect(app.quit).not.toHaveBeenCalled();
+
+    finish();
+    await vi.waitFor(() => expect(app.quit).toHaveBeenCalledOnce());
+    expect(willQuit()).not.toHaveBeenCalled();
   });
 });

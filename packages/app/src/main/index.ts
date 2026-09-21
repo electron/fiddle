@@ -7,6 +7,7 @@ import { headlessArgs, startHeadless } from './cli';
 import { initCrashReporting } from './crash/sentry';
 import { installDevCsp } from './csp';
 import {
+  flushDraftsAndSession,
   installEarlyDocumentHandlers,
   openFiddleWindow,
   startDocuments,
@@ -71,7 +72,7 @@ async function main(): Promise<void> {
     },
     (error) => log.error('store push failed', error),
   );
-  installFlushOnExit();
+  installFlushOnExit(flushDraftsAndSession);
   const settings = await startSettings(hub, settingsFile.store);
 
   applySessionSecurity();

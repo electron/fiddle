@@ -117,7 +117,7 @@ export function registerCommands(registry: CommandRegistry, services: Services):
   });
   for (const task of ['package', 'make'] as const) {
     registry.register(`run.${task}`, async ({ windowId }) => {
-      if (windowId) await packageFiddle(windowId, task, services);
+      if (windowId) await runs.track(packageFiddle(windowId, task, services));
     });
   }
   // Stops a bisect in progress; otherwise the window shows the range dialog.
