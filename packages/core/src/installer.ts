@@ -499,8 +499,10 @@ export class Installer extends EventEmitter {
     });
   }
 
+  /** Downloads `version`'s zip into a new folder in `tempDirectory`. */
   private async download(
     version: string,
+    tempDirectory: string,
     opts?: Partial<InstallerParams>,
   ): Promise<string> {
     let pctDone = 0;
@@ -538,6 +540,7 @@ export class Installer extends EventEmitter {
         // Fiddle keeps its own copy, so leave the cache shared with other
         // tools alone. The temp file is ours to move and clean up.
         cacheMode: ElectronDownloadCacheMode.Bypass,
+        tempDirectory,
         ...(this.options.downloader ? { downloader: this.options.downloader } : {}),
       });
     } catch (err) {
@@ -579,20 +582,17 @@ export class Installer extends EventEmitter {
       }
       this.setState(version, InstallState.downloading);
       try {
-        const tempFile = await this.download(version, opts);
+        // Download next to the zips, so the move is a rename and a failed
+        // download leaves nothing behind (@electron/get keeps its temp folder
+        // on failure when it bypasses its cache).
+        await fs.promises.mkdir(electronDownloads, { recursive: true });
+        const tempDir = await fs.promises.mkdtemp(
+          path.join(electronDownloads, '.download-'),
+        );
         try {
-          await fs.promises.mkdir(electronDownloads, { recursive: true });
-          try {
-            await rename(tempFile, zipFile);
-          } catch (err) {
-            // cross-device move not permitted, fallback to copy
-            if ((err as NodeJS.ErrnoException).code !== 'EXDEV') throw err;
-            const partial = `${zipFile}.${process.pid}.partial`;
-            await fs.promises.copyFile(tempFile, partial);
-            await rename(partial, zipFile);
-          }
+          await rename(await this.download(version, tempDir, opts), zipFile);
         } finally {
-          await removeBestEffort(path.dirname(tempFile));
+          await removeBestEffort(tempDir);
         }
       } catch (err) {
         this.setState(version, InstallState.missing);

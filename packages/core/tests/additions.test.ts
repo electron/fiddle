@@ -488,6 +488,13 @@ describe('Installer and ElectronVersions options', () => {
       hangZip = true;
       const controller = new AbortController();
       onZipRequest = () => controller.abort();
+      const tempDirs: string[] = [];
+      const mkdtemp = fs.promises.mkdtemp.bind(fs.promises);
+      vi.spyOn(fs.promises, 'mkdtemp').mockImplementation(((prefix: string) =>
+        mkdtemp(prefix).then((dir) => {
+          if (path.basename(prefix) === 'electron-download-') tempDirs.push(dir);
+          return dir;
+        })) as never);
       const installer = createInstaller({ layout: 'per-version' });
 
       const install = installer.install('13.1.7', { signal: controller.signal });
@@ -495,6 +502,8 @@ describe('Installer and ElectronVersions options', () => {
       // the caller stops waiting at once; the download then cleans up
       await expect.poll(() => installer.state('13.1.7')).toBe(missing);
       expect(ls(paths.electronDownloads)).toStrictEqual(['.locks']);
+      expect(tempDirs.length).toBeGreaterThan(0);
+      for (const dir of tempDirs) expect(fs.existsSync(dir)).toBe(false);
       expect(fs.existsSync(versionsDir('13.1.7'))).toBe(false);
     });
 

@@ -31,20 +31,40 @@ describe('fetchDownloader', () => {
           percents.push(progress.percent),
       },
     );
-    expect(fetchFn).toHaveBeenCalledWith('https://example.test/electron.zip', undefined);
+    expect(fetchFn).toHaveBeenCalledWith('https://example.test/electron.zip', {
+      signal: expect.any(AbortSignal),
+    });
     expect(await readFile(file, 'utf8')).toBe('hello world');
     expect(percents.at(-1)).toBe(1);
   });
 
   it('passes the abort signal on', async () => {
-    const fetchFn = vi.fn(async () => new Response('x'));
-    const signal = new AbortController().signal;
+    let seen: AbortSignal | undefined;
+    const fetchFn = async (_url: string, init?: RequestInit) => {
+      seen = init?.signal ?? undefined;
+      return new Response('x');
+    };
+    const controller = new AbortController();
     await fetchDownloader(fetchFn as unknown as typeof fetch).download(
       'https://example.test/a',
       path.join(dir, 'a'),
-      { signal },
+      { signal: controller.signal },
     );
-    expect(fetchFn).toHaveBeenCalledWith('https://example.test/a', { signal });
+    controller.abort();
+    expect(seen?.aborted).toBe(true);
+  });
+
+  it('fails when the body stops arriving', async () => {
+    const fetchFn = async () =>
+      // one chunk, then nothing, with the connection left open
+      new Response(new ReadableStream({ start: (c) => c.enqueue(new Uint8Array(1)) }));
+    await expect(
+      fetchDownloader(fetchFn as unknown as typeof fetch, 50).download(
+        'https://example.test/c',
+        path.join(dir, 'c'),
+        {},
+      ),
+    ).rejects.toThrow('no data received');
   });
 
   it('fails on an HTTP error', async () => {
