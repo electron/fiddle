@@ -1,3 +1,5 @@
+import { EventEmitter } from 'node:events';
+
 import type { MenuItemConstructorOptions } from 'electron';
 import { describe, expect, it, vi } from 'vitest';
 
@@ -47,14 +49,20 @@ vi.mock('./documents/service', () => ({
     (_windowId: string | undefined, action: () => Promise<unknown>) => action(),
   ),
 }));
+/** Open BrowserWindows by ID, for the title bar menu bar's item activation. */
+const openWindows = vi.hoisted(
+  () => new Map<string, { id: string; isFullScreen(): boolean }>(),
+);
 vi.mock('./windows', () => ({
   focusedWindowId: () => undefined,
-  getWindow: () => undefined,
+  getWindow: (windowId?: string) =>
+    windowId === undefined ? undefined : openWindows.get(windowId),
   windowIdOf: (window?: { id?: string }) => window?.id,
 }));
 vi.mock('./test-mode', () => ({ testMenuBar: () => false }));
 
-const { buildMenuTemplate, installMenu, toggleWindowMenuBar } = await import('./menu');
+const { activateWindowMenuItem, buildMenuTemplate, installMenu, toggleWindowMenuBar } =
+  await import('./menu');
 const { roleAccelerator, toMenuModel } = await import('./menu-model');
 const { t } = await import('./i18n');
 const { log } = await import('./log');
@@ -420,6 +428,8 @@ describe('command items', () => {
       expect(documents.openFolderIn).toHaveBeenCalledWith('clicked', '/tmp/f1');
       click('example:Menu');
       expect(documents.showMeIn).toHaveBeenCalledWith('clicked', 'Menu');
+      click('recent:clear');
+      expect(documents.clearRecentFolders).toHaveBeenCalledOnce();
     } finally {
       recent.folders = [];
     }
@@ -567,6 +577,59 @@ describe('title bar menu bar toggle', () => {
       ['w2', { menuBar: undefined }],
     ]);
     expect(nativeToggle()).toMatchObject({ checked: false });
+  });
+
+  it("chooses an item in a window's title bar menu as the native menu would", async () => {
+    const hub = fakeHub(['w']);
+    installMenu({ registry, hub, platform: 'linux' } as unknown as Services);
+    await rebuilt();
+    const unavailable = expect.objectContaining({ code: 'unavailable' });
+    // No bar was built for this window.
+    expect(() => activateWindowMenuItem('other', 'run.toggle')).toThrow(unavailable);
+    // A bar, but the window has closed.
+    expect(() => activateWindowMenuItem('w', 'run.toggle')).toThrow(unavailable);
+
+    openWindows.set('w', { id: 'w', isFullScreen: () => false });
+    try {
+      vi.mocked(registry.run).mockClear();
+      activateWindowMenuItem('w', 'run.toggle');
+      expect(registry.run).toHaveBeenCalledWith('run.toggle', { windowId: 'w' });
+      // A closed window's bar goes with it, on the store change that unregisters it.
+      hub.windowIds.length = 0;
+      hub.updateWindow.mockClear();
+      const onStoreChange = hub.onChange.mock.calls[0]![0] as () => void;
+      onStoreChange();
+      await rebuilt();
+      expect(hub.updateWindow).not.toHaveBeenCalled();
+      expect(() => activateWindowMenuItem('w', 'run.toggle')).toThrow(unavailable);
+    } finally {
+      openWindows.clear();
+    }
+  });
+
+  it('rebuilds when a window is created, and again when it enters or leaves full screen', async () => {
+    const hub = fakeHub(['w']);
+    installMenu({ registry, hub, platform: 'linux' } as unknown as Services);
+    await rebuilt();
+    const onCreated = electron.app.on.mock.calls
+      .filter(([name]) => name === 'browser-window-created')
+      .at(-1)![1] as (event: unknown, win: unknown) => void;
+    const win = new EventEmitter();
+    hub.windowIds.push('w2');
+    onCreated({}, win);
+    await rebuilt();
+    expect(hub.updateWindow.mock.calls.map(([windowId]) => windowId)).toContain('w2');
+
+    // Full screen changes View's last item in that window's bar.
+    hub.updateWindow.mockClear();
+    openWindows.set('w', { id: 'w', isFullScreen: () => true });
+    try {
+      win.emit('enter-full-screen');
+      await rebuilt();
+      expect(hub.updateWindow.mock.calls.map(([windowId]) => windowId)).toEqual(['w']);
+    } finally {
+      openWindows.clear();
+    }
   });
 
   it('starts with the bar on Windows and Linux, where the toggle hides it', async () => {
