@@ -117,6 +117,37 @@ describe('ensureTrusted', () => {
     });
   });
 
+  it('runs a local fiddle without asking', async () => {
+    const { documents } = await setup();
+    documents.updateDoc(W, (doc) => ({
+      ...doc,
+      fiddle: { ...doc.fiddle, origin: { kind: 'local' } },
+    }));
+    expect(await documents.ensureTrusted(W, 'run')).toMatchObject({
+      approved: true,
+      allowScripts: true,
+      fiddle: { files: { 'main.js': 'approved()' } },
+    });
+    expect(showMessageBox).not.toHaveBeenCalled();
+  });
+
+  it('lists where the code comes from, its files and its dependencies in the prompt', async () => {
+    const { documents } = await setup({
+      packument: async () => ({ versions: {} }),
+      modules: { lodash: '^4.17.0' },
+    });
+    showMessageBox.mockResolvedValue({ response: 1, checkboxChecked: false });
+
+    await documents.ensureTrusted(W, 'run');
+
+    const { detail } = showMessageBox.mock.calls[0]![0] as { detail: string };
+    expect(detail).toContain(
+      `detailOrigin:{"origin":"gist:octocat/${ID}@${'a'.repeat(40)}"}`,
+    );
+    expect(detail).toContain('detailFiles:{"files":"main.js"}');
+    expect(detail).toContain('detailDependencies:{"dependencies":"lodash@^4.17.0"}');
+  });
+
   it('asks again for install scripts when an operation needs them and the approval left them off', async () => {
     const { documents } = await setup();
     showMessageBox.mockResolvedValue({ response: 0, checkboxChecked: false });
@@ -160,6 +191,18 @@ describe('installScriptPackages', () => {
       modules,
     });
     expect(await documents.installScriptPackages(W)).toEqual(['esbuild', 'lodash']);
+  });
+
+  it('lists nothing once an approval allowed install scripts, without asking the registry again', async () => {
+    const packument = vi.fn(async (name: string) => packuments[name]);
+    const { documents } = await setup({ packument, modules });
+    showMessageBox.mockResolvedValue({ response: 0, checkboxChecked: true });
+    await documents.ensureTrusted(W, 'run', {
+      packagesWithInstallScripts: ['esbuild@0.20.0'],
+    });
+
+    expect(await documents.installScriptPackages(W)).toEqual([]);
+    expect(packument).not.toHaveBeenCalled();
   });
 
   it('lists nothing for a trusted fiddle', async () => {

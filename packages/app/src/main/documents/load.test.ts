@@ -118,6 +118,26 @@ describe('fiddleFromGist', () => {
     expect(loaded.warnings).toEqual([{ kind: 'unusable-version', version: '99.0.0' }]);
   });
 
+  it('keeps the current version with a warning when package.json names an Electron version that is not one, and drops module specs it will not install', async () => {
+    const pkg = JSON.stringify({
+      dependencies: { react: '^19.0.0', evil: 'git+https://x.test/y' },
+      devDependencies: { electron: 'latest' },
+    });
+    const loaded = await fiddleFromGist(gist({ 'main.js': '', 'package.json': pkg }), {
+      context: current,
+      confirmAddFile: async () => true,
+    });
+    expect(loaded.fiddle.version).toEqual(current.version);
+    expect(loaded.fiddle.modules).toEqual({ react: '^19.0.0' });
+    expect(loaded.warnings).toEqual([
+      { kind: 'unusable-version', version: 'latest' },
+      {
+        kind: 'rejected-modules',
+        modules: [{ name: 'evil', spec: 'git+https://x.test/y', reason: 'invalid-spec' }],
+      },
+    ]);
+  });
+
   it('warns about an invalid package.json and keeps the previous modules', async () => {
     const loaded = await fiddleFromGist(
       gist({ 'main.js': '', 'package.json': '{nope' }),

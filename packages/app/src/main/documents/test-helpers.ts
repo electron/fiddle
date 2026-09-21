@@ -5,6 +5,7 @@ type Deps = Parameters<typeof initDocuments>[0];
 
 interface FakeDocumentsOptions {
   sessionRestore?: boolean;
+  platform?: Deps['platform'];
   /** Members added to (or replacing those of) the fake state hub. */
   hub?: object;
   versions?: object;
@@ -12,6 +13,7 @@ interface FakeDocumentsOptions {
   npm?: object;
   /** Runs after the window is recorded in the returned map. */
   onCreateWindow?: (windowId: string, init: WindowInit) => Promise<void>;
+  onDocsExampleLoaded?: (windowId: string) => void;
 }
 
 /** Initialises the documents service with a state hub that keeps window state in the returned map. */
@@ -31,7 +33,7 @@ export function initFakeDocuments(
       onChange: () => () => undefined,
       ...options.hub,
     } as unknown as Deps['hub'],
-    platform: 'linux',
+    platform: options.platform ?? 'linux',
     versions: {
       releases: () => [],
       release: () => undefined,
@@ -52,6 +54,9 @@ export function initFakeDocuments(
       windows.set(windowId, { ...init });
       await options.onCreateWindow?.(windowId, init);
     },
+    ...(options.onDocsExampleLoaded
+      ? { onDocsExampleLoaded: options.onDocsExampleLoaded }
+      : {}),
   });
   return windows;
 }
