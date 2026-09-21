@@ -55,7 +55,7 @@ The full guide, with a template spec, is in `packages/app/e2e/README.md`.
 - **Test mode** (`src/main/test-mode.ts`) is on only in test builds launched with `FIDDLE_TEST_MODE=1`, which the launcher sets. Every feature must use:
   - `getEndpoints()` for every network URL (`src/shared/endpoints.ts`). In test mode these point at the fixture server in `e2e/fixtures/`, and any non-loopback request fails the test.
   - `getCacheRoot()` for the `core` cache.
-  - `isTestMode()`, or `testFlags().updates`, `.sentry`, `.firstRunPrompts` and `.tour`, to skip what tests must not trigger.
+  - `isTestMode()` to skip what tests must not trigger: updates, Sentry, first-run prompts and the tour.
   - Native dialogs through Electron's `dialog` module, so the driver can script them.
   - `shell`, protocol, recent-document, notification and `Menu.popup` calls through Electron as usual. Test mode records and stubs them.
   - `win.show()` and `win.focus()` for windows, never `app.focus()` or `webContents.focus()`, which would pull the app in front of whoever runs the tests on macOS.

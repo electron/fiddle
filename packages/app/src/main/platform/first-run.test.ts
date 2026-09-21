@@ -8,7 +8,7 @@ const mocks = vi.hoisted(() => ({
     moveToApplicationsFolder: vi.fn(),
   },
   showMessageBox: vi.fn(async (_options: unknown) => ({ response: 0 })),
-  firstRunPrompts: true,
+  testMode: false,
   error: vi.fn(),
 }));
 
@@ -19,7 +19,7 @@ vi.mock('electron', () => ({
 vi.mock('../i18n', () => ({ tm: () => (key: string) => key }));
 vi.mock('../log', () => ({ log: { error: mocks.error } }));
 vi.mock('../test-mode', () => ({
-  testFlags: () => ({ firstRunPrompts: mocks.firstRunPrompts }),
+  isTestMode: () => mocks.testMode,
 }));
 
 import { offerMoveToApplications } from './first-run';
@@ -29,7 +29,7 @@ const realPlatform = process.platform;
 beforeEach(() => {
   Object.defineProperty(process, 'platform', { value: 'darwin' });
   mocks.app.isPackaged = true;
-  mocks.firstRunPrompts = true;
+  mocks.testMode = false;
   mocks.app.isInApplicationsFolder.mockReset().mockReturnValue(false);
   mocks.app.moveToApplicationsFolder.mockReset();
   mocks.showMessageBox.mockReset().mockResolvedValue({ response: 0 });
@@ -67,9 +67,9 @@ describe('offerMoveToApplications', () => {
     mocks.app.isPackaged = false;
     await offerMoveToApplications(true);
     mocks.app.isPackaged = true;
-    mocks.firstRunPrompts = false;
+    mocks.testMode = true;
     await offerMoveToApplications(true);
-    mocks.firstRunPrompts = true;
+    mocks.testMode = false;
     mocks.app.isInApplicationsFolder.mockReturnValue(true);
     await offerMoveToApplications(true);
     expect(mocks.showMessageBox).not.toHaveBeenCalled();
