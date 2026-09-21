@@ -20,7 +20,7 @@ vi.mock('../i18n', () => ({
   tm: () => (key: string, values?: Record<string, string>) =>
     values ? `${key} ${values.message ?? ''}`.trim() : key,
 }));
-vi.mock('./argv', () => ({ helpText: () => 'HELP\n', parseCommandLine: vi.fn() }));
+vi.mock('./argv', () => ({ helpText: vi.fn(() => 'HELP\n'), parseCommandLine: vi.fn() }));
 vi.mock('./commands', () => ({ runCommand: vi.fn() }));
 
 const consoleMethods = { log: console.log, info: console.info, debug: console.debug };
@@ -31,6 +31,7 @@ const signalListeners = {
 
 afterEach(() => {
   vi.restoreAllMocks();
+  vi.unstubAllEnvs();
   Object.assign(console, consoleMethods);
   for (const [signal, keep] of Object.entries(signalListeners) as [
     'SIGINT' | 'SIGTERM',
@@ -58,12 +59,14 @@ async function launch(
   options: {
     parse?: () => unknown;
     parseError?: [string, string];
+    help?: () => string;
     run?: RunCommand;
   } = {},
 ) {
   vi.resetModules();
   const { app } = await import('electron');
-  const { parseCommandLine } = await import('./argv');
+  const { helpText, parseCommandLine } = await import('./argv');
+  if (options.help) vi.mocked(helpText).mockImplementation(options.help);
   const { runCommand } = await import('./commands');
   const { FiddleError } = await import('../../shared/errors');
   vi.mocked(parseCommandLine).mockImplementation(((): unknown => {
@@ -110,6 +113,7 @@ describe('headlessArgs', () => {
       ['run', 'x'],
     ],
     [['electron-fiddle', '--no-sandbox', '--headless'], []],
+    [['electron-fiddle', '--no-sandbox'], undefined],
     [['electron-fiddle', 'run'], undefined],
     [
       [
@@ -225,6 +229,35 @@ describe('exit codes', () => {
       },
     });
     expect(plain.code).toBe(70);
+  });
+
+  it('exits 70 with the stack on stderr when it fails outside the command', async () => {
+    const result = await launch(['--headless', '--help'], {
+      parse: () => ({ kind: 'help' }),
+      help: () => {
+        throw new TypeError('no help');
+      },
+    });
+    expect(result.code).toBe(70);
+    expect(result.stderr).toMatch(/^TypeError: no help\n\s+at /);
+  });
+});
+
+describe('main’s own logs', () => {
+  it('are dropped, so stdout is the command’s alone', async () => {
+    const error = vi.spyOn(console, 'error').mockImplementation(() => undefined);
+    await launch(['--headless', 'run']);
+    console.log('starting');
+    console.info('info');
+    expect(error).not.toHaveBeenCalled();
+  });
+
+  it('go to stderr with FIDDLE_CLI_VERBOSE=1', async () => {
+    vi.stubEnv('FIDDLE_CLI_VERBOSE', '1');
+    const error = vi.spyOn(console, 'error').mockImplementation(() => undefined);
+    await launch(['--headless', 'run']);
+    console.debug('resolving', 42);
+    expect(error).toHaveBeenCalledWith('resolving', 42);
   });
 });
 
