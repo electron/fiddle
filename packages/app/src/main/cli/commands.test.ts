@@ -175,6 +175,23 @@ describe('runCommand', () => {
       else delete (process.stdin as { isTTY?: boolean }).isTTY;
     });
 
+    it('keeps the Electron version a gist asks for when the cached release list predates it', async () => {
+      const pkg = JSON.stringify({ devDependencies: { electron: '999.0.0' } });
+      vi.mocked((await import('electron')).net.fetch).mockImplementation(async () =>
+        Response.json({
+          ...gist,
+          files: {
+            ...gist.files,
+            'package.json': { filename: 'package.json', content: pkg },
+          },
+        }),
+      );
+      expect((await run('export', exportInput(ID))).code).toBeUndefined();
+      expect(
+        JSON.parse(await readFile(path.join(dir, 'out', 'package.json'), 'utf8')),
+      ).toMatchObject({ devDependencies: { electron: '999.0.0' } });
+    });
+
     const remoteInput = (id: 'run' | 'bisect' | 'package' | 'make', trust: boolean) =>
       descriptors[id].input.parse({ fiddle: ID, good: '30.0.0', bad: '31.0.0', trust });
 
