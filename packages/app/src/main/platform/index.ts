@@ -5,7 +5,6 @@ import { startUpdates } from '../updates';
 import { setupAboutPanel } from './about';
 import { offerMoveToApplications } from './first-run';
 import { finishStartup } from './lifecycle';
-import { installRelaunchOnQuit } from './locale';
 import { registerProtocolClient } from './protocol-client';
 
 export { installQuitOnLastWindowClosed } from './lifecycle';
@@ -13,7 +12,6 @@ export { installQuitOnLastWindowClosed } from './lifecycle';
 /** `firstLaunch`: from the one-time import, no earlier launch of this app. */
 export async function startPlatform(hub: StateHub, firstLaunch: boolean): Promise<void> {
   finishStartup();
-  installRelaunchOnQuit();
   setupAboutPanel();
   registerProtocolClient();
   hub.onChange(() => {

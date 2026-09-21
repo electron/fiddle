@@ -1,4 +1,4 @@
-/** The quit prompt for unsaved windows: `before-quit` is held, and a cancelled quit drops a pending relaunch. */
+/** The quit prompt for unsaved windows: `before-quit` is held until the user answers. */
 import { EventEmitter } from 'node:events';
 import fs from 'node:fs';
 import os from 'node:os';
@@ -8,7 +8,6 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 let userData = '';
 const showMessageBox = vi.fn();
-const cancelRelaunch = vi.fn();
 
 vi.mock('electron', async () => {
   const { EventEmitter } = await import('node:events');
@@ -25,7 +24,6 @@ vi.mock('electron', async () => {
   };
 });
 vi.mock('../windows', () => ({ getWindow: () => undefined }));
-vi.mock('../platform/locale', () => ({ cancelRelaunch: () => cancelRelaunch() }));
 vi.mock('../i18n', () => ({
   tm: () => (key: string) => key,
   t: (key: string) => key,
@@ -73,7 +71,6 @@ beforeEach(() => {
   mockApp.removeAllListeners();
   mockApp.quit.mockClear();
   showMessageBox.mockReset();
-  cancelRelaunch.mockClear();
 });
 
 afterEach(() => {
@@ -87,18 +84,11 @@ describe('before-quit', () => {
     expect(showMessageBox).not.toHaveBeenCalled();
   });
 
-  it('holds the quit and asks once when a window has unsaved changes', async () => {
+  it('holds the quit and asks once when a window has unsaved changes, and stays when cancelled', async () => {
     await setup(true);
     showMessageBox.mockResolvedValue({ response: 1, checkboxChecked: false });
     expect(beforeQuit().preventDefault).toHaveBeenCalledOnce();
     await vi.waitFor(() => expect(showMessageBox).toHaveBeenCalledOnce());
-  });
-
-  it('cancels a pending relaunch when the user cancels the quit', async () => {
-    await setup(true);
-    showMessageBox.mockResolvedValue({ response: 1, checkboxChecked: false });
-    beforeQuit();
-    await vi.waitFor(() => expect(cancelRelaunch).toHaveBeenCalledOnce());
     expect(mockApp.quit).not.toHaveBeenCalled();
   });
 
@@ -107,7 +97,6 @@ describe('before-quit', () => {
     showMessageBox.mockResolvedValue({ response: 0, checkboxChecked: false });
     beforeQuit();
     await vi.waitFor(() => expect(mockApp.quit).toHaveBeenCalledOnce());
-    expect(cancelRelaunch).not.toHaveBeenCalled();
     // The second `before-quit`, from that quit, goes through.
     expect(beforeQuit().preventDefault).not.toHaveBeenCalled();
   });

@@ -50,7 +50,6 @@ import type { NpmClient } from '../modules/npm-client';
 import { netFetch } from '../net-fetch';
 import { forgeElectronFor, forgeOptionsFor } from '../packaging/service';
 import { createJsonStore, type JsonStore } from '../persistence/json-store';
-import { cancelRelaunch } from '../platform/locale';
 import type { StateHub, WindowInit } from '../state-hub';
 import { getCacheRoot, getEndpoints } from '../test-mode';
 import { defaultVersionFor } from '../versions/selection';
@@ -569,10 +568,7 @@ function onBeforeQuit(event: Electron.Event): void {
   }
   event.preventDefault();
   void (async () => {
-    if (!(await askToQuit())) {
-      cancelRelaunch();
-      return;
-    }
+    if (!(await askToQuit())) return;
     finishQuit();
     // A later turn: a prompt answered at once would otherwise quit inside this
     // `before-quit` dispatch, which Electron then treats as cancelled.
@@ -581,9 +577,9 @@ function onBeforeQuit(event: Electron.Event): void {
 }
 
 /**
- * The unsaved-changes check of a normal quit, for a quit that closes the
- * windows before `before-quit` (`autoUpdater.quitAndInstall()`). False if the
- * user cancelled.
+ * The unsaved-changes check of a normal quit, for a quit that must not start unless it goes
+ * through: `autoUpdater.quitAndInstall()` closes the windows before `before-quit`, and
+ * `app.relaunch()` can't be undone. False if the user cancelled.
  */
 export async function confirmQuit(): Promise<boolean> {
   if (quitting) return true;

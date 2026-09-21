@@ -25,26 +25,3 @@ export function applyChromiumLanguage(): void {
   const setting = forced ?? localeSettingFrom(data);
   if (setting) app.commandLine.appendSwitch('lang', pickLocale([setting]));
 }
-
-let relaunchRequested = false;
-
-/**
- * Restarts the app after the usual quit (unsaved-change prompts included). The
- * relaunch is armed only once the app has really quit: `app.relaunch()` can't
- * be undone, and the quit can be cancelled.
- */
-export function relaunchApp(): void {
-  relaunchRequested = true;
-  app.quit();
-}
-
-/** The user cancelled the quit that `relaunchApp` started. */
-export function cancelRelaunch(): void {
-  relaunchRequested = false;
-}
-
-export function installRelaunchOnQuit(): void {
-  app.on('quit', () => {
-    if (relaunchRequested) app.relaunch();
-  });
-}
