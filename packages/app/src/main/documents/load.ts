@@ -42,11 +42,13 @@ function releaseVersion(ref: VersionRef): string | undefined {
   return ref.kind === 'release' ? ref.version : undefined;
 }
 
+/** `waitMs`: how long to wait for a template download before taking the bundled one (default: the loader's). */
 export async function newFiddle(
   templates: TemplateLoader,
   version: VersionRef,
+  waitMs?: number,
 ): Promise<LoadedFiddle> {
-  const files = await templates.getTemplate(releaseVersion(version));
+  const files = await templates.getTemplate(releaseVersion(version), waitMs);
   return {
     fiddle: createFiddle({ files, version, templateName: DEFAULT_TEMPLATE }),
     name: getProjectName(),

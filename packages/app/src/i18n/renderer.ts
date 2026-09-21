@@ -22,6 +22,8 @@ const SHELL_NAMESPACES: Namespace[] = [
   'palette',
   'main',
   'onboarding',
+  // StorageNotices mounts with App.
+  'settings',
 ];
 
 /** `<html lang dir>`: a right-to-left locale mirrors the chrome through CSS logical properties. */
