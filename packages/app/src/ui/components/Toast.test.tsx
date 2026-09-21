@@ -1,7 +1,7 @@
 import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { UNSTABLE_ToastQueue as ToastQueue } from 'react-aria-components';
-import { describe, expect, it } from 'vitest';
-import { Toaster, type ToastContent } from './Toast';
+import { afterEach, describe, expect, it, vi } from 'vitest';
+import { showToast, Toaster, toastQueue, type ToastContent } from './Toast';
 
 describe('Toaster', () => {
   it('shows queued toasts and closes them', async () => {
@@ -35,5 +35,26 @@ describe('Toaster', () => {
     await waitFor(() =>
       expect(screen.queryByText('Electron 44.0.0-beta.3 is ready')).toBeNull(),
     );
+  });
+});
+
+describe('showToast', () => {
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
+  it('times a toast out after 5s or the given delay, but never one with an action', () => {
+    const add = vi.spyOn(toastQueue, 'add').mockReturnValue('key');
+    expect(showToast({ title: 'Published' })).toBe('key');
+    showToast({ title: 'Saved' }, { timeout: 1000 });
+    showToast(
+      { title: 'Electron 44.0.0 is ready', actionLabel: 'Switch', onAction: () => {} },
+      { timeout: 1000 },
+    );
+    expect(add.mock.calls.map(([, options]) => options?.timeout)).toEqual([
+      5000,
+      1000,
+      undefined,
+    ]);
   });
 });

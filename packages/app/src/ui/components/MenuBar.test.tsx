@@ -60,22 +60,25 @@ const MENUS: MenuBarMenu[] = [
 
 function setup(props: { menus?: MenuBarMenu[]; availableWidth?: () => number } = {}) {
   const onAction = vi.fn<(id: string) => void>();
-  const result = render(
+  const ui = (menus: MenuBarMenu[]) => (
     <>
       <textarea aria-label="Editor" />
       <MenuBar
-        menus={props.menus ?? MENUS}
+        menus={menus}
         label="Application menu"
         moreLabel="More"
         menuLabel="Menu"
         availableWidth={props.availableWidth}
         onAction={onAction}
       />
-    </>,
+    </>
   );
+  const result = render(ui(props.menus ?? MENUS));
   const editor = screen.getByRole('textbox', { name: 'Editor' });
   act(() => editor.focus());
-  return { ...result, onAction, editor };
+  /** Main pushed a new menu model. */
+  const setMenus = (menus: MenuBarMenu[]) => result.rerender(ui(menus));
+  return { ...result, onAction, editor, setMenus };
 }
 
 const title = (name: string) => screen.getByRole('menuitem', { name });
@@ -401,6 +404,95 @@ describe('MenuBar', () => {
     press('ArrowDown');
     press('Enter');
     expect(onAction).toHaveBeenCalledWith('recent:1');
+  });
+
+  it('opens a menu on its last item with Up, and moves up and to the top with Up and Home', () => {
+    setup();
+    tapAlt();
+    press('ArrowUp');
+    expect(openMenus()).toEqual(['File']);
+    expect(focused()).toBe(screen.getByRole('menuitem', { name: 'Exit' }));
+    press('ArrowUp');
+    expect(focused()).toBe(screen.getByRole('menuitem', { name: 'Open recent' }));
+    press('Home');
+    expect(focused()).toBe(screen.getByRole('menuitem', { name: 'New fiddle' }));
+    press('ArrowUp');
+    expect(focused()).toBe(screen.getByRole('menuitem', { name: 'Exit' }));
+  });
+
+  it('lets Tab leave the bar, closing an open menu and giving focus back first', () => {
+    const { editor } = setup();
+    const bar = screen.getByRole('menubar');
+    tapAlt();
+    // Keys it has no use for pass through.
+    expect(fireEvent.keyDown(title('File'), { key: 'Shift' })).toBe(true);
+    expect(fireEvent.keyDown(title('File'), { key: 'Tab' })).toBe(true);
+    expect(bar.hasAttribute('data-engaged')).toBe(false);
+    // The browser's Tab moved on (jsdom's doesn't).
+    act(() => editor.focus());
+    press('f', { altKey: true });
+    expect(openMenus()).toEqual(['File']);
+    press('Tab');
+    expect(openMenus()).toEqual([]);
+    expect(focused()).toBe(editor);
+    expect(bar.hasAttribute('data-engaged')).toBe(false);
+  });
+
+  it('drops focus on Escape when nothing had it before the bar took the keyboard', () => {
+    const { editor } = setup();
+    act(() => editor.blur());
+    tapAlt();
+    expect(focused()).toBe(title('File'));
+    press('Escape');
+    expect(focused()).toBe(document.body);
+  });
+
+  it('keeps the keys working when the focused item goes away under an open menu', () => {
+    const { setMenus } = setup();
+    press('f', { altKey: true });
+    expect(focused()).toBe(screen.getByRole('menuitem', { name: 'New fiddle' }));
+    const [file, ...others] = MENUS;
+    setMenus([{ ...file!, children: file!.children.slice(1) }, ...others]);
+    expect(screen.queryByRole('menuitem', { name: 'New fiddle' })).toBeNull();
+    expect(focused()).toBe(screen.getByRole('menu', { name: 'File' }));
+    press('ArrowDown');
+    expect(focused()).toBe(screen.getByRole('menuitem', { name: 'Open recent' }));
+  });
+
+  it('opens a submenu on click without moving focus, and a press in a menu never takes it', () => {
+    setup();
+    fireEvent.mouseDown(title('File'), { button: 0 });
+    const fileMenu = screen.getByRole('menu', { name: 'File' });
+    const trigger = screen.getByRole('menuitem', { name: 'Open recent' });
+    expect(fireEvent.mouseDown(fileMenu)).toBe(false);
+    expect(fireEvent.mouseDown(trigger)).toBe(false);
+    fireEvent.click(trigger);
+    expect(openMenus()).toEqual(['File', 'Open recent']);
+    expect(focused()).toBe(fileMenu);
+  });
+
+  it('highlights the item under the pointer, and none over a disabled one', () => {
+    setup();
+    fireEvent.mouseDown(title('File'), { button: 0 });
+    fireEvent.mouseEnter(screen.getByRole('menuitem', { name: 'New fiddle' }));
+    expect(focused()).toBe(screen.getByRole('menuitem', { name: 'New fiddle' }));
+    fireEvent.mouseEnter(screen.getByRole('menuitem', { name: 'Save' }));
+    expect(focused()).toBe(screen.getByRole('menu', { name: 'File' }));
+  });
+
+  it('closes and lets go of the keyboard when the window loses focus', () => {
+    setup();
+    const bar = screen.getByRole('menubar');
+    press('f', { altKey: true });
+    act(() => void window.dispatchEvent(new Event('blur')));
+    expect(openMenus()).toEqual([]);
+    expect(bar.hasAttribute('data-engaged')).toBe(false);
+    expect(title('File').getAttribute('aria-expanded')).toBe('false');
+    // With nothing open it only forgets a held Alt.
+    fireEvent.keyDown(document.body, { key: 'Alt', altKey: true });
+    expect(bar.hasAttribute('data-mnemonics')).toBe(true);
+    act(() => void window.dispatchEvent(new Event('blur')));
+    expect(bar.hasAttribute('data-mnemonics')).toBe(false);
   });
 
   it('jumps to the next item that starts with a typed letter', () => {
