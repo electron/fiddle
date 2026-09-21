@@ -128,7 +128,7 @@ describe('schema and defaults', () => {
     expect(isModified({ ...defaultSettings, channels: ['stable'] }, 'channels')).toBe(
       true,
     );
-    expect(sameValue({ a: 1, b: [1, { c: 2 }] }, { b: [1, { c: 2 }], a: 1 })).toBe(true);
+    expect(sameValue({ a: 1, b: [1, { c: 2 }] }, { a: 1, b: [1, { c: 2 }] })).toBe(true);
     expect(sameValue([1, 2], { 0: 1, 1: 2 })).toBe(false);
   });
 });

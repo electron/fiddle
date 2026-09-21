@@ -184,24 +184,13 @@ async function downloadTemplate(
 }
 
 /** `promise`'s value, or undefined if it takes longer than `ms`. Never rejects on its own. */
-function withinWait<T>(
-  promise: Promise<T>,
-  ms: number | undefined,
-): Promise<T | undefined> {
+async function withinWait<T>(promise: Promise<T>, ms?: number): Promise<T | undefined> {
   if (ms === undefined) return promise;
-  return new Promise((resolve, reject) => {
-    const timer = setTimeout(resolve, ms, undefined);
-    promise.then(
-      (value) => {
-        clearTimeout(timer);
-        resolve(value);
-      },
-      (error: unknown) => {
-        clearTimeout(timer);
-        reject(error);
-      },
-    );
+  let timer: NodeJS.Timeout | undefined;
+  const timeout = new Promise<undefined>((resolve) => {
+    timer = setTimeout(() => resolve(undefined), ms);
   });
+  return Promise.race([promise, timeout]).finally(() => clearTimeout(timer));
 }
 
 export function createTemplateLoader(options: TemplateLoaderOptions): TemplateLoader {

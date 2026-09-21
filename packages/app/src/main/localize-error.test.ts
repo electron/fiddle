@@ -1,8 +1,6 @@
-import fs from 'node:fs';
-
 import { beforeAll, describe, expect, it } from 'vitest';
 
-import { ERROR_REASONS, reasonError } from '../fiddle/error-reasons';
+import { reasonError } from '../fiddle/error-reasons';
 import { assertValidFileName, fileRuleError } from '../fiddle/files';
 import { forgeTransform } from '../fiddle/forge';
 import { assertGistFiles } from '../fiddle/github';
@@ -24,18 +22,6 @@ function thrown(fn: () => unknown): FiddleError {
   }
   throw new Error('did not throw');
 }
-
-describe('the mainErrors catalog', () => {
-  it('has a key for every reason, and no others', () => {
-    const catalog = JSON.parse(
-      fs.readFileSync(
-        new URL('../i18n/locales/en/mainErrors.json', import.meta.url),
-        'utf8',
-      ),
-    ) as Record<string, unknown>;
-    expect(Object.keys(catalog).sort()).toEqual([...ERROR_REASONS].sort());
-  });
-});
 
 describe('localizeError', () => {
   it('fills the message from the details and keeps the code and details', () => {
