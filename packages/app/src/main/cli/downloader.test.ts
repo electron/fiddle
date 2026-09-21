@@ -67,6 +67,29 @@ describe('fetchDownloader', () => {
     ).rejects.toThrow('no data received');
   });
 
+  it('gives the headers and then the first chunk each the full stall window', async () => {
+    const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+    const fetchFn = async () => {
+      await wait(70);
+      return new Response(
+        new ReadableStream({
+          async start(c) {
+            await wait(70);
+            c.enqueue(new TextEncoder().encode('late'));
+            c.close();
+          },
+        }),
+      );
+    };
+    const file = path.join(dir, 'd');
+    await fetchDownloader(fetchFn as unknown as typeof fetch, 100).download(
+      'https://example.test/d',
+      file,
+      {},
+    );
+    expect(await readFile(file, 'utf8')).toBe('late');
+  });
+
   it('fails on an HTTP error', async () => {
     const fetchFn = async () => new Response('missing', { status: 404 });
     await expect(
