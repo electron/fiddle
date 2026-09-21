@@ -3,9 +3,10 @@ import { describe, expect, it, vi } from 'vitest';
 import type { VersionRef } from '../../fiddle/fiddle';
 import type { ReleaseChannel } from '../../fiddle/versions';
 import { ErrorCode } from '../../shared/errors';
-import type { LocalBuild, ReleaseRow, VersionNotice } from '../../shared/stores';
+import type { LocalBuild, VersionNotice } from '../../shared/stores';
 import type { ChangeListener } from '../state-hub';
 import { VersionSelector } from './select';
+import { row } from './test-helpers';
 
 const dialog = { prompts: [] as string[], answer: true };
 vi.mock('../dialogs', () => ({
@@ -21,16 +22,8 @@ vi.mock('../i18n', () => ({
   tm: () => (key: string, values?: Record<string, string>) =>
     values ? `${key}(${Object.values(values).join('|')})` : key,
 }));
-vi.mock('../log', () => ({ log: { warn: vi.fn() } }));
+vi.mock('../log');
 
-const row = (version: string, extra: Partial<ReleaseRow> = {}): ReleaseRow => ({
-  version,
-  date: '',
-  node: '',
-  obsolete: false,
-  supported: true,
-  ...extra,
-});
 const release = (version: string): VersionRef => ({ kind: 'release', version });
 const sameRef = (a: VersionRef, b: VersionRef) => JSON.stringify(a) === JSON.stringify(b);
 

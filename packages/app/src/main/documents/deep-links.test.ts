@@ -47,11 +47,7 @@ vi.mock('../windows', () => ({
     id === undefined ? undefined : browserWindows.get(id),
   sendWindowCommand: (...args: unknown[]) => sendWindowCommand(...args),
 }));
-vi.mock('../i18n', () => ({
-  tm: () => (key: string, options?: Record<string, string>) =>
-    options ? `${key}:${JSON.stringify(options)}` : key,
-  t: (key: string) => key,
-}));
+vi.mock('../i18n');
 vi.mock('../test-mode', async (original) => ({
   ...(await original<typeof import('../test-mode')>()),
   getCacheRoot: () => path.join(userData, 'cache'),

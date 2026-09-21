@@ -16,9 +16,7 @@ vi.mock('electron', () => ({
   app: { getPath: () => mocks.userData, getVersion: () => '1.0.0' },
   safeStorage: {},
 }));
-vi.mock('../log', () => ({
-  log: { debug: vi.fn(), info: vi.fn(), warn: vi.fn(), error: vi.fn() },
-}));
+vi.mock('../log');
 vi.mock('../test-mode', () => ({
   isTestMode: () => mocks.testMode,
   getCacheRoot: mocks.cacheRoot,

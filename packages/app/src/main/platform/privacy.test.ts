@@ -10,8 +10,8 @@ const mocks = vi.hoisted(() => ({
 
 vi.mock('node:child_process', () => ({ execFile: mocks.execFile }));
 vi.mock('../dialogs', () => ({ confirm: mocks.confirm }));
-vi.mock('../i18n', () => ({ tm: () => (key: string) => key }));
-vi.mock('../log', () => ({ log: { error: vi.fn() } }));
+vi.mock('../i18n');
+vi.mock('../log');
 
 import {
   BUNDLE_ID,

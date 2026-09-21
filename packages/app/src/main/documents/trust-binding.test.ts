@@ -23,11 +23,7 @@ vi.mock('electron', () => ({
   dialog: { showMessageBox: (...args: unknown[]) => showMessageBox(...args) },
 }));
 vi.mock('../windows', () => ({ getWindow: () => undefined }));
-vi.mock('../i18n', () => ({
-  tm: () => (key: string, options?: Record<string, string>) =>
-    options ? `${key}:${JSON.stringify(options)}` : key,
-  t: (key: string) => key,
-}));
+vi.mock('../i18n');
 
 const ID = '8c5fc0c6a5153d49b5a4a56d3ed9da8f';
 

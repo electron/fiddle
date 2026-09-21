@@ -20,7 +20,7 @@ const electron = vi.hoisted(() => ({
 const windows = vi.hoisted(() => ({ open: new Map<string, unknown>() }));
 
 vi.mock('electron', () => electron);
-vi.mock('./i18n', () => ({ t: (key: string) => key }));
+vi.mock('./i18n');
 vi.mock('./windows', () => ({ getWindow: (id: string) => windows.open.get(id) }));
 
 import { confirm, messageBox, pickFile, pickFolder, pickSave } from './dialogs';

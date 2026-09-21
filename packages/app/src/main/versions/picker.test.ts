@@ -1,16 +1,8 @@
 import { describe, expect, it } from 'vitest';
 
-import type { LocalBuild, ReleaseRow, VersionsState } from '../../shared/stores';
+import type { LocalBuild, VersionsState } from '../../shared/stores';
 import { normalizeVersionQuery, pickerGroups, type PickerInput } from './releases';
-
-const row = (version: string, extra: Partial<ReleaseRow> = {}): ReleaseRow => ({
-  version,
-  date: '',
-  node: '',
-  obsolete: false,
-  supported: true,
-  ...extra,
-});
+import { row } from './test-helpers';
 
 const allChannels = {
   channels: ['stable', 'beta', 'nightly'] as const,

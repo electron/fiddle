@@ -5,7 +5,6 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 const mocks = vi.hoisted(() => ({
   flushAll: vi.fn<() => Promise<void>>(),
   hasPendingWrites: vi.fn<() => boolean>(),
-  flushLog: vi.fn(async () => undefined),
   flushDocuments: vi.fn(),
 }));
 
@@ -16,10 +15,7 @@ vi.mock('electron', async () => {
     powerMonitor: new EventEmitter(),
   };
 });
-vi.mock('../log', () => ({
-  log: { debug: vi.fn(), info: vi.fn(), warn: vi.fn(), error: vi.fn() },
-  flushLog: mocks.flushLog,
-}));
+vi.mock('../log');
 vi.mock('./json-store', () => ({
   flushAll: mocks.flushAll,
   hasPendingWrites: mocks.hasPendingWrites,
@@ -27,6 +23,7 @@ vi.mock('./json-store', () => ({
 
 import { app, powerMonitor } from 'electron';
 
+import { flushLog } from '../log';
 import { installFlushOnExit } from './lifecycle';
 
 const emitter = app as unknown as EventEmitter & { quit: ReturnType<typeof vi.fn> };
@@ -45,7 +42,7 @@ beforeEach(() => {
   emitter.quit.mockClear();
   mocks.flushAll.mockReset().mockResolvedValue(undefined);
   mocks.hasPendingWrites.mockReset().mockReturnValue(false);
-  mocks.flushLog.mockClear();
+  vi.mocked(flushLog).mockClear();
   mocks.flushDocuments.mockClear();
   installFlushOnExit(mocks.flushDocuments);
 });
@@ -67,7 +64,7 @@ describe('installFlushOnExit', () => {
     expect(emitter.quit).not.toHaveBeenCalled();
 
     await vi.advanceTimersByTimeAsync(0);
-    expect(mocks.flushLog).toHaveBeenCalledOnce();
+    expect(flushLog).toHaveBeenCalledOnce();
     expect(emitter.quit).toHaveBeenCalledOnce();
   });
 

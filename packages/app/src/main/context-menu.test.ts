@@ -11,8 +11,8 @@ const electron = vi.hoisted(() => ({
   popup: vi.fn(),
 }));
 vi.mock('electron', () => electron);
-vi.mock('./i18n', () => ({ t: (key: string) => key }));
-vi.mock('./log', () => ({ log: { info: vi.fn(), error: vi.fn() } }));
+vi.mock('./i18n');
+vi.mock('./log');
 
 import {
   attachContextMenu,

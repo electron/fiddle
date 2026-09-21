@@ -18,8 +18,8 @@ vi.mock('electron', async () => {
   };
 });
 vi.mock('./dialogs', () => ({ confirm }));
-vi.mock('./i18n', () => ({ t: (key: string) => key }));
-vi.mock('./log', () => ({ log: { warn: vi.fn() } }));
+vi.mock('./i18n');
+vi.mock('./log');
 
 import { app } from 'electron';
 

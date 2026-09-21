@@ -45,12 +45,8 @@ vi.mock('../documents/service', () => ({
   openFolderIn: mocks.openFolderIn,
   recentFolders: mocks.recentFolders,
 }));
-vi.mock('../i18n', () => ({
-  t: (key: string) => key,
-  tm: () => (key: string, options?: Record<string, unknown>) =>
-    options ? `${key}:${JSON.stringify(options)}` : key,
-}));
-vi.mock('../log', () => ({ log: { warn: vi.fn(), error: vi.fn() } }));
+vi.mock('../i18n');
+vi.mock('../log');
 vi.mock('../windows', () => ({
   focusedWindowId: () => undefined,
   getWindow: mocks.getWindow,
