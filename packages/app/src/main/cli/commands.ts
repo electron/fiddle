@@ -389,7 +389,7 @@ async function releaseExec(ctx: Ctx, version: string): Promise<string> {
 }
 
 /** `sfw.mjs`, to wrap installs with, as the app does when Socket Firewall is on (its default). */
-function sfwPath(): string | undefined {
+function sfwPath(): Promise<string | undefined> {
   return sfwPathFor(defaultSettings.socketFirewall);
 }
 
@@ -473,7 +473,7 @@ async function runOnce(
           ? tr('installingModules', { pm })
           : tr('installingModulesNoScripts', { pm }),
       );
-      const sfw = sfwPath();
+      const sfw = await sfwPath();
       await installModules({
         dir: appDir,
         tempRoot: dir,
@@ -574,7 +574,7 @@ async function packageOrMake(
     ctx.reporter.log(
       task === 'package' ? tr('packaging', { path: dir }) : tr('making', { path: dir }),
     );
-    const sfw = sfwPath();
+    const sfw = await sfwPath();
     const failed = await runForgeTask(dir, input.pm, task, {
       env,
       signal: ctx.signal,

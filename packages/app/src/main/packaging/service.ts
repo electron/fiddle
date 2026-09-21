@@ -180,7 +180,7 @@ export async function packageFiddle(
       return;
     }
 
-    const sfwPath = runs.sfwPath();
+    const sfwPath = await runs.sfwPath();
     runs.setState(windowId, { status: 'running' });
     const project = forgeProject(
       {

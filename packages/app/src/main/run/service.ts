@@ -185,7 +185,7 @@ export class RunService {
    * for runs, package and make alike. Undefined when the setting is off, and
    * throws when it's on but `sfw.mjs` is missing.
    */
-  sfwPath(): string | undefined {
+  sfwPath(): Promise<string | undefined> {
     return sfwPathFor(this.#hub.app.settings.socketFirewall);
   }
 
@@ -455,7 +455,7 @@ export class RunService {
           : t('installingModulesNoScripts', { pm }),
       );
       try {
-        const sfwPath = this.sfwPath();
+        const sfwPath = await this.sfwPath();
         await installModules({
           dir: appDir,
           tempRoot: dir,
