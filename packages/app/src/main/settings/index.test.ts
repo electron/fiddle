@@ -1,4 +1,5 @@
 /** Settings startup: the App fields read from settings.json, the OS theme, screen reader, contrast and locale wiring, and live reloads of outside edits. */
+import { EventEmitter } from 'node:events';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
@@ -39,9 +40,14 @@ const { flushAll, onJsonStoreNotice } = await import('../persistence/json-store'
 const { SETTINGS_VERSION } = await import('./service');
 const { loadSettings, preferredLocales, startSettings } = await import('./index');
 
-// Each start leaves a watcher on the settings folder. Close it before the
-// folder goes: on Windows, removing a watched folder can crash the process.
-const watch = vi.spyOn(fs, 'watch');
+// The folder watcher is faked: the test reports changes itself, which keeps OS
+// latency out of it (and a real watch on a short-lived temp folder crashed Node on Windows CI).
+type WatchListener = (event: 'rename' | 'change', filename: string | null) => void;
+let reportChange: WatchListener = () => undefined;
+vi.spyOn(fs, 'watch').mockImplementation(((_dir: unknown, listener: WatchListener) => {
+  reportChange = listener;
+  return Object.assign(new EventEmitter(), { close: vi.fn(), unref: vi.fn() });
+}) as never);
 
 let dir = '';
 beforeEach(() => {
@@ -56,9 +62,6 @@ beforeEach(() => {
 afterEach(async () => {
   vi.useRealTimers();
   await flushAll();
-  for (const started of watch.mock.results)
-    if (started.type === 'return') started.value.close();
-  watch.mockClear();
   // Drop the listeners each `startSettings` added, so they don't fire for the next test.
   app.removeAllListeners();
   nativeTheme.removeAllListeners();
@@ -188,24 +191,22 @@ describe('startSettings', () => {
     expect(store.readOnly).toBe(true);
   });
 
-  it('applies an outside edit to settings.json shortly after it is saved', async () => {
+  it('applies an outside edit to settings.json once the writes settle, and ignores other files', async () => {
     vi.useFakeTimers();
     const { hub } = await start({ packageManager: 'npm' });
-    const applied = () => hub.app.settings.packageManager === 'yarn';
-    // The OS delivers the change between checks, and each check first advances
-    // the debounce. macOS can start reporting a moment after the watch begins,
-    // so the edit is saved again until it is seen.
-    await vi.waitFor(
-      () => {
-        if (applied()) return;
-        writeSettings({ packageManager: 'yarn', showObsolete: true });
-        throw new Error('not applied yet');
-      },
-      { timeout: 4000, interval: 250 },
-    );
+    writeSettings({ packageManager: 'yarn', showObsolete: true });
+    reportChange('change', 'window-state.json');
+    vi.advanceTimersByTime(200);
+    expect(hub.app.settings.packageManager).toBe('npm');
+
+    reportChange('rename', 'settings.json');
+    reportChange('change', 'settings.json');
+    vi.advanceTimersByTime(199);
+    expect(hub.app.settings.packageManager).toBe('npm');
+    vi.advanceTimersByTime(1);
     expect(hub.app.settings).toMatchObject({
       packageManager: 'yarn',
       showObsolete: true,
     });
-  }, 10_000);
+  });
 });
