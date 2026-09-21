@@ -4,34 +4,16 @@ import { Icon, type IconName } from '../icons/Icon';
 import styles from './Callout.module.css';
 
 export interface CalloutProps {
-  /** default is the neutral fill, primary is accent-soft, danger is spark-soft. */
-  intent?: 'default' | 'primary' | 'danger';
-  title?: ReactNode;
-  icon?: IconName;
-  children?: ReactNode;
-  /** A link or button under the text. */
-  action?: ReactNode;
+  children: ReactNode;
   className?: string;
 }
 
 /** An inline note. No border. */
-export function Callout({
-  intent = 'default',
-  title,
-  icon,
-  children,
-  action,
-  className,
-}: CalloutProps) {
-  const iconName = icon ?? (intent === 'danger' ? 'warning' : 'info');
+export function Callout({ children, className }: CalloutProps) {
   return (
-    <div className={cx(styles.callout, className)} data-intent={intent}>
-      <Icon name={iconName} className={styles.icon} />
-      <div className={styles.body}>
-        {title && <div className={styles.title}>{title}</div>}
-        {children && <div className={styles.text}>{children}</div>}
-        {action && <div className={styles.action}>{action}</div>}
-      </div>
+    <div className={cx(styles.callout, className)}>
+      <Icon name="info" className={styles.icon} />
+      <div className={styles.text}>{children}</div>
     </div>
   );
 }

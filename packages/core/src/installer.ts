@@ -12,16 +12,9 @@ import {
 import debug from 'debug';
 import semver from 'semver';
 
-import {
-  type ErrorMode,
-  FiddleCoreError,
-  abortError,
-  throwIfAborted,
-  wrapError,
-} from './errors.js';
+import { FiddleCoreError, abortError, throwIfAborted } from './errors.js';
 import { extractZip } from './extract.js';
 import {
-  copyFolder,
   remove,
   removeBestEffort,
   rename,
@@ -29,8 +22,15 @@ import {
   safeHostname,
 } from './fs-util.js';
 import { LOCK_STALE_MS, isProcessAlive, withLock } from './lock.js';
-import { DefaultPaths, type Paths } from './paths.js';
 import { warmExecutable } from './warm.js';
+
+export interface Paths {
+  // folder where electron zipfiles will be cached
+  readonly electronDownloads: string;
+
+  // folder holding one immutable folder per installed version
+  readonly electronVersions: string;
+}
 
 function getZipName(version: string): string {
   return `electron-v${version}-${process.platform}-${process.arch}.zip`;
@@ -44,19 +44,6 @@ function assertValidVersion(version: string): void {
     );
   }
 }
-
-/**
- * Extracts the zip at `zipPath` into `destDir`, which exists and is empty.
- * `signal` aborts once no caller is waiting for the install any more.
- */
-export type ExtractFunction = (
-  zipPath: string,
-  destDir: string,
-  signal?: AbortSignal,
-) => Promise<void>;
-
-/** Written into `paths.electronInstall` once an install into it is complete. */
-const INSTALLED_MARKER = '.fiddle-core-installed';
 
 // Temp and trash folders in `electronVersions` and `electronDownloads` are
 // named `.tmp-<version>_<host>_<pid>_<random>` and `.rm-…`, so a sweep can
@@ -124,11 +111,6 @@ function mirrorAssetUrl(mirror: Partial<Mirrors>, asset: AssetDetails): string {
   return `${base}${asset.version}/${file}`;
 }
 
-export interface ElectronBinary {
-  path: string;
-  alreadyExtracted: boolean; // to check if it's kept as zipped or not
-}
-
 export interface InstallerParams {
   progressCallback: (progress: ProgressObject) => void;
   mirror: Mirrors;
@@ -140,31 +122,9 @@ export interface InstallerParams {
   signal?: AbortSignal;
 }
 
-/**
- * - `current` (default): one version at a time in `paths.electronInstall`.
- *   Installing a version replaces the previous one.
- * - `per-version`: each version gets its own immutable folder in
- *   `paths.electronVersions`. It is extracted to a temp folder and renamed into
- *   place, so it is either complete or absent. Several versions can be
- *   installed at once, and downloads and installs take cross-process locks, so
- *   several processes can share the cache.
- */
-export type InstallLayout = 'current' | 'per-version';
-
 export interface InstallerOptions {
-  /** Default: `current`. */
-  layout?: InstallLayout;
-  /**
-   * @deprecated Ignored. The `per-version` layout always uses locks, and the
-   * `current` layout never does.
-   */
-  locks?: boolean;
   /** Mirrors used when a call doesn't pass its own `mirror`. */
   mirror?: Partial<Mirrors>;
-  /** See {@link ErrorMode}. Default: `legacy`. */
-  errors?: ErrorMode;
-  /** Extracts a downloaded zip. The default is a native extractor. */
-  extract?: ExtractFunction;
   /**
    * Downloads each file (`@electron/get`'s `downloader`). The default uses
    * Node's `fetch`; Electron apps can pass one backed by `net.fetch`, so the
@@ -188,43 +148,28 @@ interface SharedTask<T> {
  * An Electron release's .zip is downloaded into `paths.electronDownloads`,
  * which holds all the downloaded zips.
  *
- * With the default `current` layout, the installed version is unzipped into
- * `paths.electronInstall`. Only one version is installed at a time --
- * installing a new version overwrites the current one in
- * `paths.electronInstall`. See {@link InstallLayout} for the `per-version`
- * layout.
- *
- * See {@link DefaultPaths} for the default paths.
+ * Each version gets its own immutable folder in `paths.electronVersions`. It
+ * is extracted to a temp folder and renamed into place, so it is either
+ * complete or absent. Several versions can be installed at once, and downloads
+ * and installs take cross-process locks, so several processes can share the
+ * cache.
  */
 export class Installer extends EventEmitter {
-  private readonly paths: Readonly<Required<Paths>>;
   private readonly options: Readonly<{
-    layout: InstallLayout;
     mirror: Partial<Mirrors>;
-    errors: ErrorMode | undefined;
-    extract: ExtractFunction;
     downloader: InstallerOptions['downloader'];
   }>;
   private readonly stateMap = new Map<string, InstallState>();
-  /** Downloads and per-version installs in flight, keyed `download:<version>` and `install:<version>`. */
+  /** Downloads and installs in flight, keyed `download:<version>` and `install:<version>`. */
   private readonly inflight = new Map<string, SharedTask<unknown>>();
-  /** Versions being installed (`current` layout). */
-  private readonly installing = new Set<string>();
 
-  constructor(pathsIn: Partial<Paths> = {}, options: InstallerOptions = {}) {
+  constructor(
+    private readonly paths: Paths,
+    options: InstallerOptions = {},
+  ) {
     super();
-    const paths = { ...DefaultPaths, ...pathsIn };
-    this.paths = Object.freeze({
-      ...paths,
-      electronVersions:
-        paths.electronVersions ??
-        path.join(path.dirname(paths.electronInstall), 'versions'),
-    });
     this.options = Object.freeze({
-      layout: options.layout ?? 'current',
       mirror: { ...options.mirror },
-      errors: options.errors,
-      extract: options.extract ?? extractZip,
       downloader: options.downloader,
     });
     this.rebuildStates();
@@ -268,11 +213,6 @@ export class Installer extends EventEmitter {
     }
   }
 
-  /** The `per-version` layout locks downloads and installs across processes. */
-  private get locked(): boolean {
-    return this.options.layout === 'per-version';
-  }
-
   private versionDir(version: string): string {
     return path.join(this.paths.electronVersions, version);
   }
@@ -282,8 +222,6 @@ export class Installer extends EventEmitter {
   }
 
   private rebuildStates() {
-    this.stateMap.clear();
-
     const str = `^electron-v(.*)-${process.platform}-${process.arch}.zip$`;
     const reg = new RegExp(str);
     try {
@@ -291,52 +229,22 @@ export class Installer extends EventEmitter {
         const match = reg.exec(file);
         if (match?.[1]) {
           this.setState(match[1], InstallState.downloaded);
-        } else {
-          // Case when the download path already has the unzipped electron version
-          const versionFile = path.join(this.paths.electronDownloads, file, 'version');
-
-          if (fs.existsSync(versionFile)) {
-            const version = fs.readFileSync(versionFile, 'utf8').trim();
-            if (semver.valid(version)) {
-              this.setState(version, InstallState.downloaded);
-            }
-          }
         }
       }
     } catch {
       // no download directory yet
     }
 
-    if (this.options.layout === 'per-version') {
-      try {
-        for (const name of fs.readdirSync(this.paths.electronVersions)) {
-          const exec = Installer.getExecPath(this.versionDir(name));
-          if (semver.valid(name) && fs.existsSync(exec)) {
-            this.setState(name, InstallState.installed);
-          }
+    try {
+      for (const name of fs.readdirSync(this.paths.electronVersions)) {
+        const exec = Installer.getExecPath(this.versionDir(name));
+        if (semver.valid(name) && fs.existsSync(exec)) {
+          this.setState(name, InstallState.installed);
         }
-      } catch {
-        // no versions directory yet
       }
-    } else {
-      try {
-        const { electronInstall } = this.paths;
-        const versionFile = path.join(electronInstall, 'version');
-        const version = fs.readFileSync(versionFile, 'utf8').trim();
-        // without the marker, the install may be partial
-        const complete = fs.existsSync(path.join(electronInstall, INSTALLED_MARKER));
-        this.setState(
-          version,
-          complete ? InstallState.installed : InstallState.downloaded,
-        );
-      } catch {
-        // no current version
-      }
+    } catch {
+      // no versions directory yet
     }
-
-    this.installing.forEach((version) => {
-      this.setState(version, InstallState.installing);
-    });
   }
 
   /**
@@ -357,21 +265,12 @@ export class Installer extends EventEmitter {
       );
 
     const zipPath = path.join(this.paths.electronDownloads, getZipName(version));
-    // a download folder may hold an unzipped version instead of a zip
-    const preInstalledPath = path.join(this.paths.electronDownloads, version);
-    const downloadsRemoved = [await removed(zipPath), await removed(preInstalledPath)];
+    const downloadRemoved = await removed(zipPath);
 
-    let installRemoved = true;
-    if (this.options.layout === 'per-version') {
-      installRemoved = await this.removeVersionDir(version);
-    } else if (this.installedVersion === version) {
-      installRemoved = await removed(this.paths.electronInstall);
-    }
-
-    if (installRemoved) {
+    if (await this.removeVersionDir(version)) {
       this.setState(
         version,
-        downloadsRemoved.every(Boolean) ? InstallState.missing : InstallState.downloaded,
+        downloadRemoved ? InstallState.missing : InstallState.downloaded,
       );
     }
   }
@@ -430,19 +329,6 @@ export class Installer extends EventEmitter {
         // already deleted
       }
     }
-  }
-
-  /** The current Electron installation, if any. */
-  public get installedVersion(): string | undefined {
-    for (const [version, state] of this.stateMap)
-      if (state === InstallState.installed) return version;
-  }
-
-  /** Every installed version. With the `current` layout, at most one. */
-  public get installedVersions(): string[] {
-    return [...this.stateMap]
-      .filter(([, state]) => state === InstallState.installed)
-      .map(([version]) => version);
   }
 
   /**
@@ -547,35 +433,23 @@ export class Installer extends EventEmitter {
       });
     } catch (err) {
       if (signal?.aborted) throw abortError(signal);
-      throw wrapError(this.options.errors, 'download-failed', err);
+      throw err;
     }
   }
 
+  /** Resolves with the path of `version`'s zip, downloading it if needed. */
   private async ensureDownloadedImpl(
     version: string,
     opts: Partial<InstallerParams>,
-  ): Promise<ElectronBinary> {
+  ): Promise<string> {
     const d = debug(`fiddle-core:Installer:${version}:ensureDownloadedImpl`);
     const { signal } = opts;
     throwIfAborted(signal);
     const { electronDownloads } = this.paths;
     const zipFile = path.join(electronDownloads, getZipName(version));
-    const zipFileExists = fs.existsSync(zipFile);
-
-    const state = this.state(version);
-
-    if (state === InstallState.downloaded) {
-      const preInstalledPath = path.join(electronDownloads, version);
-      if (!zipFileExists && fs.existsSync(preInstalledPath)) {
-        return {
-          path: preInstalledPath,
-          alreadyExtracted: true,
-        };
-      }
-    }
 
     const fetchZip = async () => {
-      if (this.locked && fs.existsSync(zipFile)) {
+      if (fs.existsSync(zipFile)) {
         // another process downloaded it while we waited for the lock
         if (this.state(version) === InstallState.missing) {
           this.setState(version, InstallState.downloaded);
@@ -608,33 +482,25 @@ export class Installer extends EventEmitter {
       d(`"${zipFile}" downloaded`);
     };
 
-    if (state === InstallState.missing || !zipFileExists) {
+    if (this.state(version) === InstallState.missing || !fs.existsSync(zipFile)) {
       d(`"${zipFile}" does not exist; downloading now`);
-      if (this.locked) {
-        const lockPath = path.join(
-          electronDownloads,
-          '.locks',
-          `${getZipName(version)}.lock`,
-        );
-        await withLock(lockPath, { signal }, fetchZip);
-      } else {
-        await fetchZip();
-      }
+      const lockPath = path.join(
+        electronDownloads,
+        '.locks',
+        `${getZipName(version)}.lock`,
+      );
+      await withLock(lockPath, { signal }, fetchZip);
     } else {
       d(`"${zipFile}" exists; no need to download`);
     }
 
-    return {
-      path: zipFile,
-      alreadyExtracted: false,
-    };
+    return zipFile;
   }
 
-  public async ensureDownloaded(
+  private ensureDownloaded(
     version: string,
-    opts?: Partial<InstallerParams>,
-  ): Promise<ElectronBinary> {
-    assertValidVersion(version);
+    opts: Partial<InstallerParams>,
+  ): Promise<string> {
     return this.shared(`download:${version}`, opts, (params) =>
       this.ensureDownloadedImpl(version, params),
     );
@@ -649,10 +515,10 @@ export class Installer extends EventEmitter {
     throwIfAborted(signal);
     await fs.promises.mkdir(dir, { recursive: true });
     try {
-      await this.options.extract(zipPath, dir, signal);
+      await extractZip(zipPath, dir, signal);
     } catch (err) {
       if (signal?.aborted) throw abortError(signal);
-      throw wrapError(this.options.errors, 'extract-failed', err);
+      throw err;
     }
     throwIfAborted(signal);
   }
@@ -661,80 +527,10 @@ export class Installer extends EventEmitter {
     version: string,
     opts?: Partial<InstallerParams>,
   ): Promise<string> {
-    if (this.options.layout === 'per-version') {
-      assertValidVersion(version);
-      return this.shared(`install:${version}`, opts, (params) =>
-        this.installPerVersion(version, params),
-      );
-    }
-
-    const d = debug(`fiddle-core:Installer:${version}:install`);
-    const { electronInstall } = this.paths;
-    const electronExec = Installer.getExecPath(electronInstall);
-
-    // every version installs into the same folder
-    const [busy] = this.installing;
-    if (busy !== undefined) {
-      throw new FiddleCoreError('already-installing', `Currently installing "${busy}"`);
-    }
-
-    this.installing.add(version);
-
-    try {
-      const { installedVersion } = this;
-      if (installedVersion === version) {
-        d(`already installed`);
-      } else {
-        const { path: source, alreadyExtracted } = await this.ensureDownloaded(
-          version,
-          opts,
-        );
-        throwIfAborted(opts?.signal);
-
-        await this.installVersionImpl(version, source, async () => {
-          if (alreadyExtracted) {
-            // already unzipped in the downloads folder, so copy it over
-            await copyFolder(source, electronInstall);
-          } else {
-            await this.extractZip(source, electronInstall, opts?.signal);
-          }
-          await fs.promises.writeFile(path.join(electronInstall, INSTALLED_MARKER), '');
-        });
-        warmExecutable(electronExec);
-      }
-    } finally {
-      this.installing.delete(version);
-    }
-
-    d(inspect({ electronExec, version }));
-    return electronExec;
-  }
-
-  private async installVersionImpl(
-    version: string,
-    source: string,
-    installCallback: () => Promise<void> | void,
-  ): Promise<void> {
-    const {
-      paths: { electronInstall },
-      installedVersion,
-    } = this;
-    const d = debug(`fiddle-core:Installer:${version}:install`);
-
-    const originalState = this.state(version);
-    this.setState(version, InstallState.installing);
-    try {
-      d(`installing from "${source}"`);
-      await remove(electronInstall);
-      await installCallback();
-    } catch (err) {
-      this.setState(version, originalState);
-      throw err;
-    } finally {
-      // the previous version's files are gone or incomplete
-      if (installedVersion) this.setState(installedVersion, InstallState.downloaded);
-    }
-    this.setState(version, InstallState.installed);
+    assertValidVersion(version);
+    return this.shared(`install:${version}`, opts, (params) =>
+      this.installPerVersion(version, params),
+    );
   }
 
   private async installPerVersion(
@@ -755,7 +551,7 @@ export class Installer extends EventEmitter {
     if (fs.existsSync(exec)) return done();
 
     // Download first, so the install lock is only held while extracting.
-    const { path: source, alreadyExtracted } = await this.ensureDownloaded(version, opts);
+    const source = await this.ensureDownloaded(version, opts);
 
     return withLock(this.installLockPath(version), { signal }, async () => {
       // another process may have installed it while we waited for the lock
@@ -769,13 +565,7 @@ export class Installer extends EventEmitter {
       this.setState(version, InstallState.installing);
       try {
         d(`installing from "${source}" via "${tmp}"`);
-        if (alreadyExtracted) {
-          throwIfAborted(signal);
-          await copyFolder(source, tmp, { verbatimSymlinks: true });
-        } else {
-          await this.extractZip(source, tmp, signal);
-        }
-        throwIfAborted(signal);
+        await this.extractZip(source, tmp, signal);
         // a folder without an executable isn't a complete install
         if (fs.existsSync(dir)) await this.trash(version);
         await renameIntoPlace(tmp, dir);

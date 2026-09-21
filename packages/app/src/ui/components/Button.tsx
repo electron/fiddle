@@ -19,7 +19,6 @@ export interface ButtonProps extends BaseProps {
   variant?: ButtonVariant;
   size?: 'md' | 'sm';
   icon?: IconName;
-  iconEnd?: IconName;
   /** Key-cap hint after the label, such as "⌘R". Hidden while loading or in progress. */
   kbd?: string;
   /** Shows a spinner in place of the icon and ignores presses. Stays focusable. */
@@ -28,8 +27,6 @@ export interface ButtonProps extends BaseProps {
   progress?: number;
   /** Toggled-on look (aria-pressed). */
   isPressed?: boolean;
-  /** Stretch to the container's width. */
-  fill?: boolean;
   children?: ReactNode;
   className?: string;
   style?: CSSProperties;
@@ -39,12 +36,10 @@ export function Button({
   variant = 'secondary',
   size = 'md',
   icon,
-  iconEnd,
   kbd,
   loading = false,
   progress,
   isPressed,
-  fill,
   children,
   className,
   style,
@@ -72,12 +67,10 @@ export function Button({
       data-variant={variant}
       data-size={size}
       data-capsule={inCapsule || undefined}
-      data-fill={fill || undefined}
       data-busy={busy || undefined}
     >
       {lead}
       {children != null && <span className={styles.label}>{children}</span>}
-      {iconEnd && <Icon name={iconEnd} size={iconSize} />}
       {kbd && !busy && (
         <span className={styles.kbd} aria-hidden="true">
           {kbd}

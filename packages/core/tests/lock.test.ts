@@ -5,8 +5,7 @@ import path from 'node:path';
 
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { FiddleCoreError, LOCK_STALE_MS, acquireLock, withLock } from '../src/index.js';
-import { isLockStale } from '../src/lock.js';
+import { LOCK_STALE_MS, acquireLock, isLockStale, withLock } from '../src/lock.js';
 
 /** The pid of a process that has already exited. */
 async function deadPid(): Promise<number> {
@@ -41,6 +40,8 @@ describe('locks', () => {
   }
 
   const longAgo = () => new Date(Date.now() - LOCK_STALE_MS - 60_000);
+  /** Gives up with an `aborted` error if the lock is still held after `ms`. */
+  const within = (ms: number) => ({ signal: AbortSignal.timeout(ms), pollMs: 10 });
 
   it('creates a lock file holding pid, hostname and startedAt', async () => {
     const lock = await acquireLock(lockPath);
@@ -68,14 +69,6 @@ describe('locks', () => {
     expect(acquired).toBe(true);
   });
 
-  it('rejects with a `locked` error after timeoutMs', async () => {
-    const first = await acquireLock(lockPath);
-    const pending = acquireLock(lockPath, { timeoutMs: 50, pollMs: 10 });
-    await expect(pending).rejects.toBeInstanceOf(FiddleCoreError);
-    await expect(pending).rejects.toMatchObject({ code: 'locked' });
-    await first.release();
-  });
-
   it('rejects with an `aborted` error when its signal aborts', async () => {
     const first = await acquireLock(lockPath);
     const controller = new AbortController();
@@ -87,21 +80,21 @@ describe('locks', () => {
 
   it('recovers a stale lock whose process is dead', async () => {
     writeLock({ pid: await deadPid(), hostname: os.hostname(), startedAt: Date.now() });
-    const lock = await acquireLock(lockPath, { timeoutMs: 1000 });
+    const lock = await acquireLock(lockPath, within(1000));
     expect(lock.info.pid).toBe(process.pid);
     await lock.release();
   });
 
   it('trusts a live process on this host while its lock is being refreshed', async () => {
     writeLock({ pid: process.pid, hostname: os.hostname(), startedAt: 0 });
-    await expect(
-      acquireLock(lockPath, { timeoutMs: 50, pollMs: 10 }),
-    ).rejects.toMatchObject({ code: 'locked' });
+    await expect(acquireLock(lockPath, within(50))).rejects.toMatchObject({
+      code: 'aborted',
+    });
   });
 
   it('recovers an old lock from this host whose pid now belongs to another process', async () => {
     writeLock({ pid: process.pid, hostname: os.hostname(), startedAt: 0 }, longAgo());
-    const lock = await acquireLock(lockPath, { timeoutMs: 1000 });
+    const lock = await acquireLock(lockPath, within(1000));
     expect(lock.info.startedAt).toBeGreaterThan(0);
     await lock.release();
   });
@@ -112,31 +105,27 @@ describe('locks', () => {
       hostname: 'some-other-host',
       startedAt: Date.now(),
     });
-    await expect(
-      acquireLock(lockPath, { timeoutMs: 50, pollMs: 10 }),
-    ).rejects.toMatchObject({
-      code: 'locked',
+    await expect(acquireLock(lockPath, within(50))).rejects.toMatchObject({
+      code: 'aborted',
     });
   });
 
   it('recovers a lock from another host once its mtime is older than staleMs', async () => {
     writeLock({ pid: 1, hostname: 'some-other-host', startedAt: 0 }, longAgo());
-    const lock = await acquireLock(lockPath, { timeoutMs: 1000 });
+    const lock = await acquireLock(lockPath, within(1000));
     expect(lock.info.hostname).toBe(os.hostname());
     await lock.release();
   });
 
   it('gives an unreadable lock a grace period before treating it as stale', async () => {
     writeLock('');
-    await expect(
-      acquireLock(lockPath, { timeoutMs: 50, pollMs: 10 }),
-    ).rejects.toMatchObject({
-      code: 'locked',
+    await expect(acquireLock(lockPath, within(50))).rejects.toMatchObject({
+      code: 'aborted',
     });
 
     const old = new Date(Date.now() - 60_000);
     fs.utimesSync(lockPath, old, old);
-    const lock = await acquireLock(lockPath, { timeoutMs: 1000 });
+    const lock = await acquireLock(lockPath, within(1000));
     await lock.release();
   });
 
@@ -169,9 +158,9 @@ describe('locks', () => {
       return mkdir(target, ...rest);
     }) as never);
 
-    await expect(
-      acquireLock(lockPath, { timeoutMs: 100, pollMs: 10 }),
-    ).rejects.toMatchObject({ code: 'locked' });
+    await expect(acquireLock(lockPath, within(100))).rejects.toMatchObject({
+      code: 'aborted',
+    });
     expect(raced).toBe(true);
     expect(JSON.parse(fs.readFileSync(lockPath, 'utf8'))).toStrictEqual(live);
     expect(fs.readdirSync(path.dirname(lockPath))).toStrictEqual(['thing.lock']);
@@ -181,13 +170,13 @@ describe('locks', () => {
     writeLock({ pid: await deadPid(), hostname: os.hostname(), startedAt: 0 });
     const guard = `${lockPath}.takeover`;
     fs.mkdirSync(guard);
-    await expect(
-      acquireLock(lockPath, { timeoutMs: 50, pollMs: 10 }),
-    ).rejects.toMatchObject({ code: 'locked' });
+    await expect(acquireLock(lockPath, within(50))).rejects.toMatchObject({
+      code: 'aborted',
+    });
 
     const old = new Date(Date.now() - 60_000);
     fs.utimesSync(guard, old, old);
-    const lock = await acquireLock(lockPath, { timeoutMs: 1000, pollMs: 10 });
+    const lock = await acquireLock(lockPath, within(1000));
     await lock.release();
     expect(fs.readdirSync(path.dirname(lockPath))).toStrictEqual([]);
   });
@@ -242,17 +231,15 @@ describe('locks', () => {
     });
     await new Promise((resolve) => child.stdout.once('data', resolve));
 
-    await expect(
-      acquireLock(lockPath, { timeoutMs: 100, pollMs: 10 }),
-    ).rejects.toMatchObject({
-      code: 'locked',
+    await expect(acquireLock(lockPath, within(100))).rejects.toMatchObject({
+      code: 'aborted',
     });
 
     const exited = new Promise((resolve) => child.once('exit', resolve));
     child.kill();
     await exited;
 
-    const lock = await acquireLock(lockPath, { timeoutMs: 1000, pollMs: 10 });
+    const lock = await acquireLock(lockPath, within(1000));
     expect(lock.info.pid).toBe(process.pid);
     await lock.release();
   });

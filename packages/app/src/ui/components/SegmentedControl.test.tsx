@@ -12,34 +12,38 @@ function segment(name: string) {
   return screen.getByRole('radio', { name });
 }
 
+function setup(props: { isDisabled?: boolean } = {}) {
+  const onChange = vi.fn();
+  render(
+    <SegmentedControl
+      label="Process"
+      options={OPTIONS}
+      value="main"
+      onChange={onChange}
+      {...props}
+    />,
+  );
+  return onChange;
+}
+
 describe('SegmentedControl', () => {
-  it('selects the first option by default and reports changes', () => {
-    const onChange = vi.fn();
-    render(<SegmentedControl label="Process" options={OPTIONS} onChange={onChange} />);
+  it('marks the current option and reports changes', () => {
+    const onChange = setup();
     expect(screen.getByRole('radiogroup', { name: 'Process' })).toBeTruthy();
     expect(segment('Main').getAttribute('aria-checked')).toBe('true');
     fireEvent.click(segment('Both'));
     expect(onChange).toHaveBeenLastCalledWith('both');
-    expect(segment('Both').getAttribute('aria-checked')).toBe('true');
   });
 
   it('moves between segments with arrow keys', () => {
-    render(<SegmentedControl label="Process" options={OPTIONS} />);
+    setup();
     act(() => segment('Main').focus());
     fireEvent.keyDown(segment('Main'), { key: 'ArrowRight' });
     expect(document.activeElement).toBe(segment('Renderer'));
   });
 
   it('ignores presses when disabled', () => {
-    const onChange = vi.fn();
-    render(
-      <SegmentedControl
-        label="Process"
-        options={OPTIONS}
-        onChange={onChange}
-        isDisabled
-      />,
-    );
+    const onChange = setup({ isDisabled: true });
     fireEvent.click(segment('Renderer'));
     expect(onChange).not.toHaveBeenCalled();
   });

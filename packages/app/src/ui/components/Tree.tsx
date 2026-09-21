@@ -1,56 +1,36 @@
 import type { ReactNode } from 'react';
 import {
-  Button as AriaButton,
   Tree as AriaTree,
   TreeItem,
   TreeItemContent,
   VisuallyHidden,
-  type Key,
 } from 'react-aria-components';
-import { cx } from '../cx';
-import { Icon, type IconName } from '../icons/Icon';
+import { Icon } from '../icons/Icon';
 import styles from './Tree.module.css';
 
 export interface TreeProps {
   'aria-label': string;
   children: ReactNode;
   /** The selected row. */
-  value?: string | null;
-  defaultValue?: string;
-  onChange?: (id: string) => void;
-  /** Sidebar rows sit on the glass: the selected row is a chip with shadow-lift. */
-  variant?: 'sheet' | 'sidebar';
-  expandedKeys?: Iterable<Key>;
-  defaultExpandedKeys?: Iterable<Key>;
-  onExpandedChange?: (keys: Set<Key>) => void;
-  className?: string;
+  value: string | null;
+  onChange: (id: string) => void;
 }
 
-/** Arrow keys move between rows; one Tab stop. */
-export function Tree({
-  children,
-  value,
-  defaultValue,
-  onChange,
-  variant = 'sheet',
-  className,
-  ...rest
-}: TreeProps) {
+/** Sidebar file rows on the glass. Arrow keys move between rows; one Tab stop. */
+export function Tree({ children, value, onChange, ...rest }: TreeProps) {
   return (
     <AriaTree
       {...rest}
       selectionMode="single"
       selectionBehavior="replace"
       disallowEmptySelection
-      selectedKeys={value === undefined ? undefined : value === null ? [] : [value]}
-      defaultSelectedKeys={defaultValue !== undefined ? [defaultValue] : undefined}
+      selectedKeys={value === null ? [] : [value]}
       onSelectionChange={(keys) => {
         if (keys === 'all') return;
         const [key] = [...keys];
-        if (key != null) onChange?.(String(key));
+        if (key != null) onChange(String(key));
       }}
-      className={cx(styles.tree, className)}
-      data-variant={variant}
+      className={styles.tree}
     >
       {children}
     </AriaTree>
@@ -60,7 +40,6 @@ export function Tree({
 export interface TreeRowProps {
   id: string;
   label: string;
-  icon?: IconName;
   /** Right-aligned pill in spark on spark-soft, such as "1 error". */
   pill?: string;
   /** `warning` draws the pill in the warning colour, such as "2 warnings". */
@@ -69,59 +48,28 @@ export interface TreeRowProps {
   unsaved?: string;
   /** Text direction of the label, e.g. `ltr` for file names in a mirrored locale. */
   labelDir?: 'ltr' | 'rtl' | 'auto';
-  isDisabled?: boolean;
-  /** Nested rows. */
-  children?: ReactNode;
-  className?: string;
 }
 
-export function TreeRow({
-  id,
-  label,
-  icon = 'file',
-  pill,
-  pillTone,
-  unsaved,
-  labelDir,
-  isDisabled,
-  children,
-  className,
-}: TreeRowProps) {
+export function TreeRow({ id, label, pill, pillTone, unsaved, labelDir }: TreeRowProps) {
   return (
-    <TreeItem
-      id={id}
-      data-key={id}
-      textValue={label}
-      isDisabled={isDisabled}
-      className={cx(styles.row, className)}
-    >
+    <TreeItem id={id} data-key={id} textValue={label} className={styles.row}>
       <TreeItemContent>
-        {({ hasChildItems, isExpanded }) => (
+        <Icon name="file" className={styles.icon} />
+        <span className={styles.label} dir={labelDir}>
+          {label}
+        </span>
+        {pill && (
+          <span className={styles.pill} data-tone={pillTone}>
+            {pill}
+          </span>
+        )}
+        {unsaved && (
           <>
-            {hasChildItems && (
-              <AriaButton slot="chevron" className={styles.chevron}>
-                <Icon name={isExpanded ? 'chevron-down' : 'chevron-right'} size={12} />
-              </AriaButton>
-            )}
-            <Icon name={icon} className={styles.icon} />
-            <span className={styles.label} dir={labelDir}>
-              {label}
-            </span>
-            {pill && (
-              <span className={styles.pill} data-tone={pillTone}>
-                {pill}
-              </span>
-            )}
-            {unsaved && (
-              <>
-                <span className={styles.dot} aria-hidden="true" />
-                <VisuallyHidden>{`, ${unsaved}`}</VisuallyHidden>
-              </>
-            )}
+            <span className={styles.dot} aria-hidden="true" />
+            <VisuallyHidden>{`, ${unsaved}`}</VisuallyHidden>
           </>
         )}
       </TreeItemContent>
-      {children}
     </TreeItem>
   );
 }
