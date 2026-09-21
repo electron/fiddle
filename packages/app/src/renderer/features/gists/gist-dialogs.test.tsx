@@ -21,29 +21,59 @@ const mocks = vi.hoisted(() => ({
           allowPlaintext: boolean,
         ) => Promise<{ login: string; persisted: boolean }>
       >(),
-    SignInFromClipboard: vi.fn(),
+    SignInFromClipboard:
+      vi.fn<
+        (allowPlaintext: boolean) => Promise<{ login: string; persisted: boolean }>
+      >(),
     Publish: vi.fn<(description: string, isPublic: boolean) => Promise<{ id: string }>>(),
-    OpenNewTokenPage: vi.fn(),
+    Update: vi.fn<() => Promise<{ id: string }>>(),
+    CopyShareLink: vi.fn<(id: string) => Promise<void>>(() => Promise.resolve()),
+    GetHistory: vi.fn<() => Promise<History>>(),
+    ReadClipboardGist: vi.fn(() => Promise.resolve(null)),
+  },
+  documentsApi: {
+    LoadGist: vi.fn<(id: string, sha: string | null) => Promise<number>>(),
   },
   settingsApi: { SetSetting: vi.fn<(key: string, value: unknown) => Promise<number>>() },
   showToast: vi.fn(),
 }));
 
+interface History {
+  id: string;
+  activeSha?: string;
+  revisions: {
+    sha: string;
+    date: string;
+    additions: number;
+    deletions: number;
+    n: number;
+  }[];
+}
+
 vi.mock('../../../ipc/renderer', () => ({
   githubApi: mocks.githubApi,
+  documentsApi: mocks.documentsApi,
   settingsApi: mocks.settingsApi,
 }));
 vi.mock('../../state', () => ({
-  useAppState: () => undefined,
+  useAppState: () => ({}),
   useWindowState: () => null,
 }));
-vi.mock('react-i18next', () => ({ useTranslation: () => ({ t: (key: string) => key }) }));
+vi.mock('react-i18next', () => ({
+  useTranslation: () => ({
+    t: (key: string, options?: Record<string, unknown>) =>
+      options ? `${key} ${JSON.stringify(options)}` : key,
+    i18n: { language: 'en' },
+  }),
+}));
 vi.mock('../../../ui', async (importOriginal) => ({
   ...(await importOriginal<typeof import('../../../ui')>()),
   showToast: mocks.showToast,
 }));
 
-import { reportGistError, type GistT } from './actions';
+import { copyShareLink, reportGistError, updateGist, type GistT } from './actions';
+import { GistDialogs } from './GistDialogs';
+import { HistoryDialog } from './HistoryDialog';
 import { PublishDialog } from './PublishDialog';
 import { SignInDialog } from './SignInDialog';
 import { closeGistDialog, showGistDialog, useGistDialog, type GistDialog } from './state';
@@ -111,6 +141,60 @@ describe('reportGistError', () => {
   });
 });
 
+describe('updateGist', () => {
+  it('offers to copy the link of the gist it updated', async () => {
+    mocks.githubApi.Update.mockResolvedValue({ id: 'abc' });
+    await updateGist(t);
+    const toast = mocks.showToast.mock.calls[0]![0] as {
+      title: string;
+      actionLabel: string;
+      onAction: () => void;
+    };
+    expect(toast).toMatchObject({
+      tone: 'success',
+      title: 'updated',
+      actionLabel: 'copyLink',
+    });
+    toast.onAction();
+    expect(mocks.githubApi.CopyShareLink).toHaveBeenCalledWith('abc');
+  });
+
+  it('retries after a sign-in when GitHub no longer accepts the token', async () => {
+    mocks.githubApi.Update.mockRejectedValueOnce(
+      new FiddleError(ErrorCode.unauthorized, 'Bad credentials', { status: 401 }),
+    );
+    mocks.githubApi.Update.mockResolvedValue({ id: 'abc' });
+    const view = openDialog();
+    await act(() => updateGist(t));
+    expect(view.result.current?.kind).toBe('sign-in');
+    await act(async () => (view.result.current as { then: () => void }).then());
+    expect(mocks.githubApi.Update).toHaveBeenCalledTimes(2);
+    expect(mocks.showToast).toHaveBeenCalledWith(
+      expect.objectContaining({ title: 'updated' }),
+    );
+  });
+});
+
+describe('copyShareLink', () => {
+  it('says so when the link was copied, and why when it could not be', async () => {
+    copyShareLink(t, 'abc');
+    await waitFor(() =>
+      expect(mocks.showToast).toHaveBeenCalledWith({
+        tone: 'success',
+        title: 'linkCopied',
+      }),
+    );
+    mocks.githubApi.CopyShareLink.mockRejectedValueOnce(new Error('clipboard busy'));
+    copyShareLink(t, 'abc');
+    await waitFor(() =>
+      expect(mocks.showToast).toHaveBeenCalledWith({
+        tone: 'error',
+        title: 'clipboard busy',
+      }),
+    );
+  });
+});
+
 describe('SignInDialog', () => {
   const signIn = () => {
     fireEvent.change(screen.getByLabelText('signInTokenLabel'), {
@@ -145,6 +229,87 @@ describe('SignInDialog', () => {
     expect(onClose).not.toHaveBeenCalled();
     expect(onSignedIn).not.toHaveBeenCalled();
   });
+
+  it('signs in with the token on the clipboard when the field is left empty, on Enter too', async () => {
+    mocks.githubApi.HasClipboardToken.mockResolvedValue(true);
+    mocks.githubApi.SignInFromClipboard.mockResolvedValue({
+      login: 'octocat',
+      persisted: false,
+    });
+    const onClose = vi.fn();
+    render(<SignInDialog onClose={onClose} />);
+    await screen.findByText('signInClipboardHint');
+    fireEvent.submit(screen.getByLabelText('signInTokenLabel').closest('form')!);
+
+    await waitFor(() => expect(onClose).toHaveBeenCalled());
+    expect(mocks.githubApi.SignInFromClipboard).toHaveBeenCalledWith(false);
+    expect(mocks.githubApi.SignIn).not.toHaveBeenCalled();
+    // Not persisted: the toast says the sign-in lasts for this session.
+    expect(mocks.showToast).toHaveBeenCalledWith(
+      expect.objectContaining({ tone: 'success', description: 'signedInSession' }),
+    );
+  });
+
+  it.each([
+    [
+      'a token in the wrong format',
+      { reason: 'bad-format' },
+      ErrorCode.invalidArgument,
+      'signInErrorFormat',
+    ],
+    [
+      'a token GitHub rejects',
+      { reason: 'invalid-token' },
+      ErrorCode.unauthorized,
+      'signInErrorInvalid',
+    ],
+    [
+      'a token without the gist scope',
+      { reason: 'missing-scope' },
+      ErrorCode.forbidden,
+      'signInErrorScope',
+    ],
+    ['GitHub being unreachable', undefined, ErrorCode.network, 'signInErrorNetwork'],
+    [
+      'anything else',
+      undefined,
+      ErrorCode.internal,
+      'signInErrorOther {"message":"boom"}',
+    ],
+  ])(
+    'explains %s under the field and stays open',
+    async (_case, details, code, message) => {
+      mocks.githubApi.SignIn.mockRejectedValue(new FiddleError(code, 'boom', details));
+      const onClose = vi.fn();
+      render(<SignInDialog onClose={onClose} />);
+      signIn();
+      expect(await screen.findByText(message)).toBeTruthy();
+      expect(onClose).not.toHaveBeenCalled();
+      // Typing clears the message.
+      fireEvent.change(screen.getByLabelText('signInTokenLabel'), {
+        target: { value: 'ghp_other' },
+      });
+      expect(screen.queryByText(message)).toBeNull();
+    },
+  );
+
+  it('stores the token in plain text only when the user asks, where the keyring is weak', async () => {
+    mocks.githubApi.GetCredentialStorage.mockResolvedValue('weak');
+    mocks.githubApi.SignIn.mockResolvedValue({ login: 'octocat', persisted: true });
+    render(<SignInDialog onClose={vi.fn()} />);
+    fireEvent.click(await screen.findByLabelText('signInRemember'));
+    signIn();
+    await waitFor(() =>
+      expect(mocks.githubApi.SignIn).toHaveBeenCalledWith('ghp_token', true),
+    );
+  });
+
+  it('says the sign-in only lasts for the session where nothing can store the token', async () => {
+    mocks.githubApi.GetCredentialStorage.mockResolvedValue('unavailable');
+    render(<SignInDialog onClose={vi.fn()} />);
+    expect(await screen.findByText('signInSessionOnly')).toBeTruthy();
+    expect(screen.queryByLabelText('signInRemember')).toBeNull();
+  });
 });
 
 describe('PublishDialog', () => {
@@ -167,6 +332,19 @@ describe('PublishDialog', () => {
     expect(mocks.githubApi.Publish).toHaveBeenCalledWith('My fiddle', true);
     expect(mocks.showToast).toHaveBeenCalledWith(
       expect.objectContaining({ tone: 'success', title: 'published' }),
+    );
+  });
+
+  it('publishes on Enter in the description, and closes on Escape', async () => {
+    mocks.githubApi.Publish.mockResolvedValue({ id: 'abc' });
+    const onClose = vi.fn();
+    render(<PublishDialog onClose={onClose} />);
+    fireEvent.keyDown(screen.getByRole('dialog'), { key: 'Escape' });
+    await waitFor(() => expect(onClose).toHaveBeenCalledTimes(1));
+    fill('Enter does it');
+    fireEvent.submit(screen.getByLabelText('publishDescriptionLabel').closest('form')!);
+    await waitFor(() =>
+      expect(mocks.githubApi.Publish).toHaveBeenCalledWith('Enter does it', false),
     );
   });
 
@@ -216,5 +394,116 @@ describe('PublishDialog', () => {
       expect.objectContaining({ tone: 'error', title: 'publishFailed' }),
       expect.anything(),
     );
+  });
+});
+
+describe('HistoryDialog', () => {
+  const history: History = {
+    id: 'abc',
+    activeSha: 'b'.repeat(40),
+    revisions: [
+      {
+        sha: 'a'.repeat(40),
+        date: '2026-01-01T00:00:00Z',
+        additions: 3,
+        deletions: 0,
+        n: 0,
+      },
+      {
+        sha: 'b'.repeat(40),
+        date: '2026-01-02T00:00:00Z',
+        additions: 1,
+        deletions: 1,
+        n: 1,
+      },
+      {
+        sha: 'c'.repeat(40),
+        date: '2026-01-03T00:00:00Z',
+        additions: 2,
+        deletions: 5,
+        n: 2,
+      },
+    ],
+  };
+  const rows = () => screen.getAllByRole('option').map((row) => row.textContent);
+
+  it('lists the revisions newest first, marks the loaded one, and loads the one chosen', async () => {
+    mocks.githubApi.GetHistory.mockResolvedValue(history);
+    mocks.documentsApi.LoadGist.mockResolvedValue(1);
+    const onClose = vi.fn();
+    render(<HistoryDialog onClose={onClose} />);
+    await screen.findAllByRole('option');
+    expect(screen.getByRole('listbox', { name: 'historyListLabel' })).toBeTruthy();
+    expect(rows()).toEqual([
+      expect.stringContaining('historyRevision {"n":2}'),
+      expect.stringContaining('historyRevision {"n":1}'),
+      expect.stringContaining('historyCreated'),
+    ]);
+    expect(rows()[1]).toContain('historyActive');
+    expect(rows()[0]).not.toContain('historyActive');
+
+    fireEvent.click(screen.getByRole('option', { name: /historyCreated/ }));
+    await waitFor(() => expect(onClose).toHaveBeenCalled());
+    expect(mocks.documentsApi.LoadGist).toHaveBeenCalledWith('abc', 'a'.repeat(40));
+  });
+
+  it('stays open and says why when a revision could not be loaded', async () => {
+    mocks.githubApi.GetHistory.mockResolvedValue(history);
+    mocks.documentsApi.LoadGist.mockRejectedValue(
+      new FiddleError(ErrorCode.notFound, 'gone'),
+    );
+    const onClose = vi.fn();
+    render(<HistoryDialog onClose={onClose} />);
+    fireEvent.click(await screen.findByRole('option', { name: /historyCreated/ }));
+    await waitFor(() =>
+      expect(mocks.showToast).toHaveBeenCalledWith({
+        tone: 'error',
+        title: 'loadFailed {"message":"gone"}',
+      }),
+    );
+    expect(onClose).not.toHaveBeenCalled();
+  });
+
+  it('says when the gist has no revisions, or its history could not be read', async () => {
+    mocks.githubApi.GetHistory.mockResolvedValue({ id: 'abc', revisions: [] });
+    const view = render(<HistoryDialog onClose={vi.fn()} />);
+    expect(await screen.findByText('historyEmpty')).toBeTruthy();
+    view.unmount();
+
+    mocks.githubApi.GetHistory.mockRejectedValue(
+      new FiddleError(ErrorCode.network, 'offline'),
+    );
+    render(<HistoryDialog onClose={vi.fn()} />);
+    expect(await screen.findByText('historyFailed {"message":"offline"}')).toBeTruthy();
+  });
+
+  it('closes from the footer or on Escape', async () => {
+    mocks.githubApi.GetHistory.mockResolvedValue(history);
+    const onClose = vi.fn();
+    render(<HistoryDialog onClose={onClose} />);
+    fireEvent.click(screen.getAllByRole('button', { name: 'close' }).at(-1)!);
+    expect(onClose).toHaveBeenCalledTimes(1);
+    fireEvent.keyDown(screen.getByRole('dialog'), { key: 'Escape' });
+    await waitFor(() => expect(onClose).toHaveBeenCalledTimes(2));
+  });
+});
+
+describe('GistDialogs', () => {
+  it('mounts the dialog that was asked for, and unmounts it when it closes', async () => {
+    mocks.githubApi.GetHistory.mockResolvedValue({ id: 'abc', revisions: [] });
+    render(<GistDialogs />);
+    expect(screen.queryByRole('dialog')).toBeNull();
+
+    act(() => showGistDialog({ kind: 'publish' }));
+    expect(screen.getByRole('dialog', { name: 'publishTitle' })).toBeTruthy();
+    act(() => showGistDialog({ kind: 'open' }));
+    expect(screen.getByRole('dialog', { name: 'openTitle' })).toBeTruthy();
+    act(() => showGistDialog({ kind: 'history' }));
+    expect(screen.getByRole('dialog', { name: 'historyTitle' })).toBeTruthy();
+    act(() => showGistDialog({ kind: 'sign-in' }));
+    expect(screen.getByRole('dialog', { name: 'signInTitle' })).toBeTruthy();
+
+    fireEvent.click(screen.getByRole('button', { name: 'cancel' }));
+    await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull());
   });
 });

@@ -1,13 +1,22 @@
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { defaultSettings, type Keybindings } from '../../../shared/settings';
 import type { AppState, WindowState } from '../../../shared/stores';
 
-const mocks = vi.hoisted(() => ({ app: {} as AppState, win: {} as WindowState }));
+const mocks = vi.hoisted(() => ({
+  app: {} as AppState,
+  win: {} as WindowState,
+  RunCommand: vi.fn((_id: string) => Promise.resolve()),
+  showToast: vi.fn(),
+}));
 
 vi.mock('../../../ipc/renderer', () => ({
-  windowApi: { RunCommand: vi.fn(() => Promise.resolve()) },
+  windowApi: { RunCommand: mocks.RunCommand },
+}));
+vi.mock('../../../ui', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('../../../ui')>()),
+  showToast: mocks.showToast,
 }));
 vi.mock('../../state', () => ({
   useAppState: () => mocks.app,
@@ -54,5 +63,21 @@ describe('RunButton', () => {
     setup({});
     render(<RunButton compact />);
     expect(screen.getByRole('button', { name: /run/ }).textContent).toBe('run');
+  });
+
+  it('shows the pre-run checks at once, runs the toggle command, and is Run again when that fails', async () => {
+    setup({});
+    mocks.RunCommand.mockRejectedValueOnce(new Error('no version'));
+    render(<RunButton />);
+    fireEvent.click(screen.getByRole('button', { name: /run/ }));
+    expect(mocks.RunCommand).toHaveBeenCalledWith('run.toggle');
+    expect(screen.getByRole('button').textContent).toContain('checking');
+    await waitFor(() =>
+      expect(mocks.showToast).toHaveBeenCalledWith({
+        tone: 'error',
+        title: 'no version',
+      }),
+    );
+    expect(screen.getByRole('button', { name: /run/ }).textContent).toContain('run');
   });
 });

@@ -13,7 +13,17 @@ const mocks = vi.hoisted(() => ({
     OpenSettingsFile: vi.fn(() => Promise.resolve()),
     ImportSettings: vi.fn(() => Promise.resolve(null)),
     ExportSettings: vi.fn(() => Promise.resolve()),
+    ImportTheme: vi.fn(() => Promise.resolve(null)),
+    CreateTheme: vi.fn((_from: unknown) => Promise.resolve('my-theme')),
+    OpenThemesFolder: vi.fn(() => Promise.resolve()),
   },
+  appPlatformApi: {
+    Relaunch: vi.fn(() => Promise.resolve()),
+    ResetPrivacyPermissions: vi.fn(() => Promise.resolve(true)),
+  },
+  RunCommand: vi.fn((_id: string) => Promise.resolve()),
+  setView: vi.fn((_view: string, _errorTitle: string) => Promise.resolve(true)),
+  versionRef: { kind: 'release', version: '44.0.0' } as { kind: string; version: string },
   app: {} as Record<string, unknown>,
   showToast: vi.fn(),
   // Enough of i18next to announce a language change and to word text in that language.
@@ -42,21 +52,23 @@ vi.mock('../../../ui', async (importOriginal) => ({
 }));
 vi.mock('../../../ipc/renderer', () => ({
   settingsApi: mocks.settingsApi,
+  appPlatformApi: mocks.appPlatformApi,
   appApi: {
     GetAppInfo: () =>
       Promise.resolve({ name: 'Fiddle', version: '1.0.0', electronVersion: '44.0.0' }),
   },
-  windowApi: { RunCommand: vi.fn(() => Promise.resolve()) },
+  windowApi: { RunCommand: mocks.RunCommand },
 }));
 vi.mock('../../state', () => ({
   useAppState: () => mocks.app,
-  useWindowState: () => ({
-    fiddle: { versionRef: { kind: 'release', version: '44.0.0' } },
-  }),
+  useWindowState: () => ({ fiddle: { versionRef: mocks.versionRef } }),
 }));
 vi.mock('../gists/GitHubAccountSection', () => ({ GitHubAccountSection: () => null }));
 vi.mock('../versions/VersionManager', () => ({ VersionManager: () => null }));
-vi.mock('../../shell/window-state', () => ({ setView: vi.fn() }));
+vi.mock('../../shell/window-state', () => ({ setView: mocks.setView }));
+vi.mock('../../shell/theme-snapshot', () => ({
+  currentThemeSnapshot: () => ({ snapshot: true }),
+}));
 
 import { openSettingsSection } from './sections';
 import { SettingsPage } from './SettingsPage';
@@ -68,6 +80,7 @@ let storeRev = 0;
 beforeEach(() => {
   vi.clearAllMocks();
   mocks.i18n.listeners.clear();
+  mocks.versionRef = { kind: 'release', version: '44.0.0' };
   storeRev += 10;
   mocks.settingsApi.SetSetting.mockImplementation(() => Promise.resolve(storeRev + 1));
   mocks.settingsApi.ResetSetting.mockImplementation(() => Promise.resolve(storeRev + 1));
@@ -134,6 +147,35 @@ describe('SettingsPage', () => {
 
     fireEvent.click(screen.getByRole('button', { name: 'reset packageManager.title' }));
     expect(mocks.settingsApi.ResetSetting).toHaveBeenCalledWith('packageManager');
+  });
+
+  it('goes back to the editor on Escape, unless a popup that is open takes it', () => {
+    render(<SettingsPage />);
+    fireEvent.keyDown(document.body, { key: 'Escape' });
+    expect(mocks.setView).toHaveBeenCalledWith('editor', 'actionFailed');
+
+    mocks.setView.mockClear();
+    fireEvent.click(screen.getByRole('button', { name: /^(?!reset).*locale\.title/ }));
+    fireEvent.keyDown(screen.getByRole('listbox'), { key: 'Escape' });
+    expect(mocks.setView).not.toHaveBeenCalled();
+  });
+
+  it('opens, imports and exports settings.json, and says when that fails', async () => {
+    render(<SettingsPage />);
+    fireEvent.click(screen.getByRole('button', { name: 'openFile' }));
+    fireEvent.click(screen.getByRole('button', { name: 'import' }));
+    expect(mocks.settingsApi.OpenSettingsFile).toHaveBeenCalledTimes(1);
+    expect(mocks.settingsApi.ImportSettings).toHaveBeenCalledTimes(1);
+
+    mocks.settingsApi.ExportSettings.mockRejectedValueOnce(new Error('disk full'));
+    fireEvent.click(screen.getByRole('button', { name: 'export' }));
+    await waitFor(() =>
+      expect(mocks.showToast).toHaveBeenCalledWith({
+        tone: 'error',
+        title: 'actionFailed',
+        description: 'disk full',
+      }),
+    );
   });
 
   it('applies a change at once and sends it to main', () => {
@@ -244,6 +286,150 @@ describe('General settings', () => {
     expect(mocks.showToast).not.toHaveBeenCalledWith(
       expect.objectContaining({ title: expect.stringContaining('relaunchTitle') }),
     );
+  });
+});
+
+describe('Appearance and theme settings', () => {
+  const themeSelect = () =>
+    screen.getByRole('button', { name: /^(?!reset).*theme\.title/ });
+
+  it('sets light or dark, unless the theme decides that', () => {
+    const view = render(<SettingsPage />);
+    fireEvent.click(screen.getByRole('radio', { name: 'appearance.dark' }));
+    expect(mocks.settingsApi.SetSetting).toHaveBeenCalledWith('appearance', 'dark');
+    view.unmount();
+
+    mocks.app = {
+      ...mocks.app,
+      themes: [{ id: 'nord', name: 'Nord', isDark: true }],
+      settings: { ...defaultSettings, theme: 'nord' },
+    };
+    render(<SettingsPage />);
+    expect(
+      (screen.getByRole('radio', { name: 'appearance.dark' }) as HTMLInputElement)
+        .disabled,
+    ).toBe(true);
+    expect(screen.getByText('appearance.fromTheme')).toBeTruthy();
+  });
+
+  it('lists the built-in, high-contrast and custom themes, and a missing one by its id', () => {
+    mocks.app = {
+      ...mocks.app,
+      themes: [{ id: 'nord', name: 'Nord', isDark: true }],
+      settings: { ...defaultSettings, theme: 'deleted-theme' },
+    };
+    render(<SettingsPage />);
+    expect(themeSelect().textContent).toContain('deleted-theme');
+    fireEvent.click(themeSelect());
+    expect(screen.getAllByRole('option').map((option) => option.textContent)).toEqual([
+      'theme.lucent',
+      'theme.highContrastDark',
+      'theme.highContrastLight',
+      expect.stringContaining('Nord'),
+      'deleted-theme',
+    ]);
+    fireEvent.click(screen.getByRole('option', { name: /Nord/ }));
+    expect(mocks.settingsApi.SetSetting).toHaveBeenCalledWith('theme', 'nord');
+  });
+
+  it('imports a Monaco theme, starts a new one from the current look, and opens the folder', () => {
+    render(<SettingsPage />);
+    fireEvent.click(screen.getByRole('button', { name: 'theme.importMonaco' }));
+    fireEvent.click(screen.getByRole('button', { name: 'theme.create' }));
+    fireEvent.click(screen.getByRole('button', { name: 'theme.openFolder' }));
+    expect(mocks.settingsApi.ImportTheme).toHaveBeenCalledTimes(1);
+    // On the built-in theme the new file starts from what is on screen; on a custom one main copies that.
+    expect(mocks.settingsApi.CreateTheme).toHaveBeenCalledWith({ snapshot: true });
+    expect(mocks.settingsApi.OpenThemesFolder).toHaveBeenCalledTimes(1);
+  });
+
+  it('starts a new theme from the custom theme in use', () => {
+    mocks.app = {
+      ...mocks.app,
+      themes: [{ id: 'nord', name: 'Nord', isDark: true }],
+      settings: { ...defaultSettings, theme: 'nord' },
+    };
+    render(<SettingsPage />);
+    fireEvent.click(screen.getByRole('button', { name: 'theme.create' }));
+    expect(mocks.settingsApi.CreateTheme).toHaveBeenCalledWith(null);
+  });
+
+  it('relaunches from the language toast', async () => {
+    render(<SettingsPage />);
+    fireEvent.click(screen.getByRole('button', { name: /^(?!reset).*locale\.title/ }));
+    fireEvent.click(screen.getByRole('option', { name: 'Deutsch' }));
+    await waitFor(() => expect(mocks.i18n.listeners.size).toBe(1));
+    act(() => mocks.i18n.switchTo('de'));
+    const toast = mocks.showToast.mock.calls[0]![0] as { onAction: () => void };
+    toast.onAction();
+    expect(mocks.appPlatformApi.Relaunch).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe('Section controls', () => {
+  const open = (section: string) => {
+    render(<SettingsPage />);
+    fireEvent.click(screen.getByRole('button', { name: `section.${section}` }));
+  };
+
+  it("turns release channels on and off, but never the current version's", () => {
+    mocks.versionRef = { kind: 'release', version: '45.0.0-beta.3' };
+    mocks.app = {
+      ...mocks.app,
+      settings: { ...defaultSettings, channels: ['stable', 'beta'] },
+    };
+    open('electron');
+    const box = (name: string) =>
+      screen.getByRole('checkbox', { name }) as HTMLInputElement;
+    expect(box('channel.beta').disabled).toBe(true);
+    expect(box('channel.stable').disabled).toBe(false);
+
+    fireEvent.click(box('channel.nightly'));
+    expect(mocks.settingsApi.SetSetting).toHaveBeenCalledWith('channels', [
+      'stable',
+      'beta',
+      'nightly',
+    ]);
+    fireEvent.click(box('channel.stable'));
+    expect(mocks.settingsApi.SetSetting).toHaveBeenLastCalledWith('channels', [
+      'beta',
+      'nightly',
+    ]);
+  });
+
+  it('picks a download mirror, and asks for the URLs of a custom one', () => {
+    open('electron');
+    expect(
+      screen.queryByRole('textbox', { name: 'customMirrorElectron.title' }),
+    ).toBeNull();
+    fireEvent.click(screen.getByRole('radio', { name: 'mirror.custom' }));
+    expect(mocks.settingsApi.SetSetting).toHaveBeenCalledWith('mirror', 'custom');
+    expect(
+      screen.getByRole('textbox', { name: 'customMirrorElectron.title' }),
+    ).toBeTruthy();
+    expect(
+      screen.getByRole('textbox', { name: 'customMirrorNightly.title' }),
+    ).toBeTruthy();
+  });
+
+  it('shows the app and Electron versions and the contributors', async () => {
+    open('about');
+    expect(await screen.findByText(/1\.0\.0/)).toBeTruthy();
+    expect(screen.getByRole('heading', { name: 'about.contributors' })).toBeTruthy();
+    expect(screen.getAllByRole('link').length).toBeGreaterThan(0);
+  });
+
+  it('resets the macOS privacy permissions and confirms it', async () => {
+    mocks.app = { ...mocks.app, platform: 'darwin' };
+    open('privacy');
+    fireEvent.click(screen.getByRole('button', { name: 'privacyReset.button' }));
+    await waitFor(() =>
+      expect(mocks.showToast).toHaveBeenCalledWith({
+        tone: 'success',
+        title: 'privacyReset.done',
+      }),
+    );
+    expect(mocks.appPlatformApi.ResetPrivacyPermissions).toHaveBeenCalledTimes(1);
   });
 });
 

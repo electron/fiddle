@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { defaultSettings } from '../../../shared/settings';
@@ -12,11 +12,16 @@ const mocks = vi.hoisted(() => ({
     SetVersion: vi.fn(() => Promise.resolve()),
     CopyVersion: vi.fn(() => Promise.resolve()),
     RetryDownload: vi.fn(() => Promise.resolve()),
-    DismissNotice: vi.fn(() => Promise.resolve()),
+    DismissNotice: vi.fn((_id: number) => Promise.resolve()),
   },
+  showToast: vi.fn(),
 }));
 
 vi.mock('../../../ipc/renderer', () => ({ versionsApi: mocks.versionsApi }));
+vi.mock('../../../ui', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('../../../ui')>()),
+  showToast: mocks.showToast,
+}));
 vi.mock('../../state', () => ({
   useAppState: () => mocks.app,
   useWindowState: () => mocks.win,
@@ -142,5 +147,67 @@ describe('VersionPicker', () => {
     rerender(<VersionPicker />);
     expect(option('r:43.7.0')?.textContent).toContain('stateInstalled');
     expect(vi.mocked(pickerGroups).mock.calls.length).toBe(builds + 1);
+  });
+
+  it('picks a local build, and names every other install state', () => {
+    push((app) => {
+      app.versions!.installs = {
+        '44.3.0': { state: 'downloaded' },
+        '43.7.0': { state: 'installing' },
+      };
+      app.versions!.localBuilds.push({
+        id: 'gone',
+        name: 'old build',
+        path: '/src/old',
+        available: false,
+      });
+    });
+    mocks.rows = [...mocks.rows.slice(0, 3), { ...row('42.0.0'), supported: false }];
+    render(<VersionPicker />);
+    fireEvent.click(screen.getByRole('button'));
+    expect(option('r:44.3.0')?.textContent).toContain('stateDownloaded');
+    expect(option('r:43.7.0')?.textContent).toContain('stateInstalling');
+    expect(option('r:42.0.0')?.textContent).toContain('stateUnsupported');
+    expect(option('l:gone')?.textContent).toContain('stateLocalMissing');
+
+    fireEvent.click(option('l:gn')!);
+    expect(mocks.versionsApi.SetVersion).toHaveBeenCalledWith({
+      kind: 'local',
+      id: 'gn',
+    });
+  });
+
+  it('copies the version from the list action and says so', async () => {
+    render(<VersionPicker />);
+    fireEvent.click(screen.getByRole('button'));
+    fireEvent.click(screen.getByRole('option', { name: 'copyVersion' }));
+    await waitFor(() =>
+      expect(mocks.showToast).toHaveBeenCalledWith({
+        tone: 'success',
+        title: 'copied {"version":"44.3.0"}',
+      }),
+    );
+    expect(mocks.versionsApi.CopyVersion).toHaveBeenCalledTimes(1);
+  });
+
+  it('shows a version notice once as an error and clears it in main', () => {
+    mocks.win = { ...mocks.win, versionNotice: { id: 7, message: '44.3.0 is gone' } };
+    const view = render(<VersionPicker />);
+    view.rerender(<VersionPicker />);
+    expect(mocks.showToast).toHaveBeenCalledTimes(1);
+    expect(mocks.showToast).toHaveBeenCalledWith({
+      tone: 'error',
+      title: '44.3.0 is gone',
+    });
+    expect(mocks.versionsApi.DismissNotice).toHaveBeenCalledWith(7);
+  });
+
+  it('retries the download when the network comes back, until it unmounts', () => {
+    const view = render(<VersionPicker />);
+    window.dispatchEvent(new Event('online'));
+    expect(mocks.versionsApi.RetryDownload).toHaveBeenCalledTimes(1);
+    view.unmount();
+    window.dispatchEvent(new Event('online'));
+    expect(mocks.versionsApi.RetryDownload).toHaveBeenCalledTimes(1);
   });
 });

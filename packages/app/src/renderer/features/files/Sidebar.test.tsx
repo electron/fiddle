@@ -4,10 +4,11 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 const mocks = vi.hoisted(() => ({
   documentsApi: {
     AddFile: vi.fn(() => Promise.resolve()),
-    RenameFile: vi.fn(() => Promise.resolve()),
-    RemoveFile: vi.fn(() => Promise.resolve()),
+    RenameFile: vi.fn((_from: string, _to: string) => Promise.resolve()),
+    RemoveFile: vi.fn((_name: string) => Promise.resolve()),
   },
   toastError: vi.fn(),
+  onSetVisible: vi.fn((_name: string, _visible: boolean) => undefined),
 }));
 
 vi.mock('../../../ipc/renderer', () => ({ documentsApi: mocks.documentsApi }));
@@ -39,7 +40,7 @@ function renderSidebar(names: readonly string[] = TEMPLATE) {
         dirtyFiles={[]}
         activeFile="main.js"
         onOpen={onOpen}
-        onSetVisible={vi.fn()}
+        onSetVisible={mocks.onSetVisible}
       />
       <DialogHost />
     </>,
@@ -100,6 +101,71 @@ describe('Sidebar context menu', () => {
     expect((await nameField()).value).toBe('index.html');
     fireEvent.click(screen.getByRole('button', { name: 'cancel' }));
     await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull());
+  });
+});
+
+describe('Sidebar context menu actions', () => {
+  const openMenuOn = async (file: RegExp, item: string) => {
+    fireEvent.contextMenu(screen.getByRole('row', { name: file }), {
+      clientX: 40,
+      clientY: 60,
+    });
+    fireEvent.click(await screen.findByRole('menuitem', { name: item }));
+  };
+
+  it('renames a file to the trimmed new name, and says why when main refuses', async () => {
+    renderSidebar();
+    await openMenuOn(/index\.html/, 'rename');
+    fireEvent.change(await nameField(), { target: { value: ' page.html ' } });
+    fireEvent.click(screen.getByRole('button', { name: 'renameConfirm' }));
+    await waitFor(() =>
+      expect(mocks.documentsApi.RenameFile).toHaveBeenCalledWith(
+        'index.html',
+        'page.html',
+      ),
+    );
+
+    // The same name again changes nothing.
+    await openMenuOn(/index\.html/, 'rename');
+    await nameField();
+    fireEvent.click(screen.getByRole('button', { name: 'renameConfirm' }));
+    await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull());
+    expect(mocks.documentsApi.RenameFile).toHaveBeenCalledTimes(1);
+
+    const refusal = new Error('taken');
+    mocks.documentsApi.RenameFile.mockRejectedValueOnce(refusal);
+    await openMenuOn(/preload\.js/, 'rename');
+    fireEvent.change(await nameField(), { target: { value: 'main.js' } });
+    fireEvent.click(screen.getByRole('button', { name: 'renameConfirm' }));
+    await waitFor(() =>
+      expect(mocks.toastError).toHaveBeenCalledWith(refusal, 'fileChangeFailed'),
+    );
+  });
+
+  it('deletes a file once confirmed, but never the main entry', async () => {
+    renderSidebar();
+    fireEvent.contextMenu(screen.getByRole('row', { name: /main\.js/ }), {
+      clientX: 40,
+      clientY: 60,
+    });
+    expect(
+      (await screen.findByRole('menuitem', { name: 'delete' })).getAttribute(
+        'aria-disabled',
+      ),
+    ).toBe('true');
+    fireEvent.keyDown(screen.getByRole('menu'), { key: 'Escape' });
+    await waitFor(() => expect(screen.queryByRole('menu')).toBeNull());
+
+    await openMenuOn(/renderer\.js/, 'delete');
+    fireEvent.click(await screen.findByRole('button', { name: 'cancel' }));
+    await waitFor(() => expect(screen.queryByRole('alertdialog')).toBeNull());
+    expect(mocks.documentsApi.RemoveFile).not.toHaveBeenCalled();
+
+    await openMenuOn(/renderer\.js/, 'delete');
+    fireEvent.click(await screen.findByRole('button', { name: 'deleteConfirm' }));
+    await waitFor(() =>
+      expect(mocks.documentsApi.RemoveFile).toHaveBeenCalledWith('renderer.js'),
+    );
   });
 });
 
