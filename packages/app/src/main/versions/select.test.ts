@@ -15,6 +15,7 @@ const row = (version: string, extra: Partial<ReleaseRow> = {}): ReleaseRow => ({
   ...extra,
 });
 const release = (version: string): VersionRef => ({ kind: 'release', version });
+const sameRef = (a: VersionRef, b: VersionRef) => JSON.stringify(a) === JSON.stringify(b);
 
 interface Options {
   version?: VersionRef;
@@ -23,6 +24,8 @@ interface Options {
   channels?: ReleaseChannel[];
   answer?: boolean;
   install?: (version: string) => Promise<unknown>;
+  /** Resolves when `setVersion` may apply `ref`. */
+  setDelay?: (ref: VersionRef) => Promise<void>;
   busy?: boolean;
 }
 
@@ -69,6 +72,7 @@ function setup(options: Options = {}) {
     getVersion: () => state.version,
     setVersion: async (_windowId, ref) => {
       state.version = ref;
+      if (options.setDelay) await options.setDelay(ref);
       return 7;
     },
     remember: (ref) => state.remembered.push(ref),
@@ -94,6 +98,21 @@ describe('VersionSelector.select', () => {
     expect(state.version).toEqual(release('42.4.1'));
     expect(state.remembered).toEqual([release('42.4.1')]);
     expect(install).toHaveBeenCalledWith('42.4.1');
+  });
+
+  it("doesn't remember or download a pick that another one replaced while its template loaded", async () => {
+    let land!: () => void;
+    const slow = new Promise<void>((resolve) => (land = resolve));
+    const { selector, state, install } = setup({
+      setDelay: (ref) => (sameRef(ref, release('42.4.1')) ? slow : Promise.resolve()),
+    });
+    const first = selector.select('w', release('42.4.1'), { remember: true });
+    await selector.select('w', release('44.0.0-beta.3'), { remember: true });
+    land();
+    await first;
+    expect(state.version).toEqual(release('44.0.0-beta.3'));
+    expect(state.remembered).toEqual([release('44.0.0-beta.3')]);
+    expect(install.mock.calls).toEqual([['44.0.0-beta.3']]);
   });
 
   it("doesn't download a version that's already there", async () => {
