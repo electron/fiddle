@@ -12,7 +12,6 @@ export {
   Documents,
   GitHub,
   Modules,
-  Onboarding,
   Run,
   Settings,
   Versions,

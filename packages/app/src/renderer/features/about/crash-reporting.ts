@@ -1,7 +1,6 @@
-import { appPlatformApi } from '../../../ipc/renderer';
-
-export async function initRendererCrashReporting(): Promise<void> {
-  if (!(await appPlatformApi.IsCrashReportingEnabled())) return;
+/** `enabled`: `App.crashReporting`, whether main started Sentry. */
+export async function initRendererCrashReporting(enabled?: boolean): Promise<void> {
+  if (!enabled) return;
   const Sentry = await import('@sentry/electron/renderer');
   // Events go to main, whose `beforeSend` scrubs them. The integrations are an allowlist:
   // no breadcrumbs, so no console, DOM or network breadcrumbs.

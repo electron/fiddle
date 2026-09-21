@@ -1,4 +1,4 @@
-/** Settings startup: the App fields read from settings.json, the OS theme, screen reader, contrast and locale wiring, and live reloads of outside edits. */
+/** Settings: the App fields read from settings.json, changing and replacing settings, the OS theme, screen reader, contrast and locale wiring, and live reloads of outside edits. */
 import { EventEmitter } from 'node:events';
 import fs from 'node:fs';
 import os from 'node:os';
@@ -6,7 +6,15 @@ import path from 'node:path';
 
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { BUILTIN_THEME, defaultSettings, type Settings } from '../../shared/settings';
+import { FiddleError } from '../../shared/errors';
+import {
+  BUILTIN_THEME,
+  defaultSettings,
+  fromSparse,
+  sanitizeSettings,
+  SETTINGS_VERSION,
+  type Settings,
+} from '../../shared/settings';
 import type { AppState } from '../../shared/stores';
 
 const mocks = vi.hoisted(() => ({
@@ -30,14 +38,16 @@ vi.mock('electron', async () => {
     ),
   };
 });
-vi.mock('../i18n', () => ({ setMainLocale: mocks.setMainLocale }));
+vi.mock('../i18n', () => ({
+  setMainLocale: mocks.setMainLocale,
+  tm: () => (key: string) => key,
+}));
 vi.mock('../log', () => ({
   log: { debug: vi.fn(), info: vi.fn(), warn: vi.fn(), error: vi.fn() },
 }));
 
 const { app, nativeTheme } = await import('electron');
 const { flushAll, onJsonStoreNotice } = await import('../persistence/json-store');
-const { SETTINGS_VERSION } = await import('./service');
 const { loadSettings, preferredLocales, startSettings } = await import('./index');
 
 // The folder watcher is faked: the test reports changes itself, which keeps OS
@@ -74,6 +84,9 @@ function writeSettings(sparse: Partial<Settings>, version = SETTINGS_VERSION): v
     JSON.stringify({ schemaVersion: version, ...sparse }),
   );
 }
+
+const readJson = () =>
+  JSON.parse(fs.readFileSync(path.join(dir, 'settings.json'), 'utf8')) as unknown;
 
 function writeTheme(id: string, theme: { name: string; isDark: boolean }): void {
   fs.mkdirSync(path.join(dir, 'themes'), { recursive: true });
@@ -139,6 +152,67 @@ describe('loadSettings', () => {
 });
 
 describe('startSettings', () => {
+  it('applies a change and returns the rev that includes it, keeping settings.json sparse', async () => {
+    const { hub, store, ctx } = await start();
+    const rev = hub.app.rev;
+    expect(ctx.set('packageManager', 'yarn')).toBe(rev + 1);
+    expect(hub.app.rev).toBe(rev + 1);
+    expect(hub.app.settings.packageManager).toBe('yarn');
+    ctx.set('showObsolete', true);
+    await store.flush();
+    expect(readJson()).toEqual({
+      schemaVersion: 1,
+      packageManager: 'yarn',
+      showObsolete: true,
+    });
+
+    ctx.set('showObsolete', false);
+    ctx.reset('packageManager');
+    await store.flush();
+    expect(readJson()).toEqual({ schemaVersion: 1 });
+  });
+
+  it('rejects invalid values and unknown keys without changing anything', async () => {
+    const { hub, ctx } = await start();
+    const rev = hub.app.rev;
+    expect(() => ctx.set('packageManager', 'pnpm')).toThrow(FiddleError);
+    expect(() => ctx.set('nope', true)).toThrow('unknownSetting');
+    expect(() => ctx.reset('nope')).toThrow('unknownSetting');
+    expect(hub.app.rev).toBe(rev);
+  });
+
+  it('keeps keys from newer app versions in the file', async () => {
+    const { store, ctx } = await start({
+      futureSetting: 42,
+      showObsolete: true,
+    } as never);
+    ctx.set('packageManager', 'yarn');
+    await store.flush();
+    expect(readJson()).toEqual({
+      schemaVersion: 1,
+      futureSetting: 42,
+      showObsolete: true,
+      packageManager: 'yarn',
+    });
+  });
+
+  it('validates an outside settings object per key, and replaces and exports the sparse values', async () => {
+    const { hub, ctx } = await start();
+    ctx.set('showObsolete', true);
+    const { settings, dropped } = sanitizeSettings({
+      schemaVersion: 1,
+      packageManager: 'yarn',
+      theme: 42,
+      unknown: 'x',
+    });
+    expect(settings).toEqual({ packageManager: 'yarn' });
+    expect(dropped).toEqual(['theme', 'unknown']);
+    ctx.replace(fromSparse(settings));
+    expect(hub.app.settings.showObsolete).toBe(false);
+    expect(hub.app.settings.packageManager).toBe('yarn');
+    expect(ctx.exportData()).toEqual({ schemaVersion: 1, packageManager: 'yarn' });
+  });
+
   it('publishes the custom themes and sets the OS appearance from the chosen one', async () => {
     writeTheme('midnight', { name: 'Midnight', isDark: true });
     const { hub, ctx } = await start({ theme: 'midnight', appearance: 'light' });
@@ -180,15 +254,17 @@ describe('startSettings', () => {
     expect(mocks.setMainLocale).toHaveBeenCalledOnce();
   });
 
-  it('turns a settings file from a newer app version into a storage notice', async () => {
+  it('turns a settings file from a newer app version into a storage notice, until dismissed', async () => {
     writeSettings({ packageManager: 'yarn' }, SETTINGS_VERSION + 1);
     const { store, initialApp } = loadSettings(dir);
     const hub = fakeHub(initialApp);
-    await startSettings(hub as never, store, dir);
+    const ctx = await startSettings(hub as never, store, dir);
     expect(hub.app.storageNotices).toEqual([
       { id: expect.any(String), kind: 'newer-version', file: 'settings.json' },
     ]);
     expect(store.readOnly).toBe(true);
+    ctx.dismissStorageNotice(hub.app.storageNotices[0]!.id);
+    expect(hub.app.storageNotices).toEqual([]);
   });
 
   it('applies an outside edit to settings.json once the writes settle, and ignores other files', async () => {

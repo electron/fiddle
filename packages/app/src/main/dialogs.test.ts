@@ -62,9 +62,9 @@ describe('parent window', () => {
     const win = { id: 1 };
     windows.open.set('w', win);
     await messageBox('w', { message: 'hi' });
-    expect(showMessageBox).toHaveBeenLastCalledWith(win, { message: 'hi' });
+    expect(showMessageBox).toHaveBeenLastCalledWith(win, { message: 'hi', noLink: true });
     await messageBox('gone', { message: 'hi' });
-    expect(showMessageBox).toHaveBeenLastCalledWith({ message: 'hi' });
+    expect(showMessageBox).toHaveBeenLastCalledWith({ message: 'hi', noLink: true });
     await pickFolder(win as never, { title: 'Add' });
     expect(showOpenDialog).toHaveBeenLastCalledWith(win, expect.anything());
     await pickSave('w', { title: 'Save' });
