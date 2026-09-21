@@ -13,10 +13,11 @@ import { windowApi } from '../../ipc/renderer';
 import type { MenuBarModel, Platform } from '../../shared/stores';
 import { MenuBar, ToolbarButton, ToolbarCapsule, type MenuBarMenu } from '../../ui';
 import { log } from '../features/about/log';
-import { OpenGistButton } from '../features/gists/OpenGistButton';
 import { PublishButton } from '../features/gists/PublishButton';
+import { showGistDialog } from '../features/gists/state';
 import { RunButton } from '../features/run/RunButton';
 import { VersionPicker } from '../features/versions/VersionPicker';
+import { useShortcut } from '../hooks';
 import styles from './Shell.module.css';
 import { TITLE_BAR_PARTS, titleBarFit } from './title-bar-fit';
 
@@ -58,7 +59,9 @@ export function TitleBar({
   onToggleSettings,
 }: TitleBarProps) {
   const { t } = useTranslation('shell');
+  const { t: tGists } = useTranslation('gists');
   const sidebarLabel = sidebar ? t('hideSidebar') : t('showSidebar');
+  const openGistKbd = useShortcut('gist.open');
   const headerRef = useRef<HTMLElement>(null);
   const menusRef = useRef<HTMLDivElement>(null);
   const titleRef = useRef<HTMLDivElement>(null);
@@ -186,7 +189,14 @@ export function TitleBar({
         <RunButton compact={!fit.runHint} />
       </ToolbarCapsule>
       <div className={styles.barEnd}>
-        {fit.openGistButton && <OpenGistButton />}
+        {fit.openGistButton && (
+          <ToolbarButton
+            icon="link"
+            label={tGists('openGist')}
+            tooltip={{ kbd: openGistKbd }}
+            onPress={() => showGistDialog({ kind: 'open' })}
+          />
+        )}
         <PublishButton compact={!fit.publishLabel} />
         <ToolbarButton
           icon="settings"

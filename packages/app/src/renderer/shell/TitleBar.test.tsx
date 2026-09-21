@@ -29,9 +29,8 @@ vi.mock('../features/gists/PublishButton', () => ({
     </button>
   ),
 }));
-vi.mock('../features/gists/OpenGistButton', () => ({
-  OpenGistButton: () => <button type="button">open gist</button>,
-}));
+vi.mock('../features/gists/state', () => ({ showGistDialog: vi.fn() }));
+vi.mock('../hooks', () => ({ useShortcut: () => undefined }));
 vi.mock('../features/versions/VersionPicker', () => ({
   VersionPicker: ({ className }: { className?: string }) => (
     <button type="button" className={className}>
@@ -122,17 +121,17 @@ describe('TitleBar', () => {
 
   it('shows everything in a wide window and gives up the Publish label, then Open gist and the Run hint, as it narrows', () => {
     setup({ platform: 'win32', menuBar: MENU_BAR });
-    screen.getByRole('button', { name: 'open gist' });
+    screen.getByRole('button', { name: 'openGist' });
     expect(compact('publish')).toBe('false');
     expect(compact('run')).toBe('false');
 
     resizeTo(700);
     expect(compact('publish')).toBe('true');
-    screen.getByRole('button', { name: 'open gist' });
+    screen.getByRole('button', { name: 'openGist' });
     expect(compact('run')).toBe('false');
 
     resizeTo(600);
-    expect(screen.queryByRole('button', { name: 'open gist' })).toBeNull();
+    expect(screen.queryByRole('button', { name: 'openGist' })).toBeNull();
     expect(compact('run')).toBe('true');
   });
 
