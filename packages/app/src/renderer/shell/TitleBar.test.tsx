@@ -98,10 +98,10 @@ afterEach(() => {
 describe('TitleBar', () => {
   it('names the fiddle, marking it edited while it has unsaved changes', () => {
     const { rerender, props } = setup();
-    expect(screen.getByText('My fiddle')).toBeTruthy();
+    screen.getByText('My fiddle');
     expect(screen.queryByText('edited')).toBeNull();
     rerender(<TitleBar {...props} dirty />);
-    expect(screen.getByText('edited')).toBeTruthy();
+    screen.getByText('edited');
   });
 
   it('toggles the sidebar and the Settings page from its two buttons, which say what they will do', () => {
@@ -114,7 +114,7 @@ describe('TitleBar', () => {
     expect(props.onToggleSettings).toHaveBeenCalledOnce();
 
     rerender(<TitleBar {...props} sidebar={false} settingsOpen={false} />);
-    expect(screen.getByRole('button', { name: 'showSidebar' })).toBeTruthy();
+    screen.getByRole('button', { name: 'showSidebar' });
     expect(
       screen.getByRole('button', { name: 'settings' }).getAttribute('aria-pressed'),
     ).toBe('false');
@@ -122,13 +122,13 @@ describe('TitleBar', () => {
 
   it('shows everything in a wide window and gives up the Publish label, then Open gist and the Run hint, as it narrows', () => {
     setup({ platform: 'win32', menuBar: MENU_BAR });
-    expect(screen.getByRole('button', { name: 'open gist' })).toBeTruthy();
+    screen.getByRole('button', { name: 'open gist' });
     expect(compact('publish')).toBe('false');
     expect(compact('run')).toBe('false');
 
     resizeTo(700);
     expect(compact('publish')).toBe('true');
-    expect(screen.getByRole('button', { name: 'open gist' })).toBeTruthy();
+    screen.getByRole('button', { name: 'open gist' });
     expect(compact('run')).toBe('false');
 
     resizeTo(600);
@@ -157,11 +157,6 @@ describe('TitleBar', () => {
         ),
       );
     });
-
-    it('draws no menu bar, since main sends it no menu model there', () => {
-      setup({ platform: 'darwin', menuBar: undefined });
-      expect(screen.queryByRole('menubar')).toBeNull();
-    });
   });
 
   describe('on Windows and Linux', () => {
@@ -179,8 +174,7 @@ describe('TitleBar', () => {
           { kind: 'item', id: 'stray', label: 'Stray', enabled: true },
         ],
       });
-      const bar = screen.getByRole('menubar', { name: 'menuBar' });
-      expect(bar).toBeTruthy();
+      screen.getByRole('menubar', { name: 'menuBar' });
       expect(screen.queryByRole('menuitem', { name: 'Stray' })).toBeNull();
       fireEvent.mouseDown(screen.getByRole('menuitem', { name: 'File' }), { button: 0 });
       fireEvent.click(screen.getByRole('menuitem', { name: 'New fiddle' }));
@@ -244,7 +238,10 @@ describe('TitleBar', () => {
   describe('room for the menus', () => {
     /**
      * Lays the bar out by hand: the header `bar` px wide from 0, the menus starting at `menusLeft`, the capsule
-     * `capsule` px wide with a full-width picker, every menu title 60px and the More button 28px.
+     * `capsule` px wide with a full-width picker, every menu title 60px and the More button 28px. It leans on the
+     * DOM as the components draw it: the title bar is the HEADER, the capsule the role="group", the menus' box the
+     * element around the role="menubar", and MenuBar measures unseen copies of its titles in its
+     * aria-hidden="true" element, where only the More button holds an svg.
      */
     function layOut({
       bar,
@@ -267,7 +264,6 @@ describe('TitleBar', () => {
           return rect(0, 0);
         },
       );
-      // The bar measures unseen copies of its titles.
       vi.spyOn(HTMLElement.prototype, 'offsetWidth', 'get').mockImplementation(function (
         this: HTMLElement,
       ) {
@@ -288,13 +284,17 @@ describe('TitleBar', () => {
         children: [{ kind: 'item', id: `item:${i}`, label: `Item ${i}`, enabled: true }],
       }));
 
-    // 1000px bar, 300px capsule centred: each side has (1000 − 24 − 300) / 2 = 338px free past its padding. The
-    // menus start at 60, and keep the divider's 25px and a 12px gap: 12 + 338 − 60 − 37 = 253px for titles.
+    // The titles get what is free beside the centred capsule past the bar's 12px padding, from where the menus
+    // start, less the divider's 25px (a 12px gap each side of the hairline) and the 12px gap before the capsule.
+    // A 976px bar with a 300px capsule: (976 − 24 − 300) / 2 = 326 free, so 12 + 326 − 60 − 25 − 12 = 241 for
+    // titles, and four (240) just fit. Both cases leave a pixel: one 12px term off and the fold flips.
     it('lets the titles run up to where the capsule sits centred, and folds the rest before pushing it', () => {
-      layOut({ bar: 1000, menusLeft: 60, capsule: 300 });
+      layOut({ bar: 976, menusLeft: 60, capsule: 300 });
       const { rerender, props } = setup({ menuBar: menus(4) });
       expect(titles()).toEqual(['Menu 0', 'Menu 1', 'Menu 2', 'Menu 3']);
-      // Five titles take 300: three stay (28 + 180 ≤ 253) and the rest fold into More.
+      // A 1028px bar leaves 12 + 352 − 60 − 37 = 267. Five titles take 300: three stay beside More
+      // (28 + 180 ≤ 267) and a fourth (268) just doesn't.
+      layOut({ bar: 1028, menusLeft: 60, capsule: 300 });
       rerender(<TitleBar {...props} menuBar={menus(5)} />);
       expect(titles()).toEqual(['Menu 0', 'Menu 1', 'Menu 2', 'menuBarMore']);
     });

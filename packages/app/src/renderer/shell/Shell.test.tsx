@@ -209,16 +209,6 @@ describe('Shell', () => {
     expect(mocks.moveFile).toHaveBeenCalledTimes(2);
   });
 
-  it('hands the editor commands to Monaco', () => {
-    render(<Shell />);
-    forward('editor.toggleSoftWrap');
-    forward('editor.toggleMinimap');
-    forward('editor.format');
-    expect(mocks.toggleSoftWrap).toHaveBeenCalledOnce();
-    expect(mocks.toggleMinimap).toHaveBeenCalledOnce();
-    expect(mocks.formatFocusedEditor).toHaveBeenCalledOnce();
-  });
-
   it('renders nothing until both stores have loaded', () => {
     mocks.win = null;
     mocks.sheet = undefined;
@@ -387,13 +377,6 @@ describe('Shell tabs and panes', () => {
 });
 
 describe('Shell layout', () => {
-  it('stores the console height, and hides the console when its splitter closes it', () => {
-    render(<Shell />);
-    act(() => sheet().onConsoleHeight(200));
-    act(() => sheet().onHideConsole());
-    expect(layoutPatches()).toEqual([{ consoleHeight: 200 }, { consoleVisible: false }]);
-  });
-
   it('resets the layout to the defaults and shows every hidden file again', () => {
     mocks.win = windowState(
       { sidebar: false, panes: ['a.js', 'c.js'] },

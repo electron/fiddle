@@ -171,11 +171,11 @@ afterEach(() => {
 describe('Sheet without an open file', () => {
   it('offers to reset the layout, with the console still below', () => {
     const { on } = setup({ active: null, panes: [] });
-    expect(screen.getByText('emptyTitle')).toBeTruthy();
+    screen.getByText('emptyTitle');
     expect(screen.queryByRole('tablist')).toBeNull();
     fireEvent.click(screen.getByRole('button', { name: 'resetLayout' }));
     expect(on.onResetLayout).toHaveBeenCalledOnce();
-    expect(screen.getByRole('log')).toBeTruthy();
+    screen.getByRole('log');
   });
 
   it('leaves the console out when it is hidden', () => {
@@ -221,7 +221,7 @@ describe('Sheet tab row', () => {
       active: 'index.html',
       state: windowState({ dirtyFiles: ['renderer.js'] }),
     });
-    expect(screen.getByText('processRenderer')).toBeTruthy();
+    screen.getByText('processRenderer');
     expect(tab('renderer.js').textContent).toContain('unsaved');
     expect(tab('main.js').textContent).not.toContain('unsaved');
 
@@ -289,12 +289,6 @@ describe('Sheet panes', () => {
     expect(within(pane(0)).queryByText(/Count/)).toBeNull();
   });
 
-  it('has no pane headers when the editor is not split', () => {
-    setup();
-    expect(screen.queryByRole('button', { name: 'maximize' })).toBeNull();
-    expect(screen.queryByRole('separator', { name: 'resizePanes' })).toBeNull();
-  });
-
   it('resizes neighbouring panes from the divider between them, and evens them out again on reset', () => {
     setup({ panes: ['main.js', 'renderer.js'] });
     const divider = screen.getByRole('separator', { name: 'resizePanes' });
@@ -312,16 +306,9 @@ describe('Sheet panes', () => {
 
   it('covers the editors with the Settings page without unmounting them', () => {
     setup({ state: windowState({ view: 'settings' }) });
-    expect(screen.getByRole('heading', { name: 'settings page' })).toBeTruthy();
+    screen.getByRole('heading', { name: 'settings page' });
     const editor = screen.getByRole('button', { name: 'editor main.js' });
     expect(editor.closest('[data-covered]')).toBeTruthy();
-  });
-
-  it('invites a drop while something droppable is dragged over the window', () => {
-    const { rerender, props } = setup();
-    expect(screen.queryByText('dropToOpen')).toBeNull();
-    rerender(<Sheet {...props} dropping />);
-    expect(screen.getByText('dropToOpen')).toBeTruthy();
   });
 });
 

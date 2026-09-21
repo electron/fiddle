@@ -31,8 +31,8 @@ describe('StatusBar', () => {
   it('shows the cursor position and the language of the file it is in', () => {
     mocks.cursor = { file: 'index.html', line: 12, column: 3 };
     render(<StatusBar files={['main.js', 'index.html']} />);
-    expect(screen.getByText('cursorPosition {"line":12,"column":3}')).toBeTruthy();
-    expect(screen.getByText('languageHtml')).toBeTruthy();
+    screen.getByText('cursorPosition {"line":12,"column":3}');
+    screen.getByText('languageHtml');
   });
 
   it('shows no position for a cursor left in a file the fiddle no longer has', () => {

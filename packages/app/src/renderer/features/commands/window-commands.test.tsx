@@ -1,6 +1,6 @@
 /** Tests the renderer's handlers for forwarded window commands: Edit menu roles, editor actions, tab-focus mode, Format all and Clear console. */
 import { act, render } from '@testing-library/react';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 interface FakeEditor {
   updateOptions: ReturnType<typeof vi.fn>;
@@ -92,10 +92,13 @@ function fakeEditor(): FakeEditor {
     onContextMenu: (listener) => (emit.contextMenu = listener),
   };
 }
+/** Editors the command module has heard of; it may remember one as the last focused. */
+const created: FakeEditor[] = [];
 /** An editor Monaco just created, as the command module hears of it. */
 function createEditor(): FakeEditor {
   const editor = fakeEditor();
   mocks.onCreate?.(editor);
+  created.push(editor);
   return editor;
 }
 
@@ -130,6 +133,12 @@ beforeEach(() => {
     '<input id="field" /><div class="monaco-editor"><textarea id="monaco"></textarea></div>';
   Object.assign(document, { execCommand: vi.fn(() => true) });
 });
+afterEach(() => {
+  vi.restoreAllMocks();
+  // The module keeps tab-focus mode and the last focused editor between tests: put both back.
+  if (seen.at(-1)) send('editor.toggleTabFocus');
+  for (const editor of created.splice(0)) editor.emit.dispose?.();
+});
 
 describe('window commands', () => {
   it('turns tab-focus mode on and off in every editor', () => {
@@ -153,7 +162,6 @@ describe('window commands', () => {
     await Promise.resolve();
     expect(during.updateOptions).toHaveBeenCalledWith({ tabFocusMode: true });
     expect(before.updateOptions).not.toHaveBeenCalled();
-    send('editor.toggleTabFocus');
   });
 
   it('does what the native role does for Edit menu commands outside the editor', () => {
@@ -267,6 +275,5 @@ describe('Format all', () => {
       '/index.html',
       expect.any(SyntaxError),
     );
-    warn.mockRestore();
   });
 });

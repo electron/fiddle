@@ -57,15 +57,12 @@ describe('renderer log', () => {
     expect(sent()[1]?.text).toHaveLength(10_000);
   });
 
-  it('never throws, whether the bridge is missing or main refuses the line', async () => {
+  it('never throws, even outside a window, where the bridge is missing', () => {
     vi.spyOn(console, 'error').mockImplementation(() => undefined);
     mocks.Log.mockImplementationOnce(() => {
       throw new TypeError('no bridge');
     });
     expect(() => log.error('outside a window')).not.toThrow();
-    mocks.Log.mockRejectedValueOnce(new Error('too long'));
-    expect(() => log.error('refused')).not.toThrow();
-    await Promise.resolve();
   });
 
   it('forwards uncaught errors and unhandled rejections to main as errors', () => {

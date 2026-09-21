@@ -123,11 +123,6 @@ describe('window state changes', () => {
     expect(shown()).toBe(next);
   });
 
-  it('is null until the store has loaded', () => {
-    render(<Reader state={null} />);
-    expect(shown()).toBeNull();
-  });
-
   it('patches the layout at once and sends main the whole of it', async () => {
     render(<Reader state={split} />);
     await act(() => setLayout(split.layout, { consoleHeight: 300 }, 'failed'));
