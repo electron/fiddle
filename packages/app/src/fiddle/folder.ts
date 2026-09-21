@@ -7,13 +7,11 @@ import { writeAtomic } from '@electron/fiddle-core';
 import { ErrorCode } from '../shared/errors';
 import { reasonError } from './error-reasons';
 import {
+  assertValidFileName,
   type FileMap,
   fileRuleError,
-  hasInvalidCharacter,
   hasName,
-  hasPathSeparator,
   isSupportedFileName,
-  isWindowsReservedName,
   PACKAGE_JSON,
 } from './files';
 import { type PickedFiles, pickFiddleFiles } from './pick';
@@ -67,17 +65,11 @@ export async function readFiddleFolder(dir: string): Promise<FolderReadResult> {
   return { ...picked, skipped: [...skipped, ...picked.skipped] };
 }
 
-/** The same name rules as `files.ts`, plus `package.json`. Names that differ only in case are refused. */
+/** The name rules of `files.ts`, plus `package.json`. Names that differ only in case are refused. */
 function assertWritableNames(names: readonly string[]): void {
   const seen: string[] = [];
   for (const name of names) {
-    if (name !== PACKAGE_JSON) {
-      if (name === '') throw fileRuleError('empty-name', name);
-      if (hasPathSeparator(name)) throw fileRuleError('path-separator', name);
-      if (hasInvalidCharacter(name)) throw fileRuleError('invalid-character', name);
-      if (!isSupportedFileName(name)) throw fileRuleError('unsupported-extension', name);
-      if (isWindowsReservedName(name)) throw fileRuleError('reserved-name', name);
-    }
+    if (name !== PACKAGE_JSON) assertValidFileName(name);
     if (hasName(seen, name)) throw fileRuleError('duplicate-name', name);
     seen.push(name);
   }
