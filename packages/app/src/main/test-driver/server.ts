@@ -149,6 +149,8 @@ function createHandlers({ hub, registry, state }: DriverContext): Handlers {
     sideEffects: () => state.sideEffects,
     violations: () => state.violations,
     quit: () => {
+      // Unsaved changes would ask first, and an unscripted prompt is cancelled: answer Quit.
+      state.dialogQueue.messageBox.push({ response: 0 });
       setImmediate(() => app.quit());
       return null;
     },

@@ -69,7 +69,11 @@ describe('localizeError', () => {
   });
 
   it('gives every error thrown from src/fiddle a complete sentence', async () => {
-    const start = await runCommand({ command: 'fiddle-no-such-command', args: [] }).then(
+    // Not through the Windows shell, which would start fine and report the missing command itself.
+    const start = await runCommand(
+      { command: 'fiddle-no-such-command', args: [] },
+      { platform: 'linux' },
+    ).then(
       () => undefined,
       (error: unknown) => error as FiddleError,
     );

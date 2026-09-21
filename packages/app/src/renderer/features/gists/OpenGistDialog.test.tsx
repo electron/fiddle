@@ -30,8 +30,14 @@ describe('OpenGistDialog', () => {
   it('offers the gist link on the clipboard, selected, and opens it', async () => {
     mocks.githubApi.ReadClipboardGist.mockResolvedValue(LINK);
     render(<OpenGistDialog onClose={vi.fn()} />);
-    await waitFor(() => expect(field().value).toBe(LINK));
-    expect([field().selectionStart, field().selectionEnd]).toEqual([0, LINK.length]);
+    // The selection follows the value in an effect of its own.
+    await waitFor(() =>
+      expect([field().value, field().selectionStart, field().selectionEnd]).toEqual([
+        LINK,
+        0,
+        LINK.length,
+      ]),
+    );
 
     fireEvent.click(screen.getByRole('button', { name: 'openSubmit' }));
     await waitFor(() =>

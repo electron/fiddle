@@ -26,6 +26,8 @@ vi.mock('../log', () => ({
 vi.mock('./process', async (importOriginal) => ({
   ...(await importOriginal<typeof import('./process')>()),
   spawnElectron: (...args: unknown[]) => spawnElectron(...args),
+  // The fake child has no pid for a process-tree kill. That is tested in kill-tree.test.ts.
+  stopChild: (child: { kill(signal: string): boolean }) => child.kill('SIGTERM'),
 }));
 
 const { RunService } = await import('./service');

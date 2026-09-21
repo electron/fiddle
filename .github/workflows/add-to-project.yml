@@ -12,6 +12,8 @@ permissions: {}
 
 jobs:
   add-to-project:
+    # The project and its app credentials exist only in the electron org.
+    if: github.repository_owner == 'electron'
     runs-on: ubuntu-latest
     steps:
       - name: Generate GitHub App token

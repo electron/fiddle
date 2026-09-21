@@ -30,6 +30,11 @@ describe('menu bar', () => {
   /** The bar's titles while no menu is open: every menu, or the ones that fit and More. */
   const barTitles = async () =>
     (await app().query(role('menuitem'))).map((item) => item.name);
+  /** Opens a menu from its title, or from the More button when it is folded there. */
+  const openMenu = async (label: string) => {
+    if (!(await barTitles()).includes(label)) await app().click(role('menuitem', 'More'));
+    await app().click(role('menuitem', label));
+  };
 
   it('shows every menu in the title bar', async () => {
     await app().query(role('menubar', 'Application menu'));
@@ -100,12 +105,12 @@ describe('menu bar', () => {
   });
 
   it('runs what is chosen, with labels that follow the window', async () => {
-    await app().click(role('menuitem', 'View'));
+    await openMenu('View');
     await app().click(role('menuitem', 'Hide sidebar'));
     await app().waitForAbsent(role('menu', 'View'));
     await expect.poll(async () => (await windowState(app())).layout.sidebar).toBe(false);
     await app().waitForAbsent(role('navigation', 'Files'));
-    await app().click(role('menuitem', 'View'));
+    await openMenu('View');
     await app().click(role('menuitem', 'Show sidebar'));
     await expect.poll(async () => (await windowState(app())).layout.sidebar).toBe(true);
     await app().query(role('navigation', 'Files'));
@@ -114,10 +119,19 @@ describe('menu bar', () => {
   it('runs role items itself: Zoom in and Actual size', async () => {
     const ratio = async () => Number(await app().evaluate('window.devicePixelRatio'));
     const initial = await ratio();
-    await app().click(role('menuitem', 'View'));
+    await openMenu('View');
     await app().click(role('menuitem', 'Zoom in'));
     await expect.poll(ratio).toBeGreaterThan(initial);
-    await app().click(role('menuitem', 'View'));
+    // The narrower bar may now fold View into More: wait until its titles stop changing.
+    let last = '';
+    await expect
+      .poll(async () => {
+        const previous = last;
+        last = (await barTitles()).join();
+        return last === previous;
+      })
+      .toBe(true);
+    await openMenu('View');
     await app().click(role('menuitem', 'Actual size'));
     await expect.poll(ratio).toBe(initial);
   });

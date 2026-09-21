@@ -71,22 +71,23 @@ const BOX_FUNCTION = `function () {
     range.selectNodeContents(this);
     return range.getBoundingClientRect();
   };
+  // A hit inside the element's <label> counts too: a switch's input sits under its visual track.
+  const hits = (hit) => !!hit && (hit === el || el.contains(hit) ||
+    (!!el.labels && Array.from(el.labels).some((label) => label.contains(hit))) ||
+    !!(hit.shadowRoot && hit.shadowRoot.contains(el)));
   let r = measure();
-  if (r.bottom < 0 || r.right < 0 || r.top > innerHeight || r.left > innerWidth) {
+  let hit = document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2);
+  // Its centre may be scrolled out, or under a bar that overlaps the scrolling area's edge.
+  if (!hits(hit)) {
     box.scrollIntoView({ block: 'center', inline: 'center' });
     r = measure();
+    hit = document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2);
   }
-  const x = r.left + r.width / 2;
-  const y = r.top + r.height / 2;
-  const hit = document.elementFromPoint(x, y);
-  // A hit inside the element's <label> counts too: a switch's input sits under its visual track.
-  const inLabel = !!hit && !!el.labels && Array.from(el.labels).some((label) => label.contains(hit));
-  const ok = !!hit && (hit === el || el.contains(hit) || inLabel || !!(hit.shadowRoot && hit.shadowRoot.contains(el)));
   const describe = (node) => node
     ? node.tagName.toLowerCase() + (node.id ? '#' + node.id : '') +
       (typeof node.className === 'string' && node.className.trim() ? '.' + node.className.trim().split(/\\s+/).join('.') : '')
     : 'nothing';
-  return { x, y, width: r.width, height: r.height, hit: ok, hitDescription: describe(hit) };
+  return { x: r.left + r.width / 2, y: r.top + r.height / 2, width: r.width, height: r.height, hit: hits(hit), hitDescription: describe(hit) };
 }`;
 
 export interface PageSetup {

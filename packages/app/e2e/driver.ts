@@ -631,9 +631,10 @@ export async function launchApp(options: LaunchOptions = {}): Promise<FiddleApp>
   const cleanup = async (keep: boolean) => {
     if (child.exitCode === null && child.signalCode === null) child.kill('SIGKILL');
     display?.stop();
-    output.end();
+    await new Promise((resolve) => output.close(resolve));
     if (!options.fixtures) await fixtures.close();
-    if (!keep) fs.rmSync(testDir, { recursive: true, force: true });
+    // On Windows, Electron's helpers can hold files here for a moment after it exits.
+    if (!keep) fs.rmSync(testDir, { recursive: true, force: true, maxRetries: 10 });
   };
 
   try {

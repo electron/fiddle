@@ -28,6 +28,7 @@ vi.mock('../log', () => ({
 
 const { VersionsService, mirrorsFor, readReleaseList } = await import('./service');
 const { cachePaths } = await import('./paths');
+const { flushAll } = await import('../persistence/json-store');
 
 const DEFAULT_ELECTRON = 'https://github.com/electron/electron/releases/download/';
 const DEFAULT_NIGHTLY = 'https://github.com/electron/nightlies/releases/download/';
@@ -118,8 +119,10 @@ let dir = '';
 beforeEach(() => {
   dir = fs.mkdtempSync(path.join(os.tmpdir(), 'fiddle-versions-'));
 });
-afterEach(() => {
+afterEach(async () => {
   vi.useRealTimers();
+  // `deleteAll` saves the local builds in the background: let that land before the folder goes.
+  await flushAll();
   fs.rmSync(dir, { recursive: true, force: true });
 });
 
@@ -217,8 +220,8 @@ describe('release list', () => {
 
   it('keeps a fetched list when it cannot be cached', async () => {
     const { service, cache, fetch } = setup();
-    fs.mkdirSync(cache.root, { recursive: true });
-    fs.mkdirSync(cache.releases);
+    // A file where the cache folder should be, so nothing can be written under it.
+    fs.writeFileSync(cache.root, '');
     fetch.mockImplementation(respond(listText('99.0.0')));
     await service.refresh();
     expect(service.releases().map((row) => row.version)).toEqual(['99.0.0']);

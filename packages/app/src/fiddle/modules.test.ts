@@ -296,7 +296,7 @@ describe('runCommand', () => {
     const result = await runCommand(
       {
         command: node,
-        args: ['-e', 'console.log("out"); console.error("err"); process.exit(3)'],
+        args: ['-e', "console.log('out'); console.error('err'); process.exit(3)"],
       },
       { onOutput: (t) => chunks.push(t) },
     );
@@ -320,7 +320,7 @@ describe('runCommand', () => {
 
   it('passes on whole lines, and the unfinished last line at the end', async () => {
     const script =
-      'process.stdout.write("ab"); setTimeout(() => { process.stdout.write("c\\nd"); setTimeout(() => process.stdout.write("e\\nf"), 50) }, 50)';
+      "process.stdout.write('ab'); setTimeout(() => { process.stdout.write('c\\nd'); setTimeout(() => process.stdout.write('e\\nf'), 50) }, 50)";
     const chunks: string[] = [];
     await runCommand(
       { command: node, args: ['-e', script] },
@@ -369,11 +369,11 @@ describe('runCommand', () => {
   });
 
   it('reports a missing command', async () => {
-    await expect(
-      runCommand({ command: 'definitely-not-a-command-xyz', args: [] }),
-    ).rejects.toMatchObject({
-      code: ErrorCode.unavailable,
-    });
+    const result = runCommand({ command: 'definitely-not-a-command-xyz', args: [] });
+    // On Windows the shell starts fine, and reports the missing command itself.
+    await (process.platform === 'win32'
+      ? expect(result).resolves.toMatchObject({ code: 1 })
+      : expect(result).rejects.toMatchObject({ code: ErrorCode.unavailable }));
   });
 
   it('refuses shell-special arguments on Windows', async () => {

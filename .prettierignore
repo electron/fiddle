@@ -9,3 +9,4 @@ packages/app/static/
 packages/app/src/ipc/generated/
 packages/app/src/i18n/generated/
 packages/app/src/main/migration/fixtures/
+THIRD_PARTY_NOTICES.md

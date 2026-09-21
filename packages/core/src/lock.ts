@@ -72,6 +72,12 @@ export interface HeldLock {
   mtimeMs: number;
 }
 
+// On Windows, a file that is being deleted can't be opened or created again
+// until its last handle closes. Both fail with EPERM for that moment.
+function isVanishing(err: unknown): boolean {
+  return process.platform === 'win32' && (err as NodeJS.ErrnoException).code === 'EPERM';
+}
+
 /** Reads a lock file. Returns `undefined` if there is no lock. */
 export async function readLock(lockPath: string): Promise<HeldLock | undefined> {
   try {
@@ -81,7 +87,8 @@ export async function readLock(lockPath: string): Promise<HeldLock | undefined> 
     ]);
     return { text, info: parseLockInfo(text), mtimeMs: st.mtimeMs };
   } catch (err) {
-    if ((err as NodeJS.ErrnoException).code === 'ENOENT') return undefined;
+    if ((err as NodeJS.ErrnoException).code === 'ENOENT' || isVanishing(err))
+      return undefined;
     throw err;
   }
 }
@@ -152,7 +159,7 @@ async function removeStaleLock(lockPath: string, staleText: string): Promise<boo
   try {
     await fs.mkdir(guard);
   } catch (err) {
-    if ((err as NodeJS.ErrnoException).code !== 'EEXIST') throw err;
+    if ((err as NodeJS.ErrnoException).code !== 'EEXIST' && !isVanishing(err)) throw err;
     const st = await fs.stat(guard).catch(() => undefined);
     if (st && Date.now() - st.mtimeMs > TAKEOVER_GUARD_MS) {
       await fs.rmdir(guard).catch(() => {});
@@ -191,22 +198,28 @@ export async function acquireLock(
       hostname: os.hostname(),
       startedAt: Date.now(),
     };
+    let vanishing: boolean;
     try {
       await fs.writeFile(lockPath, JSON.stringify(info), { flag: 'wx' });
       return new Lock(lockPath, info, staleMs);
     } catch (err) {
-      if ((err as NodeJS.ErrnoException).code !== 'EEXIST') throw err;
+      vanishing = isVanishing(err);
+      if ((err as NodeJS.ErrnoException).code !== 'EEXIST' && !vanishing) throw err;
     }
 
     const held = await readLock(lockPath);
-    if (!held) continue; // released between our attempt and our read
+    if (!held && !vanishing) continue; // released between our attempt and our read
     const now = Date.now();
-    if (isLockStale(held, staleMs, now) && (await removeStaleLock(lockPath, held.text))) {
+    if (
+      held &&
+      isLockStale(held, staleMs, now) &&
+      (await removeStaleLock(lockPath, held.text))
+    ) {
       continue;
     }
 
     if (timeoutMs !== undefined && now - start >= timeoutMs) {
-      const owner = held.info
+      const owner = held?.info
         ? `process ${held.info.pid} on ${held.info.hostname}`
         : 'another process';
       throw new FiddleCoreError('locked', `"${lockPath}" is locked by ${owner}`);

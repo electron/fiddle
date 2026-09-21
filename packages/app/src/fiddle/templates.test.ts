@@ -316,8 +316,8 @@ describe('createTemplateLoader', () => {
 
     expect(await loader.getTemplate('30.0.0')).toEqual(quickStart);
     release!();
-    // The same download finishes in the background: the next call gets the real template.
-    expect(await loader.getTemplate('30.0.0')).toEqual(FIXTURE_FILES);
+    // The same download finishes in the background: a later call gets the real template.
+    await expect.poll(() => loader.getTemplate('30.0.0')).toEqual(FIXTURE_FILES);
     expect(urls).toHaveLength(1);
   });
 
