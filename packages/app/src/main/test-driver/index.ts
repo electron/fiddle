@@ -1,5 +1,4 @@
 // Keep this module free of top-level side effects so release builds drop it.
-import nodeCrypto from 'node:crypto';
 import fs from 'node:fs';
 import http from 'node:http';
 import https from 'node:https';
@@ -77,17 +76,15 @@ export function installTestHarness(): TestHarness {
 
   const state = createTestState(testDir);
   const locale = process.env.FIDDLE_TEST_LOCALE ?? 'en-US';
-  const seed = Number(process.env.FIDDLE_TEST_SEED ?? 1) >>> 0;
 
   captureMainLog(state);
   applySwitches(locale);
   fixLocaleAndTime(locale);
-  seedMainRandomness(seed);
   guardNodeNetwork(state);
   stubOsSideEffects(state);
   scriptDialogs(state);
   if (process.platform === 'darwin') stayInBackground(state);
-  configurePages({ locale, timezone: 'UTC', initScript: seededRandomScript(seed) });
+  configurePages({ locale, timezone: 'UTC' });
 
   app.on('session-created', (ses) => guardSession(ses, state));
   app.on('web-contents-created', (_event, contents) =>
@@ -148,37 +145,6 @@ function fixLocaleAndTime(locale: string): void {
   app.getPreferredSystemLanguages = () => [locale];
   app.getLocale = () => locale;
   app.getSystemLocale = () => locale;
-}
-
-function mulberry32(seed: number): () => number {
-  let a = seed >>> 0;
-  return () => {
-    a = (a + 0x6d2b79f5) >>> 0;
-    let t = a;
-    t = Math.imul(t ^ (t >>> 15), t | 1);
-    t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
-    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
-  };
-}
-
-function seedMainRandomness(seed: number): void {
-  const random = mulberry32(seed);
-  Math.random = random;
-  // windowIds and other UUIDs become reproducible too.
-  (nodeCrypto as { randomUUID: () => string }).randomUUID = () => {
-    const bytes = Array.from({ length: 16 }, () => Math.floor(random() * 256));
-    bytes[6] = ((bytes[6] ?? 0) & 0x0f) | 0x40;
-    bytes[8] = ((bytes[8] ?? 0) & 0x3f) | 0x80;
-    const hex = bytes.map((byte) => byte.toString(16).padStart(2, '0')).join('');
-    return `${hex.slice(0, 8)}-${hex.slice(8, 12)}-${hex.slice(12, 16)}-${hex.slice(16, 20)}-${hex.slice(20)}`;
-  };
-}
-
-function seededRandomScript(seed: number): string {
-  return `(() => { let a = ${seed} >>> 0; Math.random = () => {
-    a = (a + 0x6d2b79f5) >>> 0; let t = a;
-    t = Math.imul(t ^ (t >>> 15), t | 1); t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
-    return ((t ^ (t >>> 14)) >>> 0) / 4294967296; }; })();`;
 }
 
 function guardSession(ses: Session, state: TestState): void {
@@ -265,26 +231,21 @@ function stubOsSideEffects(state: TestState): void {
     },
     showItemInFolder: (file: string) => record('shell.showItemInFolder', file),
   });
-  Object.assign(app, {
-    setAsDefaultProtocolClient: (protocol: string) => {
-      record('app.setAsDefaultProtocolClient', protocol);
-      return true;
-    },
-    removeAsDefaultProtocolClient: (protocol: string) => {
-      record('app.removeAsDefaultProtocolClient', protocol);
-      return true;
-    },
-    addRecentDocument: (file: string) => record('app.addRecentDocument', file),
-    clearRecentDocuments: () => record('app.clearRecentDocuments'),
-    moveToApplicationsFolder: () => {
-      record('app.moveToApplicationsFolder');
-      return false;
-    },
-    setJumpList: (categories: unknown) => {
-      record('app.setJumpList', categories);
-      return 'ok';
-    },
-  });
+  for (const [method, result] of [
+    ['setAsDefaultProtocolClient', true],
+    ['removeAsDefaultProtocolClient', true],
+    ['addRecentDocument', undefined],
+    ['clearRecentDocuments', undefined],
+    ['moveToApplicationsFolder', false],
+    ['setJumpList', 'ok'],
+  ] as const) {
+    Object.assign(app, {
+      [method]: (...args: unknown[]) => {
+        record(`app.${method}`, ...args);
+        return result;
+      },
+    });
+  }
   // The real clipboard is shared with every other app, including other e2e apps and the developer's.
   let clipboardText = '';
   Object.assign(clipboard, {
@@ -441,34 +402,28 @@ function resolveDialog(
   options: Record<string, unknown>,
   state: TestState,
 ): unknown {
-  const canceled = !queued || ('canceled' in queued && queued.canceled);
-  if (kind === 'open') {
-    return canceled || !('filePaths' in queued)
-      ? { canceled: true, filePaths: [] }
-      : { canceled: false, filePaths: queued.filePaths };
-  }
-  if (kind === 'save') {
-    return canceled || !('filePath' in queued)
-      ? { canceled: true, filePath: '' }
-      : { canceled: false, filePath: queued.filePath };
-  }
-  const cancelId = typeof options.cancelId === 'number' ? options.cancelId : 0;
-  if (!queued || 'canceled' in queued || 'filePaths' in queued || 'filePath' in queued) {
-    return { response: cancelId, checkboxChecked: false };
-  }
-  let response = queued.response ?? cancelId;
-  if (queued.button !== undefined) {
+  // No answer, `canceled` or an answer for another kind of dialog: cancelled.
+  const given = (queued && !('canceled' in queued) ? queued : {}) as Partial<
+    { filePaths: string[]; filePath: string } & Electron.MessageBoxReturnValue & {
+        button: string;
+      }
+  >;
+  if (kind === 'open')
+    return { canceled: !given.filePaths, filePaths: given.filePaths ?? [] };
+  if (kind === 'save')
+    return { canceled: given.filePath === undefined, filePath: given.filePath ?? '' };
+  let response =
+    given.response ?? (typeof options.cancelId === 'number' ? options.cancelId : 0);
+  if (given.button !== undefined) {
     const buttons = Array.isArray(options.buttons) ? (options.buttons as string[]) : [];
-    const index = buttons.indexOf(queued.button);
-    if (index === -1) {
+    const index = buttons.indexOf(given.button);
+    if (index !== -1) response = index;
+    else
       state.violation(
-        `queued button ${JSON.stringify(queued.button)} is not in ${JSON.stringify(buttons)}`,
+        `queued button ${JSON.stringify(given.button)} is not in ${JSON.stringify(buttons)}`,
       );
-    } else {
-      response = index;
-    }
   }
-  return { response, checkboxChecked: queued.checkboxChecked ?? false };
+  return { response, checkboxChecked: given.checkboxChecked ?? false };
 }
 
 function prepareWebContents(contents: WebContents, state: TestState): void {
@@ -488,14 +443,9 @@ function prepareWebContents(contents: WebContents, state: TestState): void {
       }
     });
 
-  const lines = state.consoles.get(contents.id) ?? [];
-  state.consoles.set(contents.id, lines);
   contents.on('console-message', (event) => {
-    const source = `${event.sourceId}:${event.lineNumber}`;
-    lines.push({ level: event.level, message: event.message, source });
-    if (lines.length > 1000) lines.shift();
     state.rendererLog.push(
-      `[${contents.id}:${event.level}] ${event.message} (${source})`,
+      `[${contents.id}:${event.level}] ${event.message} (${event.sourceId}:${event.lineNumber})`,
     );
   });
   contents.on('render-process-gone', (_event, details) => {

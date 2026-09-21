@@ -6,7 +6,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 const mocks = vi.hoisted(() => ({
   isPackaged: true,
-  sentryFlag: true,
+  testMode: false,
   userData: '',
   init: vi.fn(),
   close: vi.fn(async () => true),
@@ -48,7 +48,7 @@ vi.mock('@sentry/electron/main', () => {
 vi.mock('../log', () => ({
   log: { debug: vi.fn(), info: vi.fn(), warn: vi.fn(), error: vi.fn() },
 }));
-vi.mock('../test-mode', () => ({ testFlags: () => ({ sentry: mocks.sentryFlag }) }));
+vi.mock('../test-mode', () => ({ isTestMode: () => mocks.testMode }));
 
 const rendererCrash = {
   tags: { 'event.environment': 'native', 'event.process': 'renderer' },
@@ -73,7 +73,7 @@ function beforeSend(): BeforeSend {
 beforeEach(() => {
   mocks.userData = fs.mkdtempSync(path.join(os.tmpdir(), 'fiddle-sentry-'));
   mocks.isPackaged = true;
-  mocks.sentryFlag = true;
+  mocks.testMode = false;
   mocks.init.mockClear();
   mocks.close.mockClear();
 });
@@ -96,7 +96,7 @@ describe('initCrashReporting', () => {
 
   it.each([
     ['an unpackaged app', () => void (mocks.isPackaged = false)],
-    ['test mode', () => void (mocks.sentryFlag = false)],
+    ['test mode', () => void (mocks.testMode = true)],
     [
       'the setting turned off',
       () => writeSettings('{"schemaVersion":1,"crashReports":false}'),

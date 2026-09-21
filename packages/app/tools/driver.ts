@@ -4,7 +4,7 @@
 // `{ ok: false, error }` (exit code 1). `launch` starts a background process
 // that owns the app, its display and its fixture server until `quit`.
 //
-//   launch [--no-build] [--seed N] [--locale L]   build the test build, start the app
+//   launch [--no-build] [--locale L]              build the test build, start the app
 //   snapshot                                      accessibility tree, `role "name"` lines
 //   query <role> [name] | query --text <text>     wait for matches, list them
 //   click <role> [name] | click --text <text>     real click on exactly one match
@@ -13,7 +13,7 @@
 //   run-command <id>                              run a command from the registry
 //   screenshot [file]                             PNG of the window
 //   eval <expression>                             evaluate in the renderer
-//   windows | stores | console | logs | clipboard | dialogs | side-effects | violations
+//   windows | stores | logs | clipboard | dialogs | side-effects | violations
 //   wait-idle                                     no pending IPC, network or frames
 //   queue-dialog <messageBox|open|save> <json>    answer the next native dialog
 //   call <method> [json-params]                   any driver method (protocol.ts)
@@ -54,7 +54,6 @@ const { values, positionals } = parseArgs({
     text: { type: 'string' },
     role: { type: 'string' },
     name: { type: 'string' },
-    seed: { type: 'string' },
     locale: { type: 'string' },
     'no-build': { type: 'boolean', default: false },
   },
@@ -125,11 +124,7 @@ async function serve(): Promise<void> {
   writeSession({ status: 'starting', daemonPid: process.pid });
   let app: FiddleApp;
   try {
-    app = await launchApp({
-      keepArtifacts: true,
-      seed: values.seed === undefined ? undefined : Number(values.seed),
-      locale: values.locale,
-    });
+    app = await launchApp({ keepArtifacts: true, locale: values.locale });
   } catch (error) {
     writeSession({
       status: 'error',
@@ -193,6 +188,18 @@ async function launch(): Promise<void> {
   }
 }
 
+/** Commands that are a driver method with at most the window. */
+const plain: Record<string, DriverMethod> = {
+  snapshot: 'snapshot',
+  windows: 'windows',
+  stores: 'stores',
+  logs: 'logs',
+  clipboard: 'clipboard',
+  dialogs: 'dialogs',
+  'side-effects': 'sideEffects',
+  violations: 'violations',
+};
+
 async function command(name: string, args: string[]): Promise<unknown> {
   const session = readSession();
   if (session?.status !== 'ready' || !session.socketPath || !alive(session.daemonPid)) {
@@ -203,9 +210,9 @@ async function command(name: string, args: string[]): Promise<unknown> {
   const app = await FiddleApp.connect(session.socketPath);
   const window = windowRef();
   try {
+    const method = plain[name];
+    if (method) return await app.call(method, { window } as never);
     switch (name) {
-      case 'snapshot':
-        return await app.snapshot(window);
       case 'query':
         return await app.query(queryFrom(args));
       case 'click':
@@ -214,18 +221,15 @@ async function command(name: string, args: string[]): Promise<unknown> {
         const [value = '', ...rest] = args;
         const hasTarget =
           values.role !== undefined || values.text !== undefined || rest.length > 0;
-        await app.type(value, hasTarget ? queryFrom(rest) : undefined);
-        return null;
+        return await app.type(value, hasTarget ? queryFrom(rest) : undefined);
       }
       case 'press':
-        await app.press(
+        return await app.press(
           args[0] ?? '',
           values.role || values.text ? queryFrom([]) : undefined,
         );
-        return null;
       case 'run-command':
-        await app.runCommand(args[0] ?? '', window);
-        return null;
+        return await app.runCommand(args[0] ?? '', window);
       case 'screenshot':
         return await app.screenshot(
           args[0] ? path.resolve(cwd, args[0]) : undefined,
@@ -233,27 +237,10 @@ async function command(name: string, args: string[]): Promise<unknown> {
         );
       case 'eval':
         return await app.evaluate(args.join(' '), window);
-      case 'windows':
-        return await app.windows();
-      case 'stores':
-        return await app.stores(window);
-      case 'console':
-        return await app.console(window);
-      case 'logs':
-        return await app.logs();
-      case 'clipboard':
-        return await app.clipboard();
-      case 'dialogs':
-        return await app.dialogs();
-      case 'side-effects':
-        return await app.sideEffects();
-      case 'violations':
-        return await app.violations();
       case 'wait-idle':
         return await app.waitForIdle(values.timeout ? Number(values.timeout) : undefined);
       case 'queue-dialog':
-        await app.queueDialog(args[0] as DialogKind, json(args[1]) as never);
-        return null;
+        return await app.queueDialog(args[0] as DialogKind, json(args[1]) as never);
       case 'call':
         return await app.call(args[0] as DriverMethod, (json(args[1]) ?? {}) as never);
       case 'quit': {
@@ -270,7 +257,7 @@ async function command(name: string, args: string[]): Promise<unknown> {
         );
     }
   } finally {
-    app.client.close();
+    app.disconnect();
   }
 }
 
@@ -282,7 +269,7 @@ try {
     throw new Error(
       'Usage: yarn driver <launch|snapshot|click|type|press|screenshot|logs|quit|...>',
     );
-  else print(await command(name, args));
+  else print((await command(name, args)) ?? null);
 } catch (error) {
   print(
     error instanceof DriverError
