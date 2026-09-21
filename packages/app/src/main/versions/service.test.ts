@@ -193,6 +193,11 @@ describe('release list', () => {
     backdate(cache.releases, 5 * HOURS);
     await service.init();
     expect(fetch).toHaveBeenCalledTimes(1);
+    // That fetch runs in the background and ends by rewriting the cache: let it, before the folder goes.
+    await vi.waitFor(
+      () => expect(Date.now() - fs.statSync(cache.releases).mtimeMs).toBeLessThan(HOURS),
+      { timeout: 4000 },
+    );
   });
 
   it('publishes a refreshed list, caches its text, and skips a refresh that changes nothing', async () => {

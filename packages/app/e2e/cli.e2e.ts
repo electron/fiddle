@@ -7,7 +7,7 @@ import path from 'node:path';
 
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 
-import { APP_DIR, electronArgs, TEST_BUILD_DIR } from './driver.ts';
+import { APP_DIR, electronArgs, removeTestDir, TEST_BUILD_DIR } from './driver.ts';
 import { startFixtureServer, type FixtureServer } from './fixtures/server.ts';
 
 interface CliRun {
@@ -32,7 +32,7 @@ describe('headless CLI', () => {
 
   afterAll(async () => {
     await fixtures?.close();
-    if (dir) fs.rmSync(dir, { recursive: true, force: true });
+    if (dir) removeTestDir(dir);
   });
 
   /** Runs the CLI, killing it after `timeout` ms so a hung run doesn't outlive the test. */

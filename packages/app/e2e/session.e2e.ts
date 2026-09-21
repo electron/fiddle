@@ -1,10 +1,8 @@
 // Session restore across a relaunch: the second app reuses the first one's
 // userData (FIDDLE_TEST_DIR), so it sees what the first one saved on quit.
-import fs from 'node:fs';
-
 import { describe, expect, it } from 'vitest';
 
-import { launchApp, role, type FiddleApp } from './driver.ts';
+import { launchApp, removeTestDir, role, type FiddleApp } from './driver.ts';
 import { startFixtureServer } from './fixtures/server.ts';
 import { windowState } from './harness.ts';
 
@@ -49,7 +47,8 @@ describe('session', () => {
       await second.assertClean();
     } finally {
       await second?.close();
-      if (first?.testDir) fs.rmSync(first.testDir, { recursive: true, force: true });
+      await first?.close();
+      if (first?.testDir) removeTestDir(first.testDir);
       await fixtures.close();
     }
   }, 120_000);

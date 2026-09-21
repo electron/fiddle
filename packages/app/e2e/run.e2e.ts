@@ -20,8 +20,10 @@ describe('run', () => {
       })
       .toContain(`200 /electron-mirror/v${version}/${zip}`);
 
-    // Running flips the button to Stop; stopping flips it back.
+    // Running flips the button to Stop; stopping flips it back. The inspector line shows the
+    // fiddle's main process came up: a Chromium start-up abort (no usable sandbox) ends the run first.
     await app().query(role('button', 'Stop', { timeout: 60_000 }));
+    await app().query(text(/^Inspector listening on /, { timeout: 60_000 }));
     await app().click(role('button', 'Stop'));
     await app().query(role('button', 'Run', { timeout: 15_000 }));
   }, 120_000);
@@ -48,6 +50,7 @@ describe('run', () => {
     await app().press('F5');
     await app().query(role('button', 'Stop', { timeout: 60_000 }));
     await app().query(role('region', 'Console'));
+    await app().query(text(/^Inspector listening on /, { timeout: 60_000 }));
     await app().press('CmdOrCtrl+R');
     await app().query(role('button', 'Run', { timeout: 15_000 }));
   }, 90_000);

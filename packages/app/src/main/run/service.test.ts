@@ -140,8 +140,9 @@ function spawnReturns(child: FakeChild): void {
   });
 }
 
+// The run writes the app to a temp folder first, which can take a busy Windows runner over a second.
 const running = (state: () => RunState) =>
-  vi.waitFor(() => expect(state().status).toBe('running'));
+  vi.waitFor(() => expect(state().status).toBe('running'), { timeout: 4000 });
 
 describe('RunService.run', () => {
   it('runs a fiddle to a clean exit, and removes the run directory', async () => {

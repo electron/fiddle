@@ -69,11 +69,13 @@ describe('versions', () => {
     await app().query(role('cell', 'Not downloaded'));
 
     await app().click(role('button', /^Download\b/, { nth: 0 }));
+    // Download also unzips. Wait for that too: while it unzips the row has no Remove button,
+    // and a click that lands as it starts is lost.
     await expect
       .poll(async () => (await appState(app())).versions?.installs['44.3.0']?.state, {
         timeout: 60_000,
       })
-      .toMatch(/^(downloaded|installed)$/);
+      .toBe('installed');
     await app().query(role('cell', 'Downloaded', { timeout: 30_000 }));
   }, 90_000);
 
@@ -85,9 +87,7 @@ describe('versions', () => {
           `${await app().snapshot(0)}\n${(await dialogMessages(app())).join('\n')}`,
       )
       .toContain("Electron 44.3.0 is in use, so it can't be removed.");
-    expect((await appState(app())).versions?.installs['44.3.0']?.state).toMatch(
-      /^(downloaded|installed)$/,
-    );
+    expect((await appState(app())).versions?.installs['44.3.0']?.state).toBe('installed');
   });
 
   it('refreshes the release list on demand', async () => {

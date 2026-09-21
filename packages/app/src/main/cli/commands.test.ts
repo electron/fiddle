@@ -27,6 +27,11 @@ vi.mock('../documents/service', () => ({
   staticDir: () => '/nonexistent/static',
 }));
 vi.mock('../run/service', () => ({ PM_INSTALL_URLS: { npm: '', yarn: '' } }));
+// No package manager: package and make stop right after the trust check instead of looking for npm.
+vi.mock('../../fiddle/modules', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('../../fiddle/modules')>()),
+  findPackageManager: async () => null,
+}));
 vi.mock('../packaging/service', () => ({
   forgeOptionsFor: vi.fn(),
   forgeProject: vi.fn(),
@@ -44,6 +49,7 @@ beforeEach(async () => {
   paths.cache = path.join(dir, 'cache');
 });
 afterEach(async () => {
+  vi.unstubAllEnvs(); // here, so a timed-out test can't leave TMPDIR pointing at the deleted folder
   if (previousToken !== undefined) process.env.GITHUB_TOKEN = previousToken;
   await rm(dir, { recursive: true, force: true });
 });
@@ -186,13 +192,9 @@ describe('runCommand', () => {
       async (id) => {
         // What comes next (a build, a download) may leave files: keep them in the test's folder.
         for (const key of ['TMPDIR', 'TEMP', 'TMP']) vi.stubEnv(key, dir);
-        try {
-          expect((await run(id, remoteInput(id, true))).code).not.toBe(
-            CliErrorCode.untrusted,
-          );
-        } finally {
-          vi.unstubAllEnvs();
-        }
+        expect((await run(id, remoteInput(id, true))).code).not.toBe(
+          CliErrorCode.untrusted,
+        );
       },
     );
   });

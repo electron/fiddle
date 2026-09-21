@@ -459,22 +459,41 @@ Module._load = function (request, ...rest) {
 };
 `;
 
-/** The FIDDLE_DEV_ELECTRON_FLAGS that load BACKGROUND_FIDDLE_PRELOAD into runs, on macOS in the background. */
-function backgroundFiddleFlags(testDir: string): Record<string, string> {
+/**
+ * FIDDLE_DEV_ELECTRON_FLAGS for the fiddles a run starts: no sandbox where the app itself has none
+ * (without it Chromium aborts with SIGTRAP on hosts that forbid its namespace sandbox, like the
+ * Ubuntu CI runners), and on macOS BACKGROUND_FIDDLE_PRELOAD, so they stay in the background.
+ */
+function fiddleRunFlags(testDir: string): Record<string, string> {
+  const flags = [
+    process.env.FIDDLE_DEV_ELECTRON_FLAGS,
+    needsNoSandbox() && '--no-sandbox',
+  ];
   // The app splits the variable on spaces, so a temp dir with one (never on macOS) opts out.
   if (
-    process.platform !== 'darwin' ||
-    process.env.FIDDLE_E2E_FOREGROUND === '1' ||
-    testDir.includes(' ')
-  )
-    return {};
-  const preload = path.join(testDir, 'background-windows.cjs');
-  fs.writeFileSync(preload, BACKGROUND_FIDDLE_PRELOAD);
-  return {
-    FIDDLE_DEV_ELECTRON_FLAGS: [process.env.FIDDLE_DEV_ELECTRON_FLAGS, '-r', preload]
-      .filter(Boolean)
-      .join(' '),
-  };
+    process.platform === 'darwin' &&
+    process.env.FIDDLE_E2E_FOREGROUND !== '1' &&
+    !testDir.includes(' ')
+  ) {
+    const preload = path.join(testDir, 'background-windows.cjs');
+    fs.writeFileSync(preload, BACKGROUND_FIDDLE_PRELOAD);
+    flags.push('-r', preload);
+  }
+  const value = flags.filter(Boolean).join(' ');
+  return value ? { FIDDLE_DEV_ELECTRON_FLAGS: value } : {};
+}
+
+/**
+ * Removes a test dir. On Windows something from the app that just quit can still hold it after
+ * the retries; that is left to the temp dir rather than failing a spec that passed.
+ */
+export function removeTestDir(dir: string): void {
+  try {
+    fs.rmSync(dir, { recursive: true, force: true, maxRetries: 10 });
+  } catch (error) {
+    if (process.platform !== 'win32') throw error;
+    console.warn(`[e2e] left ${dir} behind: ${(error as Error).message}`);
+  }
 }
 
 interface Display {
@@ -596,7 +615,7 @@ export async function launchApp(options: LaunchOptions = {}): Promise<FiddleApp>
     LANGUAGE: 'en_US',
     LC_ALL: 'en_US.UTF-8',
     ...(process.env.FIDDLE_E2E_FOREGROUND === '1' ? { FIDDLE_TEST_FOREGROUND: '1' } : {}),
-    ...backgroundFiddleFlags(testDir),
+    ...fiddleRunFlags(testDir),
     ...options.env,
   });
 
@@ -629,12 +648,14 @@ export async function launchApp(options: LaunchOptions = {}): Promise<FiddleApp>
   });
 
   const cleanup = async (keep: boolean) => {
-    if (child.exitCode === null && child.signalCode === null) child.kill('SIGKILL');
+    if (child.exitCode === null && child.signalCode === null) {
+      console.warn(`[e2e] the app in ${testDir} had not exited; killing it`);
+      child.kill('SIGKILL');
+    }
     display?.stop();
     await new Promise((resolve) => output.close(resolve));
     if (!options.fixtures) await fixtures.close();
-    // On Windows, Electron's helpers can hold files here for a moment after it exits.
-    if (!keep) fs.rmSync(testDir, { recursive: true, force: true, maxRetries: 10 });
+    if (!keep) removeTestDir(testDir);
   };
 
   try {

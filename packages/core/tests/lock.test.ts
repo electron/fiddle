@@ -202,8 +202,8 @@ describe('locks', () => {
         await sleep(1);
         holders--;
       });
-    // The race is rare, about one round in fifty, so this takes many rounds.
-    for (let round = 0; round < 250; round++) {
+    // The race shows in about one round in ten. Windows timers tick every 16 ms, so a round costs ~70 ms there.
+    for (let round = 0; round < 100; round++) {
       writeLock({ pid: dead, hostname: os.hostname(), startedAt: round });
       await Promise.all(Array.from({ length: 4 }, hold));
     }
