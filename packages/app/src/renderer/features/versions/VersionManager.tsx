@@ -22,7 +22,12 @@ import { useReleases } from '../run/use-run';
 import styles from './Versions.module.css';
 
 const ROW_LIMIT = 200;
-const CHANNELS: readonly ReleaseChannel[] = ['stable', 'beta', 'nightly'];
+const CHANNEL_LABEL = {
+  stable: 'channelStable',
+  beta: 'channelBeta',
+  nightly: 'channelNightly',
+} as const satisfies Record<ReleaseChannel, string>;
+const CHANNELS = Object.keys(CHANNEL_LABEL) as ReleaseChannel[];
 
 type Row =
   | { id: string; kind: 'release'; release: ReleaseRow }
@@ -174,15 +179,7 @@ export function VersionManager() {
   for (const channel of CHANNELS) {
     const inChannel = shown.filter((row) => getReleaseChannel(row.version) === channel);
     if (inChannel.length === 0) continue;
-    tableRows.push({
-      section: t(
-        channel === 'stable'
-          ? 'channelStable'
-          : channel === 'beta'
-            ? 'channelBeta'
-            : 'channelNightly',
-      ),
-    });
+    tableRows.push({ section: t(CHANNEL_LABEL[channel]) });
     for (const release of inChannel)
       tableRows.push({ id: `r:${release.version}`, kind: 'release', release });
   }
@@ -259,13 +256,7 @@ export function VersionManager() {
             isSelected={channels.includes(channel)}
             onChange={(on) => toggleChannel(channel, on)}
           >
-            {t(
-              channel === 'stable'
-                ? 'channelStable'
-                : channel === 'beta'
-                  ? 'channelBeta'
-                  : 'channelNightly',
-            )}
+            {t(CHANNEL_LABEL[channel])}
           </Checkbox>
         ))}
         <Checkbox isSelected={downloadedOnly} onChange={setDownloadedOnly}>
