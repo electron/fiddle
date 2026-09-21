@@ -43,18 +43,6 @@ function json(
   });
 }
 
-async function codeOf(
-  promise: Promise<unknown>,
-): Promise<{ code: string; details: unknown }> {
-  try {
-    await promise;
-  } catch (error) {
-    expect(error).toBeInstanceOf(FiddleError);
-    return { code: (error as FiddleError).code, details: (error as FiddleError).details };
-  }
-  throw new Error('expected a rejection');
-}
-
 function gist(files: Record<string, unknown>, extra: Record<string, unknown> = {}) {
   return {
     id: ID,
@@ -104,10 +92,9 @@ describe('auth', () => {
 
   it('refuses a bad format without a request', async () => {
     const { fn, calls } = mockFetch(() => json({}));
-    const result = await codeOf(
+    await expect(
       new GitHubClient({ token: 'nope', fetch: fn }).verifyToken(),
-    );
-    expect(result).toMatchObject({
+    ).rejects.toMatchObject({
       code: ErrorCode.invalidArgument,
       details: { reason: 'bad-format' },
     });
@@ -118,10 +105,9 @@ describe('auth', () => {
     const { fn } = mockFetch(() =>
       json({ login: 'octocat' }, { headers: { 'x-oauth-scopes': 'repo' } }),
     );
-    const result = await codeOf(
+    await expect(
       new GitHubClient({ token: TOKEN, fetch: fn }).verifyToken(),
-    );
-    expect(result).toMatchObject({
+    ).rejects.toMatchObject({
       code: ErrorCode.forbidden,
       details: { reason: 'missing-scope' },
     });
@@ -136,18 +122,16 @@ describe('auth', () => {
     const empty = mockFetch(() =>
       json({ login: 'octocat' }, { headers: { 'x-oauth-scopes': '' } }),
     );
-    const result = await codeOf(
+    await expect(
       new GitHubClient({ token: TOKEN, fetch: empty.fn }).verifyToken(),
-    );
-    expect(result).toMatchObject({ details: { reason: 'missing-scope' } });
+    ).rejects.toMatchObject({ details: { reason: 'missing-scope' } });
   });
 
   it('reports an invalid token', async () => {
     const { fn } = mockFetch(() => json({ message: 'Bad credentials' }, { status: 401 }));
-    const result = await codeOf(
+    await expect(
       new GitHubClient({ token: TOKEN, fetch: fn }).verifyToken(),
-    );
-    expect(result).toMatchObject({
+    ).rejects.toMatchObject({
       code: ErrorCode.unauthorized,
       details: { reason: 'invalid-token' },
     });
@@ -155,50 +139,46 @@ describe('auth', () => {
 
   it('maps 401, 403 and network failures for the startup check', async () => {
     const check = (fetchFn: typeof fetch) =>
-      codeOf(new GitHubClient({ token: TOKEN, fetch: fetchFn }).getAuthenticatedUser());
-    expect(
-      (
-        await check(
-          mockFetch(() => json({ message: 'Bad credentials' }, { status: 401 })).fn,
-        )
-      ).code,
-    ).toBe(ErrorCode.unauthorized);
-    expect((await check(mockFetch(() => json({}, { status: 403 })).fn)).code).toBe(
-      ErrorCode.forbidden,
-    );
+      expect(new GitHubClient({ token: TOKEN, fetch: fetchFn }).getAuthenticatedUser())
+        .rejects;
+    await check(
+      mockFetch(() => json({ message: 'Bad credentials' }, { status: 401 })).fn,
+    ).toMatchObject({ code: ErrorCode.unauthorized });
+    await check(mockFetch(() => json({}, { status: 403 })).fn).toMatchObject({
+      code: ErrorCode.forbidden,
+    });
     const offline = (async () => {
       throw new TypeError('fetch failed');
     }) as typeof fetch;
-    expect((await check(offline)).code).toBe(ErrorCode.network);
+    await check(offline).toMatchObject({ code: ErrorCode.network });
   });
 
   it('maps a rate-limited 403 to unavailable, so the startup check keeps the token', async () => {
     const check = (headers: Record<string, string>) =>
-      codeOf(
+      expect(
         new GitHubClient({
           token: TOKEN,
           fetch: mockFetch(() =>
             json({ message: 'API rate limit exceeded' }, { status: 403, headers }),
           ).fn,
         }).getAuthenticatedUser(),
-      );
-    expect((await check({ 'x-ratelimit-remaining': '0' })).code).toBe(
-      ErrorCode.unavailable,
-    );
-    expect((await check({ 'retry-after': '60' })).code).toBe(ErrorCode.unavailable);
-    expect((await check({ 'retry-after': '60' })).details).toMatchObject({
-      reason: 'rate-limited',
+      ).rejects;
+    await check({ 'x-ratelimit-remaining': '0' }).toMatchObject({
+      code: ErrorCode.unavailable,
     });
-    expect((await check({ 'x-ratelimit-remaining': '42' })).code).toBe(
-      ErrorCode.forbidden,
-    );
+    await check({ 'retry-after': '60' }).toMatchObject({
+      code: ErrorCode.unavailable,
+      details: { reason: 'rate-limited' },
+    });
+    await check({ 'x-ratelimit-remaining': '42' }).toMatchObject({
+      code: ErrorCode.forbidden,
+    });
     const verify = mockFetch(() =>
       json({}, { status: 403, headers: { 'x-ratelimit-remaining': '0' } }),
     );
-    expect(
-      (await codeOf(new GitHubClient({ token: TOKEN, fetch: verify.fn }).verifyToken()))
-        .code,
-    ).toBe(ErrorCode.unavailable);
+    await expect(
+      new GitHubClient({ token: TOKEN, fetch: verify.fn }).verifyToken(),
+    ).rejects.toMatchObject({ code: ErrorCode.unavailable });
   });
 
   it('maps an abort to cancelled', async () => {
@@ -208,16 +188,16 @@ describe('auth', () => {
       throw new DOMException('aborted', 'AbortError');
     }) as typeof fetch;
     const client = new GitHubClient({ token: TOKEN, fetch: aborting });
-    expect((await codeOf(client.getAuthenticatedUser(controller.signal))).code).toBe(
-      ErrorCode.cancelled,
-    );
+    await expect(client.getAuthenticatedUser(controller.signal)).rejects.toMatchObject({
+      code: ErrorCode.cancelled,
+    });
   });
 
   it('needs a token for the auth check', async () => {
     const { fn } = mockFetch(() => json({}));
-    expect(
-      (await codeOf(new GitHubClient({ fetch: fn }).getAuthenticatedUser())).code,
-    ).toBe(ErrorCode.unauthorized);
+    const check = new GitHubClient({ fetch: fn }).getAuthenticatedUser();
+    await expect(check).rejects.toBeInstanceOf(FiddleError);
+    await expect(check).rejects.toMatchObject({ code: ErrorCode.unauthorized });
   });
 });
 
@@ -243,9 +223,9 @@ describe('where the token goes', () => {
   it('fetches plain http from loopback only when that is allowed', async () => {
     const { fn } = mockFetch(() => new Response('text'));
     const url = 'http://localhost:4567/raw/main.js';
-    expect((await codeOf(new GitHubClient({ fetch: fn }).fetchText(url))).code).toBe(
-      ErrorCode.invalidArgument,
-    );
+    await expect(new GitHubClient({ fetch: fn }).fetchText(url)).rejects.toMatchObject({
+      code: ErrorCode.invalidArgument,
+    });
     await expect(
       new GitHubClient({ fetch: fn, allowLoopbackHttp: true }).fetchText(url),
     ).resolves.toBe('text');
@@ -302,10 +282,9 @@ describe('where the token goes', () => {
     const { fn } = mockFetch(
       () => new Response(null, { status: 302, headers: { location: '/loop' } }),
     );
-    expect(
-      (await codeOf(new GitHubClient({ token: TOKEN, fetch: fn }).getAuthenticatedUser()))
-        .code,
-    ).toBe(ErrorCode.network);
+    await expect(
+      new GitHubClient({ token: TOKEN, fetch: fn }).getAuthenticatedUser(),
+    ).rejects.toMatchObject({ code: ErrorCode.network });
   });
 });
 
@@ -385,8 +364,7 @@ describe('loadGist', () => {
   it('throws when the gist has no history', async () => {
     for (const extra of [{ history: [] }, { history: undefined }]) {
       const { fn } = mockFetch(() => json(gist({ 'main.js': { content: 'x' } }, extra)));
-      const error = await codeOf(new GitHubClient({ fetch: fn }).loadGist(ID));
-      expect(error).toMatchObject({
+      await expect(new GitHubClient({ fetch: fn }).loadGist(ID)).rejects.toMatchObject({
         code: ErrorCode.internal,
         details: { reason: 'no-history' },
       });
@@ -396,44 +374,33 @@ describe('loadGist', () => {
   it('validates the ID and revision before any request', async () => {
     const { fn, calls } = mockFetch(() => json({}));
     const client = new GitHubClient({ fetch: fn });
-    expect((await codeOf(client.loadGist('nope'))).code).toBe(ErrorCode.invalidArgument);
-    expect((await codeOf(client.loadGist(ID, 'abc'))).code).toBe(
-      ErrorCode.invalidArgument,
-    );
+    for (const load of [client.loadGist('nope'), client.loadGist(ID, 'abc')])
+      await expect(load).rejects.toMatchObject({ code: ErrorCode.invalidArgument });
     expect(calls).toHaveLength(0);
   });
 
   it('maps a missing gist to not-found and a bad body to internal', async () => {
-    expect(
-      (
-        await codeOf(
-          new GitHubClient({
-            fetch: mockFetch(() => json({}, { status: 404 })).fn,
-          }).loadGist(ID),
-        )
-      ).code,
-    ).toBe(ErrorCode.notFound);
-    expect(
-      (
-        await codeOf(
-          new GitHubClient({ fetch: mockFetch(() => json({ nope: 1 })).fn }).loadGist(ID),
-        )
-      ).code,
-    ).toBe(ErrorCode.internal);
+    const load = (res: Response) =>
+      new GitHubClient({ fetch: mockFetch(() => res).fn }).loadGist(ID);
+    await expect(load(json({}, { status: 404 }))).rejects.toMatchObject({
+      code: ErrorCode.notFound,
+    });
+    await expect(load(json({ nope: 1 }))).rejects.toMatchObject({
+      code: ErrorCode.internal,
+    });
   });
 });
 
 describe('writing gists', () => {
   it('needs a token', async () => {
     const { fn, calls } = mockFetch(() => json({}));
-    const result = await codeOf(
+    await expect(
       new GitHubClient({ fetch: fn }).createGist({
         description: 'd',
         files: { 'a.js': 'x' },
         isPublic: false,
       }),
-    );
-    expect(result).toMatchObject({
+    ).rejects.toMatchObject({
       code: ErrorCode.unauthorized,
       details: { reason: 'signed-out' },
     });
@@ -477,27 +444,27 @@ describe('writing gists', () => {
   it('validates the description and files', async () => {
     const { fn, calls } = mockFetch(() => json(gist({})));
     const client = new GitHubClient({ token: TOKEN, fetch: fn });
-    const create = (description: string, files: Record<string, string>) =>
-      codeOf(client.createGist({ description, files, isPublic: false }));
-    expect((await create('', { 'a.js': 'x' })).details).toMatchObject({
-      reason: 'invalid-description',
-    });
-    expect((await create('x'.repeat(257), { 'a.js': 'x' })).details).toMatchObject({
-      reason: 'invalid-description',
-    });
-    expect((await create('d', {})).details).toMatchObject({ reason: 'no-files' });
+    const refused = (
+      description: string,
+      files: Record<string, string>,
+      reason: string,
+    ) =>
+      expect(
+        client.createGist({ description, files, isPublic: false }),
+      ).rejects.toMatchObject({ details: { reason } });
+    await refused('', { 'a.js': 'x' }, 'invalid-description');
+    await refused('x'.repeat(257), { 'a.js': 'x' }, 'invalid-description');
+    await refused('d', {}, 'no-files');
     const many = Object.fromEntries(
       Array.from({ length: 301 }, (_, i) => [`f${i}.js`, 'x']),
     );
-    expect((await create('d', many)).details).toMatchObject({ reason: 'too-many-files' });
-    expect(
-      (await create('d', { 'big.js': 'x'.repeat(GIST_MAX_FILE_BYTES + 1) })).details,
-    ).toMatchObject({
-      reason: 'file-too-large',
-    });
-    expect((await create('d', { 'a/b.js': 'x' })).details).toMatchObject({
-      reason: 'invalid-file-name',
-    });
+    await refused('d', many, 'too-many-files');
+    await refused(
+      'd',
+      { 'big.js': 'x'.repeat(GIST_MAX_FILE_BYTES + 1) },
+      'file-too-large',
+    );
+    await refused('d', { 'a/b.js': 'x' }, 'invalid-file-name');
     expect(calls).toHaveLength(0);
     await client.createGist({
       description: 'x'.repeat(256),
@@ -585,10 +552,9 @@ describe('writing gists', () => {
       public: false,
       files: { 'main.js': { content: 'x' } },
     });
-    const allEmpty = await codeOf(
+    await expect(
       client.createGist({ description: 'd', files: { 'a.js': '' }, isPublic: false }),
-    );
-    expect(allEmpty.details).toMatchObject({ reason: 'no-files' });
+    ).rejects.toMatchObject({ details: { reason: 'no-files' } });
     expect(calls).toHaveLength(1);
   });
 
@@ -611,10 +577,9 @@ describe('writing gists', () => {
       'main.js',
       'styles.css',
     ]);
-    const allEmpty = await codeOf(
+    await expect(
       client.updateGist(ID, { files: { 'main.js': '' }, canDelete: () => true }),
-    );
-    expect(allEmpty.details).toMatchObject({ reason: 'no-files' });
+    ).rejects.toMatchObject({ details: { reason: 'no-files' } });
     expect(calls).toHaveLength(2);
   });
 
@@ -626,10 +591,9 @@ describe('writing gists', () => {
       url: `https://api.github.com/gists/${ID}`,
     });
     const missing = mockFetch(() => json({ message: 'Not Found' }, { status: 404 }));
-    const error = await codeOf(
+    await expect(
       new GitHubClient({ token: TOKEN, fetch: missing.fn }).deleteGist(ID),
-    );
-    expect(error).toMatchObject({
+    ).rejects.toMatchObject({
       code: ErrorCode.notFound,
       details: { status: 404, detail: 'Not Found' },
     });
@@ -714,15 +678,14 @@ describe('repository contents', () => {
 
   it('rejects a path that is not a folder', async () => {
     const { fn } = mockFetch(() => json({ name: 'main.js', type: 'file' }));
-    const error = await codeOf(
+    await expect(
       new GitHubClient({ fetch: fn }).listRepoDirectory(
         'electron',
         'electron',
         'x',
         'v1.0.0',
       ),
-    );
-    expect(error.details).toMatchObject({ reason: 'not-a-directory' });
+    ).rejects.toMatchObject({ details: { reason: 'not-a-directory' } });
   });
 
   it('fetches text only over https, without the token for other hosts', async () => {
@@ -732,8 +695,8 @@ describe('repository contents', () => {
       client.fetchText('https://raw.githubusercontent.com/electron/electron/v1/main.js'),
     ).resolves.toBe('text');
     expect(calls[0]!.headers.Authorization).toBeUndefined();
-    expect(
-      (await codeOf(client.fetchText('http://raw.githubusercontent.com/x'))).code,
-    ).toBe(ErrorCode.invalidArgument);
+    await expect(
+      client.fetchText('http://raw.githubusercontent.com/x'),
+    ).rejects.toMatchObject({ code: ErrorCode.invalidArgument });
   });
 });
