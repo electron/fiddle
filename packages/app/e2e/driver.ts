@@ -1,7 +1,7 @@
 // The e2e client: `launchApp()` starts the test build (out/test-build) with test mode on, a fresh
 // temp dir, its own fixture server and, on Linux, its own Xvfb display. Plain Node with type
 // stripping (`yarn driver` uses it too): `.ts` import extensions, and no Vitest imports.
-import { spawn } from 'node:child_process';
+import { spawn, type ChildProcess, type SpawnOptions } from 'node:child_process';
 import fs from 'node:fs';
 import { createRequire } from 'node:module';
 import net from 'node:net';
@@ -346,6 +346,27 @@ export function electronArgs(): string[] {
     : ['--password-store=basic'];
 }
 
+const TEST_ENV = {
+  FIDDLE_TEST_MODE: '1',
+  TZ: 'UTC',
+  LANG: 'en_US.UTF-8',
+  LANGUAGE: 'en_US',
+  LC_ALL: 'en_US.UTF-8',
+};
+
+/** Starts the test build in test mode with `args` after the app path (Chromium takes switches there too) and `env` added. */
+export function spawnTestBuild(
+  args: string[],
+  env: SpawnOptions['env'],
+  options: SpawnOptions = {},
+): ChildProcess {
+  const childEnv: NodeJS.ProcessEnv = { ...process.env, ...TEST_ENV, ...env };
+  for (const key of ['ELECTRON_RUN_AS_NODE', 'NODE_OPTIONS', 'ELECTRON_ENABLE_LOGGING'])
+    delete childEnv[key];
+  const argv = [...electronArgs(), TEST_BUILD_DIR, ...args];
+  return spawn(requireFromApp('electron') as string, argv, { ...options, env: childEnv });
+}
+
 /**
  * macOS: loaded with `electron -r` into every fiddle a run starts, so its windows stay in the
  * background like the app's own; otherwise each `new BrowserWindow` activates that Electron over
@@ -496,8 +517,6 @@ export async function launchApp(options: LaunchOptions = {}): Promise<FiddleApp>
       `No test build in ${TEST_BUILD_DIR}. Build it with: yarn workspace electron-fiddle driver:build`,
     );
   }
-  // Before anything is started, so a failure here leaves nothing to clean up.
-  const electronPath = requireFromApp('electron') as string;
   const fixtures = options.fixtures ?? (await startFixtureServer());
   const testDir = fs.mkdtempSync(path.join(os.tmpdir(), 'fiddle-e2e-'));
   const socketPath =
@@ -515,34 +534,22 @@ export async function launchApp(options: LaunchOptions = {}): Promise<FiddleApp>
     }
   }
 
-  const env: NodeJS.ProcessEnv = { ...process.env };
-  for (const key of ['ELECTRON_RUN_AS_NODE', 'NODE_OPTIONS', 'ELECTRON_ENABLE_LOGGING']) {
-    delete env[key];
-  }
-  Object.assign(env, display?.env, {
-    FIDDLE_TEST_MODE: '1',
+  const env = {
+    ...display?.env,
     FIDDLE_TEST_DIR: testDir,
     FIDDLE_TEST_FIXTURE_URL: fixtures.url,
     FIDDLE_TEST_LOCALE: options.locale ?? 'en-US',
     ELECTRON_FIDDLE_DRIVER_SOCKET: socketPath,
-    TZ: 'UTC',
-    LANG: 'en_US.UTF-8',
-    LANGUAGE: 'en_US',
-    LC_ALL: 'en_US.UTF-8',
     ...(process.env.FIDDLE_E2E_FOREGROUND === '1' ? { FIDDLE_TEST_FOREGROUND: '1' } : {}),
     ...fiddleRunFlags(testDir),
     ...options.env,
-  });
-
+  };
   const output = fs.createWriteStream(path.join(testDir, 'app-output.log'));
   const tail: string[] = [];
   // FIDDLE_E2E_VERBOSE=1 echoes the app's stdout and stderr.
   const verbose = process.env.FIDDLE_E2E_VERBOSE === '1';
-  const child = spawn(electronPath, [...electronArgs(), TEST_BUILD_DIR], {
-    env,
-    stdio: ['ignore', 'pipe', 'pipe'],
-  });
-  for (const stream of [child.stdout, child.stderr]) {
+  const child = spawnTestBuild([], env, { stdio: ['ignore', 'pipe', 'pipe'] });
+  for (const stream of [child.stdout!, child.stderr!]) {
     stream.on('data', (chunk: Buffer) => {
       output.write(chunk);
       if (verbose) process.stderr.write(chunk);
@@ -556,7 +563,7 @@ export async function launchApp(options: LaunchOptions = {}): Promise<FiddleApp>
   });
   // An uncaught exception in main leaves Electron up behind an error dialog; fail fast.
   let mainCrashed = false;
-  child.stderr.on('data', (chunk: Buffer) => {
+  child.stderr!.on('data', (chunk: Buffer) => {
     if (chunk.toString().includes('A JavaScript error occurred in the main process')) {
       mainCrashed = true;
     }
