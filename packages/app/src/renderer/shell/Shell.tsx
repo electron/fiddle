@@ -2,15 +2,6 @@ import { memo, useEffect, useLayoutEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { windowApi } from '../../ipc/renderer';
-import {
-  closePane,
-  dropOnPane,
-  MAX_PANES,
-  neighbourOf,
-  shownPanes,
-  storedPanes,
-  type PaneDropPosition,
-} from '../../shared/panes';
 import { DEFAULT_LAYOUT, type Platform, type WindowState } from '../../shared/stores';
 import { SplitHandle } from '../../ui';
 import {
@@ -24,7 +15,7 @@ import { useEditorTypes } from '../editor/types';
 import { log } from '../features/about/log';
 import { useDocumentDrop } from '../features/documents/useDocumentDrop';
 import { Sidebar } from '../features/files/Sidebar';
-import { splitTarget } from './processes';
+import { paneActions } from './pane-actions';
 import { Sheet } from './Sheet';
 import styles from './Shell.module.css';
 import { StatusBar } from './StatusBar';
@@ -32,13 +23,6 @@ import { TitleBar } from './TitleBar';
 import { ErrorBoundary } from './ErrorBoundary';
 import { useDraft } from './use-draft';
 import { useAppState, useWindowState } from '../state';
-import {
-  moveFile,
-  setActiveFile,
-  setFileVisible,
-  setLayout,
-  setView,
-} from './window-state';
 
 const SIDEBAR_MIN = 200;
 const SIDEBAR_MAX = 320;
@@ -60,8 +44,8 @@ const ShellView = memo(function ShellView({
 }) {
   const { t } = useTranslation('shell');
   const { fiddle, layout } = state;
-  const failTitle = t('fileChangeFailed');
-  const names = fiddle.files.map((file) => file.name);
+  const actions = paneActions(state, t('fileChangeFailed'));
+  const { names, changeLayout } = actions;
   const namesKey = names.join('\n');
 
   useEffect(() => {
@@ -82,27 +66,6 @@ const ShellView = memo(function ShellView({
 
   const dropping = useDocumentDrop();
 
-  const changeLayout = (patch: Partial<WindowState['layout']>) =>
-    void setLayout(layout, patch, failTitle);
-  const openFile = (name: string) => void setActiveFile(name, failTitle);
-  // Picking a file in the sidebar leaves the Settings page.
-  const openFromSidebar = (name: string) => {
-    if (state.view !== 'editor') void setView('editor', failTitle);
-    openFile(name);
-  };
-
-  // The tab row shows the visible files and selects the focused pane's file.
-  // `panes` are the files in the editor panes; a single entry means no split.
-  const visibleNames = fiddle.files
-    .filter((file) => file.visible)
-    .map((file) => file.name);
-  const active =
-    fiddle.activeFile && visibleNames.includes(fiddle.activeFile)
-      ? fiddle.activeFile
-      : (visibleNames[0] ?? null);
-  const panes = shownPanes(layout.panes, visibleNames, active);
-  const split = panes.length > 1;
-
   // revealLocation(): focus the file's pane, or show the file in the focused pane.
   const reveal = useRevealRequest();
   const revealed = useRef(0);
@@ -113,61 +76,14 @@ const ShellView = memo(function ShellView({
       claimReveal(reveal.seq);
       return;
     }
-    if (state.view !== 'editor') void setView('editor', failTitle);
-    if (reveal.file !== fiddle.activeFile) openFile(reveal.file);
+    actions.showEditor();
+    actions.focusPane(reveal.file);
   });
-
-  /** Shows these panes (layout first, so main sees them before the focus change), focusing `focus`. */
-  const showPanes = (next: readonly string[], focus?: string | null) => {
-    const stored = storedPanes(next);
-    if (
-      stored.length !== layout.panes.length ||
-      stored.some((name, i) => name !== layout.panes[i])
-    ) {
-      changeLayout({ panes: stored });
-    }
-    if (focus && focus !== fiddle.activeFile) openFile(focus);
-  };
-
-  // One pane: open a second one beside it. Several: keep only the focused one.
-  const toggleSplit = () => {
-    if (!active) return;
-    if (split) {
-      showPanes([active]);
-      return;
-    }
-    const target = splitTarget(active, names);
-    if (!target) return;
-    if (!visibleNames.includes(target)) void setFileVisible(target, true, failTitle);
-    showPanes([active, target]);
-  };
-
-  // Closing a tab hides its file. Its pane closes with it; the last pane shows the next tab instead.
-  const closeFile = (name: string) => {
-    if (split && panes.includes(name)) {
-      showPanes(
-        closePane(panes, name),
-        name === active ? neighbourOf(panes, name) : undefined,
-      );
-    } else if (name === active) {
-      const index = visibleNames.indexOf(name);
-      const next = visibleNames[index + 1] ?? visibleNames[index - 1];
-      if (next) openFile(next);
-    }
-    void setFileVisible(name, false, failTitle);
-  };
-
-  const dropTab = (name: string, index: number, position: PaneDropPosition) => {
-    if (!visibleNames.includes(name)) return;
-    const next = dropOnPane(panes, name, index, position);
-    if (next.length > MAX_PANES) return;
-    showPanes(next, name);
-  };
 
   // Window.Command handlers that act on view state and Monaco. Kept in a ref, not `useEffectEvent`: React never
   // updates the effect events of a memo component, so it would keep the first render's state.
   const onCommand = (id: string) => {
-    if (id === 'view.toggleSplit') toggleSplit();
+    if (id === 'view.toggleSplit') actions.toggleSplit();
     else if (id === 'editor.toggleSoftWrap') toggleSoftWrap();
     else if (id === 'editor.toggleMinimap') toggleMinimap();
     else if (id === 'editor.format') void formatFocusedEditor();
@@ -188,12 +104,6 @@ const ShellView = memo(function ShellView({
   );
   const shownSidebarWidth = Math.min(SIDEBAR_MAX, Math.max(SIDEBAR_MIN, sidebarWidth));
 
-  const resetLayout = () => {
-    changeLayout({ ...DEFAULT_LAYOUT });
-    for (const file of fiddle.files)
-      if (!file.visible) void setFileVisible(file.name, true, failTitle);
-  };
-
   return (
     <div className={styles.shell} data-platform={platform} data-sidebar={layout.sidebar}>
       <TitleBar
@@ -204,9 +114,7 @@ const ShellView = memo(function ShellView({
         settingsOpen={state.view === 'settings'}
         menuBar={state.menuBar}
         onToggleSidebar={() => changeLayout({ sidebar: !layout.sidebar })}
-        onToggleSettings={() =>
-          void setView(state.view === 'settings' ? 'editor' : 'settings', failTitle)
-        }
+        onToggleSettings={actions.toggleSettings}
       />
       {layout.sidebar && (
         <div className={styles.side} style={{ width: shownSidebarWidth }}>
@@ -217,10 +125,8 @@ const ShellView = memo(function ShellView({
                 dirtyFiles={fiddle.dirtyFiles}
                 // No row is current while the Settings page covers the editor, so picking the current file opens it too.
                 activeFile={state.view === 'editor' ? fiddle.activeFile : null}
-                onOpen={openFromSidebar}
-                onSetVisible={(name, visible) =>
-                  visible ? void setFileVisible(name, true, failTitle) : closeFile(name)
-                }
+                onOpen={actions.openFromSidebar}
+                onSetVisible={actions.setVisible}
               />
             </ErrorBoundary>
           </div>
@@ -236,31 +142,7 @@ const ShellView = memo(function ShellView({
       )}
       <div className={styles.sheetArea}>
         <ErrorBoundary region="sheet">
-          <Sheet
-            state={state}
-            active={active}
-            panes={panes}
-            // A tab (or sidebar row) picks the focused pane's file: a file in another pane moves focus there instead.
-            onSelectFile={openFile}
-            onCloseFile={closeFile}
-            onMoveFile={(name, before) => void moveFile(name, before, failTitle)}
-            onDropOnPane={dropTab}
-            onFocusPane={(name) => {
-              if (name !== fiddle.activeFile) openFile(name);
-            }}
-            onToggleSplit={toggleSplit}
-            onClosePane={(name) =>
-              showPanes(
-                closePane(panes, name),
-                name === active ? neighbourOf(panes, name) : undefined,
-              )
-            }
-            onMaximize={(name) => showPanes([name], name)}
-            onConsoleHeight={(height) => changeLayout({ consoleHeight: height })}
-            onHideConsole={() => changeLayout({ consoleVisible: false })}
-            onResetLayout={resetLayout}
-            dropping={dropping}
-          />
+          <Sheet state={state} actions={actions} dropping={dropping} />
         </ErrorBoundary>
       </div>
       <StatusBar files={names} />

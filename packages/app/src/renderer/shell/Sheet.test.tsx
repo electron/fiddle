@@ -112,31 +112,32 @@ function windowState(
 }
 
 type Props = ComponentProps<typeof Sheet>;
+type Actions = Props['actions'];
 function handlers() {
   return {
-    onSelectFile: vi.fn<Props['onSelectFile']>(),
-    onCloseFile: vi.fn<Props['onCloseFile']>(),
-    onMoveFile: vi.fn<Props['onMoveFile']>(),
-    onDropOnPane: vi.fn<Props['onDropOnPane']>(),
-    onFocusPane: vi.fn<Props['onFocusPane']>(),
-    onToggleSplit: vi.fn<Props['onToggleSplit']>(),
-    onClosePane: vi.fn<Props['onClosePane']>(),
-    onMaximize: vi.fn<Props['onMaximize']>(),
-    onConsoleHeight: vi.fn<Props['onConsoleHeight']>(),
-    onHideConsole: vi.fn<Props['onHideConsole']>(),
-    onResetLayout: vi.fn<Props['onResetLayout']>(),
+    changeLayout: vi.fn<Actions['changeLayout']>(),
+    openFile: vi.fn<Actions['openFile']>(),
+    closeFile: vi.fn<Actions['closeFile']>(),
+    moveFile: vi.fn<Actions['moveFile']>(),
+    dropTab: vi.fn<Actions['dropTab']>(),
+    focusPane: vi.fn<Actions['focusPane']>(),
+    toggleSplit: vi.fn<Actions['toggleSplit']>(),
+    closePane: vi.fn<Actions['closePane']>(),
+    maximize: vi.fn<Actions['maximize']>(),
+    resetLayout: vi.fn<Actions['resetLayout']>(),
   };
 }
 
-function setup(overrides: Partial<Props> = {}) {
+function setup(
+  overrides: Partial<Omit<Props, 'actions'> & Pick<Actions, 'active' | 'panes'>> = {},
+) {
   const on = handlers();
+  const { active = 'main.js', panes = ['main.js'], ...rest } = overrides;
   const props: Props = {
     state: windowState(),
-    active: 'main.js',
-    panes: ['main.js'],
+    actions: { ...on, active, panes } as unknown as Actions,
     dropping: false,
-    ...on,
-    ...overrides,
+    ...rest,
   };
   const view = render(<Sheet {...props} />);
   return { ...view, on, props };
@@ -174,7 +175,7 @@ describe('Sheet without an open file', () => {
     screen.getByText('emptyTitle');
     expect(screen.queryByRole('tablist')).toBeNull();
     fireEvent.click(screen.getByRole('button', { name: 'resetLayout' }));
-    expect(on.onResetLayout).toHaveBeenCalledOnce();
+    expect(on.resetLayout).toHaveBeenCalledOnce();
     screen.getByRole('log');
   });
 
@@ -199,21 +200,21 @@ describe('Sheet tab row', () => {
     ]);
     expect(tab('main.js').getAttribute('aria-selected')).toBe('true');
     fireEvent.click(tab('index.html'));
-    expect(on.onSelectFile).toHaveBeenCalledWith('index.html');
+    expect(on.openFile).toHaveBeenCalledWith('index.html');
   });
 
   it('closes a file from its tab: the close glyph, a middle click, or Delete', () => {
     const { on } = setup();
     fireEvent.click(tab('renderer.js').querySelector('[data-tab-close]')!);
-    expect(on.onCloseFile).toHaveBeenLastCalledWith('renderer.js');
+    expect(on.closeFile).toHaveBeenLastCalledWith('renderer.js');
     fireEvent(
       tab('index.html'),
       new MouseEvent('auxclick', { bubbles: true, button: 1 }),
     );
-    expect(on.onCloseFile).toHaveBeenLastCalledWith('index.html');
+    expect(on.closeFile).toHaveBeenLastCalledWith('index.html');
     fireEvent.keyDown(tab('main.js'), { key: 'Delete' });
-    expect(on.onCloseFile).toHaveBeenLastCalledWith('main.js');
-    expect(on.onSelectFile).not.toHaveBeenCalled();
+    expect(on.closeFile).toHaveBeenLastCalledWith('main.js');
+    expect(on.openFile).not.toHaveBeenCalled();
   });
 
   it('names the process of the open file, and marks unsaved files and files with problems', () => {
@@ -242,15 +243,17 @@ describe('Sheet tab row', () => {
   it('splits the editor from the row button, which closes the split once there is one', () => {
     const { on, rerender, props } = setup();
     fireEvent.click(screen.getByRole('button', { name: 'splitEditor' }));
-    expect(on.onToggleSplit).toHaveBeenCalledOnce();
+    expect(on.toggleSplit).toHaveBeenCalledOnce();
 
-    rerender(<Sheet {...props} panes={['main.js', 'renderer.js']} />);
+    rerender(
+      <Sheet {...props} actions={{ ...props.actions, panes: ['main.js', 'renderer.js'] }} />,
+    );
     const close = screen.getByRole('button', { name: 'closeSplit' });
     expect(close.getAttribute('aria-pressed')).toBe('true');
     // Split, the panes' headers name the processes instead of the row.
     expect(screen.queryByText('processMain')?.closest('[data-pane-index]')).toBeTruthy();
     fireEvent.click(close);
-    expect(on.onToggleSplit).toHaveBeenCalledTimes(2);
+    expect(on.toggleSplit).toHaveBeenCalledTimes(2);
   });
 });
 
@@ -264,7 +267,7 @@ describe('Sheet panes', () => {
     ]);
     expect(editors.map((node) => node.dataset.primary)).toEqual(['true', 'false']);
     fireEvent.click(editors[1]!);
-    expect(on.onFocusPane).toHaveBeenCalledWith('renderer.js');
+    expect(on.focusPane).toHaveBeenCalledWith('renderer.js');
   });
 
   it('gives each split pane a header that maximizes or closes it, and the other pane’s tab the split glyph', () => {
@@ -273,9 +276,9 @@ describe('Sheet panes', () => {
     expect(second.getByText('renderer.js')).toBeTruthy();
     expect(second.getByText('processRenderer')).toBeTruthy();
     fireEvent.click(second.getByRole('button', { name: 'maximize' }));
-    expect(on.onMaximize).toHaveBeenCalledWith('renderer.js');
+    expect(on.maximize).toHaveBeenCalledWith('renderer.js');
     fireEvent.click(within(pane(0)).getByRole('button', { name: 'closePane' }));
-    expect(on.onClosePane).toHaveBeenCalledWith('main.js');
+    expect(on.closePane).toHaveBeenCalledWith('main.js');
     // Only the file showing in the unfocused pane carries the glyph (the tab's own icon, before its label).
     expect(tab('renderer.js').querySelector(':scope > svg')).toBeTruthy();
     expect(tab('main.js').querySelector(':scope > svg')).toBeNull();
@@ -322,10 +325,10 @@ describe('Sheet console splitter', () => {
     fireEvent.keyDown(splitter, { key: 'ArrowUp' });
     fireEvent.keyDown(splitter, { key: 'ArrowUp' });
     expect(splitter.getAttribute('aria-valuenow')).toBe('176');
-    expect(on.onConsoleHeight).not.toHaveBeenCalled();
+    expect(on.changeLayout).not.toHaveBeenCalled();
     act(() => vi.advanceTimersByTime(250));
-    expect(on.onConsoleHeight).toHaveBeenCalledOnce();
-    expect(on.onConsoleHeight).toHaveBeenCalledWith(176);
+    expect(on.changeLayout).toHaveBeenCalledOnce();
+    expect(on.changeLayout).toHaveBeenCalledWith({ consoleHeight: 176 });
 
     fireEvent.keyDown(splitter, { key: 'End' });
     expect(splitter.getAttribute('aria-valuenow')).toBe('300');
@@ -336,10 +339,10 @@ describe('Sheet console splitter', () => {
     const splitter = screen.getByRole('separator', { name: 'resizeConsole' });
     fireEvent.keyDown(splitter, { key: 'ArrowDown' });
     expect(splitter.getAttribute('aria-valuenow')).toBe('96');
-    expect(on.onHideConsole).not.toHaveBeenCalled();
+    expect(on.changeLayout).not.toHaveBeenCalled();
     // Home jumps to 0: well below half the minimum.
     fireEvent.keyDown(splitter, { key: 'Home' });
-    expect(on.onHideConsole).toHaveBeenCalledOnce();
+    expect(on.changeLayout).toHaveBeenCalledExactlyOnceWith({ consoleVisible: false });
   });
 
   it('restores the default height on reset', () => {
@@ -348,7 +351,7 @@ describe('Sheet console splitter', () => {
     fireEvent.keyDown(splitter, { key: 'Enter' });
     expect(splitter.getAttribute('aria-valuenow')).toBe('160');
     act(() => vi.advanceTimersByTime(250));
-    expect(on.onConsoleHeight).toHaveBeenCalledWith(160);
+    expect(on.changeLayout).toHaveBeenCalledWith({ consoleHeight: 160 });
   });
 
   it('shows a stored height that no longer fits at half the sheet', () => {
@@ -386,7 +389,7 @@ describe('Sheet tab drag along the row', () => {
     expect(transfer.dropEffect).toBe('move');
     expect(tab('main.js').getAttribute('data-drop-indicator')).toBe('before');
     drag('drop', tab('main.js'), transfer, { clientX: 20 });
-    expect(on.onMoveFile).toHaveBeenCalledWith('index.html', 'main.js');
+    expect(on.moveFile).toHaveBeenCalledWith('index.html', 'main.js');
     expect(tab('main.js').hasAttribute('data-drop-indicator')).toBe(false);
   });
 
@@ -397,13 +400,13 @@ describe('Sheet tab drag along the row', () => {
     drag('dragover', tab('renderer.js'), transfer, { clientX: 180 });
     expect(tab('index.html').getAttribute('data-drop-indicator')).toBe('before');
     drag('drop', tab('renderer.js'), transfer, { clientX: 180 });
-    expect(on.onMoveFile).toHaveBeenLastCalledWith('main.js', 'index.html');
+    expect(on.moveFile).toHaveBeenLastCalledWith('main.js', 'index.html');
 
     const again = startDrag('main.js');
     drag('dragover', tabRow(), again);
     expect(tab('index.html').getAttribute('data-drop-indicator')).toBe('after');
     drag('drop', tabRow(), again);
-    expect(on.onMoveFile).toHaveBeenLastCalledWith('main.js', null);
+    expect(on.moveFile).toHaveBeenLastCalledWith('main.js', null);
   });
 
   it('shows nothing and moves nothing where the tab already is', () => {
@@ -420,7 +423,7 @@ describe('Sheet tab drag along the row', () => {
     drag('dragover', tabRow(), last);
     expect(document.querySelector('[data-drop-indicator]')).toBeNull();
     drag('drop', tabRow(), last);
-    expect(on.onMoveFile).not.toHaveBeenCalled();
+    expect(on.moveFile).not.toHaveBeenCalled();
   });
 
   it('reads the near half from the other side in a right-to-left layout', () => {
@@ -430,7 +433,7 @@ describe('Sheet tab drag along the row', () => {
     const transfer = startDrag('index.html');
     // The right half is the near one now.
     drag('drop', tab('main.js'), transfer, { clientX: 80 });
-    expect(on.onMoveFile).toHaveBeenLastCalledWith('index.html', 'main.js');
+    expect(on.moveFile).toHaveBeenLastCalledWith('index.html', 'main.js');
   });
 
   it('clears the indicator when the drag leaves the row, and ignores drags that are not tabs', () => {
@@ -449,7 +452,7 @@ describe('Sheet tab drag along the row', () => {
     drag('dragover', tab('main.js'), files, { clientX: 20 });
     expect(files.dropEffect).toBe('none');
     drag('drop', tab('main.js'), files, { clientX: 20 });
-    expect(on.onMoveFile).not.toHaveBeenCalled();
+    expect(on.moveFile).not.toHaveBeenCalled();
   });
 
   it('ignores a drag start that carries no tab', () => {
@@ -486,7 +489,7 @@ describe('Sheet tab drag onto panes', () => {
     drag('dragover', dropZone(1, 'after')!, transfer);
     expect(center.parentElement?.getAttribute('data-over')).toBe('after');
     drag('drop', dropZone(1, 'after')!, transfer);
-    expect(on.onDropOnPane).toHaveBeenCalledWith('index.html', 1, 'after');
+    expect(on.dropTab).toHaveBeenCalledWith('index.html', 1, 'after');
   });
 
   it('offers a showing file only the drops that would change the panes', () => {
@@ -527,6 +530,6 @@ describe('Sheet tab drag onto panes', () => {
     drag('dragenter', center, files);
     expect(center.parentElement?.hasAttribute('data-over')).toBe(false);
     drag('drop', center, files);
-    expect(on.onDropOnPane).not.toHaveBeenCalled();
+    expect(on.dropTab).not.toHaveBeenCalled();
   });
 });

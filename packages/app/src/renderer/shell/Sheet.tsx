@@ -19,6 +19,7 @@ import { EditorPane } from '../editor/EditorPane';
 import { ConsolePane } from '../features/run/ConsolePane';
 import { SettingsPage } from '../features/settings/SettingsPage';
 import { useShortcut } from '../use-shortcut';
+import type { PaneActions } from './pane-actions';
 import { processOf, type FileProcess } from './processes';
 import styles from './Sheet.module.css';
 import { isTabDrag, TAB_DRAG_TYPE, useTabDrag } from './tab-drag';
@@ -81,23 +82,7 @@ function paneWidths(total: number, shares: readonly number[]): number[] {
 
 export interface SheetProps {
   state: WindowState;
-  /** The focused pane's file, which the tab row selects; null when no file is open. */
-  active: string | null;
-  /** The files in the editor panes, from the start. One entry means the editor isn't split. */
-  panes: readonly string[];
-  onSelectFile: (name: string) => void;
-  onCloseFile: (name: string) => void;
-  /** A tab was dragged along the row: its file goes in front of `before`'s, or to the end. */
-  onMoveFile: (name: string, before: string | null) => void;
-  /** A tab was dropped on pane `index`: in its middle, or on the edge where a new pane opens. */
-  onDropOnPane: (name: string, index: number, position: PaneDropPosition) => void;
-  onFocusPane: (name: string) => void;
-  onToggleSplit: () => void;
-  onClosePane: (name: string) => void;
-  onMaximize: (name: string) => void;
-  onConsoleHeight: (height: number) => void;
-  onHideConsole: () => void;
-  onResetLayout: () => void;
+  actions: PaneActions;
   /** Something droppable is being dragged over the window. */
   dropping: boolean;
 }
@@ -133,26 +118,11 @@ export function Sheet(props: SheetProps) {
   );
 }
 
-function EditorArea({
-  state,
-  active,
-  panes,
-  onSelectFile,
-  onCloseFile,
-  onMoveFile,
-  onDropOnPane,
-  onFocusPane,
-  onToggleSplit,
-  onClosePane,
-  onMaximize,
-  onConsoleHeight,
-  onHideConsole,
-  onResetLayout,
-  sheetHeight,
-}: SheetProps & { sheetHeight: number }) {
+function EditorArea({ state, actions, sheetHeight }: SheetProps & { sheetHeight: number }) {
   const { t, i18n } = useTranslation('shell');
   const rtl = i18n.dir() === 'rtl';
   const { fiddle, layout } = state;
+  const { active, panes } = actions;
   const diagnostics = useDiagnostics();
   const badgeLabel = useBadgeLabel();
   const badge = (name: string) => badgeOf(diagnostics.get(name));
@@ -164,13 +134,12 @@ function EditorArea({
 
   // The console: 96px to half the sheet; dragged below half the minimum, it closes.
   const consoleMax = Math.max(CONSOLE_MIN, Math.floor(sheetHeight / 2));
-  const [consoleHeight, setConsoleHeight] = useDraft(
-    layout.consoleHeight,
-    onConsoleHeight,
+  const [consoleHeight, setConsoleHeight] = useDraft(layout.consoleHeight, (height) =>
+    actions.changeLayout({ consoleHeight: height }),
   );
   const shownConsoleHeight = Math.min(Math.max(consoleHeight, CONSOLE_MIN), consoleMax);
   const resizeConsole = (value: number) => {
-    if (value < CONSOLE_COLLAPSE) onHideConsole();
+    if (value < CONSOLE_COLLAPSE) actions.changeLayout({ consoleVisible: false });
     else setConsoleHeight(Math.max(value, CONSOLE_MIN));
   };
 
@@ -231,7 +200,7 @@ function EditorArea({
     if (!name) return;
     event.preventDefault();
     const before = insertionPoint(event);
-    if (!isNoMove(name, before)) onMoveFile(name, before);
+    if (!isNoMove(name, before)) actions.moveFile(name, before);
   };
 
   /** The drop zones pane `index` offers the dragged tab: those that change the panes and stay within `MAX_PANES`. */
@@ -277,7 +246,7 @@ function EditorArea({
                 variant="secondary"
                 size="sm"
                 icon="refresh"
-                onPress={onResetLayout}
+                onPress={actions.resetLayout}
               >
                 {t('resetLayout')}
               </Button>
@@ -293,7 +262,7 @@ function EditorArea({
 
   return (
     <>
-      <Tabs value={active} onChange={onSelectFile} className={styles.tabsRoot}>
+      <Tabs value={active} onChange={actions.openFile} className={styles.tabsRoot}>
         {/* The whole row takes a dragged tab: past the last tab it goes to the end. */}
         <div
           className={styles.tabrow}
@@ -320,7 +289,7 @@ function EditorArea({
                         ? 'columns'
                         : undefined
                     }
-                    onClose={() => onCloseFile(file.name)}
+                    onClose={() => actions.closeFile(file.name)}
                     drag={{ type: TAB_DRAG_TYPE, data: file.name }}
                     dropIndicator={indicatorFor(file.name, index === visible.length - 1)}
                     error={
@@ -353,7 +322,7 @@ function EditorArea({
             label={split ? t('closeSplit') : t('splitEditor')}
             tooltip={{ kbd: split ? undefined : splitKbd }}
             isPressed={split}
-            onPress={onToggleSplit}
+            onPress={actions.toggleSplit}
           />
         </div>
         <TabPanel id={active} className={styles.tabpanel}>
@@ -391,19 +360,19 @@ function EditorArea({
                       <PaneHeader
                         name={name}
                         badge={badge(name)}
-                        onMaximize={() => onMaximize(name)}
-                        onClose={() => onClosePane(name)}
+                        onMaximize={() => actions.maximize(name)}
+                        onClose={() => actions.closePane(name)}
                       />
                     )}
                     <EditorPane
                       file={name}
                       primary={name === active}
-                      onFocus={() => onFocusPane(name)}
+                      onFocus={() => actions.focusPane(name)}
                     />
                     {dragged && (
                       <PaneDropZones
                         zones={dropZonesFor(index)}
-                        onDrop={(file, position) => onDropOnPane(file, index, position)}
+                        onDrop={(file, position) => actions.dropTab(file, index, position)}
                       />
                     )}
                   </div>
