@@ -322,7 +322,8 @@ export async function startDocuments(): Promise<void> {
       }),
       buttons: [td('restore'), td('discardDrafts')],
       defaultId: 0,
-      cancelId: 1,
+      // Escape or closing the dialog keeps the drafts.
+      cancelId: 0,
       noLink: true,
     });
     for (const draft of orphans) {
