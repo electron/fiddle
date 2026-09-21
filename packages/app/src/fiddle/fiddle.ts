@@ -45,17 +45,10 @@ export interface Fiddle {
   templateName?: string;
 }
 
-export interface CreateFiddleInput {
-  files: FileMap;
-  version: VersionRef;
-  modules?: Readonly<Record<string, string>>;
-  origin?: FiddleOrigin;
-  source?: FiddleSource;
-  templateName?: string;
-}
-
 /** Builds a fiddle, adding a main entry if needed. Empty or placeholder-only files start hidden. */
-export function createFiddle(input: CreateFiddleInput): Fiddle {
+export function createFiddle(
+  input: Pick<Fiddle, 'files' | 'version'> & Partial<Omit<Fiddle, 'hidden'>>,
+): Fiddle {
   const withMain = ensureMainEntry(input.files);
   const files = orderFiles(withMain, sortFileNames(Object.keys(withMain)));
   const fiddle: Fiddle = {

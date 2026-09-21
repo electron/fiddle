@@ -7,7 +7,7 @@ import { Installer, InstallState } from '@electron/fiddle-core';
 import { app } from 'electron';
 
 import { bisectCompareUrl } from '../../fiddle/bisect';
-import { findExample, listExamples } from '../../fiddle/examples';
+import { findExample } from '../../fiddle/examples';
 import { isSupportedFileName, PACKAGE_JSON, type FileMap } from '../../fiddle/files';
 import { writeFiddleFolder } from '../../fiddle/folder';
 import { getGistId } from '../../fiddle/gist-id';
@@ -26,6 +26,7 @@ import {
   getVersionRange,
 } from '../../fiddle/versions';
 import { ErrorCode, FiddleError } from '../../shared/errors';
+import { SHOW_ME_EXAMPLES } from '../../shared/examples';
 import { defaultSettings } from '../../shared/settings';
 import type { ReleaseRow } from '../../shared/stores';
 import { autoBisect } from '../bisect/auto';
@@ -186,12 +187,9 @@ async function loadFiddle(
   if (spec.startsWith(EXAMPLE_PREFIX)) {
     const name = spec.slice(EXAMPLE_PREFIX.length);
     if (!findExample(name)) {
-      const names = listExamples()
-        .map((example) => example.name)
-        .join(', ');
       throw new FiddleError(
         ErrorCode.notFound,
-        t('errorUnknownExample', { name, names }),
+        t('errorUnknownExample', { name, names: SHOW_ME_EXAMPLES.join(', ') }),
       );
     }
     return report(ctx, await loadShowMe(staticDir(), name, context));

@@ -393,19 +393,6 @@ export class Installer extends EventEmitter {
     tempDirectory: string,
     opts?: Partial<InstallerParams>,
   ): Promise<string> {
-    let pctDone = 0;
-    const getProgressCallback = (progress: ProgressObject) => {
-      if (opts?.progressCallback) {
-        opts.progressCallback(progress);
-      }
-      const pct = Math.round(progress.percent * 100);
-      if (pctDone + 10 <= pct) {
-        const emoji = pct >= 100 ? '🏁' : '⏳';
-        // FIXME(anyone): is there a better place than console.log for this?
-        console.log(`${emoji} downloading ${version} - ${pct}%`);
-        pctDone = pct;
-      }
-    };
     const mirror = { ...this.options.mirror, ...opts?.mirror };
     const signal = opts?.signal;
     try {
@@ -422,7 +409,8 @@ export class Installer extends EventEmitter {
         },
         downloadOptions: {
           quiet: true,
-          getProgressCallback,
+          getProgressCallback: (progress: ProgressObject) =>
+            opts?.progressCallback?.(progress),
           ...(signal ? { signal } : {}),
         },
         // Fiddle keeps its own copy, so leave the cache shared with other

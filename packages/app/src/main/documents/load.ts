@@ -98,15 +98,15 @@ export async function loadShowMe(
         name,
       },
     );
-  const files = await loadExample(staticDir, example.name);
+  const files = await loadExample(staticDir, example);
   return {
     fiddle: createFiddle({
       files,
       version: context.version,
       origin: { kind: 'example' },
-      templateName: example.name,
+      templateName: example,
     }),
-    name: example.name,
+    name: example,
     warnings: [],
   };
 }
