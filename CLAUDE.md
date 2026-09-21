@@ -63,10 +63,11 @@ The full guide, with a template spec, is in `packages/app/e2e/README.md`.
 
 ## Dev differences
 
-These apply only to `yarn start`, on an unpackaged app. `yarn start:xvfb` and packaged builds have none.
+These apply only to unpackaged runs, and the first two only to `yarn start`. `yarn start:xvfb` loads `app://main` like a packaged build.
 
 - The renderer comes from the Vite dev server (`http://localhost:<port>`) instead of `app://main`. The EIPC validator accepts that origin only when `is_packaged is false`.
 - The CSP is added to dev-server responses by `webRequest` (`src/main/csp.ts`). It allows React Refresh's inline preamble and the hot-reload websocket.
+- On macOS, every unpackaged run (`yarn start`, `yarn fiddle`, the driver and e2e) uses Chromium's mock keychain (`--use-mock-keychain`), so it never triggers a Keychain prompt. Its GitHub token is then only obfuscated and lives in `credentials/github-dev` instead of the installed app's `credentials/github`, and the first-launch import can't read the old app's token.
 
 ## Headless CLI
 

@@ -236,8 +236,13 @@ describe('gists', () => {
   });
 
   it('signs out from the settings, and forgets the stored token', async () => {
-    // Whether sign-in stored a token depends on the OS keyring, so put one where the app keeps it.
-    const stored = path.join(app().testDir ?? '', 'userData', 'credentials', 'github');
+    // Whether sign-in stored a token depends on the OS keyring, so put one where the app keeps
+    // it: under the mock keychain of macOS test runs, a file of its own.
+    const stored = path.join(
+      app().testDir ?? '',
+      'userData/credentials',
+      process.platform === 'darwin' ? 'github-dev' : 'github',
+    );
     fs.mkdirSync(path.dirname(stored), { recursive: true });
     fs.writeFileSync(stored, 'stored token');
     await app().press('CmdOrCtrl+,');

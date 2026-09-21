@@ -47,6 +47,13 @@ if (!squirrelEvent && !headless) logProcessErrors();
 // Both must happen before `ready`.
 registerAppScheme();
 app.enableSandbox();
+// An unpackaged run (dev, the CLI, tests) is another binary than the installed app, so macOS
+// would prompt before letting it read the "Electron Fiddle Safe Storage" keychain item, or show
+// "Keychain Not Found" under a moved HOME. Chromium's in-memory mock keychain never asks; a token
+// saved from such a run is only obfuscated, and kept apart (services.ts).
+if (process.platform === 'darwin' && !app.isPackaged) {
+  app.commandLine.appendSwitch('use-mock-keychain');
+}
 if (!squirrelEvent && !headless) applyChromiumLanguage();
 
 const primary = !squirrelEvent && !headless && installEarlyDocumentHandlers();
