@@ -4,51 +4,28 @@ import path from 'node:path';
 
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { IGNORE_SCRIPTS_ENV } from '../../fiddle/modules';
-
 vi.mock('electron', () => ({ shell: { openPath: vi.fn() } }));
 vi.mock('../i18n', () => ({ tm: () => (key: string) => key }));
 vi.mock('../documents/service', () => ({
   installScriptPackages: vi.fn(),
   ensureTrusted: vi.fn(),
 }));
-vi.mock('../run/service', () => ({ PM_INSTALL_URLS: { npm: '', yarn: '' } }));
 const findPackageManager = vi.hoisted(() =>
   vi.fn(async (): Promise<string | undefined> => '/bin/npm'),
+);
+const sfwPathFor = vi.hoisted(() =>
+  vi.fn(async (): Promise<string | undefined> => undefined),
 );
 vi.mock('../../fiddle/modules', async (importOriginal) => ({
   ...(await importOriginal<typeof import('../../fiddle/modules')>()),
   findPackageManager,
+  // `toolEnv()` would otherwise spawn the real login shell for its PATH.
+  loadLoginShellPath: async () => undefined,
 }));
+vi.mock('../platform/sfw', () => ({ sfwPathFor }));
 
 const documents = await import('../documents/service');
-const { forgeTaskCommands, packageFiddle, runForgeTask } = await import('./service');
-
-describe('forgeTaskCommands', () => {
-  it('installs through Socket Firewall when given sfw.mjs, like a run', () => {
-    expect(
-      forgeTaskCommands('npm', 'make', { sfwPath: '/res/sfw.mjs', ignoreScripts: true }),
-    ).toEqual([
-      {
-        command: 'node',
-        args: ['/res/sfw.mjs', 'npm', 'install', '-S'],
-        env: IGNORE_SCRIPTS_ENV,
-      },
-      { command: 'npm', args: ['run', 'make'] },
-    ]);
-  });
-
-  it('runs the package manager directly without it', () => {
-    expect(forgeTaskCommands('yarn', 'package')).toEqual([
-      { command: 'yarn', args: ['install'] },
-      { command: 'yarn', args: ['run', 'package'] },
-    ]);
-    expect(forgeTaskCommands('npm', 'package', { sfwPath: undefined })[0]).toEqual({
-      command: 'npm',
-      args: ['install', '-S'],
-    });
-  });
-});
+const { packageFiddle, runForgeTask } = await import('./service');
 
 describe('runForgeTask', () => {
   let dir: string;
@@ -118,15 +95,16 @@ describe('packageFiddle', () => {
       setState: (_id: string, patch: Partial<typeof run>) => Object.assign(run, patch),
       log: (_id: string, text: string) => events.push(text),
       logText: () => undefined,
-      toolEnv: async () => process.env,
-      sfwPath: async () => {
-        if (sfwPath instanceof Error) throw sfwPath;
-        return sfwPath;
-      },
     };
+    sfwPathFor.mockImplementation(async () => {
+      if (sfwPath instanceof Error) throw sfwPath;
+      return sfwPath;
+    });
     const hub = {
       getWindow: () => ({ fiddle: { name: 'My fiddle' } }),
-      app: { settings: { packageManager: 'npm', packageAuthor: 'me' } },
+      app: {
+        settings: { packageManager: 'npm', packageAuthor: 'me', socketFirewall: true },
+      },
     };
     const versions = {
       releases: () => [],

@@ -35,10 +35,6 @@
     "message": "Downloading Electron {{version}}…",
     "description": "Console line before a run downloads its Electron version."
   },
-  "downloadFailed": {
-    "message": "Couldn't download Electron {{version}}: {{message}}",
-    "description": "Console line and notice when a download fails. {{version}} is the Electron version, {{message}} the error."
-  },
   "installingModules": {
     "message": "Installing packages with {{pm}}…",
     "description": "Console line before npm or yarn installs the fiddle's packages. {{pm}} is npm or yarn."
@@ -54,18 +50,6 @@
   "pmMissing": {
     "message": "{{pm}} wasn't found. Install it to use packages: {{url}}",
     "description": "Console error when the package manager is missing. {{pm}} is npm or yarn, {{url}} explains how to install it."
-  },
-  "versionUnavailable": {
-    "message": "Electron {{version}} can't run on this computer.",
-    "description": "Console error from the pre-run checks. {{version}} is the Electron version."
-  },
-  "versionUnknown": {
-    "message": "Electron {{version}} isn't a known release.",
-    "description": "Console error from the pre-run checks. {{version}} is the Electron version."
-  },
-  "localBuildMissing": {
-    "message": "The local build “{{name}}” is missing its Electron binary.",
-    "description": "Console error when the chosen local build is gone. {{name}} is the build's name."
   },
   "esmNeeds28": {
     "message": "main.mjs needs Electron 28 or later.",
@@ -163,11 +147,6 @@
   "openCompareButton": {
     "message": "Open",
     "description": "Button that opens the comparison in the browser.",
-    "maxLength": 16
-  },
-  "cancel": {
-    "message": "Cancel",
-    "description": "Button that closes the open-comparison confirmation without opening the comparison.",
     "maxLength": 16
   }
 }

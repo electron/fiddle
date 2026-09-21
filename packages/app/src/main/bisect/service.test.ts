@@ -5,7 +5,10 @@ import { ErrorCode } from '../../shared/errors';
 import type { BisectState } from '../../shared/stores';
 import type { RunOutcome } from '../run/logic';
 
-vi.mock('electron', () => ({ app: {} }));
+const electron = vi.hoisted(() => ({ app: {}, shell: { openExternal: vi.fn() } }));
+const confirm = vi.hoisted(() => vi.fn<() => Promise<boolean>>());
+vi.mock('electron', () => electron);
+vi.mock('../dialogs', () => ({ confirm }));
 vi.mock('../documents/service', () => ({
   ensureTrusted: vi.fn(async () => ({ approved: true })),
   setFiddleVersion: vi.fn(async () => 1),
@@ -209,15 +212,24 @@ describe('BisectService (manual)', () => {
     await ctx.service.start('w', '1.0.0', '5.0.0', false);
     expect(ctx.bisect()).toMatchObject({ auto: false, current: '3.0.0' });
     expect(ctx.service.isActive('w')).toBe(true);
-    expect(ctx.service.compareUrl('w')).toBeUndefined();
+    // Nothing to compare yet.
+    await ctx.service.openCompare('w');
+    expect(confirm).not.toHaveBeenCalled();
     expect(ctx.typesChanged).toHaveBeenCalledWith('w');
     await ctx.service.mark('w', 'good');
     await ctx.service.mark('w', 'bad');
     expect(ctx.bisect()?.result).toEqual({ good: '3.0.0', bad: '4.0.0' });
     expect(ctx.service.isActive('w')).toBe(false);
-    expect(ctx.service.compareUrl('w')).toBe(
-      'https://github.com/electron/electron/compare/v3.0.0...v4.0.0',
-    );
+
+    // The comparison opens only when the user agrees, after seeing its URL.
+    const url = 'https://github.com/electron/electron/compare/v3.0.0...v4.0.0';
+    confirm.mockResolvedValueOnce(false);
+    await ctx.service.openCompare('w');
+    expect(confirm).toHaveBeenCalledWith('w', expect.objectContaining({ detail: url }));
+    expect(electron.shell.openExternal).not.toHaveBeenCalled();
+    confirm.mockResolvedValueOnce(true);
+    await ctx.service.openCompare('w');
+    expect(electron.shell.openExternal).toHaveBeenCalledWith(url);
   });
 
   it('starts downloading a step the user does not have yet, so Run is quick', async () => {

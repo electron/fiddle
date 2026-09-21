@@ -1,7 +1,10 @@
+import { shell } from 'electron';
+
 import { Bisector, bisectCompareUrl, type BisectStep } from '../../fiddle/bisect';
 import { compareVersions, getVersionRange } from '../../fiddle/versions';
 import { ErrorCode, FiddleError } from '../../shared/errors';
 import type { BisectState } from '../../shared/stores';
+import { confirm } from '../dialogs';
 import * as documents from '../documents/service';
 import { tm } from '../i18n';
 import { log } from '../log';
@@ -39,11 +42,9 @@ export class BisectService {
     this.#typesChanged = typesChanged;
   }
 
+  /** A bisect is going and has no result yet. */
   isActive(windowId: string): boolean {
-    return (
-      this.#runs.state(windowId).bisect !== null &&
-      this.#runs.state(windowId).bisect?.result === null
-    );
+    return this.#runs.state(windowId).bisect?.result === null;
   }
 
   async start(windowId: string, good: string, bad: string, auto: boolean): Promise<void> {
@@ -99,6 +100,7 @@ export class BisectService {
     await this.#show(windowId, session, step);
   }
 
+  /** Ends the window's bisect without a result. Closing the window does this too. */
   stop(windowId: string): void {
     const session = this.#sessions.get(windowId);
     if (session) {
@@ -110,9 +112,18 @@ export class BisectService {
       this.#runs.setState(windowId, { bisect: null });
   }
 
-  compareUrl(windowId: string): string | undefined {
+  /** Shows the finished bisect's compare URL and opens it if the user agrees. */
+  async openCompare(windowId: string): Promise<void> {
     const result = this.#runs.state(windowId).bisect?.result;
-    return result ? bisectCompareUrl(result.good, result.bad) : undefined;
+    if (!result) return;
+    const url = bisectCompareUrl(result.good, result.bad);
+    const t = tm('mainRun');
+    const open = await confirm(windowId, {
+      message: t('openCompareMessage'),
+      detail: url,
+      ok: t('openCompareButton'),
+    });
+    if (open) await shell.openExternal(url);
   }
 
   async #show(windowId: string, session: Session, step: BisectStep): Promise<void> {
@@ -171,22 +182,16 @@ export class BisectService {
     };
 
     const result = await autoBisect(range, check);
-    if ('stopped' in result) return this.#abort(windowId, session, result.unexpected);
-    this.#finish(windowId, session, result.good, result.bad);
-  }
-
-  /** Ends `session` without a result. A session that was stopped and replaced leaves the new one alone. */
-  #abort(windowId: string, session: Session, unexpected: string | undefined): void {
+    // A session that was stopped and replaced leaves the new one alone.
     if (this.#sessions.get(windowId) !== session) return;
-    if (unexpected)
-      this.#runs.log(
-        windowId,
-        tm('mainRun')('bisectVerifyFailed', { version: unexpected }),
-        'error',
-      );
-    this.#sessions.delete(windowId);
-    if (this.#runs.state(windowId).bisect)
-      this.#runs.setState(windowId, { bisect: null });
+    if (!('stopped' in result)) {
+      this.#finish(windowId, session, result.good, result.bad);
+    } else {
+      const version = result.unexpected;
+      if (version)
+        this.#runs.log(windowId, t('bisectVerifyFailed', { version }), 'error');
+      this.stop(windowId);
+    }
   }
 
   #finish(windowId: string, session: Session, good: string, bad: string): void {

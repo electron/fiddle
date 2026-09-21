@@ -189,15 +189,15 @@ const backdate = (file: string, ms: number) => {
 describe('release list', () => {
   it('falls back to the bundled list when the cached one is not a release list', async () => {
     const { cache } = setup({ cached: '{"oops":true}' });
-    const data = await readReleaseList(cache);
-    expect(Array.isArray(data) && data.length > 100).toBe(true);
+    const { rows, fresh } = await readReleaseList(cache);
+    expect(rows.length).toBeGreaterThan(100);
+    expect(fresh).toBe(false);
   });
 
   it('prefers the bundled list to an older cached one', async () => {
     const older = JSON.stringify([{ version: '30.0.0', date: '2026-01-01' }]);
     const { cache } = setup({ cached: older });
-    const data = await readReleaseList(cache);
-    expect(Array.isArray(data) && data.length > 100).toBe(true);
+    expect((await readReleaseList(cache)).rows.length).toBeGreaterThan(100);
   });
 
   it('skips the network at startup while the cached list is fresh, and fetches once it is old', async () => {
@@ -252,9 +252,10 @@ describe('release list', () => {
     const { cache, fetch } = setup();
     fs.mkdirSync(cache.root, { recursive: true });
     fetch.mockImplementation(respond(listText('40.0.0')));
-    const data = await fetchReleaseList(cache, 'https://example.test/r.json', fetch);
-    expect(data).toEqual([release('40.0.0')]);
-    expect(await readReleaseList(cache)).toEqual([release('40.0.0')]);
+    const fetched = await fetchReleaseList(cache, 'https://example.test/r.json', fetch);
+    expect(fetched.rows.map((row) => row.version)).toEqual(['40.0.0']);
+    const read = await readReleaseList(cache);
+    expect(read).toMatchObject({ rows: fetched.rows, fresh: true });
   });
 
   it('reports a failed refresh to the caller, and keeps the list it has', async () => {
@@ -273,8 +274,10 @@ describe('release list', () => {
 
 describe('downloads', () => {
   it('publishes progress only when the percent changes', async () => {
+    const { service, updateApp } = setup({ cached: listText('30.0.0') });
+    await service.init();
+    updateApp.mockClear();
     vi.useFakeTimers();
-    const { service, updateApp } = setup();
     vi.spyOn(service.installer, 'install').mockImplementation(
       async (_version, options) => {
         for (const percent of [0.1, 0.1, 0.101, 0.2])
@@ -290,6 +293,22 @@ describe('downloads', () => {
           .versions.installs['30.0.0']?.percent,
     );
     expect(percents).toEqual([20]);
+  });
+
+  it('refuses a version the release list lacks, and wraps an installer failure in a network error that names the version', async () => {
+    const { service } = setup({ cached: listText('30.0.0') });
+    await service.init();
+    const install = vi
+      .spyOn(service.installer, 'install')
+      .mockRejectedValue(new Error('ECONNRESET'));
+    await expect(service.install('99.0.0')).rejects.toMatchObject({
+      code: ErrorCode.notFound,
+    });
+    expect(install).not.toHaveBeenCalled();
+    await expect(service.install('30.0.0')).rejects.toMatchObject({
+      code: ErrorCode.network,
+      message: 'downloadFailed:{"version":"30.0.0","message":"ECONNRESET"}',
+    });
   });
 
   it('downloads every listed release that is missing, notes a failure and carries on', async () => {

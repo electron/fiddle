@@ -9,14 +9,10 @@ export default {
   "runFailed": "Impossible d’exécuter le fiddle : {{message}}",
   "privacyHelperMissing": "L’assistant de confidentialité ({{path}}) est manquant ou ne peut pas s’exécuter : les fiddles ne peuvent donc pas démarrer, car ils partageraient les autorisations d’Electron Fiddle pour la caméra, le microphone, etc. Réinstallez Electron Fiddle.",
   "downloading": "Téléchargement d’Electron {{version}}…",
-  "downloadFailed": "Impossible de télécharger Electron {{version}} : {{message}}",
   "installingModules": "Installation des packages avec {{pm}}…",
   "installingModulesNoScripts": "Installation des packages avec {{pm}}. Les scripts d’installation sont désactivés, car ce fiddle n’est pas approuvé.",
   "modulesFailed": "Échec de l’installation des packages : {{message}}",
   "pmMissing": "{{pm}} est introuvable. Installez-le pour utiliser des packages : {{url}}",
-  "versionUnavailable": "Electron {{version}} ne peut pas s’exécuter sur cet ordinateur.",
-  "versionUnknown": "Electron {{version}} n’est pas une version connue.",
-  "localBuildMissing": "Le build local « {{name}} » ne contient plus son binaire Electron.",
   "esmNeeds28": "main.mjs nécessite Electron 28 ou une version ultérieure.",
   "envInvalid": "Entrées d’environnement illisibles ignorées : {{entries}}",
   "envBlocked": "Variables d’environnement ignorées, car les fiddles ne peuvent pas les définir (elles chargent du code dans Electron ou modifient son démarrage) : {{keys}}",
@@ -40,6 +36,5 @@ export default {
   "bisectTooFew": "Le bisect nécessite au moins deux versions entre la version correcte et la version défectueuse.",
   "bisectGoodNotOlder": "La version correcte doit être plus ancienne que la version défectueuse.",
   "openCompareMessage": "Ouvrir la comparaison sur GitHub ?",
-  "openCompareButton": "Ouvrir",
-  "cancel": "Annuler"
+  "openCompareButton": "Ouvrir"
 } as const;

@@ -9,14 +9,10 @@ export default {
   "runFailed": "Não foi possível executar o fiddle: {{message}}",
   "privacyHelperMissing": "O auxiliar de privacidade ({{path}}) está ausente ou não pode ser executado, então os fiddles não podem ser iniciados: eles compartilhariam a câmera, o microfone e outras permissões do Electron Fiddle. Reinstale o Electron Fiddle.",
   "downloading": "Baixando o Electron {{version}}…",
-  "downloadFailed": "Não foi possível baixar o Electron {{version}}: {{message}}",
   "installingModules": "Instalando pacotes com {{pm}}…",
   "installingModulesNoScripts": "Instalando pacotes com {{pm}}. Os scripts de instalação estão desativados porque este fiddle não é considerado confiável.",
   "modulesFailed": "Falha ao instalar os pacotes: {{message}}",
   "pmMissing": "{{pm}} não foi encontrado. Instale-o para usar pacotes: {{url}}",
-  "versionUnavailable": "O Electron {{version}} não pode ser executado neste computador.",
-  "versionUnknown": "O Electron {{version}} não é uma versão conhecida.",
-  "localBuildMissing": "O build local “{{name}}” está sem o binário do Electron.",
   "esmNeeds28": "O main.mjs exige o Electron 28 ou posterior.",
   "envInvalid": "Entradas de ambiente que não puderam ser lidas foram ignoradas: {{entries}}",
   "envBlocked": "Variáveis de ambiente que os fiddles não podem definir foram ignoradas, porque carregam código no Electron ou alteram a forma como ele inicia: {{keys}}",
@@ -40,6 +36,5 @@ export default {
   "bisectTooFew": "O bisect precisa de pelo menos duas versões entre a boa e a ruim.",
   "bisectGoodNotOlder": "A versão boa deve ser mais antiga que a ruim.",
   "openCompareMessage": "Abrir a comparação no GitHub?",
-  "openCompareButton": "Abrir",
-  "cancel": "Cancelar"
+  "openCompareButton": "Abrir"
 } as const;
