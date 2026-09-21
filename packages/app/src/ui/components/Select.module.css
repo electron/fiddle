@@ -11,28 +11,13 @@
 }
 
 .trigger {
+  composes: lu-field-box from global;
   appearance: none;
   display: flex;
-  align-items: center;
-  gap: var(--lu-space-2);
   width: 100%;
-  height: var(--lu-size-control);
-  min-width: 0;
-  padding: 0 11px;
-  border: 1px solid var(--lu-line-strong);
-  border-radius: var(--lu-radius-control);
-  corner-shape: squircle;
-  background: var(--lu-field);
-  color: var(--lu-ink);
-  font: var(--lu-type-body);
-  letter-spacing: var(--lu-type-body-tracking);
   text-align: left;
   cursor: default;
   -webkit-app-region: no-drag;
-  transition:
-    border-color var(--lu-dur-fast) var(--lu-ease),
-    background-color var(--lu-dur-fast) var(--lu-ease),
-    box-shadow var(--lu-dur-base) var(--lu-ease);
 }
 
 .trigger[data-hovered] {
@@ -59,11 +44,8 @@
 }
 
 .value {
+  composes: lu-truncate from global;
   flex: 1;
-  min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
   font-variant-numeric: tabular-nums;
 }
 
