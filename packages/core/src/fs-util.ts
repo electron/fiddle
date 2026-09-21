@@ -42,6 +42,8 @@ export async function rename(from: string, to: string): Promise<void> {
         process.platform === 'win32' &&
         (code === 'EPERM' || code === 'EACCES' || code === 'EBUSY');
       if (!transient || Date.now() - start + delay > RENAME_RETRY_MS) throw err;
+      // A folder already at `to` is EPERM on Windows too, and no retry gets past it.
+      if ((await fs.stat(to).catch(() => undefined))?.isDirectory()) throw err;
       await sleep(delay);
     }
   }

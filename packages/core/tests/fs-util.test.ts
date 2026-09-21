@@ -28,6 +28,14 @@ describe('rename()', () => {
     expect(spy).toHaveBeenCalledTimes(2);
   });
 
+  it('gives up at once on Windows when a folder already sits at the destination', async () => {
+    Object.defineProperty(process, 'platform', { ...platform, value: 'win32' });
+    const spy = vi.spyOn(fs.promises, 'rename').mockRejectedValue(fail('EPERM'));
+
+    await expect(rename('a', os.tmpdir())).rejects.toHaveProperty('code', 'EPERM');
+    expect(spy).toHaveBeenCalledTimes(1);
+  });
+
   it('throws at once elsewhere, where these errors are not transient', async () => {
     Object.defineProperty(process, 'platform', { ...platform, value: 'linux' });
     const spy = vi.spyOn(fs.promises, 'rename').mockRejectedValue(fail('EACCES'));
