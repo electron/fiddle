@@ -13,6 +13,7 @@ const mocks = vi.hoisted(() => ({
   files: [] as { name: string; visible: boolean }[],
   localBuilds: [] as { id: string; name: string; available: boolean }[],
   showToast: vi.fn(),
+  editorActions: [] as { id: string; label: string; run(): unknown }[],
 }));
 
 vi.mock('../../../ipc/renderer', () => ({
@@ -42,6 +43,9 @@ vi.mock('../../../ui', async (importOriginal) => ({
   ...(await importOriginal<typeof import('../../../ui')>()),
   showToast: mocks.showToast,
 }));
+vi.mock('../../editor/editor-state', () => ({
+  getEditorActions: () => mocks.editorActions,
+}));
 vi.mock('../run/use-run', () => ({ useReleases: () => mocks.releases }));
 vi.mock('../onboarding/OnboardingTour', () => ({ OnboardingTour: () => null }));
 vi.mock('react-i18next', () => ({
@@ -52,7 +56,6 @@ vi.mock('react-i18next', () => ({
 }));
 
 import { CommandPalette } from './CommandPalette';
-import { setEditorActionProvider } from './editor-actions';
 
 const input = () => screen.getByRole('combobox', { name: 'label' });
 
@@ -74,7 +77,7 @@ beforeEach(() => {
 afterEach(() => {
   vi.restoreAllMocks();
   vi.unstubAllGlobals();
-  setEditorActionProvider(undefined);
+  mocks.editorActions = [];
 });
 
 const selected = () => screen.getByRole('option', { selected: true }).textContent;
@@ -147,9 +150,7 @@ describe('CommandPalette', () => {
     mocks.localBuilds = [{ id: 'b1', name: 'Debug build', available: true }];
     mocks.releases = [{ version: '44.0.1', supported: true }];
     const format = vi.fn();
-    setEditorActionProvider(() => [
-      { id: 'format', label: 'Format document', run: format },
-    ]);
+    mocks.editorActions = [{ id: 'format', label: 'Format document', run: format }];
     render(<CommandPalette />);
 
     await pick('preload.js');

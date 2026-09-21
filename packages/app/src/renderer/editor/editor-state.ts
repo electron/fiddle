@@ -1,5 +1,4 @@
 import { documentsApi } from '../../ipc/renderer';
-import { setEditorActionProvider } from '../features/palette/editor-actions';
 import { createStore, useStore } from '../store';
 import type { monaco } from './monaco';
 
@@ -33,14 +32,15 @@ export function setCursor(file: string, line: number, column: number): void {
 
 export function setFocusedEditor(editor: monaco.editor.IStandaloneCodeEditor): void {
   focused = editor;
-  // Its actions show up in the app's command palette.
-  setEditorActionProvider(() =>
-    editor.getSupportedActions().map((action) => ({
-      id: action.id,
-      label: action.label,
-      run: () => action.run(),
-    })),
-  );
+}
+
+/** The focused editor's actions, for the command palette. */
+export function getEditorActions(): { id: string; label: string; run(): unknown }[] {
+  return (focused?.getSupportedActions() ?? []).map((action) => ({
+    id: action.id,
+    label: action.label,
+    run: () => action.run(),
+  }));
 }
 
 type ViewState = monaco.editor.ICodeEditorViewState | null;
@@ -80,9 +80,7 @@ export async function renameFile(from: string, to: string): Promise<void> {
 
 /** A disposed editor stops being the focused one; another pane's editor stays it. */
 export function clearFocusedEditor(editor: monaco.editor.IStandaloneCodeEditor): void {
-  if (focused !== editor) return;
-  focused = null;
-  setEditorActionProvider(undefined);
+  if (focused === editor) focused = null;
 }
 
 export async function formatFocusedEditor(): Promise<void> {

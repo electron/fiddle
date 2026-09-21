@@ -16,12 +16,12 @@ import type { AppState, ReleaseRow, WindowState } from '../../../shared/stores';
 import { cx, Icon, Kbd, type IconName } from '../../../ui';
 import menu from '../../../ui/components/Menu.module.css';
 import { useAppState, useWindowState } from '../../state';
+import { getEditorActions } from '../../editor/editor-state';
 import { toastError } from '../../toast-error';
 import { useCommand } from '../../hooks';
 import { OnboardingTour } from '../onboarding/OnboardingTour';
 import { useReleases } from '../run/use-run';
 import styles from './CommandPalette.module.css';
-import { getEditorActions } from './editor-actions';
 import { pushRecent, rankItems, type PaletteItem, type PaletteKind } from './rank';
 
 const RECENT_KEY = 'fiddle.palette.recent';
