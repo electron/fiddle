@@ -4,6 +4,13 @@ import { cx } from '../cx';
 import { Icon, type IconName } from '../icons/Icon';
 import styles from './Content.module.css';
 
+/** Adapts react-aria's single selection to an id callback. */
+export const singleSelection =
+  (onChange: (id: string) => void) => (keys: 'all' | Iterable<unknown>) => {
+    const [key] = keys === 'all' ? [] : [...keys];
+    if (key != null) onChange(String(key));
+  };
+
 export interface ListProps {
   'aria-label': string;
   children: ReactNode;
@@ -19,11 +26,7 @@ export function List({ children, value, onChange, className, ...rest }: ListProp
       aria-label={rest['aria-label']}
       selectionMode="single"
       selectedKeys={value === null ? [] : [value]}
-      onSelectionChange={(keys) => {
-        if (keys === 'all') return;
-        const [key] = [...keys];
-        if (key != null) onChange(String(key));
-      }}
+      onSelectionChange={singleSelection(onChange)}
       className={cx(styles.list, className)}
     >
       {children}

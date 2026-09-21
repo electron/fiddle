@@ -1,7 +1,7 @@
 import { fireEvent, render, screen } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
-import { Button, IconButton } from './Button';
-import { ToolbarButton, ToolbarCapsule } from './Toolbar';
+import { Button, IconButton, ToolbarButton } from './Button';
+import { ToolbarCapsule } from './Toolbar';
 
 describe('Button', () => {
   it('shows the key-cap hint, and hides it while loading', () => {
