@@ -89,8 +89,7 @@ export function registerProtocolClient(): void {
 /** macOS, first launch of a packaged app outside /Applications: offers to move it there. */
 export async function offerMoveToApplications(firstLaunch: boolean): Promise<void> {
   if (process.platform !== 'darwin' || !firstLaunch) return;
-  if (!app.isPackaged || isTestMode() || app.isInApplicationsFolder())
-    return;
+  if (!app.isPackaged || isTestMode() || app.isInApplicationsFolder()) return;
   const tp = tm('mainPlatform');
   const { response } = await dialog.showMessageBox({
     type: 'question',
