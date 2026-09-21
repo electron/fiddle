@@ -170,23 +170,10 @@ const ShellView = memo(function ShellView({
     showPanes(next, name);
   };
 
-  const moveTab = (direction: -1 | 1) => {
-    if (!active) return;
-    const index = visibleNames.indexOf(active);
-    if (direction < 0 ? index <= 0 : index >= visibleNames.length - 1) return;
-    const before = direction < 0 ? visibleNames[index - 1] : visibleNames[index + 2];
-    void moveFile(active, before ?? null, failTitle);
-  };
-
   // Window.Command handlers that act on view state and Monaco. Kept in a ref, not `useEffectEvent`: React never
   // updates the effect events of a memo component, so it would keep the first render's state.
   const onCommand = (id: string) => {
     if (id === 'view.toggleSplit') toggleSplit();
-    else if (id === 'editor.moveTabLeft') moveTab(-1);
-    else if (id === 'editor.moveTabRight') moveTab(1);
-    else if (id === 'view.toggleSidebar') changeLayout({ sidebar: !layout.sidebar });
-    else if (id === 'view.toggleConsole')
-      changeLayout({ consoleVisible: !layout.consoleVisible });
     else if (id === 'editor.toggleSoftWrap') toggleSoftWrap();
     else if (id === 'editor.toggleMinimap') toggleMinimap();
     else if (id === 'editor.format') void formatFocusedEditor();

@@ -1,4 +1,4 @@
-import { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { I18nProvider } from 'react-aria-components';
 import { useTranslation } from 'react-i18next';
 
@@ -31,7 +31,6 @@ export function App() {
   useEffect(() => {
     if (storeError) log.error('a store failed to load', storeError);
   }, [storeError]);
-  const material = appState?.material;
   const locale = appState?.locale;
 
   const themeId = appState?.settings.theme ?? BUILTIN_THEME;
@@ -56,13 +55,6 @@ export function App() {
     appState?.settings.appearance ?? 'system',
     customTheme?.id === themeId ? customTheme.data : null,
   );
-
-  // Lucent: without an OS material, the tokens swap to their opaque fallbacks.
-  useLayoutEffect(() => {
-    if (!material) return;
-    document.documentElement.classList.toggle('lu-no-material', material === 'none');
-    document.documentElement.dataset.material = material;
-  }, [material]);
 
   useSyncLocale(locale);
 

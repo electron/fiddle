@@ -20,12 +20,6 @@ import { useConsoleLines, useRunState } from './use-run';
 
 type ProcessFilter = 'all' | 'main' | 'renderer';
 
-const processKey = {
-  fiddle: 'processFiddle',
-  main: 'processMain',
-  renderer: 'processRenderer',
-} as const satisfies Record<OutputLine['process'], string>;
-
 const TIME: Intl.DateTimeFormatOptions = {
   hour: '2-digit',
   minute: '2-digit',
@@ -46,9 +40,9 @@ export const ConsolePane = memo(function ConsolePane() {
   const [query, setQuery] = useState('');
   const { formatDate } = useFormat();
   const processLabels: Record<OutputLine['process'], string> = {
-    fiddle: t(processKey.fiddle),
-    main: t(processKey.main),
-    renderer: t(processKey.renderer),
+    fiddle: t('processFiddle'),
+    main: t('processMain'),
+    renderer: t('processRenderer'),
   };
 
   const needle = query.trim().toLowerCase();
