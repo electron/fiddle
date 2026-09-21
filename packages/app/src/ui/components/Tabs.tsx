@@ -73,6 +73,12 @@ export interface TabProps {
   className?: string;
 }
 
+/**
+ * React Aria selects a tab on mouse down, which would show a file before its tab can be dragged to another pane.
+ * `useTab` reads this option though `TabProps` doesn't declare it.
+ */
+const SELECT_ON_PRESS_UP: object = { shouldSelectOnPressUp: true };
+
 export function Tab({
   id,
   children,
@@ -126,6 +132,7 @@ export function Tab({
     <AriaTab
       ref={setNode}
       id={id}
+      {...(drag ? SELECT_ON_PRESS_UP : undefined)}
       isDisabled={isDisabled}
       className={cx(styles.tab, className)}
       data-closable={closable || undefined}

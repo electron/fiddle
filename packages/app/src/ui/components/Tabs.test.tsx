@@ -106,6 +106,39 @@ describe('Tabs', () => {
     expect(setData).toHaveBeenCalledWith('application/x-test', 'main.js');
   });
 
+  it('selects a draggable tab when the mouse is released, not pressed, so a drag leaves it be', () => {
+    const onChange = vi.fn();
+    const drag = (name: string) => ({ type: 'application/x-test', data: name });
+    render(
+      <Tabs defaultValue="main" onChange={onChange}>
+        <TabList aria-label="Open files">
+          <Tab id="main" drag={drag('main.js')}>
+            main.js
+          </Tab>
+          <Tab id="css" drag={drag('styles.css')}>
+            styles.css
+          </Tab>
+          <Tab id="fixed">fixed</Tab>
+        </TabList>
+      </Tabs>,
+    );
+    const press = { pointerType: 'mouse', button: 0, detail: 1 };
+    const tab = screen.getByRole('tab', { name: 'styles.css' });
+    fireEvent.pointerDown(tab, press);
+    expect(onChange).not.toHaveBeenCalled();
+    fireEvent.dragStart(tab);
+    fireEvent.pointerUp(tab, press);
+    expect(onChange).not.toHaveBeenCalled();
+
+    fireEvent.pointerDown(tab, press);
+    fireEvent.pointerUp(tab, press);
+    fireEvent.click(tab, { detail: 1 });
+    expect(onChange).toHaveBeenLastCalledWith('css');
+    // A tab that can't be dragged keeps selecting on press.
+    fireEvent.pointerDown(screen.getByRole('tab', { name: 'fixed' }), press);
+    expect(onChange).toHaveBeenLastCalledWith('fixed');
+  });
+
   it('marks where a dragged tab would land', () => {
     const { rerender } = render(
       <Tabs defaultValue="main">
