@@ -12,6 +12,7 @@ import {
   MISSING_TEMPLATE_TTL_MS,
   readQuickStart,
   templateBranch,
+  type TemplateLoaderOptions,
 } from './templates';
 
 const staticDir = fileURLToPath(new URL('../../static', import.meta.url));
@@ -29,6 +30,16 @@ beforeEach(async () => {
 afterEach(async () => {
   await rm(cacheDir, { recursive: true, force: true });
 });
+
+function templates(fetchFn: typeof fetch, options: Partial<TemplateLoaderOptions> = {}) {
+  return createTemplateLoader({
+    staticDir,
+    cacheDir,
+    isReleasedMajor: released,
+    fetch: fetchFn,
+    ...options,
+  });
+}
 
 function zipFetch(status = 200) {
   const urls: string[] = [];
@@ -75,12 +86,7 @@ describe('quick-start', () => {
 describe('createTemplateLoader', () => {
   it('downloads, extracts and caches the archive root', async () => {
     const { fn, urls } = zipFetch();
-    const loader = createTemplateLoader({
-      staticDir,
-      cacheDir,
-      isReleasedMajor: released,
-      fetch: fn,
-    });
+    const loader = templates(fn);
     const files = await loader.getTemplate('30.1.0');
     expect(files).toEqual(FIXTURE_FILES);
     expect(urls).toEqual([
@@ -103,36 +109,21 @@ describe('createTemplateLoader', () => {
 
     // Cached on disk for a new loader.
     const second = zipFetch();
-    const again = createTemplateLoader({
-      staticDir,
-      cacheDir,
-      isReleasedMajor: released,
-      fetch: second.fn,
-    });
+    const again = templates(second.fn);
     expect(await again.getTemplate('30.0.0')).toEqual(FIXTURE_FILES);
     expect(second.urls).toHaveLength(0);
   });
 
   it('shares one download between concurrent callers', async () => {
     const { fn, urls } = zipFetch();
-    const loader = createTemplateLoader({
-      staticDir,
-      cacheDir,
-      isReleasedMajor: released,
-      fetch: fn,
-    });
+    const loader = templates(fn);
     await Promise.all([loader.getTemplate('29.0.0'), loader.getTemplate('29.1.0')]);
     expect(urls).toHaveLength(1);
   });
 
   it('loads the test template from its branch', async () => {
     const { fn, urls } = zipFetch();
-    const loader = createTemplateLoader({
-      staticDir,
-      cacheDir,
-      isReleasedMajor: released,
-      fetch: fn,
-    });
+    const loader = templates(fn);
     expect(await loader.getTestTemplate()).toEqual(FIXTURE_FILES);
     expect(urls).toEqual([
       'https://github.com/electron/minimal-repro/archive/test-template.zip',
@@ -141,12 +132,7 @@ describe('createTemplateLoader', () => {
 
   it('uses the bundled template for unreleased majors and local builds', async () => {
     const { fn, urls } = zipFetch();
-    const loader = createTemplateLoader({
-      staticDir,
-      cacheDir,
-      isReleasedMajor: released,
-      fetch: fn,
-    });
+    const loader = templates(fn);
     const quickStart = await readQuickStart(staticDir);
     expect(await loader.getTemplate('99.0.0-nightly.20300101')).toEqual(quickStart);
     expect(await loader.getTemplate()).toEqual(quickStart);
@@ -157,11 +143,7 @@ describe('createTemplateLoader', () => {
     const { fn, urls } = zipFetch(500);
     const fallbacks: string[] = [];
     const errors: unknown[] = [];
-    const loader = createTemplateLoader({
-      staticDir,
-      cacheDir,
-      isReleasedMajor: released,
-      fetch: fn,
+    const loader = templates(fn, {
       onFallback: (branch, error) => {
         fallbacks.push(branch);
         errors.push(error);
@@ -185,13 +167,7 @@ describe('createTemplateLoader', () => {
     const quickStart = await readQuickStart(staticDir);
     const { fn, urls } = zipFetch(404);
     const errors: unknown[] = [];
-    const loader = createTemplateLoader({
-      staticDir,
-      cacheDir,
-      isReleasedMajor: released,
-      fetch: fn,
-      onFallback: (_branch, error) => errors.push(error),
-    });
+    const loader = templates(fn, { onFallback: (_branch, error) => errors.push(error) });
     expect(await loader.getTemplate('30.0.0')).toEqual(quickStart);
     expect(urls).toEqual([
       'https://github.com/electron/minimal-repro/archive/30-x-y.zip',
@@ -212,13 +188,7 @@ describe('createTemplateLoader', () => {
     // Nor does the next launch, while the marker is fresh.
     const next = zipFetch(404);
     const onFallback = (_branch: string, error: unknown) => errors.push(error);
-    const relaunched = createTemplateLoader({
-      staticDir,
-      cacheDir,
-      isReleasedMajor: released,
-      fetch: next.fn,
-      onFallback,
-    });
+    const relaunched = templates(next.fn, { onFallback });
     expect(await relaunched.getTemplate('30.0.0')).toEqual(quickStart);
     expect(next.urls).toHaveLength(0);
     expect(errors).toHaveLength(2);
@@ -228,12 +198,7 @@ describe('createTemplateLoader', () => {
     const dayAgo = new Date(Date.now() - MISSING_TEMPLATE_TTL_MS - 1000);
     await utimes(path.join(cacheDir, 'minimal-repro-30-x-y.missing'), dayAgo, dayAgo);
     const later = zipFetch();
-    const nextDay = createTemplateLoader({
-      staticDir,
-      cacheDir,
-      isReleasedMajor: released,
-      fetch: later.fn,
-    });
+    const nextDay = templates(later.fn);
     expect(await nextDay.getTemplate('30.0.0')).toEqual(FIXTURE_FILES);
     expect(later.urls).toEqual([
       'https://github.com/electron/minimal-repro/archive/30-x-y.zip',
@@ -247,32 +212,17 @@ describe('createTemplateLoader', () => {
   it('refreshes an expired marker when the branch is still missing', async () => {
     const quickStart = await readQuickStart(staticDir);
     const first = zipFetch(404);
-    await createTemplateLoader({
-      staticDir,
-      cacheDir,
-      isReleasedMajor: released,
-      fetch: first.fn,
-    }).getTemplate('30.0.0');
+    await templates(first.fn).getTemplate('30.0.0');
     const marker = path.join(cacheDir, 'minimal-repro-30-x-y.missing');
     const dayAgo = new Date(Date.now() - MISSING_TEMPLATE_TTL_MS - 1000);
     await utimes(marker, dayAgo, dayAgo);
 
     const second = zipFetch(404);
-    const expired = createTemplateLoader({
-      staticDir,
-      cacheDir,
-      isReleasedMajor: released,
-      fetch: second.fn,
-    });
+    const expired = templates(second.fn);
     expect(await expired.getTemplate('30.0.0')).toEqual(quickStart);
     expect(second.urls).toHaveLength(1);
     const third = zipFetch(404);
-    await createTemplateLoader({
-      staticDir,
-      cacheDir,
-      isReleasedMajor: released,
-      fetch: third.fn,
-    }).getTemplate('30.0.0');
+    await templates(third.fn).getTemplate('30.0.0');
     expect(third.urls).toHaveLength(0);
   });
 
@@ -284,11 +234,7 @@ describe('createTemplateLoader', () => {
     const quickStart = await readQuickStart(staticDir);
     for (const fn of [offline, corrupt]) {
       const errors: unknown[] = [];
-      const loader = createTemplateLoader({
-        staticDir,
-        cacheDir,
-        isReleasedMajor: released,
-        fetch: fn,
+      const loader = templates(fn, {
         onFallback: (_branch, error) => errors.push(error),
       });
       expect(await loader.getTemplate('30.0.0')).toEqual(quickStart);
@@ -306,13 +252,7 @@ describe('createTemplateLoader', () => {
       await gate;
       return fn(input, init);
     }) as typeof fetch;
-    const loader = createTemplateLoader({
-      staticDir,
-      cacheDir,
-      isReleasedMajor: released,
-      fetch: slow,
-      waitMs: 60_000,
-    });
+    const loader = templates(slow, { waitMs: 60_000 });
 
     // A call's own waitMs overrides the loader's.
     expect(await loader.getTemplate('30.0.0', 20)).toEqual(quickStart);
@@ -327,26 +267,12 @@ describe('createTemplateLoader', () => {
     const errors: unknown[] = [];
     const onFallback = (_branch: string, error: unknown) => errors.push(error);
 
-    const slow = createTemplateLoader({
-      staticDir,
-      cacheDir,
-      isReleasedMajor: released,
-      fetch: hangingFetch,
-      timeoutMs: 20,
-      onFallback,
-    });
+    const slow = templates(hangingFetch, { timeoutMs: 20, onFallback });
     expect(await slow.getTemplate('30.0.0')).toEqual(quickStart);
     expect(errors[0]).toMatchObject({ code: ErrorCode.network });
 
     const controller = new AbortController();
-    const aborted = createTemplateLoader({
-      staticDir,
-      cacheDir,
-      isReleasedMajor: released,
-      fetch: hangingFetch,
-      signal: controller.signal,
-      onFallback,
-    });
+    const aborted = templates(hangingFetch, { signal: controller.signal, onFallback });
     const pending = aborted.getTemplate('31.0.0');
     controller.abort();
     expect(await pending).toEqual(quickStart);
