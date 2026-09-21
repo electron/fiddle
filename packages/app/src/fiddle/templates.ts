@@ -1,16 +1,15 @@
 import { access, mkdir, mkdtemp, readdir, rm, stat, writeFile } from 'node:fs/promises';
 import * as path from 'node:path';
 
-import { extractZip, renameWithRetry } from '@electron/fiddle-core';
+import { extractZip, renameIntoPlace } from '@electron/fiddle-core';
 import * as semver from 'semver';
 
+import { DEFAULT_ENDPOINTS } from '../shared/endpoints';
 import { ErrorCode, FiddleError } from '../shared/errors';
 import { reasonError } from './error-reasons';
 import type { FileMap } from './files';
 import { readFiddleFolder } from './folder';
 
-export const MINIMAL_REPRO_ARCHIVE_URL =
-  'https://github.com/electron/minimal-repro/archive';
 export const TEST_TEMPLATE_BRANCH = 'test-template';
 export const QUICK_START_DIR = 'electron-quick-start';
 export const TEMPLATE_TIMEOUT_MS = 60_000;
@@ -145,7 +144,8 @@ async function downloadTemplate(
     );
   }
 
-  const url = `${options.archiveBaseUrl ?? MINIMAL_REPRO_ARCHIVE_URL}/${branch}.zip`;
+  const base = options.archiveBaseUrl ?? `${DEFAULT_ENDPOINTS.minimalRepro}/archive`;
+  const url = `${base}/${branch}.zip`;
   let archive: Uint8Array;
   try {
     archive = await fetchArchive(options, url);
@@ -171,12 +171,8 @@ async function downloadTemplate(
     await extractZip(zipPath, out);
     const root = await archiveRoot(out);
     const { files } = await readFiddleFolder(root);
-    try {
-      await renameWithRetry(root, target);
-    } catch (error) {
-      // Another download may have finished first.
-      if (!(await exists(target))) throw error;
-    }
+    // Another download may have finished first: then that one is kept.
+    await renameIntoPlace(root, target);
     return files;
   } finally {
     await rm(work, { recursive: true, force: true });

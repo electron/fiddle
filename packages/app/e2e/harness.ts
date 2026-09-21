@@ -22,12 +22,12 @@ export interface AppHandle {
  * One app per spec file, launched before the first test and closed after the last. A failing test
  * prints diagnostics and keeps the temp dir; an isolation violation fails the file.
  */
-export function useApp(options: LaunchOptions = {}): AppHandle {
+export function useApp(options: Omit<LaunchOptions, 'fixtures'> = {}): AppHandle {
   let app: FiddleApp | undefined;
   let fixtures: FixtureServer | undefined;
 
   beforeAll(async () => {
-    fixtures = options.fixtures ?? (await startFixtureServer());
+    fixtures = await startFixtureServer();
     app = await launchApp({ ...options, fixtures });
   });
 
@@ -44,7 +44,7 @@ export function useApp(options: LaunchOptions = {}): AppHandle {
       await app?.assertClean();
     } finally {
       await app?.close();
-      if (!options.fixtures) await fixtures?.close();
+      await fixtures?.close();
     }
   });
 

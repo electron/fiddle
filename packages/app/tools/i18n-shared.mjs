@@ -67,15 +67,6 @@ export function translatedLocales(dir = localesDir) {
     .sort();
 }
 
-/** `{ ns: { key: { message, description, maxLength? } } }` */
-export function loadEnglish(dir = localesDir) {
-  const catalog = {};
-  for (const ns of namespacesOf('en', dir)) {
-    catalog[ns] = readJsonFile(path.join(dir, 'en', `${ns}.json`));
-  }
-  return catalog;
-}
-
 /** `{ ns: { key: message } }` for every namespace file the locale has. */
 export function loadMessages(locale, dir = localesDir) {
   const catalog = {};
@@ -84,6 +75,9 @@ export function loadMessages(locale, dir = localesDir) {
   }
   return catalog;
 }
+
+/** `{ ns: { key: { message, description, maxLength? } } }`: English messages are objects. */
+export const loadEnglish = (dir = localesDir) => loadMessages('en', dir);
 
 /** The CLDR plural categories of a locale, in canonical order. */
 export function pluralCategories(locale) {

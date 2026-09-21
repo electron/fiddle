@@ -264,7 +264,6 @@ function stubOsSideEffects(state: TestState): void {
       return '';
     },
     showItemInFolder: (file: string) => record('shell.showItemInFolder', file),
-    beep: () => record('shell.beep'),
   });
   Object.assign(app, {
     setAsDefaultProtocolClient: (protocol: string) => {
@@ -281,17 +280,9 @@ function stubOsSideEffects(state: TestState): void {
       record('app.moveToApplicationsFolder');
       return false;
     },
-    setUserTasks: (tasks: unknown[]) => {
-      record('app.setUserTasks', tasks);
-      return true;
-    },
     setJumpList: (categories: unknown) => {
       record('app.setJumpList', categories);
       return 'ok';
-    },
-    setBadgeCount: (count?: number) => {
-      record('app.setBadgeCount', count);
-      return true;
     },
   });
   // The real clipboard is shared with every other app, including other e2e apps and the developer's.
@@ -391,21 +382,13 @@ function stayInBackground(state: TestState): void {
 
 /** Only what's useful in assertions; options can hold windows and functions. */
 function summarize(options: Record<string, unknown>): Record<string, unknown> {
-  const keys = [
-    'type',
-    'title',
-    'message',
-    'detail',
-    'buttons',
-    'checkboxLabel',
-    'defaultPath',
-    'filters',
-    'properties',
-    'cancelId',
-    'defaultId',
-  ];
+  const keys =
+    'type title message detail buttons checkboxLabel defaultPath filters properties cancelId defaultId';
   return Object.fromEntries(
-    keys.filter((key) => key in options).map((key) => [key, options[key]]),
+    keys
+      .split(' ')
+      .filter((key) => key in options)
+      .map((key) => [key, options[key]]),
   );
 }
 
@@ -436,20 +419,10 @@ function scriptDialogs(state: TestState): void {
   Object.assign(dialog, {
     showMessageBox: async (...args: unknown[]) =>
       respond('messageBox', optionsOf(args)) as MessageBox,
-    showMessageBoxSync: (...args: unknown[]) =>
-      (respond('messageBox', optionsOf(args)) as MessageBox).response,
     showOpenDialog: async (...args: unknown[]) =>
       respond('open', optionsOf(args)) as Open,
-    showOpenDialogSync: (...args: unknown[]) => {
-      const result = respond('open', optionsOf(args)) as Open;
-      return result.canceled ? undefined : result.filePaths;
-    },
     showSaveDialog: async (...args: unknown[]) =>
       respond('save', optionsOf(args)) as Save,
-    showSaveDialogSync: (...args: unknown[]) => {
-      const result = respond('save', optionsOf(args)) as Save;
-      return result.canceled ? '' : result.filePath;
-    },
     showErrorBox: (title: string, content: string) => {
       state.dialogs.push({
         kind: 'errorBox',

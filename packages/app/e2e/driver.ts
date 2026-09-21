@@ -388,10 +388,6 @@ export class FiddleApp {
 }
 
 export interface LaunchOptions {
-  /** Default: out/test-build (`yarn workspace electron-fiddle driver:build`). */
-  appDir?: string;
-  /** Extra Electron arguments. */
-  args?: string[];
   /** Extra environment variables for the app. */
   env?: Record<string, string>;
   /** Default `en-US`. */
@@ -400,12 +396,8 @@ export interface LaunchOptions {
   seed?: number;
   /** Share a fixture server; by default each app gets its own. */
   fixtures?: FixtureServer;
-  /** Launch timeout in ms. Default 30000. */
-  timeout?: number;
   /** Keep the temp dir after close even if nothing failed. */
   keepArtifacts?: boolean;
-  /** Echo the app's stdout and stderr. Default: FIDDLE_E2E_VERBOSE=1. */
-  verbose?: boolean;
 }
 
 const requireFromApp = createRequire(path.join(APP_DIR, 'package.json'));
@@ -573,11 +565,10 @@ async function connectWhenReady(
 
 /** Launches the test build and waits for its first window to be shown. */
 export async function launchApp(options: LaunchOptions = {}): Promise<FiddleApp> {
-  const appDir = options.appDir ?? TEST_BUILD_DIR;
-  const timeout = options.timeout ?? 30_000;
-  if (!fs.existsSync(path.join(appDir, 'package.json'))) {
+  const timeout = 30_000;
+  if (!fs.existsSync(path.join(TEST_BUILD_DIR, 'package.json'))) {
     throw new Error(
-      `No test build in ${appDir}. Build it with: yarn workspace electron-fiddle driver:build`,
+      `No test build in ${TEST_BUILD_DIR}. Build it with: yarn workspace electron-fiddle driver:build`,
     );
   }
   // Before anything is started, so a failure here leaves nothing to clean up.
@@ -621,12 +612,12 @@ export async function launchApp(options: LaunchOptions = {}): Promise<FiddleApp>
 
   const output = fs.createWriteStream(path.join(testDir, 'app-output.log'));
   const tail: string[] = [];
-  const verbose = options.verbose ?? process.env.FIDDLE_E2E_VERBOSE === '1';
-  const child = spawn(
-    electronPath,
-    [...electronArgs(), appDir, ...(options.args ?? [])],
-    { env, stdio: ['ignore', 'pipe', 'pipe'] },
-  );
+  // FIDDLE_E2E_VERBOSE=1 echoes the app's stdout and stderr.
+  const verbose = process.env.FIDDLE_E2E_VERBOSE === '1';
+  const child = spawn(electronPath, [...electronArgs(), TEST_BUILD_DIR], {
+    env,
+    stdio: ['ignore', 'pipe', 'pipe'],
+  });
   for (const stream of [child.stdout, child.stderr]) {
     stream.on('data', (chunk: Buffer) => {
       output.write(chunk);
