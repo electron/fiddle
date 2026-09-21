@@ -637,9 +637,6 @@ describe('update and delete', () => {
     });
     const result = await history.history('w');
     expect(result.activeSha).toBe(SHA1);
-    expect(result.revisions.map((r) => [r.sha, r.title])).toEqual([
-      [SHA1, { key: 'created' }],
-      [SHA2, { key: 'revision', n: 1 }],
-    ]);
+    expect(result.revisions.map((r) => r.sha)).toEqual([SHA1, SHA2]);
   });
 });

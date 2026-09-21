@@ -106,22 +106,8 @@ it('GetHistory numbers the revisions, with 0 for the one that created the gist',
     id: GIST,
     activeSha: 'b',
     revisions: [
-      {
-        sha: 'a',
-        date: '2026-01-01',
-        additions: 3,
-        deletions: 0,
-        total: 3,
-        title: { key: 'created' },
-      },
-      {
-        sha: 'b',
-        date: '2026-01-02',
-        additions: 1,
-        deletions: 2,
-        total: 3,
-        title: { key: 'revision', n: 1 },
-      },
+      { sha: 'a', date: '2026-01-01', additions: 3, deletions: 0, total: 3 },
+      { sha: 'b', date: '2026-01-02', additions: 1, deletions: 2, total: 3 },
     ],
   });
   expect(await mocks.handlers.GetHistory!()).toEqual({

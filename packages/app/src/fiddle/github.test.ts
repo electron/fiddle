@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
+import { DEFAULT_ENDPOINTS } from '../shared/endpoints';
 import { ErrorCode, FiddleError } from '../shared/errors';
 import { GIST_MAX_FILE_BYTES, GitHubClient, isValidTokenFormat } from './github';
 import { ANONYMOUS_GIST_OWNER } from './trust';
@@ -225,21 +226,17 @@ describe('where the token goes', () => {
 
   it('is sent to a loopback fixture server only when that is allowed (test mode)', async () => {
     const { fn, calls } = mockFetch(ok);
-    const apiBaseUrl = 'http://127.0.0.1:4567/api';
+    const endpoints = { ...DEFAULT_ENDPOINTS, githubApi: 'http://127.0.0.1:4567/api' };
     await new GitHubClient({
       token: TOKEN,
-      apiBaseUrl,
+      endpoints,
       fetch: fn,
       allowLoopbackHttp: true,
     }).getAuthenticatedUser();
     expect(calls[0]!.url).toBe('http://127.0.0.1:4567/api/user');
     expect(calls[0]!.headers.Authorization).toBe(`Bearer ${TOKEN}`);
 
-    await new GitHubClient({
-      token: TOKEN,
-      apiBaseUrl,
-      fetch: fn,
-    }).getAuthenticatedUser();
+    await new GitHubClient({ token: TOKEN, endpoints, fetch: fn }).getAuthenticatedUser();
     expect(calls[1]!.headers.Authorization).toBeUndefined();
   });
 
@@ -258,7 +255,7 @@ describe('where the token goes', () => {
     const { fn, calls } = mockFetch(ok);
     await new GitHubClient({
       token: TOKEN,
-      apiBaseUrl: 'http://example.com',
+      endpoints: { ...DEFAULT_ENDPOINTS, githubApi: 'http://example.com' },
       fetch: fn,
     }).getAuthenticatedUser();
     expect(calls[0]!.headers.Authorization).toBeUndefined();
@@ -651,7 +648,7 @@ describe('listGistRevisions', () => {
     change_status: { total: additions + deletions, additions, deletions },
   });
 
-  it('drops empty revisions except the first, oldest first, with keyed titles', async () => {
+  it('drops empty revisions except the first, oldest first', async () => {
     const { fn, calls } = mockFetch(() =>
       json([
         commit('d'.repeat(40), 0, 3),
@@ -662,10 +659,10 @@ describe('listGistRevisions', () => {
     );
     const revisions = await new GitHubClient({ fetch: fn }).listGistRevisions(ID);
     expect(calls[0]!.url).toBe(`https://api.github.com/gists/${ID}/commits?per_page=100`);
-    expect(revisions.map((r) => [r.sha[0], r.title, r.additions, r.deletions])).toEqual([
-      ['a', { key: 'created' }, 0, 0],
-      ['b', { key: 'revision', n: 1 }, 2, 0],
-      ['d', { key: 'revision', n: 2 }, 0, 3],
+    expect(revisions.map((r) => [r.sha[0], r.additions, r.deletions])).toEqual([
+      ['a', 0, 0],
+      ['b', 2, 0],
+      ['d', 0, 3],
     ]);
   });
 

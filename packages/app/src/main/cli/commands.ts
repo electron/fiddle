@@ -131,12 +131,10 @@ async function templates(ctx: Ctx): Promise<TemplateLoader> {
 
 /** A GitHub client with `GITHUB_TOKEN`, if set. The app's stored credentials are never used. */
 function github(): GitHubClient {
-  const endpoints = getEndpoints();
   const token = process.env.GITHUB_TOKEN;
   return new GitHubClient({
     ...(token ? { token } : {}),
-    apiBaseUrl: endpoints.githubApi,
-    rawOrigins: [endpoints.gistRaw],
+    endpoints: getEndpoints(),
     fetch: netFetch,
   });
 }
@@ -648,27 +646,16 @@ const handlers: Handlers = {
   async 'gist history'(ctx, input) {
     const id = gistIdOf(input.id);
     const revisions = await github().listGistRevisions(id, ctx.signal);
-    const lines = revisions.map((r) =>
+    const lines = revisions.map((r, n) =>
       [
         r.sha,
         r.date,
-        r.title.key === 'created'
-          ? t('resultRevisionCreated')
-          : t('resultRevisionN', { n: r.title.n }),
+        n === 0 ? t('resultRevisionCreated') : t('resultRevisionN', { n }),
         `+${r.additions} -${r.deletions}`,
       ].join('  '),
     );
     return {
-      data: {
-        id,
-        revisions: revisions.map(({ sha, date, additions, deletions, total }) => ({
-          sha,
-          date,
-          additions,
-          deletions,
-          total,
-        })),
-      },
+      data: { id, revisions },
       human: lines.join('\n'),
     };
   },

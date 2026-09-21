@@ -58,12 +58,12 @@ export function bindGitHubIpc({
       return {
         id: history.id,
         activeSha: history.activeSha,
-        revisions: history.revisions.map((r) => ({
-          sha: r.sha,
-          date: r.date,
-          additions: r.additions,
-          deletions: r.deletions,
-          n: r.title.key === 'created' ? 0 : r.title.n,
+        revisions: history.revisions.map(({ sha, date, additions, deletions }, n) => ({
+          sha,
+          date,
+          additions,
+          deletions,
+          n,
         })),
       };
     },
