@@ -1,4 +1,5 @@
 import { spawn } from 'node:child_process';
+import fs from 'node:fs';
 import path from 'node:path';
 
 import { app } from 'electron';
@@ -13,6 +14,18 @@ export const PROTOCOL = 'electron-fiddle';
  */
 export function squirrelStubPath(execPath: string = process.execPath): string {
   return path.resolve(path.dirname(execPath), '..', 'electron-fiddle.exe');
+}
+
+/**
+ * What a shortcut to the app should start: the Squirrel stub when this is a Squirrel install, so it
+ * survives updates, otherwise this executable (MSIX, a portable copy, dev).
+ */
+export function appLauncherPath(): string {
+  if (process.platform === 'win32' && app.isPackaged && !process.windowsStore) {
+    const stub = squirrelStubPath();
+    if (fs.existsSync(stub)) return stub;
+  }
+  return process.execPath;
 }
 
 type SquirrelEvent = 'install' | 'updated' | 'uninstall' | 'obsolete';

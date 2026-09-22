@@ -15,13 +15,14 @@ import type { RunState, WindowState } from '../../shared/stores';
 import { openFolderIn, recentFolders } from '../documents/service';
 import { t, tm } from '../i18n';
 import { log } from '../log';
+import { appLauncherPath } from '../platform/squirrel';
 import type { Services } from '../services';
 import { focusedWindowId, getWindow } from '../windows';
 import {
   ARG_NEW_FIDDLE,
   ARG_NEW_WINDOW,
-  ARG_OPEN_FOLDER,
   jumpListFolder,
+  openFolderArg,
 } from './jump-list';
 import {
   downloadsFinished,
@@ -209,13 +210,15 @@ function dockMenu(
 }
 
 function setJumpList(recent: readonly string[]): void {
+  // The list outlives this version, so its entries start the launcher that survives updates.
+  const program = appLauncherPath();
   const task = (title: string, args: string, description = title) => ({
     type: 'task' as const,
     title,
     description,
-    program: process.execPath,
+    program,
     args,
-    iconPath: process.execPath,
+    iconPath: program,
     iconIndex: 0,
   });
   const tasks = [
@@ -227,9 +230,7 @@ function setJumpList(recent: readonly string[]): void {
     categories.push({
       type: 'custom',
       name: tm('mainUx')('recent'),
-      items: recent.map((dir) =>
-        task(path.basename(dir), `${ARG_OPEN_FOLDER} "${dir}"`, dir),
-      ),
+      items: recent.map((dir) => task(path.basename(dir), openFolderArg(dir), dir)),
     });
   }
   const result = app.setJumpList(categories);
