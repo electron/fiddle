@@ -37,7 +37,6 @@
   "toggleDevTools": "개발자 도구 켜기/끄기",
   "develop": "개발",
   "toggleMenuBar": "제목 표시줄 메뉴 막대 표시/숨기기",
-  "openComponentGallery": "컴포넌트 갤러리 열기",
   "undo": "실행 취소",
   "redo": "다시 실행",
   "cut": "잘라내기",
