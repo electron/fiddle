@@ -1,5 +1,5 @@
 /**
- * What gives way in a narrow title bar (the window is at least 600px wide), before the capsule's version picker
+ * What gives way in a narrow title bar, before the capsule's version picker
  * narrows: the Publish label, then the Open gist button and Run's key hint. The widths are the px the parts' CSS
  * adds up to, with room in the labels for long translations.
  */
@@ -26,8 +26,12 @@ const PUBLISH_LABEL_FROM: Record<Platform, readonly [number, number]> = {
   linux: [634, 674],
   win32: [774, 814],
 };
-/** Below this, Windows also drops Open gist and the Run hint; the others fit them down to 600. */
-const WIN32_ROOMY_FROM = [612, 652] as const;
+/** The narrowest window where Open gist and the Run hint stay, with the picker at its narrowest. */
+const ROOMY_FROM: Record<Platform, readonly [number, number]> = {
+  darwin: [534, 574],
+  linux: [472, 512],
+  win32: [612, 652],
+};
 
 /** What the title bar shows at `width` px. */
 export function titleBarFit(
@@ -36,7 +40,7 @@ export function titleBarFit(
   menuBar: boolean,
 ): TitleBarFit {
   const i = menuBar ? 1 : 0;
-  const roomy = platform !== 'win32' || width >= WIN32_ROOMY_FROM[i];
+  const roomy = width >= ROOMY_FROM[platform][i];
   return {
     publishLabel: width >= PUBLISH_LABEL_FROM[platform][i],
     openGistButton: roomy,

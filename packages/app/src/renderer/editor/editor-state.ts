@@ -34,13 +34,18 @@ export function setFocusedEditor(editor: monaco.editor.IStandaloneCodeEditor): v
   focused = editor;
 }
 
-/** The focused editor's actions, for the command palette. */
+/** The focused editor's actions, for the command palette. Empty if Monaco refuses, so the palette still opens. */
 export function getEditorActions(): { id: string; label: string; run(): unknown }[] {
-  return (focused?.getSupportedActions() ?? []).map((action) => ({
-    id: action.id,
-    label: action.label,
-    run: () => action.run(),
-  }));
+  try {
+    return (focused?.getSupportedActions() ?? []).map((action) => ({
+      id: action.id,
+      label: action.label,
+      run: () => action.run(),
+    }));
+  } catch (error) {
+    console.error('[fiddle] listing the editor actions failed', error);
+    return [];
+  }
 }
 
 type ViewState = monaco.editor.ICodeEditorViewState | null;

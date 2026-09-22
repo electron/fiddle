@@ -83,7 +83,10 @@ export function Sidebar({
     )?.trim();
     if (!name) return;
     // Main checks the name against the file rules, and words a refusal in the user's language.
-    await documentsApi.AddFile(name).then(() => onOpen(name), fail);
+    await documentsApi
+      .AddFile(name)
+      .then(() => onOpen(name))
+      .catch(fail);
   };
 
   const renameFile = async (name: string) => {

@@ -39,9 +39,25 @@ describe('titleBarFit', () => {
       );
   });
 
+  it('drops Open gist and the Run hint on every platform, as page zoom narrows the bar below 600', () => {
+    for (const [platform, width, menuBar, fit] of [
+      ['darwin', 534, false, noLabel],
+      ['darwin', 533, false, bare],
+      ['darwin', 574, true, noLabel],
+      ['darwin', 573, true, bare],
+      ['linux', 472, false, noLabel],
+      ['linux', 471, false, bare],
+      ['linux', 512, true, noLabel],
+      ['linux', 511, true, bare],
+    ] as const)
+      expect(titleBarFit(platform, width, menuBar), `${platform} at ${width}`).toEqual(
+        fit,
+      );
+  });
+
   it('gives things up in order: the Publish label before the Open gist button and the Run hint', () => {
     for (const platform of PLATFORMS) {
-      for (let width = 1280; width >= MIN_WIDTH; width -= 4) {
+      for (let width = 1280; width >= 320; width -= 4) {
         const fit = titleBarFit(platform, width, true);
         expect(fit.openGistButton).toBe(fit.runHint);
         if (!fit.openGistButton)
