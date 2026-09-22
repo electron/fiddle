@@ -58,8 +58,8 @@ describe('run', () => {
 });
 ```
 
-The rest of the API (`snapshot`, `screenshot`, `console`, `logs`, `clipboard`, `sideEffects`,
-`dialogs`, `mainFetch` and more) is on `FiddleApp` in `e2e/driver.ts`, and the spec
+The rest of the API (`snapshot`, `screenshot`, `logs`, `clipboard`, `sideEffects`, `dialogs`,
+`mainFetch` and more) is on `FiddleApp` in `e2e/driver.ts`, and the spec
 glue is in `e2e/harness.ts`.
 
 - **Queries.** `role('button', 'Run')`, `role('heading', /welcome/i)` and `text('Saved')` take

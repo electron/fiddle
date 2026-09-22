@@ -11,7 +11,6 @@ import {
   MenuTrigger,
   showToast,
   ToolbarButton,
-  Tooltip,
 } from '../../../ui';
 import { useShortcut } from '../../use-shortcut';
 import { copyShareLink, deleteGist, setGistVisibility, updateGist } from './actions';
@@ -93,16 +92,15 @@ export function PublishButton({ compact = false }: { compact?: boolean } = {}) {
   };
 
   const button = (
-    <Tooltip label={t('publishButton')} isDisabled={!compact}>
-      <ToolbarButton
-        data-tour="publish"
-        icon="upload"
-        label={t('publishButton')}
-        onPress={gist ? undefined : () => requestPublish(login)}
-      >
-        {compact ? undefined : t('publishButton')}
-      </ToolbarButton>
-    </Tooltip>
+    <ToolbarButton
+      data-tour="publish"
+      icon="upload"
+      label={t('publishButton')}
+      tooltip
+      onPress={gist ? undefined : () => requestPublish(login)}
+    >
+      {compact ? undefined : t('publishButton')}
+    </ToolbarButton>
   );
 
   return (

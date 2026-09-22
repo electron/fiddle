@@ -18,21 +18,13 @@
 }
 
 .toast {
+  composes: lu-overlay-glass from global;
   display: flex;
   align-items: flex-start;
   gap: 10px;
   width: 100%;
   padding: 12px 12px 12px 14px;
   border-radius: var(--lu-radius-panel);
-  corner-shape: squircle;
-  background: var(--lu-material-overlay);
-  -webkit-backdrop-filter: var(--lu-blur-overlay);
-  backdrop-filter: var(--lu-blur-overlay);
-  box-shadow: var(--lu-shadow-overlay);
-  color: var(--lu-ink);
-  font: var(--lu-type-body);
-  letter-spacing: var(--lu-type-body-tracking);
-  outline: none;
   animation: toast-in var(--lu-dur-base) var(--lu-ease);
 }
 

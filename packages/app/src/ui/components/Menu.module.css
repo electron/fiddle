@@ -19,6 +19,7 @@
 }
 
 .surface {
+  composes: lu-overlay-glass from global;
   box-sizing: border-box;
   width: max-content;
   min-width: max(200px, var(--trigger-width, 0px));
@@ -27,15 +28,6 @@
   overflow: auto;
   padding: 5px;
   border-radius: var(--lu-radius-menu);
-  corner-shape: squircle;
-  background: var(--lu-material-overlay);
-  -webkit-backdrop-filter: var(--lu-blur-overlay);
-  backdrop-filter: var(--lu-blur-overlay);
-  box-shadow: var(--lu-shadow-overlay);
-  color: var(--lu-ink);
-  font: var(--lu-type-body);
-  letter-spacing: var(--lu-type-body-tracking);
-  outline: none;
 }
 
 .section {
@@ -95,11 +87,8 @@
 }
 
 .label {
+  composes: lu-truncate from global;
   flex: 1;
-  min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
 }
 
 .hint {

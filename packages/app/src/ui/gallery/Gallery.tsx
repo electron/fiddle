@@ -49,7 +49,6 @@ import {
   Toaster,
   ToolbarButton,
   ToolbarCapsule,
-  Tooltip,
   Tree,
   TreeRow,
   type SelectOption,
@@ -402,9 +401,7 @@ export function Gallery({
             <ToolbarButton icon="upload" label="Publish">
               Publish
             </ToolbarButton>
-            <Tooltip label="Settings">
-              <ToolbarButton icon="settings" label="Settings" />
-            </Tooltip>
+            <ToolbarButton icon="settings" label="Settings" tooltip />
           </div>
         </header>
 
@@ -463,15 +460,14 @@ export function Gallery({
                 </TabList>
               </Tabs>
               <span className={styles.process}>{current.process}</span>
-              <Tooltip label={split ? 'Close split' : 'Split editor'} kbd="⌘\">
-                <IconButton
-                  icon="columns"
-                  size="sm"
-                  label={split ? 'Close split' : 'Split editor'}
-                  isPressed={split}
-                  onPress={() => setSplit(!split)}
-                />
-              </Tooltip>
+              <IconButton
+                icon="columns"
+                size="sm"
+                label={split ? 'Close split' : 'Split editor'}
+                tooltip={{ kbd: '⌘\\' }}
+                isPressed={split}
+                onPress={() => setSplit(!split)}
+              />
             </div>
 
             <div className={styles.sheetBody}>

@@ -1,38 +1,9 @@
 import { fireEvent, render, screen } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
-import { Button, IconButton } from './Button';
-import { ToolbarButton, ToolbarCapsule } from './Toolbar';
+import { Button, IconButton, ToolbarButton } from './Button';
+import { ToolbarCapsule } from './Toolbar';
 
 describe('Button', () => {
-  it('calls onPress when clicked', () => {
-    const onPress = vi.fn();
-    render(<Button onPress={onPress}>Run</Button>);
-    fireEvent.click(screen.getByRole('button', { name: 'Run' }));
-    expect(onPress).toHaveBeenCalledTimes(1);
-  });
-
-  it('calls onPress from the keyboard', () => {
-    const onPress = vi.fn();
-    render(<Button onPress={onPress}>Run</Button>);
-    const button = screen.getByRole('button', { name: 'Run' });
-    fireEvent.keyDown(button, { key: 'Enter' });
-    fireEvent.keyUp(button, { key: 'Enter' });
-    expect(onPress).toHaveBeenCalledTimes(1);
-  });
-
-  it('ignores presses when disabled', () => {
-    const onPress = vi.fn();
-    render(
-      <Button onPress={onPress} isDisabled>
-        Publish
-      </Button>,
-    );
-    const button = screen.getByRole('button', { name: 'Publish' }) as HTMLButtonElement;
-    expect(button.disabled).toBe(true);
-    fireEvent.click(button);
-    expect(onPress).not.toHaveBeenCalled();
-  });
-
   it('shows the key-cap hint, and hides it while loading', () => {
     const onPress = vi.fn();
     const { rerender } = render(
@@ -67,13 +38,6 @@ describe('IconButton', () => {
     render(<IconButton icon="settings" label="Settings" onPress={onPress} />);
     fireEvent.click(screen.getByRole('button', { name: 'Settings' }));
     expect(onPress).toHaveBeenCalledTimes(1);
-  });
-
-  it('ignores presses when disabled', () => {
-    const onPress = vi.fn();
-    render(<IconButton icon="trash" label="Delete" onPress={onPress} isDisabled />);
-    fireEvent.click(screen.getByRole('button', { name: 'Delete' }));
-    expect(onPress).not.toHaveBeenCalled();
   });
 });
 

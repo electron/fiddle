@@ -18,7 +18,6 @@ const mocks = vi.hoisted(() => ({
   },
   showMessageBox: vi.fn(async (_options: unknown) => ({ response: 0 })),
   testMode: false,
-  firstRunPrompts: true,
   stubExists: true,
   log: { warn: vi.fn(), error: vi.fn() },
 }));
@@ -30,10 +29,7 @@ vi.mock('electron', () => ({
 vi.mock('node:fs', () => ({ default: { existsSync: () => mocks.stubExists } }));
 vi.mock('../i18n', () => ({ tm: () => (key: string) => key }));
 vi.mock('../log', () => ({ log: mocks.log }));
-vi.mock('../test-mode', () => ({
-  isTestMode: () => mocks.testMode,
-  testFlags: () => ({ firstRunPrompts: mocks.firstRunPrompts }),
-}));
+vi.mock('../test-mode', () => ({ isTestMode: () => mocks.testMode }));
 vi.mock('../crash/sentry', () => ({ applyCrashReportsSetting: () => undefined }));
 vi.mock('../migration', () => ({ importElectronVersionsInBackground: () => undefined }));
 vi.mock('../updates', () => ({ startUpdates: () => undefined }));
@@ -59,7 +55,6 @@ beforeEach(() => {
   mocks.listeners.clear();
   mocks.app.isPackaged = true;
   mocks.testMode = false;
-  mocks.firstRunPrompts = true;
   mocks.stubExists = true;
   mocks.app.isDefaultProtocolClient.mockReturnValue(false);
   mocks.app.isInApplicationsFolder.mockReturnValue(false);
@@ -193,9 +188,9 @@ describe('offerMoveToApplications', () => {
     mocks.app.isPackaged = false;
     await offerMoveToApplications(true);
     mocks.app.isPackaged = true;
-    mocks.firstRunPrompts = false;
+    mocks.testMode = true;
     await offerMoveToApplications(true);
-    mocks.firstRunPrompts = true;
+    mocks.testMode = false;
     mocks.app.isInApplicationsFolder.mockReturnValue(true);
     await offerMoveToApplications(true);
     expect(mocks.showMessageBox).not.toHaveBeenCalled();

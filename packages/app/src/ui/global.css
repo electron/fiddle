@@ -1,5 +1,5 @@
 @import './fonts/fonts.css';
-@import './tokens/lucent-tokens.css';
+@import '../../../../docs/design/lucent-tokens.css';
 @import './tokens/lucent-extensions.css';
 
 /* The OS material shows through: the page itself is transparent. */
@@ -67,6 +67,47 @@ samp {
 }
 :where(:focus:not(:focus-visible)) {
   outline: none;
+}
+
+/* One line of text that ends in an ellipsis where it runs out of room. */
+.lu-truncate {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* The glass that menus, popovers, dialogs and toasts are cut from. */
+.lu-overlay-glass {
+  corner-shape: squircle;
+  background: var(--lu-material-overlay);
+  -webkit-backdrop-filter: var(--lu-blur-overlay);
+  backdrop-filter: var(--lu-blur-overlay);
+  box-shadow: var(--lu-shadow-overlay);
+  color: var(--lu-ink);
+  font: var(--lu-type-body);
+  letter-spacing: var(--lu-type-body-tracking);
+  outline: none;
+}
+
+/* The bordered box of a text field or a select's trigger. */
+.lu-field-box {
+  align-items: center;
+  gap: var(--lu-space-2);
+  height: var(--lu-size-control);
+  min-width: 0;
+  padding: 0 11px;
+  border: 1px solid var(--lu-line-strong);
+  border-radius: var(--lu-radius-control);
+  corner-shape: squircle;
+  background: var(--lu-field);
+  color: var(--lu-ink);
+  font: var(--lu-type-body);
+  letter-spacing: var(--lu-type-body-tracking);
+  transition:
+    border-color var(--lu-dur-fast) var(--lu-ease),
+    background-color var(--lu-dur-fast) var(--lu-ease),
+    box-shadow var(--lu-dur-base) var(--lu-ease);
 }
 
 /* The tokens zero the durations that move things; smooth scrolling goes too. */

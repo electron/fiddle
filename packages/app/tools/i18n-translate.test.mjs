@@ -7,7 +7,6 @@ import { test } from 'node:test';
 
 import { checkEnglish, checkLocale, findUnusedEnglish } from './i18n-check.mjs';
 import {
-  hashValue,
   pluralCategories,
   pseudoLocalize,
   pseudoMessages,
@@ -82,7 +81,7 @@ const run = (locale, state, model, { eng = english(), dryRun = false } = {}) =>
 
 const unit = (eng, key) => unitsOf(eng.run).find((u) => u.key === key);
 
-test('translates new keys and records them as unreviewed machine translations', async () => {
+test('translates new keys and records the English they came from', async () => {
   const model = mockModel();
   const result = await run('de', { messages: {}, meta: {} }, model);
   assert.deepEqual(result.messages.run, {
@@ -91,11 +90,7 @@ test('translates new keys and records them as unreviewed machine translations', 
     errorCount_one: 'de:{{count}} error',
     errorCount_other: 'de:{{count}} errors',
   });
-  assert.deepEqual(result.meta['run:runButton'], {
-    source: sourceHash(unit(english(), 'runButton')),
-    translation: hashValue('de:Run'),
-    reviewed: false,
-  });
+  assert.equal(result.meta['run:runButton'], sourceHash(unit(english(), 'runButton')));
   assert.equal(model.calls.length, 1);
   const [request] = model.calls;
   assert.deepEqual(request.glossary.fixed, { Run: 'Ausführen' });
@@ -128,7 +123,6 @@ test('does nothing when English and the translations are unchanged', async () =>
   assert.equal(model.calls.length, 0);
   assert.deepEqual(second.messages, first.messages);
   assert.deepEqual(second.meta, first.meta);
-  assert.deepEqual(second.plan.humanEdits, []);
 });
 
 test('redoes a machine translation when its English changes, passing the old one', async () => {
@@ -148,50 +142,48 @@ test('redoes a machine translation when its English changes, passing the old one
     },
   ]);
   assert.equal(second.messages.run.runButton, 'de:Run it');
-  assert.equal(second.meta['run:runButton'].source, sourceHash(unit(eng, 'runButton')));
+  assert.equal(second.meta['run:runButton'], sourceHash(unit(eng, 'runButton')));
 });
 
-test('never overwrites a human edit, and flags it for re-review when English changes', async () => {
+test('keeps a hand edit until its English changes, then retranslates it', async () => {
   const first = await run('de', { messages: {}, meta: {} }, mockModel());
   first.messages.run.runButton = 'Los';
 
-  // The edit is recorded as reviewed.
   let model = mockModel();
   const second = await run('de', first, model);
   assert.equal(model.calls.length, 0);
-  assert.deepEqual(second.plan.humanEdits, ['run:runButton']);
-  assert.deepEqual(second.meta['run:runButton'], {
-    source: sourceHash(unit(english(), 'runButton')),
-    translation: hashValue('Los'),
-    reviewed: true,
-  });
+  assert.equal(second.messages.run.runButton, 'Los');
+  assert.deepEqual(second.meta, first.meta);
 
-  // English changes: the reviewed text stays and is flagged, not retranslated.
   const eng = english();
   eng.run.runButton.message = 'Run it';
+  const { warnings } = checkLocale(eng, 'de', second.messages, second.meta);
+  assert.equal(warnings.length, 1);
+  assert.match(warnings[0], /runButton: English changed since it was translated/);
   model = mockModel();
   const third = await run('de', second, model, { eng });
-  assert.equal(model.calls.length, 0);
-  assert.equal(third.messages.run.runButton, 'Los');
-  assert.deepEqual(
-    third.plan.review.map((item) => `${item.ns}:${item.unit.key}`),
-    ['run:runButton'],
-  );
-  assert.deepEqual(third.meta['run:runButton'], second.meta['run:runButton']);
-  const { warnings } = checkLocale(eng, 'de', third.messages, third.meta);
-  assert.equal(warnings.length, 1);
-  assert.match(warnings[0], /runButton: English changed since review/);
-
-  // A human updates the translation: the flag clears and it stays theirs.
-  third.messages.run.runButton = 'Ausführen';
-  const fourth = await run('de', third, mockModel(), { eng });
-  assert.deepEqual(fourth.plan.review, []);
-  assert.equal(fourth.meta['run:runButton'].reviewed, true);
-  assert.equal(fourth.meta['run:runButton'].source, sourceHash(unit(eng, 'runButton')));
-  assert.equal(fourth.messages.run.runButton, 'Ausführen');
+  assert.equal(model.calls.length, 1);
+  assert.equal(model.calls[0].units[0].previous, 'Los');
+  assert.equal(third.messages.run.runButton, 'de:Run it');
 });
 
-test('treats a translation with no state as written by a human', async () => {
+test('keeps a failed retranslation pending for the next run', async () => {
+  const first = await run('de', { messages: {}, meta: {} }, mockModel());
+  const eng = english();
+  eng.run.runButton.message = 'Run it';
+  const failing = { calls: [], translate: async () => ({}) };
+  const second = await run('de', first, failing, { eng });
+  assert.deepEqual(second.failed, [
+    { id: 'run:runButton', problems: ['no translation returned'] },
+  ]);
+  assert.equal(second.messages.run.runButton, 'de:Run');
+  assert.deepEqual(second.meta, first.meta);
+  const model = mockModel();
+  await run('de', second, model, { eng });
+  assert.equal(model.calls.length, 1);
+});
+
+test('treats a translation with no recorded source as current', async () => {
   const model = mockModel();
   const result = await run(
     'de',
@@ -203,7 +195,7 @@ test('treats a translation with no state as written by a human', async () => {
     ['running', 'errorCount'],
   );
   assert.equal(result.messages.run.runButton, 'Starten');
-  assert.equal(result.meta['run:runButton'].reviewed, true);
+  assert.equal(result.meta['run:runButton'], sourceHash(unit(english(), 'runButton')));
 });
 
 test('removes keys English dropped and plural forms the locale lacks', async () => {

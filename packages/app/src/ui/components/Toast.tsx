@@ -38,14 +38,13 @@ export interface ToasterProps {
   closeLabel: string;
   /** Accessible name for the region. Required: react-aria's default isn't from the catalog. */
   'aria-label': string;
-  queue?: ToastQueue<ToastContent>;
 }
 
 /** The toaster region. Mount once. */
-export function Toaster({ closeLabel, queue = toastQueue, ...rest }: ToasterProps) {
+export function Toaster({ closeLabel, ...rest }: ToasterProps) {
   return (
     <AriaToastRegion
-      queue={queue}
+      queue={toastQueue}
       aria-label={rest['aria-label']}
       className={styles.region}
     >
@@ -68,7 +67,7 @@ export function Toaster({ closeLabel, queue = toastQueue, ...rest }: ToasterProp
                   className={styles.action}
                   onPress={() => {
                     toast.content.onAction?.();
-                    queue.close(toast.key);
+                    toastQueue.close(toast.key);
                   }}
                 >
                   {toast.content.actionLabel}

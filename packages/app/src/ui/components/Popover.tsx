@@ -1,4 +1,4 @@
-import type { CSSProperties, ReactNode } from 'react';
+import type { ReactNode } from 'react';
 import {
   Dialog as AriaDialog,
   DialogTrigger,
@@ -21,7 +21,6 @@ export interface PopoverProps extends Omit<
   'aria-label'?: string;
   width?: number;
   className?: string;
-  style?: CSSProperties;
 }
 
 /** Anchored floating content on overlay glass, with an arrow cut from the same material. */
@@ -29,7 +28,6 @@ export function Popover({
   children,
   width,
   className,
-  style,
   placement = 'bottom',
   offset = 10,
   ...rest
@@ -41,7 +39,7 @@ export function Popover({
       placement={placement}
       offset={offset}
       className={cx(styles.popover, className)}
-      style={{ width, ...style }}
+      style={{ width }}
     >
       <OverlayArrow className={styles.arrow}>
         <svg width={14} height={7} viewBox="0 0 14 7" aria-hidden="true">

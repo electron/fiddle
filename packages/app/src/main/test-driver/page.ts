@@ -93,8 +93,6 @@ const BOX_FUNCTION = `function () {
 export interface PageSetup {
   locale: string;
   timezone: string;
-  /** Runs before any page script in every document (seeded Math.random). */
-  initScript: string;
 }
 
 let pageSetup: PageSetup | undefined;
@@ -144,9 +142,6 @@ export class Page {
         });
         await dbg.sendCommand('Emulation.setEmulatedMedia', {
           features: [{ name: 'prefers-reduced-motion', value: 'reduce' }],
-        });
-        await dbg.sendCommand('Page.addScriptToEvaluateOnNewDocument', {
-          source: pageSetup.initScript,
         });
       }
     })();
@@ -239,32 +234,39 @@ export class Page {
     };
   }
 
-  /** Waits for at least one match (or none, for `absent`) and describes the matches. */
-  query(query: Query, state: 'present' | 'absent' = 'present'): Promise<ElementInfo[]> {
-    return poll<ElementInfo[]>(
-      `query ${describeQuery(query)}`,
+  /** Polls the accessibility tree until `accept` takes the matches (or the `nth` match). Only `absent` accepts none. */
+  #match<T>(
+    what: string,
+    query: Query,
+    accept: (nodes: AXNode[], total: number) => Promise<Attempt<T>> | Attempt<T>,
+    absent = false,
+  ): Promise<T> {
+    return poll<T>(
+      `${what} ${describeQuery(query)}`,
       query.timeout ?? DEFAULT_TIMEOUT,
       async () => {
-        const matches = matchNodes(await this.axNodes(), query);
-        if (state === 'absent') {
-          return matches.length === 0
-            ? { value: [] }
-            : { reason: `${matches.length} match(es) still present` };
-        }
-        const selected =
-          query.nth === undefined ? matches : matches.slice(query.nth, query.nth + 1);
-        if (selected.length === 0) {
+        const all = matchNodes(await this.axNodes(), query);
+        const nodes = query.nth === undefined ? all : all.slice(query.nth, query.nth + 1);
+        if (nodes.length === 0 && !absent)
           return {
-            reason:
-              matches.length === 0 ? 'no match' : `only ${matches.length} match(es)`,
+            reason: all.length === 0 ? 'no match' : `only ${all.length} match(es)`,
           };
-        }
-        const found = await Promise.all(
-          selected.slice(0, 50).map((n) => this.#describe(n)),
-        );
-        return { value: found.map((f) => f.info) };
+        return accept(nodes, all.length);
       },
     );
+  }
+
+  /** Waits for at least one match (or none, for `absent`) and describes the matches. */
+  query(query: Query, state: 'present' | 'absent' = 'present'): Promise<ElementInfo[]> {
+    if (state === 'absent') {
+      const gone = (_nodes: AXNode[], total: number) =>
+        total === 0 ? { value: [] } : { reason: `${total} match(es) still present` };
+      return this.#match<ElementInfo[]>('query', query, gone, true);
+    }
+    return this.#match('query', query, async (nodes) => {
+      const found = await Promise.all(nodes.slice(0, 50).map((n) => this.#describe(n)));
+      return { value: found.map((f) => f.info) };
+    });
   }
 
   /** Waits for one enabled match with a size, on top at its center and still for a frame, so a click's press and release land together. */
@@ -276,37 +278,24 @@ export class Page {
       return undefined;
     };
     const same = (a: ElementInfo, b: ElementInfo) =>
-      Math.abs(a.x - b.x) < 1 &&
-      Math.abs(a.y - b.y) < 1 &&
-      Math.abs(a.width - b.width) < 1 &&
-      Math.abs(a.height - b.height) < 1;
-    return poll<ElementInfo>(
-      `find ${describeQuery(query)}`,
-      query.timeout ?? DEFAULT_TIMEOUT,
-      async () => {
-        const matches = matchNodes(await this.axNodes(), query);
-        if (matches.length === 0) return { reason: 'no match' };
-        if (query.nth === undefined && matches.length > 1) {
-          const list = matches
-            .slice(0, 5)
-            .map((m) => `${roleOf(m)} ${JSON.stringify(nameOf(m))}`)
-            .join(', ');
-          return {
-            reason: `${matches.length} matches (${list}); narrow the query or pass nth`,
-          };
-        }
-        const node = matches[query.nth ?? 0];
-        if (!node) return { reason: `only ${matches.length} match(es)` };
-        const first = await this.#describe(node);
-        const problem = check(first);
-        if (problem) return { reason: problem };
-        await this.#nextFrame();
-        const second = await this.#describe(node);
-        if (!same(first.info, second.info)) return { reason: 'the element is moving' };
-        const later = check(second);
-        return later ? { reason: later } : { value: second.info };
-      },
-    );
+      (['x', 'y', 'width', 'height'] as const).every((k) => Math.abs(a[k] - b[k]) < 1);
+    return this.#match<ElementInfo>('find', query, async (nodes, total) => {
+      if (nodes.length > 1) {
+        const list = nodes
+          .slice(0, 5)
+          .map((m) => `${roleOf(m)} ${JSON.stringify(nameOf(m))}`)
+          .join(', ');
+        return { reason: `${total} matches (${list}); narrow the query or pass nth` };
+      }
+      const first = await this.#describe(nodes[0]!);
+      const problem = check(first);
+      if (problem) return { reason: problem };
+      await this.#nextFrame();
+      const second = await this.#describe(nodes[0]!);
+      if (!same(first.info, second.info)) return { reason: 'the element is moving' };
+      const later = check(second);
+      return later ? { reason: later } : { value: second.info };
+    });
   }
 
   /** A left click at the center of the match. Each event resolves once the renderer has handled it. */

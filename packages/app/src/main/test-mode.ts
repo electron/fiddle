@@ -16,20 +16,9 @@ declare global {
 export const TEST_BUILD: boolean =
   typeof __FIDDLE_TEST_BUILD__ !== 'undefined' && __FIDDLE_TEST_BUILD__ === true;
 
-/** True when a test build runs with FIDDLE_TEST_MODE=1. */
+/** True when a test build runs with FIDDLE_TEST_MODE=1: no updates, Sentry, first-run prompts or tour. */
 export function isTestMode(): boolean {
   return TEST_BUILD && process.env.FIDDLE_TEST_MODE === '1';
-}
-
-/** What test mode turns off; outside test mode every flag is true. */
-export function testFlags(): {
-  updates: boolean;
-  sentry: boolean;
-  firstRunPrompts: boolean;
-  tour: boolean;
-} {
-  const on = !isTestMode();
-  return { updates: on, sentry: on, firstRunPrompts: on, tour: on };
 }
 
 /** `FIDDLE_TEST_MENUBAR=1` draws the Windows and Linux menu bar on every platform, so e2e specs can drive it on macOS. */

@@ -5,7 +5,7 @@ import { confirmQuit } from '../documents/service';
 import { tm } from '../i18n';
 import { log } from '../log';
 import { openExternalLink } from '../security';
-import { getEndpoints, testFlags } from '../test-mode';
+import { getEndpoints, isTestMode } from '../test-mode';
 import { pickUpdate, type AvailableUpdate, type GitHubRelease } from './releases';
 
 const UPDATE_REPO = 'electron/fiddle';
@@ -20,7 +20,7 @@ let available: AvailableUpdate | undefined;
 
 /** Off in dev and test mode. Linux and MSIX have no auto-update: `onAvailable` gets a newer release's version, which each window shows as a toast. */
 export function startUpdates(onAvailable: (version: string) => void): void {
-  if (!app.isPackaged || !testFlags().updates) {
+  if (!app.isPackaged || isTestMode()) {
     log.info('updates are off (dev or test mode)');
     return;
   }
