@@ -1,3947 +1,801 @@
 {
-  "about:crashNoticeAction": {
-    "source": "54345f962d13",
-    "translation": "741fd31af3f9",
-    "reviewed": false
-  },
-  "about:crashNoticeDescription": {
-    "source": "395a67b92b3c",
-    "translation": "a75c6cfe2b62",
-    "reviewed": false
-  },
-  "about:crashNoticeTitle": {
-    "source": "0aa18c894255",
-    "translation": "32453c53ecf9",
-    "reviewed": false
-  },
-  "about:download": {
-    "source": "d6eafe823591",
-    "translation": "d477c75aa656",
-    "reviewed": false
-  },
-  "about:openSettingsFailed": {
-    "source": "c670b1c81fbd",
-    "translation": "3f8aebb8a217",
-    "reviewed": false
-  },
-  "about:updateAvailableDescription": {
-    "source": "2d786aa2a139",
-    "translation": "3c09bdc99443",
-    "reviewed": false
-  },
-  "about:updateAvailableTitle": {
-    "source": "ff8b555d818f",
-    "translation": "d7d50bdf38dd",
-    "reviewed": false
-  },
-  "gists:accountLabel": {
-    "source": "d686f873a566",
-    "translation": "9266f2ed3776",
-    "reviewed": false
-  },
-  "gists:accountSignedInAs": {
-    "source": "318bfd84d8dd",
-    "translation": "05e187bb974a",
-    "reviewed": false
-  },
-  "gists:accountSignedOut": {
-    "source": "491fc91cd76e",
-    "translation": "4e852fca0381",
-    "reviewed": false
-  },
-  "gists:accountSignIn": {
-    "source": "bfd402b2f6f3",
-    "translation": "92fc480bee59",
-    "reviewed": false
-  },
-  "gists:accountSignOut": {
-    "source": "48f0d3d397d4",
-    "translation": "057f31bc16c8",
-    "reviewed": false
-  },
-  "gists:cancel": {
-    "source": "19766ed6ccb2",
-    "translation": "2cd0f3be8738",
-    "reviewed": false
-  },
-  "gists:close": {
-    "source": "7d9eb7acb13e",
-    "translation": "c7fdddf79eaa",
-    "reviewed": false
-  },
-  "gists:copyLink": {
-    "source": "dbf362d4f210",
-    "translation": "d55104374e08",
-    "reviewed": false
-  },
-  "gists:deleteConfirm": {
-    "source": "e2d0a54968ea",
-    "translation": "3c8f5b363ab3",
-    "reviewed": false
-  },
-  "gists:deleteConfirmMessage": {
-    "source": "5320e91f344b",
-    "translation": "1b81edf6857f",
-    "reviewed": false
-  },
-  "gists:deleteConfirmTitle": {
-    "source": "e223887dccb2",
-    "translation": "59c8ecff657c",
-    "reviewed": false
-  },
-  "gists:deleted": {
-    "source": "5f527a5ecca6",
-    "translation": "43679248e663",
-    "reviewed": false
-  },
-  "gists:deleteFailed": {
-    "source": "27c4d02e2f61",
-    "translation": "b6f7845af75f",
-    "reviewed": false
-  },
-  "gists:errorWithHint": {
-    "source": "e80ab184fe69",
-    "translation": "e80ab184fe69",
-    "reviewed": false
-  },
-  "gists:hintConnectivity": {
-    "source": "176afd02072f",
-    "translation": "6c5a2b0e435e",
-    "reviewed": false
-  },
-  "gists:hintOwnership": {
-    "source": "959bcf3565ef",
-    "translation": "4041ee82beae",
-    "reviewed": false
-  },
-  "gists:historyActive": {
-    "source": "92340695899b",
-    "translation": "fa48e8938940",
-    "reviewed": false
-  },
-  "gists:historyChanges": {
-    "source": "8946f555319b",
-    "translation": "8946f555319b",
-    "reviewed": false
-  },
-  "gists:historyCreated": {
-    "source": "d70b9e24bca2",
-    "translation": "d626b138672b",
-    "reviewed": false
-  },
-  "gists:historyDescription": {
-    "source": "ff052a122982",
-    "translation": "61d7c19af415",
-    "reviewed": false
-  },
-  "gists:historyEmpty": {
-    "source": "db4f96393559",
-    "translation": "9942881f70a1",
-    "reviewed": false
-  },
-  "gists:historyFailed": {
-    "source": "3e7300c114a0",
-    "translation": "ca9910fb61ff",
-    "reviewed": false
-  },
-  "gists:historyListLabel": {
-    "source": "da80b1d5740c",
-    "translation": "42d713803e5e",
-    "reviewed": false
-  },
-  "gists:historyMeta": {
-    "source": "def93763edc8",
-    "translation": "def93763edc8",
-    "reviewed": false
-  },
-  "gists:historyRevision": {
-    "source": "865dda60a194",
-    "translation": "c264ff6da4fd",
-    "reviewed": false
-  },
-  "gists:historyTitle": {
-    "source": "50b82c24ba4d",
-    "translation": "125d9de9b99e",
-    "reviewed": false
-  },
-  "gists:linkCopied": {
-    "source": "d12860c21e78",
-    "translation": "cf4349cb6523",
-    "reviewed": false
-  },
-  "gists:loadFailed": {
-    "source": "cd80beb3a8b2",
-    "translation": "965f5fe1ca60",
-    "reviewed": false
-  },
-  "gists:menuCopyLink": {
-    "source": "d31483e209cd",
-    "translation": "adf8981913e8",
-    "reviewed": false
-  },
-  "gists:menuDelete": {
-    "source": "46b9559ebb35",
-    "translation": "dfafe9a70946",
-    "reviewed": false
-  },
-  "gists:menuHistory": {
-    "source": "7dbece317db5",
-    "translation": "b7532cdaa76a",
-    "reviewed": false
-  },
-  "gists:menuLabel": {
-    "source": "1f4ad709673e",
-    "translation": "20bc7f7c13cb",
-    "reviewed": false
-  },
-  "gists:menuPublishNew": {
-    "source": "8cae2fe04081",
-    "translation": "2b9e301f4cbb",
-    "reviewed": false
-  },
-  "gists:menuUpdate": {
-    "source": "14412674c320",
-    "translation": "f57db7684ed1",
-    "reviewed": false
-  },
-  "gists:menuVisibility": {
-    "source": "e47b86af4a9e",
-    "translation": "bdb7fa10eb2a",
-    "reviewed": false
-  },
-  "gists:noticeDecryptFailed": {
-    "source": "6aa9d8f58cfd",
-    "translation": "cbd1e06bf9ec",
-    "reviewed": false
-  },
-  "gists:noticeDecryptFailedDetail": {
-    "source": "6c6314e82cba",
-    "translation": "7b67b26cc80d",
-    "reviewed": false
-  },
-  "gists:openCurrent": {
-    "source": "53b3231b9bd7",
-    "translation": "3b7e60e9a7df",
-    "reviewed": false
-  },
-  "gists:openGist": {
-    "source": "8c76b5c3fb7c",
-    "translation": "a179d862d2b1",
-    "reviewed": false
-  },
-  "gists:openInvalid": {
-    "source": "62a4243fc705",
-    "translation": "6040b87488d8",
-    "reviewed": false
-  },
-  "gists:openLabel": {
-    "source": "49fea22c8d4b",
-    "translation": "56521f2c13f4",
-    "reviewed": false
-  },
-  "gists:openPlaceholder": {
-    "source": "ac239ab30d60",
-    "translation": "ac239ab30d60",
-    "reviewed": false
-  },
-  "gists:openSubmit": {
-    "source": "ed077f3d8125",
-    "translation": "f290f9167ad0",
-    "reviewed": false
-  },
-  "gists:openTitle": {
-    "source": "386b1bfb4b60",
-    "translation": "b3bf4415cf2d",
-    "reviewed": false
-  },
-  "gists:publishButton": {
-    "source": "859390eb495b",
-    "translation": "eeb509bfc0dd",
-    "reviewed": false
-  },
-  "gists:publishDefaultDescription": {
-    "source": "7eb97a4ce529",
-    "translation": "7eb97a4ce529",
-    "reviewed": false
-  },
-  "gists:publishDescriptionError": {
-    "source": "54dad26f7510",
-    "translation": "941cc8a04528",
-    "reviewed": false
-  },
-  "gists:publishDescriptionLabel": {
-    "source": "526e0087cc3f",
-    "translation": "dc2ba467fc7a",
-    "reviewed": false
-  },
-  "gists:published": {
-    "source": "35d1118d4a15",
-    "translation": "eb70b07a7d1b",
-    "reviewed": false
-  },
-  "gists:publishFailed": {
-    "source": "335cdcfcb544",
-    "translation": "399181ee5089",
-    "reviewed": false
-  },
-  "gists:publishSubmit": {
-    "source": "859390eb495b",
-    "translation": "eeb509bfc0dd",
-    "reviewed": false
-  },
-  "gists:publishTitle": {
-    "source": "0e6d60d6f9d9",
-    "translation": "92ed5ab2f9a1",
-    "reviewed": false
-  },
-  "gists:publishVisibilityHelp": {
-    "source": "97e4a586f089",
-    "translation": "7cb1632f2ff5",
-    "reviewed": false
-  },
-  "gists:publishVisibilityLabel": {
-    "source": "7448611d5f93",
-    "translation": "7a2e8b8a1ea7",
-    "reviewed": false
-  },
-  "gists:signedIn": {
-    "source": "7700a63fdd6c",
-    "translation": "a4ac619fe336",
-    "reviewed": false
-  },
-  "gists:signedInSession": {
-    "source": "aa42ae09a55a",
-    "translation": "b7af1c2f3457",
-    "reviewed": false
-  },
-  "gists:signInClipboardHint": {
-    "source": "2919bc8524f5",
-    "translation": "eb36a305fa58",
-    "reviewed": false
-  },
-  "gists:signInCreateToken": {
-    "source": "519994e5b519",
-    "translation": "b6079d719e2c",
-    "reviewed": false
-  },
-  "gists:signInDescription": {
-    "source": "3ec5509b14ea",
-    "translation": "808e4310f28a",
-    "reviewed": false
-  },
-  "gists:signInErrorFormat": {
-    "source": "2e6d674280ee",
-    "translation": "0ded4320cbcc",
-    "reviewed": false
-  },
-  "gists:signInErrorInvalid": {
-    "source": "f87551bdff1d",
-    "translation": "53d729ad8a78",
-    "reviewed": false
-  },
-  "gists:signInErrorNetwork": {
-    "source": "05a0be5cbbf0",
-    "translation": "648ccac01c97",
-    "reviewed": false
-  },
-  "gists:signInErrorOther": {
-    "source": "18bf0405edaa",
-    "translation": "170243fb4ea3",
-    "reviewed": false
-  },
-  "gists:signInErrorScope": {
-    "source": "badeb36a28d0",
-    "translation": "2ee8d7b9f19e",
-    "reviewed": false
-  },
-  "gists:signInRemember": {
-    "source": "934891184a81",
-    "translation": "db0e86ea4006",
-    "reviewed": false
-  },
-  "gists:signInRememberHelp": {
-    "source": "a0620a0219e0",
-    "translation": "55041efeb1a3",
-    "reviewed": false
-  },
-  "gists:signInSessionOnly": {
-    "source": "182f8e97703b",
-    "translation": "2fbef5942847",
-    "reviewed": false
-  },
-  "gists:signInSubmit": {
-    "source": "bfd402b2f6f3",
-    "translation": "92fc480bee59",
-    "reviewed": false
-  },
-  "gists:signInTitle": {
-    "source": "47e9895d1d76",
-    "translation": "732343a30256",
-    "reviewed": false
-  },
-  "gists:signInTokenLabel": {
-    "source": "a6d0f740e426",
-    "translation": "4eb6ac07b52d",
-    "reviewed": false
-  },
-  "gists:updated": {
-    "source": "2d9ab66fb88d",
-    "translation": "d8dbbe28a7f7",
-    "reviewed": false
-  },
-  "gists:updateFailed": {
-    "source": "714a0a76dcc8",
-    "translation": "19a5b5f16820",
-    "reviewed": false
-  },
-  "gists:visibilityPublic": {
-    "source": "591935b15b1c",
-    "translation": "b8765f4645e4",
-    "reviewed": false
-  },
-  "gists:visibilitySecret": {
-    "source": "7e32a729b122",
-    "translation": "412677b5b74f",
-    "reviewed": false
-  },
-  "main:about": {
-    "source": "a4e3053f92ec",
-    "translation": "4c386e3191a0",
-    "reviewed": false
-  },
-  "main:aboutFiddle": {
-    "source": "389d4cadf6df",
-    "translation": "3a7dc1819ec5",
-    "reviewed": false
-  },
-  "main:actualSize": {
-    "source": "74cdbe70e394",
-    "translation": "2672f6a1e008",
-    "reviewed": false
-  },
-  "main:appMenu": {
-    "source": "ec28e55d864c",
-    "translation": "ec28e55d864c",
-    "reviewed": false
-  },
-  "main:bringAllToFront": {
-    "source": "fc84e851bb9b",
-    "translation": "3dea071b44f2",
-    "reviewed": false
-  },
-  "main:cancel": {
-    "source": "19766ed6ccb2",
-    "translation": "2cd0f3be8738",
-    "reviewed": false
-  },
-  "main:clearConsole": {
-    "source": "888c33cff71b",
-    "translation": "cc245185ca50",
-    "reviewed": false
-  },
-  "main:closeWindow": {
-    "source": "8b9de9c0c0a0",
-    "translation": "511067d6387e",
-    "reviewed": false
-  },
-  "main:commandPalette": {
-    "source": "6b1c93dbdb99",
-    "translation": "fb328e9247c6",
-    "reviewed": false
-  },
-  "main:copy": {
-    "source": "e21f935f11d7",
-    "translation": "bb6dad578c81",
-    "reviewed": false
-  },
-  "main:copyDiagnostics": {
-    "source": "46fa69e51b74",
-    "translation": "6eb22087d98f",
-    "reviewed": false
-  },
-  "main:cut": {
-    "source": "1f45f02561f4",
-    "translation": "116579b89097",
-    "reviewed": false
-  },
-  "main:develop": {
-    "source": "7576b5e7f210",
-    "translation": "f3dd47bf55e5",
-    "reviewed": false
-  },
-  "main:edit": {
-    "source": "464c4ffd019e",
-    "translation": "e0d4485966bd",
-    "reviewed": false
-  },
-  "main:enterFullScreen": {
-    "source": "5a74219758ed",
-    "translation": "790df0d5c827",
-    "reviewed": false
-  },
-  "main:exit": {
-    "source": "d17d84a60499",
-    "translation": "ee1f5ad7d73a",
-    "reviewed": false
-  },
-  "main:exitFullScreen": {
-    "source": "897e0cf78b80",
-    "translation": "186cf1ed4fc2",
-    "reviewed": false
-  },
-  "main:file": {
-    "source": "50009ce1da4d",
-    "translation": "a11ac5efe91d",
-    "reviewed": false
-  },
-  "main:findReferences": {
-    "source": "e83095998601",
-    "translation": "9d8258a86891",
-    "reviewed": false
-  },
-  "main:formatAll": {
-    "source": "9869b1dc2200",
-    "translation": "9f62f724e4e9",
-    "reviewed": false
-  },
-  "main:formatDocument": {
-    "source": "452c55a3f6d2",
-    "translation": "a8e4777ef2f3",
-    "reviewed": false
-  },
-  "main:formatSelection": {
-    "source": "3ad931de390c",
-    "translation": "88f8a30fe414",
-    "reviewed": false
-  },
-  "main:goToDefinition": {
-    "source": "06f4d0b891e1",
-    "translation": "a1206729855e",
-    "reviewed": false
-  },
-  "main:help": {
-    "source": "b79cac926e0b",
-    "translation": "6d3c9336bf4c",
-    "reviewed": false
-  },
-  "main:hide": {
-    "source": "3751aca7183b",
-    "translation": "d7d3f5c72d0f",
-    "reviewed": false
-  },
-  "main:hideConsole": {
-    "source": "f5a456ddc181",
-    "translation": "06e34394e914",
-    "reviewed": false
-  },
-  "main:hideOthers": {
-    "source": "74376e4337d2",
-    "translation": "0899a74a09b0",
-    "reviewed": false
-  },
-  "main:hideSidebar": {
-    "source": "d1db29ebc76d",
-    "translation": "72304db9edc9",
-    "reviewed": false
-  },
-  "main:inspectElement": {
-    "source": "f6493a99c5a3",
-    "translation": "acec819c537e",
-    "reviewed": false
-  },
-  "main:makeFiddle": {
-    "source": "344779c79ab0",
-    "translation": "b79fdba1491d",
-    "reviewed": false
-  },
-  "main:minimize": {
-    "source": "d72e311c4dda",
-    "translation": "ac29e57a46f4",
-    "reviewed": false
-  },
-  "main:moveTabLeft": {
-    "source": "6a55f1c38458",
-    "translation": "71e3ec417e5c",
-    "reviewed": false
-  },
-  "main:moveTabRight": {
-    "source": "a0f125fa0a29",
-    "translation": "3302587e0e4e",
-    "reviewed": false
-  },
-  "main:newFiddle": {
-    "source": "6b5b3e4227c2",
-    "translation": "7c7e4e1bca21",
-    "reviewed": false
-  },
-  "main:newTest": {
-    "source": "1a144751cd7c",
-    "translation": "a86f88c9c3ed",
-    "reviewed": false
-  },
-  "main:newWindow": {
-    "source": "f84ca1459cc4",
-    "translation": "8c81aacd8fc6",
-    "reviewed": false
-  },
-  "main:openElectronRepository": {
-    "source": "3337928f4668",
-    "translation": "3efe9310bfdd",
-    "reviewed": false
-  },
-  "main:openFiddleRepository": {
-    "source": "2bb3c0b6081b",
-    "translation": "28011cc325d7",
-    "reviewed": false
-  },
-  "main:openFolder": {
-    "source": "1f1d592bdd1a",
-    "translation": "75c3fd7c9727",
-    "reviewed": false
-  },
-  "main:openGist": {
-    "source": "8c76b5c3fb7c",
-    "translation": "a179d862d2b1",
-    "reviewed": false
-  },
-  "main:openLink": {
-    "source": "aab63f85c7f1",
-    "translation": "6b4319370557",
-    "reviewed": false
-  },
-  "main:openLinkMessage": {
-    "source": "a16b4663a5d3",
-    "translation": "1c3e493f1844",
-    "reviewed": false
-  },
-  "main:openLogsFolder": {
-    "source": "9d19ac7b2039",
-    "translation": "1e3afbe78e65",
-    "reviewed": false
-  },
-  "main:openRecent": {
-    "source": "b61339b2040d",
-    "translation": "c12a0c8f2417",
-    "reviewed": false
-  },
-  "main:packageFiddle": {
-    "source": "59de121db1b8",
-    "translation": "70c31cbdcf41",
-    "reviewed": false
-  },
-  "main:paste": {
-    "source": "f3380f7b44bd",
-    "translation": "e279da6ebbeb",
-    "reviewed": false
-  },
-  "main:preferences": {
-    "source": "7a04083baf8d",
-    "translation": "c98007f226ed",
-    "reviewed": false
-  },
-  "main:publishToGist": {
-    "source": "858a4b252473",
-    "translation": "65f582b68187",
-    "reviewed": false
-  },
-  "main:quit": {
-    "source": "5c70a5445c2a",
-    "translation": "b5b53d6d1bed",
-    "reviewed": false
-  },
-  "main:redo": {
-    "source": "74273989b096",
-    "translation": "6d52b1d6560d",
-    "reviewed": false
-  },
-  "main:reload": {
-    "source": "bdc090ec61e3",
-    "translation": "70dd895b66db",
-    "reviewed": false
-  },
-  "main:reloadAllWindows": {
-    "source": "d896c941f52e",
-    "translation": "92f20f814e94",
-    "reviewed": false
-  },
-  "main:reportIssue": {
-    "source": "635ae219ad13",
-    "translation": "4839b161ab62",
-    "reviewed": false
-  },
-  "main:run": {
-    "source": "00d60e31a4e6",
-    "translation": "4a9042df9bf9",
-    "reviewed": false
-  },
-  "main:runMenu": {
-    "source": "00d60e31a4e6",
-    "translation": "4a9042df9bf9",
-    "reviewed": false
-  },
-  "main:runToggle": {
-    "source": "15d328d8ca70",
-    "translation": "c159d76d49e2",
-    "reviewed": false
-  },
-  "main:save": {
-    "source": "1509f561f241",
-    "translation": "dba44ed3f54f",
-    "reviewed": false
-  },
-  "main:saveAs": {
-    "source": "06359c03b085",
-    "translation": "596133798cf8",
-    "reviewed": false
-  },
-  "main:saveAsForge": {
-    "source": "ddaf05ab41a3",
-    "translation": "0d44406c03cf",
-    "reviewed": false
-  },
-  "main:selectAll": {
-    "source": "1fc9a387654d",
-    "translation": "1ffe5f02d5b3",
-    "reviewed": false
-  },
-  "main:services": {
-    "source": "604dce445e32",
-    "translation": "318bc18e562d",
-    "reviewed": false
-  },
-  "main:showAll": {
-    "source": "2150d8df37e4",
-    "translation": "2eab4d1b8a51",
-    "reviewed": false
-  },
-  "main:showConsole": {
-    "source": "a909083f778f",
-    "translation": "22bb20b2c307",
-    "reviewed": false
-  },
-  "main:showGistHistory": {
-    "source": "65500a5e3d8d",
-    "translation": "aad7df322a1b",
-    "reviewed": false
-  },
-  "main:showMe": {
-    "source": "b76c42cb4bf3",
-    "translation": "44df3ad4b04d",
-    "reviewed": false
-  },
-  "main:showSidebar": {
-    "source": "9e8197ce9e5f",
-    "translation": "64b42b31a980",
-    "reviewed": false
-  },
-  "main:showTour": {
-    "source": "36ce477486f9",
-    "translation": "39a6b9bacecc",
-    "reviewed": false
-  },
-  "main:stop": {
-    "source": "cae7d57bc067",
-    "translation": "ca4d973c0b00",
-    "reviewed": false
-  },
-  "main:stopBisect": {
-    "source": "0ddac35c0ea8",
-    "translation": "e51a0c678b2d",
-    "reviewed": false
-  },
-  "main:toggleBisect": {
-    "source": "76a0570abde3",
-    "translation": "e7dc447aeb5c",
-    "reviewed": false
-  },
-  "main:toggleConsole": {
-    "source": "f1ecb956b718",
-    "translation": "d081f83057df",
-    "reviewed": false
-  },
-  "main:toggleDevTools": {
-    "source": "cf08ce6b4afe",
-    "translation": "89969575d082",
-    "reviewed": false
-  },
-  "main:toggleMenuBar": {
-    "source": "fb1de89a7cbf",
-    "translation": "8461a6e2412e",
-    "reviewed": false
-  },
-  "main:toggleMinimap": {
-    "source": "357182e8ff71",
-    "translation": "33d80ec95194",
-    "reviewed": false
-  },
-  "main:toggleSidebar": {
-    "source": "041aefc44394",
-    "translation": "10882997eef1",
-    "reviewed": false
-  },
-  "main:toggleSoftWrap": {
-    "source": "5a5caf687390",
-    "translation": "d9e6181c9f49",
-    "reviewed": false
-  },
-  "main:toggleSplit": {
-    "source": "31bdf2f29a0b",
-    "translation": "1b1f07baecbd",
-    "reviewed": false
-  },
-  "main:toggleTabFocus": {
-    "source": "84656ff09464",
-    "translation": "f32b2a0e44f6",
-    "reviewed": false
-  },
-  "main:undo": {
-    "source": "a8283ade3185",
-    "translation": "2abdcba8d536",
-    "reviewed": false
-  },
-  "main:view": {
-    "source": "dcc839a4015c",
-    "translation": "55f633268f47",
-    "reviewed": false
-  },
-  "main:window": {
-    "source": "19734a1b58ca",
-    "translation": "0a66d7740c1f",
-    "reviewed": false
-  },
-  "main:zoom": {
-    "source": "509c517ede79",
-    "translation": "cf077bbe7386",
-    "reviewed": false
-  },
-  "main:zoomIn": {
-    "source": "0e47f09a748f",
-    "translation": "80f8fbcfa011",
-    "reviewed": false
-  },
-  "main:zoomOut": {
-    "source": "bc7b631a689b",
-    "translation": "092a4a0ba550",
-    "reviewed": false
-  },
-  "mainCli:argBad": {
-    "source": "a32f78880e1a",
-    "translation": "4ffe05e1f320",
-    "reviewed": false
-  },
-  "mainCli:argChannel": {
-    "source": "24ccaebdaf00",
-    "translation": "892c5aa472a3",
-    "reviewed": false
-  },
-  "mainCli:argDescription": {
-    "source": "322ef587d6cf",
-    "translation": "64fc2aed4626",
-    "reviewed": false
-  },
-  "mainCli:argDir": {
-    "source": "57baceffdc3f",
-    "translation": "8d54690d5321",
-    "reviewed": false
-  },
-  "mainCli:argElectronPath": {
-    "source": "32b1063c91a8",
-    "translation": "64ebe11a60d3",
-    "reviewed": false
-  },
-  "mainCli:argEnv": {
-    "source": "5a983d27116b",
-    "translation": "6407d272deea",
-    "reviewed": false
-  },
-  "mainCli:argFiddle": {
-    "source": "0c83ebdc7e0a",
-    "translation": "828d113c245e",
-    "reviewed": false
-  },
-  "mainCli:argFlag": {
-    "source": "c83710bc2ceb",
-    "translation": "de3557fea6bc",
-    "reviewed": false
-  },
-  "mainCli:argForge": {
-    "source": "54c6add7eee3",
-    "translation": "5813ed59ced8",
-    "reviewed": false
-  },
-  "mainCli:argGood": {
-    "source": "4f8b7351f4fb",
-    "translation": "a1160ae2b1c6",
-    "reviewed": false
-  },
-  "mainCli:argHelp": {
-    "source": "18e074108f06",
-    "translation": "f240837149c4",
-    "reviewed": false
-  },
-  "mainCli:argId": {
-    "source": "045a5ef4a5a3",
-    "translation": "215fa0df5987",
-    "reviewed": false
-  },
-  "mainCli:argJson": {
-    "source": "d72ca85ed852",
-    "translation": "da3ab5d8e414",
-    "reviewed": false
-  },
-  "mainCli:argLogging": {
-    "source": "216da10793cb",
-    "translation": "5ff5d4901be8",
-    "reviewed": false
-  },
-  "mainCli:argModule": {
-    "source": "d9fc7a402780",
-    "translation": "953b43f65817",
-    "reviewed": false
-  },
-  "mainCli:argObsolete": {
-    "source": "dd7eedb67403",
-    "translation": "a066a7b63af6",
-    "reviewed": false
-  },
-  "mainCli:argOut": {
-    "source": "be0673d0518c",
-    "translation": "45e500019c0d",
-    "reviewed": false
-  },
-  "mainCli:argPm": {
-    "source": "ed581c0ba17e",
-    "translation": "9a68063522e9",
-    "reviewed": false
-  },
-  "mainCli:argPublic": {
-    "source": "1b8c1e6758cf",
-    "translation": "79a559e67005",
-    "reviewed": false
-  },
-  "mainCli:argRevision": {
-    "source": "5524c45f49f9",
-    "translation": "7dd532fdca6d",
-    "reviewed": false
-  },
-  "mainCli:argTrust": {
-    "source": "7dc0d124bd20",
-    "translation": "045649e9af23",
-    "reviewed": false
-  },
-  "mainCli:argVersion": {
-    "source": "a709d10e0d4e",
-    "translation": "cbc8244a7895",
-    "reviewed": false
-  },
-  "mainCli:cmdBisect": {
-    "source": "29663e249f9e",
-    "translation": "8ffb412dd3e2",
-    "reviewed": false
-  },
-  "mainCli:cmdExport": {
-    "source": "e2bf28fec0d0",
-    "translation": "b93bd4b0aba6",
-    "reviewed": false
-  },
-  "mainCli:cmdGistDelete": {
-    "source": "d540976f3478",
-    "translation": "dfafe9a70946",
-    "reviewed": false
-  },
-  "mainCli:cmdGistHistory": {
-    "source": "a46271250b4d",
-    "translation": "c2e655ae2364",
-    "reviewed": false
-  },
-  "mainCli:cmdGistPublish": {
-    "source": "2add9206ca4c",
-    "translation": "f24986519db4",
-    "reviewed": false
-  },
-  "mainCli:cmdGistUpdate": {
-    "source": "02f457587f32",
-    "translation": "7f9cf2cf03d8",
-    "reviewed": false
-  },
-  "mainCli:cmdMake": {
-    "source": "8c26d2650c2d",
-    "translation": "b53e5a67b2ea",
-    "reviewed": false
-  },
-  "mainCli:cmdPackage": {
-    "source": "ea5b93589ccf",
-    "translation": "8df81c92b6c1",
-    "reviewed": false
-  },
-  "mainCli:cmdRun": {
-    "source": "64826286759d",
-    "translation": "cd54d368f662",
-    "reviewed": false
-  },
-  "mainCli:cmdVersionsDownload": {
-    "source": "8c4b3d1ad543",
-    "translation": "55045704a29c",
-    "reviewed": false
-  },
-  "mainCli:cmdVersionsList": {
-    "source": "8ced92dab9a6",
-    "translation": "c7d6f0a4c774",
-    "reviewed": false
-  },
-  "mainCli:cmdVersionsRemove": {
-    "source": "edb6cd4c0483",
-    "translation": "f66b43361a55",
-    "reviewed": false
-  },
-  "mainCli:errorElectronExample": {
-    "source": "1addb67705d3",
-    "translation": "e67eb77e4895",
-    "reviewed": false
-  },
-  "mainCli:errorElectronPathMissing": {
-    "source": "3d33ef0ee438",
-    "translation": "50761f72e47f",
-    "reviewed": false
-  },
-  "mainCli:errorFiddleNotFound": {
-    "source": "d72c5c8d6c9e",
-    "translation": "39f15b9e5c93",
-    "reviewed": false
-  },
-  "mainCli:errorGistId": {
-    "source": "ccfed736f741",
-    "translation": "3b014f390340",
-    "reviewed": false
-  },
-  "mainCli:errorHelpHint": {
-    "source": "441fa1e788df",
-    "translation": "149d1e29a139",
-    "reviewed": false
-  },
-  "mainCli:errorInvalidChoice": {
-    "source": "f5d7107b13a6",
-    "translation": "68e1a542bf3d",
-    "reviewed": false
-  },
-  "mainCli:errorInvalidModule": {
-    "source": "b8b8c88b708a",
-    "translation": "f9c42bf694b5",
-    "reviewed": false
-  },
-  "mainCli:errorInvalidValue": {
-    "source": "795170e1e5a5",
-    "translation": "746bbcb74ba1",
-    "reviewed": false
-  },
-  "mainCli:errorMissingArgument": {
-    "source": "80d936da2c32",
-    "translation": "8579a5175765",
-    "reviewed": false
-  },
-  "mainCli:errorMissingValue": {
-    "source": "8f1642959c62",
-    "translation": "dce7bbe6f574",
-    "reviewed": false
-  },
-  "mainCli:errorNoToken": {
-    "source": "6de6facb63fc",
-    "translation": "e5646ec0e313",
-    "reviewed": false
-  },
-  "mainCli:errorPrefix": {
-    "source": "537574019c77",
-    "translation": "c03156991186",
-    "reviewed": false
-  },
-  "mainCli:errorTooManyArguments": {
-    "source": "505c8ddb5442",
-    "translation": "79a267d09eec",
-    "reviewed": false
-  },
-  "mainCli:errorUnexpectedValue": {
-    "source": "fa3bebfb0763",
-    "translation": "25e77b473a20",
-    "reviewed": false
-  },
-  "mainCli:errorUnknownCommand": {
-    "source": "31bfaec30785",
-    "translation": "250950f7366c",
-    "reviewed": false
-  },
-  "mainCli:errorUnknownExample": {
-    "source": "b8769f0f4200",
-    "translation": "d4983a14cc74",
-    "reviewed": false
-  },
-  "mainCli:errorUnknownOption": {
-    "source": "ece27282a1ff",
-    "translation": "bfd1c80486db",
-    "reviewed": false
-  },
-  "mainCli:errorUntrusted": {
-    "source": "46b6e6357cdf",
-    "translation": "675ad329e879",
-    "reviewed": false
-  },
-  "mainCli:helpArguments": {
-    "source": "a1281c0c1ec8",
-    "translation": "777f6dbde112",
-    "reviewed": false
-  },
-  "mainCli:helpCommands": {
-    "source": "c12b95153db8",
-    "translation": "dfb006d46dfc",
-    "reviewed": false
-  },
-  "mainCli:helpDefault": {
-    "source": "537624196d72",
-    "translation": "0d33a61bd5c8",
-    "reviewed": false
-  },
-  "mainCli:helpMore": {
-    "source": "4815c1480a52",
-    "translation": "be8816f54dda",
-    "reviewed": false
-  },
-  "mainCli:helpOptions": {
-    "source": "367431fd664b",
-    "translation": "f001c242cf94",
-    "reviewed": false
-  },
-  "mainCli:helpRepeatable": {
-    "source": "1e179859d9dd",
-    "translation": "57ea92d198ef",
-    "reviewed": false
-  },
-  "mainCli:helpUsage": {
-    "source": "6bb424049789",
-    "translation": "3910ce69cf53",
-    "reviewed": false
-  },
-  "mainCli:invalidVersion": {
-    "source": "36ec078defc4",
-    "translation": "38dbd521cc09",
-    "reviewed": false
-  },
-  "mainCli:resultDownloaded": {
-    "source": "fde8f4d3430b",
-    "translation": "9a6013d0448c",
-    "reviewed": false
-  },
-  "mainCli:resultExported": {
-    "source": "c505b32378d3",
-    "translation": "8b3e91b58392",
-    "reviewed": false
-  },
-  "mainCli:resultGistDeleted": {
-    "source": "d25a7f6cba1a",
-    "translation": "761b99b9e614",
-    "reviewed": false
-  },
-  "mainCli:resultGistPublished": {
-    "source": "e13ede0a6973",
-    "translation": "e16203d19fa2",
-    "reviewed": false
-  },
-  "mainCli:resultGistUpdated": {
-    "source": "9fcc5b2c63b8",
-    "translation": "9cadc32054c9",
-    "reviewed": false
-  },
-  "mainCli:resultNoVersions": {
-    "source": "caad964bd259",
-    "translation": "7af229369088",
-    "reviewed": false
-  },
-  "mainCli:resultRemoved": {
-    "source": "ae178a9e0a71",
-    "translation": "826b9e102376",
-    "reviewed": false
-  },
-  "mainCli:resultRevisionCreated": {
-    "source": "d70b9e24bca2",
-    "translation": "d626b138672b",
-    "reviewed": false
-  },
-  "mainCli:resultRevisionN": {
-    "source": "865dda60a194",
-    "translation": "c264ff6da4fd",
-    "reviewed": false
-  },
-  "mainCli:stateInstalled": {
-    "source": "a51a6c19a1ff",
-    "translation": "1e8b9769df70",
-    "reviewed": false
-  },
-  "mainCli:stateObsolete": {
-    "source": "b80cd861051a",
-    "translation": "110cdc072bf4",
-    "reviewed": false
-  },
-  "mainCli:trustQuestion": {
-    "source": "adcc02cafca0",
-    "translation": "626c0efd8357",
-    "reviewed": false
-  },
-  "mainCli:warnGistPartial": {
-    "source": "fb87ab7a01eb",
-    "translation": "e9e2e0fa4a37",
-    "reviewed": false
-  },
-  "mainDocuments:add": {
-    "source": "9fd728c66c9a",
-    "translation": "451755e3831f",
-    "reviewed": false
-  },
-  "mainDocuments:addFileDetail": {
-    "source": "ee3a7264fc1a",
-    "translation": "ba111b7b4c9b",
-    "reviewed": false
-  },
-  "mainDocuments:addFileMessage": {
-    "source": "fdec5eb1efc0",
-    "translation": "2ea4fea5674d",
-    "reviewed": false
-  },
-  "mainDocuments:busyDetail": {
-    "source": "db5679650500",
-    "translation": "9bf450774010",
-    "reviewed": false
-  },
-  "mainDocuments:busyMessage": {
-    "source": "0452c74c8e34",
-    "translation": "b2e8afbce72f",
-    "reviewed": false
-  },
-  "mainDocuments:cancel": {
-    "source": "19766ed6ccb2",
-    "translation": "2cd0f3be8738",
-    "reviewed": false
-  },
-  "mainDocuments:clearRecent": {
-    "source": "ef7945beb4b1",
-    "translation": "9659097a8500",
-    "reviewed": false
-  },
-  "mainDocuments:closeMessage": {
-    "source": "43be6ab0e589",
-    "translation": "86dc0dbdac78",
-    "reviewed": false
-  },
-  "mainDocuments:detailDependencies": {
-    "source": "cd1c666c0dcf",
-    "translation": "d330cacea1fe",
-    "reviewed": false
-  },
-  "mainDocuments:detailDescription": {
-    "source": "66ef4edec101",
-    "translation": "d0c6ac89e169",
-    "reviewed": false
-  },
-  "mainDocuments:detailFiles": {
-    "source": "52617dc8275c",
-    "translation": "1cbefd1aa12c",
-    "reviewed": false
-  },
-  "mainDocuments:detailOrigin": {
-    "source": "dc5dfdc8b9c0",
-    "translation": "827d92408ac5",
-    "reviewed": false
-  },
-  "mainDocuments:detailOwner": {
-    "source": "e4fd0f1fc066",
-    "translation": "b2c06812d074",
-    "reviewed": false
-  },
-  "mainDocuments:detailPath": {
-    "source": "b7bdf72aaacd",
-    "translation": "895936e98c23",
-    "reviewed": false
-  },
-  "mainDocuments:detailRevision": {
-    "source": "fd12fa0bea10",
-    "translation": "1a31a34599f2",
-    "reviewed": false
-  },
-  "mainDocuments:detailVersion": {
-    "source": "11fa2a310357",
-    "translation": "1373b981efee",
-    "reviewed": false
-  },
-  "mainDocuments:discard": {
-    "source": "f9bfa3dc7c8f",
-    "translation": "5c0c9eab98a8",
-    "reviewed": false
-  },
-  "mainDocuments:discardDrafts": {
-    "source": "eb1a70e39274",
-    "translation": "4038ba3c12fb",
-    "reviewed": false
-  },
-  "mainDocuments:dontSave": {
-    "source": "cd76b2debde1",
-    "translation": "8313fd8e427e",
-    "reviewed": false
-  },
-  "mainDocuments:linkDocsMessage": {
-    "source": "68ae5b3d3933",
-    "translation": "1d2741bd7c18",
-    "reviewed": false
-  },
-  "mainDocuments:linkGistMessage": {
-    "source": "0f80ba47cd37",
-    "translation": "95d353ebfb47",
-    "reviewed": false
-  },
-  "mainDocuments:linkInvalid": {
-    "source": "e0ff601d2459",
-    "translation": "e0dcb6862117",
-    "reviewed": false
-  },
-  "mainDocuments:linkNeedsNewer": {
-    "source": "98b9a8f9dc76",
-    "translation": "f6910c93b173",
-    "reviewed": false
-  },
-  "mainDocuments:linkOwnerMismatch": {
-    "source": "db416f8fe229",
-    "translation": "9b44874b968e",
-    "reviewed": false
-  },
-  "mainDocuments:linkSignInDetail": {
-    "source": "78314d0e68a6",
-    "translation": "ae1de787158e",
-    "reviewed": false
-  },
-  "mainDocuments:linkSignInMessage": {
-    "source": "0e68afe36b22",
-    "translation": "0be12cdeb739",
-    "reviewed": false
-  },
-  "mainDocuments:linkUntrusted": {
-    "source": "3099c98cf5cf",
-    "translation": "7f202ed84fbb",
-    "reviewed": false
-  },
-  "mainDocuments:load": {
-    "source": "8a6bdb6b18da",
-    "translation": "a7ec6fbee8f5",
-    "reviewed": false
-  },
-  "mainDocuments:loadFailed": {
-    "source": "44a13c8a8ee2",
-    "translation": "47e011060521",
-    "reviewed": false
-  },
-  "mainDocuments:loadWarnings": {
-    "source": "594a94fb8a5e",
-    "translation": "7ec0ea8c5802",
-    "reviewed": false
-  },
-  "mainDocuments:none": {
-    "source": "140bedbf9c3f",
-    "translation": "da5930e53d54",
-    "reviewed": false
-  },
-  "mainDocuments:noRecent": {
-    "source": "7e31f0e43fec",
-    "translation": "024751053f03",
-    "reviewed": false
-  },
-  "mainDocuments:notAFolder": {
-    "source": "5bfe03a58acb",
-    "translation": "dad817f0bf5f",
-    "reviewed": false
-  },
-  "mainDocuments:notAGist": {
-    "source": "053309281ee7",
-    "translation": "69fb11b04ae2",
-    "reviewed": false
-  },
-  "mainDocuments:offline": {
-    "source": "827fe8f10f8d",
-    "translation": "da9548239b93",
-    "reviewed": false
-  },
-  "mainDocuments:open": {
-    "source": "ed077f3d8125",
-    "translation": "f290f9167ad0",
-    "reviewed": false
-  },
-  "mainDocuments:openFolderTitle": {
-    "source": "653d5cf32bae",
-    "translation": "db7473fd5000",
-    "reviewed": false
-  },
-  "mainDocuments:overwriteDetail": {
-    "source": "c6c3d7a3cec9",
-    "translation": "4255df65fe73",
-    "reviewed": false
-  },
-  "mainDocuments:overwriteMessage": {
-    "source": "87d1d10e7d23",
-    "translation": "8709066e0cb6",
-    "reviewed": false
-  },
-  "mainDocuments:quit": {
-    "source": "b3eb37acb66b",
-    "translation": "ee1f5ad7d73a",
-    "reviewed": false
-  },
-  "mainDocuments:quitDetail": {
-    "source": "1498fc0811c2",
-    "translation": "9945c72cab68",
-    "reviewed": false
-  },
-  "mainDocuments:quitMessage": {
-    "source": "491d29fd3d1d",
-    "translation": "cdddc45b40cb",
-    "reviewed": false
-  },
-  "mainDocuments:replace": {
-    "source": "95e154398a4b",
-    "translation": "d8f014b5b2bd",
-    "reviewed": false
-  },
-  "mainDocuments:replaceDetail": {
-    "source": "e5e82fab795a",
-    "translation": "22c159767856",
-    "reviewed": false
-  },
-  "mainDocuments:replaceMessage": {
-    "source": "f117f108bd96",
-    "translation": "afd31e834cc8",
-    "reviewed": false
-  },
-  "mainDocuments:restore": {
-    "source": "a76e13b98392",
-    "translation": "c07fb8c4d3e4",
-    "reviewed": false
-  },
-  "mainDocuments:restoreDetail": {
-    "source": "6be72cd294b6",
-    "translation": "116a7827ce71",
-    "reviewed": false
-  },
-  "mainDocuments:restoreFailedDetail": {
-    "source": "2caa730c5874",
-    "translation": "d18f64da0e9e",
-    "reviewed": false
-  },
-  "mainDocuments:restoreFailedMessage": {
-    "source": "5a41104e0294",
-    "translation": "b7ae45c6c205",
-    "reviewed": false
-  },
-  "mainDocuments:restoreMessage": {
-    "source": "3082330c3c06",
-    "translation": "dc584d325d23",
-    "reviewed": false
-  },
-  "mainDocuments:save": {
-    "source": "1509f561f241",
-    "translation": "dba44ed3f54f",
-    "reviewed": false
-  },
-  "mainDocuments:saveFailed": {
-    "source": "c4f1549342d6",
-    "translation": "5f65748814c8",
-    "reviewed": false
-  },
-  "mainDocuments:saveFolderTitle": {
-    "source": "4ea15a96fac5",
-    "translation": "7aa743b6bb67",
-    "reviewed": false
-  },
-  "mainDocuments:signIn": {
-    "source": "bfd402b2f6f3",
-    "translation": "92fc480bee59",
-    "reviewed": false
-  },
-  "mainDocuments:signInRequired": {
-    "source": "79b2ad9b6d15",
-    "translation": "37c83a32faef",
-    "reviewed": false
-  },
-  "mainDocuments:skip": {
-    "source": "28d03596d24e",
-    "translation": "e2485d4c29a4",
-    "reviewed": false
-  },
-  "mainDocuments:titleEdited": {
-    "source": "805efedfe877",
-    "translation": "b1173c56c0d7",
-    "reviewed": false
-  },
-  "mainDocuments:trustAllowScripts": {
-    "source": "78daf186a887",
-    "translation": "dfccc6e29674",
-    "reviewed": false
-  },
-  "mainDocuments:trustContinue": {
-    "source": "fd493d090313",
-    "translation": "4c14f22e9622",
-    "reviewed": false
-  },
-  "mainDocuments:trustDetail": {
-    "source": "b4f0290806e0",
-    "translation": "c19748de798e",
-    "reviewed": false
-  },
-  "mainDocuments:trustMessage": {
-    "source": "b37d6d6d4b4b",
-    "translation": "52ca8e331b81",
-    "reviewed": false
-  },
-  "mainDocuments:unknownOwner": {
-    "source": "b23a6a8439c0",
-    "translation": "bd5a8814a363",
-    "reviewed": false
-  },
-  "mainDocuments:warnModules": {
-    "source": "f6ea77a7795f",
-    "translation": "f216c3363789",
-    "reviewed": false
-  },
-  "mainDocuments:warnPackageJson": {
-    "source": "c3b6061f2d93",
-    "translation": "18f245e32a52",
-    "reviewed": false
-  },
-  "mainDocuments:warnVersion": {
-    "source": "fcc52719d62f",
-    "translation": "f888abc5cf60",
-    "reviewed": false
-  },
-  "mainErrors:command-not-started": {
-    "source": "cb6c918a8ec3",
-    "translation": "38fb45cdcfc7",
-    "reviewed": false
-  },
-  "mainErrors:duplicate-name": {
-    "source": "8c8b75988e48",
-    "translation": "d20b2e3a4324",
-    "reviewed": false
-  },
-  "mainErrors:empty-name": {
-    "source": "7b5ad702b446",
-    "translation": "f45f64fcb3e4",
-    "reviewed": false
-  },
-  "mainErrors:example-not-found": {
-    "source": "bc1449e98023",
-    "translation": "674e18ba0337",
-    "reviewed": false
-  },
-  "mainErrors:file-not-found": {
-    "source": "e2039866f001",
-    "translation": "660715791e53",
-    "reviewed": false
-  },
-  "mainErrors:file-too-large": {
-    "source": "042c9ce76a36",
-    "translation": "5452c7e29d28",
-    "reviewed": false
-  },
-  "mainErrors:folder-not-found": {
-    "source": "28cae74d0793",
-    "translation": "64e153e96d6a",
-    "reviewed": false
-  },
-  "mainErrors:github-response": {
-    "source": "ce646c12b11f",
-    "translation": "64d35fcd694d",
-    "reviewed": false
-  },
-  "mainErrors:github-response-detail": {
-    "source": "82b886913c6e",
-    "translation": "e6a98feb1ec1",
-    "reviewed": false
-  },
-  "mainErrors:install-failed": {
-    "source": "81188bc7e77f",
-    "translation": "d4fa4fbe8ad3",
-    "reviewed": false
-  },
-  "mainErrors:invalid-character": {
-    "source": "60edec4eae90",
-    "translation": "6f95acb244f7",
-    "reviewed": false
-  },
-  "mainErrors:invalid-json": {
-    "source": "59ab3a23a4bd",
-    "translation": "49c972c9cf18",
-    "reviewed": false
-  },
-  "mainErrors:invalid-name": {
-    "source": "85aeacc29198",
-    "translation": "44fca8d04832",
-    "reviewed": false
-  },
-  "mainErrors:invalid-path": {
-    "source": "664ebfe5ec0d",
-    "translation": "3cdc2460b589",
-    "reviewed": false
-  },
-  "mainErrors:invalid-spec": {
-    "source": "8404d2e10584",
-    "translation": "3bc095a8848d",
-    "reviewed": false
-  },
-  "mainErrors:invalid-tag": {
-    "source": "f1a6ec36c43e",
-    "translation": "0c78bb8695df",
-    "reviewed": false
-  },
-  "mainErrors:missing-package-json": {
-    "source": "5dadac8c6b43",
-    "translation": "34574583698b",
-    "reviewed": false
-  },
-  "mainErrors:no-main-entry": {
-    "source": "101d93cf9920",
-    "translation": "6788402340fa",
-    "reviewed": false
-  },
-  "mainErrors:no-supported-files": {
-    "source": "aad0bd01a7f0",
-    "translation": "f9d954e03b35",
-    "reviewed": false
-  },
-  "mainErrors:path-separator": {
-    "source": "84e0f622eef6",
-    "translation": "27704c57fcb3",
-    "reviewed": false
-  },
-  "mainErrors:rate-limited": {
-    "source": "df574eebff64",
-    "translation": "464aa48aea6a",
-    "reviewed": false
-  },
-  "mainErrors:registry-metadata": {
-    "source": "bc2e3d8ae8fa",
-    "translation": "f761701f4276",
-    "reviewed": false
-  },
-  "mainErrors:remove-main-entry": {
-    "source": "2a8e6fc25e65",
-    "translation": "5e26f1b2371c",
-    "reviewed": false
-  },
-  "mainErrors:reserved-name": {
-    "source": "de3dfbcba73b",
-    "translation": "063ff2d64c67",
-    "reviewed": false
-  },
-  "mainErrors:second-main-entry": {
-    "source": "c46911707ed8",
-    "translation": "24ceb4a65750",
-    "reviewed": false
-  },
-  "mainErrors:template-status": {
-    "source": "07787ed79a3a",
-    "translation": "d93724b9f3f0",
-    "reviewed": false
-  },
-  "mainErrors:template-unreachable": {
-    "source": "9c322939b6f9",
-    "translation": "68708247fcb7",
-    "reviewed": false
-  },
-  "mainErrors:timeout": {
-    "source": "54387ec942f0",
-    "translation": "3d320eadf570",
-    "reviewed": false
-  },
-  "mainErrors:too-many-files": {
-    "source": "d6d02cd43fe0",
-    "translation": "f86b1413c68e",
-    "reviewed": false
-  },
-  "mainErrors:too-many-redirects": {
-    "source": "de62e5204cea",
-    "translation": "d83f5655ca68",
-    "reviewed": false
-  },
-  "mainErrors:unexpected-response": {
-    "source": "0ddb99100145",
-    "translation": "bd5d4899b658",
-    "reviewed": false
-  },
-  "mainErrors:unreachable": {
-    "source": "e774e9279948",
-    "translation": "0d105a9d2da9",
-    "reviewed": false
-  },
-  "mainErrors:unsupported-extension": {
-    "source": "94d07fb07733",
-    "translation": "a76c5fdaf2b7",
-    "reviewed": false
-  },
-  "mainModules:invalidPackageName": {
-    "source": "85aeacc29198",
-    "translation": "44fca8d04832",
-    "reviewed": false
-  },
-  "mainModules:noPublishedVersions": {
-    "source": "ba30f6eb3a01",
-    "translation": "742497c9b63f",
-    "reviewed": false
-  },
-  "mainModules:notOnNpm": {
-    "source": "93a0021eade6",
-    "translation": "11be19228e1b",
-    "reviewed": false
-  },
-  "mainModules:registryInvalidResponse": {
-    "source": "6ae1575c6e00",
-    "translation": "2da3f7be48d9",
-    "reviewed": false
-  },
-  "mainModules:registryStatus": {
-    "source": "e5ee057f42dd",
-    "translation": "1ae1d73d4e4c",
-    "reviewed": false
-  },
-  "mainModules:registryUnreachable": {
-    "source": "f5df5f3b478f",
-    "translation": "0009c5d5c8c5",
-    "reviewed": false
-  },
-  "mainPlatform:aboutCopyright": {
-    "source": "299e242d0856",
-    "translation": "3731c60f0754",
-    "reviewed": false
-  },
-  "mainPlatform:aboutVersion": {
-    "source": "58c5d0ebd6a7",
-    "translation": "58c5d0ebd6a7",
-    "reviewed": false
-  },
-  "mainPlatform:dontMove": {
-    "source": "e6bbe0aa6b8e",
-    "translation": "0804d8dee79b",
-    "reviewed": false
-  },
-  "mainPlatform:later": {
-    "source": "73b6e48a1b55",
-    "translation": "b67b4254dd02",
-    "reviewed": false
-  },
-  "mainPlatform:moveButton": {
-    "source": "830a1041dac7",
-    "translation": "4391ab5d58a5",
-    "reviewed": false
-  },
-  "mainPlatform:moveDetail": {
-    "source": "590512b3538a",
-    "translation": "4089cabb888e",
-    "reviewed": false
-  },
-  "mainPlatform:moveMessage": {
-    "source": "2fe577e949b5",
-    "translation": "b9ed8f5a3c0d",
-    "reviewed": false
-  },
-  "mainPlatform:resetPrivacyButton": {
-    "source": "daee7606b339",
-    "translation": "c608df63a4b4",
-    "reviewed": false
-  },
-  "mainPlatform:resetPrivacyDetail": {
-    "source": "3194af1a98de",
-    "translation": "06aaa4123d75",
-    "reviewed": false
-  },
-  "mainPlatform:resetPrivacyFailed": {
-    "source": "5babbeda481a",
-    "translation": "f81fc57884da",
-    "reviewed": false
-  },
-  "mainPlatform:resetPrivacyMessage": {
-    "source": "bc5d0817c4a9",
-    "translation": "23ea0dc055e3",
-    "reviewed": false
-  },
-  "mainPlatform:resetPrivacyUnavailable": {
-    "source": "eac316267bdc",
-    "translation": "d1251b5b4598",
-    "reviewed": false
-  },
-  "mainPlatform:restart": {
-    "source": "6b983a81e5e8",
-    "translation": "6081003546e7",
-    "reviewed": false
-  },
-  "mainPlatform:updateReadyDetail": {
-    "source": "de66a4e35bfc",
-    "translation": "634e64a6ccf5",
-    "reviewed": false
-  },
-  "mainPlatform:updateReadyTitle": {
-    "source": "46570c771ff5",
-    "translation": "be757ad1ab6c",
-    "reviewed": false
-  },
-  "mainRun:addLocalBuildButton": {
-    "source": "aed7695aee7b",
-    "translation": "5710ab420dc3",
-    "reviewed": false
-  },
-  "mainRun:addLocalBuildTitle": {
-    "source": "fd7d0f8b6303",
-    "translation": "d96ce4831dc2",
-    "reviewed": false
-  },
-  "mainRun:bisectDone": {
-    "source": "8f009e55d71f",
-    "translation": "de217e6b30ab",
-    "reviewed": false
-  },
-  "mainRun:bisectGoodNotOlder": {
-    "source": "a49cc30b31b9",
-    "translation": "05afc540bd7b",
-    "reviewed": false
-  },
-  "mainRun:bisectInvalid": {
-    "source": "a0d82bb636d4",
-    "translation": "1420ad57e09b",
-    "reviewed": false
-  },
-  "mainRun:bisectStep": {
-    "source": "7c490a580946",
-    "translation": "0eb99d37fdd6",
-    "reviewed": false
-  },
-  "mainRun:bisectTooFew": {
-    "source": "639461489ce4",
-    "translation": "9529c756f83f",
-    "reviewed": false
-  },
-  "mainRun:bisectVerdictBad": {
-    "source": "4fff96d30311",
-    "translation": "bc2c727eddcd",
-    "reviewed": false
-  },
-  "mainRun:bisectVerdictGood": {
-    "source": "1c9c70403909",
-    "translation": "f31fae90f9c1",
-    "reviewed": false
-  },
-  "mainRun:bisectVerifyFailed": {
-    "source": "92b3680530d5",
-    "translation": "5cca11055f9e",
-    "reviewed": false
-  },
-  "mainRun:cancel": {
-    "source": "19766ed6ccb2",
-    "translation": "2cd0f3be8738",
-    "reviewed": false
-  },
-  "mainRun:cannotRemoveActive": {
-    "source": "3704205e276a",
-    "translation": "94fb1316f41e",
-    "reviewed": false
-  },
-  "mainRun:commandFailed": {
-    "source": "94d97d56d6c9",
-    "translation": "7e466af8941a",
-    "reviewed": false
-  },
-  "mainRun:consoleReady": {
-    "source": "5b9f082e1faa",
-    "translation": "94d5b7e30bc3",
-    "reviewed": false
-  },
-  "mainRun:downloadFailed": {
-    "source": "8acdc0b49837",
-    "translation": "7904ed96721e",
-    "reviewed": false
-  },
-  "mainRun:downloading": {
-    "source": "8804c3afe1c2",
-    "translation": "c2bc4c1c6be7",
-    "reviewed": false
-  },
-  "mainRun:envBlocked": {
-    "source": "8831c8f6d99a",
-    "translation": "0011e2830c11",
-    "reviewed": false
-  },
-  "mainRun:envInvalid": {
-    "source": "ec2b0cbe8d5a",
-    "translation": "3f04b8ee0121",
-    "reviewed": false
-  },
-  "mainRun:esmNeeds28": {
-    "source": "cf49340ad690",
-    "translation": "78b9a1e5e9a9",
-    "reviewed": false
-  },
-  "mainRun:exitedCode": {
-    "source": "0df62ed33e8e",
-    "translation": "799643898034",
-    "reviewed": false
-  },
-  "mainRun:exitedSignal": {
-    "source": "ed528b4565a7",
-    "translation": "9b9c8a776033",
-    "reviewed": false
-  },
-  "mainRun:inspector": {
-    "source": "549642df54a8",
-    "translation": "a2735de325f5",
-    "reviewed": false
-  },
-  "mainRun:installingModules": {
-    "source": "f6d03b444659",
-    "translation": "a53abe584735",
-    "reviewed": false
-  },
-  "mainRun:installingModulesNoScripts": {
-    "source": "5d2cbc7959c4",
-    "translation": "ee21d6184f94",
-    "reviewed": false
-  },
-  "mainRun:localBuildMissing": {
-    "source": "e77ab917c380",
-    "translation": "2afeec391f06",
-    "reviewed": false
-  },
-  "mainRun:making": {
-    "source": "6b4ec81ec0f2",
-    "translation": "d98bce376e95",
-    "reviewed": false
-  },
-  "mainRun:modulesFailed": {
-    "source": "2cbed1af5e88",
-    "translation": "37100c326035",
-    "reviewed": false
-  },
-  "mainRun:noBinaryDetail": {
-    "source": "c29f6fa12a95",
-    "translation": "240bcf6ef4c8",
-    "reviewed": false
-  },
-  "mainRun:noBinaryTitle": {
-    "source": "f5a6768fc3b3",
-    "translation": "5ff7d9e84858",
-    "reviewed": false
-  },
-  "mainRun:openCompareButton": {
-    "source": "ed077f3d8125",
-    "translation": "f290f9167ad0",
-    "reviewed": false
-  },
-  "mainRun:openCompareMessage": {
-    "source": "c4e871f383a4",
-    "translation": "9ffaf9d42525",
-    "reviewed": false
-  },
-  "mainRun:packageDone": {
-    "source": "379818de2209",
-    "translation": "e7c1a59d0d44",
-    "reviewed": false
-  },
-  "mainRun:packaging": {
-    "source": "86a0fc225e81",
-    "translation": "f34b645633af",
-    "reviewed": false
-  },
-  "mainRun:pmMissing": {
-    "source": "8c33a48abbf7",
-    "translation": "e6b73b50d36e",
-    "reviewed": false
-  },
-  "mainRun:privacyHelperMissing": {
-    "source": "e8d27b861b82",
-    "translation": "63c795ba3f14",
-    "reviewed": false
-  },
-  "mainRun:runFailed": {
-    "source": "24c8d3e320af",
-    "translation": "7d5675b85e68",
-    "reviewed": false
-  },
-  "mainRun:scriptsRequired": {
-    "source": "71761bcd46f1",
-    "translation": "67052837f68c",
-    "reviewed": false
-  },
-  "mainRun:spawnFailed": {
-    "source": "38e210360dbe",
-    "translation": "1e72f90057bb",
-    "reviewed": false
-  },
-  "mainRun:started": {
-    "source": "6ebdbd2b12ee",
-    "translation": "f061dd796467",
-    "reviewed": false
-  },
-  "mainRun:untrusted": {
-    "source": "dcb157063c2b",
-    "translation": "a70de78a1186",
-    "reviewed": false
-  },
-  "mainRun:versionUnavailable": {
-    "source": "d9b594d4abc8",
-    "translation": "ac1194bbf434",
-    "reviewed": false
-  },
-  "mainRun:versionUnknown": {
-    "source": "4a09edbbb383",
-    "translation": "bcf5acc978db",
-    "reviewed": false
-  },
-  "mainSettings:exportSettingsTitle": {
-    "source": "4431ea74c184",
-    "translation": "9263e6bbcdf7",
-    "reviewed": false
-  },
-  "mainSettings:importButton": {
-    "source": "2cff9baabf56",
-    "translation": "20809c5d8596",
-    "reviewed": false
-  },
-  "mainSettings:importEmpty": {
-    "source": "140bedbf9c3f",
-    "translation": "da5930e53d54",
-    "reviewed": false
-  },
-  "mainSettings:importExecutionDetail": {
-    "source": "3a809edb835d",
-    "translation": "f8549a01a966",
-    "reviewed": false
-  },
-  "mainSettings:importExecutionMessage": {
-    "source": "8f9a463c1572",
-    "translation": "95c75d55705b",
-    "reviewed": false
-  },
-  "mainSettings:importSettingLine": {
-    "source": "9d356e78069b",
-    "translation": "a951f7517a12",
-    "reviewed": false
-  },
-  "mainSettings:importSettingsTitle": {
-    "source": "72f01a736575",
-    "translation": "f5475897e4a5",
-    "reviewed": false
-  },
-  "mainSettings:importThemeTitle": {
-    "source": "32bb2ed98de6",
-    "translation": "7e61dfd11716",
-    "reviewed": false
-  },
-  "mainSettings:invalidValue": {
-    "source": "e5354ffdd87e",
-    "translation": "b2f77baadab9",
-    "reviewed": false
-  },
-  "mainSettings:jsonFiles": {
-    "source": "9fe1f29e5343",
-    "translation": "9b6c44bc3e3d",
-    "reviewed": false
-  },
-  "mainSettings:lucentDark": {
-    "source": "e7fd5bf6ab2d",
-    "translation": "47e3cb02f04c",
-    "reviewed": false
-  },
-  "mainSettings:lucentHcDark": {
-    "source": "12e682d711c4",
-    "translation": "a4361fda2798",
-    "reviewed": false
-  },
-  "mainSettings:lucentHcLight": {
-    "source": "510c02c874b2",
-    "translation": "e2e67a9314bb",
-    "reviewed": false
-  },
-  "mainSettings:lucentLight": {
-    "source": "d79cdcb99ff3",
-    "translation": "d2ff51b98eeb",
-    "reviewed": false
-  },
-  "mainSettings:notJson": {
-    "source": "59ab3a23a4bd",
-    "translation": "49c972c9cf18",
-    "reviewed": false
-  },
-  "mainSettings:notSettings": {
-    "source": "07053f93d25a",
-    "translation": "d98193c409b5",
-    "reviewed": false
-  },
-  "mainSettings:notTheme": {
-    "source": "1a38700535f6",
-    "translation": "8929156f7650",
-    "reviewed": false
-  },
-  "mainSettings:openFailed": {
-    "source": "a76a61882fa5",
-    "translation": "275b82841e79",
-    "reviewed": false
-  },
-  "mainSettings:themeCopyName": {
-    "source": "6305eb6721a4",
-    "translation": "9e714f96a8ae",
-    "reviewed": false
-  },
-  "mainSettings:themeNeedsValues": {
-    "source": "37d39534b079",
-    "translation": "7a81aa5a353d",
-    "reviewed": false
-  },
-  "mainSettings:unknownSetting": {
-    "source": "9189e9bffffd",
-    "translation": "9557b193245d",
-    "reviewed": false
-  },
-  "mainUx:bisectDone": {
-    "source": "8b1e815f28af",
-    "translation": "dff72d9ceb6a",
-    "reviewed": false
-  },
-  "mainUx:bisectFailed": {
-    "source": "e18d564df0e1",
-    "translation": "4dbec5510a93",
-    "reviewed": false
-  },
-  "mainUx:downloadsDone": {
-    "source": "cdc7cfec7ce6",
-    "translation": "b1492e83c9c7",
-    "reviewed": false
-  },
-  "mainUx:downloadsFailed": {
-    "source": "f9b912b3be2f",
-    "translation": "e7111b3b75ea",
-    "reviewed": false
-  },
-  "mainUx:notificationBody": {
-    "source": "f03387ea9bee",
-    "translation": "f03387ea9bee",
-    "reviewed": false
-  },
-  "mainUx:packageDone": {
-    "source": "acc8b2a663c1",
-    "translation": "9cb92e19a717",
-    "reviewed": false
-  },
-  "mainUx:packageFailed": {
-    "source": "cad5fcca065c",
-    "translation": "b589832bfed1",
-    "reviewed": false
-  },
-  "mainUx:recent": {
-    "source": "690dbe9dc099",
-    "translation": "39a9046f9c8c",
-    "reviewed": false
-  },
-  "mainUx:runDone": {
-    "source": "b089e971d3bb",
-    "translation": "8c905ac8c8a7",
-    "reviewed": false
-  },
-  "mainUx:runFailed": {
-    "source": "443ccc276c7d",
-    "translation": "0b2443371a5e",
-    "reviewed": false
-  },
-  "mainVersions:cannotChange": {
-    "source": "bc31d120b783",
-    "translation": "cdad7c4020aa",
-    "reviewed": false
-  },
-  "mainVersions:downloadFailed": {
-    "source": "fae62659099e",
-    "translation": "4d7417a250fa",
-    "reviewed": false
-  },
-  "mainVersions:electronVersion": {
-    "source": "8c69cff12cea",
-    "translation": "8c69cff12cea",
-    "reviewed": false
-  },
-  "mainVersions:fallback": {
-    "source": "7d8c336c71ba",
-    "translation": "53ddb673710c",
-    "reviewed": false
-  },
-  "mainVersions:localBuildMissing": {
-    "source": "e77ab917c380",
-    "translation": "2afeec391f06",
-    "reviewed": false
-  },
-  "mainVersions:localBuildUnknown": {
-    "source": "0b2917b84827",
-    "translation": "cf625f25526e",
-    "reviewed": false
-  },
-  "mainVersions:refreshFailed": {
-    "source": "cb64a9b4e2e9",
-    "translation": "ad2fa086df4c",
-    "reviewed": false
-  },
-  "mainVersions:removeFailed": {
-    "source": "c368072bc66f",
-    "translation": "134855b1fab8",
-    "reviewed": false
-  },
-  "mainVersions:showBetaTitle": {
-    "source": "56a991fb236d",
-    "translation": "7a62f4c223e0",
-    "reviewed": false
-  },
-  "mainVersions:showChannelDetail": {
-    "source": "a2b06e655b8a",
-    "translation": "fd57efeb48a7",
-    "reviewed": false
-  },
-  "mainVersions:showChannelOk": {
-    "source": "cab88e281cc4",
-    "translation": "86927b464e9e",
-    "reviewed": false
-  },
-  "mainVersions:showNightlyTitle": {
-    "source": "949fd2705412",
-    "translation": "397221cde96f",
-    "reviewed": false
-  },
-  "mainVersions:showStableTitle": {
-    "source": "f21936baa12b",
-    "translation": "8b53640b44c3",
-    "reviewed": false
-  },
-  "mainVersions:switchButton": {
-    "source": "39921a740bf2",
-    "translation": "873b0afae9ba",
-    "reviewed": false
-  },
-  "mainVersions:switchToBuild": {
-    "source": "b3f8d7da26d4",
-    "translation": "7bb3f68115b9",
-    "reviewed": false
-  },
-  "mainVersions:switchToBuildDetail": {
-    "source": "6925a2428461",
-    "translation": "3ea4216aa7ac",
-    "reviewed": false
-  },
-  "mainVersions:versionUnknown": {
-    "source": "4a09edbbb383",
-    "translation": "bcf5acc978db",
-    "reviewed": false
-  },
-  "mainVersions:versionUnsupported": {
-    "source": "d9b594d4abc8",
-    "translation": "ac1194bbf434",
-    "reviewed": false
-  },
-  "onboarding:back": {
-    "source": "76900f1bfd16",
-    "translation": "da336fdc0dbd",
-    "reviewed": false
-  },
-  "onboarding:basicsBody": {
-    "source": "d6c41a0421a6",
-    "translation": "a6b1da0d28be",
-    "reviewed": false
-  },
-  "onboarding:basicsStart": {
-    "source": "b76c42cb4bf3",
-    "translation": "3bdaed184a37",
-    "reviewed": false
-  },
-  "onboarding:basicsTitle": {
-    "source": "eddc833d566a",
-    "translation": "2fd6399b28c0",
-    "reviewed": false
-  },
-  "onboarding:consoleBody": {
-    "source": "4a00632bbac9",
-    "translation": "ca5a99696c5a",
-    "reviewed": false
-  },
-  "onboarding:consoleTitle": {
-    "source": "8ee213344443",
-    "translation": "72b6edd8a283",
-    "reviewed": false
-  },
-  "onboarding:done": {
-    "source": "11a6767d5674",
-    "translation": "c0b3fbff51cc",
-    "reviewed": false
-  },
-  "onboarding:editorBody": {
-    "source": "ef0d56a8cec1",
-    "translation": "6884827ed9ff",
-    "reviewed": false
-  },
-  "onboarding:editorTitle": {
-    "source": "2f96b6fcdaab",
-    "translation": "5f24831dd2a1",
-    "reviewed": false
-  },
-  "onboarding:htmlBody": {
-    "source": "b1e185bfbd18",
-    "translation": "6bd4e143f729",
-    "reviewed": false
-  },
-  "onboarding:htmlTitle": {
-    "source": "c596285cd054",
-    "translation": "15143d6dd203",
-    "reviewed": false
-  },
-  "onboarding:label": {
-    "source": "5155b98763c0",
-    "translation": "d2b671107b73",
-    "reviewed": false
-  },
-  "onboarding:mainBody": {
-    "source": "92d55908f23a",
-    "translation": "d2601145242a",
-    "reviewed": false
-  },
-  "onboarding:mainTitle": {
-    "source": "783d9624d46a",
-    "translation": "f102aa91eada",
-    "reviewed": false
-  },
-  "onboarding:next": {
-    "source": "1ff57a29d7c9",
-    "translation": "acfc4e74a650",
-    "reviewed": false
-  },
-  "onboarding:notNow": {
-    "source": "28d03596d24e",
-    "translation": "e2485d4c29a4",
-    "reviewed": false
-  },
-  "onboarding:offerBody": {
-    "source": "76ba5b0d5340",
-    "translation": "ef8b8da5faee",
-    "reviewed": false
-  },
-  "onboarding:offerTitle": {
-    "source": "f0cd3e2139ea",
-    "translation": "35438b60bb76",
-    "reviewed": false
-  },
-  "onboarding:publishBody": {
-    "source": "161dffa5869a",
-    "translation": "fb8e44ac3e89",
-    "reviewed": false
-  },
-  "onboarding:publishTitle": {
-    "source": "54acdcbb867a",
-    "translation": "ecc645fbfcd0",
-    "reviewed": false
-  },
-  "onboarding:rendererBody": {
-    "source": "8c8d64c3a493",
-    "translation": "7a12c2163f9e",
-    "reviewed": false
-  },
-  "onboarding:rendererTitle": {
-    "source": "e607182db014",
-    "translation": "73fb60d8382b",
-    "reviewed": false
-  },
-  "onboarding:runBody": {
-    "source": "014ff0b35399",
-    "translation": "9eda45492082",
-    "reviewed": false
-  },
-  "onboarding:runTitle": {
-    "source": "52f39495b3d3",
-    "translation": "7a5ef22d1aa2",
-    "reviewed": false
-  },
-  "onboarding:sidebarBody": {
-    "source": "96ec92dd8539",
-    "translation": "19c85b9dfde4",
-    "reviewed": false
-  },
-  "onboarding:sidebarTitle": {
-    "source": "55858ee5f49a",
-    "translation": "1f496378e79a",
-    "reviewed": false
-  },
-  "onboarding:skipTour": {
-    "source": "5ac614dee51b",
-    "translation": "c1cbaf2c2c36",
-    "reviewed": false
-  },
-  "onboarding:start": {
-    "source": "a83c4366d2df",
-    "translation": "59ce5aacb827",
-    "reviewed": false
-  },
-  "onboarding:stepCount": {
-    "source": "487fcaf37ab9",
-    "translation": "1315c4393bb6",
-    "reviewed": false
-  },
-  "onboarding:versionBody": {
-    "source": "e0e6ca22b059",
-    "translation": "eba5fb6884e5",
-    "reviewed": false
-  },
-  "onboarding:versionTitle": {
-    "source": "a94b1005c6ad",
-    "translation": "f683903f17f8",
-    "reviewed": false
-  },
-  "packages:addFailed": {
-    "source": "4d4f68a62215",
-    "translation": "47d05bae5776",
-    "reviewed": false
-  },
-  "packages:addLabel": {
-    "source": "c3611fcb48ea",
-    "translation": "c5d22a9fd290",
-    "reviewed": false
-  },
-  "packages:addPlaceholder": {
-    "source": "6a6e7053ec9b",
-    "translation": "5e4ab0c87194",
-    "reviewed": false
-  },
-  "packages:changeFailed": {
-    "source": "84edd1088cce",
-    "translation": "e7006a64d324",
-    "reviewed": false
-  },
-  "packages:latest": {
-    "source": "5e1e2bcac305",
-    "translation": "569af1a47dbd",
-    "reviewed": false
-  },
-  "packages:list": {
-    "source": "916e04bf3fe7",
-    "translation": "80933ab93dca",
-    "reviewed": false
-  },
-  "packages:moreVersions": {
-    "source": "8b8b62f47ab0",
-    "translation": "9face0650bdb",
-    "reviewed": false
-  },
-  "packages:noResults": {
-    "source": "0d977800db55",
-    "translation": "ad2c7d7feb55",
-    "reviewed": false
-  },
-  "packages:noVersions": {
-    "source": "1c3e2f174528",
-    "translation": "e4bb99472ca4",
-    "reviewed": false
-  },
-  "packages:remove": {
-    "source": "43e1269ac88a",
-    "translation": "5773020ee5f8",
-    "reviewed": false
-  },
-  "packages:searchFailed": {
-    "source": "119b75849c62",
-    "translation": "b0760dfa25a4",
-    "reviewed": false
-  },
-  "packages:searching": {
-    "source": "c31723ab3302",
-    "translation": "d373df6e334e",
-    "reviewed": false
-  },
-  "packages:searchVersions": {
-    "source": "2af5bdafa2e7",
-    "translation": "2e3f379b95f2",
-    "reviewed": false
-  },
-  "packages:title": {
-    "source": "40a2085371b8",
-    "translation": "58be5abb3cf5",
-    "reviewed": false
-  },
-  "packages:version": {
-    "source": "2a38c956c7ac",
-    "translation": "c3145f053d3d",
-    "reviewed": false
-  },
-  "palette:electronVersion": {
-    "source": "8c69cff12cea",
-    "translation": "8c69cff12cea",
-    "reviewed": false
-  },
-  "palette:empty": {
-    "source": "2df01a03ff43",
-    "translation": "9e9cfa3c23bd",
-    "reviewed": false
-  },
-  "palette:kindCommand": {
-    "source": "713166971d73",
-    "translation": "928f87d4507b",
-    "reviewed": false
-  },
-  "palette:kindEditor": {
-    "source": "936a161c3931",
-    "translation": "76ea678e0069",
-    "reviewed": false
-  },
-  "palette:kindExample": {
-    "source": "d029f87e3d80",
-    "translation": "38a5716e46c9",
-    "reviewed": false
-  },
-  "palette:kindFile": {
-    "source": "50009ce1da4d",
-    "translation": "a11ac5efe91d",
-    "reviewed": false
-  },
-  "palette:kindVersion": {
-    "source": "dd167905de0d",
-    "translation": "5f76b2bf82dd",
-    "reviewed": false
-  },
-  "palette:label": {
-    "source": "0347f794d69c",
-    "translation": "503ed54b5d69",
-    "reviewed": false
-  },
-  "palette:placeholder": {
-    "source": "e6d4a15ef0cd",
-    "translation": "f1433672d58c",
-    "reviewed": false
-  },
-  "palette:runFailed": {
-    "source": "6f6e2d2daebc",
-    "translation": "e9c542256aed",
-    "reviewed": false
-  },
-  "run:addLocalBuild": {
-    "source": "3377ad9312b1",
-    "translation": "b640b9158d97",
-    "reviewed": false
-  },
-  "run:announceChecking": {
-    "source": "556ca2b5e6bf",
-    "translation": "e6de21879e3e",
-    "reviewed": false
-  },
-  "run:announceDownloading": {
-    "source": "8708b29a3627",
-    "translation": "175646193518",
-    "reviewed": false
-  },
-  "run:announceInstalling": {
-    "source": "5b1ba0587995",
-    "translation": "f99f8cf09d20",
-    "reviewed": false
-  },
-  "run:announceReady": {
-    "source": "c2e2ee67d426",
-    "translation": "4af8fc184376",
-    "reviewed": false
-  },
-  "run:announceRunning": {
-    "source": "43f525a5d8c2",
-    "translation": "4b2d61505163",
-    "reviewed": false
-  },
-  "run:announceStarting": {
-    "source": "aeed4d26bb5f",
-    "translation": "09d1fa762580",
-    "reviewed": false
-  },
-  "run:announceUnzipping": {
-    "source": "c25d55ecc69c",
-    "translation": "5e669faca20f",
-    "reviewed": false
-  },
-  "run:bisectAuto": {
-    "source": "0286249762f7",
-    "translation": "36147b7e34df",
-    "reviewed": false
-  },
-  "run:bisectAutoRunning": {
-    "source": "e8e22d19497c",
-    "translation": "5ad92e2491b8",
-    "reviewed": false
-  },
-  "run:bisectBad": {
-    "source": "6fe7d7112caa",
-    "translation": "c1166ff79db0",
-    "reviewed": false
-  },
-  "run:bisectBadVersion": {
-    "source": "919295e2bc3b",
-    "translation": "74862e123e48",
-    "reviewed": false
-  },
-  "run:bisectDoneTitle": {
-    "source": "8b1e815f28af",
-    "translation": "dff72d9ceb6a",
-    "reviewed": false
-  },
-  "run:bisectFailed": {
-    "source": "e18d564df0e1",
-    "translation": "4dbec5510a93",
-    "reviewed": false
-  },
-  "run:bisectGood": {
-    "source": "c939327ca16d",
-    "translation": "296de0e31f8c",
-    "reviewed": false
-  },
-  "run:bisectGoodVersion": {
-    "source": "4bf233eaf589",
-    "translation": "23ca4878d572",
-    "reviewed": false
-  },
-  "run:bisectIntro": {
-    "source": "b31e2a8b8510",
-    "translation": "03d415cdc5cd",
-    "reviewed": false
-  },
-  "run:bisectRangeInvalid": {
-    "source": "a49cc30b31b9",
-    "translation": "05afc540bd7b",
-    "reviewed": false
-  },
-  "run:bisectResult": {
-    "source": "5c9756dfa95d",
-    "translation": "d97bb9fccce2",
-    "reviewed": false
-  },
-  "run:bisectSkip": {
-    "source": "28d03596d24e",
-    "translation": "e2485d4c29a4",
-    "reviewed": false
-  },
-  "run:bisectStart": {
-    "source": "e4bb9f1ece9a",
-    "translation": "cc147e162c82",
-    "reviewed": false
-  },
-  "run:bisectTesting": {
-    "source": "e41c7613c661",
-    "translation": "a62bf19a154b",
-    "reviewed": false
-  },
-  "run:bisectTitle": {
-    "source": "846e108d1305",
-    "translation": "06b2dad30f6f",
-    "reviewed": false
-  },
-  "run:cancel": {
-    "source": "19766ed6ccb2",
-    "translation": "2cd0f3be8738",
-    "reviewed": false
-  },
-  "run:channelBeta": {
-    "source": "703390318bd5",
-    "translation": "703390318bd5",
-    "reviewed": false
-  },
-  "run:channelNightly": {
-    "source": "ab6b5a4d586b",
-    "translation": "ab6b5a4d586b",
-    "reviewed": false
-  },
-  "run:channelStable": {
-    "source": "90ee305714d7",
-    "translation": "e458d7fb0f85",
-    "reviewed": false
-  },
-  "run:checking": {
-    "source": "0dfe1d63c9d8",
-    "translation": "6bd6fa39daa6",
-    "reviewed": false
-  },
-  "run:clearConsole": {
-    "source": "888c33cff71b",
-    "translation": "cc245185ca50",
-    "reviewed": false
-  },
-  "run:close": {
-    "source": "7d9eb7acb13e",
-    "translation": "c7fdddf79eaa",
-    "reviewed": false
-  },
-  "run:columnAction": {
-    "source": "64cff1319d2f",
-    "translation": "ea3a27bc20be",
-    "reviewed": false
-  },
-  "run:columnStatus": {
-    "source": "920e413c7d41",
-    "translation": "e01b94ddd5d5",
-    "reviewed": false
-  },
-  "run:columnVersion": {
-    "source": "dd167905de0d",
-    "translation": "5f76b2bf82dd",
-    "reviewed": false
-  },
-  "run:console": {
-    "source": "29a40861bafe",
-    "translation": "c928639c99a0",
-    "reviewed": false
-  },
-  "run:consoleOutput": {
-    "source": "9e109a582da6",
-    "translation": "2b1420ab8838",
-    "reviewed": false
-  },
-  "run:deleteAll": {
-    "source": "978111835dfa",
-    "translation": "89cae00f8c27",
-    "reviewed": false
-  },
-  "run:deleteAllBody": {
-    "source": "1206aa3ae31d",
-    "translation": "557679f422f8",
-    "reviewed": false
-  },
-  "run:deleteAllTitle": {
-    "source": "129d4b9bfab4",
-    "translation": "dd05c706f90f",
-    "reviewed": false
-  },
-  "run:download": {
-    "source": "d6eafe823591",
-    "translation": "d477c75aa656",
-    "reviewed": false
-  },
-  "run:downloadAll": {
-    "source": "f7917eced9c2",
-    "translation": "f06080bc10fc",
-    "reviewed": false
-  },
-  "run:downloadedOnly": {
-    "source": "debc3464050f",
-    "translation": "4c3e19171ae1",
-    "reviewed": false
-  },
-  "run:downloadingPercent": {
-    "source": "c0e6fb45dc39",
-    "translation": "c0c3d52e86e3",
-    "reviewed": false
-  },
-  "run:electronVersion": {
-    "source": "8c69cff12cea",
-    "translation": "8c69cff12cea",
-    "reviewed": false
-  },
-  "run:filterAll": {
-    "source": "a52ace420f21",
-    "translation": "5c55a67935af",
-    "reviewed": false
-  },
-  "run:filterMain": {
-    "source": "eb814be3ca3b",
-    "translation": "f102aa91eada",
-    "reviewed": false
-  },
-  "run:filterOutput": {
-    "source": "b304514715a9",
-    "translation": "c5002e03ef7c",
-    "reviewed": false
-  },
-  "run:filterProcess": {
-    "source": "e083bd83e9d3",
-    "translation": "52a962297d5b",
-    "reviewed": false
-  },
-  "run:filterRenderer": {
-    "source": "9deb780b4331",
-    "translation": "b9f8cc835e53",
-    "reviewed": false
-  },
-  "run:filterVersions": {
-    "source": "5b4f8b6e5695",
-    "translation": "25e957994fac",
-    "reviewed": false
-  },
-  "run:groupLocal": {
-    "source": "01f46fd1a39c",
-    "translation": "ae0f53c98faa",
-    "reviewed": false
-  },
-  "run:groupPrerelease": {
-    "source": "a90d2f735a49",
-    "translation": "57e8b2cd0518",
-    "reviewed": false
-  },
-  "run:groupStable": {
-    "source": "90ee305714d7",
-    "translation": "e458d7fb0f85",
-    "reviewed": false
-  },
-  "run:hintBeta": {
-    "source": "f44e64e75f39",
-    "translation": "703390318bd5",
-    "reviewed": false
-  },
-  "run:hintLatest": {
-    "source": "5e1e2bcac305",
-    "translation": "569af1a47dbd",
-    "reviewed": false
-  },
-  "run:hintNightly": {
-    "source": "2a3b62b53ddb",
-    "translation": "ab6b5a4d586b",
-    "reviewed": false
-  },
-  "run:installingModules": {
-    "source": "5b1ba0587995",
-    "translation": "abc1a6c75302",
-    "reviewed": false
-  },
-  "run:newError": {
-    "source": "22cf52b5750b",
-    "translation": "3c9ca3d384f3",
-    "reviewed": false
-  },
-  "run:noVersions": {
-    "source": "1c3e2f174528",
-    "translation": "e4bb99472ca4",
-    "reviewed": false
-  },
-  "run:openCompare": {
-    "source": "577388f4cc09",
-    "translation": "729b23d829e9",
-    "reviewed": false
-  },
-  "run:processFiddle": {
-    "source": "6a201cad2f65",
-    "translation": "6a201cad2f65",
-    "reviewed": false
-  },
-  "run:processMain": {
-    "source": "eb814be3ca3b",
-    "translation": "f102aa91eada",
-    "reviewed": false
-  },
-  "run:processRenderer": {
-    "source": "9deb780b4331",
-    "translation": "b9f8cc835e53",
-    "reviewed": false
-  },
-  "run:ready": {
-    "source": "5fa7aac5375c",
-    "translation": "68ddad7fd948",
-    "reviewed": false
-  },
-  "run:refreshReleases": {
-    "source": "0e9161011702",
-    "translation": "5f451c71b46a",
-    "reviewed": false
-  },
-  "run:remove": {
-    "source": "c3812fc4acb8",
-    "translation": "6135d4159e89",
-    "reviewed": false
-  },
-  "run:revealLocation": {
-    "source": "084063c2b8e4",
-    "translation": "6c338ad386d6",
-    "reviewed": false
-  },
-  "run:run": {
-    "source": "00d60e31a4e6",
-    "translation": "4a9042df9bf9",
-    "reviewed": false
-  },
-  "run:running": {
-    "source": "f4ccae29e1bb",
-    "translation": "f51b8fa9a805",
-    "reviewed": false
-  },
-  "run:starting": {
-    "source": "aeed4d26bb5f",
-    "translation": "09d1fa762580",
-    "reviewed": false
-  },
-  "run:stateDownloaded": {
-    "source": "f0b0738f75b8",
-    "translation": "4c80da8064b9",
-    "reviewed": false
-  },
-  "run:stateDownloading": {
-    "source": "c0e6fb45dc39",
-    "translation": "c0c3d52e86e3",
-    "reviewed": false
-  },
-  "run:stateInstalled": {
-    "source": "f0b0738f75b8",
-    "translation": "4c80da8064b9",
-    "reviewed": false
-  },
-  "run:stateInstalling": {
-    "source": "88eb20c03626",
-    "translation": "c2fd08b1ab3e",
-    "reviewed": false
-  },
-  "run:stateLocal": {
-    "source": "1a9495c00228",
-    "translation": "ae0f53c98faa",
-    "reviewed": false
-  },
-  "run:stateLocalMissing": {
-    "source": "d8e615b73d13",
-    "translation": "3a2d37aef55a",
-    "reviewed": false
-  },
-  "run:stateMissing": {
-    "source": "5569a4e0a4ce",
-    "translation": "f82f19774a5e",
-    "reviewed": false
-  },
-  "run:stateUnsupported": {
-    "source": "8e475d51b78c",
-    "translation": "a6a8ac94000a",
-    "reviewed": false
-  },
-  "run:stop": {
-    "source": "cae7d57bc067",
-    "translation": "ca4d973c0b00",
-    "reviewed": false
-  },
-  "run:stopDownloads": {
-    "source": "82c41b504d27",
-    "translation": "e62c2b3ab1f4",
-    "reviewed": false
-  },
-  "run:truncated": {
-    "source": "cb598c7ee971",
-    "translation": "2ff945d3e8a4",
-    "reviewed": false
-  },
-  "run:unzipping": {
-    "source": "88eb20c03626",
-    "translation": "c2fd08b1ab3e",
-    "reviewed": false
-  },
-  "run:versionPicker": {
-    "source": "2817888487f2",
-    "translation": "6a05ac6c1b42",
-    "reviewed": false
-  },
-  "settings:about.contributions": {
-    "source": "ae0d04dc3492",
-    "translation": "d3d8940c6ae0",
-    "reviewed": false
-  },
-  "settings:about.contributors": {
-    "source": "350ad433c42f",
-    "translation": "7bf136d816f0",
-    "reviewed": false
-  },
-  "settings:about.electron": {
-    "source": "8c69cff12cea",
-    "translation": "8c69cff12cea",
-    "reviewed": false
-  },
-  "settings:about.notices": {
-    "source": "8fadbc8de273",
-    "translation": "8efc737b1ca9",
-    "reviewed": false
-  },
-  "settings:about.version": {
-    "source": "c6b6b4b58937",
-    "translation": "cf7812111b4f",
-    "reviewed": false
-  },
-  "settings:actionFailed": {
-    "source": "57b25b95e3f7",
-    "translation": "1b62697615b1",
-    "reviewed": false
-  },
-  "settings:appearance.dark": {
-    "source": "60acc53f13a5",
-    "translation": "a6b75d068032",
-    "reviewed": false
-  },
-  "settings:appearance.description": {
-    "source": "c433abbec0cc",
-    "translation": "ee85f500806f",
-    "reviewed": false
-  },
-  "settings:appearance.fromTheme": {
-    "source": "f72e99083c24",
-    "translation": "cf132d0defa8",
-    "reviewed": false
-  },
-  "settings:appearance.light": {
-    "source": "dbcd5e7bb7a0",
-    "translation": "dee60aee2501",
-    "reviewed": false
-  },
-  "settings:appearance.system": {
-    "source": "6725e7bbcd28",
-    "translation": "6df543c4a401",
-    "reviewed": false
-  },
-  "settings:appearance.title": {
-    "source": "3907fa7f8072",
-    "translation": "b70682d027ce",
-    "reviewed": false
-  },
-  "settings:changeFailed": {
-    "source": "460f91c85b5b",
-    "translation": "e3a3f60c7390",
-    "reviewed": false
-  },
-  "settings:channel.beta": {
-    "source": "703390318bd5",
-    "translation": "703390318bd5",
-    "reviewed": false
-  },
-  "settings:channel.nightly": {
-    "source": "ab6b5a4d586b",
-    "translation": "ab6b5a4d586b",
-    "reviewed": false
-  },
-  "settings:channel.stable": {
-    "source": "90ee305714d7",
-    "translation": "e458d7fb0f85",
-    "reviewed": false
-  },
-  "settings:channels.description": {
-    "source": "6f4addbf36f0",
-    "translation": "76545831572d",
-    "reviewed": false
-  },
-  "settings:channels.title": {
-    "source": "87756db5b2b0",
-    "translation": "165a480fb3d2",
-    "reviewed": false
-  },
-  "settings:clearConsoleOnRun.description": {
-    "source": "9cc58c533e1c",
-    "translation": "3f5f2b3adf1d",
-    "reviewed": false
-  },
-  "settings:clearConsoleOnRun.title": {
-    "source": "50a46d9067b7",
-    "translation": "170694fcbfed",
-    "reviewed": false
-  },
-  "settings:close": {
-    "source": "0ccfef828950",
-    "translation": "95af2305b2e3",
-    "reviewed": false
-  },
-  "settings:closeHint": {
-    "source": "177b7cb06867",
-    "translation": "177b7cb06867",
-    "reviewed": false
-  },
-  "settings:crashReports.description": {
-    "source": "1e7a46a01b5b",
-    "translation": "b47b3d3b2a85",
-    "reviewed": false
-  },
-  "settings:crashReports.title": {
-    "source": "2b8f06d96293",
-    "translation": "e271c257df00",
-    "reviewed": false
-  },
-  "settings:customMirrorElectron.description": {
-    "source": "675fbd999e88",
-    "translation": "93664e137406",
-    "reviewed": false
-  },
-  "settings:customMirrorElectron.title": {
-    "source": "3b74b436fa70",
-    "translation": "e2841787922d",
-    "reviewed": false
-  },
-  "settings:customMirrorNightly.description": {
-    "source": "518e82b8889f",
-    "translation": "21481ad3284f",
-    "reviewed": false
-  },
-  "settings:customMirrorNightly.title": {
-    "source": "babe9698327d",
-    "translation": "07b462151bca",
-    "reviewed": false
-  },
-  "settings:editorFont.reload": {
-    "source": "2e65aa0021f8",
-    "translation": "bd9a3c919fde",
-    "reviewed": false
-  },
-  "settings:editorFont.reloadHint": {
-    "source": "f596498424b0",
-    "translation": "2e72f183a821",
-    "reviewed": false
-  },
-  "settings:editorFontFamily.description": {
-    "source": "b2e45e125327",
-    "translation": "8f760eb6500b",
-    "reviewed": false
-  },
-  "settings:editorFontFamily.invalid": {
-    "source": "d2313a0dd572",
-    "translation": "658921ef0953",
-    "reviewed": false
-  },
-  "settings:editorFontFamily.title": {
-    "source": "119ef3fa607e",
-    "translation": "e04e8c3e7c40",
-    "reviewed": false
-  },
-  "settings:editorFontSize.description": {
-    "source": "ff0ed36d6bdd",
-    "translation": "cb061d6b07bb",
-    "reviewed": false
-  },
-  "settings:editorFontSize.invalid": {
-    "source": "90d173957501",
-    "translation": "07a64ae6c3ee",
-    "reviewed": false
-  },
-  "settings:editorFontSize.title": {
-    "source": "6d784d95c638",
-    "translation": "1aa750b31e8e",
-    "reviewed": false
-  },
-  "settings:electronFlags.description": {
-    "source": "314b9c35e4d0",
-    "translation": "8df52a1a6276",
-    "reviewed": false
-  },
-  "settings:electronFlags.invalid": {
-    "source": "1a246a87a740",
-    "translation": "84277462baf5",
-    "reviewed": false
-  },
-  "settings:electronFlags.title": {
-    "source": "d7e28129b403",
-    "translation": "c158b83567fd",
-    "reviewed": false
-  },
-  "settings:electronLogging.description": {
-    "source": "b1d59dc5be77",
-    "translation": "1200a1f939ce",
-    "reviewed": false
-  },
-  "settings:electronLogging.title": {
-    "source": "144acf0933ed",
-    "translation": "76ee7b018de8",
-    "reviewed": false
-  },
-  "settings:environmentVariables.description": {
-    "source": "823203d86c4f",
-    "translation": "d9617cf49a20",
-    "reviewed": false
-  },
-  "settings:environmentVariables.invalid": {
-    "source": "95bb76545551",
-    "translation": "9fb7fcfe99d3",
-    "reviewed": false
-  },
-  "settings:environmentVariables.title": {
-    "source": "aac7246f5e97",
-    "translation": "b9441d095cef",
-    "reviewed": false
-  },
-  "settings:export": {
-    "source": "4a4c59c5208e",
-    "translation": "6514d3b365a8",
-    "reviewed": false
-  },
-  "settings:gistPublishAsRevision.description": {
-    "source": "fb75fd83247e",
-    "translation": "ee128308fba7",
-    "reviewed": false
-  },
-  "settings:gistPublishAsRevision.title": {
-    "source": "c7ffab0e4758",
-    "translation": "68ad8dfbf526",
-    "reviewed": false
-  },
-  "settings:gistShowHistory.description": {
-    "source": "8bc366ca02cb",
-    "translation": "d4db9cf7ca8d",
-    "reviewed": false
-  },
-  "settings:gistShowHistory.title": {
-    "source": "5123215f8ee3",
-    "translation": "5e29a817788a",
-    "reviewed": false
-  },
-  "settings:gistVisibility.description": {
-    "source": "3444db7c85d8",
-    "translation": "fb17d0a957ce",
-    "reviewed": false
-  },
-  "settings:gistVisibility.public": {
-    "source": "591935b15b1c",
-    "translation": "b8765f4645e4",
-    "reviewed": false
-  },
-  "settings:gistVisibility.secret": {
-    "source": "7e32a729b122",
-    "translation": "412677b5b74f",
-    "reviewed": false
-  },
-  "settings:gistVisibility.title": {
-    "source": "2d5502bb06ef",
-    "translation": "da39aa4dc780",
-    "reviewed": false
-  },
-  "settings:import": {
-    "source": "ea94509e38cf",
-    "translation": "12a8d12ad9ad",
-    "reviewed": false
-  },
-  "settings:keepUserDataDirs.description": {
-    "source": "01ce07de7571",
-    "translation": "3d87615df969",
-    "reviewed": false
-  },
-  "settings:keepUserDataDirs.title": {
-    "source": "e92c2a1a13b6",
-    "translation": "7ff957a9390e",
-    "reviewed": false
-  },
-  "settings:keybindings.change": {
-    "source": "c0bf75bd78bf",
-    "translation": "52f74c781b76",
-    "reviewed": false
-  },
-  "settings:keybindings.conflict": {
-    "source": "2e17db43d191",
-    "translation": "db1661310e84",
-    "reviewed": false
-  },
-  "settings:keybindings.description": {
-    "source": "4310ea4a11ee",
-    "translation": "72a8dbc499be",
-    "reviewed": false
-  },
-  "settings:keybindings.filter": {
-    "source": "6b866e96f2b6",
-    "translation": "a935e7f5429a",
-    "reviewed": false
-  },
-  "settings:keybindings.none": {
-    "source": "dc937b598926",
-    "translation": "da5930e53d54",
-    "reviewed": false
-  },
-  "settings:keybindings.record": {
-    "source": "68ac11343183",
-    "translation": "51ac48dfa853",
-    "reviewed": false
-  },
-  "settings:keybindings.recordLabel": {
-    "source": "e9840453626c",
-    "translation": "aee9dd2f9e95",
-    "reviewed": false
-  },
-  "settings:keybindings.remove": {
-    "source": "aea0ad85340a",
-    "translation": "774ea718e7f6",
-    "reviewed": false
-  },
-  "settings:keybindings.resetLabel": {
-    "source": "4fffdddf8707",
-    "translation": "a57e281cb33d",
-    "reviewed": false
-  },
-  "settings:keybindings.title": {
-    "source": "e9bef0b0f3c2",
-    "translation": "223fc4bd70b7",
-    "reviewed": false
-  },
-  "settings:list.add": {
-    "source": "1868a8dd78ad",
-    "translation": "67bf0b6526cd",
-    "reviewed": false
-  },
-  "settings:list.remove": {
-    "source": "c3812fc4acb8",
-    "translation": "6135d4159e89",
-    "reviewed": false
-  },
-  "settings:locale.description": {
-    "source": "d8e51520473a",
-    "translation": "2e72d27e5c0d",
-    "reviewed": false
-  },
-  "settings:locale.relaunch": {
-    "source": "8bd85e54db81",
-    "translation": "6081003546e7",
-    "reviewed": false
-  },
-  "settings:locale.relaunchDescription": {
-    "source": "59801a7c274c",
-    "translation": "9e2d9e24d2e7",
-    "reviewed": false
-  },
-  "settings:locale.relaunchTitle": {
-    "source": "996b13ea9c9e",
-    "translation": "d307e4f7971e",
-    "reviewed": false
-  },
-  "settings:locale.system": {
-    "source": "b0459211f9f7",
-    "translation": "f6549721c934",
-    "reviewed": false
-  },
-  "settings:locale.title": {
-    "source": "a4fe65264ef7",
-    "translation": "df028fd6bd35",
-    "reviewed": false
-  },
-  "settings:mirror.auto": {
-    "source": "d461a493a375",
-    "translation": "36147b7e34df",
-    "reviewed": false
-  },
-  "settings:mirror.china": {
-    "source": "e7b5dce8a97c",
-    "translation": "98177be800d0",
-    "reviewed": false
-  },
-  "settings:mirror.custom": {
-    "source": "494ca78f7374",
-    "translation": "1fe9883907ba",
-    "reviewed": false
-  },
-  "settings:mirror.default": {
-    "source": "f911e414cf6b",
-    "translation": "f911e414cf6b",
-    "reviewed": false
-  },
-  "settings:mirror.description": {
-    "source": "53814af50ad5",
-    "translation": "7dfa7187e7c4",
-    "reviewed": false
-  },
-  "settings:mirror.invalidUrl": {
-    "source": "9ba6da027206",
-    "translation": "89e625595c22",
-    "reviewed": false
-  },
-  "settings:mirror.title": {
-    "source": "6d6ceb5b602a",
-    "translation": "9cf423832c64",
-    "reviewed": false
-  },
-  "settings:modified": {
-    "source": "96b50e9cc169",
-    "translation": "17593f9ca1d4",
-    "reviewed": false
-  },
-  "settings:navLabel": {
-    "source": "e26d51d36781",
-    "translation": "3b616d1c5a19",
-    "reviewed": false
-  },
-  "settings:noResults": {
-    "source": "a0e86b6149ce",
-    "translation": "c68ab3b1d11c",
-    "reviewed": false
-  },
-  "settings:notice.corrupt.description": {
-    "source": "e5fdf281af68",
-    "translation": "8e3a516d0f4a",
-    "reviewed": false
-  },
-  "settings:notice.corrupt.title": {
-    "source": "57feeba9ea6a",
-    "translation": "9272ac4f83bf",
-    "reviewed": false
-  },
-  "settings:notice.dismiss": {
-    "source": "48845bff334a",
-    "translation": "c7fdddf79eaa",
-    "reviewed": false
-  },
-  "settings:notice.newer.description": {
-    "source": "1e98978cd1b3",
-    "translation": "3254f59a732d",
-    "reviewed": false
-  },
-  "settings:notice.newer.title": {
-    "source": "8d3447102a5f",
-    "translation": "ff1ba0200438",
-    "reviewed": false
-  },
-  "settings:notifications.description": {
-    "source": "ebf094d93eb9",
-    "translation": "299b582b09dc",
-    "reviewed": false
-  },
-  "settings:notifications.title": {
-    "source": "788011833a5a",
-    "translation": "4b6ded8a7f18",
-    "reviewed": false
-  },
-  "settings:openFile": {
-    "source": "514375a65e99",
-    "translation": "127cdb208bd6",
-    "reviewed": false
-  },
-  "settings:packageAuthor.description": {
-    "source": "6b73251c5e24",
-    "translation": "76251206f0f3",
-    "reviewed": false
-  },
-  "settings:packageAuthor.invalid": {
-    "source": "49b758cb3784",
-    "translation": "844c73ae4a38",
-    "reviewed": false
-  },
-  "settings:packageAuthor.title": {
-    "source": "3ed7a3815580",
-    "translation": "67713d239c4e",
-    "reviewed": false
-  },
-  "settings:packageManager.description": {
-    "source": "e4e298c66d57",
-    "translation": "196f7ad3e33d",
-    "reviewed": false
-  },
-  "settings:packageManager.title": {
-    "source": "087de11becaa",
-    "translation": "a88a8d67c95c",
-    "reviewed": false
-  },
-  "settings:privacyReset.button": {
-    "source": "f6027ace5b0f",
-    "translation": "53a10e517808",
-    "reviewed": false
-  },
-  "settings:privacyReset.description": {
-    "source": "e6adf9963e41",
-    "translation": "f6aec50fc2ff",
-    "reviewed": false
-  },
-  "settings:privacyReset.done": {
-    "source": "619cd189d35f",
-    "translation": "c5e07527b357",
-    "reviewed": false
-  },
-  "settings:privacyReset.title": {
-    "source": "de2f2bf465a5",
-    "translation": "fc501de015fb",
-    "reviewed": false
-  },
-  "settings:reset": {
-    "source": "daee7606b339",
-    "translation": "c608df63a4b4",
-    "reviewed": false
-  },
-  "settings:screenReader.active": {
-    "source": "dbe423837418",
-    "translation": "db7eae0ca6d3",
-    "reviewed": false
-  },
-  "settings:screenReader.auto": {
-    "source": "d461a493a375",
-    "translation": "36147b7e34df",
-    "reviewed": false
-  },
-  "settings:screenReader.description": {
-    "source": "839d56caad94",
-    "translation": "6061a9c459e1",
-    "reviewed": false
-  },
-  "settings:screenReader.inactive": {
-    "source": "7443aeabe7fb",
-    "translation": "d8cea821c4e9",
-    "reviewed": false
-  },
-  "settings:screenReader.off": {
-    "source": "ca7981b46ecf",
-    "translation": "c7fdddf79eaa",
-    "reviewed": false
-  },
-  "settings:screenReader.on": {
-    "source": "130011756125",
-    "translation": "f290f9167ad0",
-    "reviewed": false
-  },
-  "settings:screenReader.title": {
-    "source": "f2d2aed1c4d2",
-    "translation": "af062c2bd8ad",
-    "reviewed": false
-  },
-  "settings:search": {
-    "source": "255b076dd828",
-    "translation": "eebce051bf46",
-    "reviewed": false
-  },
-  "settings:section.about": {
-    "source": "abc6e68f5da1",
-    "translation": "5a83bef0fb5b",
-    "reviewed": false
-  },
-  "settings:section.accessibility": {
-    "source": "d3368cbffe23",
-    "translation": "f9c0c23b3e33",
-    "reviewed": false
-  },
-  "settings:section.editor": {
-    "source": "936a161c3931",
-    "translation": "76ea678e0069",
-    "reviewed": false
-  },
-  "settings:section.electron": {
-    "source": "61a62a841f54",
-    "translation": "61a62a841f54",
-    "reviewed": false
-  },
-  "settings:section.execution": {
-    "source": "a45cd4bd0998",
-    "translation": "4a9042df9bf9",
-    "reviewed": false
-  },
-  "settings:section.general": {
-    "source": "c910d474dcd7",
-    "translation": "91e25f4ddc6f",
-    "reviewed": false
-  },
-  "settings:section.github": {
-    "source": "f911e414cf6b",
-    "translation": "f911e414cf6b",
-    "reviewed": false
-  },
-  "settings:section.keybindings": {
-    "source": "e9bef0b0f3c2",
-    "translation": "223fc4bd70b7",
-    "reviewed": false
-  },
-  "settings:section.privacy": {
-    "source": "54a57c3147c4",
-    "translation": "298a9a82bd7e",
-    "reviewed": false
-  },
-  "settings:sessionRestore.description": {
-    "source": "797ed01233b1",
-    "translation": "38d36db3bbb4",
-    "reviewed": false
-  },
-  "settings:sessionRestore.title": {
-    "source": "59ad740f601b",
-    "translation": "3608465cdb84",
-    "reviewed": false
-  },
-  "settings:showNotDownloaded.description": {
-    "source": "4fb3d13689f0",
-    "translation": "69b939088718",
-    "reviewed": false
-  },
-  "settings:showNotDownloaded.title": {
-    "source": "2ffa80b1fd7d",
-    "translation": "39fad6730ca0",
-    "reviewed": false
-  },
-  "settings:showObsolete.description": {
-    "source": "1ceca55491fe",
-    "translation": "a9f12eb744f2",
-    "reviewed": false
-  },
-  "settings:showObsolete.title": {
-    "source": "1ec74298c900",
-    "translation": "fff48b322c9c",
-    "reviewed": false
-  },
-  "settings:socketFirewall.description": {
-    "source": "145f2ea9e00e",
-    "translation": "43edaabbb192",
-    "reviewed": false
-  },
-  "settings:socketFirewall.title": {
-    "source": "b4d5b7f1ed06",
-    "translation": "8927538fe642",
-    "reviewed": false
-  },
-  "settings:theme.create": {
-    "source": "7021a1715108",
-    "translation": "ad2c97a5b75e",
-    "reviewed": false
-  },
-  "settings:theme.dark": {
-    "source": "e6bb5689beec",
-    "translation": "a6b75d068032",
-    "reviewed": false
-  },
-  "settings:theme.description": {
-    "source": "ede4471edd1b",
-    "translation": "a3d9bf32919b",
-    "reviewed": false
-  },
-  "settings:theme.highContrastDark": {
-    "source": "12e682d711c4",
-    "translation": "a4361fda2798",
-    "reviewed": false
-  },
-  "settings:theme.highContrastLight": {
-    "source": "510c02c874b2",
-    "translation": "e2e67a9314bb",
-    "reviewed": false
-  },
-  "settings:theme.importMonaco": {
-    "source": "3018a4f5e083",
-    "translation": "5c8a0e878d66",
-    "reviewed": false
-  },
-  "settings:theme.light": {
-    "source": "99a7026172d4",
-    "translation": "dee60aee2501",
-    "reviewed": false
-  },
-  "settings:theme.lucent": {
-    "source": "fa404b2f767b",
-    "translation": "fa404b2f767b",
-    "reviewed": false
-  },
-  "settings:theme.openFolder": {
-    "source": "243672f60873",
-    "translation": "8cc5cb8a6aa7",
-    "reviewed": false
-  },
-  "settings:theme.title": {
-    "source": "efb52e7172b7",
-    "translation": "69248f22708c",
-    "reviewed": false
-  },
-  "settings:title": {
-    "source": "74a883a037bc",
-    "translation": "0d8619aae051",
-    "reviewed": false
-  },
-  "shell:addFile": {
-    "source": "2c83c00f0e83",
-    "translation": "d394e02b064c",
-    "reviewed": false
-  },
-  "shell:addFileTitle": {
-    "source": "44dedd0f97fe",
-    "translation": "d394e02b064c",
-    "reviewed": false
-  },
-  "shell:addMainFile": "94f75a6de52c",
-  "shell:addOtherFile": "293d7ca21bf9",
-  "shell:addPreloadFile": "96b72adcdb58",
-  "shell:addRendererFile": "b76201692c1f",
-  "shell:cancel": {
-    "source": "19766ed6ccb2",
-    "translation": "2cd0f3be8738",
-    "reviewed": false
-  },
-  "shell:clearNotifications": {
-    "source": "29a390f9237e",
-    "translation": "6ef0acce0f3b",
-    "reviewed": false
-  },
-  "shell:closePane": {
-    "source": "7fa0f9613d91",
-    "translation": "feae961ed6b4",
-    "reviewed": false
-  },
-  "shell:closeSplit": {
-    "source": "b9295ef7f3fd",
-    "translation": "b165948e2ee4",
-    "reviewed": false
-  },
-  "shell:closeTab": {
-    "source": "50a3f9523122",
-    "translation": "167a2cf108c7",
-    "reviewed": false
-  },
-  "shell:create": {
-    "source": "4759498ac2a7",
-    "translation": "da34023b4bda",
-    "reviewed": false
-  },
-  "shell:cursorPosition": {
-    "source": "74bc54466be5",
-    "translation": "a80af9154d4a",
-    "reviewed": false
-  },
-  "shell:delete": {
-    "source": "9ce78fe395f3",
-    "translation": "7dfe159e405b",
-    "reviewed": false
-  },
-  "shell:deleteConfirm": {
-    "source": "e2d0a54968ea",
-    "translation": "3c8f5b363ab3",
-    "reviewed": false
-  },
-  "shell:deleteMessage": {
-    "source": "94271c1ca23f",
-    "translation": "5cdb3960b5a4",
-    "reviewed": false
-  },
-  "shell:deleteTitle": {
-    "source": "69be14a40a60",
-    "translation": "22a8d1714262",
-    "reviewed": false
-  },
-  "shell:dismiss": {
-    "source": "48845bff334a",
-    "translation": "c7fdddf79eaa",
-    "reviewed": false
-  },
-  "shell:dropToOpen": {
-    "source": "01d8c20220cb",
-    "translation": "691022bfd5ff",
-    "reviewed": false
-  },
-  "shell:dropToOpenHint": {
-    "source": "272f1f2080c4",
-    "translation": "a6e97cd196af",
-    "reviewed": false
-  },
-  "shell:edited": {
-    "source": "7117f0807129",
-    "translation": "1986f2e04f12",
-    "reviewed": false
-  },
-  "shell:editorFor": {
-    "source": "fc313e74abac",
-    "translation": "28aa58413a4b",
-    "reviewed": false
-  },
-  "shell:emptyText": {
-    "source": "92f473d3d19a",
-    "translation": "a8b4d26a5161",
-    "reviewed": false
-  },
-  "shell:emptyTitle": {
-    "source": "a334ca2cacfc",
-    "translation": "aca9e687b491",
-    "reviewed": false
-  },
-  "shell:errorCount": {
-    "source": "ed1590c47a42",
-    "translation": "f76e661e763b",
-    "reviewed": false
-  },
-  "shell:fileActions": {
-    "source": "fb3d7e2c77f4",
-    "translation": "6e16b61398c0",
-    "reviewed": false
-  },
-  "shell:fileChangeFailed": {
-    "source": "b3542614a6ce",
-    "translation": "ce64331d3817",
-    "reviewed": false
-  },
-  "shell:fileName": {
-    "source": "3efed3de9d4b",
-    "translation": "2c8ca9f1cf3c",
-    "reviewed": false
-  },
-  "shell:fileNameHint": {
-    "source": "28279d4b59b9",
-    "translation": "80c923e706ef",
-    "reviewed": false
-  },
-  "shell:files": {
-    "source": "abc7e9892806",
-    "translation": "a11ac5efe91d",
-    "reviewed": false
-  },
-  "shell:filterFiles": {
-    "source": "56fc0ca26b09",
-    "translation": "6403112a17dc",
-    "reviewed": false
-  },
-  "shell:groupHintMain": "cea339e2f592",
-  "shell:groupHintOther": "d0f933350f35",
-  "shell:groupHintPreload": "a5da54596e64",
-  "shell:groupHintRenderer": "37d15dcfde80",
-  "shell:hideSidebar": {
-    "source": "d1db29ebc76d",
-    "translation": "72304db9edc9",
-    "reviewed": false
-  },
-  "shell:languageCss": "b581e46042cb",
-  "shell:languageHtml": "07239dbd2a1a",
-  "shell:languageJavascript": "b27ad06d123c",
-  "shell:languageJson": "db1a21a0bc2e",
-  "shell:lensErrorTitle": "54a0e8c17ebb",
-  "shell:lensHint": {
-    "source": "1b9e5a8d74b1",
-    "translation": "5ddb10186b84",
-    "reviewed": false
-  },
-  "shell:lensProcessMain": "9c96b3aeaba4",
-  "shell:lensProcessPreload": "4261433e1b89",
-  "shell:lensProcessRenderer": "6bd52b204f5b",
-  "shell:maximize": {
-    "source": "fba6c2c5d946",
-    "translation": "82c4aa13b7ca",
-    "reviewed": false
-  },
-  "shell:menuBar": {
-    "source": "d79194552215",
-    "translation": "685a98ba7778",
-    "reviewed": false
-  },
-  "shell:menuBarMenu": {
-    "source": "99af6606ff9d",
-    "translation": "984592086ce1",
-    "reviewed": false
-  },
-  "shell:menuBarMore": {
-    "source": "d47d7cb0e4f8",
-    "translation": "38844b135cf7",
-    "reviewed": false
-  },
-  "shell:noNotifications": {
-    "source": "37ecf3603dbf",
-    "translation": "b7f20690c9f2",
-    "reviewed": false
-  },
-  "shell:notifications": {
-    "source": "788011833a5a",
-    "translation": "4b6ded8a7f18",
-    "reviewed": false
-  },
-  "shell:notificationsButton": {
-    "source": "b99ab5925428",
-    "translation": "61b9bfb19061",
-    "reviewed": false
-  },
-  "shell:openFiles": {
-    "source": "3faecf01527d",
-    "translation": "d19df67c3d0c",
-    "reviewed": false
-  },
-  "shell:openTab": {
-    "source": "ed077f3d8125",
-    "translation": "f290f9167ad0",
-    "reviewed": false
-  },
-  "shell:processMain": "eb814be3ca3b",
-  "shell:processOther": "f97e9da0e3b8",
-  "shell:processPreload": "b39edfe3bc54",
-  "shell:processRenderer": "9deb780b4331",
-  "shell:regionErrorBody": {
-    "source": "833cad4ae351",
-    "translation": "3d5f939324f2",
-    "reviewed": false
-  },
-  "shell:regionErrorReload": {
-    "source": "bdc090ec61e3",
-    "translation": "70dd895b66db",
-    "reviewed": false
-  },
-  "shell:regionErrorTitle": {
-    "source": "ab827e3fe17d",
-    "translation": "9fb71a8113b3",
-    "reviewed": false
-  },
-  "shell:rename": {
-    "source": "6fa62b3dba2f",
-    "translation": "adb0e1ce5fc0",
-    "reviewed": false
-  },
-  "shell:renameConfirm": {
-    "source": "3064d79a295c",
-    "translation": "a605609f5c2e",
-    "reviewed": false
-  },
-  "shell:renameTitle": {
-    "source": "4862f2751eb0",
-    "translation": "1cd8c69df1c1",
-    "reviewed": false
-  },
-  "shell:resetLayout": {
-    "source": "2e2a17849c24",
-    "translation": "0d6f1516e91a",
-    "reviewed": false
-  },
-  "shell:resizeConsole": {
-    "source": "89cb4b995288",
-    "translation": "b2f9b53f2813",
-    "reviewed": false
-  },
-  "shell:resizePanes": {
-    "source": "39056de4c03d",
-    "translation": "bc15a2966a8b",
-    "reviewed": false
-  },
-  "shell:resizeSidebar": {
-    "source": "243854b4d0c7",
-    "translation": "dba2000dde5c",
-    "reviewed": false
-  },
-  "shell:settings": {
-    "source": "74a883a037bc",
-    "translation": "0d8619aae051",
-    "reviewed": false
-  },
-  "shell:showSidebar": {
-    "source": "9e8197ce9e5f",
-    "translation": "64b42b31a980",
-    "reviewed": false
-  },
-  "shell:splitEditor": {
-    "source": "31bdf2f29a0b",
-    "translation": "1b1f07baecbd",
-    "reviewed": false
-  },
-  "shell:status": {
-    "source": "920e413c7d41",
-    "translation": "484ec0e55842",
-    "reviewed": false
-  },
-  "shell:tabFocusMode": {
-    "source": "d81a0d194b1c",
-    "translation": "d5a1958954d3",
-    "reviewed": false
-  },
-  "shell:toolbar": {
-    "source": "451aa51a0fb5",
-    "translation": "75029a190189",
-    "reviewed": false
-  },
-  "shell:unsaved": {
-    "source": "a710c2b90913",
-    "translation": "8b31b0ee641e",
-    "reviewed": false
-  },
-  "shell:warningCount": {
-    "source": "460638ad9286",
-    "translation": "77ef63ac2814",
-    "reviewed": false
-  },
-  "versions:copied": {
-    "source": "886e05896e1b",
-    "translation": "ae0f86074a0f",
-    "reviewed": false
-  },
-  "versions:copyVersion": {
-    "source": "ae76d89fd36a",
-    "translation": "722d4b230d4c",
-    "reviewed": false
-  },
-  "versions:noMatches": {
-    "source": "1c3e2f174528",
-    "translation": "e4bb99472ca4",
-    "reviewed": false
-  },
-  "versions:searchVersions": {
-    "source": "2af5bdafa2e7",
-    "translation": "2e3f379b95f2",
-    "reviewed": false
-  },
-  "versions:versionChangeFailed": {
-    "source": "346b33d1fce1",
-    "translation": "a88344668f3b",
-    "reviewed": false
-  }
+  "about:crashNoticeAction": "54345f962d13",
+  "about:crashNoticeDescription": "395a67b92b3c",
+  "about:crashNoticeTitle": "0aa18c894255",
+  "about:download": "d6eafe823591",
+  "about:openSettingsFailed": "c670b1c81fbd",
+  "about:updateAvailableDescription": "2d786aa2a139",
+  "about:updateAvailableTitle": "ff8b555d818f",
+  "gists:accountLabel": "d686f873a566",
+  "gists:accountSignedInAs": "318bfd84d8dd",
+  "gists:accountSignedOut": "491fc91cd76e",
+  "gists:accountSignIn": "bfd402b2f6f3",
+  "gists:accountSignOut": "48f0d3d397d4",
+  "gists:cancel": "19766ed6ccb2",
+  "gists:close": "7d9eb7acb13e",
+  "gists:copyLink": "dbf362d4f210",
+  "gists:deleteConfirm": "e2d0a54968ea",
+  "gists:deleteConfirmMessage": "5320e91f344b",
+  "gists:deleteConfirmTitle": "e223887dccb2",
+  "gists:deleted": "5f527a5ecca6",
+  "gists:deleteFailed": "27c4d02e2f61",
+  "gists:errorWithHint": "e80ab184fe69",
+  "gists:hintConnectivity": "176afd02072f",
+  "gists:hintOwnership": "959bcf3565ef",
+  "gists:historyActive": "92340695899b",
+  "gists:historyChanges": "8946f555319b",
+  "gists:historyCreated": "d70b9e24bca2",
+  "gists:historyDescription": "ff052a122982",
+  "gists:historyEmpty": "db4f96393559",
+  "gists:historyFailed": "3e7300c114a0",
+  "gists:historyListLabel": "da80b1d5740c",
+  "gists:historyMeta": "def93763edc8",
+  "gists:historyRevision": "865dda60a194",
+  "gists:historyTitle": "50b82c24ba4d",
+  "gists:linkCopied": "d12860c21e78",
+  "gists:loadFailed": "cd80beb3a8b2",
+  "gists:menuCopyLink": "d31483e209cd",
+  "gists:menuDelete": "46b9559ebb35",
+  "gists:menuHistory": "7dbece317db5",
+  "gists:menuLabel": "1f4ad709673e",
+  "gists:menuPublishNew": "8cae2fe04081",
+  "gists:menuUpdate": "14412674c320",
+  "gists:menuVisibility": "e47b86af4a9e",
+  "gists:noticeDecryptFailed": "6aa9d8f58cfd",
+  "gists:noticeDecryptFailedDetail": "6c6314e82cba",
+  "gists:openCurrent": "53b3231b9bd7",
+  "gists:openGist": "8c76b5c3fb7c",
+  "gists:openInvalid": "62a4243fc705",
+  "gists:openLabel": "49fea22c8d4b",
+  "gists:openPlaceholder": "ac239ab30d60",
+  "gists:openSubmit": "ed077f3d8125",
+  "gists:openTitle": "386b1bfb4b60",
+  "gists:publishButton": "859390eb495b",
+  "gists:publishDefaultDescription": "7eb97a4ce529",
+  "gists:publishDescriptionError": "54dad26f7510",
+  "gists:publishDescriptionLabel": "526e0087cc3f",
+  "gists:published": "35d1118d4a15",
+  "gists:publishFailed": "335cdcfcb544",
+  "gists:publishSubmit": "859390eb495b",
+  "gists:publishTitle": "0e6d60d6f9d9",
+  "gists:publishVisibilityHelp": "97e4a586f089",
+  "gists:publishVisibilityLabel": "7448611d5f93",
+  "gists:signedIn": "7700a63fdd6c",
+  "gists:signedInSession": "aa42ae09a55a",
+  "gists:signInClipboardHint": "2919bc8524f5",
+  "gists:signInCreateToken": "519994e5b519",
+  "gists:signInDescription": "3ec5509b14ea",
+  "gists:signInErrorFormat": "2e6d674280ee",
+  "gists:signInErrorInvalid": "f87551bdff1d",
+  "gists:signInErrorNetwork": "05a0be5cbbf0",
+  "gists:signInErrorOther": "18bf0405edaa",
+  "gists:signInErrorScope": "badeb36a28d0",
+  "gists:signInRemember": "934891184a81",
+  "gists:signInRememberHelp": "a0620a0219e0",
+  "gists:signInSessionOnly": "182f8e97703b",
+  "gists:signInSubmit": "bfd402b2f6f3",
+  "gists:signInTitle": "47e9895d1d76",
+  "gists:signInTokenLabel": "a6d0f740e426",
+  "gists:updated": "2d9ab66fb88d",
+  "gists:updateFailed": "714a0a76dcc8",
+  "gists:visibilityPublic": "591935b15b1c",
+  "gists:visibilitySecret": "7e32a729b122",
+  "main:about": "a4e3053f92ec",
+  "main:aboutFiddle": "389d4cadf6df",
+  "main:actualSize": "74cdbe70e394",
+  "main:appMenu": "ec28e55d864c",
+  "main:bringAllToFront": "fc84e851bb9b",
+  "main:cancel": "19766ed6ccb2",
+  "main:clearConsole": "888c33cff71b",
+  "main:closeWindow": "8b9de9c0c0a0",
+  "main:commandPalette": "6b1c93dbdb99",
+  "main:copy": "e21f935f11d7",
+  "main:copyDiagnostics": "46fa69e51b74",
+  "main:cut": "1f45f02561f4",
+  "main:develop": "7576b5e7f210",
+  "main:edit": "464c4ffd019e",
+  "main:enterFullScreen": "5a74219758ed",
+  "main:exit": "d17d84a60499",
+  "main:exitFullScreen": "897e0cf78b80",
+  "main:file": "50009ce1da4d",
+  "main:findReferences": "e83095998601",
+  "main:formatAll": "9869b1dc2200",
+  "main:formatDocument": "452c55a3f6d2",
+  "main:formatSelection": "3ad931de390c",
+  "main:goToDefinition": "06f4d0b891e1",
+  "main:help": "b79cac926e0b",
+  "main:hide": "3751aca7183b",
+  "main:hideConsole": "f5a456ddc181",
+  "main:hideOthers": "74376e4337d2",
+  "main:hideSidebar": "d1db29ebc76d",
+  "main:inspectElement": "f6493a99c5a3",
+  "main:makeFiddle": "344779c79ab0",
+  "main:minimize": "d72e311c4dda",
+  "main:moveTabLeft": "6a55f1c38458",
+  "main:moveTabRight": "a0f125fa0a29",
+  "main:newFiddle": "6b5b3e4227c2",
+  "main:newTest": "1a144751cd7c",
+  "main:newWindow": "f84ca1459cc4",
+  "main:openElectronRepository": "3337928f4668",
+  "main:openFiddleRepository": "2bb3c0b6081b",
+  "main:openFolder": "1f1d592bdd1a",
+  "main:openGist": "8c76b5c3fb7c",
+  "main:openLink": "aab63f85c7f1",
+  "main:openLinkMessage": "a16b4663a5d3",
+  "main:openLogsFolder": "9d19ac7b2039",
+  "main:openRecent": "b61339b2040d",
+  "main:packageFiddle": "59de121db1b8",
+  "main:paste": "f3380f7b44bd",
+  "main:preferences": "7a04083baf8d",
+  "main:publishToGist": "858a4b252473",
+  "main:quit": "5c70a5445c2a",
+  "main:redo": "74273989b096",
+  "main:reload": "bdc090ec61e3",
+  "main:reloadAllWindows": "d896c941f52e",
+  "main:reportIssue": "635ae219ad13",
+  "main:run": "00d60e31a4e6",
+  "main:runMenu": "00d60e31a4e6",
+  "main:runToggle": "15d328d8ca70",
+  "main:save": "1509f561f241",
+  "main:saveAs": "06359c03b085",
+  "main:saveAsForge": "ddaf05ab41a3",
+  "main:selectAll": "1fc9a387654d",
+  "main:services": "604dce445e32",
+  "main:showAll": "2150d8df37e4",
+  "main:showConsole": "a909083f778f",
+  "main:showGistHistory": "65500a5e3d8d",
+  "main:showMe": "b76c42cb4bf3",
+  "main:showSidebar": "9e8197ce9e5f",
+  "main:showTour": "36ce477486f9",
+  "main:stop": "cae7d57bc067",
+  "main:stopBisect": "0ddac35c0ea8",
+  "main:toggleBisect": "76a0570abde3",
+  "main:toggleConsole": "f1ecb956b718",
+  "main:toggleDevTools": "cf08ce6b4afe",
+  "main:toggleMenuBar": "fb1de89a7cbf",
+  "main:toggleMinimap": "357182e8ff71",
+  "main:toggleSidebar": "041aefc44394",
+  "main:toggleSoftWrap": "5a5caf687390",
+  "main:toggleSplit": "31bdf2f29a0b",
+  "main:toggleTabFocus": "84656ff09464",
+  "main:undo": "a8283ade3185",
+  "main:view": "dcc839a4015c",
+  "main:window": "19734a1b58ca",
+  "main:zoom": "509c517ede79",
+  "main:zoomIn": "0e47f09a748f",
+  "main:zoomOut": "bc7b631a689b",
+  "mainCli:argBad": "a32f78880e1a",
+  "mainCli:argChannel": "24ccaebdaf00",
+  "mainCli:argDescription": "322ef587d6cf",
+  "mainCli:argDir": "57baceffdc3f",
+  "mainCli:argElectronPath": "32b1063c91a8",
+  "mainCli:argEnv": "5a983d27116b",
+  "mainCli:argFiddle": "0c83ebdc7e0a",
+  "mainCli:argFlag": "c83710bc2ceb",
+  "mainCli:argForge": "54c6add7eee3",
+  "mainCli:argGood": "4f8b7351f4fb",
+  "mainCli:argHelp": "18e074108f06",
+  "mainCli:argId": "045a5ef4a5a3",
+  "mainCli:argJson": "d72ca85ed852",
+  "mainCli:argLogging": "216da10793cb",
+  "mainCli:argModule": "d9fc7a402780",
+  "mainCli:argObsolete": "dd7eedb67403",
+  "mainCli:argOut": "be0673d0518c",
+  "mainCli:argPm": "ed581c0ba17e",
+  "mainCli:argPublic": "1b8c1e6758cf",
+  "mainCli:argRevision": "5524c45f49f9",
+  "mainCli:argTrust": "7dc0d124bd20",
+  "mainCli:argVersion": "a709d10e0d4e",
+  "mainCli:cmdBisect": "29663e249f9e",
+  "mainCli:cmdExport": "e2bf28fec0d0",
+  "mainCli:cmdGistDelete": "d540976f3478",
+  "mainCli:cmdGistHistory": "a46271250b4d",
+  "mainCli:cmdGistPublish": "2add9206ca4c",
+  "mainCli:cmdGistUpdate": "02f457587f32",
+  "mainCli:cmdMake": "8c26d2650c2d",
+  "mainCli:cmdPackage": "ea5b93589ccf",
+  "mainCli:cmdRun": "64826286759d",
+  "mainCli:cmdVersionsDownload": "8c4b3d1ad543",
+  "mainCli:cmdVersionsList": "8ced92dab9a6",
+  "mainCli:cmdVersionsRemove": "edb6cd4c0483",
+  "mainCli:errorElectronExample": "1addb67705d3",
+  "mainCli:errorElectronPathMissing": "3d33ef0ee438",
+  "mainCli:errorFiddleNotFound": "d72c5c8d6c9e",
+  "mainCli:errorGistId": "ccfed736f741",
+  "mainCli:errorHelpHint": "441fa1e788df",
+  "mainCli:errorInvalidChoice": "f5d7107b13a6",
+  "mainCli:errorInvalidModule": "b8b8c88b708a",
+  "mainCli:errorInvalidValue": "795170e1e5a5",
+  "mainCli:errorMissingArgument": "80d936da2c32",
+  "mainCli:errorMissingValue": "8f1642959c62",
+  "mainCli:errorNoToken": "6de6facb63fc",
+  "mainCli:errorPrefix": "537574019c77",
+  "mainCli:errorTooManyArguments": "505c8ddb5442",
+  "mainCli:errorUnexpectedValue": "fa3bebfb0763",
+  "mainCli:errorUnknownCommand": "31bfaec30785",
+  "mainCli:errorUnknownExample": "b8769f0f4200",
+  "mainCli:errorUnknownOption": "ece27282a1ff",
+  "mainCli:errorUntrusted": "46b6e6357cdf",
+  "mainCli:helpArguments": "a1281c0c1ec8",
+  "mainCli:helpCommands": "c12b95153db8",
+  "mainCli:helpDefault": "537624196d72",
+  "mainCli:helpMore": "4815c1480a52",
+  "mainCli:helpOptions": "367431fd664b",
+  "mainCli:helpRepeatable": "1e179859d9dd",
+  "mainCli:helpUsage": "6bb424049789",
+  "mainCli:invalidVersion": "36ec078defc4",
+  "mainCli:resultDownloaded": "fde8f4d3430b",
+  "mainCli:resultExported": "c505b32378d3",
+  "mainCli:resultGistDeleted": "d25a7f6cba1a",
+  "mainCli:resultGistPublished": "e13ede0a6973",
+  "mainCli:resultGistUpdated": "9fcc5b2c63b8",
+  "mainCli:resultNoVersions": "caad964bd259",
+  "mainCli:resultRemoved": "ae178a9e0a71",
+  "mainCli:resultRevisionCreated": "d70b9e24bca2",
+  "mainCli:resultRevisionN": "865dda60a194",
+  "mainCli:stateInstalled": "a51a6c19a1ff",
+  "mainCli:stateObsolete": "b80cd861051a",
+  "mainCli:trustQuestion": "adcc02cafca0",
+  "mainCli:warnGistPartial": "fb87ab7a01eb",
+  "mainDocuments:add": "9fd728c66c9a",
+  "mainDocuments:addFileDetail": "ee3a7264fc1a",
+  "mainDocuments:addFileMessage": "fdec5eb1efc0",
+  "mainDocuments:busyDetail": "db5679650500",
+  "mainDocuments:busyMessage": "0452c74c8e34",
+  "mainDocuments:cancel": "19766ed6ccb2",
+  "mainDocuments:clearRecent": "ef7945beb4b1",
+  "mainDocuments:closeMessage": "43be6ab0e589",
+  "mainDocuments:detailDependencies": "cd1c666c0dcf",
+  "mainDocuments:detailDescription": "66ef4edec101",
+  "mainDocuments:detailFiles": "52617dc8275c",
+  "mainDocuments:detailOrigin": "dc5dfdc8b9c0",
+  "mainDocuments:detailOwner": "e4fd0f1fc066",
+  "mainDocuments:detailPath": "b7bdf72aaacd",
+  "mainDocuments:detailRevision": "fd12fa0bea10",
+  "mainDocuments:detailVersion": "11fa2a310357",
+  "mainDocuments:discard": "f9bfa3dc7c8f",
+  "mainDocuments:discardDrafts": "eb1a70e39274",
+  "mainDocuments:dontSave": "cd76b2debde1",
+  "mainDocuments:linkDocsMessage": "68ae5b3d3933",
+  "mainDocuments:linkGistMessage": "0f80ba47cd37",
+  "mainDocuments:linkInvalid": "e0ff601d2459",
+  "mainDocuments:linkNeedsNewer": "98b9a8f9dc76",
+  "mainDocuments:linkOwnerMismatch": "db416f8fe229",
+  "mainDocuments:linkSignInDetail": "78314d0e68a6",
+  "mainDocuments:linkSignInMessage": "0e68afe36b22",
+  "mainDocuments:linkUntrusted": "3099c98cf5cf",
+  "mainDocuments:load": "8a6bdb6b18da",
+  "mainDocuments:loadFailed": "44a13c8a8ee2",
+  "mainDocuments:loadWarnings": "594a94fb8a5e",
+  "mainDocuments:none": "140bedbf9c3f",
+  "mainDocuments:noRecent": "7e31f0e43fec",
+  "mainDocuments:notAFolder": "5bfe03a58acb",
+  "mainDocuments:notAGist": "053309281ee7",
+  "mainDocuments:offline": "827fe8f10f8d",
+  "mainDocuments:open": "ed077f3d8125",
+  "mainDocuments:openFolderTitle": "653d5cf32bae",
+  "mainDocuments:overwriteDetail": "c6c3d7a3cec9",
+  "mainDocuments:overwriteMessage": "87d1d10e7d23",
+  "mainDocuments:quit": "b3eb37acb66b",
+  "mainDocuments:quitDetail": "1498fc0811c2",
+  "mainDocuments:quitMessage": "491d29fd3d1d",
+  "mainDocuments:replace": "95e154398a4b",
+  "mainDocuments:replaceDetail": "e5e82fab795a",
+  "mainDocuments:replaceMessage": "f117f108bd96",
+  "mainDocuments:restore": "a76e13b98392",
+  "mainDocuments:restoreDetail": "6be72cd294b6",
+  "mainDocuments:restoreFailedDetail": "2caa730c5874",
+  "mainDocuments:restoreFailedMessage": "5a41104e0294",
+  "mainDocuments:restoreMessage": "3082330c3c06",
+  "mainDocuments:save": "1509f561f241",
+  "mainDocuments:saveFailed": "c4f1549342d6",
+  "mainDocuments:saveFolderTitle": "4ea15a96fac5",
+  "mainDocuments:signIn": "bfd402b2f6f3",
+  "mainDocuments:signInRequired": "79b2ad9b6d15",
+  "mainDocuments:skip": "28d03596d24e",
+  "mainDocuments:titleEdited": "805efedfe877",
+  "mainDocuments:trustAllowScripts": "78daf186a887",
+  "mainDocuments:trustContinue": "fd493d090313",
+  "mainDocuments:trustDetail": "b4f0290806e0",
+  "mainDocuments:trustMessage": "b37d6d6d4b4b",
+  "mainDocuments:unknownOwner": "b23a6a8439c0",
+  "mainDocuments:warnModules": "f6ea77a7795f",
+  "mainDocuments:warnPackageJson": "c3b6061f2d93",
+  "mainDocuments:warnVersion": "fcc52719d62f",
+  "mainErrors:command-not-started": "cb6c918a8ec3",
+  "mainErrors:duplicate-name": "8c8b75988e48",
+  "mainErrors:empty-name": "7b5ad702b446",
+  "mainErrors:example-not-found": "bc1449e98023",
+  "mainErrors:file-not-found": "e2039866f001",
+  "mainErrors:file-too-large": "042c9ce76a36",
+  "mainErrors:folder-not-found": "28cae74d0793",
+  "mainErrors:github-response": "ce646c12b11f",
+  "mainErrors:github-response-detail": "82b886913c6e",
+  "mainErrors:install-failed": "81188bc7e77f",
+  "mainErrors:invalid-character": "60edec4eae90",
+  "mainErrors:invalid-json": "59ab3a23a4bd",
+  "mainErrors:invalid-name": "85aeacc29198",
+  "mainErrors:invalid-path": "664ebfe5ec0d",
+  "mainErrors:invalid-spec": "8404d2e10584",
+  "mainErrors:invalid-tag": "f1a6ec36c43e",
+  "mainErrors:missing-package-json": "5dadac8c6b43",
+  "mainErrors:no-main-entry": "101d93cf9920",
+  "mainErrors:no-supported-files": "aad0bd01a7f0",
+  "mainErrors:path-separator": "84e0f622eef6",
+  "mainErrors:rate-limited": "df574eebff64",
+  "mainErrors:registry-metadata": "bc2e3d8ae8fa",
+  "mainErrors:remove-main-entry": "2a8e6fc25e65",
+  "mainErrors:reserved-name": "de3dfbcba73b",
+  "mainErrors:second-main-entry": "c46911707ed8",
+  "mainErrors:template-status": "07787ed79a3a",
+  "mainErrors:template-unreachable": "9c322939b6f9",
+  "mainErrors:timeout": "54387ec942f0",
+  "mainErrors:too-many-files": "d6d02cd43fe0",
+  "mainErrors:too-many-redirects": "de62e5204cea",
+  "mainErrors:unexpected-response": "0ddb99100145",
+  "mainErrors:unreachable": "e774e9279948",
+  "mainErrors:unsupported-extension": "94d07fb07733",
+  "mainModules:invalidPackageName": "85aeacc29198",
+  "mainModules:noPublishedVersions": "ba30f6eb3a01",
+  "mainModules:notOnNpm": "93a0021eade6",
+  "mainModules:registryInvalidResponse": "6ae1575c6e00",
+  "mainModules:registryStatus": "e5ee057f42dd",
+  "mainModules:registryUnreachable": "f5df5f3b478f",
+  "mainPlatform:aboutCopyright": "299e242d0856",
+  "mainPlatform:aboutVersion": "58c5d0ebd6a7",
+  "mainPlatform:dontMove": "e6bbe0aa6b8e",
+  "mainPlatform:later": "73b6e48a1b55",
+  "mainPlatform:moveButton": "830a1041dac7",
+  "mainPlatform:moveDetail": "590512b3538a",
+  "mainPlatform:moveMessage": "2fe577e949b5",
+  "mainPlatform:resetPrivacyButton": "daee7606b339",
+  "mainPlatform:resetPrivacyDetail": "3194af1a98de",
+  "mainPlatform:resetPrivacyFailed": "5babbeda481a",
+  "mainPlatform:resetPrivacyMessage": "bc5d0817c4a9",
+  "mainPlatform:resetPrivacyUnavailable": "eac316267bdc",
+  "mainPlatform:restart": "6b983a81e5e8",
+  "mainPlatform:updateReadyDetail": "de66a4e35bfc",
+  "mainPlatform:updateReadyTitle": "46570c771ff5",
+  "mainRun:addLocalBuildButton": "aed7695aee7b",
+  "mainRun:addLocalBuildTitle": "fd7d0f8b6303",
+  "mainRun:bisectDone": "8f009e55d71f",
+  "mainRun:bisectGoodNotOlder": "a49cc30b31b9",
+  "mainRun:bisectInvalid": "a0d82bb636d4",
+  "mainRun:bisectStep": "7c490a580946",
+  "mainRun:bisectTooFew": "639461489ce4",
+  "mainRun:bisectVerdictBad": "4fff96d30311",
+  "mainRun:bisectVerdictGood": "1c9c70403909",
+  "mainRun:bisectVerifyFailed": "92b3680530d5",
+  "mainRun:cannotRemoveActive": "3704205e276a",
+  "mainRun:commandFailed": "94d97d56d6c9",
+  "mainRun:consoleReady": "5b9f082e1faa",
+  "mainRun:downloading": "8804c3afe1c2",
+  "mainRun:envBlocked": "8831c8f6d99a",
+  "mainRun:envInvalid": "ec2b0cbe8d5a",
+  "mainRun:esmNeeds28": "cf49340ad690",
+  "mainRun:exitedCode": "0df62ed33e8e",
+  "mainRun:exitedSignal": "ed528b4565a7",
+  "mainRun:inspector": "549642df54a8",
+  "mainRun:installingModules": "f6d03b444659",
+  "mainRun:installingModulesNoScripts": "5d2cbc7959c4",
+  "mainRun:making": "6b4ec81ec0f2",
+  "mainRun:modulesFailed": "2cbed1af5e88",
+  "mainRun:noBinaryDetail": "c29f6fa12a95",
+  "mainRun:noBinaryTitle": "f5a6768fc3b3",
+  "mainRun:openCompareButton": "ed077f3d8125",
+  "mainRun:openCompareMessage": "c4e871f383a4",
+  "mainRun:packageDone": "379818de2209",
+  "mainRun:packaging": "86a0fc225e81",
+  "mainRun:pmMissing": "8c33a48abbf7",
+  "mainRun:privacyHelperMissing": "e8d27b861b82",
+  "mainRun:runFailed": "24c8d3e320af",
+  "mainRun:scriptsRequired": "71761bcd46f1",
+  "mainRun:spawnFailed": "38e210360dbe",
+  "mainRun:started": "6ebdbd2b12ee",
+  "mainRun:untrusted": "dcb157063c2b",
+  "mainSettings:exportSettingsTitle": "4431ea74c184",
+  "mainSettings:importButton": "2cff9baabf56",
+  "mainSettings:importEmpty": "140bedbf9c3f",
+  "mainSettings:importExecutionDetail": "3a809edb835d",
+  "mainSettings:importExecutionMessage": "8f9a463c1572",
+  "mainSettings:importSettingLine": "9d356e78069b",
+  "mainSettings:importSettingsTitle": "72f01a736575",
+  "mainSettings:importThemeTitle": "32bb2ed98de6",
+  "mainSettings:invalidValue": "e5354ffdd87e",
+  "mainSettings:jsonFiles": "9fe1f29e5343",
+  "mainSettings:lucentDark": "e7fd5bf6ab2d",
+  "mainSettings:lucentHcDark": "12e682d711c4",
+  "mainSettings:lucentHcLight": "510c02c874b2",
+  "mainSettings:lucentLight": "d79cdcb99ff3",
+  "mainSettings:notJson": "59ab3a23a4bd",
+  "mainSettings:notSettings": "07053f93d25a",
+  "mainSettings:notTheme": "1a38700535f6",
+  "mainSettings:openFailed": "a76a61882fa5",
+  "mainSettings:themeCopyName": "6305eb6721a4",
+  "mainSettings:themeNeedsValues": "37d39534b079",
+  "mainSettings:unknownSetting": "9189e9bffffd",
+  "mainUx:bisectDone": "8b1e815f28af",
+  "mainUx:bisectFailed": "e18d564df0e1",
+  "mainUx:downloadsDone": "cdc7cfec7ce6",
+  "mainUx:downloadsFailed": "f9b912b3be2f",
+  "mainUx:notificationBody": "f03387ea9bee",
+  "mainUx:packageDone": "acc8b2a663c1",
+  "mainUx:packageFailed": "cad5fcca065c",
+  "mainUx:recent": "690dbe9dc099",
+  "mainUx:runDone": "b089e971d3bb",
+  "mainUx:runFailed": "443ccc276c7d",
+  "mainVersions:cannotChange": "bc31d120b783",
+  "mainVersions:downloadFailed": "fae62659099e",
+  "mainVersions:electronVersion": "8c69cff12cea",
+  "mainVersions:fallback": "7d8c336c71ba",
+  "mainVersions:localBuildMissing": "e77ab917c380",
+  "mainVersions:localBuildUnknown": "0b2917b84827",
+  "mainVersions:refreshFailed": "cb64a9b4e2e9",
+  "mainVersions:removeFailed": "c368072bc66f",
+  "mainVersions:showBetaTitle": "56a991fb236d",
+  "mainVersions:showChannelDetail": "a2b06e655b8a",
+  "mainVersions:showChannelOk": "cab88e281cc4",
+  "mainVersions:showNightlyTitle": "949fd2705412",
+  "mainVersions:showStableTitle": "f21936baa12b",
+  "mainVersions:switchButton": "39921a740bf2",
+  "mainVersions:switchToBuild": "b3f8d7da26d4",
+  "mainVersions:switchToBuildDetail": "6925a2428461",
+  "mainVersions:versionUnknown": "4a09edbbb383",
+  "mainVersions:versionUnsupported": "d9b594d4abc8",
+  "onboarding:back": "76900f1bfd16",
+  "onboarding:basicsBody": "d6c41a0421a6",
+  "onboarding:basicsStart": "b76c42cb4bf3",
+  "onboarding:basicsTitle": "eddc833d566a",
+  "onboarding:consoleBody": "4a00632bbac9",
+  "onboarding:consoleTitle": "8ee213344443",
+  "onboarding:done": "11a6767d5674",
+  "onboarding:editorBody": "ef0d56a8cec1",
+  "onboarding:editorTitle": "2f96b6fcdaab",
+  "onboarding:htmlBody": "b1e185bfbd18",
+  "onboarding:htmlTitle": "c596285cd054",
+  "onboarding:label": "5155b98763c0",
+  "onboarding:mainBody": "92d55908f23a",
+  "onboarding:mainTitle": "783d9624d46a",
+  "onboarding:next": "1ff57a29d7c9",
+  "onboarding:notNow": "28d03596d24e",
+  "onboarding:offerBody": "76ba5b0d5340",
+  "onboarding:offerTitle": "f0cd3e2139ea",
+  "onboarding:publishBody": "161dffa5869a",
+  "onboarding:publishTitle": "54acdcbb867a",
+  "onboarding:rendererBody": "8c8d64c3a493",
+  "onboarding:rendererTitle": "e607182db014",
+  "onboarding:runBody": "014ff0b35399",
+  "onboarding:runTitle": "52f39495b3d3",
+  "onboarding:sidebarBody": "96ec92dd8539",
+  "onboarding:sidebarTitle": "55858ee5f49a",
+  "onboarding:skipTour": "5ac614dee51b",
+  "onboarding:start": "a83c4366d2df",
+  "onboarding:stepCount": "487fcaf37ab9",
+  "onboarding:versionBody": "e0e6ca22b059",
+  "onboarding:versionTitle": "a94b1005c6ad",
+  "packages:addFailed": "4d4f68a62215",
+  "packages:addLabel": "c3611fcb48ea",
+  "packages:addPlaceholder": "6a6e7053ec9b",
+  "packages:changeFailed": "84edd1088cce",
+  "packages:latest": "5e1e2bcac305",
+  "packages:list": "916e04bf3fe7",
+  "packages:moreVersions": "8b8b62f47ab0",
+  "packages:noResults": "0d977800db55",
+  "packages:noVersions": "1c3e2f174528",
+  "packages:remove": "43e1269ac88a",
+  "packages:searchFailed": "119b75849c62",
+  "packages:searching": "c31723ab3302",
+  "packages:searchVersions": "2af5bdafa2e7",
+  "packages:title": "40a2085371b8",
+  "packages:version": "2a38c956c7ac",
+  "palette:electronVersion": "8c69cff12cea",
+  "palette:empty": "2df01a03ff43",
+  "palette:kindCommand": "713166971d73",
+  "palette:kindEditor": "936a161c3931",
+  "palette:kindExample": "d029f87e3d80",
+  "palette:kindFile": "50009ce1da4d",
+  "palette:kindVersion": "dd167905de0d",
+  "palette:label": "0347f794d69c",
+  "palette:placeholder": "e6d4a15ef0cd",
+  "palette:runFailed": "6f6e2d2daebc",
+  "run:addLocalBuild": "3377ad9312b1",
+  "run:announceChecking": "556ca2b5e6bf",
+  "run:announceDownloading": "8708b29a3627",
+  "run:announceInstalling": "5b1ba0587995",
+  "run:announceReady": "c2e2ee67d426",
+  "run:announceRunning": "43f525a5d8c2",
+  "run:announceStarting": "aeed4d26bb5f",
+  "run:announceUnzipping": "c25d55ecc69c",
+  "run:bisectAuto": "0286249762f7",
+  "run:bisectAutoRunning": "e8e22d19497c",
+  "run:bisectBad": "6fe7d7112caa",
+  "run:bisectBadVersion": "919295e2bc3b",
+  "run:bisectDoneTitle": "8b1e815f28af",
+  "run:bisectFailed": "e18d564df0e1",
+  "run:bisectGood": "c939327ca16d",
+  "run:bisectGoodVersion": "4bf233eaf589",
+  "run:bisectIntro": "b31e2a8b8510",
+  "run:bisectRangeInvalid": "a49cc30b31b9",
+  "run:bisectResult": "5c9756dfa95d",
+  "run:bisectSkip": "28d03596d24e",
+  "run:bisectStart": "e4bb9f1ece9a",
+  "run:bisectTesting": "e41c7613c661",
+  "run:bisectTitle": "846e108d1305",
+  "run:cancel": "19766ed6ccb2",
+  "run:channelBeta": "703390318bd5",
+  "run:channelNightly": "ab6b5a4d586b",
+  "run:channelStable": "90ee305714d7",
+  "run:checking": "0dfe1d63c9d8",
+  "run:clearConsole": "888c33cff71b",
+  "run:close": "7d9eb7acb13e",
+  "run:columnAction": "64cff1319d2f",
+  "run:columnStatus": "920e413c7d41",
+  "run:columnVersion": "dd167905de0d",
+  "run:console": "29a40861bafe",
+  "run:consoleOutput": "9e109a582da6",
+  "run:deleteAll": "978111835dfa",
+  "run:deleteAllBody": "1206aa3ae31d",
+  "run:deleteAllTitle": "129d4b9bfab4",
+  "run:download": "d6eafe823591",
+  "run:downloadAll": "f7917eced9c2",
+  "run:downloadedOnly": "debc3464050f",
+  "run:downloadingPercent": "c0e6fb45dc39",
+  "run:electronVersion": "8c69cff12cea",
+  "run:filterAll": "a52ace420f21",
+  "run:filterMain": "eb814be3ca3b",
+  "run:filterOutput": "b304514715a9",
+  "run:filterProcess": "e083bd83e9d3",
+  "run:filterRenderer": "9deb780b4331",
+  "run:filterVersions": "5b4f8b6e5695",
+  "run:groupLocal": "01f46fd1a39c",
+  "run:groupPrerelease": "a90d2f735a49",
+  "run:groupStable": "90ee305714d7",
+  "run:hintBeta": "f44e64e75f39",
+  "run:hintLatest": "5e1e2bcac305",
+  "run:hintNightly": "2a3b62b53ddb",
+  "run:installingModules": "5b1ba0587995",
+  "run:newError": "22cf52b5750b",
+  "run:noVersions": "1c3e2f174528",
+  "run:openCompare": "577388f4cc09",
+  "run:processFiddle": "6a201cad2f65",
+  "run:processMain": "eb814be3ca3b",
+  "run:processRenderer": "9deb780b4331",
+  "run:ready": "5fa7aac5375c",
+  "run:refreshReleases": "0e9161011702",
+  "run:remove": "c3812fc4acb8",
+  "run:revealLocation": "084063c2b8e4",
+  "run:run": "00d60e31a4e6",
+  "run:running": "f4ccae29e1bb",
+  "run:starting": "aeed4d26bb5f",
+  "run:stateDownloaded": "f0b0738f75b8",
+  "run:stateDownloading": "c0e6fb45dc39",
+  "run:stateInstalled": "f0b0738f75b8",
+  "run:stateInstalling": "88eb20c03626",
+  "run:stateLocal": "1a9495c00228",
+  "run:stateLocalMissing": "d8e615b73d13",
+  "run:stateMissing": "5569a4e0a4ce",
+  "run:stateUnsupported": "8e475d51b78c",
+  "run:stop": "cae7d57bc067",
+  "run:stopDownloads": "82c41b504d27",
+  "run:truncated": "cb598c7ee971",
+  "run:unzipping": "88eb20c03626",
+  "run:versionPicker": "2817888487f2",
+  "settings:about.contributions": "ae0d04dc3492",
+  "settings:about.contributors": "350ad433c42f",
+  "settings:about.electron": "8c69cff12cea",
+  "settings:about.notices": "8fadbc8de273",
+  "settings:about.version": "c6b6b4b58937",
+  "settings:actionFailed": "57b25b95e3f7",
+  "settings:appearance.dark": "60acc53f13a5",
+  "settings:appearance.description": "c433abbec0cc",
+  "settings:appearance.fromTheme": "f72e99083c24",
+  "settings:appearance.light": "dbcd5e7bb7a0",
+  "settings:appearance.system": "6725e7bbcd28",
+  "settings:appearance.title": "3907fa7f8072",
+  "settings:changeFailed": "460f91c85b5b",
+  "settings:channel.beta": "703390318bd5",
+  "settings:channel.nightly": "ab6b5a4d586b",
+  "settings:channel.stable": "90ee305714d7",
+  "settings:channels.description": "6f4addbf36f0",
+  "settings:channels.title": "87756db5b2b0",
+  "settings:clearConsoleOnRun.description": "9cc58c533e1c",
+  "settings:clearConsoleOnRun.title": "50a46d9067b7",
+  "settings:close": "0ccfef828950",
+  "settings:closeHint": "177b7cb06867",
+  "settings:crashReports.description": "1e7a46a01b5b",
+  "settings:crashReports.title": "2b8f06d96293",
+  "settings:customMirrorElectron.description": "675fbd999e88",
+  "settings:customMirrorElectron.title": "3b74b436fa70",
+  "settings:customMirrorNightly.description": "518e82b8889f",
+  "settings:customMirrorNightly.title": "babe9698327d",
+  "settings:editorFont.reload": "2e65aa0021f8",
+  "settings:editorFont.reloadHint": "f596498424b0",
+  "settings:editorFontFamily.description": "b2e45e125327",
+  "settings:editorFontFamily.invalid": "d2313a0dd572",
+  "settings:editorFontFamily.title": "119ef3fa607e",
+  "settings:editorFontSize.description": "ff0ed36d6bdd",
+  "settings:editorFontSize.invalid": "90d173957501",
+  "settings:editorFontSize.title": "6d784d95c638",
+  "settings:electronFlags.description": "314b9c35e4d0",
+  "settings:electronFlags.invalid": "1a246a87a740",
+  "settings:electronFlags.title": "d7e28129b403",
+  "settings:electronLogging.description": "b1d59dc5be77",
+  "settings:electronLogging.title": "144acf0933ed",
+  "settings:environmentVariables.description": "823203d86c4f",
+  "settings:environmentVariables.invalid": "95bb76545551",
+  "settings:environmentVariables.title": "aac7246f5e97",
+  "settings:export": "4a4c59c5208e",
+  "settings:gistPublishAsRevision.description": "fb75fd83247e",
+  "settings:gistPublishAsRevision.title": "c7ffab0e4758",
+  "settings:gistShowHistory.description": "8bc366ca02cb",
+  "settings:gistShowHistory.title": "5123215f8ee3",
+  "settings:gistVisibility.description": "3444db7c85d8",
+  "settings:gistVisibility.public": "591935b15b1c",
+  "settings:gistVisibility.secret": "7e32a729b122",
+  "settings:gistVisibility.title": "2d5502bb06ef",
+  "settings:import": "ea94509e38cf",
+  "settings:keepUserDataDirs.description": "01ce07de7571",
+  "settings:keepUserDataDirs.title": "e92c2a1a13b6",
+  "settings:keybindings.change": "c0bf75bd78bf",
+  "settings:keybindings.conflict": "2e17db43d191",
+  "settings:keybindings.description": "4310ea4a11ee",
+  "settings:keybindings.filter": "6b866e96f2b6",
+  "settings:keybindings.none": "dc937b598926",
+  "settings:keybindings.record": "68ac11343183",
+  "settings:keybindings.recordLabel": "e9840453626c",
+  "settings:keybindings.remove": "aea0ad85340a",
+  "settings:keybindings.resetLabel": "4fffdddf8707",
+  "settings:keybindings.title": "e9bef0b0f3c2",
+  "settings:list.add": "1868a8dd78ad",
+  "settings:list.remove": "c3812fc4acb8",
+  "settings:locale.description": "d8e51520473a",
+  "settings:locale.relaunch": "8bd85e54db81",
+  "settings:locale.relaunchDescription": "59801a7c274c",
+  "settings:locale.relaunchTitle": "996b13ea9c9e",
+  "settings:locale.system": "b0459211f9f7",
+  "settings:locale.title": "a4fe65264ef7",
+  "settings:mirror.auto": "d461a493a375",
+  "settings:mirror.china": "e7b5dce8a97c",
+  "settings:mirror.custom": "494ca78f7374",
+  "settings:mirror.default": "f911e414cf6b",
+  "settings:mirror.description": "53814af50ad5",
+  "settings:mirror.invalidUrl": "9ba6da027206",
+  "settings:mirror.title": "6d6ceb5b602a",
+  "settings:modified": "96b50e9cc169",
+  "settings:navLabel": "e26d51d36781",
+  "settings:noResults": "a0e86b6149ce",
+  "settings:notice.corrupt.description": "e5fdf281af68",
+  "settings:notice.corrupt.title": "57feeba9ea6a",
+  "settings:notice.dismiss": "48845bff334a",
+  "settings:notice.newer.description": "1e98978cd1b3",
+  "settings:notice.newer.title": "8d3447102a5f",
+  "settings:notifications.description": "ebf094d93eb9",
+  "settings:notifications.title": "788011833a5a",
+  "settings:openFile": "514375a65e99",
+  "settings:packageAuthor.description": "6b73251c5e24",
+  "settings:packageAuthor.invalid": "49b758cb3784",
+  "settings:packageAuthor.title": "3ed7a3815580",
+  "settings:packageManager.description": "e4e298c66d57",
+  "settings:packageManager.title": "087de11becaa",
+  "settings:privacyReset.button": "f6027ace5b0f",
+  "settings:privacyReset.description": "e6adf9963e41",
+  "settings:privacyReset.done": "619cd189d35f",
+  "settings:privacyReset.title": "de2f2bf465a5",
+  "settings:reset": "daee7606b339",
+  "settings:screenReader.active": "dbe423837418",
+  "settings:screenReader.auto": "d461a493a375",
+  "settings:screenReader.description": "839d56caad94",
+  "settings:screenReader.inactive": "7443aeabe7fb",
+  "settings:screenReader.off": "ca7981b46ecf",
+  "settings:screenReader.on": "130011756125",
+  "settings:screenReader.title": "f2d2aed1c4d2",
+  "settings:search": "255b076dd828",
+  "settings:section.about": "abc6e68f5da1",
+  "settings:section.accessibility": "d3368cbffe23",
+  "settings:section.editor": "936a161c3931",
+  "settings:section.electron": "61a62a841f54",
+  "settings:section.execution": "a45cd4bd0998",
+  "settings:section.general": "c910d474dcd7",
+  "settings:section.github": "f911e414cf6b",
+  "settings:section.keybindings": "e9bef0b0f3c2",
+  "settings:section.privacy": "54a57c3147c4",
+  "settings:sessionRestore.description": "797ed01233b1",
+  "settings:sessionRestore.title": "59ad740f601b",
+  "settings:showNotDownloaded.description": "4fb3d13689f0",
+  "settings:showNotDownloaded.title": "2ffa80b1fd7d",
+  "settings:showObsolete.description": "1ceca55491fe",
+  "settings:showObsolete.title": "1ec74298c900",
+  "settings:socketFirewall.description": "145f2ea9e00e",
+  "settings:socketFirewall.title": "b4d5b7f1ed06",
+  "settings:theme.create": "7021a1715108",
+  "settings:theme.dark": "e6bb5689beec",
+  "settings:theme.description": "ede4471edd1b",
+  "settings:theme.highContrastDark": "12e682d711c4",
+  "settings:theme.highContrastLight": "510c02c874b2",
+  "settings:theme.importMonaco": "3018a4f5e083",
+  "settings:theme.light": "99a7026172d4",
+  "settings:theme.lucent": "fa404b2f767b",
+  "settings:theme.openFolder": "243672f60873",
+  "settings:theme.title": "efb52e7172b7",
+  "settings:title": "74a883a037bc",
+  "shell:addFile": "2c83c00f0e83",
+  "shell:addFileIn.main": "94f75a6de52c",
+  "shell:addFileIn.other": "293d7ca21bf9",
+  "shell:addFileIn.preload": "96b72adcdb58",
+  "shell:addFileIn.renderer": "b76201692c1f",
+  "shell:addFileTitle": "44dedd0f97fe",
+  "shell:cancel": "19766ed6ccb2",
+  "shell:clearNotifications": "29a390f9237e",
+  "shell:closePane": "7fa0f9613d91",
+  "shell:closeSplit": "b9295ef7f3fd",
+  "shell:closeTab": "50a3f9523122",
+  "shell:create": "4759498ac2a7",
+  "shell:cursorPosition": "74bc54466be5",
+  "shell:delete": "9ce78fe395f3",
+  "shell:deleteConfirm": "e2d0a54968ea",
+  "shell:deleteMessage": "94271c1ca23f",
+  "shell:deleteTitle": "69be14a40a60",
+  "shell:dismiss": "48845bff334a",
+  "shell:dropToOpen": "01d8c20220cb",
+  "shell:dropToOpenHint": "272f1f2080c4",
+  "shell:edited": "7117f0807129",
+  "shell:editorFor": "fc313e74abac",
+  "shell:emptyText": "92f473d3d19a",
+  "shell:emptyTitle": "a334ca2cacfc",
+  "shell:errorCount": "ed1590c47a42",
+  "shell:fileActions": "fb3d7e2c77f4",
+  "shell:fileChangeFailed": "b3542614a6ce",
+  "shell:fileName": "3efed3de9d4b",
+  "shell:fileNameHint": "28279d4b59b9",
+  "shell:files": "abc7e9892806",
+  "shell:filterFiles": "56fc0ca26b09",
+  "shell:groupHint.main": "cea339e2f592",
+  "shell:groupHint.other": "d0f933350f35",
+  "shell:groupHint.preload": "a5da54596e64",
+  "shell:groupHint.renderer": "37d15dcfde80",
+  "shell:hideSidebar": "d1db29ebc76d",
+  "shell:language.css": "b581e46042cb",
+  "shell:language.html": "07239dbd2a1a",
+  "shell:language.javascript": "b27ad06d123c",
+  "shell:language.json": "db1a21a0bc2e",
+  "shell:lensHint": "1b9e5a8d74b1",
+  "shell:lensProcess.main": "9c96b3aeaba4",
+  "shell:lensProcess.preload": "4261433e1b89",
+  "shell:lensProcess.renderer": "6bd52b204f5b",
+  "shell:maximize": "fba6c2c5d946",
+  "shell:menuBar": "d79194552215",
+  "shell:menuBarMenu": "99af6606ff9d",
+  "shell:menuBarMore": "d47d7cb0e4f8",
+  "shell:noNotifications": "37ecf3603dbf",
+  "shell:notifications": "788011833a5a",
+  "shell:notificationsButton": "b99ab5925428",
+  "shell:openFiles": "3faecf01527d",
+  "shell:openTab": "ed077f3d8125",
+  "shell:process.main": "eb814be3ca3b",
+  "shell:process.other": "f97e9da0e3b8",
+  "shell:process.preload": "b39edfe3bc54",
+  "shell:process.renderer": "9deb780b4331",
+  "shell:regionErrorBody": "833cad4ae351",
+  "shell:regionErrorReload": "bdc090ec61e3",
+  "shell:regionErrorTitle": "ab827e3fe17d",
+  "shell:rename": "6fa62b3dba2f",
+  "shell:renameConfirm": "3064d79a295c",
+  "shell:renameTitle": "4862f2751eb0",
+  "shell:resetLayout": "2e2a17849c24",
+  "shell:resizeConsole": "89cb4b995288",
+  "shell:resizePanes": "39056de4c03d",
+  "shell:resizeSidebar": "243854b4d0c7",
+  "shell:settings": "74a883a037bc",
+  "shell:showSidebar": "9e8197ce9e5f",
+  "shell:splitEditor": "31bdf2f29a0b",
+  "shell:status": "920e413c7d41",
+  "shell:tabFocusMode": "d81a0d194b1c",
+  "shell:toolbar": "451aa51a0fb5",
+  "shell:unsaved": "a710c2b90913",
+  "shell:warningCount": "460638ad9286",
+  "versions:copied": "886e05896e1b",
+  "versions:copyVersion": "ae76d89fd36a",
+  "versions:noMatches": "1c3e2f174528",
+  "versions:searchVersions": "2af5bdafa2e7",
+  "versions:versionChangeFailed": "346b33d1fce1"
 }
