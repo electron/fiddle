@@ -1,10 +1,10 @@
 import { memo, useEffect, useId, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ComboBox, Input, ListBox, ListBoxItem, Popover } from 'react-aria-components';
+import { ComboBox, Input, ListBox, ListBoxItem } from 'react-aria-components';
 
 import { modulesApi } from '../../../ipc/renderer';
 import type { PackageSearchResults, PackageVersions } from '../../../shared/stores';
-import { cx, Icon, IconButton } from '../../../ui';
+import { cx, Icon, IconButton, MenuPopover } from '../../../ui';
 import field from '../../../ui/components/Field.module.css';
 import menu from '../../../ui/components/Menu.module.css';
 import { addModule } from '../../shell/window-state';
@@ -136,7 +136,7 @@ function PackageSearch() {
             }}
           />
         </div>
-        <Popover className={menu.popover} placement="bottom start" offset={4}>
+        <MenuPopover>
           <ListBox<PackageSearchResults[number]>
             className={menu.surface}
             renderEmptyState={() => <div className={styles.empty}>{empty}</div>}
@@ -165,7 +165,7 @@ function PackageSearch() {
               </ListBoxItem>
             )}
           </ListBox>
-        </Popover>
+        </MenuPopover>
       </ComboBox>
     </div>
   );

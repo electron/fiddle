@@ -4,14 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { useFormat } from '../../../i18n/renderer';
 import { runApi } from '../../../ipc/renderer';
 import type { OutputLine } from '../../../shared/stores';
-import {
-  Button,
-  IconButton,
-  SegmentedControl,
-  StatusPill,
-  TextField,
-  Tooltip,
-} from '../../../ui';
+import { Button, IconButton, SegmentedControl, StatusPill, TextField } from '../../../ui';
 import { revealLocation } from '../../editor/runtime-errors';
 import { toastError } from '../../toast-error';
 import styles from './Console.module.css';
@@ -95,9 +88,13 @@ export const ConsolePane = memo(function ConsolePane() {
         />
         <span className={styles.spacer} />
         {run.status === 'running' && <StatusPill>{t('running')}</StatusPill>}
-        <Tooltip label={t('clearConsole')}>
-          <IconButton icon="trash" size="sm" label={t('clearConsole')} onPress={clear} />
-        </Tooltip>
+        <IconButton
+          icon="trash"
+          size="sm"
+          label={t('clearConsole')}
+          tooltip
+          onPress={clear}
+        />
       </div>
       <ol
         ref={list}

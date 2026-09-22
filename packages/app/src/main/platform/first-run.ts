@@ -2,12 +2,11 @@ import { app, dialog } from 'electron';
 
 import { tm } from '../i18n';
 import { log } from '../log';
-import { testFlags } from '../test-mode';
+import { isTestMode } from '../test-mode';
 
 export async function offerMoveToApplications(firstLaunch: boolean): Promise<void> {
   if (process.platform !== 'darwin' || !firstLaunch) return;
-  if (!app.isPackaged || !testFlags().firstRunPrompts || app.isInApplicationsFolder())
-    return;
+  if (!app.isPackaged || isTestMode() || app.isInApplicationsFolder()) return;
   const tp = tm('mainPlatform');
   const { response } = await dialog.showMessageBox({
     type: 'question',

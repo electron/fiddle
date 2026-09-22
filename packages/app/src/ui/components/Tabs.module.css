@@ -57,9 +57,7 @@
 }
 
 .label {
-  min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  composes: lu-truncate from global;
 }
 
 .errors {

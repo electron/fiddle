@@ -13,7 +13,6 @@ import {
   TabList,
   TabPanel,
   Tabs,
-  Tooltip,
 } from '../../ui';
 import { badgeOf, useDiagnostics } from '../editor/diagnostics';
 import { EditorPane } from '../editor/EditorPane';
@@ -348,18 +347,14 @@ function EditorArea({
               {t(processLabelKey[processOf(active)])}
             </span>
           )}
-          <Tooltip
+          <IconButton
+            icon="columns"
+            size="sm"
             label={split ? t('closeSplit') : t('splitEditor')}
-            kbd={split ? undefined : splitKbd}
-          >
-            <IconButton
-              icon="columns"
-              size="sm"
-              label={split ? t('closeSplit') : t('splitEditor')}
-              isPressed={split}
-              onPress={onToggleSplit}
-            />
-          </Tooltip>
+            tooltip={{ kbd: split ? undefined : splitKbd }}
+            isPressed={split}
+            onPress={onToggleSplit}
+          />
         </div>
         <TabPanel id={active} className={styles.tabpanel}>
           <div ref={setRow} className={styles.panes} data-tour="editor">
@@ -492,17 +487,20 @@ function PaneHeader({ name, badge, onMaximize, onClose }: PaneHeaderProps) {
       </span>
       <span className={styles.paneProcess}>{t(processLabelKey[processOf(name)])}</span>
       <span className={styles.paneActions}>
-        <Tooltip label={t('maximize')}>
-          <IconButton
-            icon="maximize"
-            size="sm"
-            label={t('maximize')}
-            onPress={onMaximize}
-          />
-        </Tooltip>
-        <Tooltip label={t('closePane')}>
-          <IconButton icon="close" size="sm" label={t('closePane')} onPress={onClose} />
-        </Tooltip>
+        <IconButton
+          icon="maximize"
+          size="sm"
+          label={t('maximize')}
+          tooltip
+          onPress={onMaximize}
+        />
+        <IconButton
+          icon="close"
+          size="sm"
+          label={t('closePane')}
+          tooltip
+          onPress={onClose}
+        />
       </span>
     </div>
   );

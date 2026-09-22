@@ -12,24 +12,9 @@
 }
 
 .field {
+  composes: lu-field-box from global;
   display: flex;
-  align-items: center;
-  gap: var(--lu-space-2);
-  height: var(--lu-size-control);
-  min-width: 0;
-  padding: 0 11px;
-  border: 1px solid var(--lu-line-strong);
-  border-radius: var(--lu-radius-control);
-  corner-shape: squircle;
-  background: var(--lu-field);
-  color: var(--lu-ink);
-  font: var(--lu-type-body);
-  letter-spacing: var(--lu-type-body-tracking);
   cursor: text;
-  transition:
-    border-color var(--lu-dur-fast) var(--lu-ease),
-    background-color var(--lu-dur-fast) var(--lu-ease),
-    box-shadow var(--lu-dur-base) var(--lu-ease);
 }
 
 .root[data-size='sm'] .field {

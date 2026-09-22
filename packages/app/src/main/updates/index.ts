@@ -6,7 +6,7 @@ import { confirmQuit } from '../documents/service';
 import { tm } from '../i18n';
 import { log } from '../log';
 import { openExternalLink } from '../security';
-import { getEndpoints, testFlags } from '../test-mode';
+import { getEndpoints, isTestMode } from '../test-mode';
 import { pickUpdate, type AvailableUpdate, type GitHubRelease } from './releases';
 
 const UPDATE_REPO = 'electron/fiddle';
@@ -23,7 +23,7 @@ const shownWindows = new Set<BrowserWindow>();
 
 /** Off in dev and test mode. Linux and MSIX have no auto-update and get a toast instead. */
 export function startUpdates(): void {
-  if (!app.isPackaged || !testFlags().updates) {
+  if (!app.isPackaged || isTestMode()) {
     log.info('updates are off (dev or test mode)');
     return;
   }

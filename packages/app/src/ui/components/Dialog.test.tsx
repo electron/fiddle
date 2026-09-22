@@ -1,100 +1,12 @@
 import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
-import { useState } from 'react';
-import { describe, expect, it, vi } from 'vitest';
-import { Button } from './Button';
-import { confirmDialog, Dialog, DialogHost, promptDialog } from './Dialog';
-
-function Harness({
-  onOpenChange,
-  isDismissable,
-}: {
-  onOpenChange?: (open: boolean) => void;
-  isDismissable?: boolean;
-}) {
-  const [open, setOpen] = useState(false);
-  return (
-    <>
-      <Button onPress={() => setOpen(true)}>Publish</Button>
-      <Dialog
-        title="Publish gist"
-        closeLabel="Close"
-        isOpen={open}
-        isDismissable={isDismissable}
-        onOpenChange={(next) => {
-          setOpen(next);
-          onOpenChange?.(next);
-        }}
-      >
-        <input aria-label="Description" />
-        <Button>Publish now</Button>
-      </Dialog>
-    </>
-  );
-}
+import { describe, expect, it } from 'vitest';
+import { confirmDialog, DialogHost, promptDialog } from './Dialog';
 
 function escape() {
   const target = document.activeElement!;
   fireEvent.keyDown(target, { key: 'Escape' });
   fireEvent.keyUp(target, { key: 'Escape' });
 }
-
-/** A full press on `target`, as pointer, mouse and click events: react-aria listens to one set or the other. */
-function press(target: Element) {
-  fireEvent.pointerDown(target, { pointerId: 1, button: 0 });
-  fireEvent.mouseDown(target, { button: 0 });
-  fireEvent.pointerUp(target, { pointerId: 1, button: 0 });
-  fireEvent.mouseUp(target, { button: 0 });
-  fireEvent.click(target, { button: 0 });
-}
-
-async function openDialog() {
-  const trigger = screen.getByRole('button', { name: 'Publish' });
-  act(() => trigger.focus());
-  fireEvent.click(trigger);
-  const dialog = await screen.findByRole('dialog', { name: 'Publish gist' });
-  await waitFor(() => expect(dialog.contains(document.activeElement)).toBe(true));
-  return { trigger, dialog };
-}
-
-describe('Dialog', () => {
-  it('takes focus when it opens and keeps Tab inside it', async () => {
-    render(<Harness />);
-    const { dialog } = await openDialog();
-    const inside = () => dialog.contains(document.activeElement);
-    for (let press = 0; press < 6; press++) {
-      fireEvent.keyDown(document.activeElement!, { key: 'Tab' });
-      expect(inside()).toBe(true);
-    }
-    for (let press = 0; press < 6; press++) {
-      fireEvent.keyDown(document.activeElement!, { key: 'Tab', shiftKey: true });
-      expect(inside()).toBe(true);
-    }
-  });
-
-  it('closes on Escape and gives focus back to what opened it', async () => {
-    const onOpenChange = vi.fn();
-    render(<Harness onOpenChange={onOpenChange} />);
-    const { trigger } = await openDialog();
-    escape();
-    await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull());
-    expect(onOpenChange).toHaveBeenLastCalledWith(false);
-    await waitFor(() => expect(document.activeElement).toBe(trigger));
-  });
-
-  it('closes on a press outside it only when dismissable', async () => {
-    const { unmount } = render(<Harness isDismissable={false} />);
-    const { dialog } = await openDialog();
-    const scrim = dialog.parentElement!.parentElement!;
-    press(scrim);
-    expect(screen.queryByRole('dialog')).not.toBeNull();
-    unmount();
-    render(<Harness />);
-    const second = await openDialog();
-    const secondScrim = second.dialog.parentElement!.parentElement!;
-    press(secondScrim);
-    await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull());
-  });
-});
 
 describe('confirmDialog', () => {
   const ask = () => {

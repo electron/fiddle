@@ -22,10 +22,8 @@ export interface DialogProps {
   iconTone?: DialogTone;
   children?: ReactNode;
   footer?: ReactNode;
-  /** Adds a close button in the header, named by this. Escape always closes. */
+  /** Adds a close button in the header, named by this. Escape and a click on the scrim always close. */
   closeLabel?: string;
-  /** Close by clicking the scrim. */
-  isDismissable?: boolean;
   role?: 'dialog' | 'alertdialog';
   width?: number;
 }
@@ -40,7 +38,6 @@ export function Dialog({
   children,
   footer,
   closeLabel,
-  isDismissable = true,
   role,
   width = 420,
 }: DialogProps) {
@@ -48,7 +45,7 @@ export function Dialog({
     <ModalOverlay
       isOpen={isOpen}
       onOpenChange={onOpenChange}
-      isDismissable={isDismissable}
+      isDismissable
       className={styles.scrim}
     >
       <Modal className={styles.modal} style={{ maxWidth: width }}>

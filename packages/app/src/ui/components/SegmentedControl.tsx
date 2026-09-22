@@ -1,4 +1,5 @@
 import { ToggleButton, ToggleButtonGroup } from 'react-aria-components';
+import { singleSelection } from './Content';
 import styles from './SegmentedControl.module.css';
 
 export interface SegmentOption {
@@ -31,10 +32,7 @@ export function SegmentedControl({
       selectionMode="single"
       disallowEmptySelection
       selectedKeys={[value]}
-      onSelectionChange={(keys) => {
-        const [key] = [...keys];
-        if (key != null) onChange(String(key));
-      }}
+      onSelectionChange={singleSelection(onChange)}
       isDisabled={isDisabled}
       className={styles.track}
       data-size={size}

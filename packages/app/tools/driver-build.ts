@@ -3,11 +3,9 @@
 // renderer in Vite mode `test` (which defines `__FIDDLE_TEST_BUILD__`) into out/test-build.
 import fs from 'node:fs/promises';
 import path from 'node:path';
-import { fileURLToPath, pathToFileURL } from 'node:url';
 
-import { build } from 'vite';
+import { appDir, buildApp } from './electron-run.mjs';
 
-const appDir = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 export const testBuildDir = path.join(appDir, 'out', 'test-build');
 
 const isCode = (error: unknown, ...codes: string[]) =>
@@ -19,19 +17,7 @@ export async function buildTestApp(): Promise<string> {
   const old = `${testBuildDir}.old-${process.pid}`;
   await fs.rm(staging, { recursive: true, force: true });
   try {
-    for (const [config, outDir] of [
-      ['vite.main.config.mts', 'build'],
-      ['vite.preload.config.mts', 'build'],
-      ['vite.renderer.config.mts', 'renderer/main_window'],
-    ] as const) {
-      await build({
-        configFile: path.join(appDir, config),
-        root: appDir,
-        mode: 'test',
-        logLevel: 'warn',
-        build: { outDir: path.join(staging, outDir) },
-      });
-    }
+    await buildApp('test', staging);
     const pkg = JSON.parse(
       await fs.readFile(path.join(appDir, 'package.json'), 'utf8'),
     ) as {
@@ -75,6 +61,4 @@ export async function buildTestApp(): Promise<string> {
   return testBuildDir;
 }
 
-if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
-  await buildTestApp();
-}
+if (process.argv[1] === import.meta.filename) await buildTestApp();
