@@ -4,7 +4,7 @@ import { AppPlatform, implement } from '../../ipc/main';
 import { confirmQuit } from '../documents/service';
 import type { IpcContext } from '../ipc';
 import { log, type LogLevel } from '../log';
-import { testFlags } from '../test-mode';
+import { isTestMode } from '../test-mode';
 import { openUpdatePage } from '../updates';
 import { resetPrivacyPermissions } from './privacy';
 
@@ -18,8 +18,7 @@ export function bindAppPlatformIpc({
     OpenUpdatePage: () => openUpdatePage(),
     // Never in e2e runs, like the other first-run prompts.
     TakeCrashReportsNotice: () =>
-      testFlags().firstRunPrompts &&
-      onboarding.takeCrashReportsNotice(hub.app.settings.crashReports),
+      !isTestMode() && onboarding.takeCrashReportsNotice(hub.app.settings.crashReports),
     // After the usual unsaved-changes prompt, which can cancel it.
     Relaunch: async () => {
       if (!(await confirmQuit())) return;

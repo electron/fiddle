@@ -31,9 +31,7 @@ describe('dev-only commands', () => {
     const devOnly = commandIds.filter(
       (id) => (commands[id] as CommandDefinition).devOnly,
     );
-    expect(devOnly).toEqual(
-      expect.arrayContaining(['dev.toggleMenuBar', 'dev.openGallery']),
-    );
+    expect(devOnly).toEqual(expect.arrayContaining(['dev.toggleMenuBar']));
     for (const id of devOnly) {
       expect(id.startsWith('dev.')).toBe(true);
       expect((commands[id] as CommandDefinition).accelerator).toBeUndefined();

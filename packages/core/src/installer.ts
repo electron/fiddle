@@ -162,6 +162,8 @@ export class Installer extends EventEmitter {
   private readonly stateMap = new Map<string, InstallState>();
   /** Downloads and installs in flight, keyed `download:<version>` and `install:<version>`. */
   private readonly inflight = new Map<string, SharedTask<unknown>>();
+  /** Windows warm-ups still running, by version: each holds its executable open. */
+  private readonly warming = new Map<string, Promise<void>>();
 
   constructor(
     private readonly paths: Paths,
@@ -279,6 +281,7 @@ export class Installer extends EventEmitter {
   private async removeVersionDir(version: string): Promise<boolean> {
     const dir = this.versionDir(version);
     try {
+      await this.warming.get(version);
       await withLock(this.installLockPath(version), {}, async () => {
         if (fs.existsSync(dir)) await this.trash(version);
       });
@@ -574,7 +577,10 @@ export class Installer extends EventEmitter {
         this.setState(version, originalState);
         throw err;
       }
-      warmExecutable(exec);
+      this.warming.set(
+        version,
+        warmExecutable(exec).finally(() => this.warming.delete(version)),
+      );
       return done();
     });
   }

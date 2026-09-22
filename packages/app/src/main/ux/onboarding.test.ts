@@ -9,10 +9,10 @@ import type { AppStateFile } from '../documents/service';
 import { createJsonStore, flushAll } from '../persistence/json-store';
 import { createOnboarding } from './onboarding';
 
-const flags = vi.hoisted(() => ({ tour: true }));
+const flags = vi.hoisted(() => ({ testMode: false }));
 vi.mock('../test-mode', async (importOriginal) => {
   const actual = await importOriginal<typeof import('../test-mode')>();
-  return { ...actual, testFlags: () => ({ ...actual.testFlags(), tour: flags.tour }) };
+  return { ...actual, isTestMode: () => flags.testMode };
 });
 
 let dir = '';
@@ -22,7 +22,7 @@ beforeEach(() => {
 });
 
 afterEach(async () => {
-  flags.tour = true;
+  flags.testMode = false;
   await flushAll();
   fs.rmSync(dir, { recursive: true, force: true });
 });
@@ -50,7 +50,7 @@ describe('onboarding', () => {
   });
 
   it('never offers the tour in test mode', () => {
-    flags.tour = false;
+    flags.testMode = true;
     expect(load().shouldOfferTour()).toBe(false);
   });
 

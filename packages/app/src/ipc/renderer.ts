@@ -32,7 +32,7 @@ export {
 
 function bind<T extends object>(api: Partial<T> | undefined, name: string): T {
   if (api) return wrapRendererApi(api as T);
-  // Not exposed (a test, the component gallery, or a foreign origin): fail on use, not on import.
+  // Not exposed (a test or a foreign origin): fail on use, not on import.
   return new Proxy({} as T, {
     get(_target, property) {
       throw new FiddleError(

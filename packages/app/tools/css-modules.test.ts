@@ -8,7 +8,7 @@ const SRC = fileURLToPath(new URL('../src', import.meta.url));
 function sources(dir: string): string[] {
   return readdirSync(dir, { withFileTypes: true }).flatMap((entry) => {
     const path = join(dir, entry.name);
-    if (entry.isDirectory()) return entry.name === 'gallery' ? [] : sources(path);
+    if (entry.isDirectory()) return sources(path);
     return /\.tsx?$/.test(entry.name) && !/\.test\.tsx?$/.test(entry.name) ? [path] : [];
   });
 }

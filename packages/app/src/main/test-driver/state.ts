@@ -1,11 +1,5 @@
 // No Electron imports.
-import type {
-  ConsoleLine,
-  DialogKind,
-  DialogRecord,
-  DialogResponse,
-  SideEffect,
-} from './protocol';
+import type { DialogKind, DialogRecord, DialogResponse, SideEffect } from './protocol';
 
 export class Ring {
   readonly #lines: string[] = [];
@@ -28,9 +22,8 @@ export class Ring {
 export interface TestState {
   testDir: string;
   mainLog: Ring;
+  /** The renderers' DevTools console messages. */
   rendererLog: Ring;
-  /** DevTools console messages per webContents ID. */
-  consoles: Map<number, ConsoleLine[]>;
   sideEffects: SideEffect[];
   dialogs: DialogRecord[];
   dialogQueue: Record<DialogKind, DialogResponse[]>;
@@ -47,7 +40,6 @@ export function createTestState(testDir: string): TestState {
     testDir,
     mainLog: new Ring(2000),
     rendererLog: new Ring(2000),
-    consoles: new Map(),
     sideEffects: [],
     dialogs: [],
     dialogQueue: { messageBox: [], open: [], save: [] },

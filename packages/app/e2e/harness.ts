@@ -35,7 +35,7 @@ export function useApp(options: Omit<LaunchOptions, 'fixtures'> = {}): AppHandle
     context.onTestFailed(async () => {
       if (!app) return;
       app.markFailed();
-      console.error(await app.diagnostics(context.task.name));
+      console.error(await app.report(context.task.name));
     });
   });
 

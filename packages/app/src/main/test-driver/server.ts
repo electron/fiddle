@@ -67,6 +67,45 @@ function windowInfo(win: BrowserWindow, index: number): WindowInfo {
   };
 }
 
+function windowRefOf(params: unknown): WindowRef | undefined {
+  const p = (params ?? {}) as { window?: WindowRef; query?: { window?: WindowRef } };
+  return p.window ?? p.query?.window;
+}
+
+let failures = 0;
+
+/** What a failed step reports: the error, the window's accessibility snapshot, a screenshot and the log tails. */
+async function failureReport(
+  state: TestState,
+  step: string,
+  params: unknown,
+  error: unknown,
+): Promise<FailureReport> {
+  const report: FailureReport = {
+    message: error instanceof Error ? error.message : String(error),
+    step,
+    query: params,
+    mainLog: state.mainLog.tail(40),
+    rendererLog: state.rendererLog.tail(40),
+  };
+  const win = findWindow(windowRefOf(params)) ?? allWindows()[0];
+  if (win && step !== 'quit') {
+    const page = pageFor(win.webContents);
+    try {
+      report.a11ySnapshot = await page.snapshot();
+    } catch (snapshotError) {
+      report.a11ySnapshot = `(snapshot failed: ${String(snapshotError)})`;
+    }
+    try {
+      const file = path.join(state.testDir, 'artifacts', `failure-${++failures}.png`);
+      report.screenshot = (await page.screenshot(file)).path;
+    } catch {
+      // No screenshot; the rest of the report still helps.
+    }
+  }
+  return report;
+}
+
 function createHandlers({ hub, registry, state }: DriverContext): Handlers {
   let screenshots = 0;
   const artifact = (name: string) => path.join(state.testDir, 'artifacts', name);
@@ -106,7 +145,6 @@ function createHandlers({ hub, registry, state }: DriverContext): Handlers {
         window: windowId ? (hub.getWindow(windowId) ?? null) : null,
       };
     },
-    console: ({ window }) => state.consoles.get(pageOf(window).contents.id) ?? [],
     clipboard: () => clipboard.readText(),
     logs: ({ tail = 200 }) => ({
       main: state.mainLog.tail(tail),
@@ -148,6 +186,7 @@ function createHandlers({ hub, registry, state }: DriverContext): Handlers {
     dialogs: () => state.dialogs,
     sideEffects: () => state.sideEffects,
     violations: () => state.violations,
+    report: ({ title }) => failureReport(state, title, undefined, `see ${state.testDir}`),
     quit: () => {
       // Unsaved changes would ask first, and an unscripted prompt is cancelled: answer Quit.
       state.dialogQueue.messageBox.push({ response: 0 });
@@ -157,49 +196,12 @@ function createHandlers({ hub, registry, state }: DriverContext): Handlers {
   };
 }
 
-function windowRefOf(params: unknown): WindowRef | undefined {
-  const p = (params ?? {}) as { window?: WindowRef; query?: { window?: WindowRef } };
-  return p.window ?? p.query?.window;
-}
-
 export function startDriverServer(
   socketPath: string,
   context: DriverContext,
 ): net.Server {
   const { state } = context;
   const handlers = createHandlers(context);
-  let failures = 0;
-
-  const failureReport = async (
-    method: string,
-    params: unknown,
-    error: unknown,
-  ): Promise<FailureReport> => {
-    const report: FailureReport = {
-      message: error instanceof Error ? error.message : String(error),
-      step: method,
-      query: params,
-      mainLog: state.mainLog.tail(40),
-      rendererLog: state.rendererLog.tail(40),
-    };
-    const win = findWindow(windowRefOf(params)) ?? allWindows()[0];
-    if (win && method !== 'quit') {
-      const page = pageFor(win.webContents);
-      try {
-        report.a11ySnapshot = await page.snapshot();
-      } catch (snapshotError) {
-        report.a11ySnapshot = `(snapshot failed: ${String(snapshotError)})`;
-      }
-      try {
-        const file = path.join(state.testDir, 'artifacts', `failure-${++failures}.png`);
-        report.screenshot = (await page.screenshot(file)).path;
-      } catch {
-        // No screenshot; the rest of the report still helps.
-      }
-    }
-    return report;
-  };
-
   if (process.platform !== 'win32') fs.rmSync(socketPath, { force: true });
   const server = net.createServer((socket) => {
     socket.setEncoding('utf8');
@@ -212,11 +214,8 @@ export function startDriverServer(
       try {
         request = JSON.parse(line) as DriverRequest;
       } catch {
-        reply({
-          id: -1,
-          ok: false,
-          error: await failureReport('parse', line, 'Invalid JSON'),
-        });
+        const error = { message: `Invalid JSON: ${line}`, step: 'parse' };
+        reply({ id: -1, ok: false, error: { ...error, mainLog: [], rendererLog: [] } });
         return;
       }
       try {
@@ -230,7 +229,7 @@ export function startDriverServer(
         reply({
           id: request.id,
           ok: false,
-          error: await failureReport(request.method, request.params, error),
+          error: await failureReport(state, request.method, request.params, error),
         });
       }
     };

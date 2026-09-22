@@ -43,12 +43,6 @@ export interface WindowInfo {
   url: string;
 }
 
-export interface ConsoleLine {
-  level: string;
-  message: string;
-  source: string;
-}
-
 export type DialogKind = 'messageBox' | 'open' | 'save';
 
 /** A scripted answer for the next dialog of a kind: a messageBox `button` (by label) or `response`; `filePaths` or `filePath`; or `canceled`. */
@@ -100,9 +94,8 @@ export interface DriverMethods {
   press: [{ key: string; query?: Query; window?: WindowRef }, null];
   runCommand: [{ id: string; window?: WindowRef }, null];
   stores: [{ window?: WindowRef }, { app: unknown; window: unknown }];
-  /** The renderer's DevTools console messages. */
-  console: [{ window?: WindowRef }, ConsoleLine[]];
   clipboard: [NoParams, string];
+  /** Main's log, and the renderers' console messages. */
   logs: [{ tail?: number }, { main: string[]; renderer: string[] }];
   screenshot: [
     { window?: WindowRef; path?: string },
@@ -122,6 +115,8 @@ export interface DriverMethods {
   sideEffects: [NoParams, SideEffect[]];
   /** Non-loopback requests, unexpected dialogs and renderer crashes. Should stay empty. */
   violations: [NoParams, string[]];
+  /** What a failed step would report right now (screenshot, snapshot, log tails), titled `title`. */
+  report: [{ title: string }, FailureReport];
   quit: [NoParams, null];
 }
 

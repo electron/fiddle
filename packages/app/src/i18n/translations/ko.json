@@ -584,11 +584,6 @@
     "translation": "6250f9c31a0a",
     "reviewed": false
   },
-  "main:openComponentGallery": {
-    "source": "4208cdcd8bc4",
-    "translation": "52ce0d493c2f",
-    "reviewed": false
-  },
   "main:openElectronRepository": {
     "source": "3337928f4668",
     "translation": "807af0201293",
@@ -3629,31 +3624,15 @@
     "translation": "e7e7ec59984d",
     "reviewed": false
   },
-  "shell:addFileIn.main": {
-    "source": "94f75a6de52c",
-    "translation": "53922e267137",
-    "reviewed": false
-  },
-  "shell:addFileIn.other": {
-    "source": "293d7ca21bf9",
-    "translation": "64da9888554a",
-    "reviewed": false
-  },
-  "shell:addFileIn.preload": {
-    "source": "96b72adcdb58",
-    "translation": "afc1d6f37526",
-    "reviewed": false
-  },
-  "shell:addFileIn.renderer": {
-    "source": "b76201692c1f",
-    "translation": "8d37da7785a9",
-    "reviewed": false
-  },
   "shell:addFileTitle": {
     "source": "44dedd0f97fe",
     "translation": "45a992eef558",
     "reviewed": false
   },
+  "shell:addMainFile": "94f75a6de52c",
+  "shell:addOtherFile": "293d7ca21bf9",
+  "shell:addPreloadFile": "96b72adcdb58",
+  "shell:addRendererFile": "b76201692c1f",
   "shell:cancel": {
     "source": "19766ed6ccb2",
     "translation": "be876433993a",
@@ -3779,71 +3758,28 @@
     "translation": "d34e8a17e9cc",
     "reviewed": false
   },
-  "shell:groupHint.main": {
-    "source": "cea339e2f592",
-    "translation": "00932d513785",
-    "reviewed": false
-  },
-  "shell:groupHint.other": {
-    "source": "d0f933350f35",
-    "translation": "3675953f247a",
-    "reviewed": false
-  },
-  "shell:groupHint.preload": {
-    "source": "a5da54596e64",
-    "translation": "b473606ede70",
-    "reviewed": false
-  },
-  "shell:groupHint.renderer": {
-    "source": "37d15dcfde80",
-    "translation": "f6553c98a636",
-    "reviewed": false
-  },
+  "shell:groupHintMain": "cea339e2f592",
+  "shell:groupHintOther": "d0f933350f35",
+  "shell:groupHintPreload": "a5da54596e64",
+  "shell:groupHintRenderer": "37d15dcfde80",
   "shell:hideSidebar": {
     "source": "d1db29ebc76d",
     "translation": "ce702db40751",
     "reviewed": false
   },
-  "shell:language.css": {
-    "source": "b581e46042cb",
-    "translation": "b581e46042cb",
-    "reviewed": false
-  },
-  "shell:language.html": {
-    "source": "07239dbd2a1a",
-    "translation": "07239dbd2a1a",
-    "reviewed": false
-  },
-  "shell:language.javascript": {
-    "source": "b27ad06d123c",
-    "translation": "b27ad06d123c",
-    "reviewed": false
-  },
-  "shell:language.json": {
-    "source": "db1a21a0bc2e",
-    "translation": "db1a21a0bc2e",
-    "reviewed": false
-  },
+  "shell:languageCss": "b581e46042cb",
+  "shell:languageHtml": "07239dbd2a1a",
+  "shell:languageJavascript": "b27ad06d123c",
+  "shell:languageJson": "db1a21a0bc2e",
+  "shell:lensErrorTitle": "54a0e8c17ebb",
   "shell:lensHint": {
     "source": "1b9e5a8d74b1",
     "translation": "d4bc4eeef0b0",
     "reviewed": false
   },
-  "shell:lensProcess.main": {
-    "source": "9c96b3aeaba4",
-    "translation": "14d151f33deb",
-    "reviewed": false
-  },
-  "shell:lensProcess.preload": {
-    "source": "4261433e1b89",
-    "translation": "78bd48b5131b",
-    "reviewed": false
-  },
-  "shell:lensProcess.renderer": {
-    "source": "6bd52b204f5b",
-    "translation": "2d52c5e00c6e",
-    "reviewed": false
-  },
+  "shell:lensProcessMain": "9c96b3aeaba4",
+  "shell:lensProcessPreload": "4261433e1b89",
+  "shell:lensProcessRenderer": "6bd52b204f5b",
   "shell:maximize": {
     "source": "fba6c2c5d946",
     "translation": "b7b1c1530346",
@@ -3889,26 +3825,10 @@
     "translation": "2668bc818e5b",
     "reviewed": false
   },
-  "shell:process.main": {
-    "source": "eb814be3ca3b",
-    "translation": "0b39b6a4e252",
-    "reviewed": false
-  },
-  "shell:process.other": {
-    "source": "f97e9da0e3b8",
-    "translation": "2991f61ced07",
-    "reviewed": false
-  },
-  "shell:process.preload": {
-    "source": "b39edfe3bc54",
-    "translation": "78bd48b5131b",
-    "reviewed": false
-  },
-  "shell:process.renderer": {
-    "source": "9deb780b4331",
-    "translation": "2d52c5e00c6e",
-    "reviewed": false
-  },
+  "shell:processMain": "eb814be3ca3b",
+  "shell:processOther": "f97e9da0e3b8",
+  "shell:processPreload": "b39edfe3bc54",
+  "shell:processRenderer": "9deb780b4331",
   "shell:regionErrorBody": {
     "source": "833cad4ae351",
     "translation": "a9435ea13b0f",

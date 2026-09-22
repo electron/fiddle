@@ -38,7 +38,6 @@ export default {
   "toggleDevTools": "開発者ツールの切り替え",
   "develop": "開発",
   "toggleMenuBar": "タイトルバーのメニューバーの表示切り替え",
-  "openComponentGallery": "コンポーネントギャラリーを開く",
   "undo": "元に戻す",
   "redo": "やり直し",
   "cut": "切り取り",

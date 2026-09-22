@@ -2,7 +2,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 const mocks = vi.hoisted(() => ({
   isPackaged: true,
-  updatesFlag: true,
+  testMode: false,
   fetch: vi.fn(),
   updateElectronApp: vi.fn(),
   onAvailable: vi.fn(),
@@ -34,7 +34,7 @@ vi.mock('../log', () => ({
 vi.mock('../security', () => ({ openExternalLink: vi.fn() }));
 vi.mock('../test-mode', () => ({
   getEndpoints: () => ({ githubApi: 'https://api.github.test' }),
-  testFlags: () => ({ updates: mocks.updatesFlag }),
+  isTestMode: () => mocks.testMode,
 }));
 
 let startUpdates: () => void;
@@ -59,7 +59,7 @@ beforeEach(async () => {
   startUpdates = () => updates.startUpdates(mocks.onAvailable);
   vi.useFakeTimers();
   mocks.isPackaged = true;
-  mocks.updatesFlag = true;
+  mocks.testMode = false;
   mocks.fetch.mockReset();
   mocks.updateElectronApp.mockClear();
   mocks.onAvailable.mockClear();
@@ -76,7 +76,7 @@ describe('startUpdates', () => {
     mocks.isPackaged = false;
     startUpdates();
     mocks.isPackaged = true;
-    mocks.updatesFlag = false;
+    mocks.testMode = true;
     startUpdates();
     await vi.advanceTimersByTimeAsync(60_000);
     expect(mocks.fetch).not.toHaveBeenCalled();

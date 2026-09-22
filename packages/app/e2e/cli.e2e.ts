@@ -1,13 +1,11 @@
 // The headless CLI of the test build, in test mode against the fixture server.
-import { spawn } from 'node:child_process';
 import fs from 'node:fs';
-import { createRequire } from 'node:module';
 import os from 'node:os';
 import path from 'node:path';
 
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 
-import { APP_DIR, electronArgs, removeTestDir, TEST_BUILD_DIR } from './driver.ts';
+import { electronArgs, removeTestDir, spawnTestBuild } from './driver.ts';
 import { startFixtureServer, type FixtureServer } from './fixtures/server.ts';
 
 interface CliRun {
@@ -19,9 +17,6 @@ interface CliRun {
 }
 
 describe('headless CLI', () => {
-  const electron = createRequire(path.join(APP_DIR, 'package.json'))(
-    'electron',
-  ) as string;
   let fixtures: FixtureServer;
   let dir: string;
 
@@ -38,25 +33,16 @@ describe('headless CLI', () => {
   /** Runs the CLI, killing it after `timeout` ms so a hung run doesn't outlive the test. */
   const cli = (timeout: number, ...args: string[]) =>
     new Promise<CliRun>((resolve, reject) => {
-      const env: NodeJS.ProcessEnv = {
-        ...process.env,
-        FIDDLE_TEST_MODE: '1',
-        FIDDLE_TEST_DIR: dir,
-        FIDDLE_TEST_FIXTURE_URL: fixtures.url,
-        LANG: 'en_US.UTF-8',
-        LC_ALL: 'en_US.UTF-8',
-      };
-      delete env.ELECTRON_RUN_AS_NODE;
-      delete env.NODE_OPTIONS;
-      const child = spawn(
-        electron,
-        [...electronArgs(), '--log-level=3', TEST_BUILD_DIR, '--headless', ...args],
-        { env, cwd: dir, timeout, killSignal: 'SIGKILL' },
-      );
+      const env = { FIDDLE_TEST_DIR: dir, FIDDLE_TEST_FIXTURE_URL: fixtures.url };
+      const child = spawnTestBuild(['--log-level=3', '--headless', ...args], env, {
+        cwd: dir,
+        timeout,
+        killSignal: 'SIGKILL',
+      });
       let stdout = '';
       let stderr = '';
-      child.stdout.on('data', (chunk: Buffer) => (stdout += chunk.toString()));
-      child.stderr.on('data', (chunk: Buffer) => (stderr += chunk.toString()));
+      child.stdout!.on('data', (chunk: Buffer) => (stdout += chunk.toString()));
+      child.stderr!.on('data', (chunk: Buffer) => (stderr += chunk.toString()));
       child.once('error', reject);
       child.once('exit', (code, signal) => {
         if (signal === 'SIGKILL') {

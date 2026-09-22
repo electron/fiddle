@@ -9,7 +9,7 @@ import { tm } from '../i18n';
 import { log } from '../log';
 import { importElectronVersionsInBackground } from '../migration';
 import type { StateHub } from '../state-hub';
-import { isTestMode, testFlags } from '../test-mode';
+import { isTestMode } from '../test-mode';
 import { startUpdates } from '../updates';
 import { PROTOCOL, squirrelStubPath } from './squirrel';
 
@@ -89,8 +89,7 @@ export function registerProtocolClient(): void {
 /** macOS, first launch of a packaged app outside /Applications: offers to move it there. */
 export async function offerMoveToApplications(firstLaunch: boolean): Promise<void> {
   if (process.platform !== 'darwin' || !firstLaunch) return;
-  if (!app.isPackaged || !testFlags().firstRunPrompts || app.isInApplicationsFolder())
-    return;
+  if (!app.isPackaged || isTestMode() || app.isInApplicationsFolder()) return;
   const tp = tm('mainPlatform');
   const { response } = await dialog.showMessageBox({
     type: 'question',

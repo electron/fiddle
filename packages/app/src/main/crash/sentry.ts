@@ -7,7 +7,7 @@ import { app } from 'electron';
 import { defaultSettings, parseSetting } from '../../shared/settings';
 import { log } from '../log';
 import { readJsonObjectSync } from '../persistence/json-store';
-import { testFlags } from '../test-mode';
+import { isTestMode } from '../test-mode';
 import { prepareEvent, scrubBreadcrumb } from './scrub';
 
 export const SENTRY_DSN = 'https://966a5b01ac8d4941b81e4ebd0ab4c991@sentry.io/1882540';
@@ -35,7 +35,7 @@ function readCrashReportsSetting(userData: string): boolean {
 export function initCrashReporting(headless = false): boolean {
   const off = !app.isPackaged
     ? 'dev'
-    : !testFlags().sentry
+    : isTestMode()
       ? 'test mode'
       : headless
         ? 'headless'
