@@ -65,6 +65,7 @@ jobs:
       - name: Build (macOS)
         if: runner.os == 'macOS'
         env:
+          APPLE_SIGNING_IDENTITY: 'Developer ID Application: OpenJS Foundation, Inc. (UY52UFTVTM)'
           APPLE_ID: ${{ secrets.APPLE_ID }}
           APPLE_ID_PASSWORD: ${{ secrets.APPLE_ID_PASSWORD }}
         run: yarn workspace electron-fiddle run publish --arch=${{ matrix.arch }} --dry-run # zizmor: ignore[use-trusted-publishing]

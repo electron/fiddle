@@ -62,3 +62,26 @@ in the root `package.json` and explain why in the pull request.
    provenance, and drafts a GitHub release with generated notes.
 4. Check that all the expected files are present and that the installers work, then publish the
    release.
+
+### Signed local builds
+
+`yarn make` signs the macOS app when `APPLE_SIGNING_IDENTITY` names a Developer ID Application
+certificate in your keychain, and notarizes it when one of three sets of credentials is also set.
+Without the identity the build is unsigned, as in CI.
+
+```sh
+export APPLE_SIGNING_IDENTITY="Developer ID Application: Your Name (TEAMID)"
+
+# One of: an Apple ID with an app-specific password,
+export APPLE_ID="you@example.com" APPLE_ID_PASSWORD="xxxx-xxxx-xxxx-xxxx"
+# an App Store Connect API key (APPLE_API_ISSUER only for a team key),
+export APPLE_API_KEY="$HOME/AuthKey_ABC123DEF4.p8" APPLE_API_KEY_ID="ABC123DEF4" APPLE_API_ISSUER="<issuer uuid>"
+# or a profile saved with `xcrun notarytool store-credentials fiddle`.
+export APPLE_KEYCHAIN_PROFILE="fiddle"
+
+yarn make   # or `yarn package` for just the .app
+spctl --assess -vv "packages/app/out/Electron Fiddle-darwin-arm64/Electron Fiddle.app"
+```
+
+On Windows, `yarn make` signs the installers through Azure Trusted Signing when the
+`AZURE_CODE_SIGNING_*` and `WINDOWS_SIGNTOOL_PATH` variables read in `forge.config.ts` are set.
