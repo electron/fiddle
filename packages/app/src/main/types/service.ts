@@ -12,11 +12,13 @@ import { writeAtomic } from '@electron/fiddle-core';
 import { getEndpoints } from '../test-mode';
 
 const FETCH_CONCURRENCY = 8;
+/** A stalled request gives up, so the version's types can be fetched again later. */
+const FETCH_TIMEOUT_MS = 30_000;
 
 interface TypesServiceOptions {
   /** `<cache>/types`. */
   dir: string;
-  fetch: (url: string) => Promise<Response>;
+  fetch: (url: string, init?: { signal?: AbortSignal }) => Promise<Response>;
   /** The Node version bundled with an Electron release. */
   nodeVersionOf: (version: string) => string | undefined;
   /** A watched local build's types changed. */
@@ -151,7 +153,9 @@ export class TypesService {
 
   async #text(url: string): Promise<string | undefined> {
     try {
-      const response = await this.#options.fetch(url);
+      const response = await this.#options.fetch(url, {
+        signal: AbortSignal.timeout(FETCH_TIMEOUT_MS),
+      });
       return response.ok ? await response.text() : undefined;
     } catch (error) {
       log.warn('fetching types failed', url, error);

@@ -227,18 +227,24 @@ describe('Installer', () => {
       expect(ls(paths.electronVersions)).toStrictEqual(['.locks', '13.1.7']);
     });
 
-    it('leaves nothing behind when extraction fails', async () => {
-      vi.mocked(extract).mockImplementation(
+    it('leaves nothing behind when extraction fails, and downloads the zip again next time', async () => {
+      vi.mocked(extract).mockImplementationOnce(
         async (_zip: string, { dir }: ExtractOptions) => {
           fs.writeFileSync(path.join(dir, 'partial'), '');
-          throw new Error('disk full');
+          throw new Error('end of central directory record signature not found');
         },
       );
       const installer = createInstaller();
 
-      await expect(installer.install('13.1.7')).rejects.toThrow('disk full');
+      await expect(installer.install('13.1.7')).rejects.toThrow(
+        'end of central directory',
+      );
       expect(ls(paths.electronVersions)).toStrictEqual(['.locks']);
-      expect(installer.state('13.1.7')).toBe(downloaded);
+      expect(ls(paths.electronDownloads)).toStrictEqual(['.locks']);
+      expect(installer.state('13.1.7')).toBe(missing);
+
+      await installer.install('13.1.7');
+      expect(installer.state('13.1.7')).toBe(installed);
     });
 
     it('sweeps temp and trash folders left by dead or long-gone processes', async () => {
