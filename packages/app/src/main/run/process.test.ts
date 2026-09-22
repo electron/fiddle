@@ -39,6 +39,15 @@ describe('waitForExit', () => {
     expect(await waitForExit(killed)).toMatchObject({ code: null, signal: 'SIGKILL' });
   });
 
+  it('ends soon after the child exits even when a process it left behind holds the output pipes', async () => {
+    const started = Date.now();
+    const child = node(
+      `require('node:child_process').spawn(process.execPath, ['-e', 'setTimeout(() => {}, 8000)'], { detached: true, stdio: 'inherit' }).unref()`,
+    );
+    expect(await waitForExit(child)).toMatchObject({ code: 0 });
+    expect(Date.now() - started).toBeLessThan(4000);
+  });
+
   it('reports a spawn failure once, as spawnFailed', async () => {
     const onError = vi.fn();
     const child = spawn(path.join(process.cwd(), 'no-such-electron'), [], {
