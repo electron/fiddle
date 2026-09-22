@@ -25,7 +25,8 @@ describe('session', () => {
       await first.runCommand('app.newWindow');
       await first.waitForWindow(1);
       const before = [await windowState(first, 0), await windowState(first, 1)];
-      await first.waitForIdle();
+      // The version picked above is a full Electron download, which a busy Windows runner can take a while over.
+      await first.waitForIdle(60_000);
       await first.assertClean();
       await first.close();
 
