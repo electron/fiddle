@@ -32,16 +32,14 @@ function readCrashReportsSetting(userData: string): boolean {
 }
 
 /** Starts Sentry in main if it's allowed, and returns whether it did. Call before `ready`, after Squirrel handling. Headless CLI runs never send reports. */
-export function initCrashReporting(headless = false): boolean {
+export function initCrashReporting(): boolean {
   const off = !app.isPackaged
     ? 'dev'
     : isTestMode()
       ? 'test mode'
-      : headless
-        ? 'headless'
-        : !readCrashReportsSetting(app.getPath('userData'))
-          ? 'setting'
-          : undefined;
+      : !readCrashReportsSetting(app.getPath('userData'))
+        ? 'setting'
+        : undefined;
   if (off) {
     log.info(`crash reporting is off (${off})`);
     return false;

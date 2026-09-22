@@ -36,7 +36,8 @@ function preloadApp(): Plugin {
         if (!bundle || chunk?.name !== 'index') return [];
         const app = Object.values(bundle).find(
           (item) =>
-            item.type === 'chunk' && item.facadeModuleId?.endsWith('/renderer/App.tsx'),
+            item.type === 'chunk' &&
+            /[\\/]renderer[\\/]App\.tsx$/.test(item.facadeModuleId ?? ''),
         );
         if (!app) return [];
         const seen = new Set<string>();

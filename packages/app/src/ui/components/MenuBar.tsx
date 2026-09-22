@@ -37,7 +37,6 @@ export type MenuBarNode =
       label: string;
       enabled: boolean;
       checked?: boolean;
-      radio?: boolean;
       accelerator?: string;
     }
   | { kind: 'separator' };
@@ -852,13 +851,7 @@ function MenuPanel({
           <div
             key={node.id}
             id={id}
-            role={
-              checkable
-                ? node.kind === 'item' && node.radio
-                  ? 'menuitemradio'
-                  : 'menuitemcheckbox'
-                : 'menuitem'
-            }
+            role={checkable ? 'menuitemcheckbox' : 'menuitem'}
             aria-labelledby={`${id}-label`}
             aria-describedby={
               node.kind === 'item' && node.accelerator ? `${id}-kbd` : undefined
