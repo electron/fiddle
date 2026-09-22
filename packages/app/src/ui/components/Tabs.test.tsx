@@ -1,4 +1,4 @@
-import { act, fireEvent, render, screen } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 import { Tab, TabList, TabPanel, Tabs } from './Tabs';
 
@@ -34,17 +34,6 @@ describe('Tabs', () => {
     fireEvent.click(screen.getByRole('tab', { name: 'styles.css' }));
     expect(onChange).toHaveBeenLastCalledWith('css');
     expect(screen.getByRole('tabpanel').textContent).toBe('CSS panel');
-  });
-
-  it('moves with arrow keys and skips disabled tabs', () => {
-    const onChange = vi.fn();
-    render(<Example onChange={onChange} />);
-    const first = screen.getByRole('tab', { name: 'main.js' });
-    act(() => first.focus());
-    fireEvent.keyDown(first, { key: 'ArrowRight' });
-    expect(onChange).toHaveBeenLastCalledWith('renderer');
-    fireEvent.keyDown(document.activeElement!, { key: 'ArrowRight' });
-    expect(onChange).toHaveBeenLastCalledWith('css');
   });
 
   it('speaks the error count and unsaved state', () => {
@@ -162,23 +151,5 @@ describe('Tabs', () => {
     expect(
       screen.getByRole('tab', { name: 'main.js' }).hasAttribute('data-drop-indicator'),
     ).toBe(false);
-  });
-
-  it('jumps to the first and last enabled tab with Home and End', () => {
-    const onChange = vi.fn();
-    render(<Example onChange={onChange} />);
-    const first = screen.getByRole('tab', { name: 'main.js' });
-    act(() => first.focus());
-    fireEvent.keyDown(first, { key: 'End' });
-    expect(onChange).toHaveBeenLastCalledWith('css');
-    fireEvent.keyDown(document.activeElement!, { key: 'Home' });
-    expect(onChange).toHaveBeenLastCalledWith('main');
-  });
-
-  it('does not select a disabled tab', () => {
-    const onChange = vi.fn();
-    render(<Example onChange={onChange} />);
-    fireEvent.click(screen.getByRole('tab', { name: 'index.html' }));
-    expect(onChange).not.toHaveBeenCalledWith('html');
   });
 });

@@ -11,13 +11,7 @@ import { useTranslation } from 'react-i18next';
 
 import { windowApi } from '../../ipc/renderer';
 import type { MenuBarModel, Platform } from '../../shared/stores';
-import {
-  MenuBar,
-  ToolbarButton,
-  ToolbarCapsule,
-  Tooltip,
-  type MenuBarMenu,
-} from '../../ui';
+import { MenuBar, ToolbarButton, ToolbarCapsule, type MenuBarMenu } from '../../ui';
 import { log } from '../features/about/log';
 import { OpenGistButton } from '../features/gists/OpenGistButton';
 import { PublishButton } from '../features/gists/PublishButton';
@@ -153,13 +147,12 @@ export function TitleBar({
     <header ref={headerRef} className={styles.titlebar} onDoubleClick={onDoubleClick}>
       <div className={styles.barStart}>
         <span className={styles.start}>
-          <Tooltip label={sidebarLabel}>
-            <ToolbarButton
-              icon="sidebar"
-              label={sidebarLabel}
-              onPress={onToggleSidebar}
-            />
-          </Tooltip>
+          <ToolbarButton
+            icon="sidebar"
+            label={sidebarLabel}
+            tooltip
+            onPress={onToggleSidebar}
+          />
         </span>
         {menus && (
           <>
@@ -195,14 +188,13 @@ export function TitleBar({
       <div className={styles.barEnd}>
         {fit.openGistButton && <OpenGistButton />}
         <PublishButton compact={!fit.publishLabel} />
-        <Tooltip label={t('settings')}>
-          <ToolbarButton
-            icon="settings"
-            label={t('settings')}
-            isPressed={settingsOpen}
-            onPress={onToggleSettings}
-          />
-        </Tooltip>
+        <ToolbarButton
+          icon="settings"
+          label={t('settings')}
+          tooltip
+          isPressed={settingsOpen}
+          onPress={onToggleSettings}
+        />
       </div>
     </header>
   );

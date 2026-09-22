@@ -40,15 +40,12 @@
   outline-offset: 1px;
 }
 
-/* The leading icon sits 2px into the padding so the label looks centred. */
 .lead {
   margin-left: -2px;
 }
 
 .label {
-  min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  composes: lu-truncate from global;
 }
 
 .button[data-busy] {
@@ -140,6 +137,24 @@
   text-decoration-thickness: 2px;
 }
 
+/* A standalone 36px glass capsule on the chrome. */
+.button[data-variant='toolbar'] {
+  height: var(--lu-size-toolbar);
+  padding: 0 16px 0 14px;
+  border-radius: var(--lu-radius-capsule);
+  corner-shape: round;
+  background: var(--lu-capsule);
+  box-shadow: var(--lu-shadow-capsule);
+  transition:
+    background-color var(--lu-dur-fast) var(--lu-ease),
+    transform var(--lu-dur-base) var(--lu-ease);
+}
+.button[data-variant='toolbar'][data-hovered],
+.button[data-variant='toolbar'][aria-pressed='true'] {
+  background: var(--lu-capsule-hover);
+  box-shadow: var(--lu-shadow-capsule);
+}
+
 .button[aria-pressed='true'] {
   background: var(--lu-fill-strong);
   color: var(--lu-ink);
@@ -170,8 +185,10 @@
 }
 .button.iconOnly[data-size='sm'] {
   width: var(--lu-size-control-sm);
-  padding: 0;
 }
 .button.iconOnly[data-capsule] {
   width: var(--lu-size-toolbar-inner);
+}
+.button.iconOnly[data-variant='toolbar'] {
+  width: var(--lu-size-toolbar);
 }

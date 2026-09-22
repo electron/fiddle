@@ -5,7 +5,6 @@ import {
   Label,
   ListBox,
   ListBoxItem,
-  Popover as AriaPopover,
   Select as AriaSelect,
   SelectValue,
 } from 'react-aria-components';
@@ -13,6 +12,7 @@ import { cx } from '../cx';
 import { Icon } from '../icons/Icon';
 import { useInCapsule } from './capsule';
 import field from './Field.module.css';
+import { MenuPopover } from './Menu';
 import menu from './Menu.module.css';
 import styles from './Select.module.css';
 
@@ -86,18 +86,13 @@ export function Select({
         <Icon name="chevron-down" className={styles.chevron} />
       </AriaButton>
       <FieldError className={cx(field.help, field.error)}>{errorMessage}</FieldError>
-      <AriaPopover
-        className={menu.popover}
-        placement="bottom start"
-        offset={inCapsule ? 13 : 4}
-        crossOffset={inCapsule ? -3 : 0}
-      >
+      <MenuPopover offset={inCapsule ? 13 : 4} crossOffset={inCapsule ? -3 : 0}>
         <ListBox className={menu.surface}>
           {items.map((item) => (
             <Option key={item.id} option={item} />
           ))}
         </ListBox>
-      </AriaPopover>
+      </MenuPopover>
     </AriaSelect>
   );
 }

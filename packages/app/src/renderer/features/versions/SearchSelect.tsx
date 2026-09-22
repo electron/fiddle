@@ -9,7 +9,6 @@ import {
   ListBoxItem,
   ListBoxSection,
   ListLayout,
-  Popover,
   Rect,
   Select,
   SelectValue,
@@ -20,7 +19,7 @@ import {
   type ListLayoutOptions,
 } from 'react-aria-components';
 
-import { cx, Icon, type IconName } from '../../../ui';
+import { cx, Icon, MenuPopover, type IconName } from '../../../ui';
 import { useInCapsule } from '../../../ui/components/capsule';
 import field from '../../../ui/components/Field.module.css';
 import menu from '../../../ui/components/Menu.module.css';
@@ -255,12 +254,7 @@ export const SearchSelect = memo(function SearchSelect({
         </SelectValue>
         <Icon name="chevron-down" className={select.chevron} />
       </Button>
-      <Popover
-        className={menu.popover}
-        placement="bottom start"
-        offset={inCapsule ? 13 : 4}
-        crossOffset={inCapsule ? -3 : 0}
-      >
+      <MenuPopover offset={inCapsule ? 13 : 4} crossOffset={inCapsule ? -3 : 0}>
         <div className={cx(menu.surface, styles.searchMenu)}>
           <Autocomplete inputValue={query} onInputChange={onQueryChange}>
             {/* A TextField, not a SearchField: one Escape closes the menu instead of clearing the text first. */}
@@ -275,7 +269,7 @@ export const SearchSelect = memo(function SearchSelect({
           {note && <p className={styles.searchNote}>{note}</p>}
           <Sizer groups={groups} actions={showActions ? actions : NO_ACTIONS} />
         </div>
-      </Popover>
+      </MenuPopover>
     </Select>
   );
 });
