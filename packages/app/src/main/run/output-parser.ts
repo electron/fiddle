@@ -22,6 +22,8 @@ export interface ParseResult {
 }
 
 const MAX_LINE = 10_000;
+/** A runtime error's message lives in the Window store, so it is kept much shorter than a console line. */
+const MAX_MESSAGE = 1000;
 const MAX_CONTINUATION = 200;
 
 const INSPECTOR_LISTENING = /^Debugger listening on ws:\/\/[^:\s]+:(\d+\/\S+)/;
@@ -69,8 +71,26 @@ export function mapToFiddleFile(
   return undefined;
 }
 
-function truncate(text: string): string {
-  return text.length > MAX_LINE ? `${text.slice(0, MAX_LINE)}…` : text;
+function truncate(text: string, max = MAX_LINE): string {
+  return text.length > max ? `${text.slice(0, max)}…` : text;
+}
+
+/** A 1-based line or column from a stack frame. `0`, and digit runs too long to be a position, give none. */
+function position(digits: string): number | undefined {
+  const n = Number(digits);
+  return Number.isSafeInteger(n) && n >= 1 ? n : undefined;
+}
+
+/** The location for a mapped frame, if its line is usable. A `0` column is left out. */
+function locationAt(
+  file: string,
+  line: string,
+  column?: string,
+): SourceLocation | undefined {
+  const at = position(line);
+  if (at === undefined) return undefined;
+  const col = column === undefined ? undefined : position(column);
+  return col === undefined ? { file, line: at } : { file, line: at, column: col };
 }
 
 function processFor(file: string): RuntimeErrorValue['process'] {
@@ -135,7 +155,7 @@ export class OutputParser {
       const end = CONSOLE_END.exec(line);
       this.#console.parts.push(end ? line.slice(0, end.index) : line);
       if (end || this.#console.parts.length > MAX_CONTINUATION)
-        this.#finishConsole(end ? { source: end[1]!, line: Number(end[2]) } : undefined);
+        this.#finishConsole(end ? { source: end[1]!, line: end[2]! } : undefined);
       return;
     }
 
@@ -156,7 +176,7 @@ export class OutputParser {
           level: start[1]!,
           parts: [end ? body.slice(0, end.index) : body],
         };
-        if (end) this.#finishConsole({ source: end[1]!, line: Number(end[2]) });
+        if (end) this.#finishConsole({ source: end[1]!, line: end[2]! });
         return;
       }
       if (CHROMIUM_LOG.test(line)) {
@@ -176,12 +196,13 @@ export class OutputParser {
       const frame = FRAME.exec(line);
       const file =
         frame && mapToFiddleFile(frame[1]!, this.#options.roots, this.#options.files);
-      if (frame && file && !pending.located) {
+      const location = file ? locationAt(file, frame[2]!, frame[3]) : undefined;
+      if (location && !pending.located) {
         pending.located = true;
-        parsed.location = { file, line: Number(frame[2]), column: Number(frame[3]) };
+        parsed.location = location;
         this.#result.errors.push({
-          ...parsed.location,
-          process: processFor(file),
+          ...location,
+          process: processFor(location.file),
           name: pending.name,
           message: pending.message,
         });
@@ -192,7 +213,11 @@ export class OutputParser {
 
     const header = ERROR_HEADER.exec(line);
     this.#mainError = header
-      ? { name: header[1]!, message: header[2] ?? '', located: false }
+      ? {
+          name: header[1]!,
+          message: truncate(header[2] ?? '', MAX_MESSAGE),
+          located: false,
+        }
       : undefined;
     if (line !== '')
       this.#result.lines.push({
@@ -202,7 +227,7 @@ export class OutputParser {
       });
   }
 
-  #finishConsole(end: { source: string; line: number } | undefined): void {
+  #finishConsole(end: { source: string; line: string } | undefined): void {
     const pending = this.#console;
     this.#console = undefined;
     if (!pending) return;
@@ -227,7 +252,7 @@ export class OutputParser {
           ...location,
           process: processFor(location.file) === 'preload' ? 'preload' : 'renderer',
           name: uncaught[1]!,
-          message: firstLine,
+          message: truncate(firstLine, MAX_MESSAGE),
         });
       }
     }
@@ -237,16 +262,16 @@ export class OutputParser {
   /** A stack frame inside the run directory wins (it has a column); otherwise the `source`. */
   #locate(
     message: string,
-    end: { source: string; line: number } | undefined,
+    end: { source: string; line: string } | undefined,
   ): SourceLocation | undefined {
     const { roots, files } = this.#options;
     // Only the shown text is scanned: INLINE_FRAME is quadratic on a long run of `/`.
     for (const match of message.slice(0, MAX_LINE).matchAll(INLINE_FRAME)) {
       const file = mapToFiddleFile(match[1]!, roots, files);
-      if (file) return { file, line: Number(match[2]), column: Number(match[3]) };
+      const location = file ? locationAt(file, match[2]!, match[3]) : undefined;
+      if (location) return location;
     }
-    if (!end) return undefined;
-    const file = mapToFiddleFile(end.source, roots, files);
-    return file && end.line > 0 ? { file, line: end.line } : undefined;
+    const file = end && mapToFiddleFile(end.source, roots, files);
+    return file ? locationAt(file, end.line) : undefined;
   }
 }
