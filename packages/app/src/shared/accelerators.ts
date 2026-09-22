@@ -69,12 +69,17 @@ const OTHER_CAPS: Record<string, string> = {
   space: 'Space',
 };
 
+/** A table entry by name. A segment from a hand-edited settings file can be any string, `constructor` included. */
+const own = <T>(table: Record<string, T>, name: string): T | undefined =>
+  Object.hasOwn(table, name) ? table[name] : undefined;
+
 /** The accelerator's parts in order: a modifier for this platform, or a key with synonyms folded. */
 function parts(accelerator: string, platform: Platform): (Modifier | { key: string })[] {
   // Split on a `+` that isn't the last character: `CmdOrCtrl++` ends in the plus key.
   return accelerator.split(/\+(?!$)/).map((part) => {
-    const modifier = MODIFIERS[part.toLowerCase()];
-    if (modifier === undefined) return { key: KEY_SYNONYMS[part.toLowerCase()] ?? part };
+    const modifier = own(MODIFIERS, part.toLowerCase());
+    if (modifier === undefined)
+      return { key: own(KEY_SYNONYMS, part.toLowerCase()) ?? part };
     return typeof modifier === 'string'
       ? modifier
       : modifier[platform === 'darwin' ? 0 : 1];
@@ -104,9 +109,9 @@ export function acceleratorKeys(
   const caps = platform === 'darwin' ? MAC_CAPS : OTHER_CAPS;
   return parts(accelerator, platform).map((part) => {
     if (typeof part === 'string')
-      return caps[part] ?? (platform === 'win32' ? 'Win' : 'Super');
+      return own(caps, part) ?? (platform === 'win32' ? 'Win' : 'Super');
     return (
-      caps[part.key.toLowerCase()] ??
+      own(caps, part.key.toLowerCase()) ??
       (part.key.length === 1 ? part.key.toUpperCase() : part.key)
     );
   });

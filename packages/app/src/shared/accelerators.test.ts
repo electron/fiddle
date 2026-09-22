@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { acceleratorKeys, formatAccelerator } from './accelerators';
+import { acceleratorKeys, formatAccelerator, normalizeAccelerator } from './accelerators';
 
 describe('acceleratorKeys', () => {
   it('formats macOS symbols', () => {
@@ -35,6 +35,11 @@ describe('acceleratorKeys', () => {
     expect(acceleratorKeys('cmdorctrl+s', 'win32')).toEqual(['Ctrl', 'S']);
     expect(acceleratorKeys(undefined, 'linux')).toEqual([]);
     expect(acceleratorKeys('', 'linux')).toEqual([]);
+  });
+
+  it('treats a segment named like an Object member as a plain key', () => {
+    expect(acceleratorKeys('Ctrl+constructor', 'win32')).toEqual(['Ctrl', 'constructor']);
+    expect(normalizeAccelerator('Ctrl+constructor', 'linux')).toBe('Ctrl+constructor');
   });
 });
 
