@@ -14,6 +14,7 @@ import {
   type CommandId,
   type KeyContext,
 } from './commands';
+import { normalizeAccelerator } from './accelerators';
 import { DEFAULT_ENDPOINTS } from './endpoints';
 import type { Platform } from './stores';
 
@@ -414,61 +415,6 @@ export function matchKeybinding(
     else if (active.has(binding.context)) return binding;
   }
   return everywhere;
-}
-
-const MODIFIER_ORDER = ['Ctrl', 'Alt', 'AltGr', 'Shift', 'Cmd', 'Super'] as const;
-
-/**
- * A canonical form for comparing accelerators on one platform:
- * `CmdOrCtrl+Shift+p` and `Shift+Ctrl+P` are the same on Windows.
- */
-export function normalizeAccelerator(accelerator: string, platform: Platform): string {
-  const isMac = platform === 'darwin';
-  const modifiers = new Set<string>();
-  let key = '';
-  for (const part of accelerator.split(/\+(?!$)/)) {
-    switch (part.toLowerCase()) {
-      case 'cmdorctrl':
-      case 'commandorcontrol':
-        modifiers.add(isMac ? 'Cmd' : 'Ctrl');
-        break;
-      case 'cmd':
-      case 'command':
-        modifiers.add('Cmd');
-        break;
-      case 'ctrl':
-      case 'control':
-        modifiers.add('Ctrl');
-        break;
-      case 'alt':
-      case 'option':
-        modifiers.add('Alt');
-        break;
-      case 'altgr':
-        modifiers.add('AltGr');
-        break;
-      case 'shift':
-        modifiers.add('Shift');
-        break;
-      case 'super':
-      case 'meta':
-        modifiers.add(isMac ? 'Cmd' : 'Super');
-        break;
-      // Electron's synonyms for the same key.
-      case 'plus':
-        key = '+';
-        break;
-      case 'escape':
-        key = 'esc';
-        break;
-      case 'return':
-        key = 'enter';
-        break;
-      default:
-        key = part.length === 1 ? part.toUpperCase() : part.toLowerCase();
-    }
-  }
-  return [...MODIFIER_ORDER.filter((m) => modifiers.has(m)), key].join('+');
 }
 
 /**

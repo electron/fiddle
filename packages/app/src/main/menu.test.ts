@@ -3,8 +3,8 @@ import { EventEmitter } from 'node:events';
 import type { MenuItemConstructorOptions } from 'electron';
 import { describe, expect, it, vi } from 'vitest';
 
+import { normalizeAccelerator } from '../shared/accelerators';
 import { commandIds, isCommandId, commands, type CommandId } from '../shared/commands';
-import { normalizeAccelerator } from '../shared/settings';
 import {
   DEFAULT_LAYOUT,
   menuBarSchema,

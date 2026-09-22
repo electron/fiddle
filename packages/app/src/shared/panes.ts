@@ -14,8 +14,8 @@ function unique(names: readonly string[]): string[] {
   return [...new Set(names)];
 }
 
-/** Fewer than two panes is stored as "not split". */
-function stored(panes: readonly string[]): string[] {
+/** What to store as `layout.panes` for the shown `panes`: fewer than two is "not split". */
+export function storedPanes(panes: readonly string[]): string[] {
   return panes.length > 1 ? [...panes] : [];
 }
 
@@ -68,7 +68,7 @@ export function followActiveFile(
   ) {
     result = result.map((name) => (name === previous ? next : name));
   }
-  result = stored(unique(result).filter((name) => visible.includes(name)));
+  result = storedPanes(unique(result).filter((name) => visible.includes(name)));
   return result.length === panes.length && result.every((name, i) => name === panes[i])
     ? panes
     : result;
@@ -104,9 +104,4 @@ export function neighbourOf(panes: readonly string[], name: string): string | nu
   const index = panes.indexOf(name);
   if (index === -1) return null;
   return panes[index + 1] ?? panes[index - 1] ?? null;
-}
-
-/** What to store as `layout.panes` for the shown `panes`. */
-export function storedPanes(panes: readonly string[]): string[] {
-  return stored(panes);
 }

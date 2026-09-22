@@ -153,7 +153,7 @@ export async function packageFiddle(
     const settings = hub.app.settings;
     const pm = settings.packageManager;
     const env = await toolEnv();
-    if (!(await findPackageManager(pm, { env }))) {
+    if (!(await findPackageManager(pm, env))) {
       runs.log(windowId, t('pmMissing', { pm, url: PM_INSTALL_URLS[pm] }), 'error');
       return;
     }

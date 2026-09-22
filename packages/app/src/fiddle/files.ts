@@ -4,21 +4,12 @@ import { reasonError } from './error-reasons';
 /** A fiddle's files: name → content. Build with `Object.fromEntries`, never by key assignment from untrusted names. */
 export type FileMap = Record<string, string>;
 
-export const SUPPORTED_EXTENSIONS = [
-  '.cjs',
-  '.js',
-  '.mjs',
-  '.html',
-  '.css',
-  '.json',
-] as const;
-export type SupportedExtension = (typeof SUPPORTED_EXTENSIONS)[number];
+type SupportedExtension = '.cjs' | '.js' | '.mjs' | '.html' | '.css' | '.json';
 
-export const MAIN_ENTRY_NAMES = ['main.js', 'main.cjs', 'main.mjs'] as const;
+const MAIN_ENTRY_NAMES = ['main.js', 'main.cjs', 'main.mjs'];
 export const DEFAULT_MAIN_ENTRY = 'main.js';
 export const PACKAGE_JSON = 'package.json';
-export const PACKAGE_LOCK_JSON = 'package-lock.json';
-export const RESERVED_FILE_NAMES = [PACKAGE_JSON, PACKAGE_LOCK_JSON] as const;
+const RESERVED_FILE_NAMES = [PACKAGE_JSON, 'package-lock.json'];
 
 export type EditorLanguage = 'javascript' | 'html' | 'css' | 'json';
 
@@ -73,7 +64,7 @@ export function getExtension(name: string): string {
   return dot <= 0 ? '' : name.slice(dot).toLowerCase();
 }
 
-export function hasPathSeparator(name: string): boolean {
+function hasPathSeparator(name: string): boolean {
   return /[/\\]/.test(name);
 }
 
@@ -82,7 +73,7 @@ export function hasPathSeparator(name: string): boolean {
  * write an alternate data stream) and bidirectional overrides, which make a
  * name display as another one.
  */
-export function hasInvalidCharacter(name: string): boolean {
+function hasInvalidCharacter(name: string): boolean {
   // eslint-disable-next-line no-control-regex
   return /[\u0000-\u001f\u007f-\u009f<>:"|?*\u200e\u200f\u202a-\u202e\u2066-\u2069]/.test(
     name,
@@ -109,15 +100,12 @@ export function isWindowsReservedName(name: string): boolean {
 }
 
 export function isReservedFileName(name: string): boolean {
-  return (
-    (RESERVED_FILE_NAMES as readonly string[]).includes(name.toLowerCase()) ||
-    isWindowsReservedName(name)
-  );
+  return RESERVED_FILE_NAMES.includes(name.toLowerCase()) || isWindowsReservedName(name);
 }
 
 /** Case-insensitive, like the file systems on macOS and Windows: `Main.js` is a main entry. */
 export function isMainEntry(name: string): boolean {
-  return (MAIN_ENTRY_NAMES as readonly string[]).includes(name.toLowerCase());
+  return MAIN_ENTRY_NAMES.includes(name.toLowerCase());
 }
 
 export function findMainEntry(names: Iterable<string>): string | undefined {
@@ -153,17 +141,15 @@ export function isEmptyOrPlaceholder(name: string, content: string): boolean {
   return trimmed === '' || trimmed === getPlaceholder(name);
 }
 
-export function compareFileNames(a: string, b: string): number {
-  const ia = KNOWN_FILES.indexOf(a);
-  const ib = KNOWN_FILES.indexOf(b);
-  if (ia === -1 && ib === -1) return a < b ? -1 : a > b ? 1 : 0;
-  if (ia === -1) return 1;
-  if (ib === -1) return -1;
-  return ia - ib;
-}
-
 export function sortFileNames(names: Iterable<string>): string[] {
-  return [...names].sort(compareFileNames);
+  return [...names].sort((a, b) => {
+    const ia = KNOWN_FILES.indexOf(a);
+    const ib = KNOWN_FILES.indexOf(b);
+    if (ia === -1 && ib === -1) return a < b ? -1 : a > b ? 1 : 0;
+    if (ia === -1) return 1;
+    if (ib === -1) return -1;
+    return ia - ib;
+  });
 }
 
 /** `names` with `name` moved in front of `before`, or to the end when `before` is null or unknown. */

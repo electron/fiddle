@@ -141,16 +141,13 @@ export async function createServices({
       platform: process.platform,
     }),
     legacyFile: mockKeychain ? undefined : legacyTokenFile(userData),
-    createClient: (token) => {
-      const endpoints = getEndpoints();
-      return new GitHubClient({
+    createClient: (token) =>
+      new GitHubClient({
         token,
-        apiBaseUrl: endpoints.githubApi,
-        rawOrigins: [endpoints.gistRaw],
+        endpoints: getEndpoints(),
         allowLoopbackHttp: isTestMode(),
         fetch: netFetch,
-      });
-    },
+      }),
     prefs: {
       get: () => ({
         asRevision: hub.app.settings.gistPublishAsRevision,

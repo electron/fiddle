@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-import { DEFAULT_ENDPOINTS } from '../shared/endpoints';
+import { DEFAULT_ENDPOINTS, type Endpoints } from '../shared/endpoints';
 import { ErrorCode, FiddleError } from '../shared/errors';
 import { reasonError } from './error-reasons';
 import type { FileMap } from './files';
@@ -147,16 +147,13 @@ export interface GistWriteResult {
   files: string[];
 }
 
-/** Revision titles are data: render `created` as "Created" and `revision` as "Revision N". */
-export type GistRevisionTitle = { key: 'created' } | { key: 'revision'; n: number };
-
+/** One entry of a gist's history, oldest first: the first is the creation, entry `n` is revision `n`. */
 export interface GistRevision {
   sha: string;
   date: string;
   additions: number;
   deletions: number;
   total: number;
-  title: GistRevisionTitle;
 }
 
 export interface RepoContentEntry {
@@ -168,10 +165,8 @@ export interface RepoContentEntry {
 
 export interface GitHubClientOptions {
   token?: string;
-  /** Default `https://api.github.com`. Injectable for tests and the fixture server. */
-  apiBaseUrl?: string;
-  /** Other origins allowed to receive the token. Default: the gist raw host. */
-  rawOrigins?: readonly string[];
+  /** The API base, and the gist raw host that may also receive the token. */
+  endpoints?: Endpoints;
   fetch?: typeof fetch;
   /**
    * Allow plain http to loopback hosts (the e2e fixture server). Off by
@@ -260,11 +255,12 @@ export class GitHubClient {
   private readonly allowLoopbackHttp: boolean;
 
   constructor(options: GitHubClientOptions = {}) {
+    const endpoints = options.endpoints ?? DEFAULT_ENDPOINTS;
     this.token = options.token;
-    this.apiBase = new URL(options.apiBaseUrl ?? DEFAULT_ENDPOINTS.githubApi);
+    this.apiBase = new URL(endpoints.githubApi);
     this.trustedOrigins = new Set([
       this.apiBase.origin,
-      ...(options.rawOrigins ?? [DEFAULT_ENDPOINTS.gistRaw]),
+      new URL(endpoints.gistRaw).origin,
     ]);
     this.fetchFn = options.fetch ?? fetch;
     this.allowLoopbackHttp = options.allowLoopbackHttp ?? false;
@@ -582,13 +578,12 @@ export class GitHubClient {
           (c.change_status?.deletions ?? 0) > 0,
       )
       .reverse()
-      .map((c, i) => ({
+      .map((c) => ({
         sha: c.version,
         date: c.committed_at,
         additions: c.change_status?.additions ?? 0,
         deletions: c.change_status?.deletions ?? 0,
         total: c.change_status?.total ?? 0,
-        title: i === 0 ? { key: 'created' } : { key: 'revision', n: i },
       }));
   }
 

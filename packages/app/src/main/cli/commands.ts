@@ -7,7 +7,7 @@ import { Installer, InstallState } from '@electron/fiddle-core';
 import { app } from 'electron';
 
 import { bisectCompareUrl } from '../../fiddle/bisect';
-import { findExample, listExamples } from '../../fiddle/examples';
+import { findExample } from '../../fiddle/examples';
 import { isSupportedFileName, PACKAGE_JSON, type FileMap } from '../../fiddle/files';
 import { writeFiddleFolder } from '../../fiddle/folder';
 import { getGistId } from '../../fiddle/gist-id';
@@ -26,6 +26,7 @@ import {
   getVersionRange,
 } from '../../fiddle/versions';
 import { ErrorCode, FiddleError } from '../../shared/errors';
+import { SHOW_ME_EXAMPLES } from '../../shared/examples';
 import { defaultSettings } from '../../shared/settings';
 import type { ReleaseRow } from '../../shared/stores';
 import { autoBisect } from '../bisect/auto';
@@ -131,12 +132,10 @@ async function templates(ctx: Ctx): Promise<TemplateLoader> {
 
 /** A GitHub client with `GITHUB_TOKEN`, if set. The app's stored credentials are never used. */
 function github(): GitHubClient {
-  const endpoints = getEndpoints();
   const token = process.env.GITHUB_TOKEN;
   return new GitHubClient({
     ...(token ? { token } : {}),
-    apiBaseUrl: endpoints.githubApi,
-    rawOrigins: [endpoints.gistRaw],
+    endpoints: getEndpoints(),
     fetch: netFetch,
   });
 }
@@ -188,12 +187,9 @@ async function loadFiddle(
   if (spec.startsWith(EXAMPLE_PREFIX)) {
     const name = spec.slice(EXAMPLE_PREFIX.length);
     if (!findExample(name)) {
-      const names = listExamples()
-        .map((example) => example.name)
-        .join(', ');
       throw new FiddleError(
         ErrorCode.notFound,
-        t('errorUnknownExample', { name, names }),
+        t('errorUnknownExample', { name, names: SHOW_ME_EXAMPLES.join(', ') }),
       );
     }
     return report(ctx, await loadShowMe(staticDir(), name, context));
@@ -384,7 +380,7 @@ async function packageOrMake(
   const modules = withModules(loaded, input.module);
   await ensureTrusted(loaded.fiddle, modules, input.trust, terminalPrompt(ctx.signal));
   const env = await toolEnv();
-  if (!(await findPackageManager(input.pm, { env }))) {
+  if (!(await findPackageManager(input.pm, env))) {
     throw new FiddleError(
       ErrorCode.unavailable,
       tr('pmMissing', { pm: input.pm, url: PM_INSTALL_URLS[input.pm] }),
@@ -648,27 +644,16 @@ const handlers: Handlers = {
   async 'gist history'(ctx, input) {
     const id = gistIdOf(input.id);
     const revisions = await github().listGistRevisions(id, ctx.signal);
-    const lines = revisions.map((r) =>
+    const lines = revisions.map((r, n) =>
       [
         r.sha,
         r.date,
-        r.title.key === 'created'
-          ? t('resultRevisionCreated')
-          : t('resultRevisionN', { n: r.title.n }),
+        n === 0 ? t('resultRevisionCreated') : t('resultRevisionN', { n }),
         `+${r.additions} -${r.deletions}`,
       ].join('  '),
     );
     return {
-      data: {
-        id,
-        revisions: revisions.map(({ sha, date, additions, deletions, total }) => ({
-          sha,
-          date,
-          additions,
-          deletions,
-          total,
-        })),
-      },
+      data: { id, revisions },
       human: lines.join('\n'),
     };
   },
