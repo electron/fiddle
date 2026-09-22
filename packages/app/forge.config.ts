@@ -34,7 +34,6 @@ const macLocales = shippedLocales.map((locale) => macScripts[locale] ?? locale);
 const iconDir = path.join(appDir, 'assets', 'icons');
 const buildDir = path.join(appDir, 'build');
 const entitlements = path.join(buildDir, 'entitlements.plist');
-const requirements = path.join(buildDir, 'certs', 'requirements.txt');
 const disclaimDir = path.join(appDir, 'native', 'disclaim');
 
 // deb and rpm take a single icon: the 1024px PNG.
@@ -127,28 +126,60 @@ function getWindowsSignOptions(): WindowsSignOptions | undefined {
   };
 }
 
+// macOS: see "Signed local builds" in CONTRIBUTING.md. Without
+// APPLE_SIGNING_IDENTITY the app is left unsigned (CI and contributors). With
+// it, signing must succeed, and the app is notarized when credentials are set.
+const signingIdentity = process.env.APPLE_SIGNING_IDENTITY;
+const teamId = signingIdentity && /\(([A-Z0-9]{10})\)$/.exec(signingIdentity)?.[1];
+// The pinned designated requirement lets releases update across the two teams
+// that have signed Fiddle. A build signed by any other team keeps codesign's
+// default requirement, or it would not satisfy its own.
+const requirementsFile = path.join(buildDir, 'certs', 'requirements.txt');
+const requirements =
+  teamId && fs.readFileSync(requirementsFile, 'utf8').includes(teamId)
+    ? requirementsFile
+    : undefined;
+
 type NotarizeOptions = NonNullable<ForgeConfig['packagerConfig']>['osxNotarize'];
 
-/** Notarizes on macOS in CI (or with FORCE_NOTARIZATION), with an Apple ID. */
+/**
+ * An App Store Connect API key (APPLE_API_KEY, APPLE_API_KEY_ID and, for a team
+ * key, APPLE_API_ISSUER), an Apple ID with an app-specific password (APPLE_ID,
+ * APPLE_ID_PASSWORD), or a profile saved with `xcrun notarytool
+ * store-credentials` (APPLE_KEYCHAIN_PROFILE). Throws when a set is incomplete.
+ */
 function getNotarizeOptions(): NotarizeOptions {
-  if (process.platform !== 'darwin') return undefined;
+  if (process.platform !== 'darwin' || !signingIdentity) return undefined;
 
-  if (!process.env.CI && !process.env.FORCE_NOTARIZATION) {
-    console.log('Not in CI, skipping notarization');
-    return undefined;
+  const {
+    APPLE_API_KEY: appleApiKey,
+    APPLE_API_KEY_ID: appleApiKeyId,
+    APPLE_API_ISSUER: appleApiIssuer,
+    APPLE_ID: appleId,
+    APPLE_ID_PASSWORD: appleIdPassword,
+    APPLE_KEYCHAIN_PROFILE: keychainProfile,
+  } = process.env;
+
+  if (appleApiKey || appleApiKeyId) {
+    if (!appleApiKey || !appleApiKeyId) {
+      throw new Error(
+        'Set both APPLE_API_KEY and APPLE_API_KEY_ID to notarize with an API key.',
+      );
+    }
+    return { appleApiKey, appleApiKeyId, ...(appleApiIssuer && { appleApiIssuer }) };
   }
-
-  const { APPLE_ID, APPLE_ID_PASSWORD } = process.env;
-
-  if (APPLE_ID && APPLE_ID_PASSWORD) {
-    return {
-      appleId: APPLE_ID,
-      appleIdPassword: APPLE_ID_PASSWORD,
-      teamId: 'UY52UFTVTM',
-    };
+  if (appleId || appleIdPassword) {
+    if (!appleId || !appleIdPassword || !teamId) {
+      throw new Error(
+        'Set both APPLE_ID and APPLE_ID_PASSWORD to notarize with an Apple ID, and give ' +
+          'APPLE_SIGNING_IDENTITY as "Developer ID Application: Name (TEAMID)".',
+      );
+    }
+    return { appleId, appleIdPassword, teamId };
   }
+  if (keychainProfile) return { keychainProfile };
 
-  console.warn('Should be notarizing, but APPLE_ID and APPLE_ID_PASSWORD are not set!');
+  console.warn('No notarization credentials: the app is signed but not notarized.');
   return undefined;
 }
 
@@ -255,22 +286,24 @@ const config: ForgeConfig = {
       CompanyName: 'Electron Community',
       OriginalFilename: 'Electron Fiddle',
     },
-    // Hardened runtime. Without the identity in the keychain (local and PR
-    // builds), packager warns and leaves the app ad-hoc signed.
-    osxSign: {
-      identity: 'Developer ID Application: OpenJS Foundation, Inc. (UY52UFTVTM)',
-      optionsForFile: (filePath) => {
-        // The privacy helper only execs Electron: it needs no entitlements.
-        if (path.basename(filePath) === DISCLAIM_HELPER) {
-          return { entitlements: [], requirements };
+    // Hardened runtime.
+    osxSign: signingIdentity
+      ? {
+          identity: signingIdentity,
+          continueOnError: false,
+          optionsForFile: (filePath) => {
+            // The privacy helper only execs Electron: it needs no entitlements.
+            if (path.basename(filePath) === DISCLAIM_HELPER) {
+              return { entitlements: [], requirements };
+            }
+            return ['(Plugin).app', '(GPU).app', '(Renderer).app'].some((helper) =>
+              filePath.includes(helper),
+            )
+              ? { requirements }
+              : { entitlements, requirements };
+          },
         }
-        return ['(Plugin).app', '(GPU).app', '(Renderer).app'].some((helper) =>
-          filePath.includes(helper),
-        )
-          ? { requirements }
-          : { entitlements, requirements };
-      },
-    },
+      : undefined,
     osxNotarize: getNotarizeOptions(),
   },
   makers: [
