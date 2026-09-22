@@ -248,6 +248,13 @@ export const storageNoticeSchema = z.object({
 /** What `settings.json` holds: only the values that differ from the defaults. */
 export type SparseSettings = Partial<Settings>;
 
+/** `schemaVersion` in settings.json and in exported settings. */
+export const SETTINGS_VERSION = 1;
+
+export function isSettingKey(key: string): key is SettingKey {
+  return (settingKeys as string[]).includes(key);
+}
+
 /** Validates one value against its key's schema. Returns undefined when invalid. */
 export function parseSetting<K extends SettingKey>(
   key: K,
@@ -255,6 +262,27 @@ export function parseSetting<K extends SettingKey>(
 ): { value: Settings[K] } | undefined {
   const result = settingsSchema.shape[key].safeParse(value);
   return result.success ? { value: result.data as Settings[K] } : undefined;
+}
+
+/** Keeps the keys this app version doesn't know, so they round-trip. */
+export function unknownKeys(sparse: SparseSettings): Record<string, unknown> {
+  return Object.fromEntries(Object.entries(sparse).filter(([key]) => !isSettingKey(key)));
+}
+
+/** Per-key validation of an outside settings object. Invalid and unknown keys are dropped. */
+export function sanitizeSettings(data: Record<string, unknown>): {
+  settings: SparseSettings;
+  dropped: string[];
+} {
+  const sparse: Record<string, unknown> = {};
+  const dropped: string[] = [];
+  for (const [key, value] of Object.entries(data)) {
+    if (key === 'schemaVersion') continue;
+    const parsed = isSettingKey(key) ? parseSetting(key, value) : undefined;
+    if (parsed) sparse[key] = parsed.value;
+    else dropped.push(key);
+  }
+  return { settings: sparse as SparseSettings, dropped };
 }
 
 /** Equality for setting values. Every object default is empty, so key order never differs. */

@@ -1,7 +1,6 @@
-import { app, autoUpdater, BrowserWindow, dialog, net } from 'electron';
+import { app, autoUpdater, dialog, net } from 'electron';
 import { updateElectronApp, UpdateSourceType } from 'update-electron-app';
 
-import { AppPlatform } from '../../ipc/main';
 import { confirmQuit } from '../documents/service';
 import { tm } from '../i18n';
 import { log } from '../log';
@@ -18,20 +17,17 @@ const RELEASE_CHECK_MS = 24 * 60 * 60 * 1000;
 const RELEASE_CHECK_TIMEOUT_MS = 30_000;
 
 let available: AvailableUpdate | undefined;
-/** Shown windows, which a later check can reach. */
-const shownWindows = new Set<BrowserWindow>();
 
-/** Off in dev and test mode. Linux and MSIX have no auto-update and get a toast instead. */
-export function startUpdates(): void {
+/** Off in dev and test mode. Linux and MSIX have no auto-update: `onAvailable` gets a newer release's version, which each window shows as a toast. */
+export function startUpdates(onAvailable: (version: string) => void): void {
   if (!app.isPackaged || isTestMode()) {
     log.info('updates are off (dev or test mode)');
     return;
   }
   if (process.platform === 'linux' || process.windowsStore) {
-    watchWindows();
     setTimeout(() => {
-      void checkReleases();
-      setInterval(() => void checkReleases(), RELEASE_CHECK_MS);
+      void checkReleases(onAvailable);
+      setInterval(() => void checkReleases(onAvailable), RELEASE_CHECK_MS);
     }, FIRST_CHECK_MS);
   } else {
     setTimeout(startAutoUpdates, FIRST_CHECK_MS);
@@ -75,34 +71,8 @@ async function promptRestart(): Promise<void> {
   if (response === 0 && (await confirmQuit())) autoUpdater.quitAndInstall();
 }
 
-function announce(win: BrowserWindow): void {
-  if (available && !win.isDestroyed()) {
-    AppPlatform.getDispatcher(win.webContents)?.dispatchUpdateAvailable(
-      available.version,
-    );
-  }
-}
-
-/**
- * A window's renderer can listen once the window is shown, so a window opened
- * after the check hears about the update then.
- */
-function watchWindows(): void {
-  const watch = (win: BrowserWindow) => {
-    const shown = () => {
-      shownWindows.add(win);
-      win.once('closed', () => shownWindows.delete(win));
-      announce(win);
-    };
-    if (win.isVisible()) shown();
-    else win.once('show', shown);
-  };
-  BrowserWindow.getAllWindows().forEach(watch);
-  app.on('browser-window-created', (_event, win) => watch(win));
-}
-
-/** Linux and MSIX: tells every window about a newer GitHub release. */
-async function checkReleases(): Promise<void> {
+/** Linux and MSIX: looks for a newer GitHub release. */
+async function checkReleases(onAvailable: (version: string) => void): Promise<void> {
   try {
     const response = await net.fetch(
       `${getEndpoints().githubApi}/repos/${UPDATE_REPO}/releases?per_page=20`,
@@ -119,7 +89,7 @@ async function checkReleases(): Promise<void> {
     if (!update || update.version === available?.version) return;
     available = update;
     log.info('update available', update.version);
-    shownWindows.forEach(announce);
+    onAvailable(update.version);
   } catch (error) {
     log.warn('release check failed', error);
   }

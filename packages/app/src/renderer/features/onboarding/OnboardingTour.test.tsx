@@ -8,7 +8,7 @@ const mocks = vi.hoisted(() => ({
   offer: true,
   activeFile: 'a.js' as string | null,
   commands: [] as Array<(id: string) => void>,
-  onboardingApi: {
+  appPlatformApi: {
     ShouldOfferTour: vi.fn(() => Promise.resolve(mocks.offer)),
     SetTourDone: vi.fn(() => Promise.resolve()),
   },
@@ -16,7 +16,7 @@ const mocks = vi.hoisted(() => ({
 }));
 
 vi.mock('../../../ipc/renderer', () => ({
-  onboardingApi: mocks.onboardingApi,
+  appPlatformApi: mocks.appPlatformApi,
   documentsApi: mocks.documentsApi,
   windowApi: {
     onCommand: (listener: (id: string) => void) => {
@@ -84,7 +84,7 @@ describe('OnboardingTour', () => {
     await screen.findByRole('dialog', { name: 'offerTitle' });
     press('notNow');
     expect(screen.queryByRole('dialog')).toBeNull();
-    expect(mocks.onboardingApi.SetTourDone).toHaveBeenCalledTimes(1);
+    expect(mocks.appPlatformApi.SetTourDone).toHaveBeenCalledTimes(1);
     expect(mocks.documentsApi.SetActiveFile).not.toHaveBeenCalled();
   });
 
@@ -100,7 +100,7 @@ describe('OnboardingTour', () => {
 
     press('back');
     expect(stepCount()).toBe(`stepCount 1/${MAIN_STEPS.length}`);
-    expect(mocks.onboardingApi.SetTourDone).not.toHaveBeenCalled();
+    expect(mocks.appPlatformApi.SetTourDone).not.toHaveBeenCalled();
   });
 
   it('reports the tour done when it is skipped part-way', async () => {
@@ -108,7 +108,7 @@ describe('OnboardingTour', () => {
     press('next');
     press('skipTour');
     expect(screen.queryByRole('dialog')).toBeNull();
-    expect(mocks.onboardingApi.SetTourDone).toHaveBeenCalledTimes(1);
+    expect(mocks.appPlatformApi.SetTourDone).toHaveBeenCalledTimes(1);
   });
 
   it('ends on a step that offers the Electron basics, where Done finishes without them', async () => {
@@ -120,7 +120,7 @@ describe('OnboardingTour', () => {
 
     press('done');
     expect(screen.queryByRole('dialog')).toBeNull();
-    expect(mocks.onboardingApi.SetTourDone).toHaveBeenCalledTimes(1);
+    expect(mocks.appPlatformApi.SetTourDone).toHaveBeenCalledTimes(1);
     expect(mocks.documentsApi.SetActiveFile).not.toHaveBeenCalled();
   });
 
@@ -137,7 +137,7 @@ describe('OnboardingTour', () => {
     }
 
     expect(screen.queryByRole('dialog')).toBeNull();
-    expect(mocks.onboardingApi.SetTourDone).toHaveBeenCalledTimes(1);
+    expect(mocks.appPlatformApi.SetTourDone).toHaveBeenCalledTimes(1);
     expect(mocks.documentsApi.SetActiveFile).toHaveBeenLastCalledWith('a.js');
   });
 
@@ -154,11 +154,11 @@ describe('OnboardingTour', () => {
     for (let i = 2; i <= MAIN_STEPS.length; i++)
       fireEvent.keyDown(keys(), { key: 'ArrowRight' });
     expect(stepCount()).toBe(`stepCount ${MAIN_STEPS.length}/${MAIN_STEPS.length}`);
-    expect(mocks.onboardingApi.SetTourDone).not.toHaveBeenCalled();
+    expect(mocks.appPlatformApi.SetTourDone).not.toHaveBeenCalled();
 
     fireEvent.keyDown(keys(), { key: 'Escape' });
     await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull());
-    expect(mocks.onboardingApi.SetTourDone).toHaveBeenCalledTimes(1);
+    expect(mocks.appPlatformApi.SetTourDone).toHaveBeenCalledTimes(1);
   });
 
   it('starts again from the first step on Help > Show tour, and ignores other commands', async () => {

@@ -32,7 +32,7 @@ async function start(): Promise<void> {
     initRendererI18n(locale),
     loadMonacoMessages(locale).then(() => import('./App')),
   ]);
-  void installPlatformRenderer(i18n);
+  void installPlatformRenderer(i18n, app);
   const container = document.getElementById('root');
   if (!container) throw new Error('#root is missing from index.html');
 

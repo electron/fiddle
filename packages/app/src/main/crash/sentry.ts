@@ -14,11 +14,6 @@ export const SENTRY_DSN = 'https://966a5b01ac8d4941b81e4ebd0ab4c991@sentry.io/18
 
 let enabled = false;
 
-/** Whether Sentry is running in main. The renderer starts its SDK only then. */
-export function isCrashReportingEnabled(): boolean {
-  return enabled;
-}
-
 /**
  * The Sentry release, `Electron-Fiddle@<package.json version>` with no `v`:
  * `@sentry/electron`'s default format, which the release workflow uses too.
@@ -36,8 +31,8 @@ function readCrashReportsSetting(userData: string): boolean {
   );
 }
 
-/** Starts Sentry in main if it's allowed. Call before `ready`, after Squirrel handling. Headless CLI runs never send reports. */
-export function initCrashReporting(headless = false): void {
+/** Starts Sentry in main if it's allowed, and returns whether it did. Call before `ready`, after Squirrel handling. Headless CLI runs never send reports. */
+export function initCrashReporting(headless = false): boolean {
   const off = !app.isPackaged
     ? 'dev'
     : isTestMode()
@@ -49,7 +44,7 @@ export function initCrashReporting(headless = false): void {
           : undefined;
   if (off) {
     log.info(`crash reporting is off (${off})`);
-    return;
+    return false;
   }
   const home = os.homedir();
   Sentry.init({
@@ -81,14 +76,18 @@ export function initCrashReporting(headless = false): void {
     beforeSend: (event) => prepareEvent(event, home),
     beforeBreadcrumb: (crumb) => scrubBreadcrumb(crumb, home),
   });
-  enabled = true;
   log.info('crash reporting is on');
+  return (enabled = true);
 }
 
-/** Follows the setting at runtime: off closes Sentry now; on needs a restart. */
-export function applyCrashReportsSetting(on: boolean): void {
-  if (on || !enabled) return;
-  enabled = false;
-  void Sentry.close().catch((error: unknown) => log.warn('closing Sentry failed', error));
-  log.info('crash reporting turned off');
+/** Follows the setting at runtime: off closes Sentry now; on needs a restart. Returns whether Sentry still runs. */
+export function applyCrashReportsSetting(on: boolean): boolean {
+  if (!on && enabled) {
+    enabled = false;
+    void Sentry.close().catch((error: unknown) =>
+      log.warn('closing Sentry failed', error),
+    );
+    log.info('crash reporting turned off');
+  }
+  return enabled;
 }

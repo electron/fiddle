@@ -11,20 +11,16 @@ export function installFlushOnExit(flushDocuments: () => void): void {
   let gaveUp = false;
 
   const flushWithinLimit = async (): Promise<void> => {
-    let timer: NodeJS.Timeout | undefined;
-    const timeout = new Promise<void>((resolve) => {
-      timer = setTimeout(() => {
+    const timeout = new Promise<'timeout'>((resolve) =>
+      setTimeout(resolve, FLUSH_TIMEOUT_MS, 'timeout').unref(),
+    );
+    try {
+      if ((await Promise.race([flushAll(), timeout])) === 'timeout') {
         gaveUp = true;
         log.error('flush on exit timed out');
-        resolve();
-      }, FLUSH_TIMEOUT_MS);
-    });
-    try {
-      await Promise.race([flushAll(), timeout]);
+      }
     } catch (error) {
       log.error('flush on exit failed', error);
-    } finally {
-      clearTimeout(timer);
     }
     await flushLog();
   };

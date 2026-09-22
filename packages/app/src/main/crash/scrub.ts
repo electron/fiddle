@@ -118,19 +118,39 @@ const DROPPED_BREADCRUMBS = new Set([
   'net',
 ]);
 
-function scrubValue(value: unknown, home: string, depth = 0): unknown {
-  if (typeof value === 'string') return scrubText(value, home);
+/**
+ * A JSON-safe copy with every string through `scrub`, secret-named string values redacted and
+ * errors expanded. Cycles are cut; an object shared without cycling is copied in full each time.
+ */
+export function scrubValue(
+  value: unknown,
+  scrub: (text: string) => string,
+  seen = new Set<object>(),
+  depth = 0,
+): unknown {
+  if (typeof value === 'string') return scrub(value);
+  if (typeof value === 'bigint') return value.toString();
+  if (typeof value === 'function' || typeof value === 'symbol') return String(value);
   if (typeof value !== 'object' || value === null) return value;
-  if (depth > 20) return REDACTED;
-  if (Array.isArray(value)) return value.map((item) => scrubValue(item, home, depth + 1));
-  const out: Record<string, unknown> = {};
-  for (const [key, item] of Object.entries(value)) {
-    if (key === 'vars') continue; // stack-frame local variables
-    out[key] =
-      typeof item === 'string' && isSecretKey(key)
-        ? REDACTED
-        : scrubValue(item, home, depth + 1);
+  if (seen.has(value) || depth > 20) return '[circular]';
+  seen.add(value);
+  const next = (item: unknown) => scrubValue(item, scrub, seen, depth + 1);
+  let out: unknown;
+  if (Array.isArray(value)) out = value.map(next);
+  else if (value instanceof Error) {
+    const { name, message, stack, code, details, cause } = value as Error &
+      Record<'code' | 'details', unknown>;
+    out = next({ name, message, stack, code, details, cause });
+  } else {
+    const entries = Object.entries(value)
+      .filter(([key]) => key !== 'vars') // Sentry stack-frame local variables
+      .map(([key, item]) => [
+        scrub(key),
+        typeof item === 'string' && isSecretKey(key) ? REDACTED : next(item),
+      ]);
+    out = Object.fromEntries(entries);
   }
+  seen.delete(value);
   return out;
 }
 
@@ -140,11 +160,12 @@ export function scrubBreadcrumb<B extends { category?: string }>(
   home: string,
 ): B | null {
   if (crumb.category && DROPPED_BREADCRUMBS.has(crumb.category)) return null;
-  return scrubValue(crumb, home) as B;
+  return scrubValue(crumb, (text) => scrubText(text, home)) as B;
 }
 
 /** Removes what may hold fiddle code, console output or env, and scrubs every string. */
 export function scrubEvent<E extends object>(event: E, home: string): E {
+  const scrub = (text: string) => scrubText(text, home);
   const out: Record<string, unknown> = {};
   for (const [key, value] of Object.entries(event)) {
     if (DROPPED_KEYS.has(key)) continue;
@@ -154,18 +175,18 @@ export function scrubEvent<E extends object>(event: E, home: string): E {
       const contexts: Record<string, unknown> = {};
       for (const [name, context] of Object.entries(value)) {
         if (!ALLOWED_CONTEXTS.has(name)) continue;
-        contexts[name] = name === 'trace' ? context : scrubValue(context, home);
+        contexts[name] = name === 'trace' ? context : scrubValue(context, scrub);
       }
       out.contexts = contexts;
     } else if (key === 'request' && value && typeof value === 'object') {
       const { url } = value as { url?: unknown };
-      if (typeof url === 'string') out.request = { url: scrubText(url, home) };
+      if (typeof url === 'string') out.request = { url: scrub(url) };
     } else if (key === 'breadcrumbs' && Array.isArray(value)) {
       out.breadcrumbs = value
         .map((crumb: { category?: string }) => scrubBreadcrumb(crumb, home))
         .filter((crumb) => crumb !== null);
     } else {
-      out[key] = scrubValue(value, home);
+      out[key] = scrubValue(value, scrub);
     }
   }
   return out as E;

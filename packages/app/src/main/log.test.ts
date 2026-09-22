@@ -118,8 +118,10 @@ describe('LogFile', () => {
 
   it('rotates at the size limit and keeps three files', async () => {
     const file = new LogFile(dir, { maxBytes: 100, maxFiles: 3 });
-    for (let i = 0; i < 20; i++) file.write(JSON.stringify({ i, pad: 'x'.repeat(30) }));
-    await file.flush();
+    for (let i = 0; i < 20; i++) {
+      file.write(JSON.stringify({ i, pad: 'x'.repeat(30) }));
+      await file.flush();
+    }
 
     expect((await readdir(dir)).sort()).toEqual(['main.1.log', 'main.2.log', 'main.log']);
     const read = async (name: string) =>

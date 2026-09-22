@@ -1,5 +1,3 @@
-import { EventEmitter } from 'node:events';
-
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 const mocks = vi.hoisted(() => ({
@@ -7,11 +5,10 @@ const mocks = vi.hoisted(() => ({
   testMode: false,
   fetch: vi.fn(),
   updateElectronApp: vi.fn(),
-  dispatchUpdateAvailable: vi.fn(),
+  onAvailable: vi.fn(),
   showMessageBox: vi.fn(),
   confirmQuit: vi.fn(),
   quitAndInstall: vi.fn(),
-  windowCreated: undefined as ((event: unknown, win: unknown) => void) | undefined,
 }));
 
 vi.mock('electron', () => ({
@@ -20,26 +17,14 @@ vi.mock('electron', () => ({
       return mocks.isPackaged;
     },
     getVersion: () => '1.2.3',
-    on: (event: string, listener: (event: unknown, win: unknown) => void) => {
-      if (event === 'browser-window-created') mocks.windowCreated = listener;
-    },
   },
   autoUpdater: { quitAndInstall: mocks.quitAndInstall },
-  BrowserWindow: { getAllWindows: () => [] },
   dialog: { showMessageBox: mocks.showMessageBox },
   net: { fetch: mocks.fetch },
 }));
 vi.mock('update-electron-app', () => ({
   updateElectronApp: mocks.updateElectronApp,
   UpdateSourceType: { ElectronPublicUpdateService: 1 },
-}));
-vi.mock('../../ipc/main', () => ({
-  AppPlatform: {
-    getDispatcher: (contents: { name: string }) => ({
-      dispatchUpdateAvailable: (version: string) =>
-        mocks.dispatchUpdateAvailable(contents.name, version),
-    }),
-  },
 }));
 vi.mock('../documents/service', () => ({ confirmQuit: mocks.confirmQuit }));
 vi.mock('../i18n', () => ({ tm: () => (key: string) => key }));
@@ -52,7 +37,7 @@ vi.mock('../test-mode', () => ({
   isTestMode: () => mocks.testMode,
 }));
 
-let startUpdates: typeof import('./index').startUpdates;
+let startUpdates: () => void;
 
 const realPlatform = process.platform;
 
@@ -68,28 +53,17 @@ function serve(releases: unknown[]): void {
   mocks.fetch.mockImplementation(async () => json(releases));
 }
 
-/** A window that the app announces through `browser-window-created`. */
-function openWindow(name: string, visible: boolean) {
-  const win = Object.assign(new EventEmitter(), {
-    webContents: { name },
-    isVisible: () => visible,
-    isDestroyed: () => false,
-  });
-  mocks.windowCreated?.({}, win);
-  return { show: () => win.emit('show') };
-}
-
 beforeEach(async () => {
   vi.resetModules();
-  ({ startUpdates } = await import('./index'));
+  const updates = await import('./index');
+  startUpdates = () => updates.startUpdates(mocks.onAvailable);
   vi.useFakeTimers();
   mocks.isPackaged = true;
   mocks.testMode = false;
   mocks.fetch.mockReset();
   mocks.updateElectronApp.mockClear();
-  mocks.dispatchUpdateAvailable.mockClear();
+  mocks.onAvailable.mockClear();
   mocks.quitAndInstall.mockClear();
-  mocks.windowCreated = undefined;
 });
 
 afterEach(() => {
@@ -140,41 +114,22 @@ describe('startUpdates', () => {
     it('announces a newer release once, however often it checks', async () => {
       serve([release('v1.3.0')]);
       startUpdates();
-      openWindow('a', true);
       await vi.advanceTimersByTimeAsync(10_000);
-      expect(mocks.dispatchUpdateAvailable).toHaveBeenCalledExactlyOnceWith('a', '1.3.0');
+      expect(mocks.onAvailable).toHaveBeenCalledExactlyOnceWith('1.3.0');
 
       await vi.advanceTimersByTimeAsync(24 * 60 * 60 * 1000);
-      expect(mocks.dispatchUpdateAvailable).toHaveBeenCalledOnce();
+      expect(mocks.onAvailable).toHaveBeenCalledOnce();
 
       serve([release('v1.4.0')]);
       await vi.advanceTimersByTimeAsync(24 * 60 * 60 * 1000);
-      expect(mocks.dispatchUpdateAvailable).toHaveBeenLastCalledWith('a', '1.4.0');
-    });
-
-    it('tells a window once it is shown, if it opened after the check or was not ready', async () => {
-      serve([release('v1.3.0')]);
-      startUpdates();
-      const early = openWindow('early', false);
-      await vi.advanceTimersByTimeAsync(10_000);
-      expect(mocks.dispatchUpdateAvailable).not.toHaveBeenCalled();
-
-      early.show();
-      expect(mocks.dispatchUpdateAvailable).toHaveBeenCalledExactlyOnceWith(
-        'early',
-        '1.3.0',
-      );
-
-      openWindow('late', false).show();
-      expect(mocks.dispatchUpdateAvailable).toHaveBeenLastCalledWith('late', '1.3.0');
-      expect(mocks.dispatchUpdateAvailable).toHaveBeenCalledTimes(2);
+      expect(mocks.onAvailable).toHaveBeenLastCalledWith('1.4.0');
     });
 
     it('says nothing when the release check fails', async () => {
       mocks.fetch.mockImplementation(async () => json({}, 500));
       startUpdates();
       await vi.advanceTimersByTimeAsync(10_000);
-      expect(mocks.dispatchUpdateAvailable).not.toHaveBeenCalled();
+      expect(mocks.onAvailable).not.toHaveBeenCalled();
     });
   });
 });
