@@ -29,7 +29,6 @@ export default {
   "github-response-detail": "[ĜîţĤûƀ áñšŵéŕéð ŵîţĥ ĤŢŢÞ {{status}}: {{detail}} one two three]",
   "timeout": "[ĜîţĤûƀ ðîðñ'ţ ŕéšþöñð îñ ţîɱé. one two three]",
   "unreachable": "[Çöûļðñ'ţ ŕéáçĥ ĜîţĤûƀ. Çĥéçķ ýöûŕ îñţéŕñéţ çöññéçţîöñ. one two three four five]",
-  "too-many-redirects": "[ĜîţĤûƀ ŕéðîŕéçţéð ţĥé ŕéǫûéšţ ţöö ɱáñý ţîɱéš. one two three four]",
   "unexpected-response": "[ĜîţĤûƀ šéñţ á ŕéšþöñšé ţĥáţ çöûļðñ'ţ ƀé ŕéáð. one two three four]",
   "too-many-files": "[Å ĝîšţ çáñ ĥáṽé áţ ɱöšţ {{max}} ƒîļéš. one two three]",
   "file-too-large": "[“{{name}}” îš ļáŕĝéŕ ţĥáñ {{maxMb}} ṀƁ, ţĥé ɱöšţ á ĝîšţ ƒîļé çáñ ĥöļð. one two three four five]"

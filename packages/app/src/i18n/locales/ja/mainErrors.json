@@ -28,7 +28,6 @@
   "github-response-detail": "GitHub が HTTP {{status}} を返しました：{{detail}}",
   "timeout": "GitHub から時間内に応答がありませんでした。",
   "unreachable": "GitHub に接続できませんでした。インターネット接続を確認してください。",
-  "too-many-redirects": "GitHub がリクエストを何度もリダイレクトしました。",
   "unexpected-response": "GitHub から読み取れない応答が返されました。",
   "too-many-files": "1 つの Gist に含められるファイルは最大 {{max}} 個です。",
   "file-too-large": "「{{name}}」は、Gist のファイルの上限である {{maxMb}} MB を超えています。"

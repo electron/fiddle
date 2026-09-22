@@ -115,10 +115,6 @@
     "message": "Couldn't reach GitHub. Check your internet connection.",
     "description": "Error when GitHub can't be reached, usually because the computer is offline. GitHub is a product name."
   },
-  "too-many-redirects": {
-    "message": "GitHub redirected the request too many times.",
-    "description": "Error when GitHub keeps sending the request somewhere else. GitHub is a product name."
-  },
   "unexpected-response": {
     "message": "GitHub sent a response that couldn't be read.",
     "description": "Error when GitHub's answer isn't in the expected form. GitHub is a product name."

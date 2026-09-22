@@ -14,7 +14,6 @@ export const GIST_MAX_FILES = 300;
 export const GIST_MAX_FILE_BYTES = 10 * 1024 * 1024;
 export const GIST_DESCRIPTION_MAX = 256;
 export const DEFAULT_GIST_DESCRIPTION = 'Electron Fiddle Gist';
-const MAX_REDIRECTS = 5;
 const MAX_PAGES = 30;
 /** Per request, body included, so a stalled connection ends in an error instead of a spinner. */
 const REQUEST_TIMEOUT_MS = 60_000;
@@ -245,7 +244,7 @@ function toFetchError(
 /**
  * A small GitHub REST client on `fetch`. The token is sent only over https
  * (or to a loopback fixture server) to the API origin and the gist raw origin,
- * and is dropped on any cross-origin redirect.
+ * and redirects aren't followed.
  */
 export class GitHubClient {
   private readonly token: string | undefined;
@@ -283,59 +282,34 @@ export class GitHubClient {
     return new URL(path.replace(/^\//, ''), base);
   }
 
-  /** Sends a request, following up to 5 redirects by hand. */
+  /**
+   * Sends a request. A redirect is an error: GitHub doesn't redirect these endpoints, and Chromium's
+   * `net.fetch` would follow one with the token still attached, wherever it leads.
+   */
   private async send(
     url: URL,
     init: { method?: string; body?: unknown; accept?: string; signal?: AbortSignal } = {},
   ): Promise<Response> {
-    let current = url;
-    let method = init.method ?? 'GET';
-    let body = init.body === undefined ? undefined : JSON.stringify(init.body);
-    let withToken = this.token !== undefined && this.mayReceiveToken(current);
+    const headers: Record<string, string> = {
+      Accept: init.accept ?? 'application/vnd.github+json',
+      'X-GitHub-Api-Version': '2022-11-28',
+    };
+    if (this.token !== undefined && this.mayReceiveToken(url))
+      headers.Authorization = `Bearer ${this.token}`;
+    if (init.body !== undefined) headers['Content-Type'] = 'application/json';
 
-    for (let hop = 0; hop <= MAX_REDIRECTS; hop++) {
-      const headers: Record<string, string> = {
-        Accept: init.accept ?? 'application/vnd.github+json',
-        'X-GitHub-Api-Version': '2022-11-28',
-      };
-      if (withToken) headers.Authorization = `Bearer ${this.token}`;
-      if (body !== undefined) headers['Content-Type'] = 'application/json';
-
-      const timeout = AbortSignal.timeout(REQUEST_TIMEOUT_MS);
-      let res: Response;
-      try {
-        res = await this.fetchFn(current, {
-          method,
-          body,
-          headers,
-          redirect: 'manual',
-          signal: init.signal ? AbortSignal.any([init.signal, timeout]) : timeout,
-        });
-      } catch (error) {
-        throw toFetchError(error, init.signal, timeout);
-      }
-
-      const location = res.headers.get('location');
-      if (res.status >= 300 && res.status < 400 && location) {
-        const next = new URL(location, current);
-        if (next.origin !== current.origin) withToken = false;
-        if (
-          res.status === 303 ||
-          ((res.status === 301 || res.status === 302) && method === 'POST')
-        ) {
-          method = 'GET';
-          body = undefined;
-        }
-        current = next;
-        continue;
-      }
-      return res;
+    const timeout = AbortSignal.timeout(REQUEST_TIMEOUT_MS);
+    try {
+      return await this.fetchFn(url, {
+        method: init.method ?? 'GET',
+        body: init.body === undefined ? undefined : JSON.stringify(init.body),
+        headers,
+        redirect: 'error',
+        signal: init.signal ? AbortSignal.any([init.signal, timeout]) : timeout,
+      });
+    } catch (error) {
+      throw toFetchError(error, init.signal, timeout);
     }
-    throw reasonError(
-      ErrorCode.network,
-      'too-many-redirects',
-      'Too many redirects from GitHub',
-    );
   }
 
   private async json<T>(res: Response, schema: z.ZodType<T>): Promise<T> {

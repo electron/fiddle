@@ -28,7 +28,6 @@
   "github-response-detail": "O GitHub respondeu com HTTP {{status}}: {{detail}}",
   "timeout": "O GitHub não respondeu a tempo.",
   "unreachable": "Não foi possível acessar o GitHub. Verifique sua conexão com a internet.",
-  "too-many-redirects": "O GitHub redirecionou a requisição vezes demais.",
   "unexpected-response": "O GitHub enviou uma resposta que não pôde ser lida.",
   "too-many-files": "Um gist pode ter no máximo {{max}} arquivos.",
   "file-too-large": "“{{name}}” tem mais de {{maxMb}} MB, o máximo que um arquivo de gist comporta."
