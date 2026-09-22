@@ -25,7 +25,7 @@
     "test:watch": "vitest",
     "test:e2e": "yarn generate && vitest run -c packages/app/e2e/vitest.config.mts",
     "driver": "node --disable-warning=ExperimentalWarning --disable-warning=MODULE_TYPELESS_PACKAGE_JSON packages/app/tools/driver.ts",
-    "fiddle": "node packages/app/tools/fiddle-cli.mjs",
+    "fiddle": "node packages/app/tools/electron-run.mjs headless",
     "package": "yarn workspace electron-fiddle package",
     "make": "yarn workspace electron-fiddle make"
   },

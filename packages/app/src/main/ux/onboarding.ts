@@ -1,12 +1,12 @@
 import type { AppStateFile } from '../documents/service';
 import type { JsonStore } from '../persistence/json-store';
-import { testFlags } from '../test-mode';
+import { isTestMode } from '../test-mode';
 
 export function createOnboarding(store: JsonStore<AppStateFile>) {
   let offeredThisLaunch = false;
   return {
     shouldOfferTour(): boolean {
-      if (!testFlags().tour || offeredThisLaunch || store.get().tourDone) return false;
+      if (isTestMode() || offeredThisLaunch || store.get().tourDone) return false;
       offeredThisLaunch = true;
       return true;
     },

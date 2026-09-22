@@ -1,12 +1,10 @@
 // Deep links through the single-instance lock: a second launch of the test
 // build with the same userData forwards its argv to the running app and quits.
-import { spawn } from 'node:child_process';
-import { createRequire } from 'node:module';
 import path from 'node:path';
 
 import { describe, expect, it } from 'vitest';
 
-import { APP_DIR, electronArgs, TEST_BUILD_DIR } from './driver.ts';
+import { spawnTestBuild } from './driver.ts';
 import { FIXTURE_GIST_ID, useApp, windowState } from './harness.ts';
 
 describe('deep links', () => {
@@ -15,33 +13,22 @@ describe('deep links', () => {
   /** Launches a second instance; resolves with its exit code. */
   const secondInstance = (...args: string[]) =>
     new Promise<number | null>((resolve, reject) => {
-      const electron = createRequire(path.join(APP_DIR, 'package.json'))(
-        'electron',
-      ) as string;
       const testDir = app().testDir ?? '';
-      const env: NodeJS.ProcessEnv = {
-        ...process.env,
-        FIDDLE_TEST_MODE: '1',
-        FIDDLE_TEST_DIR: testDir,
-        FIDDLE_TEST_FIXTURE_URL: app.fixtures().url,
-        ELECTRON_FIDDLE_DRIVER_SOCKET: path.join(testDir, 'second-instance.sock'),
-      };
-      delete env.ELECTRON_RUN_AS_NODE;
-      delete env.NODE_OPTIONS;
-      const child = spawn(
-        electron,
-        [...electronArgs(), '--ozone-platform=headless', TEST_BUILD_DIR, ...args],
-        { env, stdio: 'ignore' },
+      const child = spawnTestBuild(
+        ['--ozone-platform=headless', ...args],
+        {
+          FIDDLE_TEST_DIR: testDir,
+          FIDDLE_TEST_FIXTURE_URL: app.fixtures().url,
+          ELECTRON_FIDDLE_DRIVER_SOCKET: path.join(testDir, 'second-instance.sock'),
+        },
+        { stdio: 'ignore', timeout: 20_000, killSignal: 'SIGKILL' },
       );
-      const timer = setTimeout(() => {
-        child.kill('SIGKILL');
-        reject(new Error('the second instance did not exit within 20 s'));
-      }, 20_000);
       child.once('error', reject);
-      child.once('exit', (code) => {
-        clearTimeout(timer);
-        resolve(code);
-      });
+      child.once('exit', (code, signal) =>
+        signal === 'SIGKILL'
+          ? reject(new Error('the second instance did not exit within 20 s'))
+          : resolve(code),
+      );
     });
 
   it('forwards a link from a second launch and asks before loading it', async () => {

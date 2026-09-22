@@ -60,6 +60,5 @@ describe('in a test build with FIDDLE_TEST_MODE=1', () => {
     expect(testMode.getEndpoints().releasesJson).toBe(
       'http://127.0.0.1:4000/releases.json',
     );
-    expect(testMode.testFlags().updates).toBe(false);
   });
 });

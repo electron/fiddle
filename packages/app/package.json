@@ -16,14 +16,13 @@
     "i18n:translate": "node tools/i18n-translate.mjs",
     "i18n:test": "node --test tools/i18n-translate.test.mjs",
     "start": "node tools/generate.mjs && electron-forge start",
-    "start:xvfb": "node tools/generate.mjs && node tools/start-headless.mjs",
-    "fiddle": "node tools/fiddle-cli.mjs",
+    "start:xvfb": "node tools/generate.mjs && node tools/electron-run.mjs xvfb",
+    "fiddle": "node tools/electron-run.mjs headless",
     "package": "electron-forge package",
     "make": "electron-forge make",
     "publish": "electron-forge publish",
     "driver": "node --disable-warning=ExperimentalWarning --disable-warning=MODULE_TYPELESS_PACKAGE_JSON tools/driver.ts",
-    "driver:build": "node tools/generate.mjs && node --disable-warning=ExperimentalWarning --disable-warning=MODULE_TYPELESS_PACKAGE_JSON tools/driver-build.ts",
-    "driver:release-check": "node --disable-warning=ExperimentalWarning --disable-warning=MODULE_TYPELESS_PACKAGE_JSON tools/driver-release-check.ts"
+    "driver:build": "node tools/generate.mjs && node --disable-warning=ExperimentalWarning --disable-warning=MODULE_TYPELESS_PACKAGE_JSON tools/driver-build.ts"
   },
   "dependencies": {
     "@electron-internal/extract-zip": "^1.0.1",

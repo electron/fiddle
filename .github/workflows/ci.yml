@@ -77,10 +77,6 @@ jobs:
         run: yarn typecheck
       - name: Unit tests
         run: yarn test
-      # Builds main, preload and renderer for release and for tests, and checks
-      # the test-only markers are in the second and not the first.
-      - name: Test-only code stays out of release builds
-        run: yarn workspace electron-fiddle driver:release-check
       # Fiddles start through this helper on macOS. The self-check proves it
       # disclaims responsibility on this macOS version.
       - name: Privacy helper self-check (macOS)
@@ -94,8 +90,9 @@ jobs:
       # Unsigned: no signing variables are set here.
       - name: Package smoke test
         run: yarn package
-      - name: Check that the e2e driver is not packaged
-        run: node tools/release-check-asar.mjs packages/app/out
+      # Also checks that the e2e test build (out/test-build) still has every test-only marker.
+      - name: Test-only code stays out of the package and in the test build
+        run: node tools/release-check-asar.mjs packages/app/out --test-build
       - name: Check the privacy helper in the package (macOS)
         if: runner.os == 'macOS'
         run: |

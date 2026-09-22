@@ -1,6 +1,6 @@
 import { parseArgs } from 'node:util';
 
-import type { z } from 'zod';
+import { z } from 'zod';
 
 import { ErrorCode, FiddleError } from '../../shared/errors';
 import { tm } from '../i18n';
@@ -60,58 +60,32 @@ export function fieldKey(name: string): CliKey {
   return `arg${name.charAt(0).toUpperCase()}${name.slice(1)}` as CliKey;
 }
 
-interface MinimalDef {
-  type: string;
-  innerType?: z.ZodType;
-  element?: z.ZodType;
-  defaultValue?: unknown;
-}
-
-const defOf = (schema: z.ZodType) => schema.def as unknown as MinimalDef;
-
-function unwrap(schema: z.ZodType): {
-  inner: z.ZodType;
-  optional: boolean;
-  defaultValue?: unknown;
-} {
-  let inner = schema;
-  let optional = false;
-  let defaultValue: unknown;
-  for (
-    let def = defOf(inner);
-    def.type === 'optional' || def.type === 'default';
-    def = defOf(inner)
-  ) {
-    optional = true;
-    if (def.type === 'default') defaultValue = def.defaultValue;
-    inner = def.innerType!;
-  }
-  return { inner, optional, defaultValue };
+interface FieldSchema {
+  type?: string;
+  items?: FieldSchema;
+  enum?: string[];
+  default?: unknown;
 }
 
 /** A descriptor's fields, in schema order, with how each is given on the command line. */
 export function fields(descriptor: Descriptor): Field[] {
-  return Object.entries(descriptor.input.shape as Record<string, z.ZodType>).map(
-    ([name, schema]) => {
-      const { inner, optional, defaultValue } = unwrap(schema);
-      const type = defOf(inner).type;
-      const element = type === 'array' ? unwrap(defOf(inner).element!).inner : inner;
-      const choices =
-        defOf(element).type === 'enum'
-          ? (element as unknown as { options: string[] }).options
-          : undefined;
-      return {
-        name,
-        flag: `--${kebab(name)}`,
-        type: type === 'boolean' ? 'boolean' : 'string',
-        multiple: type === 'array',
-        positional: (descriptor.positionals as readonly string[]).includes(name),
-        optional,
-        ...(choices ? { choices } : {}),
-        ...(defaultValue !== undefined ? { defaultValue } : {}),
-      };
-    },
-  );
+  const schema = z.toJSONSchema(descriptor.input, { io: 'input' }) as {
+    properties: Record<string, FieldSchema>;
+    required?: string[];
+  };
+  return Object.entries(schema.properties).map(([name, prop]) => {
+    const element = prop.items ?? prop;
+    return {
+      name,
+      flag: `--${kebab(name)}`,
+      type: element.type === 'boolean' ? 'boolean' : 'string',
+      multiple: prop.type === 'array',
+      positional: (descriptor.positionals as readonly string[]).includes(name),
+      optional: !schema.required?.includes(name),
+      ...(element.enum ? { choices: element.enum } : {}),
+      ...(prop.default !== undefined ? { defaultValue: prop.default } : {}),
+    };
+  });
 }
 
 function displayName(field: Field): string {
