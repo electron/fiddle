@@ -7,16 +7,11 @@ import { Run, Versions } from '../ipc/main';
 import type { Platform } from '../shared/stores';
 import { BisectService } from './bisect/service';
 import { CommandRegistry } from './commands';
-import {
-  getStateStore,
-  initDocuments,
-  setFiddleModules,
-  setFiddleVersion,
-} from './documents/service';
+import { getStateStore, initDocuments } from './documents/service';
 import { CredentialStore, legacyTokenFile } from './github/credentials';
 import { GitHubService } from './github/service';
 import { log } from './log';
-import { NpmClient, npmEndpoints } from './modules/npm-client';
+import { NpmClient } from './modules/npm-client';
 import { ModulesService } from './modules/service';
 import { netFetch } from './net-fetch';
 import { installRunCleanupOnExit, RunService } from './run/service';
@@ -127,23 +122,11 @@ export async function createServices({
   };
   const bisect = new BisectService(hub, runs, versions, typesChanged);
 
-  let noticeId = 0;
   const versionSelector = new VersionSelector({
+    hub,
     versions,
-    settings: () => hub.app.settings,
-    showChannel: (channel) => {
-      const { channels } = hub.app.settings;
-      if (!channels.includes(channel)) settings.set('channels', [...channels, channel]);
-    },
+    settings,
     isBusy: (windowId) => runs.isBusy(windowId) || bisect.isActive(windowId),
-    getVersion: (windowId) => hub.getWindow(windowId)?.fiddle.versionRef,
-    setVersion: (windowId, ref) => setFiddleVersion(windowId, ref),
-    remember: (ref) => getStateStore().set((prev) => ({ ...prev, lastVersion: ref })),
-    notify: (windowId, message) => {
-      noticeId += 1;
-      if (hub.getWindow(windowId))
-        hub.updateWindow(windowId, { versionNotice: { id: noticeId, message } });
-    },
     typesChanged,
   });
 
@@ -179,18 +162,8 @@ export async function createServices({
     setLogin: (githubLogin) => hub.updateApp({ githubLogin }),
   });
 
-  const npm = new NpmClient({
-    fetch: netFetch,
-    endpoints: npmEndpoints(getEndpoints()),
-  });
-  const modules = new ModulesService(
-    {
-      getWindow: (windowId) => hub.getWindow(windowId),
-      onChange: (listener) => hub.onChange(listener),
-      setModules: setFiddleModules,
-    },
-    npm,
-  );
+  const npm = new NpmClient({ fetch: netFetch, endpoints: getEndpoints() });
+  const modules = new ModulesService(hub, npm);
 
   initDocuments({
     hub,

@@ -9,14 +9,10 @@ export default {
   "runFailed": "Fiddle을 실행할 수 없습니다: {{message}}",
   "privacyHelperMissing": "개인 정보 보호 도우미({{path}})가 없거나 실행할 수 없어 Fiddle을 시작할 수 없습니다. 도우미 없이는 Fiddle이 Electron Fiddle의 카메라, 마이크 등의 권한을 공유하게 됩니다. Electron Fiddle을 다시 설치하세요.",
   "downloading": "Electron {{version}} 다운로드 중…",
-  "downloadFailed": "Electron {{version}} 다운로드 실패: {{message}}",
   "installingModules": "{{pm}}으로 패키지 설치 중…",
   "installingModulesNoScripts": "{{pm}}으로 패키지를 설치하는 중입니다. 이 Fiddle을 신뢰하지 않으므로 설치 스크립트는 실행하지 않습니다.",
   "modulesFailed": "패키지 설치 실패: {{message}}",
   "pmMissing": "{{pm}}을 찾을 수 없습니다. 패키지를 사용하려면 설치하세요: {{url}}",
-  "versionUnavailable": "이 컴퓨터에서 실행할 수 없는 Electron 버전입니다: {{version}}",
-  "versionUnknown": "알 수 없는 Electron 버전입니다: {{version}}",
-  "localBuildMissing": "로컬 빌드 “{{name}}”에 Electron 바이너리가 없습니다.",
   "esmNeeds28": "main.mjs를 사용하려면 Electron 28 이상이 필요합니다.",
   "envInvalid": "읽을 수 없는 환경 변수 항목을 건너뛰었습니다: {{entries}}",
   "envBlocked": "Electron에 코드를 로드하거나 시작 방식을 바꾸므로 Fiddle에서 설정할 수 없는 환경 변수를 건너뛰었습니다: {{keys}}",
@@ -40,6 +36,5 @@ export default {
   "bisectTooFew": "이진 탐색을 하려면 정상 버전과 문제 버전 사이에 버전이 두 개 이상 있어야 합니다.",
   "bisectGoodNotOlder": "정상 버전은 문제 버전보다 이전이어야 합니다.",
   "openCompareMessage": "GitHub에서 비교 페이지를 여시겠습니까?",
-  "openCompareButton": "열기",
-  "cancel": "취소"
+  "openCompareButton": "열기"
 } as const;

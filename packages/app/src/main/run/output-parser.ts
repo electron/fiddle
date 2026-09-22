@@ -93,6 +93,8 @@ export class OutputParser {
   readonly #partial = { stdout: '', stderr: '' };
   #console: PendingConsole | undefined;
   #mainError: PendingMainError | undefined;
+  /** What the current `push` or `flush` returns. */
+  #result: ParseResult = { lines: [], errors: [] };
 
   constructor(options: ParserOptions) {
     this.#options = options;
@@ -106,80 +108,73 @@ export class OutputParser {
     // so a huge line without a newline doesn't pile up or get re-scanned.
     this.#partial[stream] =
       partial.length > MAX_LINE ? partial.slice(0, MAX_LINE + 1) : partial;
-    return this.#parseLines(stream, parts);
+    return this.#collect(() => parts.forEach((line) => this.#parseLine(stream, line)));
   }
 
   /** Parses whatever is left, e.g. when the process exits. */
   flush(): ParseResult {
-    const result: ParseResult = { lines: [], errors: [] };
-    for (const stream of ['stdout', 'stderr'] as const) {
-      const rest = this.#partial[stream];
-      this.#partial[stream] = '';
-      if (rest) merge(result, this.#parseLines(stream, [rest]));
-    }
-    if (this.#console) merge(result, this.#finishConsole(undefined));
-    return result;
+    return this.#collect(() => {
+      for (const stream of ['stdout', 'stderr'] as const) {
+        const rest = this.#partial[stream];
+        this.#partial[stream] = '';
+        if (rest) this.#parseLine(stream, rest);
+      }
+      if (this.#console) this.#finishConsole(undefined);
+    });
   }
 
-  #parseLines(stream: 'stdout' | 'stderr', raw: string[]): ParseResult {
-    const result: ParseResult = { lines: [], errors: [] };
-    for (const line of raw) merge(result, this.#parseLine(stream, line));
-    return result;
+  #collect(parse: () => void): ParseResult {
+    this.#result = { lines: [], errors: [] };
+    parse();
+    return this.#result;
   }
 
-  #parseLine(stream: 'stdout' | 'stderr', line: string): ParseResult {
-    const result: ParseResult = { lines: [], errors: [] };
+  #line(line: ParsedLine): void {
+    this.#result.lines.push(line);
+  }
 
+  #parseLine(stream: 'stdout' | 'stderr', line: string): void {
     // A renderer console message that spans several lines.
     if (this.#console && stream === 'stderr') {
       const end = CONSOLE_END.exec(line);
-      if (end || this.#console.parts.length >= MAX_CONTINUATION) {
-        this.#console.parts.push(end ? line.slice(0, end.index) : line);
-        return this.#finishConsole(
-          end ? { source: end[1]!, line: Number(end[2]) } : undefined,
-        );
-      }
-      this.#console.parts.push(line);
-      return result;
+      this.#console.parts.push(end ? line.slice(0, end.index) : line);
+      if (end || this.#console.parts.length > MAX_CONTINUATION)
+        this.#finishConsole(end ? { source: end[1]!, line: Number(end[2]) } : undefined);
+      return;
     }
 
     const listening = INSPECTOR_LISTENING.exec(line);
     if (listening) {
-      result.inspectorAddress = listening[1];
-      return result;
+      this.#result.inspectorAddress = listening[1];
+      return;
     }
-    if (INSPECTOR_NOISE.some((re) => re.test(line))) return result;
+    if (INSPECTOR_NOISE.some((re) => re.test(line))) return;
 
     if (stream === 'stderr') {
       const start = CONSOLE_START.exec(line);
       if (start) {
         this.#mainError = undefined;
         const body = line.slice(start[0].length);
-        this.#console = { level: start[1]!, parts: [] };
         const end = CONSOLE_END.exec(body);
-        if (end) {
-          this.#console.parts.push(body.slice(0, end.index));
-          return this.#finishConsole({ source: end[1]!, line: Number(end[2]) });
-        }
-        this.#console.parts.push(body);
-        return result;
+        this.#console = {
+          level: start[1]!,
+          parts: [end ? body.slice(0, end.index) : body],
+        };
+        if (end) this.#finishConsole({ source: end[1]!, line: Number(end[2]) });
+        return;
       }
       if (CHROMIUM_LOG.test(line)) {
-        if (this.#options.chromiumLogs) {
-          result.lines.push({ process: 'main', kind: 'log', text: truncate(line) });
-        }
-        return result;
+        if (this.#options.chromiumLogs)
+          this.#line({ process: 'main', kind: 'log', text: truncate(line) });
+        return;
       }
     }
-
-    return this.#parseMainLine(line);
+    this.#parseMainLine(line);
   }
 
   /** Main-process output, watching for an error header and its stack frames. */
-  #parseMainLine(line: string): ParseResult {
-    const result: ParseResult = { lines: [], errors: [] };
+  #parseMainLine(line: string): void {
     const pending = this.#mainError;
-
     if (pending && FRAME_ANY.test(line)) {
       const parsed: ParsedLine = { process: 'main', kind: 'error', text: truncate(line) };
       const frame = FRAME.exec(line);
@@ -187,37 +182,34 @@ export class OutputParser {
         frame && mapToFiddleFile(frame[1]!, this.#options.roots, this.#options.files);
       if (frame && file && !pending.located) {
         pending.located = true;
-        const location = { file, line: Number(frame[2]), column: Number(frame[3]) };
-        parsed.location = location;
-        result.errors.push({
-          ...location,
+        parsed.location = { file, line: Number(frame[2]), column: Number(frame[3]) };
+        this.#result.errors.push({
+          ...parsed.location,
           process: processFor(file),
           name: pending.name,
           message: pending.message,
         });
       }
-      result.lines.push(parsed);
-      return result;
+      this.#line(parsed);
+      return;
     }
 
     const header = ERROR_HEADER.exec(line);
-    if (header) {
-      this.#mainError = { name: header[1]!, message: header[2] ?? '', located: false };
-      result.lines.push({ process: 'main', kind: 'error', text: truncate(line) });
-      return result;
-    }
-
-    this.#mainError = undefined;
+    this.#mainError = header
+      ? { name: header[1]!, message: header[2] ?? '', located: false }
+      : undefined;
     if (line !== '')
-      result.lines.push({ process: 'main', kind: 'log', text: truncate(line) });
-    return result;
+      this.#line({
+        process: 'main',
+        kind: header ? 'error' : 'log',
+        text: truncate(line),
+      });
   }
 
-  #finishConsole(end: { source: string; line: number } | undefined): ParseResult {
-    const result: ParseResult = { lines: [], errors: [] };
+  #finishConsole(end: { source: string; line: number } | undefined): void {
     const pending = this.#console;
     this.#console = undefined;
-    if (!pending) return result;
+    if (!pending) return;
 
     const message = pending.parts.join('\n');
     // Newer Chromium logs every console message at INFO, uncaught errors included.
@@ -235,7 +227,7 @@ export class OutputParser {
       const uncaught = UNCAUGHT.exec(message);
       if (uncaught && location) {
         const firstLine = (uncaught[2] ?? '').split('\n')[0] ?? '';
-        result.errors.push({
+        this.#result.errors.push({
           ...location,
           process: processFor(location.file) === 'preload' ? 'preload' : 'renderer',
           name: uncaught[1]!,
@@ -243,8 +235,7 @@ export class OutputParser {
         });
       }
     }
-    result.lines.push(parsed);
-    return result;
+    this.#line(parsed);
   }
 
   /** A stack frame inside the run directory wins (it has a column); otherwise the `source`. */
@@ -262,10 +253,4 @@ export class OutputParser {
     const file = mapToFiddleFile(end.source, roots, files);
     return file && end.line > 0 ? { file, line: end.line } : undefined;
   }
-}
-
-function merge(into: ParseResult, from: ParseResult): void {
-  into.lines.push(...from.lines);
-  into.errors.push(...from.errors);
-  if (from.inspectorAddress !== undefined) into.inspectorAddress = from.inspectorAddress;
 }

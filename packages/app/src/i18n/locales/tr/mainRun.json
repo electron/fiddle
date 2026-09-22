@@ -8,14 +8,10 @@
   "runFailed": "Fiddle çalıştırılamadı: {{message}}",
   "privacyHelperMissing": "Gizlilik yardımcısı ({{path}}) eksik veya çalışamıyor; bu nedenle fiddle'lar başlatılamıyor: Electron Fiddle'ın kamera, mikrofon ve diğer izinlerini paylaşmış olurlardı. Electron Fiddle'ı yeniden yükleyin.",
   "downloading": "Electron {{version}} indiriliyor…",
-  "downloadFailed": "Electron {{version}} indirilemedi: {{message}}",
   "installingModules": "Paketler {{pm}} ile yükleniyor…",
   "installingModulesNoScripts": "Paketler {{pm}} ile yükleniyor. Bu fiddle güvenilir olmadığından yükleme betikleri kapalı.",
   "modulesFailed": "Paketler yüklenemedi: {{message}}",
   "pmMissing": "{{pm}} bulunamadı. Paketleri kullanmak için yükleyin: {{url}}",
-  "versionUnavailable": "Electron {{version}} bu bilgisayarda çalışamaz.",
-  "versionUnknown": "Electron {{version}} bilinen bir sürüm değil.",
-  "localBuildMissing": "“{{name}}” yerel derlemesinde Electron ikili dosyası yok.",
   "esmNeeds28": "main.mjs için Electron 28 veya üzeri gerekir.",
   "envInvalid": "Okunamayan ortam girdileri atlandı: {{entries}}",
   "envBlocked": "Fiddle'ların ayarlayamadığı ortam değişkenleri atlandı; çünkü bunlar Electron'a kod yükler veya Electron'un başlatılma biçimini değiştirir: {{keys}}",
@@ -39,6 +35,5 @@
   "bisectTooFew": "Bisect için sorunsuz ve sorunlu sürümler arasında en az iki sürüm gerekir.",
   "bisectGoodNotOlder": "Sorunsuz sürüm, sorunlu sürümden eski olmalıdır.",
   "openCompareMessage": "GitHub'da karşılaştırma açılsın mı?",
-  "openCompareButton": "Aç",
-  "cancel": "İptal"
+  "openCompareButton": "Aç"
 }

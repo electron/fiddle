@@ -8,14 +8,10 @@
   "runFailed": "Не удалось запустить fiddle: {{message}}",
   "privacyHelperMissing": "Вспомогательная программа конфиденциальности ({{path}}) отсутствует или не запускается, поэтому fiddle не могут стартовать: иначе они получили бы разрешения Electron Fiddle на камеру, микрофон и другие. Переустановите Electron Fiddle.",
   "downloading": "Скачивание Electron {{version}}…",
-  "downloadFailed": "Не удалось скачать Electron {{version}}: {{message}}",
   "installingModules": "Установка пакетов с помощью {{pm}}…",
   "installingModulesNoScripts": "Установка пакетов с помощью {{pm}}. Скрипты установки отключены, так как этому fiddle не доверяют.",
   "modulesFailed": "Не удалось установить пакеты: {{message}}",
   "pmMissing": "{{pm}} не найден. Установите его, чтобы использовать пакеты: {{url}}",
-  "versionUnavailable": "Electron {{version}} не может работать на этом компьютере.",
-  "versionUnknown": "Electron {{version}} — неизвестный выпуск.",
-  "localBuildMissing": "В локальной сборке «{{name}}» отсутствует исполняемый файл Electron.",
   "esmNeeds28": "Для main.mjs нужен Electron 28 или новее.",
   "envInvalid": "Пропущены записи среды, которые не удалось прочитать: {{entries}}",
   "envBlocked": "Пропущены переменные среды, которые fiddle не могут задавать, так как они загружают код в Electron или меняют его запуск: {{keys}}",
@@ -39,6 +35,5 @@
   "bisectTooFew": "Для бинарного поиска нужно не менее двух версий между хорошей и плохой.",
   "bisectGoodNotOlder": "Хорошая версия должна быть старше плохой.",
   "openCompareMessage": "Открыть сравнение на GitHub?",
-  "openCompareButton": "Открыть",
-  "cancel": "Отмена"
+  "openCompareButton": "Открыть"
 }

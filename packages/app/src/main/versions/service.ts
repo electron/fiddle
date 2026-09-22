@@ -65,84 +65,58 @@ export function createInstaller(
 
 type FetchList = (url: string, init?: { signal?: AbortSignal }) => Promise<Response>;
 
-interface ReleaseListText {
+interface ReleaseList {
   text: string;
-  data: unknown[];
+  rows: ReleaseRow[];
+}
+
+/** The rows of a releases.json text, for this platform; undefined if it isn't one. */
+function parseReleases(text: string): ReleaseList | undefined {
+  const data: unknown = JSON.parse(text);
+  if (!isReleaseList(data)) return undefined;
+  const { platform, arch } = process;
+  const numStableBranches = process.env.NUM_STABLE_BRANCHES;
+  return { text, rows: toReleaseRows(data, { platform, arch, numStableBranches }) };
 }
 
 /** ISO dates sort as text. */
-function newestDate(data: readonly unknown[]): string {
-  let newest = '';
-  for (const entry of data) {
-    const date = (entry as { date?: unknown }).date;
-    if (typeof date === 'string' && date > newest) newest = date;
-  }
-  return newest;
-}
+const newestDate = (rows: readonly ReleaseRow[]) =>
+  rows.reduce((newest, row) => (row.date > newest ? row.date : newest), '');
 
 /**
  * The cached release list, or the bundled snapshot when there is none or the
  * app shipped a newer one. `fresh`: the cache is young enough to skip a fetch.
  */
-async function readReleaseListText(
+export async function readReleaseList(
   cache: CachePaths,
-): Promise<ReleaseListText & { fresh: boolean }> {
-  const snapshot = JSON.parse(snapshotText) as unknown[];
+): Promise<ReleaseList & { fresh: boolean }> {
+  const snapshot = parseReleases(snapshotText)!;
   try {
-    const text = await fsp.readFile(cache.releases, 'utf8');
-    const data: unknown = JSON.parse(text);
-    if (isReleaseList(data) && newestDate(data) >= newestDate(snapshot)) {
+    const cached = parseReleases(await fsp.readFile(cache.releases, 'utf8'));
+    if (cached && newestDate(cached.rows) >= newestDate(snapshot.rows)) {
       const age = Date.now() - (await fsp.stat(cache.releases)).mtimeMs;
-      return { text, data, fresh: age >= 0 && age < RELEASES_TTL_MS };
+      return { ...cached, fresh: age >= 0 && age < RELEASES_TTL_MS };
     }
   } catch {
     // No usable cached list.
   }
-  return { text: snapshotText, data: snapshot, fresh: false };
+  return { ...snapshot, fresh: false };
 }
 
-async function fetchReleaseListText(
-  url: string,
-  fetch: FetchList,
-): Promise<ReleaseListText> {
-  const response = await fetch(url, { signal: AbortSignal.timeout(RELEASES_TIMEOUT_MS) });
-  if (!response.ok) throw new Error(`HTTP ${response.status}`);
-  const text = await response.text();
-  const data: unknown = JSON.parse(text);
-  if (!isReleaseList(data)) throw new Error('Unexpected release list');
-  return { text, data };
-}
-
-/** Caches the list. A failed write is only logged: the fetched list is still good. */
-function cacheReleaseList(cache: CachePaths, text: string): Promise<void> {
-  return writeAtomic(cache.releases, text).catch((error: unknown) =>
-    log.warn('caching the release list failed', error),
-  );
-}
-
-export async function readReleaseList(cache: CachePaths): Promise<unknown[]> {
-  return (await readReleaseListText(cache)).data;
-}
-
-/** Fetches releases.json and caches it. Throws on failure. */
+/** Fetches releases.json and caches its text. Throws when the fetch fails; a failed write is only logged. */
 export async function fetchReleaseList(
   cache: CachePaths,
   url: string,
   fetch: FetchList,
-): Promise<unknown[]> {
-  const { text, data } = await fetchReleaseListText(url, fetch);
-  await cacheReleaseList(cache, text);
-  return data;
-}
-
-export function loadReleases(data: unknown[]): ReleaseRow[] {
-  return isReleaseList(data)
-    ? toReleaseRows(data, {
-        platform: process.platform,
-        arch: process.arch,
-        numStableBranches: process.env.NUM_STABLE_BRANCHES,
-      })
-    : [];
+): Promise<ReleaseList> {
+  const response = await fetch(url, { signal: AbortSignal.timeout(RELEASES_TIMEOUT_MS) });
+  if (!response.ok) throw new Error(`HTTP ${response.status}`);
+  const list = parseReleases(await response.text());
+  if (!list) throw new Error('Unexpected release list');
+  await writeAtomic(cache.releases, list.text).catch((error: unknown) =>
+    log.warn('caching the release list failed', error),
+  );
+  return list;
 }
 
 /** `@electron/get` appends the version folder to a mirror as is, so it needs its trailing slash. */
@@ -197,14 +171,25 @@ export async function installRelease(
   },
 ): Promise<string> {
   const { onProgress, signal } = options;
-  const exec = await installer.install(version, {
-    mirror: options.mirror,
-    progressCallback: ({ percent }) => onProgress?.(percent),
-    ...(signal ? { signal } : {}),
-  });
-  const zip = `electron-v${version}-${process.platform}-${process.arch}.zip`;
-  await fsp.rm(path.join(cache.downloads, zip), { force: true }).catch(() => {});
-  return exec;
+  try {
+    const exec = await installer.install(version, {
+      mirror: options.mirror,
+      progressCallback: ({ percent }) => onProgress?.(percent),
+      ...(signal ? { signal } : {}),
+    });
+    const zip = `electron-v${version}-${process.platform}-${process.arch}.zip`;
+    await fsp.rm(path.join(cache.downloads, zip), { force: true }).catch(() => {});
+    return exec;
+  } catch (error) {
+    if (signal?.aborted) throw error;
+    // The installer's errors aren't FiddleErrors, so say what failed rather than "internal".
+    log.warn(`downloading ${version} failed`, error);
+    const message = FiddleError.from(error).message;
+    throw new FiddleError(
+      ErrorCode.network,
+      tm('mainVersions')('downloadFailed', { version, message }),
+    );
+  }
 }
 
 export function installedExecPath(
@@ -262,8 +247,8 @@ export class VersionsService {
 
   /** Refreshes in the background unless the cached list is fresh. */
   async init(): Promise<void> {
-    const { text, data, fresh } = await readReleaseListText(this.#options.cache);
-    await this.#setReleases(data, text);
+    const { fresh, ...list } = await readReleaseList(this.#options.cache);
+    this.#setReleases(list);
     if (fresh) return;
     this.refresh().catch((error: unknown) =>
       log.warn('refreshing the release list failed', error),
@@ -281,27 +266,28 @@ export class VersionsService {
   /** Fetches releases.json and caches it. Throws when the fetch fails. */
   async refresh(): Promise<void> {
     const { cache, releasesUrl, fetch } = this.#options;
-    const { text, data } = await fetchReleaseListText(releasesUrl, fetch).catch(
+    // Cached also when unchanged: the file's age is what tells `init` the list is fresh.
+    const list = await fetchReleaseList(cache, releasesUrl, fetch).catch(
       (error: unknown) => {
         throw new FiddleError(ErrorCode.network, tm('mainVersions')('refreshFailed'), {
           cause: error instanceof Error ? error.message : String(error),
         });
       },
     );
-    if (text !== this.#releasesText) await this.#setReleases(data, text);
-    // Also when unchanged: the file's age is what tells `init` the list is fresh.
-    await cacheReleaseList(cache, text);
-  }
-
-  state(version: string): InstallState {
-    return this.installer.state(version);
+    if (list.text !== this.#releasesText) this.#setReleases(list);
   }
 
   execPath(version: string): string | undefined {
     return installedExecPath(this.installer, this.#options.cache, version);
   }
 
+  /** Resolves with the executable. A version the release list lacks is `notFound`. */
   async install(version: string, signal?: AbortSignal): Promise<string> {
+    if (!this.release(version))
+      throw new FiddleError(
+        ErrorCode.notFound,
+        tm('mainVersions')('versionUnknown', { version }),
+      );
     return installRelease(this.installer, this.#options.cache, version, {
       mirror: this.#mirrors(),
       onProgress: (fraction) => this.#progress(version, fraction),
@@ -328,17 +314,12 @@ export class VersionsService {
     try {
       for (const version of versions) {
         if (controller.signal.aborted) break;
-        if (
-          !this.release(version)?.supported ||
-          this.state(version) === InstallState.installed
-        )
-          continue;
+        if (!this.release(version)?.supported || this.isInstalled(version)) continue;
         try {
           await this.install(version, controller.signal);
-        } catch (error) {
+        } catch {
           if (controller.signal.aborted) break;
           this.#downloadAllFailed = true;
-          log.warn(`downloading ${version} failed`, error);
         }
       }
     } finally {
@@ -474,8 +455,8 @@ export class VersionsService {
     this.#options.onRemoved?.(version);
   }
 
-  async #setReleases(data: unknown[], text: string): Promise<void> {
-    this.#rows = loadReleases(data);
+  #setReleases({ rows, text }: ReleaseList): void {
+    this.#rows = rows;
     this.#releasesText = text;
     for (const { version } of this.#rows) {
       const state = this.installer.state(version);

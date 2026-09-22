@@ -9,14 +9,10 @@ export default {
   "runFailed": "Couldn't run the fiddle: {{message}}",
   "privacyHelperMissing": "The privacy helper ({{path}}) is missing or can't run, so fiddles can't start: they would share Electron Fiddle's camera, microphone and other permissions. Reinstall Electron Fiddle.",
   "downloading": "Downloading Electron {{version}}…",
-  "downloadFailed": "Couldn't download Electron {{version}}: {{message}}",
   "installingModules": "Installing packages with {{pm}}…",
   "installingModulesNoScripts": "Installing packages with {{pm}}. Install scripts are off because this fiddle isn't trusted.",
   "modulesFailed": "Installing packages failed: {{message}}",
   "pmMissing": "{{pm}} wasn't found. Install it to use packages: {{url}}",
-  "versionUnavailable": "Electron {{version}} can't run on this computer.",
-  "versionUnknown": "Electron {{version}} isn't a known release.",
-  "localBuildMissing": "The local build “{{name}}” is missing its Electron binary.",
   "esmNeeds28": "main.mjs needs Electron 28 or later.",
   "envInvalid": "Skipped environment entries that couldn't be read: {{entries}}",
   "envBlocked": "Skipped environment variables that fiddles can't set, because they load code into Electron or change how it starts: {{keys}}",
@@ -40,6 +36,5 @@ export default {
   "bisectTooFew": "Bisect needs at least two versions between the good and bad ones.",
   "bisectGoodNotOlder": "The good version must be older than the bad one.",
   "openCompareMessage": "Open the comparison on GitHub?",
-  "openCompareButton": "Open",
-  "cancel": "Cancel"
+  "openCompareButton": "Open"
 } as const;

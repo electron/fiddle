@@ -5,11 +5,11 @@
   },
   "versionUnknown": {
     "message": "Electron {{version}} isn't a known release.",
-    "description": "Toast when a window loads or restores an Electron version that isn't in the release list. Often followed by the 'fallback' sentence."
+    "description": "Toast when a window loads or restores an Electron version that isn't in the release list, often followed by the 'fallback' sentence; also the console or CLI error when a run asks for one."
   },
   "versionUnsupported": {
     "message": "Electron {{version}} can't run on this computer.",
-    "description": "Toast when a window loads a version this OS or processor can't run."
+    "description": "Toast when a window loads a version this OS or processor can't run; also the console or CLI error when a run asks for one."
   },
   "localBuildUnknown": {
     "message": "That local build isn't added anymore.",
@@ -17,11 +17,11 @@
   },
   "localBuildMissing": {
     "message": "The local build “{{name}}” is missing its Electron binary.",
-    "description": "Toast when the chosen local Electron build's folder no longer has Electron in it. {{name}} is the build's name."
+    "description": "Toast, or console error at run time, when the chosen local Electron build's folder no longer has Electron in it. {{name}} is the build's name."
   },
   "downloadFailed": {
     "message": "Couldn't download Electron {{version}} ({{message}}).",
-    "description": "Toast when downloading the chosen version fails. {{message}} is the error, in English."
+    "description": "Toast, console line or CLI error when downloading a version fails. {{version}} is the Electron version, {{message}} the error, in English."
   },
   "fallback": {
     "message": "{{problem}} This fiddle now uses {{fallback}}.",

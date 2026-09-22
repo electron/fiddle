@@ -1,4 +1,3 @@
-import fsp from 'node:fs/promises';
 import path from 'node:path';
 
 import { shell } from 'electron';
@@ -12,8 +11,8 @@ import {
   buildInstallCommand,
   buildRunScriptCommand,
   findPackageManager,
+  PM_INSTALL_URLS,
   runCommand,
-  type CommandLine,
   type PackageManager,
 } from '../../fiddle/modules';
 import { generatePackageJson, osUserName } from '../../fiddle/package-json';
@@ -22,9 +21,10 @@ import * as documents from '../documents/service';
 import { tm } from '../i18n';
 import { errorMessage } from '../localize-error';
 import { log } from '../log';
+import { sfwPathFor } from '../platform/sfw';
+import { makeRunDir, removeDir, toolEnv } from '../run/process';
+import type { RunService } from '../run/service';
 import type { StateHub } from '../state-hub';
-import { makeRunDir } from '../run/process';
-import { PM_INSTALL_URLS, type RunService } from '../run/service';
 import type { VersionsService } from '../versions/service';
 
 /** Fiddle projects get the Forge the app is built with. */
@@ -93,19 +93,7 @@ interface ForgeInstallOptions {
   sfwPath?: string;
 }
 
-/** The commands of a Forge task: `<pm> install` (through Socket Firewall if set), then `<pm> run package|make`. */
-export function forgeTaskCommands(
-  pm: PackageManager,
-  task: 'package' | 'make',
-  options: ForgeInstallOptions = {},
-): CommandLine[] {
-  return [
-    buildInstallCommand({ packageManager: pm, ...options }),
-    buildRunScriptCommand(pm, task),
-  ];
-}
-
-/** `<pm> install`, then `<pm> run package|make` in `dir`. Resolves with the command that failed, if any. */
+/** `<pm> install` (through Socket Firewall if set), then `<pm> run package|make` in `dir`. Resolves with the command that failed, if any. */
 export async function runForgeTask(
   dir: string,
   pm: PackageManager,
@@ -117,7 +105,8 @@ export async function runForgeTask(
   },
 ): Promise<{ command: string; code: number | string } | undefined> {
   const { ignoreScripts, sfwPath, ...commandOptions } = options;
-  for (const line of forgeTaskCommands(pm, task, { ignoreScripts, sfwPath })) {
+  const install = buildInstallCommand({ packageManager: pm, ignoreScripts, sfwPath });
+  for (const line of [install, buildRunScriptCommand(pm, task)]) {
     const result = await runCommand(line, {
       cwd: dir,
       ...commandOptions,
@@ -171,13 +160,13 @@ export async function packageFiddle(
 
     const settings = hub.app.settings;
     const pm = settings.packageManager;
-    const env = await runs.toolEnv();
+    const env = await toolEnv();
     if (!(await findPackageManager(pm, { env }))) {
       runs.log(windowId, t('pmMissing', { pm, url: PM_INSTALL_URLS[pm] }), 'error');
       return;
     }
 
-    const sfwPath = await runs.sfwPath();
+    const sfwPath = await sfwPathFor(settings.socketFirewall);
     runs.setState(windowId, { status: 'running' });
     const project = forgeProject(
       {
@@ -205,7 +194,7 @@ export async function packageFiddle(
     if (failedCommand) {
       runs.log(windowId, t('commandFailed', failedCommand), 'error');
       runs.setState(windowId, { result: 'failure' });
-      await removeProject(dir);
+      await removeDir(dir);
       return;
     }
     const out = path.join(dir, 'out');
@@ -219,17 +208,10 @@ export async function packageFiddle(
       runs.log(windowId, errorMessage(error), 'error');
     }
     runs.setState(windowId, { result: 'failure' });
-    await removeProject(dir);
+    // A project that failed to build is no use: don't leave its `node_modules` in the temp folder.
+    if (dir) await removeDir(dir);
   } finally {
     runs.release(windowId);
     runs.setState(windowId, { status: 'ready', task: 'run' });
   }
-}
-
-/** A project that failed to build is no use: don't leave its `node_modules` in the temp folder. */
-async function removeProject(dir: string | undefined): Promise<void> {
-  if (dir === undefined) return;
-  await fsp
-    .rm(dir, { recursive: true, force: true, maxRetries: 5, retryDelay: 200 })
-    .catch((error: unknown) => log.warn('removing the project failed', dir, error));
 }
