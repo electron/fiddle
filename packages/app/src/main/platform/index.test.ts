@@ -19,6 +19,7 @@ const mocks = vi.hoisted(() => ({
   showMessageBox: vi.fn(async (_options: unknown) => ({ response: 0 })),
   testMode: false,
   stubExists: true,
+  log: { warn: vi.fn(), error: vi.fn() },
 }));
 
 vi.mock('electron', () => ({
@@ -26,8 +27,10 @@ vi.mock('electron', () => ({
   dialog: { showMessageBox: mocks.showMessageBox },
 }));
 vi.mock('node:fs', () => ({ default: { existsSync: () => mocks.stubExists } }));
-vi.mock('../i18n');
-vi.mock('../log');
+// Inline factories, not the shared __mocks__ files: the vi.resetModules() below
+// re-resolves a file mock, and on Windows that resolution fails.
+vi.mock('../i18n', () => ({ tm: () => (key: string) => key }));
+vi.mock('../log', () => ({ log: mocks.log }));
 vi.mock('../test-mode', () => ({ isTestMode: () => mocks.testMode }));
 vi.mock('../crash/sentry', () => ({ applyCrashReportsSetting: () => undefined }));
 vi.mock('../migration', () => ({ importElectronVersionsInBackground: () => undefined }));
@@ -42,7 +45,6 @@ import {
   registerProtocolClient,
   setupAboutPanel,
 } from './index';
-import { log } from '../log';
 
 const realPlatform = process.platform;
 const setPlatform = (value: NodeJS.Platform) =>
@@ -153,7 +155,7 @@ describe('registerProtocolClient', () => {
       throw new Error('access denied');
     });
     expect(() => registerProtocolClient()).not.toThrow();
-    expect(log.warn).toHaveBeenCalled();
+    expect(mocks.log.warn).toHaveBeenCalled();
   });
 });
 
@@ -177,7 +179,7 @@ describe('offerMoveToApplications', () => {
       throw new Error('not authorised');
     });
     await expect(offerMoveToApplications(true)).resolves.toBeUndefined();
-    expect(log.error).toHaveBeenCalled();
+    expect(mocks.log.error).toHaveBeenCalled();
   });
 
   it('never asks on a later launch, elsewhere than macOS, in dev, in tests, or from /Applications', async () => {
