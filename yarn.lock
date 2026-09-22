@@ -2548,6 +2548,7 @@ __metadata:
     electron: "npm:^44.3.0"
     i18next: "npm:^26.4.2"
     monaco-editor: "npm:^0.56.0"
+    prettier: "npm:^3.9.6"
     react: "npm:^19.2.8"
     react-aria-components: "npm:^1.21.1"
     react-dom: "npm:^19.2.8"
