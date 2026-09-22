@@ -2,6 +2,8 @@ import { documentsApi } from '../../ipc/renderer';
 import { createStore, useStore } from '../store';
 import type { monaco } from './monaco';
 
+type Editor = monaco.editor.IStandaloneCodeEditor;
+
 export interface EditorViewState {
   softWrap: boolean;
   minimap: boolean;
@@ -13,7 +15,9 @@ export type EditorCursor = { file: string; line: number; column: number } | null
 const view = createStore<EditorViewState>({ softWrap: true, minimap: false });
 // Its own store: it changes on every keystroke, and only the status bar's position readout follows it.
 const cursor = createStore<EditorCursor>(null);
-let focused: monaco.editor.IStandaloneCodeEditor | null = null;
+/** Every pane's editor, first pane first. */
+const editors = new Set<Editor>();
+let focused: Editor | null = null;
 
 const set = (patch: Partial<EditorViewState>) => view.set({ ...view.get(), ...patch });
 
@@ -30,14 +34,29 @@ export function setCursor(file: string, line: number, column: number): void {
   cursor.set({ file, line, column });
 }
 
-export function setFocusedEditor(editor: monaco.editor.IStandaloneCodeEditor): void {
+export function addEditor(editor: Editor): void {
+  editors.add(editor);
+}
+
+export function setFocusedEditor(editor: Editor): void {
   focused = editor;
 }
 
-/** The focused editor's actions, for the command palette. Empty if Monaco refuses, so the palette still opens. */
+/** A disposed editor stops being a target; another pane's editor that had focus keeps it. */
+export function removeEditor(editor: Editor): void {
+  editors.delete(editor);
+  if (focused === editor) focused = null;
+}
+
+/** The editor that commands act on: the last one with text focus, else the first pane's. */
+export function targetEditor(): Editor | null {
+  return focused ?? editors.values().next().value ?? null;
+}
+
+/** The target editor's actions, for the command palette. Empty if Monaco refuses, so the palette still opens. */
 export function getEditorActions(): { id: string; label: string; run(): unknown }[] {
   try {
-    return (focused?.getSupportedActions() ?? []).map((action) => ({
+    return (targetEditor()?.getSupportedActions() ?? []).map((action) => ({
       id: action.id,
       label: action.label,
       run: () => action.run(),
@@ -83,11 +102,6 @@ export async function renameFile(from: string, to: string): Promise<void> {
   }
 }
 
-/** A disposed editor stops being the focused one; another pane's editor stays it. */
-export function clearFocusedEditor(editor: monaco.editor.IStandaloneCodeEditor): void {
-  if (focused === editor) focused = null;
-}
-
 export async function formatFocusedEditor(): Promise<void> {
-  await focused?.getAction('editor.action.formatDocument')?.run();
+  await targetEditor()?.getAction('editor.action.formatDocument')?.run();
 }

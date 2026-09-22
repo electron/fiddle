@@ -9,13 +9,7 @@ interface FakeEditor {
   setPosition: ReturnType<typeof vi.fn>;
   getSelections: () => Array<{ containsPosition: (position: unknown) => boolean }>;
   /** What Monaco would emit: the listeners the command module registered on this editor. */
-  emit: {
-    focus?: () => void;
-    dispose?: () => void;
-    contextMenu?: (event: unknown) => void;
-  };
-  onDidFocusEditorWidget: (listener: () => void) => void;
-  onDidDispose: (listener: () => void) => void;
+  emit: { contextMenu?: (event: unknown) => void };
   onContextMenu: (listener: (event: unknown) => void) => void;
 }
 
@@ -68,6 +62,7 @@ vi.mock('../../editor/monaco', () => ({
   },
 }));
 
+import { addEditor, removeEditor, setFocusedEditor } from '../../editor/editor-state';
 import { useTabFocusMode, useWindowCommands } from './window-commands';
 
 const seen: boolean[] = [];
@@ -87,17 +82,16 @@ function fakeEditor(): FakeEditor {
     setPosition: vi.fn(),
     getSelections: () => [],
     emit,
-    onDidFocusEditorWidget: (listener) => (emit.focus = listener),
-    onDidDispose: (listener) => (emit.dispose = listener),
     onContextMenu: (listener) => (emit.contextMenu = listener),
   };
 }
-/** Editors the command module has heard of; it may remember one as the last focused. */
+/** Editors a pane mounted; one may be remembered as the last focused. */
 const created: FakeEditor[] = [];
-/** An editor Monaco just created, as the command module hears of it. */
+/** An editor Monaco just created for a pane, as the command module and the editor state hear of it. */
 function createEditor(): FakeEditor {
   const editor = fakeEditor();
   mocks.onCreate?.(editor);
+  addEditor(editor as never);
   created.push(editor);
   return editor;
 }
@@ -135,9 +129,9 @@ beforeEach(() => {
 });
 afterEach(() => {
   vi.restoreAllMocks();
-  // The module keeps tab-focus mode and the last focused editor between tests: put both back.
+  // The modules keep tab-focus mode and the editors between tests: put both back.
   if (seen.at(-1)) send('editor.toggleTabFocus');
-  for (const editor of created.splice(0)) editor.emit.dispose?.();
+  for (const editor of created.splice(0)) removeEditor(editor as never);
 });
 
 describe('window commands', () => {
@@ -173,10 +167,11 @@ describe('window commands', () => {
     expect(document.execCommand).toHaveBeenNthCalledWith(2, 'selectAll');
   });
 
-  it('sends Edit menu commands inside the editor, and editor commands anywhere, to the editor that last had focus', () => {
+  it('sends Edit menu commands inside the editor, and editor commands anywhere, to the editor that last had focus, or else the first pane’s', () => {
     render(<Probe />);
+    const other = createEditor();
     const editor = createEditor();
-    editor.emit.focus?.();
+    setFocusedEditor(editor as never);
     document.getElementById('monaco')?.focus();
     send('edit.redo');
     expect(document.execCommand).not.toHaveBeenCalled();
@@ -190,10 +185,14 @@ describe('window commands', () => {
       'editor.action.revealDefinition',
       null,
     );
-    // Once that editor is gone there is nowhere to send them.
-    editor.emit.dispose?.();
+    // Once that editor is gone they go to the pane that is left, then nowhere.
+    removeEditor(editor as never);
     send('editor.findReferences');
     expect(editor.trigger).toHaveBeenCalledTimes(2);
+    expect(other.trigger).toHaveBeenCalledOnce();
+    removeEditor(other as never);
+    send('editor.findReferences');
+    expect(other.trigger).toHaveBeenCalledOnce();
   });
 
   it('moves the cursor to a right-click outside the selection before the native menu opens, like Monaco’s own menu', () => {

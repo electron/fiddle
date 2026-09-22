@@ -18,6 +18,7 @@ export function HistoryDialog({ onClose }: { onClose: () => void }) {
   const { t } = useTranslation('gists');
   const { formatDate } = useFormat();
   const [state, setState] = useState<State>({ status: 'loading' });
+  const [loadingSha, setLoadingSha] = useState<string | null>(null);
 
   useEffect(() => {
     let live = true;
@@ -35,13 +36,16 @@ export function HistoryDialog({ onClose }: { onClose: () => void }) {
   }, []);
 
   const load = (history: History, sha: string) => {
-    if (sha === history.activeSha) return;
-    documentsApi.LoadGist(history.id, sha).then(onClose, (error: unknown) =>
+    // One load at a time: it may be waiting on the network or an unsaved-changes prompt.
+    if (sha === history.activeSha || loadingSha !== null) return;
+    setLoadingSha(sha);
+    documentsApi.LoadGist(history.id, sha).then(onClose, (error: unknown) => {
+      setLoadingSha(null);
       showToast({
         tone: 'error',
         title: t('loadFailed', { message: FiddleError.from(error).message }),
-      }),
-    );
+      });
+    });
   };
 
   return (
@@ -76,7 +80,7 @@ export function HistoryDialog({ onClose }: { onClose: () => void }) {
         <List
           aria-label={t('historyListLabel')}
           className={styles.history}
-          value={state.history.activeSha ?? null}
+          value={loadingSha ?? state.history.activeSha ?? null}
           onChange={(sha) => load(state.history, sha)}
         >
           {[...state.history.revisions].reverse().map((revision) => (

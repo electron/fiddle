@@ -53,6 +53,22 @@ describe('Keybindings recorder', () => {
     expect(document.activeElement).toBe(change());
   });
 
+  it('stores no override for the default recorded again in another modifier order', () => {
+    render(<KeybindingsSection />);
+    fireEvent.click(
+      document.querySelector<HTMLElement>('[data-command="editor.format"] button')!,
+    );
+    // Format document is `Shift+Alt+F`; the recorder writes Alt first.
+    fireEvent.keyDown(recorder()!, {
+      key: 'F',
+      code: 'KeyF',
+      altKey: true,
+      shiftKey: true,
+    });
+    const [, overrides] = mocks.settingsApi.SetSetting.mock.calls[0]!;
+    expect(overrides).not.toHaveProperty(['editor.format']);
+  });
+
   it('records a function key without a modifier', () => {
     render(<KeybindingsSection />);
     fireEvent.keyDown(startRecording(), { key: 'F7', code: 'F7' });

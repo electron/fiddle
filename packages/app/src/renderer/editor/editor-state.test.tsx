@@ -9,15 +9,17 @@ const mocks = vi.hoisted(() => ({
 vi.mock('../../ipc/renderer', () => ({ documentsApi: { RenameFile: mocks.RenameFile } }));
 
 import {
-  clearFocusedEditor,
+  addEditor,
   formatFocusedEditor,
   getEditorActions,
   getViewState,
   releaseViewState,
+  removeEditor,
   renameFile,
   saveViewState,
   setCursor,
   setFocusedEditor,
+  targetEditor,
   useEditorCursor,
 } from './editor-state';
 import type { monaco } from './monaco';
@@ -34,11 +36,13 @@ function fakeEditor(actions: Record<string, () => unknown>) {
 
 beforeEach(() => vi.clearAllMocks());
 
-describe('the focused editor', () => {
-  it('lends its actions to the command palette until it is disposed', async () => {
+describe('the target editor', () => {
+  it('is the last one with text focus, and lends its actions to the command palette until it is disposed', async () => {
     const format = vi.fn();
     const first = fakeEditor({ 'editor.action.formatDocument': format, fold: vi.fn() });
     const second = fakeEditor({});
+    addEditor(first);
+    addEditor(second);
     setFocusedEditor(first);
     expect(getEditorActions().map((action) => action.id)).toEqual([
       'editor.action.formatDocument',
@@ -50,12 +54,23 @@ describe('the focused editor', () => {
     await formatFocusedEditor();
     expect(format).toHaveBeenCalledTimes(2);
 
-    // Another pane's editor going away leaves the focused one alone.
-    clearFocusedEditor(second);
-    expect(getEditorActions()).toHaveLength(2);
-    clearFocusedEditor(first);
+    // The focused one going away makes the remaining pane's editor the target.
+    removeEditor(first);
+    expect(targetEditor()).toBe(second);
     expect(getEditorActions()).toEqual([]);
+    removeEditor(second);
+    expect(targetEditor()).toBeNull();
     await expect(formatFocusedEditor()).resolves.toBeUndefined();
+  });
+
+  it('is the first pane’s editor before any had focus', () => {
+    const first = fakeEditor({});
+    const second = fakeEditor({});
+    addEditor(first);
+    addEditor(second);
+    expect(targetEditor()).toBe(first);
+    removeEditor(first);
+    removeEditor(second);
   });
 });
 

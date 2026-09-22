@@ -455,6 +455,19 @@ describe('Text and list settings', () => {
     expect(mocks.settingsApi.SetSetting).toHaveBeenLastCalledWith('editorFontSize', null);
   });
 
+  it('sends a typed value when the page closes under the field', () => {
+    const view = render(<SettingsPage />);
+    fireEvent.change(editorField('editorFontFamily.title'), {
+      target: { value: 'Menlo' },
+    });
+    expect(mocks.settingsApi.SetSetting).not.toHaveBeenCalled();
+    view.unmount();
+    expect(mocks.settingsApi.SetSetting).toHaveBeenCalledWith(
+      'editorFontFamily',
+      'Menlo',
+    );
+  });
+
   it('holds an invalid environment variable back and sends the valid list', () => {
     render(<SettingsPage />);
     fireEvent.click(screen.getByRole('button', { name: 'section.execution' }));
