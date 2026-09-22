@@ -53,10 +53,6 @@ vi.mock('../../../ui', async (importOriginal) => ({
 vi.mock('../../../ipc/renderer', () => ({
   settingsApi: mocks.settingsApi,
   appPlatformApi: mocks.appPlatformApi,
-  appApi: {
-    GetAppInfo: () =>
-      Promise.resolve({ name: 'Fiddle', version: '1.0.0', electronVersion: '44.0.0' }),
-  },
   windowApi: { RunCommand: mocks.RunCommand },
 }));
 vi.mock('../../state', () => ({
@@ -88,6 +84,7 @@ beforeEach(() => {
     rev: storeRev,
     locale: 'en',
     platform: 'linux',
+    about: { name: 'Fiddle', version: '1.0.0', electron: '44.0.0' },
     settings: { ...defaultSettings, packageManager: 'yarn' },
     themes: [],
     screenReaderActive: false,

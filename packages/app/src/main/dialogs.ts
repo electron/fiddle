@@ -23,7 +23,8 @@ export function messageBox(
   options: MessageBoxOptions,
 ): Promise<MessageBoxReturnValue> {
   const win = parentOf(parent);
-  return win ? dialog.showMessageBox(win, options) : dialog.showMessageBox(options);
+  const box = { noLink: true, ...options };
+  return win ? dialog.showMessageBox(win, box) : dialog.showMessageBox(box);
 }
 
 /** Two buttons, `ok` and Cancel. Resolves true for `ok`. Enter chooses `ok`; pass `defaultId: 1` when it loses data or is hard to undo. */
@@ -37,7 +38,6 @@ export async function confirm(
     ...options,
     buttons: [ok, t('cancel')],
     cancelId: 1,
-    noLink: true,
   });
   return response === 0;
 }

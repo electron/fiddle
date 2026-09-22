@@ -9,7 +9,7 @@ import {
 import { useTranslation } from 'react-i18next';
 import { Dialog, Modal, ModalOverlay } from 'react-aria-components';
 
-import { documentsApi, onboardingApi, windowApi } from '../../../ipc/renderer';
+import { appPlatformApi, documentsApi, windowApi } from '../../../ipc/renderer';
 import { Button } from '../../../ui';
 import { useWindowState } from '../../state';
 import { toastError } from '../../toast-error';
@@ -173,7 +173,7 @@ export function OnboardingTour() {
 
   useEffect(() => {
     let live = true;
-    onboardingApi.ShouldOfferTour().then(
+    appPlatformApi.ShouldOfferTour().then(
       (offer) =>
         live && offer && setMode((current) => (current === 'off' ? 'offer' : current)),
       (error: unknown) => console.error('[fiddle] checking the tour offer failed', error),
@@ -202,7 +202,7 @@ export function OnboardingTour() {
 
   const finish = useCallback(() => {
     setMode('off');
-    onboardingApi.SetTourDone().catch(toastError);
+    appPlatformApi.SetTourDone().catch(toastError);
     if (returnTo.current) documentsApi.SetActiveFile(returnTo.current).catch(toastError);
     returnTo.current = null;
   }, []);

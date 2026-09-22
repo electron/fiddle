@@ -2,10 +2,10 @@
 
 import { app as $$app$$ } from 'electron';
 export * from '../common/fiddle.js';
-import type { AppState, WindowState, CommandId, FocusContext, MenuItemId, AppInfo, IAppImpl, IAppRenderer, IWindowImpl, IWindowRenderer, FileMapValue, WindowLayout, WindowView, FileName, ShortText, IDocumentsImpl, IDocumentsRenderer, SettingKey, SettingValue, ThemeData, ThemeSnapshot, ThemeId, NoticeId, ISettingsImpl, ISettingsRenderer, PackageSearchResults, PackageVersions, PackageName, PackageQuery, VersionSpec, IModulesImpl, IModulesRenderer, IOnboardingImpl, IOnboardingRenderer, ReleaseList, VersionList, VersionRefValue, OutputLines, EditorTypes, VersionString, BuildId, IVersionsImpl, IVersionsRenderer, IRunImpl, IRunRenderer, GitHubToken, GistDescription, GistId, GitHubCredentialStorage, GitHubSignInResult, GistLinkInfo, GistRevisionInfo, GistHistoryInfo, IGitHubImpl, IGitHubRenderer, LogLevel, LogText, IAppPlatformImpl, IAppPlatformRenderer } from '../common/fiddle.js';
-import { $eipc_validator$_AppState, $eipc_validator$_WindowState, $eipc_validator$_CommandId, $eipc_validator$_FocusContext, $eipc_validator$_MenuItemId, $eipc_validator$_AppInfo, $eipc_validator$_FileMapValue, $eipc_validator$_WindowLayout, $eipc_validator$_WindowView, $eipc_validator$_FileName, $eipc_validator$_ShortText, $eipc_validator$_SettingKey, $eipc_validator$_SettingValue, $eipc_validator$_ThemeData, $eipc_validator$_ThemeSnapshot, $eipc_validator$_ThemeId, $eipc_validator$_NoticeId, $eipc_validator$_PackageSearchResults, $eipc_validator$_PackageVersions, $eipc_validator$_PackageName, $eipc_validator$_PackageQuery, $eipc_validator$_VersionSpec, $eipc_validator$_ReleaseList, $eipc_validator$_VersionList, $eipc_validator$_VersionRefValue, $eipc_validator$_OutputLines, $eipc_validator$_EditorTypes, $eipc_validator$_VersionString, $eipc_validator$_BuildId, $eipc_validator$_GitHubToken, $eipc_validator$_GistDescription, $eipc_validator$_GistId, $eipc_validator$_GitHubCredentialStorage, $eipc_validator$_GitHubSignInResult, $eipc_validator$_GistLinkInfo, $eipc_validator$_GistRevisionInfo, $eipc_validator$_GistHistoryInfo, $eipc_validator$_LogLevel, $eipc_validator$_LogText } from '../common-runtime/fiddle.js';
+import type { AppState, WindowState, CommandId, FocusContext, MenuItemId, IAppImpl, IAppRenderer, IWindowImpl, IWindowRenderer, FileMapValue, WindowLayout, WindowView, FileName, ShortText, IDocumentsImpl, IDocumentsRenderer, SettingKey, SettingValue, ThemeData, ThemeSnapshot, ThemeId, NoticeId, ISettingsImpl, ISettingsRenderer, PackageSearchResults, PackageVersions, PackageName, PackageQuery, VersionSpec, IModulesImpl, IModulesRenderer, ReleaseList, VersionList, VersionRefValue, OutputLines, EditorTypes, VersionString, BuildId, IVersionsImpl, IVersionsRenderer, IRunImpl, IRunRenderer, GitHubToken, GistDescription, GistId, GitHubCredentialStorage, GitHubSignInResult, GistLinkInfo, GistRevisionInfo, GistHistoryInfo, IGitHubImpl, IGitHubRenderer, LogLevel, LogText, IAppPlatformImpl, IAppPlatformRenderer } from '../common/fiddle.js';
+import { $eipc_validator$_AppState, $eipc_validator$_WindowState, $eipc_validator$_CommandId, $eipc_validator$_FocusContext, $eipc_validator$_MenuItemId, $eipc_validator$_FileMapValue, $eipc_validator$_WindowLayout, $eipc_validator$_WindowView, $eipc_validator$_FileName, $eipc_validator$_ShortText, $eipc_validator$_SettingKey, $eipc_validator$_SettingValue, $eipc_validator$_ThemeData, $eipc_validator$_ThemeSnapshot, $eipc_validator$_ThemeId, $eipc_validator$_NoticeId, $eipc_validator$_PackageSearchResults, $eipc_validator$_PackageVersions, $eipc_validator$_PackageName, $eipc_validator$_PackageQuery, $eipc_validator$_VersionSpec, $eipc_validator$_ReleaseList, $eipc_validator$_VersionList, $eipc_validator$_VersionRefValue, $eipc_validator$_OutputLines, $eipc_validator$_EditorTypes, $eipc_validator$_VersionString, $eipc_validator$_BuildId, $eipc_validator$_GitHubToken, $eipc_validator$_GistDescription, $eipc_validator$_GistId, $eipc_validator$_GitHubCredentialStorage, $eipc_validator$_GitHubSignInResult, $eipc_validator$_GistLinkInfo, $eipc_validator$_GistRevisionInfo, $eipc_validator$_GistHistoryInfo, $eipc_validator$_LogLevel, $eipc_validator$_LogText } from '../common-runtime/fiddle.js';
 import * as $eipc$ from '../browser-runtime.js';
-const $$ipcPrefix$$ = '$eipc_message$_7361c4fc-34f7-3aeb-0bcc-b81c452aecb8_$_fiddle_$_';
+const $$ipcPrefix$$ = '$eipc_message$_811a1050-1c6e-c143-ea78-7bba5a1982d7_$_fiddle_$_';
 // Interfaces are declared as data and wired up by ../browser-runtime.ts:
 //   methods: [name, [[argName, validator], ...], resultValidator?]  ([Sync] methods append null|validator, 'sync')
 //   stores:  [name, stateValidator]
@@ -26,9 +26,6 @@ export interface IAppDispatcher {
   updateAppStore(state: AppState): void;
 }
 export const App = /*#__PURE__*/ $eipc$.defineInterface<IAppImpl, IAppRenderer, IAppDispatcher>($$ipcPrefix$$, 'App', $eipc_event_validator$_MainFrame, {
-  methods: [
-    ['GetAppInfo', [], $eipc_validator$_AppInfo],
-  ],
   stores: [
     ['App', $eipc_validator$_AppState],
   ],
@@ -99,14 +96,6 @@ export const Modules = /*#__PURE__*/ $eipc$.defineInterface<IModulesImpl, IModul
     ['RemoveModule', [['name', $eipc_validator$_PackageName]], $eipc$.number],
   ],
 });
-export interface IOnboardingDispatcher {
-}
-export const Onboarding = /*#__PURE__*/ $eipc$.defineInterface<IOnboardingImpl, IOnboardingRenderer, IOnboardingDispatcher>($$ipcPrefix$$, 'Onboarding', $eipc_event_validator$_MainFrame, {
-  methods: [
-    ['ShouldOfferTour', [], $eipc$.boolean],
-    ['SetTourDone', []],
-  ],
-});
 export interface IVersionsDispatcher {
   dispatchTypesChanged(): void;
 }
@@ -169,18 +158,15 @@ export const GitHub = /*#__PURE__*/ $eipc$.defineInterface<IGitHubImpl, IGitHubR
   ],
 });
 export interface IAppPlatformDispatcher {
-  dispatchUpdateAvailable(arg_version: string): void;
 }
 export const AppPlatform = /*#__PURE__*/ $eipc$.defineInterface<IAppPlatformImpl, IAppPlatformRenderer, IAppPlatformDispatcher>($$ipcPrefix$$, 'AppPlatform', $eipc_event_validator$_MainFrame, {
   methods: [
     ['Log', [['level', $eipc_validator$_LogLevel], ['message', $eipc_validator$_LogText]]],
-    ['IsCrashReportingEnabled', [], $eipc$.boolean],
     ['OpenUpdatePage', []],
     ['TakeCrashReportsNotice', [], $eipc$.boolean],
     ['Relaunch', []],
     ['ResetPrivacyPermissions', [], $eipc$.boolean],
-  ],
-  events: [
-    ['UpdateAvailable', [['version', $eipc$.string]]],
+    ['ShouldOfferTour', [], $eipc$.boolean],
+    ['SetTourDone', []],
   ],
 });

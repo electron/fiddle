@@ -37,6 +37,7 @@ vi.mock('./features/commands/window-commands', () => ({
 }));
 vi.mock('./features/palette/CommandPalette', () => ({ CommandPalette: () => null }));
 vi.mock('./features/settings/StorageNotices', () => ({ StorageNotices: () => null }));
+vi.mock('./features/about/UpdateNotice', () => ({ UpdateNotice: () => null }));
 vi.mock('./shell/theme', () => ({ useAppearance: () => undefined }));
 vi.mock('./shell/Shell', () => ({ Shell: () => <p>the shell</p> }));
 

@@ -42,21 +42,6 @@ export interface Doc {
   approvedScripts?: boolean;
 }
 
-/** The fiddle part of a window's store before Documents fills it in. */
-export function emptyFiddleState(): FiddleState {
-  return {
-    source: { origin: 'local', trusted: true },
-    name: '',
-    versionRef: { kind: 'release', version: '' },
-    modules: {},
-    files: [],
-    activeFile: null,
-    fiddleRev: 0,
-    dirty: false,
-    dirtyFiles: [],
-  };
-}
-
 function firstVisible(fiddle: Fiddle): string | null {
   return visibleFileNames(fiddle)[0] ?? fileNames(fiddle)[0] ?? null;
 }

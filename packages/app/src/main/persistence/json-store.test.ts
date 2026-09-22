@@ -44,8 +44,7 @@ afterEach(async () => {
   await rm(dir, { recursive: true, force: true });
 });
 
-const open = (extra: Partial<Parameters<typeof createJsonStore<Data>>[0]> = {}) =>
-  createJsonStore<Data>({ file, schema, defaults, version: 2, ...extra });
+const open = () => createJsonStore<Data>({ file, schema, defaults, version: 2 });
 const readJson = async (target = file): Promise<unknown> =>
   JSON.parse(await readFile(target, 'utf8'));
 
@@ -85,7 +84,7 @@ describe('reading', () => {
     });
   });
 
-  it('drops an invalid key in memory, logs it and leaves it on disk', async () => {
+  it('drops an invalid key in memory, logs it and leaves the file alone until the next write', async () => {
     const text = JSON.stringify({ schemaVersion: 2, name: 42, count: 5 });
     await writeFile(file, text);
     const store = createJsonStore<Partial<Data>>({
@@ -104,11 +103,7 @@ describe('reading', () => {
 
     store.set((prev) => ({ ...prev, count: 6 }));
     await store.flush();
-    expect(await readJson()).toEqual({ schemaVersion: 2, name: 42, count: 6 });
-
-    store.set((prev) => ({ ...prev, name: 'fixed' }));
-    await store.flush();
-    expect(await readJson()).toEqual({ schemaVersion: 2, name: 'fixed', count: 6 });
+    expect(await readJson()).toEqual({ schemaVersion: 2, count: 6 });
   });
 
   it('replaces an invalid value passed to set with its default', async () => {
@@ -281,27 +276,24 @@ describe('versions', () => {
 });
 
 describe('writing', () => {
+  // Every write after the first leaves the file it replaced as `.bak`.
   it('coalesces a burst of writes to the latest value', async () => {
-    const writes: string[] = [];
-    const store = open({ onWrite: (text) => writes.push(text) });
+    const store = open();
     for (let i = 1; i <= 50; i++) store.set((prev) => ({ ...prev, count: i }));
     await store.flush();
-    expect(writes).toHaveLength(1);
-    expect(JSON.parse(writes[0]!)).toMatchObject({ count: 50 });
+    expect(await readJson()).toMatchObject({ count: 50 });
     expect(await readdir(dir)).toEqual(['data.json']);
   });
 
   it('writes once more when values change during a write', async () => {
-    const writes: string[] = [];
-    const store = open({ onWrite: (text) => writes.push(text) });
+    const store = open();
     store.set((prev) => ({ ...prev, count: 1 }));
     await Promise.resolve();
     await Promise.resolve();
     for (let i = 2; i <= 20; i++) store.set((prev) => ({ ...prev, count: i }));
     await store.flush();
-    expect(writes.length).toBeLessThanOrEqual(2);
-    expect(JSON.parse(writes.at(-1)!)).toMatchObject({ count: 20 });
     expect(await readJson()).toMatchObject({ count: 20 });
+    expect(await readJson(`${file}.bak`)).toMatchObject({ count: 1 });
   });
 
   it('flushAll waits for every store', async () => {

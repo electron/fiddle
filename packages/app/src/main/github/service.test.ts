@@ -9,15 +9,45 @@ import { ErrorCode, FiddleError } from '../../shared/errors';
 import { initMainI18n } from '../i18n';
 import { log } from '../log';
 import type { LoadResult } from './credentials';
-import type { GistDocuments, GistFiddle } from './documents-bridge';
 import type { GistPrefs, PublishOptions } from './service';
 import { gistFiles, GitHubService } from './service';
 
+/** The window's document, as `../documents/service` would hold it, and what publishing told it. */
+const documents = vi.hoisted(() => ({
+  fiddle: {
+    files: { 'main.js': 'console.log(1)', 'index.html': '<p>hi</p>' },
+    version: { kind: 'release' as const, version: '43.0.0' },
+    modules: { lodash: '^4.17.21' },
+    source: {} as { gistId?: string; gistRevision?: string },
+  },
+  saved: [] as unknown[],
+  sent: [] as unknown[],
+  deleted: 0,
+}));
+vi.mock('../documents/service', () => ({
+  getDoc: () => ({
+    fiddle: documents.fiddle,
+    name: 'My fiddle',
+    baseline: { 'main.js': '', 'index.html': '', 'removed.css': '' },
+    loadRev: 3,
+  }),
+  getTemplate: async () => ({
+    'main.js': '// template',
+    'preload.js': '// template',
+    'styles.css': 'body {}',
+  }),
+  markPublished: (_windowId: string, gist: unknown, sent: unknown) => {
+    documents.saved.push(gist);
+    documents.sent.push(sent);
+  },
+  markGistDeleted: () => documents.deleted++,
+}));
 vi.mock('../log', () => ({ log: { warn: vi.fn(), error: vi.fn() } }));
 
 beforeAll(async () => {
   await initMainI18n(['en']);
 });
+beforeEach(() => Object.assign(documents, { saved: [], sent: [], deleted: 0 }));
 
 const TOKEN = `ghp_${'a'.repeat(36)}`;
 const ID = '8c5fc0c6a5153d49b5a4a56d3ed9da8f';
@@ -112,59 +142,25 @@ function fakeStore(initial: LoadResult = { kind: 'none' }) {
   };
 }
 
-function fakeDocuments(
-  fiddle: Partial<GistFiddle> = {},
-): GistDocuments & { saved: unknown[]; sent: unknown[]; deleted: number } {
-  const docs = {
-    saved: [] as unknown[],
-    sent: [] as unknown[],
-    deleted: 0,
-    getFiddle: async (): Promise<GistFiddle> => ({
-      files: { 'main.js': 'console.log(1)', 'index.html': '<p>hi</p>' },
-      name: 'My fiddle',
-      versionRef: { kind: 'release', version: '43.0.0' },
-      modules: { lodash: '^4.17.21' },
-      source: {},
-      savedNames: ['main.js', 'index.html', 'removed.css'],
-      loadRev: 3,
-      ...fiddle,
-    }),
-    getTemplate: async () => ({
-      'main.js': '// template',
-      'preload.js': '// template',
-      'styles.css': 'body {}',
-    }),
-    markGistSaved: (_windowId: string, gist: unknown, sent: unknown) => {
-      docs.saved.push(gist);
-      docs.sent.push(sent);
-    },
-    markGistDeleted: () => {
-      docs.deleted++;
-    },
-  };
-  return docs;
-}
-
 function setup(
   options: {
     stored?: LoadResult;
     remote?: Record<string, string>;
     user?: () => Response;
-    fiddle?: Partial<GistFiddle>;
+    source?: { gistId?: string; gistRevision?: string };
     asRevision?: boolean;
     legacyFile?: string;
   } = {},
 ) {
   const github = fakeGitHub({ remote: options.remote, user: options.user });
   const store = fakeStore(options.stored);
-  const documents = fakeDocuments(options.fiddle);
+  documents.fiddle.source = options.source ?? {};
   const prefs = memoryPrefs({ asRevision: options.asRevision ?? true });
   const logins: Array<string | undefined> = [];
   const service = new GitHubService({
     store,
     legacyFile: options.legacyFile,
     createClient: (token) => new GitHubClient({ token, fetch: github.fetchFn }),
-    documents,
     prefs,
     setLogin: (login) => logins.push(login),
   });
@@ -312,7 +308,6 @@ describe('startup auth check', () => {
           fetch:
             token === TOKEN ? ((() => late) as unknown as typeof fetch) : github.fetchFn,
         }),
-      documents: fakeDocuments(),
       prefs: memoryPrefs(),
       setLogin: () => undefined,
     });
@@ -444,7 +439,10 @@ describe('publish', () => {
       'preload.js': null,
       'styles.css': null,
     });
-    expect(github.remote()).toEqual(gistFiles(await documents.getFiddle('w')));
+    const { version: versionRef, ...fiddle } = documents.fiddle;
+    expect(github.remote()).toEqual(
+      gistFiles({ ...fiddle, versionRef, name: 'My fiddle' }),
+    );
     expect(link).toEqual({ id: ID, url: `https://gist.github.com/${ID}` });
     expect(documents.saved).toMatchObject([
       { id: ID, owner: 'octocat', url: link.url, revision: SHA2 },
@@ -480,7 +478,6 @@ describe('publish', () => {
     const failing = new GitHubService({
       store: fakeStore(stored),
       createClient: () => client,
-      documents,
       prefs: memoryPrefs(),
       setLogin: () => undefined,
     });
@@ -546,6 +543,7 @@ describe('publish', () => {
 
 describe('update and delete', () => {
   const loaded = { source: { gistId: ID, gistRevision: SHA1 } };
+  beforeEach(() => (documents.fiddle.source = loaded.source));
 
   it('update deletes remote files that were removed locally', async () => {
     const remote = {
@@ -554,7 +552,7 @@ describe('update and delete', () => {
       'removed.css': 'x',
       'package.json': '{}',
     };
-    const { service, github, documents } = setup({ stored, remote, fiddle: loaded });
+    const { service, github, documents } = setup({ stored, remote, ...loaded });
     await service.init();
     github.calls.length = 0;
 
@@ -579,7 +577,7 @@ describe('update and delete', () => {
       'README.md': 'docs',
       'logo.png': 'png',
     };
-    const { service, github } = setup({ stored, remote, fiddle: loaded });
+    const { service, github } = setup({ stored, remote, ...loaded });
     await service.init();
 
     await service.update('w');
@@ -606,7 +604,7 @@ describe('update and delete', () => {
     const { service, github, documents } = setup({
       stored,
       remote: { 'main.js': 'x' },
-      fiddle: loaded,
+      ...loaded,
     });
     await service.init();
     await service.delete('w');
@@ -634,7 +632,6 @@ describe('update and delete', () => {
       store: fakeStore(),
       createClient: () =>
         new GitHubClient({ fetch: (async () => json(commits)) as typeof fetch }),
-      documents: fakeDocuments(loaded),
       prefs: memoryPrefs(),
       setLogin: () => undefined,
     });
