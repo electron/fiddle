@@ -36,6 +36,8 @@ const confirm = vi.fn();
 const pickFolder = vi.fn();
 /** The BrowserWindows of the tests that need one open; the rest run with every window closed. */
 const browserWindows = new Map<string, FakeWindow>();
+// Every test imports main's module graph afresh; on a busy Windows runner the first ones take seconds.
+vi.setConfig({ testTimeout: 15_000 });
 vi.mock('electron', () => ({ app, net: { fetch: vi.fn() } }));
 vi.mock('../dialogs', () => ({
   messageBox: (...args: unknown[]) => messageBox(...args),

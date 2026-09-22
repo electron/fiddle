@@ -189,11 +189,6 @@
     "description": "Develop menu command (development builds only) that shows or hides the application menu bar drawn inside the window's title bar, on any platform, without a restart. Shown with a check mark while that menu bar is visible.",
     "maxLength": 40
   },
-  "openComponentGallery": {
-    "message": "Open component gallery",
-    "description": "Develop menu command (development builds only) that opens the component gallery in a new window: a page showing every interface component of the app in each of its states.",
-    "maxLength": 40
-  },
   "undo": {
     "message": "Undo",
     "description": "Edit menu item.",

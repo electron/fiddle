@@ -25,7 +25,7 @@ function send(level: Level, message: string, details: unknown[]): void {
       .Log(level as Parameters<typeof appPlatformApi.Log>[0], text)
       .catch(() => undefined);
   } catch {
-    // The bridge throws synchronously outside an app window (tests, the gallery); a logger must not.
+    // The bridge throws synchronously outside an app window (tests); a logger must not.
   }
 }
 

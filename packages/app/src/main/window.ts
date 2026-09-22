@@ -149,8 +149,6 @@ export async function createAppWindow({
     // Closing a window aborts its operations (but not downloads).
     services.bisect.stop(windowId);
     services.runs.disposeWindow(windowId);
-    // Open only while a fiddle window is: it must not keep the app running after the last one closes.
-    if (hub.windowIds.length === 0) gallery?.close();
   });
 
   try {
@@ -210,39 +208,6 @@ export async function createAppWindow({
     return win;
   } catch (error) {
     // Not shown yet: without this an invisible window would keep the app alive.
-    win.destroy();
-    throw error;
-  }
-}
-
-/** Bundled only outside release builds (`vite.renderer.config.mts`). */
-const GALLERY_PATH = 'src/ui/gallery/index.html';
-let gallery: BrowserWindow | undefined;
-
-/** Develop > Open component gallery. No preload and no state: the page is plain UI. */
-export async function openGalleryWindow(): Promise<void> {
-  if (gallery && !gallery.isDestroyed()) {
-    gallery.show();
-    gallery.focus();
-    return;
-  }
-  const win = new BrowserWindow({
-    width: 1280,
-    height: 820,
-    show: false,
-    autoHideMenuBar: true,
-    webPreferences,
-  });
-  gallery = win;
-  win.setMenuBarVisibility(false);
-  blockNavigation(win.webContents);
-  win.once('closed', () => {
-    if (gallery === win) gallery = undefined;
-  });
-  try {
-    await win.loadURL(new URL(GALLERY_PATH, rendererEntry().url).href);
-    win.show();
-  } catch (error) {
     win.destroy();
     throw error;
   }

@@ -38,7 +38,6 @@ export default {
   "toggleDevTools": "[Ţöĝĝļé ðéṽéļöþéŕ ţööļš one two three]",
   "develop": "[Ðéṽéļöþ one]",
   "toggleMenuBar": "[Ţöĝĝļé ţîţļé ƀáŕ ɱéñû ƀáŕ one two three]",
-  "openComponentGallery": "[Öþéñ çöɱþöñéñţ ĝáļļéŕý one two three]",
   "undo": "[Ûñðö one]",
   "redo": "[Ŕéðö one]",
   "cut": "[Çûţ one]",
