@@ -41,7 +41,7 @@ function setup() {
     stopAndWait: vi.fn(async () => {}),
     /** Each run waits for the test to say how it ended. */
     run: vi.fn(
-      (_id: string, options: { versionRef: { version: string } }) =>
+      (_id: string, options: { versionRef: { version: string }; clear?: boolean }) =>
         new Promise<RunOutcome>((resolve) => {
           steps.push({ version: options.versionRef.version, resolve });
           waiters.splice(0).forEach((wake) => wake());
@@ -139,6 +139,10 @@ describe('BisectService (auto)', () => {
         versionRef: { kind: 'release', version: '1.0.0' },
         trustOperation: 'auto-bisect',
       }),
+    );
+    // Only the first step may clear the console, so the steps' verdicts stay to read.
+    expect(ctx.runs.run.mock.calls.map(([, options]) => options.clear)).toEqual(
+      ctx.runs.run.mock.calls.map((_, index) => index === 0),
     );
   });
 

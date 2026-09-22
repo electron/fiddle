@@ -45,6 +45,8 @@ interface RunOptions {
   trustOperation?: documents.CodeExecutingOperation;
   /** A console line to start the run's output with, after the console is cleared. */
   banner?: string;
+  /** False keeps the console whatever the setting says (a later bisect step, so the verdicts so far stay). */
+  clear?: boolean;
 }
 
 type ConsoleKind = OutputLine['kind'];
@@ -155,7 +157,7 @@ export class RunService {
     const abort = new AbortController();
     entry.abort = abort;
     entry.stopRequested = false;
-    if (settings.clearConsoleOnRun) this.clear(windowId);
+    if (settings.clearConsoleOnRun && options.clear !== false) this.clear(windowId);
     if (options.banner) this.log(windowId, options.banner);
     this.setState(windowId, {
       status: 'checking',
