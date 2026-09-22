@@ -18,8 +18,6 @@ const MARKERS = [
   'FIDDLE_TEST_DIR',
   'FIDDLE_TEST_FIXTURE_URL',
   'FIDDLE_TEST_MENUBAR',
-  // src/ui/gallery, a second renderer page that only non-production builds bundle
-  'Lucent gallery',
 ];
 
 const args = process.argv.slice(2).filter((arg) => arg !== '--test-build');

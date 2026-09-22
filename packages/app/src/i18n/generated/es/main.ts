@@ -38,7 +38,6 @@ export default {
   "toggleDevTools": "Alternar herramientas de desarrollo",
   "develop": "Desarrollo",
   "toggleMenuBar": "Alternar menú en la barra de título",
-  "openComponentGallery": "Abrir galería de componentes",
   "undo": "Deshacer",
   "redo": "Rehacer",
   "cut": "Cortar",

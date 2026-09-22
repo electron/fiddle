@@ -220,7 +220,6 @@ export const commands = {
   // Font changes apply after a reload; Settings offers this next to them.
   'view.reloadAllWindows': { label: 'reloadAllWindows' },
   'dev.toggleMenuBar': { label: 'toggleMenuBar', devOnly: true },
-  'dev.openGallery': { label: 'openComponentGallery', devOnly: true },
 } as const satisfies Record<string, CommandDefinition>;
 
 export type CommandId = keyof typeof commands;

@@ -38,7 +38,6 @@ export default {
   "toggleDevTools": "Geliştirici araçlarını aç/kapat",
   "develop": "Geliştir",
   "toggleMenuBar": "Başlık çubuğu menüsünü aç/kapat",
-  "openComponentGallery": "Bileşen galerisini aç",
   "undo": "Geri al",
   "redo": "Yinele",
   "cut": "Kes",

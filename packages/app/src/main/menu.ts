@@ -118,8 +118,6 @@ function developMenu(
       separator,
       command('view.reload'),
       command('view.reloadAllWindows'),
-      separator,
-      command('dev.openGallery'),
     ],
   };
 }

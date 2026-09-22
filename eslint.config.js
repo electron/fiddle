@@ -123,7 +123,7 @@ export default defineConfig(
   // No string literals in JSX text.
   {
     files: ['packages/app/src/{renderer,ui}/**/*.tsx'],
-    ignores: ['**/*.test.tsx', 'packages/app/src/ui/gallery/**'],
+    ignores: ['**/*.test.tsx'],
     plugins: { i18next },
     rules: { 'i18next/no-literal-string': ['error', { mode: 'jsx-text-only' }] },
   },

@@ -83,7 +83,7 @@ The code is `packages/app/src/main/cli/`. To add a command, add a descriptor in 
 Paths are under `packages/app/` unless noted.
 
 - `src/main/`: the main process. `index.ts` is the entry, `services.ts` creates the services, `state-hub.ts` owns the stores, `app-commands.ts` has the command handlers.
-- `src/renderer/`: the React renderer. `src/ui/`: the Lucent component library and gallery, which opens from Develop > Open component gallery.
+- `src/renderer/`: the React renderer. `src/ui/`: the Lucent component library.
 - `src/shared/`: types shared by both sides: stores, commands and endpoints.
 - `src/ipc/fiddle.eipc`: the IPC schema. The bindings in `src/ipc/generated/` are committed.
 - `src/fiddle/`: fiddle logic, plain Node. `src/i18n/`: catalogs and tooling.

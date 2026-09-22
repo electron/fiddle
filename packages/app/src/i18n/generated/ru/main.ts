@@ -38,7 +38,6 @@ export default {
   "toggleDevTools": "Переключить средства разработчика",
   "develop": "Разработка",
   "toggleMenuBar": "Переключить меню в заголовке окна",
-  "openComponentGallery": "Открыть галерею компонентов",
   "undo": "Отменить",
   "redo": "Повторить",
   "cut": "Вырезать",
