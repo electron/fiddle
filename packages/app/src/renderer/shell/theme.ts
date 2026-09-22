@@ -1,4 +1,4 @@
-import { useEffect, useLayoutEffect } from 'react';
+import { useEffect, useLayoutEffect, useState } from 'react';
 
 import {
   BUILTIN_THEME,
@@ -6,7 +6,9 @@ import {
   type Settings,
   type ThemeData,
 } from '../../shared/settings';
+import { settingsApi } from '../../ipc/renderer';
 import { applyEditorTheme } from '../editor/monaco';
+import { log } from '../features/about/log';
 import { useAppState } from '../state';
 import { currentThemeSnapshot } from './theme-snapshot';
 
@@ -60,31 +62,36 @@ function applyEditor(custom?: Pick<ThemeData, 'editor'> | null): void {
   else applyEditorTheme();
 }
 
-/** Keeps `<html>` and Monaco's theme in step with the settings, OS high contrast and the OS appearance. */
-export function useAppearance(
-  appearance: Settings['appearance'],
-  custom?: Pick<ThemeData, 'isDark' | 'common' | 'editor'> | null,
-): void {
+/** Keeps `<html>` and Monaco's theme in step with the settings, the chosen theme's file, OS high contrast and the OS appearance. */
+export function useAppearance(): void {
   const app = useAppState();
-  const contrast = highContrastFor(
-    app?.settings.theme ?? BUILTIN_THEME,
-    app?.highContrast ?? false,
+  const appearance = app?.settings.appearance ?? 'system';
+  const themeId = app?.settings.theme ?? BUILTIN_THEME;
+  const osHighContrast = app?.highContrast ?? false;
+
+  const [loaded, setLoaded] = useState<{ id: string; data: ThemeData | null } | null>(
+    null,
   );
-  const contrastKey = contrast ? (contrast.mode ?? 'os') : undefined;
+  useEffect(() => {
+    if (themeId === BUILTIN_THEME) return;
+    let current = true;
+    settingsApi.GetTheme(themeId).then(
+      (data) => {
+        if (current) setLoaded({ id: themeId, data: data ?? null });
+      },
+      (error: unknown) => log.error('loading the theme failed', themeId, error),
+    );
+    return () => {
+      current = false;
+    };
+  }, [themeId]);
+  const custom = loaded?.id === themeId ? loaded.data : null;
 
   useLayoutEffect(() => {
-    applyAppearance(
-      document.documentElement,
-      appearance,
-      custom,
-      contrastKey === undefined
-        ? undefined
-        : contrastKey === 'os'
-          ? {}
-          : { mode: contrastKey },
-    );
+    const root = document.documentElement;
+    applyAppearance(root, appearance, custom, highContrastFor(themeId, osHighContrast));
     applyEditor(custom);
-  }, [appearance, custom, contrastKey]);
+  }, [appearance, custom, themeId, osHighContrast]);
 
   useEffect(() => {
     const query = window.matchMedia('(prefers-color-scheme: dark)');

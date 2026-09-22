@@ -11,6 +11,8 @@ export function isTabDrag(data: Pick<DataTransfer, 'types'> | null | undefined):
 export function useTabDrag(): string | null {
   const [dragging, setDragging] = useState<string | null>(null);
   useEffect(() => {
+    const listeners = new AbortController();
+    const { signal } = listeners;
     let timer: ReturnType<typeof setTimeout> | undefined;
     const onStart = (event: DragEvent) => {
       if (!isTabDrag(event.dataTransfer)) return;
@@ -24,14 +26,12 @@ export function useTabDrag(): string | null {
       clearTimeout(timer);
       setDragging(null);
     };
-    window.addEventListener('dragstart', onStart);
-    window.addEventListener('dragend', onEnd);
-    window.addEventListener('drop', onEnd);
+    window.addEventListener('dragstart', onStart, { signal });
+    window.addEventListener('dragend', onEnd, { signal });
+    window.addEventListener('drop', onEnd, { signal });
     return () => {
       clearTimeout(timer);
-      window.removeEventListener('dragstart', onStart);
-      window.removeEventListener('dragend', onEnd);
-      window.removeEventListener('drop', onEnd);
+      listeners.abort();
     };
   }, []);
   return dragging;

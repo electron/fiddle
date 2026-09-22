@@ -14,12 +14,13 @@ import {
   TabPanel,
   Tabs,
 } from '../../ui';
-import { badgeOf, useDiagnostics } from '../editor/diagnostics';
+import { useBadges, type Badge } from '../editor/diagnostics';
 import { EditorPane } from '../editor/EditorPane';
 import { ConsolePane } from '../features/run/ConsolePane';
 import { SettingsPage } from '../features/settings/SettingsPage';
-import { useShortcut } from '../use-shortcut';
-import { processOf, type FileProcess } from './processes';
+import { useShortcut } from '../hooks';
+import type { PaneActions } from './pane-actions';
+import { processOf } from './processes';
 import styles from './Sheet.module.css';
 import { isTabDrag, TAB_DRAG_TYPE, useTabDrag } from './tab-drag';
 import { useDraft } from './use-draft';
@@ -29,26 +30,6 @@ const CONSOLE_DEFAULT = 160;
 /** Dragging the console's splitter below this closes the console. */
 const CONSOLE_COLLAPSE = CONSOLE_MIN / 2;
 const PANE_MIN = 160;
-
-export const processLabelKey = {
-  main: 'processMain',
-  preload: 'processPreload',
-  renderer: 'processRenderer',
-  other: 'processOther',
-} as const satisfies Record<FileProcess, string>;
-
-type Badge = ReturnType<typeof badgeOf>;
-
-/** A badge's text: "2 errors", or "1 warning" when the file has no errors. */
-export function useBadgeLabel(): (badge: Badge) => string | undefined {
-  const { t } = useTranslation('shell');
-  return (badge) =>
-    badge
-      ? badge.tone === 'error'
-        ? t('errorCount', { count: badge.count })
-        : t('warningCount', { count: badge.count })
-      : undefined;
-}
 
 /** An element's content size, kept current. ResizeObserver reports the first size on `observe`. */
 function useSize(node: HTMLElement | null): { width: number; height: number } {
@@ -81,23 +62,7 @@ function paneWidths(total: number, shares: readonly number[]): number[] {
 
 export interface SheetProps {
   state: WindowState;
-  /** The focused pane's file, which the tab row selects; null when no file is open. */
-  active: string | null;
-  /** The files in the editor panes, from the start. One entry means the editor isn't split. */
-  panes: readonly string[];
-  onSelectFile: (name: string) => void;
-  onCloseFile: (name: string) => void;
-  /** A tab was dragged along the row: its file goes in front of `before`'s, or to the end. */
-  onMoveFile: (name: string, before: string | null) => void;
-  /** A tab was dropped on pane `index`: in its middle, or on the edge where a new pane opens. */
-  onDropOnPane: (name: string, index: number, position: PaneDropPosition) => void;
-  onFocusPane: (name: string) => void;
-  onToggleSplit: () => void;
-  onClosePane: (name: string) => void;
-  onMaximize: (name: string) => void;
-  onConsoleHeight: (height: number) => void;
-  onHideConsole: () => void;
-  onResetLayout: () => void;
+  actions: PaneActions;
   /** Something droppable is being dragged over the window. */
   dropping: boolean;
 }
@@ -135,27 +100,14 @@ export function Sheet(props: SheetProps) {
 
 function EditorArea({
   state,
-  active,
-  panes,
-  onSelectFile,
-  onCloseFile,
-  onMoveFile,
-  onDropOnPane,
-  onFocusPane,
-  onToggleSplit,
-  onClosePane,
-  onMaximize,
-  onConsoleHeight,
-  onHideConsole,
-  onResetLayout,
+  actions,
   sheetHeight,
 }: SheetProps & { sheetHeight: number }) {
   const { t, i18n } = useTranslation('shell');
   const rtl = i18n.dir() === 'rtl';
   const { fiddle, layout } = state;
-  const diagnostics = useDiagnostics();
-  const badgeLabel = useBadgeLabel();
-  const badge = (name: string) => badgeOf(diagnostics.get(name));
+  const { active, panes } = actions;
+  const badge = useBadges();
   const visible = fiddle.files.filter((file) => file.visible);
   const visibleNames = visible.map((file) => file.name);
   const split = panes.length > 1;
@@ -164,13 +116,12 @@ function EditorArea({
 
   // The console: 96px to half the sheet; dragged below half the minimum, it closes.
   const consoleMax = Math.max(CONSOLE_MIN, Math.floor(sheetHeight / 2));
-  const [consoleHeight, setConsoleHeight] = useDraft(
-    layout.consoleHeight,
-    onConsoleHeight,
+  const [consoleHeight, setConsoleHeight] = useDraft(layout.consoleHeight, (height) =>
+    actions.changeLayout({ consoleHeight: height }),
   );
   const shownConsoleHeight = Math.min(Math.max(consoleHeight, CONSOLE_MIN), consoleMax);
   const resizeConsole = (value: number) => {
-    if (value < CONSOLE_COLLAPSE) onHideConsole();
+    if (value < CONSOLE_COLLAPSE) actions.changeLayout({ consoleVisible: false });
     else setConsoleHeight(Math.max(value, CONSOLE_MIN));
   };
 
@@ -231,7 +182,7 @@ function EditorArea({
     if (!name) return;
     event.preventDefault();
     const before = insertionPoint(event);
-    if (!isNoMove(name, before)) onMoveFile(name, before);
+    if (!isNoMove(name, before)) actions.moveFile(name, before);
   };
 
   /** The drop zones pane `index` offers the dragged tab: those that change the panes and stay within `MAX_PANES`. */
@@ -277,7 +228,7 @@ function EditorArea({
                 variant="secondary"
                 size="sm"
                 icon="refresh"
-                onPress={onResetLayout}
+                onPress={actions.resetLayout}
               >
                 {t('resetLayout')}
               </Button>
@@ -293,7 +244,7 @@ function EditorArea({
 
   return (
     <>
-      <Tabs value={active} onChange={onSelectFile} className={styles.tabsRoot}>
+      <Tabs value={active} onChange={actions.openFile} className={styles.tabsRoot}>
         {/* The whole row takes a dragged tab: past the last tab it goes to the end. */}
         <div
           className={styles.tabrow}
@@ -307,45 +258,31 @@ function EditorArea({
         >
           <div className={styles.tabs}>
             <TabList aria-label={t('openFiles')}>
-              {visible.map((file, index) => {
-                const fileBadge = badge(file.name);
-                const errorLabel = badgeLabel(fileBadge);
-                return (
-                  <Tab
-                    key={file.name}
-                    id={file.name}
-                    // A file showing in another pane than the focused one carries the split glyph.
-                    icon={
-                      split && file.name !== active && panes.includes(file.name)
-                        ? 'columns'
-                        : undefined
-                    }
-                    onClose={() => onCloseFile(file.name)}
-                    drag={{ type: TAB_DRAG_TYPE, data: file.name }}
-                    dropIndicator={indicatorFor(file.name, index === visible.length - 1)}
-                    error={
-                      fileBadge && errorLabel
-                        ? {
-                            count: fileBadge.count,
-                            tone: fileBadge.tone,
-                            label: errorLabel,
-                          }
-                        : undefined
-                    }
-                    unsaved={
-                      fiddle.dirtyFiles.includes(file.name) ? t('unsaved') : undefined
-                    }
-                  >
-                    <span dir="ltr">{file.name}</span>
-                  </Tab>
-                );
-              })}
+              {visible.map((file, index) => (
+                <Tab
+                  key={file.name}
+                  id={file.name}
+                  // A file showing in another pane than the focused one carries the split glyph.
+                  icon={
+                    split && file.name !== active && panes.includes(file.name)
+                      ? 'columns'
+                      : undefined
+                  }
+                  onClose={() => actions.closeFile(file.name)}
+                  drag={{ type: TAB_DRAG_TYPE, data: file.name }}
+                  dropIndicator={indicatorFor(file.name, index === visible.length - 1)}
+                  error={badge(file.name)}
+                  unsaved={
+                    fiddle.dirtyFiles.includes(file.name) ? t('unsaved') : undefined
+                  }
+                >
+                  <span dir="ltr">{file.name}</span>
+                </Tab>
+              ))}
             </TabList>
           </div>
           {!split && (
-            <span className={styles.process}>
-              {t(processLabelKey[processOf(active)])}
-            </span>
+            <span className={styles.process}>{t(`process.${processOf(active)}`)}</span>
           )}
           <IconButton
             icon="columns"
@@ -353,7 +290,7 @@ function EditorArea({
             label={split ? t('closeSplit') : t('splitEditor')}
             tooltip={{ kbd: split ? undefined : splitKbd }}
             isPressed={split}
-            onPress={onToggleSplit}
+            onPress={actions.toggleSplit}
           />
         </div>
         <TabPanel id={active} className={styles.tabpanel}>
@@ -391,19 +328,21 @@ function EditorArea({
                       <PaneHeader
                         name={name}
                         badge={badge(name)}
-                        onMaximize={() => onMaximize(name)}
-                        onClose={() => onClosePane(name)}
+                        onMaximize={() => actions.maximize(name)}
+                        onClose={() => actions.closePane(name)}
                       />
                     )}
                     <EditorPane
                       file={name}
                       primary={name === active}
-                      onFocus={() => onFocusPane(name)}
+                      onFocus={() => actions.focusPane(name)}
                     />
                     {dragged && (
                       <PaneDropZones
                         zones={dropZonesFor(index)}
-                        onDrop={(file, position) => onDropOnPane(file, index, position)}
+                        onDrop={(file, position) =>
+                          actions.dropTab(file, index, position)
+                        }
                       />
                     )}
                   </div>
@@ -469,23 +408,22 @@ function PaneDropZones({
 
 interface PaneHeaderProps {
   name: string;
-  badge: Badge;
+  badge: Badge | undefined;
   onMaximize: () => void;
   onClose: () => void;
 }
 
 function PaneHeader({ name, badge, onMaximize, onClose }: PaneHeaderProps) {
   const { t } = useTranslation('shell');
-  const label = useBadgeLabel()(badge);
   return (
     <div className={styles.paneHeader}>
       <Icon name="grip" className={styles.grip} />
       <span className={styles.paneName} data-tone={badge?.tone}>
         {badge && <Icon name="warning" />}
         <span dir="ltr">{name}</span>
-        {label && <span className={styles.paneErrors}>{label}</span>}
+        {badge && <span className={styles.paneErrors}>{badge.label}</span>}
       </span>
-      <span className={styles.paneProcess}>{t(processLabelKey[processOf(name)])}</span>
+      <span className={styles.paneProcess}>{t(`process.${processOf(name)}`)}</span>
       <span className={styles.paneActions}>
         <IconButton
           icon="maximize"

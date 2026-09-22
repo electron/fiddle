@@ -32,7 +32,7 @@ describe('StatusBar', () => {
     mocks.cursor = { file: 'index.html', line: 12, column: 3 };
     render(<StatusBar files={['main.js', 'index.html']} />);
     screen.getByText('cursorPosition {"line":12,"column":3}');
-    screen.getByText('languageHtml');
+    screen.getByText('language.html');
   });
 
   it('shows no position for a cursor left in a file the fiddle no longer has', () => {

@@ -1,10 +1,11 @@
 import './editor.css';
 
-import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
 import { I18nextProvider, useTranslation } from 'react-i18next';
 
 import { Icon } from '../../ui';
+import { useLatest } from '../hooks';
 import { useAppState } from '../state';
 import {
   clearFocusedEditor,
@@ -19,7 +20,6 @@ import { useModel } from './models';
 import { monaco, monoFontFamily } from './monaco';
 import {
   claimReveal,
-  splitErrorMessage,
   useRevealRequest,
   useRuntimeErrors,
   type RuntimeError,
@@ -56,14 +56,7 @@ export function EditorPane({ file, primary = false, onFocus }: EditorPaneProps) 
     size: settings?.editorFontSize ?? 13,
   });
   const screenReader = app?.screenReaderActive ?? false;
-  const fileRef = useRef(file);
-  const primaryRef = useRef(primary);
-  const onFocusRef = useRef(onFocus);
-  useLayoutEffect(() => {
-    fileRef.current = file;
-    primaryRef.current = primary;
-    onFocusRef.current = onFocus;
-  });
+  const latest = useLatest({ file, primary, onFocus });
   const shown = useRef<string | null>(null);
 
   useEffect(() => {
@@ -112,13 +105,14 @@ export function EditorPane({ file, primary = false, onFocus }: EditorPaneProps) 
       instance.onDidLayoutChange(fitGutter),
       instance.onDidFocusEditorText(() => {
         setFocusedEditor(instance);
-        onFocusRef.current?.();
+        latest.current.onFocus?.();
         const position = instance.getPosition();
-        if (position) setCursor(fileRef.current, position.lineNumber, position.column);
+        if (position)
+          setCursor(latest.current.file, position.lineNumber, position.column);
       }),
       instance.onDidChangeCursorPosition(({ position }) => {
-        if (instance.hasTextFocus() || primaryRef.current)
-          setCursor(fileRef.current, position.lineNumber, position.column);
+        if (instance.hasTextFocus() || latest.current.primary)
+          setCursor(latest.current.file, position.lineNumber, position.column);
       }),
     ];
     fitGutter();
@@ -128,7 +122,7 @@ export function EditorPane({ file, primary = false, onFocus }: EditorPaneProps) 
       clearFocusedEditor(instance);
       instance.dispose();
     };
-  }, []);
+  }, [latest]);
 
   useEffect(() => {
     if (!editor) return;
@@ -241,27 +235,19 @@ export function EditorPane({ file, primary = false, onFocus }: EditorPaneProps) 
 
 function Lens({ error }: { error: RuntimeError }) {
   const { t } = useTranslation('shell');
-  const { title, text } = splitErrorMessage(error.message);
-  const process = t(
-    error.process === 'main'
-      ? 'lensProcessMain'
-      : error.process === 'preload'
-        ? 'lensProcessPreload'
-        : 'lensProcessRenderer',
-  );
   return (
     <div className="lu-lens" role="note">
       <Icon name="warning" className="lu-lens-icon" />
       <div>
         <div>
-          <span className="lu-lens-title">{title ?? t('lensErrorTitle')}</span> {text}
+          <span className="lu-lens-title">{error.name}</span> {error.message}
         </div>
         <div className="lu-lens-hint">
           {t('lensHint', {
-            process,
+            process: t(`lensProcess.${error.process}`),
             file: error.file,
             line: error.line,
-            column: error.column,
+            column: error.column ?? 1,
           })}
         </div>
       </div>

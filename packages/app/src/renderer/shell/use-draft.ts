@@ -1,4 +1,6 @@
-import { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
+
+import { useLatest } from '../hooks';
 
 /** Continuous input (a splitter drag) stays local and is committed once it settles. The commit is optimistic, so dropping the draft after it doesn't flicker. */
 export function useDraft(
@@ -8,10 +10,7 @@ export function useDraft(
 ): [number, (value: number) => void] {
   const [draft, setDraft] = useState<number | null>(null);
   const timer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
-  const commitRef = useRef(commit);
-  useLayoutEffect(() => {
-    commitRef.current = commit;
-  });
+  const commitRef = useLatest(commit);
   useEffect(() => () => clearTimeout(timer.current), []);
 
   const change = (next: number) => {

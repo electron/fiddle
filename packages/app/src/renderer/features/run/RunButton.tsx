@@ -6,7 +6,7 @@ import type { RunState } from '../../../shared/stores';
 import { Button, srOnly } from '../../../ui';
 import { useAppState, useWindowState } from '../../state';
 import { toastError } from '../../toast-error';
-import { useShortcut } from '../../use-shortcut';
+import { useShortcut } from '../../hooks';
 import styles from './Run.module.css';
 import { IDLE_RUN, STATUS_LABEL, versionLabel } from './use-run';
 

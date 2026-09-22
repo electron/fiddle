@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect } from 'react';
 
 import { windowApi } from '../../../ipc/renderer';
 import {
@@ -14,6 +14,7 @@ import {
 } from '../../../shared/settings';
 import type { AppState, WindowState } from '../../../shared/stores';
 import { useAppState, useWindowState } from '../../state';
+import { useLatest } from '../../hooks';
 import { toastError } from '../../toast-error';
 
 /** Undo, redo and select all keep their native keys: Monaco's, a text field's, or the Edit menu's. */
@@ -72,10 +73,7 @@ export function commandForKey(
 export function useKeybindings(): void {
   const app = useAppState();
   const win = useWindowState();
-  const state = useRef({ app, win });
-  useEffect(() => {
-    state.current = { app, win };
-  });
+  const state = useLatest({ app, win });
 
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
@@ -101,5 +99,5 @@ export function useKeybindings(): void {
       window.removeEventListener('keydown', onKeyDown, true);
       window.removeEventListener('contextmenu', onContextMenu, true);
     };
-  }, []);
+  }, [state]);
 }

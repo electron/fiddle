@@ -9,10 +9,11 @@ import {
 import { useTranslation } from 'react-i18next';
 import { Dialog, Modal, ModalOverlay } from 'react-aria-components';
 
-import { appPlatformApi, documentsApi, windowApi } from '../../../ipc/renderer';
+import { appPlatformApi, documentsApi } from '../../../ipc/renderer';
 import { Button } from '../../../ui';
 import { useWindowState } from '../../state';
 import { toastError } from '../../toast-error';
+import { useCommand } from '../../hooks';
 import styles from './OnboardingTour.module.css';
 import {
   BASICS_STEPS,
@@ -178,16 +179,15 @@ export function OnboardingTour() {
         live && offer && setMode((current) => (current === 'off' ? 'offer' : current)),
       (error: unknown) => console.error('[fiddle] checking the tour offer failed', error),
     );
-    const stop = windowApi.onCommand((id) => {
-      if (id !== 'help.showTour') return;
-      setIndex(0);
-      setMode('main');
-    });
     return () => {
       live = false;
-      stop();
     };
   }, []);
+  useCommand((id) => {
+    if (id !== 'help.showTour') return;
+    setIndex(0);
+    setMode('main');
+  });
 
   const steps = mode === 'basics' ? BASICS_STEPS : MAIN_STEPS;
   const step = mode === 'main' || mode === 'basics' ? steps[index] : undefined;

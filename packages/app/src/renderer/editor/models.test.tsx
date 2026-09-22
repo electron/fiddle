@@ -284,6 +284,7 @@ describe('markers', () => {
       file,
       line,
       column: 3,
+      name: 'Error',
       message: `boom at ${line}`,
       process: 'main' as const,
     });
@@ -298,7 +299,7 @@ describe('markers', () => {
     expect(owner).toBe('fiddle-runtime');
     expect(markers).toEqual([
       expect.objectContaining({
-        message: 'boom at 2',
+        message: 'Error: boom at 2',
         startLineNumber: 2,
         startColumn: 3,
         endColumn: 9,

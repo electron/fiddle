@@ -8,10 +8,10 @@ const mocks = vi.hoisted(() => ({
 
 vi.mock('../../ipc/renderer', () => ({ documentsApi: { RenameFile: mocks.RenameFile } }));
 
-import { getEditorActions } from '../features/palette/editor-actions';
 import {
   clearFocusedEditor,
   formatFocusedEditor,
+  getEditorActions,
   getViewState,
   releaseViewState,
   renameFile,

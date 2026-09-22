@@ -1,14 +1,12 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef } from 'react';
 import { I18nProvider } from 'react-aria-components';
 import { useTranslation } from 'react-i18next';
 
 import { useSyncLocale } from '../i18n/renderer';
-import { settingsApi, windowApi } from '../ipc/renderer';
-import { BUILTIN_THEME, type ThemeData } from '../shared/settings';
+import { windowApi } from '../ipc/renderer';
 import { DialogHost, Toaster } from '../ui';
 import { useModelsSynced } from './editor/models';
-import { log } from './features/about/log';
-import { UpdateNotice } from './features/about/UpdateNotice';
+import { log, UpdateNotice } from './features/about';
 import { useKeybindings } from './features/commands/keybindings';
 import { useWindowCommands } from './features/commands/window-commands';
 import { CommandPalette } from './features/palette/CommandPalette';
@@ -32,32 +30,8 @@ export function App() {
   useEffect(() => {
     if (storeError) log.error('a store failed to load', storeError);
   }, [storeError]);
-  const locale = appState?.locale;
-
-  const themeId = appState?.settings.theme ?? BUILTIN_THEME;
-  const [customTheme, setCustomTheme] = useState<{
-    id: string;
-    data: ThemeData | null;
-  } | null>(null);
-  useEffect(() => {
-    if (themeId === BUILTIN_THEME) return;
-    let current = true;
-    settingsApi.GetTheme(themeId).then(
-      (data: ThemeData | null | undefined) => {
-        if (current) setCustomTheme({ id: themeId, data: data ?? null });
-      },
-      (error: unknown) => log.error('loading the theme failed', themeId, error),
-    );
-    return () => {
-      current = false;
-    };
-  }, [themeId]);
-  useAppearance(
-    appState?.settings.appearance ?? 'system',
-    customTheme?.id === themeId ? customTheme.data : null,
-  );
-
-  useSyncLocale(locale);
+  useAppearance();
+  useSyncLocale(appState?.locale);
 
   // Main shows the window once we report ready. No frames are awaited: a window that has never been shown gets few
   // or none, so this waits on state alone (EditorPane draws its first text without a frame).

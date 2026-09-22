@@ -67,7 +67,6 @@ vi.mock('../editor/models', () => ({
 vi.mock('../editor/runtime-errors', () => ({
   claimReveal: mocks.claimReveal,
   setRuntimeErrors: vi.fn(),
-  toEditorErrors: () => [],
   useRevealRequest: () => mocks.reveal,
 }));
 vi.mock('../editor/types', () => ({ useEditorTypes: () => undefined }));
@@ -134,7 +133,8 @@ const windowState = (
 /** What main's `Window.Command` push does: every listener registered with `windowApi.onCommand` hears it. */
 const forward = (id: string) =>
   act(() => mocks.commands.forEach((listener) => listener(id)));
-const sheet = () => mocks.sheet!;
+/** The pane model and actions the shell handed the sheet. */
+const sheet = () => mocks.sheet!.actions;
 const sidebar = () => mocks.sidebar!;
 const titleBar = () => mocks.titleBar!;
 /** The layout patches sent to main, in order. */
@@ -203,7 +203,7 @@ describe('Shell tabs and panes', () => {
       },
     );
     const view = render(<Shell />);
-    act(() => sheet().onToggleSplit());
+    act(() => sheet().toggleSplit());
     expect(visibilityChanges()).toEqual([['renderer.js', true]]);
     expect(layoutPatches()).toEqual([{ panes: ['main.js', 'renderer.js'] }]);
     expect(activated()).toEqual([]);
@@ -224,25 +224,25 @@ describe('Shell tabs and panes', () => {
   it('cannot split a fiddle of one file', () => {
     mocks.win = windowState({}, { activeFile: 'a.js', files: [file('a.js')] });
     render(<Shell />);
-    act(() => sheet().onToggleSplit());
+    act(() => sheet().toggleSplit());
     expect(mocks.setLayout).not.toHaveBeenCalled();
   });
 
   it('closes a tab by hiding its file, moving to the next tab (or the previous) when it was the active one', () => {
     mocks.win = windowState({}, { activeFile: 'b.js' });
     const view = render(<Shell />);
-    act(() => sheet().onCloseFile('a.js'));
+    act(() => sheet().closeFile('a.js'));
     expect(activated()).toEqual([]);
     expect(visibilityChanges()).toEqual([['a.js', false]]);
 
-    act(() => sheet().onCloseFile('b.js'));
+    act(() => sheet().closeFile('b.js'));
     expect(activated()).toEqual(['c.js']);
     mocks.win = windowState(
       {},
       { activeFile: 'c.js', files: [file('a.js'), file('c.js')] },
     );
     view.rerender(<Shell />);
-    act(() => sheet().onCloseFile('c.js'));
+    act(() => sheet().closeFile('c.js'));
     expect(activated()).toEqual(['c.js', 'a.js']);
     expect(visibilityChanges()).toEqual([
       ['a.js', false],
@@ -254,12 +254,12 @@ describe('Shell tabs and panes', () => {
   it('closes a split pane with its tab, focusing the neighbouring pane when it had focus', () => {
     mocks.win = windowState({ panes: ['a.js', 'b.js', 'c.js'] }, { activeFile: 'b.js' });
     render(<Shell />);
-    act(() => sheet().onCloseFile('b.js'));
+    act(() => sheet().closeFile('b.js'));
     expect(layoutPatches()).toEqual([{ panes: ['a.js', 'c.js'] }]);
     expect(activated()).toEqual(['c.js']);
     expect(visibilityChanges()).toEqual([['b.js', false]]);
     // A pane without focus just goes.
-    act(() => sheet().onCloseFile('a.js'));
+    act(() => sheet().closeFile('a.js'));
     expect(layoutPatches().at(-1)).toEqual({ panes: ['b.js', 'c.js'] });
     expect(activated()).toEqual(['c.js']);
   });
@@ -267,12 +267,12 @@ describe('Shell tabs and panes', () => {
   it('closes or maximizes a pane from its header without hiding any file', () => {
     mocks.win = windowState({ panes: ['a.js', 'b.js'] }, { activeFile: 'a.js' });
     render(<Shell />);
-    act(() => sheet().onClosePane('a.js'));
+    act(() => sheet().closePane('a.js'));
     expect(layoutPatches()).toEqual([{ panes: [] }]);
     expect(activated()).toEqual(['b.js']);
-    act(() => sheet().onClosePane('b.js'));
+    act(() => sheet().closePane('b.js'));
     expect(activated()).toEqual(['b.js']);
-    act(() => sheet().onMaximize('b.js'));
+    act(() => sheet().maximize('b.js'));
     expect(layoutPatches()).toHaveLength(3);
     expect(activated()).toEqual(['b.js', 'b.js']);
     expect(mocks.setFileVisible).not.toHaveBeenCalled();
@@ -281,13 +281,13 @@ describe('Shell tabs and panes', () => {
   it('opens a dropped tab in a new pane on that side, or in the pane itself, and focuses it', () => {
     mocks.win = windowState({}, { activeFile: 'a.js' });
     const view = render(<Shell />);
-    act(() => sheet().onDropOnPane('c.js', 0, 'before'));
+    act(() => sheet().dropTab('c.js', 0, 'before'));
     expect(layoutPatches()).toEqual([{ panes: ['c.js', 'a.js'] }]);
     expect(activated()).toEqual(['c.js']);
 
     mocks.win = windowState({ panes: ['c.js', 'a.js'] }, { activeFile: 'c.js' });
     view.rerender(<Shell />);
-    act(() => sheet().onDropOnPane('b.js', 1, 'center'));
+    act(() => sheet().dropTab('b.js', 1, 'center'));
     expect(layoutPatches().at(-1)).toEqual({ panes: ['c.js', 'b.js'] });
     expect(activated().at(-1)).toBe('b.js');
   });
@@ -299,21 +299,21 @@ describe('Shell tabs and panes', () => {
       { activeFile: 'a.js', files: [...files, file('gone.js', false)] },
     );
     render(<Shell />);
-    act(() => sheet().onDropOnPane('gone.js', 0, 'center'));
-    act(() => sheet().onDropOnPane('e.js', 3, 'after'));
+    act(() => sheet().dropTab('gone.js', 0, 'center'));
+    act(() => sheet().dropTab('e.js', 3, 'after'));
     expect(mocks.setLayout).not.toHaveBeenCalled();
     expect(mocks.setActiveFile).not.toHaveBeenCalled();
-    act(() => sheet().onDropOnPane('e.js', 3, 'center'));
+    act(() => sheet().dropTab('e.js', 3, 'center'));
     expect(layoutPatches()).toEqual([{ panes: ['a.js', 'b.js', 'c.js', 'e.js'] }]);
   });
 
   it('activates a file picked from a tab, another pane or a moved tab, but not the one that already is', () => {
     render(<Shell />);
-    act(() => sheet().onSelectFile('b.js'));
-    act(() => sheet().onFocusPane('a.js'));
-    act(() => sheet().onFocusPane('c.js'));
+    act(() => sheet().openFile('b.js'));
+    act(() => sheet().focusPane('a.js'));
+    act(() => sheet().focusPane('c.js'));
     expect(activated()).toEqual(['b.js', 'c.js']);
-    act(() => sheet().onMoveFile('c.js', 'a.js'));
+    act(() => sheet().moveFile('c.js', 'a.js'));
     expect(mocks.moveFile).toHaveBeenCalledWith('c.js', 'a.js', 'fileChangeFailed');
   });
 });
@@ -325,7 +325,7 @@ describe('Shell layout', () => {
       { files: [file('a.js'), file('b.js', false), file('c.js')] },
     );
     render(<Shell />);
-    act(() => sheet().onResetLayout());
+    act(() => sheet().resetLayout());
     expect(layoutPatches()).toEqual([DEFAULT_LAYOUT]);
     expect(visibilityChanges()).toEqual([['b.js', true]]);
   });

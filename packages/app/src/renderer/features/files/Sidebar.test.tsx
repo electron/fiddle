@@ -14,16 +14,6 @@ const mocks = vi.hoisted(() => ({
 vi.mock('../../../ipc/renderer', () => ({ documentsApi: mocks.documentsApi }));
 vi.mock('../../toast-error', () => ({ toastError: mocks.toastError }));
 vi.mock('../packages/PackagesSection', () => ({ PackagesSection: () => null }));
-// Sheet pulls in Monaco; the sidebar only needs its label keys.
-vi.mock('../../shell/Sheet', () => ({
-  processLabelKey: {
-    main: 'processMain',
-    preload: 'processPreload',
-    renderer: 'processRenderer',
-    other: 'processOther',
-  },
-  useBadgeLabel: () => () => undefined,
-}));
 
 import { DialogHost } from '../../../ui';
 import { Sidebar } from './Sidebar';
@@ -61,27 +51,27 @@ beforeEach(() => {
 describe('Sidebar groups', () => {
   it('always shows Main, Preload and Renderer, and Other only when it has files', () => {
     renderSidebar(['main.js']);
-    expect(headings()).toEqual(['processMain', 'processPreload', 'processRenderer']);
+    expect(headings()).toEqual(['process.main', 'process.preload', 'process.renderer']);
     // An empty group is its head and add button, without an empty tree.
-    expect(screen.queryByRole('treegrid', { name: 'processPreload' })).toBeNull();
-    expect(screen.getByRole('button', { name: 'addPreloadFile' })).toBeTruthy();
+    expect(screen.queryByRole('treegrid', { name: 'process.preload' })).toBeNull();
+    expect(screen.getByRole('button', { name: 'addFileIn.preload' })).toBeTruthy();
   });
 
   it('lists helpers, pages and everything else under their groups', () => {
     renderSidebar([...TEMPLATE, 'main-menu.js', 'styles.css', 'data.json', 'utils.js']);
     expect(headings()).toEqual([
-      'processMain',
-      'processPreload',
-      'processRenderer',
-      'processOther',
+      'process.main',
+      'process.preload',
+      'process.renderer',
+      'process.other',
     ]);
     expect(
-      within(group('processMain')).getByRole('row', { name: /main-menu\.js/ }),
+      within(group('process.main')).getByRole('row', { name: /main-menu\.js/ }),
     ).toBeTruthy();
     expect(
-      within(group('processRenderer')).getByRole('row', { name: /styles\.css/ }),
+      within(group('process.renderer')).getByRole('row', { name: /styles\.css/ }),
     ).toBeTruthy();
-    const other = group('processOther');
+    const other = group('process.other');
     expect(within(other).getByRole('row', { name: /data\.json/ })).toBeTruthy();
     expect(within(other).getByRole('row', { name: /utils\.js/ })).toBeTruthy();
   });
@@ -91,7 +81,7 @@ describe('Sidebar context menu', () => {
   it('opens for the row under the pointer and acts on its file', async () => {
     renderSidebar();
     fireEvent.contextMenu(
-      within(group('processRenderer')).getByRole('row', { name: /index\.html/ }),
+      within(group('process.renderer')).getByRole('row', { name: /index\.html/ }),
       {
         clientX: 40,
         clientY: 60,
@@ -192,7 +182,7 @@ describe('Sidebar filter', () => {
     // A smaller fiddle has no filter field, so nothing may stay hidden by the old text.
     rerender(sidebar(TEMPLATE));
     expect(screen.queryByRole('textbox', { name: 'filterFiles' })).toBeNull();
-    expect(headings()).toEqual(['processMain', 'processPreload', 'processRenderer']);
+    expect(headings()).toEqual(['process.main', 'process.preload', 'process.renderer']);
     expect(screen.getByRole('row', { name: /renderer\.js/ })).toBeTruthy();
     expect(screen.getByRole('row', { name: /main\.js/ })).toBeTruthy();
   });
@@ -201,9 +191,9 @@ describe('Sidebar filter', () => {
 describe('Sidebar add in group', () => {
   it("opens the prompt with the group's hint and a free name, and adds it", async () => {
     const onOpen = renderSidebar();
-    fireEvent.click(screen.getByRole('button', { name: 'addPreloadFile' }));
+    fireEvent.click(screen.getByRole('button', { name: 'addFileIn.preload' }));
     expect((await nameField()).value).toBe('preload-2.js');
-    expect(screen.getByText('groupHintPreload')).toBeTruthy();
+    expect(screen.getByText('groupHint.preload')).toBeTruthy();
     fireEvent.click(screen.getByRole('button', { name: 'create' }));
     await waitFor(() =>
       expect(mocks.documentsApi.AddFile).toHaveBeenCalledWith('preload-2.js'),
@@ -213,7 +203,7 @@ describe('Sidebar add in group', () => {
 
   it('suggests a helper name for Main and takes a typed name from another group', async () => {
     renderSidebar();
-    fireEvent.click(screen.getByRole('button', { name: 'addMainFile' }));
+    fireEvent.click(screen.getByRole('button', { name: 'addFileIn.main' }));
     const input = await nameField();
     expect(input.value).toBe('main-2.js');
     fireEvent.change(input, { target: { value: 'about.html' } });
@@ -225,9 +215,9 @@ describe('Sidebar add in group', () => {
 
   it('starts empty for Other, and the generic Add file keeps the extension hint', async () => {
     renderSidebar([...TEMPLATE, 'data.json']);
-    fireEvent.click(screen.getByRole('button', { name: 'addOtherFile' }));
+    fireEvent.click(screen.getByRole('button', { name: 'addFileIn.other' }));
     expect((await nameField()).value).toBe('');
-    expect(screen.getByText('groupHintOther')).toBeTruthy();
+    expect(screen.getByText('groupHint.other')).toBeTruthy();
     fireEvent.click(screen.getByRole('button', { name: 'cancel' }));
     await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull());
 
@@ -244,7 +234,7 @@ describe('Sidebar add in group', () => {
     const refusal = new Error('Zweite Hauptdatei');
     mocks.documentsApi.AddFile.mockRejectedValueOnce(refusal);
     const onOpen = renderSidebar();
-    fireEvent.click(screen.getByRole('button', { name: 'addRendererFile' }));
+    fireEvent.click(screen.getByRole('button', { name: 'addFileIn.renderer' }));
     const input = await nameField();
     expect(input.value).toBe('renderer-2.js');
     fireEvent.change(input, { target: { value: 'main.mjs' } });

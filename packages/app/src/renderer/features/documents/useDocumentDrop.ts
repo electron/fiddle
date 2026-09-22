@@ -44,6 +44,8 @@ export function useDocumentDrop(): boolean {
   const [dragging, setDragging] = useState(false);
 
   useEffect(() => {
+    const listeners = new AbortController();
+    const { signal } = listeners;
     let depth = 0;
     /** A drag that started in this window (selected text, a link): nothing to open. */
     let local = false;
@@ -83,20 +85,13 @@ export function useDocumentDrop(): boolean {
         // Main shows load errors natively.
       });
     };
-    window.addEventListener('dragstart', onStart);
-    window.addEventListener('dragend', onEnd);
-    window.addEventListener('dragenter', onEnter);
-    window.addEventListener('dragleave', onLeave);
-    window.addEventListener('dragover', onOver);
-    window.addEventListener('drop', onDrop, true);
-    return () => {
-      window.removeEventListener('dragstart', onStart);
-      window.removeEventListener('dragend', onEnd);
-      window.removeEventListener('dragenter', onEnter);
-      window.removeEventListener('dragleave', onLeave);
-      window.removeEventListener('dragover', onOver);
-      window.removeEventListener('drop', onDrop, true);
-    };
+    window.addEventListener('dragstart', onStart, { signal });
+    window.addEventListener('dragend', onEnd, { signal });
+    window.addEventListener('dragenter', onEnter, { signal });
+    window.addEventListener('dragleave', onLeave, { signal });
+    window.addEventListener('dragover', onOver, { signal });
+    window.addEventListener('drop', onDrop, { capture: true, signal });
+    return () => listeners.abort();
   }, []);
 
   return dragging;

@@ -1,6 +1,7 @@
+import { act, renderHook } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
 
-import { badgeOf, mergeDiagnostics } from './diagnostics';
+import { mergeDiagnostics, setEditorMarkers, useBadges } from './diagnostics';
 
 describe('diagnostics', () => {
   it('merges runtime errors with Monaco errors and warnings per file', () => {
@@ -19,9 +20,27 @@ describe('diagnostics', () => {
   });
 
   it('badges errors first, then warnings', () => {
-    expect(badgeOf({ errors: 2, warnings: 1 })).toEqual({ count: 2, tone: 'error' });
-    expect(badgeOf({ errors: 0, warnings: 3 })).toEqual({ count: 3, tone: 'warning' });
-    expect(badgeOf({ errors: 0, warnings: 0 })).toBeNull();
-    expect(badgeOf(undefined)).toBeNull();
+    const { result } = renderHook(useBadges);
+    act(() =>
+      setEditorMarkers([
+        { file: 'a.js', severity: 'error' },
+        { file: 'a.js', severity: 'error' },
+        { file: 'a.js', severity: 'warning' },
+        { file: 'b.js', severity: 'warning' },
+      ]),
+    );
+    // Without an i18next instance, `t` returns the key.
+    expect(result.current('a.js')).toEqual({
+      count: 2,
+      tone: 'error',
+      label: 'errorCount',
+    });
+    expect(result.current('b.js')).toEqual({
+      count: 1,
+      tone: 'warning',
+      label: 'warningCount',
+    });
+    expect(result.current('c.js')).toBeUndefined();
+    act(() => setEditorMarkers([]));
   });
 });

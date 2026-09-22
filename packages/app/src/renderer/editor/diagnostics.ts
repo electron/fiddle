@@ -1,4 +1,5 @@
 import { useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import { createStore, useStore } from '../store';
 import { useRuntimeErrors } from './runtime-errors';
@@ -46,11 +47,27 @@ export function useDiagnostics(): ReadonlyMap<string, FileDiagnostics> {
   return useMemo(() => mergeDiagnostics(runtime, editor), [runtime, editor]);
 }
 
-/** What a badge or pill shows: the error count, or the warning count when there are no errors. */
-export function badgeOf(
-  diagnostics: FileDiagnostics | undefined,
-): { count: number; tone: 'error' | 'warning' } | null {
-  if (diagnostics?.errors) return { count: diagnostics.errors, tone: 'error' };
-  if (diagnostics?.warnings) return { count: diagnostics.warnings, tone: 'warning' };
-  return null;
+export interface Badge {
+  count: number;
+  tone: 'error' | 'warning';
+  /** "2 errors", or "1 warning". */
+  label: string;
+}
+
+/** What each file's badge or pill shows: its error count, or its warning count when it has no errors. */
+export function useBadges(): (file: string) => Badge | undefined {
+  const { t } = useTranslation('shell');
+  const diagnostics = useDiagnostics();
+  return (file) => {
+    const { errors = 0, warnings = 0 } = diagnostics.get(file) ?? {};
+    if (errors)
+      return { count: errors, tone: 'error', label: t('errorCount', { count: errors }) };
+    if (warnings)
+      return {
+        count: warnings,
+        tone: 'warning',
+        label: t('warningCount', { count: warnings }),
+      };
+    return undefined;
+  };
 }

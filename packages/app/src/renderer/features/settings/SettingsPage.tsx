@@ -1,10 +1,4 @@
-import {
-  useContext,
-  useEffect,
-  useEffectEvent,
-  useState,
-  type ComponentType,
-} from 'react';
+import { useEffect, useEffectEvent, useState, type ComponentType } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import notices from '../../../../../../THIRD_PARTY_NOTICES.md?raw';
@@ -19,7 +13,6 @@ import {
   MIRRORS,
   releaseChannelSchema,
   type Mirror,
-  type SettingKey,
   type Settings,
 } from '../../../shared/settings';
 import {
@@ -49,6 +42,7 @@ import {
   SwitchRow,
   TextRow,
   titleId,
+  type RowKey,
 } from './controls';
 import { KeybindingsSection } from './KeybindingsSection';
 import { clearRequestedSection, useRequestedSection, type SectionId } from './sections';
@@ -58,12 +52,10 @@ import { useSettings, useSettingsAction } from './use-settings';
 /** Elements whose Escape belongs to an open menu, popover or dialog. */
 const OVERLAY = '[role="dialog"], [role="alertdialog"], [role="menu"], [role="listbox"]';
 
-type SearchKey = SettingKey | 'privacyReset';
-
 interface SectionDef {
   id: SectionId;
   icon: IconName;
-  keys: readonly SearchKey[];
+  keys: readonly RowKey[];
   body: ComponentType<{ showAll: boolean }>;
 }
 
@@ -124,13 +116,13 @@ export function SettingsPage() {
 
   const title = (id: SectionId) => t(`section.${id}`);
   // Rows that aren't on screen can't be found.
-  const isRendered = (key: SearchKey) =>
+  const isRendered = (key: RowKey) =>
     key === 'privacyReset'
       ? app?.platform === 'darwin'
       : key === 'customMirrorElectron' || key === 'customMirrorNightly'
         ? settings.mirror === 'custom'
         : true;
-  const rowMatches = (key: SearchKey) =>
+  const rowMatches = (key: RowKey) =>
     isRendered(key) &&
     matchesQuery(query, t(`${key}.title`), t(`${key}.description`), key);
   const shown = searching
@@ -581,12 +573,6 @@ function PrivacySection() {
   const { t } = useTranslation('settings');
   const { app } = useSettings();
   const run = useSettingsAction();
-  const { query, showAll } = useContext(SearchContext);
-  const title = t('privacyReset.title');
-  const description = t('privacyReset.description');
-  const showReset =
-    app?.platform === 'darwin' &&
-    (showAll || matchesQuery(query, title, description, 'privacyReset'));
   const reset = async () => {
     if (await appPlatformApi.ResetPrivacyPermissions())
       showToast({ tone: 'success', title: t('privacyReset.done') });
@@ -594,20 +580,12 @@ function PrivacySection() {
   return (
     <>
       <SwitchRow setting="crashReports" />
-      {showReset && (
-        <div className={styles.row} data-inline>
-          <div className={styles.rowText}>
-            <div className={styles.rowHead}>
-              <span className={styles.rowTitle}>{title}</span>
-            </div>
-            <p className={styles.rowDescription}>{description}</p>
-          </div>
-          <div className={styles.rowControl}>
-            <Button size="sm" onPress={() => run(reset)}>
-              {t('privacyReset.button')}
-            </Button>
-          </div>
-        </div>
+      {app?.platform === 'darwin' && (
+        <Row setting="privacyReset" inline>
+          <Button size="sm" onPress={() => run(reset)}>
+            {t('privacyReset.button')}
+          </Button>
+        </Row>
       )}
     </>
   );

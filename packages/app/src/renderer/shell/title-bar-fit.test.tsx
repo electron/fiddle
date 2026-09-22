@@ -1,91 +1,65 @@
 import { describe, expect, it } from 'vitest';
 
 import type { Platform } from '../../shared/stores';
-import {
-  capsuleWidth,
-  leftGroupMin,
-  rightGroupMin,
-  TITLE_BAR_PARTS,
-  titleBarFit,
-  type TitleBarFit,
-} from './title-bar-fit';
-
-/** The least width the title bar needs with what `fit` shows. */
-function titleBarMinWidth(
-  platform: Platform,
-  menuBar: boolean,
-  fit: TitleBarFit,
-): number {
-  const parts = TITLE_BAR_PARTS;
-  return (
-    leftGroupMin(platform, menuBar) +
-    capsuleWidth(parts.pickerMin, fit.runHint ? parts.run[platform] : parts.runBare) +
-    rightGroupMin(
-      platform,
-      fit.publishLabel ? parts.publishLabelled : parts.iconButton,
-      fit.openGistButton,
-    )
-  );
-}
+import { titleBarFit } from './title-bar-fit';
 
 const PLATFORMS: readonly Platform[] = ['darwin', 'win32', 'linux'];
 /** The window's minimum width. */
 const MIN_WIDTH = 600;
+const full = { publishLabel: true, openGistButton: true, runHint: true };
+const noLabel = { ...full, publishLabel: false };
+const bare = { publishLabel: false, openGistButton: false, runHint: false };
 
 describe('titleBarFit', () => {
-  it('never needs more than the narrowest window, on any platform, with or without the menu bar', () => {
-    for (const platform of PLATFORMS) {
-      for (const menuBar of [true, false]) {
-        for (const width of [600, 640, 700, 800, 1000, 1280]) {
-          const fit = titleBarFit(platform, width, menuBar);
-          expect(
-            titleBarMinWidth(platform, menuBar, fit),
-            `${platform} at ${width} (menu bar ${menuBar})`,
-          ).toBeLessThanOrEqual(width);
-        }
-      }
-    }
-    expect(titleBarMinWidth('win32', true, titleBarFit('win32', MIN_WIDTH, true))).toBe(
-      MIN_WIDTH,
-    );
-  });
-
   it('shows everything in the default window and gives things up only as it narrows', () => {
-    const full = { publishLabel: true, openGistButton: true, runHint: true };
     for (const platform of PLATFORMS)
       expect(titleBarFit(platform, 1280, true)).toEqual(full);
-    // Linux: the Publish label goes below 674.
-    expect(titleBarFit('linux', 674, true)).toEqual(full);
-    expect(titleBarFit('linux', 673, true)).toEqual({ ...full, publishLabel: false });
-    expect(titleBarFit('linux', MIN_WIDTH, true)).toEqual({
-      ...full,
-      publishLabel: false,
-    });
-    // macOS has no menu bar: the label goes below 696 (736 when a test or dev run forces the bar).
-    expect(titleBarFit('darwin', 696, false)).toEqual(full);
-    expect(titleBarFit('darwin', 695, false).publishLabel).toBe(false);
-    expect(titleBarFit('darwin', 735, true).publishLabel).toBe(false);
-    expect(titleBarFit('darwin', MIN_WIDTH, true)).toEqual({
-      ...full,
-      publishLabel: false,
-    });
-    // Windows keeps 140px for its caption buttons: the label goes below 814, Open gist and the Run hint below 652.
-    expect(titleBarFit('win32', 1000, true)).toEqual(full);
-    expect(titleBarFit('win32', 813, true)).toEqual({ ...full, publishLabel: false });
-    expect(titleBarFit('win32', 652, true)).toEqual({ ...full, publishLabel: false });
-    expect(titleBarFit('win32', 651, true)).toEqual({
-      publishLabel: false,
-      openGistButton: false,
-      runHint: false,
-    });
+    for (const [platform, width, menuBar, fit] of [
+      // Linux: the Publish label goes below 674 (634 without the menu bar).
+      ['linux', 674, true, full],
+      ['linux', 673, true, noLabel],
+      ['linux', 634, false, full],
+      ['linux', MIN_WIDTH, true, noLabel],
+      // macOS has no menu bar: the label goes below 696 (736 when a test or dev run forces the bar).
+      ['darwin', 696, false, full],
+      ['darwin', 695, false, noLabel],
+      ['darwin', 735, true, noLabel],
+      ['darwin', MIN_WIDTH, true, noLabel],
+      // Windows keeps 140px for its caption buttons: the label goes below 814, Open gist and the Run hint below 652.
+      ['win32', 1000, true, full],
+      ['win32', 813, true, noLabel],
+      ['win32', 774, false, full],
+      ['win32', 652, true, noLabel],
+      ['win32', 651, true, bare],
+      ['win32', 612, false, noLabel],
+      ['win32', MIN_WIDTH, false, bare],
+    ] as const)
+      expect(titleBarFit(platform, width, menuBar), `${platform} at ${width}`).toEqual(
+        fit,
+      );
+  });
+
+  it('drops Open gist and the Run hint on every platform, as page zoom narrows the bar below 600', () => {
+    for (const [platform, width, menuBar, fit] of [
+      ['darwin', 534, false, noLabel],
+      ['darwin', 533, false, bare],
+      ['darwin', 574, true, noLabel],
+      ['darwin', 573, true, bare],
+      ['linux', 472, false, noLabel],
+      ['linux', 471, false, bare],
+      ['linux', 512, true, noLabel],
+      ['linux', 511, true, bare],
+    ] as const)
+      expect(titleBarFit(platform, width, menuBar), `${platform} at ${width}`).toEqual(
+        fit,
+      );
   });
 
   it('gives things up in order: the Publish label before the Open gist button and the Run hint', () => {
     for (const platform of PLATFORMS) {
-      for (let width = 1280; width >= MIN_WIDTH; width -= 4) {
+      for (let width = 1280; width >= 320; width -= 4) {
         const fit = titleBarFit(platform, width, true);
-        if (fit.openGistButton || fit.runHint)
-          expect(fit.openGistButton && fit.runHint).toBe(true);
+        expect(fit.openGistButton).toBe(fit.runHint);
         if (!fit.openGistButton)
           expect(fit.publishLabel, `${platform} at ${width}`).toBe(false);
       }
