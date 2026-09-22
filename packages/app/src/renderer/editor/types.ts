@@ -36,7 +36,7 @@ export function useEditorTypes(): void {
       unsubscribe = versionsApi.onTypesChanged(load);
       load();
     } catch (error) {
-      // Versions isn't bound in this context (a test or the gallery).
+      // Versions isn't bound in this context (a test).
       log.error('editor types unavailable', error);
     }
     return () => {

@@ -192,7 +192,8 @@ describe('versions', () => {
     await app().click(role('button', 'Delete all'));
     await app().query(role('alertdialog', 'Delete all downloaded versions?'));
     await app().click(role('button', 'Delete all'));
-    await expect.poll(others).toEqual([]);
+    // On Windows the removal waits for the download's warm-up run, which a virus scan can hold up.
+    await expect.poll(others, { timeout: 20_000 }).toEqual([]);
     expect((await fiddle()).versionRef).toEqual(active);
   });
 

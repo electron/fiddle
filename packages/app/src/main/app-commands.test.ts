@@ -14,7 +14,7 @@ const electron = vi.hoisted(() => ({
   sendActionToFirstResponder: vi.fn(),
 }));
 const sendWindowCommand = vi.fn();
-/** The fiddle windows, by ID; any other BrowserWindow is DevTools or the gallery. */
+/** The fiddle windows, by ID; any other BrowserWindow is DevTools. */
 const fiddleWindows = new Map<string, { webContents: object }>();
 
 vi.mock('electron', () => ({
@@ -136,12 +136,12 @@ describe('bisect.toggle', () => {
 describe('view.reloadAllWindows', () => {
   it('reloads the fiddle windows and leaves other windows alone', async () => {
     const { run, win } = setup();
-    const gallery = { webContents: webContentsStub() };
-    electron.allWindows = [win, gallery];
+    const other = { webContents: webContentsStub() };
+    electron.allWindows = [win, other];
 
     await run('view.reloadAllWindows', { windowId: undefined });
 
     expect(win.webContents.reload).toHaveBeenCalledOnce();
-    expect(gallery.webContents.reload).not.toHaveBeenCalled();
+    expect(other.webContents.reload).not.toHaveBeenCalled();
   });
 });
