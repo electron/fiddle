@@ -38,7 +38,6 @@ export default {
   "toggleDevTools": "切換開發人員工具",
   "develop": "開發",
   "toggleMenuBar": "切換標題列功能表列",
-  "openComponentGallery": "開啟元件圖庫",
   "undo": "復原",
   "redo": "取消復原",
   "cut": "剪下",
