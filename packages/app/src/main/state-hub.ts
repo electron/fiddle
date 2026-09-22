@@ -4,7 +4,12 @@
  * windows are `WindowSink`s.
  */
 import { ErrorCode, FiddleError } from '../shared/errors';
-import type { AppState, WindowState } from '../shared/stores';
+import {
+  appStateSchema,
+  windowStateSchema,
+  type AppState,
+  type WindowState,
+} from '../shared/stores';
 
 export interface WindowSink {
   pushApp(state: AppState): void;
@@ -38,7 +43,7 @@ export class StateHub {
     initialApp: Omit<AppState, 'rev'>,
     log: (error: unknown) => void = console.error,
   ) {
-    this.#app = { ...initialApp, rev: 0 };
+    this.#app = parse(appStateSchema, { ...initialApp, rev: 0 });
     this.#log = log;
   }
 
@@ -61,7 +66,7 @@ export class StateHub {
         `Window ${windowId} is already registered`,
       );
     }
-    const state: WindowState = { ...init, windowId, rev: 0 };
+    const state = parse(windowStateSchema, { ...init, windowId, rev: 0 });
     this.#windows.set(windowId, { state, sink });
     return state;
   }
@@ -74,7 +79,7 @@ export class StateHub {
 
   /** Applies a change to `App` and returns the `rev` that includes it. */
   updateApp(patch: AppPatch): number {
-    this.#app = { ...this.#app, ...patch, rev: this.#app.rev + 1 };
+    this.#app = parse(appStateSchema, { ...this.#app, ...patch, rev: this.#app.rev + 1 });
     this.#appDirty = true;
     this.#scheduleFlush();
     return this.#app.rev;
@@ -85,7 +90,12 @@ export class StateHub {
     const entry = this.#windows.get(windowId);
     if (!entry)
       throw new FiddleError(ErrorCode.notFound, `Window ${windowId} is not registered`);
-    entry.state = { ...entry.state, ...patch, windowId, rev: entry.state.rev + 1 };
+    entry.state = parse(windowStateSchema, {
+      ...entry.state,
+      ...patch,
+      windowId,
+      rev: entry.state.rev + 1,
+    });
     this.#dirtyWindows.add(windowId);
     this.#scheduleFlush();
     return entry.state.rev;
@@ -135,4 +145,23 @@ export class StateHub {
   #notify(change: Parameters<ChangeListener>[0]): void {
     for (const listener of this.#listeners) this.#push(() => listener(change));
   }
+}
+
+function parse<T>(
+  schema: {
+    safeParse(
+      value: unknown,
+    ): { success: true; data: T } | { success: false; error: { message: string } };
+  },
+  value: unknown,
+): T {
+  const result = schema.safeParse(value);
+  if (!result.success) {
+    throw new FiddleError(
+      ErrorCode.invalidArgument,
+      'Invalid store value',
+      result.error.message,
+    );
+  }
+  return result.data;
 }

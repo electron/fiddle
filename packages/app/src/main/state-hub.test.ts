@@ -2,7 +2,7 @@ import { randomUUID } from 'node:crypto';
 
 import { describe, expect, it, vi } from 'vitest';
 
-import { ErrorCode } from '../shared/errors';
+import { ErrorCode, FiddleError } from '../shared/errors';
 import { defaultSettings } from '../shared/settings';
 import { DEFAULT_LAYOUT, type AppState, type WindowState } from '../shared/stores';
 import { emptyFiddleState } from './documents/test-helpers';
@@ -135,11 +135,15 @@ describe('StateHub', () => {
     ]);
   });
 
-  it('rejects changes to unknown windows with a FiddleError', () => {
+  it('rejects changes to unknown windows and invalid values with FiddleErrors', () => {
     const { hub } = setup();
     expect(() => hub.updateWindow(randomUUID(), { title: 'x' })).toThrow(
       expect.objectContaining({ code: ErrorCode.notFound }),
     );
+    const invalid = () => hub.updateApp({ platform: 'beos' as never });
+    expect(invalid).toThrow(FiddleError);
+    expect(invalid).toThrow(expect.objectContaining({ code: ErrorCode.invalidArgument }));
+    expect(hub.app.rev).toBe(0);
   });
 
   it('refuses to register the same window twice', () => {
