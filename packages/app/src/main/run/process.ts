@@ -7,7 +7,6 @@ import { app } from 'electron';
 import { cleanFlags, fiddleProcessEnv, packageManagerEnv } from '../../fiddle/env';
 import { PACKAGE_JSON, type FileMap } from '../../fiddle/files';
 import { writeFiddleFolder } from '../../fiddle/folder';
-import { killTree } from '../../fiddle/kill-tree';
 import { loadLoginShellPath } from '../../fiddle/modules';
 import { generatePackageJson, type PackageJsonInput } from '../../fiddle/package-json';
 import { log } from '../log';
@@ -35,9 +34,16 @@ export async function toolEnv(): Promise<NodeJS.ProcessEnv> {
   return env;
 }
 
-/** A new run dir (`mkdtemp`, mode 0700). The caller deletes it. */
+/** A new run dir (`mkdtemp`, mode 0700). The caller deletes it with `removeDir`. */
 export function makeRunDir(prefix = 'electron-fiddle-'): Promise<string> {
   return fsp.mkdtemp(path.join(os.tmpdir(), prefix));
+}
+
+/** Deletes a run dir or build project. A failure is only logged. */
+export function removeDir(dir: string): Promise<void> {
+  return fsp
+    .rm(dir, { recursive: true, force: true, maxRetries: 5, retryDelay: 200 })
+    .catch((error: unknown) => log.warn('cleanup failed', dir, error));
 }
 
 /**
@@ -123,7 +129,7 @@ export function spawnElectron(options: SpawnElectronOptions): ChildProcess {
   ];
   return spawn(launcher ?? options.exec, args, {
     cwd: options.appDir,
-    // Leads its own process group, so `stopChild` reaches what the fiddle spawned.
+    // Leads its own process group, so `killTree` reaches what the fiddle spawned.
     detached: process.platform !== 'win32',
     stdio: ['ignore', 'pipe', 'pipe'],
     env: fiddleProcessEnv({
@@ -148,9 +154,4 @@ export function waitForExit(
       resolve(failed ? { spawnFailed: true } : { code, signal }),
     );
   });
-}
-
-/** Stops the fiddle and what it spawned. */
-export function stopChild(child: ChildProcess): void {
-  killTree(child);
 }

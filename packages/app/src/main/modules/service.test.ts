@@ -4,6 +4,15 @@ import type { FiddleState } from '../../shared/stores';
 import type { ChangeListener } from '../state-hub';
 import { ModulesService, type ModulesHub } from './service';
 
+const docs = vi.hoisted(() => ({
+  setFiddleModules:
+    vi.fn<
+      (id: string, modules: Record<string, string>, normalized?: boolean) => number
+    >(),
+}));
+vi.mock('../documents/service', () => docs);
+
+/** Window `w`, whose modules Documents' `setFiddleModules` writes. */
 function fakeHub(modules: Record<string, string>) {
   let fiddle = { modules } as FiddleState;
   let rev = 0;
@@ -11,20 +20,18 @@ function fakeHub(modules: Record<string, string>) {
   const listeners = new Set<ChangeListener>();
   const hub: ModulesHub = {
     getWindow: (id) => (id === 'w' ? { fiddle } : undefined),
-    setModules: (_id, next, normalized) => {
-      fiddle = { ...fiddle, modules: next };
-      writes.push(normalized);
-      rev += 1;
-      queueMicrotask(() =>
-        listeners.forEach((l) => l({ store: 'window', windowId: 'w' })),
-      );
-      return rev;
-    },
     onChange: (listener) => {
       listeners.add(listener);
       return () => listeners.delete(listener);
     },
   };
+  docs.setFiddleModules.mockImplementation((_id, next, normalized = false) => {
+    fiddle = { ...fiddle, modules: next };
+    writes.push(normalized);
+    rev += 1;
+    queueMicrotask(() => listeners.forEach((l) => l({ store: 'window', windowId: 'w' })));
+    return rev;
+  });
   return { hub, modules: () => fiddle.modules, writes };
 }
 
@@ -116,7 +123,7 @@ describe('ModulesService', () => {
     };
     const service = new ModulesService(hub, slow);
     const pending = service.normalize('w');
-    hub.setModules('w', { a: '1.0.0' }, false);
+    docs.setFiddleModules('w', { a: '1.0.0' });
     release();
     await pending;
     expect(modules()).toEqual({ a: '1.0.0' });

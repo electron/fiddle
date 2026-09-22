@@ -11,6 +11,11 @@ import { envFromEntries, packageManagerEnv } from './env';
 import { killTree } from './kill-tree';
 
 export type PackageManager = 'npm' | 'yarn';
+/** Where to get each package manager, for the "not installed" message. */
+export const PM_INSTALL_URLS: Record<PackageManager, string> = {
+  npm: 'https://docs.npmjs.com/downloading-and-installing-node-js-and-npm',
+  yarn: 'https://yarnpkg.com/getting-started/install',
+};
 export type ModuleSpecProblem = 'invalid-name' | 'invalid-spec';
 
 export interface CommandLine {

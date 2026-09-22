@@ -5,23 +5,15 @@ import {
 } from '../../fiddle/modules';
 import { ErrorCode, FiddleError } from '../../shared/errors';
 import type { FiddleState } from '../../shared/stores';
+import { setFiddleModules } from '../documents/service';
 import { tm } from '../i18n';
 import { log } from '../log';
 import type { ChangeListener } from '../state-hub';
 
-/** The parts of the StateHub and Documents this service needs. */
+/** The parts of the StateHub this service needs. */
 export interface ModulesHub {
   getWindow(windowId: string): { fiddle: Pick<FiddleState, 'modules'> } | undefined;
   onChange(listener: ChangeListener): () => void;
-  /**
-   * Documents' `setFiddleModules`, so a change marks the fiddle dirty.
-   * `normalized` (a floating version pinned to the latest) doesn't. Returns the Window rev.
-   */
-  setModules(
-    windowId: string,
-    modules: Record<string, string>,
-    normalized: boolean,
-  ): number;
 }
 
 interface LatestVersionSource {
@@ -112,9 +104,10 @@ export class ModulesService {
     return win.fiddle.modules;
   }
 
+  /** Through Documents, so a change marks the fiddle dirty; a `normalized` one (a floating version pinned) doesn't. Returns the Window rev. */
   #write(windowId: string, modules: Record<string, string>, normalized = false): number {
     if (!this.#hub.getWindow(windowId))
       throw new FiddleError(ErrorCode.notFound, `Window ${windowId} is not registered`);
-    return this.#hub.setModules(windowId, modules, normalized);
+    return setFiddleModules(windowId, modules, normalized);
   }
 }

@@ -141,9 +141,14 @@ export async function createAppWindow({
   // Documents' `destroyed` handler must run before the one below, while the window is still registered.
   attachWindow(windowId, contents);
   attachContextMenu(windowId, contents, services);
+  const unwatchVersion = services.versionSelector.watch(windowId);
   contents.once('destroyed', () => {
+    unwatchVersion();
     hub.unregisterWindow(windowId);
     untrackWindow(windowId);
+    // Closing a window aborts its operations (but not downloads).
+    services.bisect.stop(windowId);
+    services.runs.disposeWindow(windowId);
   });
 
   try {

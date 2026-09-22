@@ -1,50 +1,25 @@
-import type { ChildProcess } from 'node:child_process';
-import fsp from 'node:fs/promises';
-
 import { Installer, type InstallStateEvent } from '@electron/fiddle-core';
 import { app } from 'electron';
 
-import { parseEnvEntries } from '../../fiddle/env';
-import { findMainEntry } from '../../fiddle/files';
-import { findPackageManager, installModules } from '../../fiddle/modules';
-import { osUserName, toPackageName } from '../../fiddle/package-json';
 import { ErrorCode, FiddleError } from '../../shared/errors';
 import type { OutputLine, RunState, VersionRefValue } from '../../shared/stores';
 import * as documents from '../documents/service';
 import { tm } from '../i18n';
 import { errorMessage } from '../localize-error';
 import { log } from '../log';
-import { sfwPathFor } from '../platform/sfw';
 import type { StateHub } from '../state-hub';
+import { versionProblemError } from '../versions/select';
 import type { VersionsService } from '../versions/service';
-import {
-  classifyRun,
-  esmNeedsNewerElectron,
-  installRunStatus,
-  type RunOutcome,
-} from './logic';
+import { executeRun, RunRefused } from './execute';
+import { classifyRun, installRunStatus, type RunOutcome } from './logic';
 import { OutputBuffer } from './output-buffer';
-import { OutputParser, type ParseResult } from './output-parser';
-import {
-  makeRunDir,
-  spawnElectron,
-  stopChild,
-  sweepStaleDirs,
-  toolEnv as loadToolEnv,
-  waitForExit,
-  writeRunApp,
-  writeRunPackageJson,
-} from './process';
+import type { ParseResult } from './output-parser';
+import { makeRunDir, removeDir, sweepStaleDirs } from './process';
 
 const MAX_ERRORS = 50;
 const QUIT_WAIT_MS = 3000;
 const MIN_CONSOLE_HEIGHT = 96;
 const DEFAULT_CONSOLE_HEIGHT = 160;
-
-export const PM_INSTALL_URLS = {
-  npm: 'https://docs.npmjs.com/downloading-and-installing-node-js-and-npm',
-  yarn: 'https://yarnpkg.com/getting-started/install',
-} as const;
 
 export const IDLE_RUN: RunState = {
   status: 'ready',
@@ -54,17 +29,9 @@ export const IDLE_RUN: RunState = {
   bisect: null,
 };
 
-/** A pre-run check refused the run; the message is for the console. */
-class Refused extends FiddleError {
-  constructor(message: string) {
-    super('run-refused', message);
-  }
-}
-
 interface WindowRun {
   buffer: OutputBuffer;
   abort?: AbortController;
-  child?: ChildProcess;
   /** The version the current run uses. */
   version?: VersionRefValue;
   /** The user stopped the current run. */
@@ -119,10 +86,9 @@ export class RunService {
     this.#hub.updateWindow(windowId, { run: { ...this.state(windowId), ...patch } });
   }
 
-  /** The backlog for `Run.GetOutput`. */
+  /** The backlog for `Run.GetOutput`: what's left after the last clear. */
   output(windowId: string): OutputLine[] {
-    const clearedSeq = this.state(windowId).clearedSeq;
-    return this.#entry(windowId).buffer.lines.filter((line) => line.seq > clearedSeq);
+    return [...this.#entry(windowId).buffer.lines];
   }
 
   clear(windowId: string): void {
@@ -174,20 +140,6 @@ export class RunService {
     if (entry) entry.abort = undefined;
   }
 
-  /** The environment for npm, yarn and Forge, for packaging. */
-  toolEnv(): Promise<NodeJS.ProcessEnv> {
-    return loadToolEnv();
-  }
-
-  /**
-   * `sfw.mjs`, to wrap an install with when the Socket Firewall setting is on,
-   * for runs, package and make alike. Undefined when the setting is off, and
-   * throws when it's on but `sfw.mjs` is missing.
-   */
-  sfwPath(): Promise<string | undefined> {
-    return sfwPathFor(this.#hub.app.settings.socketFirewall);
-  }
-
   /**
    * Runs the fiddle and resolves when it exits, with how it ended. A second
    * run in a busy window is `invalid`.
@@ -223,7 +175,7 @@ export class RunService {
         (created) => (dir = created),
       );
     } catch (error) {
-      if (error instanceof Refused) {
+      if (error instanceof RunRefused) {
         this.log(windowId, error.message, 'error');
         outcome = { invalid: true };
       } else if (abort.signal.aborted) {
@@ -241,7 +193,6 @@ export class RunService {
       }
     } finally {
       entry.abort = undefined;
-      entry.child = undefined;
       entry.version = undefined;
     }
     if (entry.stopRequested) outcome = { ...outcome, stopped: true };
@@ -249,16 +200,16 @@ export class RunService {
       status: 'ready',
       result: outcome.stopped ? undefined : classifyRun(outcome),
     });
-    if (dir) this.#removeRunDir(dir);
+    if (dir) this.track(removeDir(dir));
     return outcome;
   }
 
+  /** Aborts the run or claimed operation, which stops Electron and what it spawned. */
   stop(windowId: string): void {
     const entry = this.#runs.get(windowId);
-    if (!entry) return;
-    if (entry.abort || entry.child) entry.stopRequested = true;
-    entry.abort?.abort();
-    if (entry.child) stopChild(entry.child);
+    if (!entry?.abort) return;
+    entry.stopRequested = true;
+    entry.abort.abort();
   }
 
   /** Stops the window's run, and resolves once the window is ready again or gone. */
@@ -300,20 +251,13 @@ export class RunService {
   /** Stops every run and waits for the children and the deletes, for at most `timeoutMs`. */
   async shutdown(timeoutMs = QUIT_WAIT_MS): Promise<void> {
     for (const windowId of this.#runs.keys()) this.stop(windowId);
-    let timer: ReturnType<typeof setTimeout> | undefined;
-    const timedOut = new Promise<'timeout'>((resolve) => {
-      timer = setTimeout(resolve, timeoutMs, 'timeout');
-    });
-    try {
-      while (this.#tasks.size > 0) {
-        if (
-          (await Promise.race([Promise.allSettled([...this.#tasks]), timedOut])) ===
-          'timeout'
-        )
-          return;
-      }
-    } finally {
-      clearTimeout(timer);
+    const timedOut = new Promise<'timeout'>((resolve) =>
+      setTimeout(resolve, timeoutMs, 'timeout').unref(),
+    );
+    // A run that ends adds the delete of its directory, so look again.
+    while (this.#tasks.size > 0) {
+      const done = Promise.allSettled([...this.#tasks]);
+      if ((await Promise.race([done, timedOut])) === 'timeout') return;
     }
   }
 
@@ -334,14 +278,6 @@ export class RunService {
     const done = () => this.#tasks.delete(work);
     work.then(done, done);
     return work;
-  }
-
-  #removeRunDir(dir: string): void {
-    this.track(
-      fsp
-        .rm(dir, { recursive: true, force: true, maxRetries: 5, retryDelay: 200 })
-        .catch((error: unknown) => log.warn('cleanup failed', dir, error)),
-    );
   }
 
   #entry(windowId: string): WindowRun {
@@ -397,9 +333,6 @@ export class RunService {
     onDir: (dir: string) => void,
   ): Promise<RunOutcome> {
     const t = tm('mainRun');
-    const settings = this.#hub.app.settings;
-    const pm = settings.packageManager;
-
     // Every run checks trust, auto-bisect steps included: it's free once the
     // fiddle is approved, and asks again if the window's fiddle has another
     // origin since. Exactly the approved fiddle runs, whatever the window loads next.
@@ -407,155 +340,60 @@ export class RunService {
       windowId,
       options.trustOperation ?? 'run',
     );
-    if (!trust.approved) throw new Refused(t('untrusted'));
-
-    const fiddle = trust.fiddle;
-    const files = { ...fiddle.files };
-    const name = toPackageName(this.#hub.getWindow(windowId)?.fiddle.name ?? 'fiddle');
+    if (!trust.approved) throw new RunRefused(ErrorCode.forbidden, t('untrusted'));
+    const { fiddle } = trust;
     const versionRef = options.versionRef ?? fiddle.version;
     this.#entry(windowId).version = versionRef;
-    const { exec, label, release } = await this.#resolveElectron(
-      windowId,
-      versionRef,
-      signal,
-    );
-    this.setState(windowId, { status: 'checking', version: label });
-    const mainEntry = findMainEntry(Object.keys(files)) ?? 'main.js';
-    if (esmNeedsNewerElectron(mainEntry, release)) throw new Refused(t('esmNeeds28'));
-
-    const modules = fiddle.modules;
-    const hasModules = Object.keys(modules).length > 0;
-    const toolEnv = hasModules ? await this.toolEnv() : undefined;
-    if (hasModules && !(await findPackageManager(pm, { env: toolEnv }))) {
-      throw new Refused(t('pmMissing', { pm, url: PM_INSTALL_URLS[pm] }));
-    }
-
+    const electron = await this.#resolveElectron(windowId, versionRef, signal);
+    this.setState(windowId, { status: 'checking', version: electron.label });
     const dir = await makeRunDir();
     onDir(dir);
-    const packageJson = {
-      name,
-      main: mainEntry,
-      author: settings.packageAuthor || osUserName(),
-      modules,
-    };
-    // devDependencies.electron goes in after the module install, or npm and
-    // yarn would install Electron as well.
-    const withElectron = release
-      ? { ...packageJson, electronVersion: release }
-      : packageJson;
-    const appDir = await writeRunApp(dir, files, hasModules ? packageJson : withElectron);
-
-    if (hasModules) {
-      this.setState(windowId, { status: 'installing' });
-      this.log(
-        windowId,
-        trust.allowScripts
-          ? t('installingModules', { pm })
-          : t('installingModulesNoScripts', { pm }),
-      );
-      try {
-        const sfwPath = await this.sfwPath();
-        await installModules({
-          dir: appDir,
-          tempRoot: dir,
-          packageManager: pm,
-          modules,
-          ignoreScripts: !trust.allowScripts,
-          ...(sfwPath ? { sfwPath } : {}),
-          ...(toolEnv ? { env: toolEnv } : {}),
-          signal,
-          onOutput: (text) => this.logText(windowId, text),
-        });
-      } catch (error) {
-        if (signal.aborted) throw error;
-        this.log(windowId, t('modulesFailed', { message: errorMessage(error) }), 'error');
-        return { installFailed: true };
-      }
-      await writeRunPackageJson(appDir, withElectron);
-    }
-    if (signal.aborted) throw new FiddleError(ErrorCode.cancelled, 'The run was stopped');
-
-    this.setState(windowId, { status: 'starting' });
-    const userEnv = parseEnvEntries(settings.environmentVariables);
-    if (userEnv.invalid.length > 0)
-      this.log(
-        windowId,
-        t('envInvalid', { entries: userEnv.invalid.join(', ') }),
-        'warn',
-      );
-    if (userEnv.blocked.length > 0)
-      this.log(windowId, t('envBlocked', { keys: userEnv.blocked.join(', ') }), 'warn');
-    const realAppDir = await fsp.realpath(appDir).catch(() => appDir);
-    const parser = new OutputParser({
-      roots: [...new Set([appDir, realAppDir])],
-      files: Object.keys(files),
-      chromiumLogs: settings.electronLogging,
-    });
-    const child = spawnElectron({
-      exec,
-      appDir,
-      runDir: dir,
-      flags: settings.electronFlags,
-      keepUserDataDirs: settings.keepUserDataDirs,
-      // Always log: renderer console messages reach stderr, for runtime errors.
-      env: { ELECTRON_ENABLE_LOGGING: 'true', ...userEnv.env },
-      advancedLogging: settings.electronLogging,
-      inspect: true,
-    });
-    // A failed spawn is an `error` event on the next tick, then `close`, so
-    // nothing may be awaited between the spawn and these listeners.
-    const exited = waitForExit(child, (error) =>
-      this.log(windowId, t('spawnFailed', { message: error.message }), 'error'),
+    return executeRun(
+      {
+        dir,
+        files: fiddle.files,
+        modules: fiddle.modules,
+        name: this.#hub.getWindow(windowId)?.fiddle.name ?? 'fiddle',
+        electron,
+        allowScripts: trust.allowScripts,
+        settings: this.#hub.app.settings,
+        signal,
+      },
+      {
+        log: (text, kind) => this.log(windowId, text, kind),
+        tool: (text) => this.logText(windowId, text),
+        status: (status) => this.setState(windowId, { status }),
+        parsed: (result) => this.#consume(windowId, result),
+        installFailed: (error) => {
+          this.log(
+            windowId,
+            t('modulesFailed', { message: errorMessage(error) }),
+            'error',
+          );
+          return { installFailed: true };
+        },
+      },
     );
-    child.stdout?.setEncoding('utf8');
-    child.stderr?.setEncoding('utf8');
-    child.stdout?.on('data', (chunk: string) =>
-      this.#consume(windowId, parser.push('stdout', chunk)),
-    );
-    child.stderr?.on('data', (chunk: string) =>
-      this.#consume(windowId, parser.push('stderr', chunk)),
-    );
-    this.#entry(windowId).child = child;
-    this.setState(windowId, { status: 'running' });
-    this.log(windowId, t('started', { version: release ? `v${release}` : label, name }));
-
-    const result = await exited;
-    this.#consume(windowId, parser.flush());
-    if (!result.spawnFailed) {
-      this.log(
-        windowId,
-        result.signal
-          ? t('exitedSignal', { signal: result.signal })
-          : t('exitedCode', { code: result.code ?? 0 }),
-      );
-    }
-    return result;
   }
 
+  /** The executable to run, downloading a release first if needed. */
   async #resolveElectron(
     windowId: string,
     ref: VersionRefValue,
     signal: AbortSignal,
-  ): Promise<{ exec: string; label: string; release: string | undefined }> {
-    const t = tm('mainRun');
+  ): Promise<{ exec: string; label: string; release?: string }> {
+    const problem = versionProblemError(ref, this.#versions);
+    if (problem) throw new RunRefused(problem.code, problem.message);
     if (ref.kind === 'local') {
-      const build = this.#versions.localBuild(ref.id);
-      if (!build?.available)
-        throw new Refused(t('localBuildMissing', { name: build?.name ?? ref.id }));
-      return {
-        exec: Installer.getExecPath(build.path),
-        label: build.name,
-        release: undefined,
-      };
+      // No problem: the build is there, with its binary.
+      const build = this.#versions.localBuild(ref.id)!;
+      return { exec: Installer.getExecPath(build.path), label: build.name };
     }
     const { version } = ref;
-    const row = this.#versions.release(version);
-    if (!row) throw new Refused(t('versionUnknown', { version }));
-    if (!row.supported) throw new Refused(t('versionUnavailable', { version }));
     let exec = this.#versions.execPath(version);
     if (!exec) {
       this.setState(windowId, { status: 'downloading', version });
-      this.log(windowId, t('downloading', { version }));
+      this.log(windowId, tm('mainRun')('downloading', { version }));
       const onState = (event: InstallStateEvent) => {
         const status =
           event.version === version ? installRunStatus(event.state) : undefined;
@@ -568,9 +406,7 @@ export class RunService {
         exec = await this.#versions.install(version, signal);
       } catch (error) {
         if (signal.aborted) throw error;
-        throw new Refused(
-          t('downloadFailed', { version, message: FiddleError.from(error).message }),
-        );
+        throw new RunRefused(ErrorCode.network, errorMessage(error));
       } finally {
         installer.off('state-changed', onState);
       }

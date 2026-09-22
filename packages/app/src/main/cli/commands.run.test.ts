@@ -32,7 +32,6 @@ vi.mock('../documents/service', () => ({
   appTemplateLoader: vi.fn(),
   staticDir: () => '/nonexistent/static',
 }));
-vi.mock('../run/service', () => ({ PM_INSTALL_URLS: { npm: '', yarn: '' } }));
 vi.mock('../../fiddle/modules', async (importOriginal) => ({
   ...(await importOriginal<typeof import('../../fiddle/modules')>()),
   loadLoginShellPath: async () => undefined,
@@ -43,8 +42,8 @@ vi.mock('../../fiddle/modules', async (importOriginal) => ({
 vi.mock('../run/process', async (importOriginal) => ({
   ...(await importOriginal<typeof import('../run/process')>()),
   spawnElectron: vi.fn(),
-  stopChild: vi.fn(),
 }));
+vi.mock('../../fiddle/kill-tree', () => ({ killTree: vi.fn() }));
 vi.mock('../packaging/service', async (importOriginal) => ({
   ...(await importOriginal<typeof import('../packaging/service')>()),
   runForgeTask: vi.fn(),
@@ -59,7 +58,8 @@ vi.mock('node:readline/promises', () => ({
 const { net } = await import('electron');
 const { findPackageManager, installModules } = await import('../../fiddle/modules');
 const { runForgeTask } = await import('../packaging/service');
-const { spawnElectron, stopChild } = await import('../run/process');
+const { killTree } = await import('../../fiddle/kill-tree');
+const { spawnElectron } = await import('../run/process');
 const { runCommand } = await import('./commands');
 
 const RELEASES = [
@@ -212,7 +212,7 @@ describe('run', () => {
     expect(logs(result.events)).toEqual([
       'warn: envInvalid {"entries":"nonsense"}',
       'warn: envBlocked {"keys":"LD_PRELOAD"}',
-      'started {"version":"99.0.0","name":"my-fiddle"}',
+      'started {"version":"v99.0.0","name":"my-fiddle"}',
       'exitedCode {"code":3}',
     ]);
     expect(
@@ -371,7 +371,7 @@ describe('run', () => {
       { fiddle: folder, version: '99.0.0' },
       controller.signal,
     );
-    expect(stopChild).toHaveBeenCalledTimes(1);
+    expect(killTree).toHaveBeenCalledTimes(1);
     expect(logs(result.events).at(-1)).toBe('exitedSignal {"signal":"SIGTERM"}');
     expect(result.events.at(-1)?.data).toMatchObject({
       result: 'failure',
@@ -389,7 +389,7 @@ describe('run', () => {
     const result = await run('run', { fiddle: folder, version: '99.0.0' });
     expect(result.exit).toBe(1);
     expect(logs(result.events)).toEqual([
-      'started {"version":"99.0.0","name":"my-fiddle"}',
+      'started {"version":"v99.0.0","name":"my-fiddle"}',
       'error: spawnFailed {"message":"EACCES"}',
     ]);
     expect(result.events.at(-1)?.data).toMatchObject({

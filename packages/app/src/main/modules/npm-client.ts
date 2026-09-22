@@ -1,6 +1,7 @@
 import * as semver from 'semver';
 
 import { isValidPackageName, pickLatestVersion } from '../../fiddle/modules';
+import type { Endpoints } from '../../shared/endpoints';
 import { ErrorCode, FiddleError } from '../../shared/errors';
 import { tm } from '../i18n';
 
@@ -17,22 +18,8 @@ interface PackageVersionList {
   versions: string[];
 }
 
-interface NpmEndpoints {
-  /** Algolia query endpoint for the `npm-search` index. */
-  searchUrl: string;
-  /** npm registry root, without a trailing slash. */
-  registryUrl: string;
-}
-
-export function npmEndpoints(base: {
-  algolia: string;
-  npmRegistry: string;
-}): NpmEndpoints {
-  return {
-    searchUrl: `${base.algolia}/1/indexes/npm-search/query`,
-    registryUrl: base.npmRegistry,
-  };
-}
+/** From the app's endpoints: Algolia's origin and the npm registry root, without trailing slashes. */
+type NpmEndpoints = Pick<Endpoints, 'algolia' | 'npmRegistry'>;
 
 // Algolia's public, search-only credentials for its npm index.
 const ALGOLIA_APP_ID = 'OFCNCOG2CU';
@@ -41,7 +28,6 @@ const ALGOLIA_API_KEY = '4efa2042cf4dba11be6e96e5c394e1a4';
 const SEARCH_LIMIT = 5;
 const VERSIONS_TTL_MS = 5 * 60_000;
 const REQUEST_TIMEOUT_MS = 30_000;
-const CACHE_SIZE = 100;
 
 export type FetchFn = (url: string, init?: RequestInit) => Promise<Response>;
 
@@ -98,33 +84,13 @@ export function toVersionList(
   return { latest: latest ?? null, versions: valid };
 }
 
-/** A small map that forgets its oldest entry once it's full. */
-class Cache<T> {
-  readonly #entries = new Map<string, { value: T; at: number }>();
-  constructor(readonly size: number) {}
-
-  get(key: string, now: number, ttl = Infinity): T | undefined {
-    const entry = this.#entries.get(key);
-    if (!entry || now - entry.at > ttl) return undefined;
-    return entry.value;
-  }
-
-  set(key: string, value: T, now: number): void {
-    this.#entries.delete(key);
-    this.#entries.set(key, { value, at: now });
-    if (this.#entries.size > this.size) {
-      const oldest = this.#entries.keys().next().value;
-      if (oldest !== undefined) this.#entries.delete(oldest);
-    }
-  }
-}
-
 export class NpmClient {
   readonly #fetch: FetchFn;
   readonly #endpoints: NpmEndpoints;
   readonly #now: () => number;
-  readonly #searches = new Cache<PackageSearchResult[]>(CACHE_SIZE);
-  readonly #versions = new Cache<PackageVersionList>(CACHE_SIZE);
+  /** A session's searches and version lists are few and small, so both caches just grow. */
+  readonly #searches = new Map<string, PackageSearchResult[]>();
+  readonly #versions = new Map<string, { list: PackageVersionList; at: number }>();
 
   constructor(options: NpmClientOptions) {
     this.#fetch = options.fetch;
@@ -136,10 +102,11 @@ export class NpmClient {
   async search(query: string): Promise<PackageSearchResult[]> {
     const trimmed = query.trim();
     if (trimmed === '') return [];
-    const cached = this.#searches.get(trimmed, this.#now());
+    const cached = this.#searches.get(trimmed);
     if (cached) return cached;
 
-    const body = (await this.#request(this.#endpoints.searchUrl, {
+    const searchUrl = `${this.#endpoints.algolia}/1/indexes/npm-search/query`;
+    const body = (await this.#request(searchUrl, {
       method: 'POST',
       headers: {
         'content-type': 'application/json',
@@ -158,7 +125,7 @@ export class NpmClient {
 
     const hits = Array.isArray(body.hits) ? (body.hits as AlgoliaHit[]) : [];
     const results = rankSearchHits(trimmed, hits);
-    this.#searches.set(trimmed, results, this.#now());
+    this.#searches.set(trimmed, results);
     return results;
   }
 
@@ -172,7 +139,7 @@ export class NpmClient {
       );
     }
     // Scoped names keep their `@` and escape the slash: `@scope%2Fname`.
-    const url = `${this.#endpoints.registryUrl}/${name.replace('/', '%2F')}`;
+    const url = `${this.#endpoints.npmRegistry}/${name.replace('/', '%2F')}`;
     return this.#request(
       url,
       { headers: { accept: 'application/vnd.npm.install-v1+json' }, signal },
@@ -181,8 +148,8 @@ export class NpmClient {
   }
 
   async versions(name: string): Promise<PackageVersionList> {
-    const cached = this.#versions.get(name, this.#now(), VERSIONS_TTL_MS);
-    if (cached) return cached;
+    const cached = this.#versions.get(name);
+    if (cached && this.#now() - cached.at <= VERSIONS_TTL_MS) return cached.list;
 
     const body = (await this.packument(name)) as {
       versions?: unknown;
@@ -198,7 +165,7 @@ export class NpmClient {
       versions,
       typeof latestTag === 'string' ? latestTag : undefined,
     );
-    this.#versions.set(name, list, this.#now());
+    this.#versions.set(name, { list, at: this.#now() });
     return list;
   }
 

@@ -3,8 +3,9 @@ import { describe, expect, it, vi } from 'vitest';
 import type { VersionRef } from '../../fiddle/fiddle';
 import type { ReleaseChannel } from '../../fiddle/versions';
 import { ErrorCode } from '../../shared/errors';
-import type { LocalBuild, ReleaseRow } from '../../shared/stores';
-import { VersionSelector, type VersionSelectorDeps } from './select';
+import type { LocalBuild, ReleaseRow, VersionNotice } from '../../shared/stores';
+import type { ChangeListener } from '../state-hub';
+import { VersionSelector } from './select';
 
 const dialog = { prompts: [] as string[], answer: true };
 vi.mock('../dialogs', () => ({
@@ -13,6 +14,8 @@ vi.mock('../dialogs', () => ({
     return dialog.answer;
   },
 }));
+const docs = vi.hoisted(() => ({ setFiddleVersion: vi.fn(), getStateStore: vi.fn() }));
+vi.mock('../documents/service', () => docs);
 // Keys and values, so tests can see which message was built from what.
 vi.mock('../i18n', () => ({
   tm: () => (key: string, values?: Record<string, string>) =>
@@ -37,10 +40,12 @@ interface Options {
   installed?: string[];
   channels?: ReleaseChannel[];
   answer?: boolean;
-  install?: (version: string) => Promise<unknown>;
-  /** Resolves when `setVersion` may apply `ref`. */
+  install?: (version: string) => Promise<string>;
+  /** Resolves when `setFiddleVersion` may apply `ref`. */
   setDelay?: (ref: VersionRef) => Promise<void>;
   busy?: boolean;
+  /** The ID of the build the folder picker adds. */
+  added?: string;
 }
 
 function setup(options: Options = {}) {
@@ -57,20 +62,50 @@ function setup(options: Options = {}) {
     showNotDownloaded: true,
   };
   const state = {
-    version: options.version ?? release('43.0.0'),
+    /** Window `w`'s version; undefined once it has closed. */
+    version: (options.version ?? release('43.0.0')) as VersionRef | undefined,
+    notice: null as VersionNotice | null,
     notices: [] as string[],
     remembered: [] as VersionRef[],
     prompts: [] as string[],
     settings,
   };
   Object.assign(dialog, { prompts: state.prompts, answer: options.answer ?? true });
+  docs.setFiddleVersion.mockImplementation(async (_windowId: string, ref: VersionRef) => {
+    state.version = ref;
+    if (options.setDelay) await options.setDelay(ref);
+    return 7;
+  });
+  docs.getStateStore.mockReturnValue({
+    set: (update: (prev: object) => { lastVersion: VersionRef }) =>
+      state.remembered.push(update({}).lastVersion),
+  });
+  const listeners = new Set<ChangeListener>();
+  const hub = {
+    app: { settings },
+    getWindow: (id: string) =>
+      id === 'w' && state.version
+        ? { rev: 7, versionNotice: state.notice, fiddle: { versionRef: state.version } }
+        : undefined,
+    updateWindow: (_id: string, patch: { versionNotice: VersionNotice | null }) => {
+      state.notice = patch.versionNotice;
+      if (patch.versionNotice) state.notices.push(patch.versionNotice.message);
+      return 8;
+    },
+    onChange: (listener: ChangeListener) => {
+      listeners.add(listener);
+      return () => listeners.delete(listener);
+    },
+  };
   const install = vi.fn(
     options.install ??
       (async (version: string) => {
         installed.add(version);
+        return '/electron';
       }),
   );
-  const deps: VersionSelectorDeps = {
+  const selector = new VersionSelector({
+    hub: hub as never,
     versions: {
       releases: () => rows,
       release: (version) => rows.find((r) => r.version === version),
@@ -78,23 +113,14 @@ function setup(options: Options = {}) {
       localBuild: (id) => (options.builds ?? []).find((b) => b.id === id),
       isInstalled: (version) => installed.has(version),
       install,
+      addLocalBuild: async () => options.added,
     },
-    settings: () => settings,
-    showChannel: (channel) => {
-      settings.channels = [...settings.channels, channel];
-    },
+    settings: { set: (_key, channels) => (settings.channels = channels) },
     isBusy: () => options.busy ?? false,
-    getVersion: () => state.version,
-    setVersion: async (_windowId, ref) => {
-      state.version = ref;
-      if (options.setDelay) await options.setDelay(ref);
-      return 7;
-    },
-    remember: (ref) => state.remembered.push(ref),
-    notify: (_windowId, message) => state.notices.push(message),
     typesChanged: () => {},
-  };
-  return { selector: new VersionSelector(deps), state, install };
+  });
+  const emit: ChangeListener = (change) => listeners.forEach((l) => l(change));
+  return { selector, state, install, emit, listeners };
 }
 
 describe('VersionSelector.select', () => {
@@ -127,6 +153,21 @@ describe('VersionSelector.select', () => {
     const { selector, install } = setup({ installed: ['42.4.1'] });
     await selector.select('w', release('42.4.1'));
     expect(install).not.toHaveBeenCalled();
+  });
+
+  it("returns the window's rev when nothing changed", async () => {
+    const { selector } = setup({ installed: ['43.0.0'] });
+    await expect(selector.select('w', release('43.0.0'))).resolves.toBe(7);
+    expect(docs.setFiddleVersion).not.toHaveBeenCalled();
+  });
+
+  it('selects and remembers the local build the user adds, and reports whether one was added', async () => {
+    const builds = [{ id: 'b1', name: 'testing', path: '/b1', available: true }];
+    const { selector, state } = setup({ builds, added: 'b1' });
+    expect(await selector.addLocalBuild('w')).toBe(true);
+    expect(state.version).toEqual({ kind: 'local', id: 'b1' });
+    expect(state.remembered).toEqual([{ kind: 'local', id: 'b1' }]);
+    expect(await setup().selector.addLocalBuild('w')).toBe(false);
   });
 
   it('refuses unknown and unrunnable versions, and busy windows', async () => {
@@ -194,16 +235,14 @@ describe('failed downloads', () => {
     await selector.select('w', release('44.0.0-beta.3'));
     await vi.waitFor(() => expect(state.version).toEqual(release('42.4.1')));
     expect(state.notices).toEqual([
-      'fallback(downloadFailed(44.0.0-beta.3|offline 44.0.0-beta.3)|electronVersion(42.4.1))',
+      'fallback(offline 44.0.0-beta.3|electronVersion(42.4.1))',
     ]);
   });
 
   it('keep the version and show the error when nothing is downloaded', async () => {
     const { selector, state } = setup({ install: failing });
     await selector.select('w', release('42.4.1'));
-    await vi.waitFor(() =>
-      expect(state.notices).toEqual(['downloadFailed(42.4.1|offline 42.4.1)']),
-    );
+    await vi.waitFor(() => expect(state.notices).toEqual(['offline 42.4.1']));
     expect(state.version).toEqual(release('42.4.1'));
   });
 
@@ -212,6 +251,7 @@ describe('failed downloads', () => {
     const { selector, state, install } = setup({
       install: async (version) => {
         if (!online) throw new Error(`offline ${version}`);
+        return '/electron';
       },
     });
     await selector.select('w', release('42.4.1'));
@@ -275,4 +315,56 @@ describe('docs examples', () => {
       'fallback(versionUnknown(99.0.0-beta.1)|electronVersion(43.0.0))',
     ]);
   });
+});
+
+describe('VersionSelector.watch', () => {
+  it("validates the window's version once per distinct version, ignoring other stores and windows", async () => {
+    const { selector, state, emit } = setup({ version: release('99.0.0') });
+    selector.watch('w');
+    emit({ store: 'app' });
+    emit({ store: 'window', windowId: 'other' });
+    expect(docs.setFiddleVersion).not.toHaveBeenCalled();
+
+    emit({ store: 'window', windowId: 'w' });
+    emit({ store: 'window', windowId: 'w' });
+    await vi.waitFor(() => expect(state.notices).toHaveLength(1));
+    expect(state.version).toEqual(release('44.0.0-beta.3'));
+    expect(docs.setFiddleVersion).toHaveBeenCalledOnce();
+
+    state.version = { kind: 'local', id: 'gone' };
+    emit({ store: 'window', windowId: 'w' });
+    await vi.waitFor(() => expect(state.notices).toHaveLength(2));
+  });
+
+  it('skips a window the hub no longer has, and stops with its unsubscribe', () => {
+    const { selector, state, emit, listeners } = setup({ version: release('99.0.0') });
+    const stop = selector.watch('w');
+    const gone = state.version;
+    state.version = undefined;
+    emit({ store: 'window', windowId: 'w' });
+    state.version = gone;
+    stop();
+    emit({ store: 'window', windowId: 'w' });
+    expect(listeners.size).toBe(0);
+    expect(docs.setFiddleVersion).not.toHaveBeenCalled();
+  });
+
+  it('logs a failed check instead of leaving the rejection unhandled', async () => {
+    const { log } = await import('../log');
+    const { selector, emit } = setup({ version: release('99.0.0') });
+    docs.setFiddleVersion.mockRejectedValueOnce(new Error('template'));
+    selector.watch('w');
+    emit({ store: 'window', windowId: 'w' });
+    await vi.waitFor(() => expect(log.warn).toHaveBeenCalled());
+  });
+});
+
+it('dismisses the notice the renderer names, and leaves a newer one alone', async () => {
+  const { selector, state } = setup({ version: release('99.0.0'), installed: [] });
+  await selector.validate('w');
+  expect(state.notice?.id).toBe(1);
+  selector.dismissNotice('w', 2);
+  expect(state.notice?.id).toBe(1);
+  selector.dismissNotice('w', 1);
+  expect(state.notice).toBeNull();
 });
