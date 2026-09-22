@@ -7,8 +7,10 @@ import path from 'node:path';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
 vi.mock('electron', () => ({ app: { isPackaged: false } }));
+const launcher = vi.fn<() => string | undefined>(() => undefined);
+vi.mock('../platform/disclaim', () => ({ disclaimLauncher: launcher }));
 
-const { makeRunDir, stopChild, sweepStaleDirs, waitForExit, writeRunApp } =
+const { makeRunDir, spawnElectron, stopChild, sweepStaleDirs, waitForExit, writeRunApp } =
   await import('./process');
 
 const node = (script: string) =>
@@ -77,6 +79,73 @@ describe('stopChild', () => {
         vi.useRealTimers();
       }
       expect(await waitForExit(child)).toMatchObject({ code: null, signal: 'SIGKILL' });
+    },
+  );
+});
+
+/** Node stands in for Electron: both take a script and the inspector flags. */
+describe('spawnElectron', () => {
+  const spawnNode = (dir: string, inspect: boolean) =>
+    spawnElectron({
+      exec: process.execPath,
+      appDir: path.join(dir, 'app'),
+      runDir: dir,
+      flags: ['--no-warnings'],
+      keepUserDataDirs: true,
+      env: {},
+      advancedLogging: false,
+      inspect,
+    });
+
+  it('starts the inspector on a random local port and does not list it over HTTP', async () => {
+    const dir = await makeRunDir('fiddle-test-');
+    dirs.push(dir);
+    await writeRunApp(
+      dir,
+      { 'main.js': 'setTimeout(() => {}, 5000)' },
+      { name: 'demo', main: 'main.js', author: 'me', modules: {} },
+    );
+    const child = spawnNode(dir, true);
+    let text = '';
+    child.stderr?.on('data', (chunk) => (text += String(chunk)));
+    const closed = waitForExit(child);
+    try {
+      const banner = /Debugger listening on ws:\/\/127\.0\.0\.1:(\d+)\/[\w-]+/;
+      await expect.poll(() => text, { timeout: 10_000 }).toMatch(banner);
+      // Without the id from the child's output, another process cannot attach.
+      const listed = await fetch(`http://127.0.0.1:${banner.exec(text)![1]}/json/list`);
+      expect(listed.status).toBe(404);
+    } finally {
+      child.kill();
+      await closed;
+    }
+  });
+
+  it.skipIf(process.platform === 'win32')(
+    'starts the launcher with Electron, the flags and the fiddle as its arguments',
+    async () => {
+      const dir = await makeRunDir('fiddle-test-');
+      dirs.push(dir);
+      await writeRunApp(
+        dir,
+        { 'main.js': 'process.exit(1)' },
+        { name: 'demo', main: 'main.js', author: 'me', modules: {} },
+      );
+      const argsFile = path.join(dir, 'launcher-args');
+      const script = path.join(dir, 'launcher.sh');
+      fs.writeFileSync(
+        script,
+        `#!/bin/sh\nprintf '%s\\n' "$@" > ${JSON.stringify(argsFile)}\nexec "$@"\n`,
+        { mode: 0o755 },
+      );
+      launcher.mockReturnValueOnce(script);
+      // The exit code passes through the launcher's exec.
+      expect(await waitForExit(spawnNode(dir, false))).toMatchObject({ code: 1 });
+      expect(fs.readFileSync(argsFile, 'utf8').trim().split('\n')).toEqual([
+        process.execPath,
+        '--no-warnings',
+        path.join(dir, 'app'),
+      ]);
     },
   );
 });

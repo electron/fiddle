@@ -1,3 +1,5 @@
+import semver from 'semver';
+
 import {
   getOldestSupportedMajor,
   getReleaseChannel,
@@ -41,6 +43,7 @@ interface RawRelease {
   version: string;
   date?: unknown;
   node?: unknown;
+  modules?: unknown;
 }
 
 function isRawRelease(value: unknown): value is RawRelease {
@@ -57,8 +60,6 @@ export function isReleaseList(data: unknown): data is RawRelease[] {
 }
 
 interface RowOptions {
-  stableMajors: readonly number[];
-  supportedMajors: readonly number[];
   platform: string;
   arch: string;
   /** `NUM_STABLE_BRANCHES`, if set. */
@@ -69,17 +70,27 @@ export function toReleaseRows(
   data: readonly RawRelease[],
   options: RowOptions,
 ): ReleaseRow[] {
-  const oldest = getOldestSupportedMajor(options);
-  const rows = data
+  const entries = data
+    .map((entry) => ({ ...entry, version: entry.version.replace(/^v/, '') }))
     // The 0.2x releases (atom-shell) can't be downloaded.
-    .filter((entry) => !entry.version.replace(/^v/, '').startsWith('0.2'))
-    .map((entry) => ({
-      version: entry.version.replace(/^v/, ''),
-      date: typeof entry.date === 'string' ? entry.date : '',
-      node: typeof entry.node === 'string' ? entry.node : '',
-      obsolete: oldest !== undefined && isObsolete(entry.version, oldest),
-      supported: isSupportedOnPlatform(entry.version, options.platform, options.arch),
-    }));
+    .filter((entry) => !entry.version.startsWith('0.2'));
+  const stableMajors = new Set<number>();
+  for (const { version } of entries) {
+    const parsed = semver.parse(version);
+    if (parsed?.prerelease.length === 0) stableMajors.add(parsed.major);
+  }
+  const oldest = getOldestSupportedMajor(
+    [...stableMajors].sort((a, b) => a - b),
+    options.numStableBranches,
+  );
+  const rows = entries.map((entry) => ({
+    version: entry.version,
+    date: typeof entry.date === 'string' ? entry.date : '',
+    node: typeof entry.node === 'string' ? entry.node : '',
+    ...(typeof entry.modules === 'string' ? { modules: entry.modules } : {}),
+    obsolete: oldest !== undefined && isObsolete(entry.version, oldest),
+    supported: isSupportedOnPlatform(entry.version, options.platform, options.arch),
+  }));
   return sortVersions(rows);
 }
 

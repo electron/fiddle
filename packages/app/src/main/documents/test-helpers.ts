@@ -57,7 +57,6 @@ export function initFakeDocuments(
       releases: () => [],
       release: () => undefined,
       localBuild: () => undefined,
-      electronVersions: {},
       ...options.versions,
     } as unknown as Deps['versions'],
     github: {

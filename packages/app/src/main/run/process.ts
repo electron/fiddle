@@ -1,14 +1,8 @@
-import type { ChildProcess } from 'node:child_process';
+import { spawn, type ChildProcess } from 'node:child_process';
 import fsp from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
-
-import {
-  type ElectronVersions,
-  Fiddle,
-  type Installer,
-  Runner,
-} from '@electron/fiddle-core';
+import { app } from 'electron';
 
 import { cleanFlags, fiddleProcessEnv, packageManagerEnv } from '../../fiddle/env';
 import { PACKAGE_JSON, type FileMap } from '../../fiddle/files';
@@ -18,7 +12,6 @@ import { loadLoginShellPath } from '../../fiddle/modules';
 import { generatePackageJson, type PackageJsonInput } from '../../fiddle/package-json';
 import { log } from '../log';
 import { disclaimLauncher } from '../platform/disclaim';
-import { devElectronFlags } from './dev';
 import type { RunOutcome } from './logic';
 
 const STALE_DIR_MS = 24 * 60 * 60 * 1000;
@@ -26,6 +19,12 @@ const STALE_DIR_MS = 24 * 60 * 60 * 1000;
 const TEMP_DIR_RE = /^electron-fiddle-((?:package|make)-)?[A-Za-z0-9]{6}$/;
 
 let shellPath: Promise<string | undefined> | undefined;
+
+/** FIDDLE_DEV_ELECTRON_FLAGS: extra flags for runs, e.g. `--no-sandbox` in a root container. Dev builds only. */
+function devElectronFlags(): string[] {
+  if (import.meta.env.MODE === 'production' || app.isPackaged) return [];
+  return (process.env.FIDDLE_DEV_ELECTRON_FLAGS ?? '').split(' ').filter(Boolean);
+}
 
 /** The environment for npm, yarn and Forge, with the login shell's PATH. */
 export async function toolEnv(): Promise<NodeJS.ProcessEnv> {
@@ -87,42 +86,42 @@ export function writeRunPackageJson(
 }
 
 interface SpawnElectronOptions {
-  installer: Installer;
-  versions: ElectronVersions;
   exec: string;
   appDir: string;
   /** The fiddle's userData goes in `<runDir>/user-data`, unless `keepUserDataDirs`. */
   runDir: string;
   flags: readonly string[];
   keepUserDataDirs: boolean;
-  /** Parsed user variables; core drops `LD_*` and `DYLD_*`. */
+  /** Parsed user variables. Blocked keys (see `isBlockedUserEnvKey`) are dropped. */
   env: Readonly<Record<string, string>>;
   advancedLogging: boolean;
-  /** The Node inspector on 127.0.0.1:0, reachable only with the id printed on stderr. */
+  /**
+   * Starts the Node inspector on 127.0.0.1 and a random port. The debugger URL,
+   * with its random id, is published only on the child's stderr, not at
+   * `/json/list`, so a process that cannot read the child's output cannot attach.
+   */
   inspect: boolean;
-  /** core's Runner echoes the child's output to `process.stdout` unless this is set. */
-  quiet?: boolean;
 }
 
 /**
  * Spawns Electron on `appDir` with the filtered environment and stdout and
- * stderr as pipes. On macOS it starts through the privacy helper, and throws
- * when a packaged build lacks it.
+ * stderr as pipes. On macOS it starts through the privacy helper (which execs
+ * Electron with the arguments and environment unchanged), and throws when a
+ * packaged build lacks it.
  */
-export async function spawnElectron(
-  options: SpawnElectronOptions,
-): Promise<ChildProcess> {
+export function spawnElectron(options: SpawnElectronOptions): ChildProcess {
   const launcher = disclaimLauncher();
-  const args = [...cleanFlags(options.flags), ...devElectronFlags()];
-  if (!options.keepUserDataDirs)
-    args.unshift(`--user-data-dir=${path.join(options.runDir, 'user-data')}`);
-  const runner = await Runner.create({
-    installer: options.installer,
-    versions: options.versions,
-  });
-  return runner.spawn(options.exec, new Fiddle(options.appDir, 'fiddle'), {
-    args,
-    showConfig: false,
+  const args = [
+    ...(launcher ? [options.exec] : []),
+    ...(options.inspect ? ['--inspect=127.0.0.1:0', '--inspect-publish-uid=stderr'] : []),
+    ...(options.keepUserDataDirs
+      ? []
+      : [`--user-data-dir=${path.join(options.runDir, 'user-data')}`]),
+    ...cleanFlags(options.flags),
+    ...devElectronFlags(),
+    options.appDir,
+  ];
+  return spawn(launcher ?? options.exec, args, {
     cwd: options.appDir,
     // Leads its own process group, so `stopChild` reaches what the fiddle spawned.
     detached: process.platform !== 'win32',
@@ -131,9 +130,6 @@ export async function spawnElectron(
       userEnv: options.env,
       advancedLogging: options.advancedLogging,
     }),
-    ...(launcher ? { launcher } : {}),
-    ...(options.inspect ? { inspect: { host: '127.0.0.1', port: 0 } } : {}),
-    ...(options.quiet ? { out: undefined } : {}),
   });
 }
 

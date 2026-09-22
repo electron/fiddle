@@ -8,7 +8,7 @@ import path from 'node:path';
 
 import type { EditorTypes, LocalBuild } from '../../shared/stores';
 import { log } from '../log';
-import { writeAtomic } from '../persistence/json-store';
+import { writeAtomic } from '@electron/fiddle-core';
 import { getEndpoints } from '../test-mode';
 
 const FETCH_CONCURRENCY = 8;

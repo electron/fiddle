@@ -1,7 +1,6 @@
 import fsp from 'node:fs/promises';
 import path from 'node:path';
 
-import type { ElectronVersions } from '@electron/fiddle-core';
 import { shell } from 'electron';
 
 import appPackage from '../../../package.json';
@@ -38,18 +37,17 @@ interface ForgeElectron {
   /** A local build's folder. */
   localPath?: string;
   releases: readonly ReleaseRow[];
-  electronVersions: ElectronVersions;
 }
 
 export function forgeOptionsFor(electron: ForgeElectron): ForgeTransformOptions {
   const { release, localPath } = electron;
   const latestStable = electron.releases.find((r) => !r.version.includes('-'))?.version;
   const nightlyAbi = release?.includes('nightly')
-    ? electron.electronVersions.getReleaseInfo(release)?.modules
+    ? electron.releases.find((r) => r.version === release)?.modules
     : undefined;
   return {
     forgeVersion: FORGE_VERSION,
-    ...(nightlyAbi !== undefined ? { nightlyAbi } : {}),
+    ...(nightlyAbi ? { nightlyAbi } : {}),
     ...(localPath ? { localElectronPath: localPath } : {}),
     ...(latestStable ? { latestStableVersion: latestStable } : {}),
   };
@@ -57,14 +55,13 @@ export function forgeOptionsFor(electron: ForgeElectron): ForgeTransformOptions 
 
 export function forgeElectronFor(
   ref: VersionRef,
-  versions: Pick<VersionsService, 'localBuild' | 'releases' | 'electronVersions'>,
+  versions: Pick<VersionsService, 'localBuild' | 'releases'>,
 ): ForgeElectron {
   return {
     ...(ref.kind === 'release'
       ? { release: ref.version }
       : { localPath: versions.localBuild(ref.id)?.path }),
     releases: versions.releases(),
-    electronVersions: versions.electronVersions,
   };
 }
 
