@@ -102,16 +102,12 @@ export class LogFile {
       const chunk = this.#pending.splice(0).join('');
       const bytes = Buffer.byteLength(chunk);
       if (this.#size > 0 && this.#size + bytes > this.#maxBytes) await this.#rotate();
-      await this.#append(chunk, bytes);
-    }
-  }
-
-  async #append(chunk: string, bytes: number): Promise<void> {
-    try {
-      await fsp.appendFile(this.file(0), chunk, { mode: 0o600 });
-      this.#size += bytes;
-    } catch (error) {
-      console.error(PREFIX, 'failed to write the log file', error);
+      try {
+        await fsp.appendFile(this.file(0), chunk, { mode: 0o600 });
+        this.#size += bytes;
+      } catch (error) {
+        console.error(PREFIX, 'failed to write the log file', error);
+      }
     }
   }
 

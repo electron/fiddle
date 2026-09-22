@@ -24,10 +24,7 @@ vi.mock('electron', async () => {
   };
 });
 vi.mock('../windows', () => ({ getWindow: () => undefined }));
-vi.mock('../i18n', () => ({
-  tm: () => (key: string) => key,
-  t: (key: string) => key,
-}));
+vi.mock('../i18n');
 
 import { app } from 'electron';
 

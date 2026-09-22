@@ -25,10 +25,7 @@ vi.mock('electron', () => ({
   dialog: { showMessageBox: vi.fn() },
 }));
 vi.mock('../windows', () => ({ getWindow: () => fakeWindow }));
-vi.mock('../i18n', () => ({
-  tm: () => (key: string) => key,
-  t: (key: string) => key,
-}));
+vi.mock('../i18n');
 
 const ID = '00000000-0000-4000-8000-0000000000aa';
 

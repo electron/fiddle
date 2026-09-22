@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
 import { isReleaseList, toReleaseRows, visibleVersions } from './releases';
+import { row } from './test-helpers';
 
 const data = [
   { version: '40.1.0', date: '2026-01-01', node: '22.1.0' },
@@ -60,17 +61,11 @@ describe('toReleaseRows', () => {
 
 describe('visibleVersions', () => {
   const rows = [
-    {
-      version: '46.0.0-nightly.20260911',
-      date: '',
-      node: '',
-      obsolete: false,
-      supported: true,
-    },
-    { version: '44.0.0-beta.3', date: '', node: '', obsolete: false, supported: true },
-    { version: '43.0.0', date: '', node: '', obsolete: false, supported: true },
-    { version: '42.0.0', date: '', node: '', obsolete: false, supported: false },
-    { version: '10.0.0', date: '', node: '', obsolete: true, supported: true },
+    row('46.0.0-nightly.20260911'),
+    row('44.0.0-beta.3'),
+    row('43.0.0'),
+    row('42.0.0', { supported: false }),
+    row('10.0.0', { obsolete: true }),
   ];
   const base = {
     channels: ['stable', 'beta'] as ('stable' | 'beta' | 'nightly')[],

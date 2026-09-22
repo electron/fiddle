@@ -21,7 +21,6 @@ const mocks = vi.hoisted(() => ({
   accessibility: false,
   highContrast: false,
   systemLanguages: ['fr-FR', 'en'],
-  setMainLocale: vi.fn(async (locales: string[]) => locales[0] ?? 'en'),
 }));
 
 vi.mock('electron', async () => {
@@ -38,15 +37,11 @@ vi.mock('electron', async () => {
     ),
   };
 });
-vi.mock('../i18n', () => ({
-  setMainLocale: mocks.setMainLocale,
-  tm: () => (key: string) => key,
-}));
-vi.mock('../log', () => ({
-  log: { debug: vi.fn(), info: vi.fn(), warn: vi.fn(), error: vi.fn() },
-}));
+vi.mock('../i18n');
+vi.mock('../log');
 
 const { app, nativeTheme } = await import('electron');
+const { setMainLocale } = await import('../i18n');
 const { flushAll, onJsonStoreNotice } = await import('../persistence/json-store');
 const { loadSettings, preferredLocales, startSettings } = await import('./index');
 
@@ -63,7 +58,7 @@ let dir = '';
 beforeEach(() => {
   dir = fs.mkdtempSync(path.join(os.tmpdir(), 'fiddle-settings-'));
   mocks.accessibility = false;
-  mocks.setMainLocale.mockClear();
+  vi.mocked(setMainLocale).mockClear();
   mocks.highContrast = false;
   nativeTheme.themeSource = 'system';
   // As at startup: no listener yet, so notices queue until `startSettings`.
@@ -243,15 +238,15 @@ describe('startSettings', () => {
 
   it("switches main's locale when the setting changes, and publishes the one it got", async () => {
     const { hub } = await start();
-    expect(mocks.setMainLocale).not.toHaveBeenCalled();
+    expect(setMainLocale).not.toHaveBeenCalled();
 
-    mocks.setMainLocale.mockResolvedValueOnce('de');
+    vi.mocked(setMainLocale).mockResolvedValueOnce('de');
     hub.setSettings({ locale: 'de-CH' });
-    expect(mocks.setMainLocale).toHaveBeenCalledWith(['de-CH', 'fr-FR', 'en']);
+    expect(setMainLocale).toHaveBeenCalledWith(['de-CH', 'fr-FR', 'en']);
     await vi.waitFor(() => expect(hub.app.locale).toBe('de'));
 
     hub.setSettings({ packageManager: 'yarn' });
-    expect(mocks.setMainLocale).toHaveBeenCalledOnce();
+    expect(setMainLocale).toHaveBeenCalledOnce();
   });
 
   it('turns a settings file from a newer app version into a storage notice, until dismissed', async () => {

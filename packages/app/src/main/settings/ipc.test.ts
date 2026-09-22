@@ -40,9 +40,7 @@ vi.mock('../i18n', () => ({
   tm: () => (key: string, options?: Record<string, string>) =>
     options ? `${key}:${Object.values(options).join(',')}` : key,
 }));
-vi.mock('../log', () => ({
-  log: { debug: vi.fn(), info: vi.fn(), warn: vi.fn(), error: vi.fn() },
-}));
+vi.mock('../log');
 
 import { bindSettingsIpc } from './ipc';
 

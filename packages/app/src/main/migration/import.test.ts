@@ -14,9 +14,7 @@ import { fileURLToPath } from 'node:url';
 
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-vi.mock('../log', () => ({
-  log: { debug: vi.fn(), info: vi.fn(), warn: vi.fn(), error: vi.fn() },
-}));
+vi.mock('../log');
 
 import { log } from '../log';
 import { importElectronVersions, importOldApp, type ImportDeps } from './import';

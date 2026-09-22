@@ -25,7 +25,7 @@ vi.mock('../windows', () => ({
   getWindow: () => undefined,
   sendWindowCommand: () => undefined,
 }));
-vi.mock('../i18n', () => ({ tm: () => (key: string) => key, t: (key: string) => key }));
+vi.mock('../i18n');
 
 const ID = '8c5fc0c6a5153d49b5a4a56d3ed9da8f';
 

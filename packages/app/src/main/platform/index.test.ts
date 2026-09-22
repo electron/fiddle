@@ -27,6 +27,8 @@ vi.mock('electron', () => ({
   dialog: { showMessageBox: mocks.showMessageBox },
 }));
 vi.mock('node:fs', () => ({ default: { existsSync: () => mocks.stubExists } }));
+// Inline factories, not the shared __mocks__ files: the vi.resetModules() below
+// re-resolves a file mock, and on Windows that resolution fails.
 vi.mock('../i18n', () => ({ tm: () => (key: string) => key }));
 vi.mock('../log', () => ({ log: mocks.log }));
 vi.mock('../test-mode', () => ({ isTestMode: () => mocks.testMode }));

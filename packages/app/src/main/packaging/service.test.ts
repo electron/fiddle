@@ -6,10 +6,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 vi.mock('electron', () => ({ shell: { openPath: vi.fn() } }));
 vi.mock('../i18n', () => ({ tm: () => (key: string) => key }));
-vi.mock('../documents/service', () => ({
-  installScriptPackages: vi.fn(),
-  ensureTrusted: vi.fn(),
-}));
+vi.mock('../documents/service', () => ({ ensureTrusted: vi.fn() }));
 const findPackageManager = vi.hoisted(() =>
   vi.fn(async (): Promise<string | undefined> => '/bin/npm'),
 );
@@ -74,7 +71,6 @@ describe('packageFiddle', () => {
       TMP: process.env.TMP,
     };
     process.env.TMPDIR = process.env.TEMP = process.env.TMP = tmp;
-    vi.mocked(documents.installScriptPackages).mockResolvedValue([]);
   });
   afterEach(async () => {
     for (const [name, value] of Object.entries(previousTmp)) {
@@ -120,6 +116,14 @@ describe('packageFiddle', () => {
     modules: {},
     version: { kind: 'release', version: '30.0.0' },
   };
+  /** An approval with install scripts off; `scripted` are the modules that have some. */
+  const approve = (scripted: string[] = []) =>
+    vi.mocked(documents.ensureTrusted).mockResolvedValue({
+      approved: true,
+      allowScripts: false,
+      fiddle,
+      scripted,
+    } as never);
 
   it('is busy from the start, while it waits for the approval', async () => {
     const { run, events, call } = setup();
@@ -143,11 +147,7 @@ describe('packageFiddle', () => {
     const sfw = path.join(tmp, 'fail-sfw.mjs');
     await writeFile(sfw, 'process.exit(1);');
     const { run, events, call } = setup(sfw);
-    vi.mocked(documents.ensureTrusted).mockResolvedValue({
-      approved: true,
-      allowScripts: false,
-      fiddle,
-    } as never);
+    approve();
 
     await call();
 
@@ -160,17 +160,11 @@ describe('packageFiddle', () => {
 
   it('will not build with install scripts off when a dependency needs them', async () => {
     const { events, call } = setup();
-    vi.mocked(documents.installScriptPackages).mockResolvedValue(['electron', 'esbuild']);
-    vi.mocked(documents.ensureTrusted).mockResolvedValue({
-      approved: true,
-      allowScripts: false,
-      fiddle,
-    } as never);
+    approve(['electron', 'esbuild']);
 
     await call();
 
     expect(documents.ensureTrusted).toHaveBeenLastCalledWith('w', 'package', {
-      packagesWithInstallScripts: ['electron', 'esbuild'],
       requireScripts: true,
     });
     expect(events).toEqual(['scriptsRequired', 'release']);
@@ -180,11 +174,7 @@ describe('packageFiddle', () => {
   it('points at the package manager’s install page when it is not installed', async () => {
     const { run, events, call } = setup();
     findPackageManager.mockResolvedValueOnce(undefined);
-    vi.mocked(documents.ensureTrusted).mockResolvedValue({
-      approved: true,
-      allowScripts: false,
-      fiddle,
-    } as never);
+    approve();
 
     await call();
 
@@ -195,11 +185,7 @@ describe('packageFiddle', () => {
 
   it('fails before creating the project when Socket Firewall is on but missing', async () => {
     const { run, events, call } = setup(new Error('no firewall'));
-    vi.mocked(documents.ensureTrusted).mockResolvedValue({
-      approved: true,
-      allowScripts: false,
-      fiddle,
-    } as never);
+    approve();
 
     await call();
 

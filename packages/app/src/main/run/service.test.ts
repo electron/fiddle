@@ -31,13 +31,8 @@ vi.mock('../../fiddle/modules', async (importOriginal) => ({
   // `toolEnv()` would otherwise spawn the real login shell for its PATH.
   loadLoginShellPath: async () => undefined,
 }));
-vi.mock('../i18n', () => ({
-  tm: () => (key: string, options?: Record<string, unknown>) =>
-    options ? `${key}:${JSON.stringify(options)}` : key,
-}));
-vi.mock('../log', () => ({
-  log: { debug: vi.fn(), info: vi.fn(), warn: vi.fn(), error: vi.fn() },
-}));
+vi.mock('../i18n');
+vi.mock('../log');
 vi.mock('./process', async (importOriginal) => ({
   ...(await importOriginal<typeof import('./process')>()),
   spawnElectron: (...args: unknown[]) => spawnElectron(...args),

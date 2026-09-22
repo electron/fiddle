@@ -13,15 +13,11 @@ vi.mock('../documents/service', () => ({
   ensureTrusted: vi.fn(async () => ({ approved: true })),
   setFiddleVersion: vi.fn(async () => 1),
 }));
-vi.mock('../i18n', () => ({
-  tm: () => (key: string, options?: Record<string, unknown>) =>
-    options ? `${key}:${JSON.stringify(options)}` : key,
-}));
-vi.mock('../log', () => ({
-  log: { debug: vi.fn(), info: vi.fn(), warn: vi.fn(), error: vi.fn() },
-}));
+vi.mock('../i18n');
+vi.mock('../log');
 
 const { BisectService } = await import('./service');
+const { row } = await import('../versions/test-helpers');
 
 const VERSIONS = ['1.0.0', '2.0.0', '3.0.0', '4.0.0', '5.0.0'];
 
@@ -53,14 +49,7 @@ function setup() {
     ),
   };
   const versions = {
-    releases: () =>
-      [...VERSIONS].reverse().map((version) => ({
-        version,
-        date: '',
-        node: '',
-        obsolete: false,
-        supported: true,
-      })),
+    releases: () => [...VERSIONS].reverse().map((version) => row(version)),
     isInstalled: vi.fn((_version: string) => true),
     install: vi.fn(async (_version: string) => ''),
   };

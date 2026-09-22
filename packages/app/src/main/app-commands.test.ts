@@ -35,7 +35,7 @@ vi.mock('./windows', () => ({
   sendWindowCommand: (...args: unknown[]) => sendWindowCommand(...args),
 }));
 vi.mock('./documents/service', () => ({ withErrorDialog: vi.fn() }));
-vi.mock('./log', () => ({ log: { warn: vi.fn() }, logsDir: () => undefined }));
+vi.mock('./log');
 vi.mock('./menu', () => ({}));
 vi.mock('./packaging/service', () => ({ packageFiddle: vi.fn(async () => 'packaged') }));
 vi.mock('./platform/diagnostics', () => ({}));

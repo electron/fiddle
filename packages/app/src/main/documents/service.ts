@@ -61,6 +61,7 @@ import {
   gistLinkDetail,
   gistUrlToDeepLink,
   shouldOfferSignIn,
+  trustDetail,
 } from './deep-link-queue';
 import {
   DraftScheduler,
@@ -795,9 +796,12 @@ export function markGistDeleted(windowId: string, loadRev: number): number {
   });
 }
 
-/** `fiddle` is the approved fiddle: callers run it, not the window's current one. */
+/**
+ * `fiddle` is the approved fiddle: callers run it, not the window's current one. `scripted` lists
+ * the modules with install scripts when `requireScripts` had to look them up.
+ */
 type TrustResult =
-  | { approved: true; allowScripts: boolean; fiddle: Fiddle }
+  | { approved: true; allowScripts: boolean; fiddle: Fiddle; scripted: readonly string[] }
   | { approved: false; allowScripts: false };
 
 const REGISTRY_TIMEOUT_MS = 5000;
@@ -821,66 +825,39 @@ async function modulesWithInstallScripts(
   }
 }
 
-/** The modules an approval has to list: none for a trusted origin or an approval that already allowed scripts. */
-export async function installScriptPackages(windowId: string): Promise<string[]> {
-  const doc = requireDoc(windowId);
-  if (!isUntrustedOrigin(doc.fiddle.origin) || (isTrusted(doc) && doc.approvedScripts))
-    return [];
-  return modulesWithInstallScripts(doc.fiddle.modules);
-}
-
 /**
  * Approves the fiddle's origin before it runs code, with the native trust dialog if it is untrusted.
  * The approval is bound to the origin: a fiddle swapped in later, or while the dialog is open, needs
- * its own. `requireScripts` asks again when an earlier approval left install scripts off.
+ * its own. `requireScripts` (package and make need them) asks again when an earlier approval left
+ * install scripts off and a module has some.
  */
 export async function ensureTrusted(
   windowId: string,
   operation: CodeExecutingOperation,
-  options: {
-    packagesWithInstallScripts?: readonly string[];
-    requireScripts?: boolean;
-  } = {},
+  { requireScripts = false } = {},
 ): Promise<TrustResult> {
   const doc = requireDoc(windowId);
   const origin = doc.fiddle.origin;
-  if (!isUntrustedOrigin(origin))
-    return { approved: true, allowScripts: true, fiddle: doc.fiddle };
+  const trusted = (allowScripts: boolean, fiddle = doc.fiddle, scripted: string[] = []) =>
+    ({ approved: true, allowScripts, fiddle, scripted }) as const;
+  if (!isUntrustedOrigin(origin)) return trusted(true);
   log.info('trust check', operation, formatOrigin(origin));
-  if (
-    !needsApproval(origin, doc.approvedOrigin) &&
-    (doc.approvedScripts || !options.requireScripts)
-  ) {
-    return {
-      approved: true,
-      allowScripts: doc.approvedScripts ?? false,
-      fiddle: doc.fiddle,
-    };
-  }
-  const packages =
-    options.packagesWithInstallScripts ??
-    (await modulesWithInstallScripts(doc.fiddle.modules));
-  const dependencies = Object.entries(doc.fiddle.modules).map(
-    ([name, spec]) => `${name}@${spec}`,
-  );
+  const approved = !needsApproval(origin, doc.approvedOrigin);
+  if (approved && (doc.approvedScripts || !requireScripts))
+    return trusted(doc.approvedScripts ?? false);
+  const scripted = await modulesWithInstallScripts(doc.fiddle.modules);
+  if (approved && scripted.length === 0) return trusted(false);
+  const files = Object.keys(doc.fiddle.files).map((name) => dialogText(name));
   const result = await messageBox(windowId, {
     type: 'warning',
     message: td('trustMessage'),
-    detail: [
-      td('trustDetail'),
-      '',
-      td('detailOrigin', { origin: formatOrigin(origin) }),
-      td('detailFiles', {
-        files: listOrNone(Object.keys(doc.fiddle.files).map((name) => dialogText(name))),
-      }),
-      td('detailDependencies', { dependencies: listOrNone(dependencies) }),
-    ].join('\n'),
+    detail: trustDetail(origin, files, doc.fiddle.modules, td),
     buttons: [td('trustContinue'), td('cancel')],
     defaultId: 1,
     cancelId: 1,
-    ...(packages.length > 0
+    ...(scripted.length > 0
       ? {
-          checkboxLabel: td('trustAllowScripts', { packages: packages.join(', ') }),
+          checkboxLabel: td('trustAllowScripts', { packages: scripted.join(', ') }),
           checkboxChecked: false,
         }
       : {}),
@@ -895,7 +872,7 @@ export async function ensureTrusted(
   });
   const folder = latest.fiddle.source.localPath;
   if (folder !== undefined) rememberFolderTrust(folder, undefined);
-  return { approved: true, allowScripts: result.checkboxChecked, fiddle: latest.fiddle };
+  return trusted(result.checkboxChecked, latest.fiddle, scripted);
 }
 
 /** A run, package or make is going, or a bisect: its window keeps its fiddle until it stops. */
@@ -1427,10 +1404,6 @@ function saveSessionNow(): void {
 function scheduleSessionSave(): void {
   if (!sessionReady || sessionFrozen || sessionTimer) return;
   sessionTimer = setTimeout(saveSessionNow, 1000);
-}
-
-function listOrNone(items: readonly string[]): string {
-  return items.length > 0 ? items.join(', ') : td('none');
 }
 
 function errorDetail(error: unknown): string {

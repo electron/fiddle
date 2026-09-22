@@ -38,7 +38,7 @@ function fakeHub(modules: Record<string, string>) {
 const npm = {
   latestVersion: vi.fn(async (name: string) => (name === 'lodash' ? '4.17.21' : '1.2.3')),
 };
-vi.mock('../log', () => ({ log: { warn: vi.fn() } }));
+vi.mock('../log');
 
 describe('ModulesService', () => {
   it('adds a module at its latest version', async () => {

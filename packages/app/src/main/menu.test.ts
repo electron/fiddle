@@ -37,7 +37,7 @@ vi.mock('./i18n', async () => {
     tm: () => (key: string) => key,
   };
 });
-vi.mock('./log', () => ({ log: { info: vi.fn(), error: vi.fn() } }));
+vi.mock('./log');
 const recent = vi.hoisted(() => ({ folders: [] as string[] }));
 vi.mock('./documents/service', () => ({
   clearRecentFolders: vi.fn(),

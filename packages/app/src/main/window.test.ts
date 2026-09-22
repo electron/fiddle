@@ -51,9 +51,7 @@ vi.mock('electron', async () => {
 vi.mock('./context-menu', () => ({ attachContextMenu: vi.fn() }));
 vi.mock('./documents/service', () => ({ attachWindow: mocks.attachWindow }));
 vi.mock('./ipc', () => ({ bindWindowIpc: mocks.bindWindowIpc }));
-vi.mock('./log', () => ({
-  log: { debug: vi.fn(), info: vi.fn(), warn: vi.fn(), error: vi.fn() },
-}));
+vi.mock('./log');
 vi.mock('./security', () => ({ blockNavigation: vi.fn() }));
 vi.mock('./windows', () => ({
   trackWindow: mocks.trackWindow,

@@ -129,10 +129,6 @@ export class OutputParser {
     return this.#result;
   }
 
-  #line(line: ParsedLine): void {
-    this.#result.lines.push(line);
-  }
-
   #parseLine(stream: 'stdout' | 'stderr', line: string): void {
     // A renderer console message that spans several lines.
     if (this.#console && stream === 'stderr') {
@@ -165,7 +161,7 @@ export class OutputParser {
       }
       if (CHROMIUM_LOG.test(line)) {
         if (this.#options.chromiumLogs)
-          this.#line({ process: 'main', kind: 'log', text: truncate(line) });
+          this.#result.lines.push({ process: 'main', kind: 'log', text: truncate(line) });
         return;
       }
     }
@@ -190,7 +186,7 @@ export class OutputParser {
           message: pending.message,
         });
       }
-      this.#line(parsed);
+      this.#result.lines.push(parsed);
       return;
     }
 
@@ -199,7 +195,7 @@ export class OutputParser {
       ? { name: header[1]!, message: header[2] ?? '', located: false }
       : undefined;
     if (line !== '')
-      this.#line({
+      this.#result.lines.push({
         process: 'main',
         kind: header ? 'error' : 'log',
         text: truncate(line),
@@ -235,7 +231,7 @@ export class OutputParser {
         });
       }
     }
-    this.#line(parsed);
+    this.#result.lines.push(parsed);
   }
 
   /** A stack frame inside the run directory wins (it has a column); otherwise the `source`. */

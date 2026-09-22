@@ -5,7 +5,7 @@ import path from 'node:path';
 import { describe, expect, it, vi } from 'vitest';
 
 vi.mock('electron', () => ({ app: { isPackaged: false } }));
-vi.mock('../i18n', () => ({ tm: () => (key: string) => key }));
+vi.mock('../i18n');
 
 const { DISCLAIM_HELPER, resolveDisclaimHelper } = await import('./disclaim');
 

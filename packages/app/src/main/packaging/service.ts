@@ -135,23 +135,15 @@ export async function packageFiddle(
   runs.setState(windowId, { status: 'checking', task, errors: [], result: undefined });
   let dir: string | undefined;
   try {
-    // The approval lists the packages with install scripts. The build needs
-    // them, so an approval that left scripts off is asked again.
-    const scripted = await documents.installScriptPackages(windowId);
-    const trust = await documents.ensureTrusted(windowId, task, {
-      packagesWithInstallScripts: scripted,
-      requireScripts: scripted.length > 0,
-    });
+    // The build needs install scripts, so an approval that left them off is asked again.
+    const trust = await documents.ensureTrusted(windowId, task, { requireScripts: true });
     if (!trust.approved) {
       runs.log(windowId, t('untrusted'), 'error');
       return;
     }
-    if (scripted.length > 0 && !trust.allowScripts) {
-      runs.log(
-        windowId,
-        t('scriptsRequired', { packages: scripted.join(', ') }),
-        'error',
-      );
+    if (trust.scripted.length > 0 && !trust.allowScripts) {
+      const packages = trust.scripted.join(', ');
+      runs.log(windowId, t('scriptsRequired', { packages }), 'error');
       return;
     }
     // Exactly the approved fiddle is built, whatever the window loads during the awaits below.

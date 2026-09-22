@@ -91,13 +91,7 @@ export class BisectService {
     const session = this.#sessions.get(windowId);
     const bisector = session?.bisector;
     if (!session || !bisector || session.stepping) return;
-    const step =
-      verdict === 'good'
-        ? bisector.good()
-        : verdict === 'bad'
-          ? bisector.bad()
-          : bisector.skip();
-    await this.#show(windowId, session, step);
+    await this.#show(windowId, session, bisector[verdict]());
   }
 
   /** Ends the window's bisect without a result. Closing the window does this too. */

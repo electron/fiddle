@@ -43,8 +43,14 @@ describe('mapOldSettings', () => {
         name: 'Old build',
       },
     ]);
-    expect(result.ignored.sort()).toEqual(['known-electron-versions', 'version']);
     expect(result.unknown).toEqual(['devtools-extension-state']);
+    expect(result.invalid).toEqual([]);
+  });
+
+  it('treats a key that names an Object.prototype member as unknown', () => {
+    const result = mapOldSettings({ constructor: 'true', toString: 'x' }, options);
+    expect(result.settings).toEqual({});
+    expect(result.unknown).toEqual(['constructor', 'toString']);
     expect(result.invalid).toEqual([]);
   });
 

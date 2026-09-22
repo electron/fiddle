@@ -45,9 +45,7 @@ vi.mock('@sentry/electron/main', () => {
     normalizePathsIntegration: integration,
   };
 });
-vi.mock('../log', () => ({
-  log: { debug: vi.fn(), info: vi.fn(), warn: vi.fn(), error: vi.fn() },
-}));
+vi.mock('../log');
 vi.mock('../test-mode', () => ({ isTestMode: () => mocks.testMode }));
 
 const rendererCrash = {

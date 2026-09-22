@@ -10,9 +10,7 @@ const protocol = vi.hoisted(() => ({
 }));
 
 vi.mock('electron', () => ({ protocol }));
-vi.mock('./log', () => ({
-  log: { debug: vi.fn(), info: vi.fn(), warn: vi.fn(), error: vi.fn() },
-}));
+vi.mock('./log');
 
 import { PRODUCTION_CSP } from './csp';
 import { handleAppProtocol, registerAppScheme } from './protocol';

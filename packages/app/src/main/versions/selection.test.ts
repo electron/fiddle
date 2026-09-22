@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
 import type { VersionRef } from '../../fiddle/fiddle';
-import type { LocalBuild, ReleaseRow } from '../../shared/stores';
+import type { LocalBuild } from '../../shared/stores';
 import {
   defaultVersionFor,
   firstUsableVersion,
@@ -9,15 +9,7 @@ import {
   versionProblem,
   type VersionCatalog,
 } from './selection';
-
-const row = (version: string, extra: Partial<ReleaseRow> = {}): ReleaseRow => ({
-  version,
-  date: '',
-  node: '',
-  obsolete: false,
-  supported: true,
-  ...extra,
-});
+import { row } from './test-helpers';
 
 const rows = [
   row('44.0.0-beta.3'),

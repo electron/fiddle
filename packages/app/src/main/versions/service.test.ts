@@ -19,13 +19,8 @@ vi.mock('../dialogs', () => ({
   messageBox: vi.fn(),
   pickFolder: vi.fn(),
 }));
-vi.mock('../i18n', () => ({
-  tm: () => (key: string, options?: Record<string, unknown>) =>
-    options ? `${key}:${JSON.stringify(options)}` : key,
-}));
-vi.mock('../log', () => ({
-  log: { debug: vi.fn(), info: vi.fn(), warn: vi.fn(), error: vi.fn() },
-}));
+vi.mock('../i18n');
+vi.mock('../log');
 
 const { Installer } = await import('@electron/fiddle-core');
 const { VersionsService, fetchReleaseList, mirrorsFor, readReleaseList } =

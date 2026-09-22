@@ -27,10 +27,8 @@ vi.mock('update-electron-app', () => ({
   UpdateSourceType: { ElectronPublicUpdateService: 1 },
 }));
 vi.mock('../documents/service', () => ({ confirmQuit: mocks.confirmQuit }));
-vi.mock('../i18n', () => ({ tm: () => (key: string) => key }));
-vi.mock('../log', () => ({
-  log: { debug: vi.fn(), info: vi.fn(), warn: vi.fn(), error: vi.fn() },
-}));
+vi.mock('../i18n');
+vi.mock('../log');
 vi.mock('../security', () => ({ openExternalLink: vi.fn() }));
 vi.mock('../test-mode', () => ({
   getEndpoints: () => ({ githubApi: 'https://api.github.test' }),

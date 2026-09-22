@@ -25,7 +25,7 @@ vi.mock('../windows', () => ({
   getWindow: () => undefined,
   sendWindowCommand: () => undefined,
 }));
-vi.mock('../i18n', () => ({ tm: () => (key: string) => key, t: (key: string) => key }));
+vi.mock('../i18n');
 
 beforeEach(() => {
   userData = fs.mkdtempSync(path.join(os.tmpdir(), 'fiddle-panes-'));
