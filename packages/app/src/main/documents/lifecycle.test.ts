@@ -562,6 +562,40 @@ describe('setFiddleVersion', () => {
     });
   });
 
+  it('changes only the version once the template was published', async () => {
+    const { documents, model } = await setup();
+    await documents.openFiddleWindow({
+      windowId: W,
+      doc: model.createDoc(
+        createFiddle({
+          files: { 'main.js': 'tpl' },
+          version: { kind: 'release', version: '29.0.0' },
+          templateName: model.DEFAULT_TEMPLATE,
+        }),
+        'fiddle',
+      ),
+    });
+    documents.editFile(W, 'main.js', 'my repro', documents.getDoc(W).fiddleRev);
+    documents.markPublished(
+      W,
+      { id: ID },
+      {
+        files: { 'main.js': 'my repro' },
+        modules: {},
+        loadRev: documents.getDoc(W).loadRev,
+      },
+    );
+    expect(model.isDirty(documents.getDoc(W))).toBe(false);
+
+    await documents.setFiddleVersion(W, version);
+
+    expect(documents.getFiddle(W)).toMatchObject({
+      version,
+      files: { 'main.js': 'my repro' },
+      source: { gistId: ID },
+    });
+  });
+
   it('changes only the version once the template was edited', async () => {
     const { documents, model } = await setup();
     await documents.openFiddleWindow({

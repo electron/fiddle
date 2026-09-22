@@ -228,7 +228,8 @@ export function installEarlyDocumentHandlers(): boolean {
   });
   app.on('open-file', (event, file) => {
     event.preventDefault();
-    if (started) void withErrorDialog(lastFocused, () => openFolderIn(lastFocused, file));
+    if (started)
+      void withErrorDialog(lastFocused, () => openFolderIn(linkTarget(), file));
     else pendingOpenFiles.push(file);
   });
   app.on('before-quit', onBeforeQuit);
@@ -318,7 +319,7 @@ export async function startDocuments(): Promise<void> {
   await deps.github.whenReady();
   await deepLinks.start();
   for (const file of pendingOpenFiles.splice(0)) {
-    await withErrorDialog(lastFocused, () => openFolderIn(lastFocused, file));
+    await withErrorDialog(lastFocused, () => openFolderIn(linkTarget(), file));
   }
 }
 
@@ -388,7 +389,7 @@ function docFromDraft(draft: Draft): Doc {
 /** A clean window is reloaded from its source. Throws if that fails, so the window isn't replaced by a template. */
 async function docFromSession(entry: SessionEntry): Promise<Doc> {
   const stored = entry.fiddle;
-  const context: LoadContext = { version: stored.version, modules: stored.modules };
+  const context: LoadContext = { version: stored.version };
   const origin = stored.origin;
   let loaded: LoadedFiddle;
   if (stored.source.localPath) {
@@ -468,7 +469,9 @@ export async function openFiddleWindow(options: OpenWindowOptions = {}): Promise
     if (lastFocused === windowId) lastFocused = docs.keys().next().value;
     throw error;
   }
-  if (docs.has(windowId)) commit(windowId, doc);
+  // What the window holds now: a version fallback or a link may have replaced `doc` while it loaded.
+  const current = docs.get(windowId);
+  if (current) commit(windowId, current);
   return windowId;
 }
 
@@ -764,13 +767,15 @@ export function markPublished(
 ): number {
   const doc = docs.get(windowId);
   if (!doc || doc.loadRev !== sent.loadRev) return revOf(windowId);
+  // No longer an unedited template, or a version switch would replace it.
+  const { templateName: _published, ...fiddle } = doc.fiddle;
   return commit(windowId, {
     ...doc,
     baseline: sent.files,
     baselineModules: sent.modules,
     ...(gist.owner ? { gistOwner: gist.owner } : {}),
     fiddle: {
-      ...doc.fiddle,
+      ...fiddle,
       source: {
         gistId: gist.id,
         ...(gist.revision ? { gistRevision: gist.revision } : {}),
@@ -885,9 +890,7 @@ function isBusy(windowId: string): boolean {
 }
 
 function contextOf(doc: Doc | undefined): LoadContext {
-  return doc
-    ? { version: doc.fiddle.version, modules: doc.fiddle.modules }
-    : { version: defaultVersion(), modules: {} };
+  return { version: doc ? doc.fiddle.version : defaultVersion() };
 }
 
 async function confirmReplace(windowId: string): Promise<boolean> {
@@ -1232,7 +1235,7 @@ export function clearRecentFolders(): void {
   getStateStore().set((prev) => ({ ...prev, recentFolders: [] }));
 }
 
-/** Focused window if it has no unsaved changes and nothing running; otherwise the link opens in a new window. */
+/** Focused window if it has no unsaved changes and nothing running; otherwise a link or Finder open gets a new window. */
 function linkTarget(): string | undefined {
   const id = lastFocused;
   const doc = id === undefined ? undefined : docs.get(id);
@@ -1248,7 +1251,7 @@ async function handleDeepLink(url: string): Promise<void> {
     await messageBox(lastFocused, {
       type: 'error',
       message: parsed.error === 'unknown-host' ? td('linkNeedsNewer') : td('linkInvalid'),
-      detail: url,
+      detail: dialogText(url, 500),
     });
     return;
   }

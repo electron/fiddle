@@ -23,7 +23,6 @@ import { DEFAULT_TEMPLATE, TEST_TEMPLATE } from './model';
 /** What a load keeps from the fiddle it replaces. */
 export interface LoadContext {
   version: VersionRef;
-  modules: Readonly<Record<string, string>>;
 }
 
 export type LoadWarning =
@@ -112,8 +111,8 @@ export async function loadShowMe(
 }
 
 /**
- * A loaded `package.json` sets the modules and, if usable, the Electron version. Without one the fiddle
- * has no modules and the version stays; an invalid one is a warning and keeps both.
+ * A loaded `package.json` sets the modules and, if usable, the Electron version. Without a valid one the
+ * fiddle has no modules and the version stays; an invalid one is also a warning.
  */
 function applyPackageJson(
   context: LoadContext,
@@ -126,11 +125,7 @@ function applyPackageJson(
   const warnings: LoadWarning[] = [];
   if (!pkg) {
     if (packageJsonError) warnings.push({ kind: 'invalid-package-json' });
-    return {
-      version: context.version,
-      modules: packageJsonError ? { ...context.modules } : {},
-      warnings,
-    };
+    return { version: context.version, modules: {}, warnings };
   }
   let version = context.version;
   if (pkg.electronVersion) {
