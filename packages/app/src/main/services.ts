@@ -14,7 +14,6 @@ import {
   setFiddleVersion,
 } from './documents/service';
 import { CredentialStore, legacyTokenFile } from './github/credentials';
-import { createDocumentsBridge } from './github/documents-bridge';
 import { GitHubService } from './github/service';
 import { log } from './log';
 import { NpmClient, npmEndpoints } from './modules/npm-client';
@@ -134,8 +133,7 @@ export async function createServices({
     settings: () => hub.app.settings,
     showChannel: (channel) => {
       const { channels } = hub.app.settings;
-      if (!channels.includes(channel))
-        settings.service.set('channels', [...channels, channel]);
+      if (!channels.includes(channel)) settings.set('channels', [...channels, channel]);
     },
     isBusy: (windowId) => runs.isBusy(windowId) || bisect.isActive(windowId),
     getVersion: (windowId) => hub.getWindow(windowId)?.fiddle.versionRef,
@@ -170,16 +168,13 @@ export async function createServices({
         fetch: netFetch,
       });
     },
-    documents: createDocumentsBridge(hub),
     prefs: {
       get: () => ({
         asRevision: hub.app.settings.gistPublishAsRevision,
-        ...(hub.app.settings.packageAuthor
-          ? { author: hub.app.settings.packageAuthor }
-          : {}),
+        author: hub.app.settings.packageAuthor || undefined,
       }),
       setVisibility: (isPublic) =>
-        settings.service.set('gistVisibility', isPublic ? 'public' : 'secret'),
+        settings.set('gistVisibility', isPublic ? 'public' : 'secret'),
     },
     setLogin: (githubLogin) => hub.updateApp({ githubLogin }),
   });

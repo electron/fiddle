@@ -4,7 +4,6 @@ import type { CommandId } from '../shared/commands';
 import type { CommandRegistry } from './commands';
 import { docMoveActiveTab } from './documents/model';
 import {
-  closeWindow,
   newFiddleIn,
   openFiddleWindow,
   openFolderIn,
@@ -125,7 +124,7 @@ export function registerCommands(registry: CommandRegistry, services: Services):
   registry.register('file.saveAsForge', ({ windowId }) =>
     withErrorDialog(windowId, () => saveIn(windowId!, 'forge')),
   );
-  registry.register('file.close', ({ windowId }) => closeWindow(windowId));
+  registry.register('file.close', ({ windowId }) => getWindow(windowId)?.close());
 
   registry.register('run.toggle', ({ windowId }) => {
     if (windowId) runs.toggle(windowId);

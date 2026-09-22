@@ -7,12 +7,18 @@ import {
   type FileMap,
 } from '../../fiddle/files';
 import type { GistRevision, GistWriteResult, GitHubClient } from '../../fiddle/github';
+import type { VersionRef } from '../../fiddle/fiddle';
 import { generatePackageJson } from '../../fiddle/package-json';
 import { ErrorCode, FiddleError } from '../../shared/errors';
+import {
+  getDoc,
+  getTemplate,
+  markGistDeleted,
+  markPublished,
+} from '../documents/service';
 import { tm } from '../i18n';
 import { log } from '../log';
 import type { CredentialStorageKind, CredentialStore } from './credentials';
-import type { GistDocuments, GistFiddle } from './documents-bridge';
 
 /** `decrypt-failed`: the user was signed out and the file was kept. */
 type GitHubNotice = 'decrypt-failed';
@@ -20,6 +26,34 @@ type GitHubNotice = 'decrypt-failed';
 interface GistLink {
   id: string;
   url: string;
+}
+
+export interface GistFiddle {
+  /** Hidden files included. */
+  files: FileMap;
+  name: string;
+  versionRef: VersionRef;
+  modules: Readonly<Record<string, string>>;
+  source: { gistId?: string; gistRevision?: string };
+  /** The files the fiddle held when it was loaded or last saved. An update deletes only remote files with these names. */
+  savedNames: string[];
+  /** Tells `markPublished` whether the window still holds the fiddle these files came from. */
+  loadRev: number;
+}
+
+/** The window's fiddle, as publishing reads it. */
+function gistFiddle(windowId: string): GistFiddle {
+  const { fiddle, baseline, loadRev, name } = getDoc(windowId);
+  const { gistId, gistRevision } = fiddle.source;
+  return {
+    files: { ...fiddle.files },
+    name,
+    versionRef: fiddle.version,
+    modules: fiddle.modules,
+    source: { gistId, gistRevision },
+    savedNames: Object.keys(baseline),
+    loadRev,
+  };
 }
 
 interface GistHistory {
@@ -47,7 +81,6 @@ interface GitHubServiceOptions {
   /** The previous app's token file, which sign-out removes too. */
   legacyFile?: string;
   createClient: (token?: string) => GitHubClient;
-  documents: GistDocuments;
   prefs: GistPrefs;
   /** Publishes the login name (or undefined when signed out) to the `App` store. */
   setLogin: (login: string | undefined) => void;
@@ -175,23 +208,18 @@ export class GitHubService {
     input: { description: string; isPublic: boolean },
   ): Promise<GistLink> {
     const client = this.#authedClient();
-    const fiddle = await this.#options.documents.getFiddle(windowId);
+    const fiddle = gistFiddle(windowId);
     const { asRevision, author } = this.#options.prefs.get();
     const files = gistFiles(fiddle, author);
     this.#options.prefs.setVisibility(input.isPublic);
-    const template = asRevision
-      ? await this.#options.documents.getTemplate(windowId)
-      : undefined;
+    const template = asRevision ? await getTemplate(fiddle.versionRef) : undefined;
     // If the update fails, the gist exists with the template: link it, still unsaved, so Update can finish the job.
     let createdId = '';
     let saved: GistWriteResult;
     try {
       saved = await publishGist(client, input, files, template, (partial) => {
         createdId = partial.id;
-        this.#options.documents.markGistSaved(windowId, partial, {
-          ...fiddle,
-          files: template ?? {},
-        });
+        markPublished(windowId, partial, { ...fiddle, files: template ?? {} });
       });
     } catch (error) {
       // `gistId` tells the renderer the gist exists, so it doesn't offer another Publish.
@@ -202,34 +230,34 @@ export class GitHubService {
         gistId: createdId,
       });
     }
-    this.#options.documents.markGistSaved(windowId, saved, fiddle);
+    markPublished(windowId, saved, fiddle);
     return { id: saved.id, url: saved.url };
   }
 
   /** Remote files the fiddle held and has removed are deleted; any others (a README, images) stay. */
   async update(windowId: string): Promise<GistLink> {
     const client = this.#authedClient();
-    const fiddle = await this.#options.documents.getFiddle(windowId);
+    const fiddle = gistFiddle(windowId);
     const id = loadedGistId(fiddle);
     const ours = new Set([...fiddle.savedNames, PACKAGE_JSON]);
     const updated = await client.updateGist(id, {
       files: gistFiles(fiddle, this.#options.prefs.get().author),
       canDelete: (name) => ours.has(name),
     });
-    this.#options.documents.markGistSaved(windowId, updated, fiddle);
+    markPublished(windowId, updated, fiddle);
     return { id: updated.id, url: updated.url };
   }
 
   async delete(windowId: string): Promise<void> {
     const client = this.#authedClient();
-    const fiddle = await this.#options.documents.getFiddle(windowId);
+    const fiddle = gistFiddle(windowId);
     await client.deleteGist(loadedGistId(fiddle));
-    this.#options.documents.markGistDeleted(windowId, fiddle.loadRev);
+    markGistDeleted(windowId, fiddle.loadRev);
   }
 
   /** Works signed out for public gists. */
   async history(windowId: string): Promise<GistHistory> {
-    const fiddle = await this.#options.documents.getFiddle(windowId);
+    const fiddle = gistFiddle(windowId);
     const id = loadedGistId(fiddle);
     const revisions = await this.#options.createClient(this.#token).listGistRevisions(id);
     return {

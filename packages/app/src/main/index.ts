@@ -41,7 +41,7 @@ if (headless) startHeadless(headless);
 const testHarness =
   __FIDDLE_TEST_BUILD__ && isTestMode() ? installTestHarness() : undefined;
 
-if (!squirrelEvent) initCrashReporting(headless !== undefined);
+const crashReporting = !squirrelEvent && initCrashReporting(headless !== undefined);
 if (!squirrelEvent && !headless) logProcessErrors();
 
 // Both must happen before `ready`.
@@ -75,6 +75,12 @@ async function main(): Promise<void> {
       platform,
       material: detectMaterial(platform),
       dev: !app.isPackaged,
+      about: {
+        name: app.getName(),
+        version: app.getVersion(),
+        electron: process.versions.electron,
+      },
+      crashReporting,
       ...settingsFile.initialApp,
     },
     (error) => log.error('store push failed', error),

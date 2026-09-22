@@ -210,9 +210,8 @@ export async function loadGist(
   revision: string | undefined,
   options: GistRulesOptions,
   signal?: AbortSignal,
-): Promise<LoadedFiddle & { gist: GistLoadResult }> {
-  const gist = await github.loadGist(id, revision, signal);
-  return { ...(await fiddleFromGist(gist, options)), gist };
+): Promise<LoadedFiddle> {
+  return fiddleFromGist(await github.loadGist(id, revision, signal), options);
 }
 
 /** Dependencies from a gist's `package.json`, for the deep-link confirmation. */

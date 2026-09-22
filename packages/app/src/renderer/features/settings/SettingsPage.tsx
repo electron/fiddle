@@ -11,13 +11,7 @@ import notices from '../../../../../../THIRD_PARTY_NOTICES.md?raw';
 import contributors from '../../../../static/contributors.json';
 import { getReleaseChannel } from '../../../fiddle/versions';
 import { shippedLocales } from '../../../i18n';
-import {
-  appApi,
-  appPlatformApi,
-  settingsApi,
-  windowApi,
-  type AppInfo,
-} from '../../../ipc/renderer';
+import { appPlatformApi, settingsApi, windowApi } from '../../../ipc/renderer';
 import { useWindowState } from '../../state';
 import {
   BUILTIN_THEME,
@@ -549,19 +543,16 @@ function AccessibilitySection() {
 
 function AboutSection() {
   const { t } = useTranslation('settings');
-  const [info, setInfo] = useState<AppInfo>();
-  useEffect(() => {
-    appApi.GetAppInfo().then(setInfo, () => undefined);
-  }, []);
+  const about = useSettings().app?.about;
 
   return (
     <>
-      {info && (
+      {about && (
         <div className={styles.about}>
-          <h3 className={styles.subTitle}>{info.name}</h3>
-          <p className={styles.muted}>{t('about.version', { version: info.version })}</p>
+          <h3 className={styles.subTitle}>{about.name}</h3>
+          <p className={styles.muted}>{t('about.version', { version: about.version })}</p>
           <p className={styles.muted}>
-            {t('about.electron', { version: info.electronVersion })}
+            {t('about.electron', { version: about.electron })}
           </p>
         </div>
       )}

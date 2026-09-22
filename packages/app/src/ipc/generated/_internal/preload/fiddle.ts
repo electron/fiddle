@@ -2,9 +2,9 @@
 
 import { contextBridge, ipcRenderer } from 'electron';
 export * from '../common/fiddle.js';
-import type { AppState, WindowState, CommandId, FocusContext, MenuItemId, AppInfo, IAppImpl, IAppRenderer, IWindowImpl, IWindowRenderer, FileMapValue, WindowLayout, WindowView, FileName, ShortText, IDocumentsImpl, IDocumentsRenderer, SettingKey, SettingValue, ThemeData, ThemeSnapshot, ThemeId, NoticeId, ISettingsImpl, ISettingsRenderer, PackageSearchResults, PackageVersions, PackageName, PackageQuery, VersionSpec, IModulesImpl, IModulesRenderer, IOnboardingImpl, IOnboardingRenderer, ReleaseList, VersionList, VersionRefValue, OutputLines, EditorTypes, VersionString, BuildId, IVersionsImpl, IVersionsRenderer, IRunImpl, IRunRenderer, GitHubToken, GistDescription, GistId, GitHubCredentialStorage, GitHubSignInResult, GistLinkInfo, GistRevisionInfo, GistHistoryInfo, IGitHubImpl, IGitHubRenderer, LogLevel, LogText, IAppPlatformImpl, IAppPlatformRenderer } from '../common/fiddle.js';
-import { $eipc_validator$_AppState, $eipc_validator$_WindowState, $eipc_validator$_CommandId, $eipc_validator$_FocusContext, $eipc_validator$_MenuItemId, $eipc_validator$_AppInfo, $eipc_validator$_FileMapValue, $eipc_validator$_WindowLayout, $eipc_validator$_WindowView, $eipc_validator$_FileName, $eipc_validator$_ShortText, $eipc_validator$_SettingKey, $eipc_validator$_SettingValue, $eipc_validator$_ThemeData, $eipc_validator$_ThemeSnapshot, $eipc_validator$_ThemeId, $eipc_validator$_NoticeId, $eipc_validator$_PackageSearchResults, $eipc_validator$_PackageVersions, $eipc_validator$_PackageName, $eipc_validator$_PackageQuery, $eipc_validator$_VersionSpec, $eipc_validator$_ReleaseList, $eipc_validator$_VersionList, $eipc_validator$_VersionRefValue, $eipc_validator$_OutputLines, $eipc_validator$_EditorTypes, $eipc_validator$_VersionString, $eipc_validator$_BuildId, $eipc_validator$_GitHubToken, $eipc_validator$_GistDescription, $eipc_validator$_GistId, $eipc_validator$_GitHubCredentialStorage, $eipc_validator$_GitHubSignInResult, $eipc_validator$_GistLinkInfo, $eipc_validator$_GistRevisionInfo, $eipc_validator$_GistHistoryInfo, $eipc_validator$_LogLevel, $eipc_validator$_LogText } from '../common-runtime/fiddle.js';
-const $$ipcPrefix$$ = '$eipc_message$_7361c4fc-34f7-3aeb-0bcc-b81c452aecb8_$_fiddle_$_';
+import type { AppState, WindowState, CommandId, FocusContext, MenuItemId, IAppImpl, IAppRenderer, IWindowImpl, IWindowRenderer, FileMapValue, WindowLayout, WindowView, FileName, ShortText, IDocumentsImpl, IDocumentsRenderer, SettingKey, SettingValue, ThemeData, ThemeSnapshot, ThemeId, NoticeId, ISettingsImpl, ISettingsRenderer, PackageSearchResults, PackageVersions, PackageName, PackageQuery, VersionSpec, IModulesImpl, IModulesRenderer, ReleaseList, VersionList, VersionRefValue, OutputLines, EditorTypes, VersionString, BuildId, IVersionsImpl, IVersionsRenderer, IRunImpl, IRunRenderer, GitHubToken, GistDescription, GistId, GitHubCredentialStorage, GitHubSignInResult, GistLinkInfo, GistRevisionInfo, GistHistoryInfo, IGitHubImpl, IGitHubRenderer, LogLevel, LogText, IAppPlatformImpl, IAppPlatformRenderer } from '../common/fiddle.js';
+import { $eipc_validator$_AppState, $eipc_validator$_WindowState, $eipc_validator$_CommandId, $eipc_validator$_FocusContext, $eipc_validator$_MenuItemId, $eipc_validator$_FileMapValue, $eipc_validator$_WindowLayout, $eipc_validator$_WindowView, $eipc_validator$_FileName, $eipc_validator$_ShortText, $eipc_validator$_SettingKey, $eipc_validator$_SettingValue, $eipc_validator$_ThemeData, $eipc_validator$_ThemeSnapshot, $eipc_validator$_ThemeId, $eipc_validator$_NoticeId, $eipc_validator$_PackageSearchResults, $eipc_validator$_PackageVersions, $eipc_validator$_PackageName, $eipc_validator$_PackageQuery, $eipc_validator$_VersionSpec, $eipc_validator$_ReleaseList, $eipc_validator$_VersionList, $eipc_validator$_VersionRefValue, $eipc_validator$_OutputLines, $eipc_validator$_EditorTypes, $eipc_validator$_VersionString, $eipc_validator$_BuildId, $eipc_validator$_GitHubToken, $eipc_validator$_GistDescription, $eipc_validator$_GistId, $eipc_validator$_GitHubCredentialStorage, $eipc_validator$_GitHubSignInResult, $eipc_validator$_GistLinkInfo, $eipc_validator$_GistRevisionInfo, $eipc_validator$_GistHistoryInfo, $eipc_validator$_LogLevel, $eipc_validator$_LogText } from '../common-runtime/fiddle.js';
+const $$ipcPrefix$$ = '$eipc_message$_811a1050-1c6e-c143-ea78-7bba5a1982d7_$_fiddle_$_';
 import { webFrame } from "electron/renderer";
 function $eipc_event_validator$_MainFrame() {
   let url: URL;
@@ -17,9 +17,6 @@ function $eipc_event_validator$_MainFrame() {
   return false;
 }
 export const App: Partial<IAppRenderer> = {
-  GetAppInfo() {
-    return ipcRenderer.invoke($$ipcPrefix$$ + 'App_$_GetAppInfo');
-  },
   AppStore: {
     getState(): Promise<AppState> {
       return ipcRenderer.invoke($$ipcPrefix$$ + 'App_$_App_$store$_getState');
@@ -194,19 +191,6 @@ const $eipc_impl$__init_Modules = (localBridged: Record<string, any>) => {
   localBridged['fiddle'] = localBridged['fiddle'] || {};
   localBridged['fiddle']['Modules'] = Modules
 };
-export const Onboarding: Partial<IOnboardingRenderer> = {
-  ShouldOfferTour() {
-    return ipcRenderer.invoke($$ipcPrefix$$ + 'Onboarding_$_ShouldOfferTour');
-  },
-  SetTourDone() {
-    return ipcRenderer.invoke($$ipcPrefix$$ + 'Onboarding_$_SetTourDone');
-  },
-}
-const $eipc_impl$__init_Onboarding = (localBridged: Record<string, any>) => {
-  if (!(($eipc_event_validator$_MainFrame()))) return;
-  localBridged['fiddle'] = localBridged['fiddle'] || {};
-  localBridged['fiddle']['Onboarding'] = Onboarding
-};
 export const Versions: Partial<IVersionsRenderer> = {
   GetReleases() {
     return ipcRenderer.invoke($$ipcPrefix$$ + 'Versions_$_GetReleases');
@@ -349,9 +333,6 @@ export const AppPlatform: Partial<IAppPlatformRenderer> = {
   Log(level: LogLevel, message: LogText) {
     return ipcRenderer.invoke($$ipcPrefix$$ + 'AppPlatform_$_Log', level, message);
   },
-  IsCrashReportingEnabled() {
-    return ipcRenderer.invoke($$ipcPrefix$$ + 'AppPlatform_$_IsCrashReportingEnabled');
-  },
   OpenUpdatePage() {
     return ipcRenderer.invoke($$ipcPrefix$$ + 'AppPlatform_$_OpenUpdatePage');
   },
@@ -364,11 +345,11 @@ export const AppPlatform: Partial<IAppPlatformRenderer> = {
   ResetPrivacyPermissions() {
     return ipcRenderer.invoke($$ipcPrefix$$ + 'AppPlatform_$_ResetPrivacyPermissions');
   },
-  onUpdateAvailable(fn: (version: string) => void) {
-    const handler = (e: unknown, version: string) => fn(version);
-    const $$channel$$ = $$ipcPrefix$$ + 'AppPlatform_$_UpdateAvailable';
-    ipcRenderer.on($$channel$$, handler)
-    return () => { ipcRenderer.removeListener($$channel$$, handler); };
+  ShouldOfferTour() {
+    return ipcRenderer.invoke($$ipcPrefix$$ + 'AppPlatform_$_ShouldOfferTour');
+  },
+  SetTourDone() {
+    return ipcRenderer.invoke($$ipcPrefix$$ + 'AppPlatform_$_SetTourDone');
   },
 }
 const $eipc_impl$__init_AppPlatform = (localBridged: Record<string, any>) => {
@@ -384,7 +365,6 @@ $eipc_impl$__init_Window($$bridged$$);
 $eipc_impl$__init_Documents($$bridged$$);
 $eipc_impl$__init_Settings($$bridged$$);
 $eipc_impl$__init_Modules($$bridged$$);
-$eipc_impl$__init_Onboarding($$bridged$$);
 $eipc_impl$__init_Versions($$bridged$$);
 $eipc_impl$__init_Run($$bridged$$);
 $eipc_impl$__init_GitHub($$bridged$$);

@@ -2,12 +2,17 @@
 // every platform. At the default width the last titles may be folded into the
 // More button, so tests drive File, Edit and View and read the whole list from
 // the Window store.
-import { describe, expect, it } from 'vitest';
+import { beforeAll, describe, expect, it } from 'vitest';
 
 import { role, text, useApp, windowState } from './harness.ts';
 
 describe('menu bar', () => {
   const app = useApp({ env: { FIDDLE_TEST_MENUBAR: '1' } });
+  // The titles refold when the toolbar capsule grows with its version label, and a
+  // refold closes an open menu, so wait for the version to resolve first.
+  beforeAll(async () => {
+    await app().query(text('Ready to run', { timeout: 20_000 }));
+  });
   const states = async (roleName: string, name: string) =>
     (await app().query(role(roleName, name)))[0]?.states ?? [];
   /** What has focus: its role, its accessible label or text, and whether it's in a code editor. */

@@ -6,11 +6,11 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import {
   defaultSettings,
+  SETTINGS_VERSION,
   THEME_SCHEMA_VERSION,
   type ThemeData,
   type ThemeSnapshot,
 } from '../../shared/settings';
-import { SETTINGS_VERSION } from './service';
 
 const mocks = vi.hoisted(() => ({
   handlers: {} as Record<string, (...args: unknown[]) => Promise<unknown>>,
@@ -55,7 +55,7 @@ const service = {
 };
 const store = { file: '', flush: vi.fn(async () => undefined) };
 const context = {
-  service,
+  ...service,
   store,
   themes: [] as ThemeData[],
   themesDir: '',
@@ -84,7 +84,7 @@ beforeEach(async () => {
   bindSettingsIpc({
     contents: {},
     windowId: 'w',
-    services: { settings: context },
+    services: { settings: context, hub: { app: service } },
   } as never);
 });
 
