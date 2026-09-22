@@ -118,7 +118,7 @@ export function mapOldSettings(
   };
 
   for (const [key, raw] of Object.entries(values)) {
-    const boolKey = BOOLEANS[key];
+    const boolKey = Object.hasOwn(BOOLEANS, key) ? BOOLEANS[key] : undefined;
     if (boolKey) {
       set(key, boolKey, parseBool(raw));
       continue;

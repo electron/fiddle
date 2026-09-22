@@ -47,6 +47,13 @@ describe('mapOldSettings', () => {
     expect(result.invalid).toEqual([]);
   });
 
+  it('treats a key that names an Object.prototype member as unknown', () => {
+    const result = mapOldSettings({ constructor: 'true', toString: 'x' }, options);
+    expect(result.settings).toEqual({});
+    expect(result.unknown).toEqual(['constructor', 'toString']);
+    expect(result.invalid).toEqual([]);
+  });
+
   it('leaves values that equal the new defaults out', () => {
     const result = mapOldSettings(
       {
