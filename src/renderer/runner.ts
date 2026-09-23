@@ -244,6 +244,7 @@ export class Runner {
       packageManager: appState.packageManager,
       useSocketFirewall: appState.isUsingSocketFirewall,
       isKeepingUserDataDirs: appState.isKeepingUserDataDirs,
+      isProcessMonitorEnabled: appState.isProcessMonitorEnabled,
     };
   }
 
