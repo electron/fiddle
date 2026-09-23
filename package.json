@@ -98,7 +98,7 @@
     "@types/react-window": "^1.8.8",
     "@types/semver": "^7.3.4",
     "@vercel/webpack-asset-relocator-loader": "^1.7.2",
-    "@vitest/coverage-v8": "4.1.0",
+    "@vitest/coverage-v8": "5.0.1",
     "copy-webpack-plugin": "^14.0.0",
     "css-loader": "^6.7.1",
     "electron": "^42.3.3",
@@ -125,7 +125,8 @@
     "ts-loader": "^9.4.4",
     "tsx": "^4.20.3",
     "typescript": "^5.8.3",
-    "vitest": "^4.1.11",
+    "vite": "^8.2.2",
+    "vitest": "^5.0.1",
     "webpack": "^5.104.1"
   },
   "lint-staged": {
