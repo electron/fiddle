@@ -10,8 +10,14 @@ vi.mock('electron', () => ({ app: { isPackaged: false } }));
 const launcher = vi.fn<() => string | undefined>(() => undefined);
 vi.mock('../platform/disclaim', () => ({ disclaimLauncher: launcher }));
 
+const shellPath = vi.fn<() => Promise<string | undefined>>();
+vi.mock('../../fiddle/modules', async (original) => ({
+  ...(await original<typeof import('../../fiddle/modules')>()),
+  loadLoginShellPath: shellPath,
+}));
+
 const { killTree } = await import('../../fiddle/kill-tree');
-const { makeRunDir, spawnElectron, sweepStaleDirs, waitForExit, writeRunApp } =
+const { makeRunDir, spawnElectron, sweepStaleDirs, toolEnv, waitForExit, writeRunApp } =
   await import('./process');
 
 const node = (script: string) =>
@@ -56,6 +62,17 @@ describe('waitForExit', () => {
     expect(await waitForExit(child, onError)).toEqual({ spawnFailed: true });
     expect(onError).toHaveBeenCalledTimes(1);
     expect(onError.mock.calls[0]?.[0]).toMatchObject({ code: 'ENOENT' });
+  });
+});
+
+describe('toolEnv', () => {
+  it("looks the login shell's PATH up once, but tries again after a lookup that found nothing", async () => {
+    shellPath.mockResolvedValueOnce(undefined);
+    expect((await toolEnv()).PATH).toBe(process.env.PATH);
+    shellPath.mockResolvedValue('/opt/homebrew/bin:/usr/bin');
+    expect((await toolEnv()).PATH).toBe('/opt/homebrew/bin:/usr/bin');
+    expect((await toolEnv()).PATH).toBe('/opt/homebrew/bin:/usr/bin');
+    expect(shellPath).toHaveBeenCalledTimes(2);
   });
 });
 

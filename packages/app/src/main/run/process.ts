@@ -27,9 +27,12 @@ function devElectronFlags(): string[] {
   return (process.env.FIDDLE_DEV_ELECTRON_FLAGS ?? '').split(' ').filter(Boolean);
 }
 
-/** The environment for npm, yarn and Forge, with the login shell's PATH. */
+/** The environment for npm, yarn and Forge, with the login shell's PATH. A lookup that failed is tried again next time. */
 export async function toolEnv(): Promise<NodeJS.ProcessEnv> {
-  shellPath ??= loadLoginShellPath();
+  shellPath ??= loadLoginShellPath().then((found) => {
+    if (found === undefined) shellPath = undefined;
+    return found;
+  });
   const resolved = await shellPath;
   const env = packageManagerEnv();
   if (resolved) env.PATH = resolved;

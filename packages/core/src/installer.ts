@@ -562,7 +562,13 @@ export class Installer extends EventEmitter {
         await renameIntoPlace(tmp, dir);
       } catch (err) {
         await removeBestEffort(tmp);
-        this.setState(version, originalState);
+        if (signal?.aborted) {
+          this.setState(version, originalState);
+        } else {
+          // A zip that doesn't extract would fail the same way every time: the next attempt downloads it again.
+          await removeBestEffort(source);
+          this.setState(version, InstallState.missing);
+        }
         throw err;
       }
       this.warming.set(
