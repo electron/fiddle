@@ -336,13 +336,9 @@ describe('application menu', () => {
   it('uses sentence case, and an ellipsis only at the end of a label', () => {
     const properNouns = new Set(['Electron', 'Fiddle', 'GitHub', 'Forge', 'Tab']);
     for (const platform of PLATFORMS) {
-      walk(build({ platform, dev: true }), (each, siblings) => {
+      walk(build({ platform, dev: true }), (each) => {
         const label = each.label;
-        if (
-          each.type === 'separator' ||
-          !label ||
-          siblings.some((sibling) => sibling.type === 'radio')
-        )
+        if (each.type === 'separator' || !label || each.id?.startsWith('example:'))
           return;
         expect(label, 'three dots instead of an ellipsis').not.toContain('...');
         expect(

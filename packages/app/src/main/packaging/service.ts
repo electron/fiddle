@@ -189,6 +189,8 @@ export async function packageFiddle(
       await removeDir(dir);
       return;
     }
+    // The build in `out/` stays; the dependencies that made it (Electron, Forge) would only fill the disk.
+    await removeDir(path.join(dir, 'node_modules'));
     const out = path.join(dir, 'out');
     runs.log(windowId, t('packageDone', { path: out }));
     runs.setState(windowId, { result: 'success' });

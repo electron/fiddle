@@ -98,7 +98,8 @@ function showMeMenu(focused: string | undefined): MenuItemConstructorOptions {
     submenu: SHOW_ME_EXAMPLES.map((name): MenuItemConstructorOptions => ({
       id: `example:${name}`,
       label: name,
-      type: 'radio',
+      // Not radio: the native menu checks a radio group's first item when none is.
+      type: 'checkbox',
       checked: current === name,
       click: (_item, window) =>
         void withErrorDialog(target(window), () => showMeIn(target(window), name)),

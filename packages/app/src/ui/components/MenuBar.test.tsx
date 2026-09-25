@@ -23,7 +23,6 @@ const item = (
   extra: {
     enabled?: boolean;
     checked?: boolean;
-    radio?: boolean;
     accelerator?: string;
   } = {},
 ) => ({
@@ -32,7 +31,6 @@ const item = (
   label,
   enabled: extra.enabled ?? true,
   ...(extra.checked === undefined ? {} : { checked: extra.checked }),
-  ...(extra.radio ? { radio: true } : {}),
   ...(extra.accelerator === undefined ? {} : { accelerator: extra.accelerator }),
 });
 
@@ -203,25 +201,6 @@ describe('MenuBar', () => {
         .getByRole('menuitemcheckbox', { name: 'Minimap' })
         .getAttribute('aria-checked'),
     ).toBe('false');
-  });
-
-  it('shows a radio group as menuitemradio, one checked', () => {
-    setup({
-      menus: [
-        submenu('menu:showMe', 'Show me', [
-          item('example:Menu', 'Menu', { checked: true, radio: true }),
-          item('example:Tabs', 'Tabs', { checked: false, radio: true }),
-        ]),
-      ],
-    });
-    fireEvent.mouseDown(title('Show me'), { button: 0 });
-    expect(
-      screen.getByRole('menuitemradio', { name: 'Menu' }).getAttribute('aria-checked'),
-    ).toBe('true');
-    expect(
-      screen.getByRole('menuitemradio', { name: 'Tabs' }).getAttribute('aria-checked'),
-    ).toBe('false');
-    expect(screen.queryByRole('menuitemcheckbox')).toBeNull();
   });
 
   it('turns the window no-drag while the bar has the keyboard or a menu is open, so a title bar click reaches the page', () => {

@@ -1,6 +1,6 @@
 /** run, bisect, package and make in the CLI: which Electron they pick, what they report while a fiddle runs, and the trust prompt. Electron itself is a fake child process. */
 import { EventEmitter } from 'node:events';
-import { existsSync, readFileSync } from 'node:fs';
+import { existsSync, mkdirSync, readFileSync } from 'node:fs';
 import { mkdir, mkdtemp, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
@@ -546,6 +546,11 @@ describe('bisect', () => {
 
 describe('package and make', () => {
   it('writes the fiddle as a Forge project to a temp folder, runs the task there and says where the output is', async () => {
+    vi.mocked(runForgeTask).mockImplementation(async (project) => {
+      mkdirSync(path.join(project, 'node_modules', 'electron'), { recursive: true });
+      mkdirSync(path.join(project, 'out', 'my-fiddle-linux-x64'), { recursive: true });
+      return undefined;
+    });
     const result = await run('package', {
       fiddle: folder,
       version: '99.0.0',
@@ -559,6 +564,9 @@ describe('package and make', () => {
     };
     expect(path.basename(project)).toMatch(/^electron-fiddle-package-/);
     expect(out).toBe(path.join(project, 'out'));
+    // The build stays, the dependencies that made it go.
+    expect(existsSync(path.join(out, 'my-fiddle-linux-x64'))).toBe(true);
+    expect(existsSync(path.join(project, 'node_modules'))).toBe(false);
     expect(runForgeTask).toHaveBeenCalledWith(
       project,
       'yarn',

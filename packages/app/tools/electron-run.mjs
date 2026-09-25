@@ -41,7 +41,11 @@ export async function buildApp(mode, outDir, targets = ['main', 'preload', 'rend
   }
 }
 
-/** Runs `electron ...args` (no sandbox where there can't be one) with inherited stdio, forwards SIGINT and SIGTERM, and exits with its code. */
+/**
+ * Runs `electron ...args` (no sandbox where there can't be one) with inherited stdio, forwards SIGTERM, and exits
+ * with its code. The terminal's Ctrl+C already reaches Electron; forwarding it too would be the second one that
+ * makes the CLI exit without cleaning up.
+ */
 export function runElectron(args, { xvfb = false, cwd = appDir } = {}) {
   const electronArgs = [...(needsNoSandbox() ? ['--no-sandbox'] : []), ...args];
   const [command, commandArgs] =
@@ -49,8 +53,8 @@ export function runElectron(args, { xvfb = false, cwd = appDir } = {}) {
       ? ['xvfb-run', ['-a', electronPath, ...electronArgs]]
       : [electronPath, electronArgs];
   const child = spawn(command, commandArgs, { stdio: 'inherit', cwd });
-  for (const signal of ['SIGINT', 'SIGTERM'])
-    process.on(signal, () => child.kill(signal));
+  process.on('SIGINT', () => {});
+  process.on('SIGTERM', () => child.kill('SIGTERM'));
   child.on('exit', (code, signal) => process.exit(code ?? (signal ? 1 : 0)));
 }
 

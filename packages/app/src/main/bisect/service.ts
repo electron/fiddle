@@ -151,6 +151,7 @@ export class BisectService {
 
   async #auto(windowId: string, session: Session, range: string[]): Promise<void> {
     const t = tm('mainRun');
+    let first = true;
     const check = async (version: string): Promise<boolean | undefined> => {
       if (session.stopped) return undefined;
       const current = this.#runs.state(windowId).bisect;
@@ -160,7 +161,9 @@ export class BisectService {
         versionRef: { kind: 'release', version },
         trustOperation: 'auto-bisect',
         banner: t('bisectStep', { version }),
+        clear: first,
       });
+      first = false;
       if (session.stopped) return undefined;
       const good = bisectVerdict(outcome);
       if (good === undefined) {

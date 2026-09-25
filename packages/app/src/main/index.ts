@@ -41,7 +41,6 @@ if (headless) startHeadless(headless);
 const testHarness =
   __FIDDLE_TEST_BUILD__ && isTestMode() ? installTestHarness() : undefined;
 
-const crashReporting = !squirrelEvent && initCrashReporting(headless !== undefined);
 if (!squirrelEvent && !headless) logProcessErrors();
 
 // Both must happen before `ready`.
@@ -57,6 +56,8 @@ if (process.platform === 'darwin' && !app.isPackaged) {
 if (!squirrelEvent && !headless) applyChromiumLanguage();
 
 const primary = !squirrelEvent && !headless && installEarlyDocumentHandlers();
+// Only the instance that stays reports: a second instance would count as one more crash-free session.
+const crashReporting = primary && initCrashReporting();
 
 async function main(): Promise<void> {
   await app.whenReady();

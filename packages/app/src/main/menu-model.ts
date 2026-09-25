@@ -75,9 +75,7 @@ export function toMenuModel(template: readonly Item[], platform: Platform): Menu
     const accelerator =
       item.accelerator ?? (item.role ? roleAccelerator(item.role, platform) : undefined);
     const node: MenuNode = { kind: 'item', id, label, enabled };
-    if (item.type === 'checkbox' || item.type === 'radio')
-      node.checked = item.checked === true;
-    if (item.type === 'radio') node.radio = true;
+    if (item.type === 'checkbox') node.checked = item.checked === true;
     const text = formatAccelerator(accelerator, platform);
     if (text) node.accelerator = text;
     return [node];

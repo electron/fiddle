@@ -92,7 +92,8 @@ async function addTheme(
   reveal: boolean,
 ): Promise<number> {
   const onDisk = await fsp.readdir(settings.themesDir).catch(() => [] as string[]);
-  const taken = new Set(onDisk.map((name) => name.replace(/\.json$/, '')));
+  // Lower-cased like the ids, so `Dracula.json` counts on a case-insensitive disk.
+  const taken = new Set(onDisk.map((name) => name.replace(/\.json$/i, '').toLowerCase()));
   const id = themeId(theme.name, taken);
   const file = await writeTheme(settings.themesDir, id, theme);
   await settings.refreshThemes();
@@ -201,7 +202,7 @@ export function bindSettingsIpc({
       }
       return addTheme(
         settings,
-        { ...base, name: t('themeCopyName', { name: base.name }) },
+        { ...base, name: t('themeCopyName', { name: base.name }).slice(0, 100) },
         true,
       );
     },

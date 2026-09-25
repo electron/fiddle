@@ -422,6 +422,8 @@ async function packageOrMake(
     await removeDir(dir);
     throw error;
   }
+  // The build in `out/` stays; the dependencies that made it (Electron, Forge) would only fill the disk.
+  await removeDir(path.join(dir, 'node_modules'));
   const out = path.join(dir, 'out');
   return { data: { dir, out }, human: tr('packageDone', { path: out }) };
 }

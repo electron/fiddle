@@ -89,7 +89,6 @@ export const menuNodeSchema = z.discriminatedUnion('kind', [
     label: z.string(),
     enabled: z.boolean(),
     checked: z.boolean().optional(),
-    radio: z.boolean().optional(),
     accelerator: z.string().optional(),
   }),
   z.object({ kind: z.literal('separator') }),

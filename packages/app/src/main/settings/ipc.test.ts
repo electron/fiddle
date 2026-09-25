@@ -236,10 +236,11 @@ describe('ImportTheme', () => {
 
   it('picks a fresh ID instead of overwriting a theme file that is already there', async () => {
     await fsp.mkdir(context.themesDir);
-    await fsp.writeFile(path.join(context.themesDir, 'night-owl.json'), '{}');
+    // Any case: on Windows and macOS `Night-Owl.json` is the file `night-owl.json` would open.
+    await fsp.writeFile(path.join(context.themesDir, 'Night-Owl.JSON'), '{}');
     await importTheme('Night Owl.json', JSON.stringify(monaco));
     expect(service.set).toHaveBeenCalledWith('theme', 'night-owl-2');
-    expect(await readJson(path.join(context.themesDir, 'night-owl.json'))).toEqual({});
+    expect(await readJson(path.join(context.themesDir, 'Night-Owl.JSON'))).toEqual({});
   });
 
   it('rejects JSON that is not a Monaco theme with invalidArgument, naming the file', async () => {
@@ -320,6 +321,29 @@ describe('CreateTheme', () => {
       });
     },
   );
+
+  it('keeps the copy’s name within what a theme file allows', async () => {
+    context.themes = [
+      {
+        id: 'long',
+        name: 'n'.repeat(100),
+        isDark: true,
+        editor: snapshot.editor,
+        common: {},
+      },
+    ];
+    service.settings = { ...defaultSettings, theme: 'long' };
+    try {
+      await mocks.handlers.CreateTheme!(null);
+    } finally {
+      service.settings = defaultSettings;
+    }
+    const [file] = await fsp.readdir(context.themesDir);
+    const written = (await readJson(path.join(context.themesDir, file!))) as {
+      name: string;
+    };
+    expect(written.name).toHaveLength(100);
+  });
 
   it('needs either a current custom theme or a snapshot', async () => {
     await expect(mocks.handlers.CreateTheme!(null)).rejects.toMatchObject({

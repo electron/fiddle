@@ -105,12 +105,6 @@ describe('initCrashReporting', () => {
     expect(mocks.init).not.toHaveBeenCalled();
   });
 
-  it('stays off for headless mode', async () => {
-    const { initCrashReporting } = await load();
-    expect(initCrashReporting(true)).toBe(false);
-    expect(mocks.init).not.toHaveBeenCalled();
-  });
-
   it('keeps the setting turned off when settings.json is corrupt and only the backup has it', async () => {
     writeSettings('{"crashReports":');
     fs.writeFileSync(
