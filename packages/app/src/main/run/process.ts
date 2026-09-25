@@ -14,6 +14,8 @@ import { disclaimLauncher } from '../platform/disclaim';
 import type { RunOutcome } from './logic';
 
 const STALE_DIR_MS = 24 * 60 * 60 * 1000;
+/** How long the output pipes may stay open after Electron exits before they are cut. */
+const CLOSE_GRACE_MS = 500;
 /** What `makeRunDir` makes: run dirs, and package and make projects (group 1). */
 const TEMP_DIR_RE = /^electron-fiddle-((?:package|make)-)?[A-Za-z0-9]{6}$/;
 
@@ -139,7 +141,11 @@ export function spawnElectron(options: SpawnElectronOptions): ChildProcess {
   });
 }
 
-/** Resolves when the child closes. A spawn error goes to `onError` and makes the outcome `spawnFailed`. */
+/**
+ * Resolves when the child closes, so its last output is in. A spawn error goes to `onError` and makes the
+ * outcome `spawnFailed`. A process the fiddle started detached with inherited stdio keeps the pipes open
+ * after Electron exits, and no signal reaches it; the pipes are cut shortly after the exit instead.
+ */
 export function waitForExit(
   child: ChildProcess,
   onError: (error: Error) => void = () => {},
@@ -149,6 +155,13 @@ export function waitForExit(
     child.once('error', (error) => {
       failed = true;
       onError(error);
+    });
+    child.once('exit', () => {
+      const cut = setTimeout(() => {
+        child.stdout?.destroy();
+        child.stderr?.destroy();
+      }, CLOSE_GRACE_MS);
+      child.once('close', () => clearTimeout(cut));
     });
     child.once('close', (code, signal) =>
       resolve(failed ? { spawnFailed: true } : { code, signal }),
