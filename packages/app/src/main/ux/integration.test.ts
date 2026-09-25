@@ -54,7 +54,7 @@ vi.mock('../windows', () => ({
 
 const { app } = await import('electron');
 const { installOsIntegration } = await import('./integration');
-const { ARG_NEW_FIDDLE, ARG_OPEN_FOLDER } = await import('./jump-list');
+const { ARG_NEW_FIDDLE, ARG_OPEN_FOLDER, openFolderArg } = await import('./jump-list');
 
 const realPlatform = process.platform;
 const READY: RunState = {
@@ -274,9 +274,9 @@ describe('second instance', () => {
     launch(ARG_NEW_FIDDLE);
     expect(registry.run).toHaveBeenCalledWith('file.newFiddle', { windowId: 'w' });
 
-    launch(ARG_OPEN_FOLDER, 'C:\\fiddles\\one');
+    launch(`${ARG_OPEN_FOLDER}=C:\\fiddles\\one`, '--enable-sandbox');
     expect(mocks.openFolderIn).toHaveBeenCalledWith(undefined, 'C:\\fiddles\\one');
-    launch(ARG_OPEN_FOLDER, 'C:\\somewhere\\else');
+    launch(`${ARG_OPEN_FOLDER}=C:\\somewhere\\else`);
     expect(mocks.openFolderIn).toHaveBeenCalledOnce();
   });
 
@@ -329,7 +329,7 @@ describe('session menus', () => {
       name: 'recent',
       items: [
         {
-          args: `${ARG_OPEN_FOLDER} "C:\\fiddles\\one"`,
+          args: openFolderArg('C:\\fiddles\\one'),
           description: 'C:\\fiddles\\one',
         },
       ],
