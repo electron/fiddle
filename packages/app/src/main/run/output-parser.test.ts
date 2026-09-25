@@ -175,6 +175,39 @@ describe('OutputParser', () => {
     expect(result.lines[2]?.location).toEqual({ file: 'main.js', line: 3, column: 15 });
   });
 
+  it('leaves out positions that are 0 or too long to be one, so every location fits the store', () => {
+    const nines = '9'.repeat(400);
+    const main = parser().push(
+      'stderr',
+      `Error: boom\n    at Object.<anonymous> (${root}/main.js:0:0)\n    at f (${root}/main.js:4:0)\n`,
+    );
+    // The first frame has no usable line, so the second one locates the error, without its column.
+    expect(main.errors).toEqual([
+      { process: 'main', file: 'main.js', line: 4, name: 'Error', message: 'boom' },
+    ]);
+    expect(main.lines.map((l) => l.location)).toEqual([
+      undefined,
+      undefined,
+      { file: 'main.js', line: 4 },
+    ]);
+    const renderer = parser().push(
+      'stderr',
+      `[1:ERROR:CONSOLE(1)] "Uncaught Error: a\n    at ${fileUrl('renderer.js')}:${nines}:1", source: ${fileUrl('renderer.js')} (0)\n` +
+        `[1:ERROR:CONSOLE(1)] "Uncaught Error: b", source: ${fileUrl('renderer.js')} (${nines})\n`,
+    );
+    expect(renderer.errors).toEqual([]);
+    expect(renderer.lines.map((l) => l.location)).toEqual([undefined, undefined]);
+  });
+
+  it('keeps a runtime error message short, whatever the console line holds', () => {
+    const result = parser().push(
+      'stderr',
+      `RangeError: ${'x'.repeat(5000)}\n    at f (${root}/main.js:2:1)\n`,
+    );
+    expect(result.errors[0]?.message).toHaveLength(1001);
+    expect(result.lines[0]?.text).toHaveLength(5012);
+  });
+
   it('flushes a trailing partial line', () => {
     const p = parser();
     p.push('stdout', 'no newline');
