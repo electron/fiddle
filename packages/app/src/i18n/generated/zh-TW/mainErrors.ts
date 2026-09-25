@@ -29,7 +29,6 @@ export default {
   "github-response-detail": "GitHub 回應 HTTP {{status}}：{{detail}}",
   "timeout": "GitHub 未在時限內回應。",
   "unreachable": "無法連線到 GitHub。請檢查您的網際網路連線。",
-  "too-many-redirects": "GitHub 將要求重新導向的次數過多。",
   "unexpected-response": "GitHub 傳回了無法讀取的回應。",
   "too-many-files": "一個 gist 最多只能有 {{max}} 個檔案。",
   "file-too-large": "「{{name}}」大於 {{maxMb}} MB，超過 gist 檔案的容量上限。"

@@ -87,7 +87,6 @@ describe('auth', () => {
     await expect(client.verifyToken()).resolves.toBe('octocat');
     expect(calls[0]!.url).toBe('https://api.github.com/user');
     expect(calls[0]!.headers.Authorization).toBe(`Bearer ${TOKEN}`);
-    expect(calls[0]!.redirect).toBe('manual');
   });
 
   it('refuses a bad format without a request', async () => {
@@ -241,50 +240,10 @@ describe('where the token goes', () => {
     expect(calls[0]!.headers.Authorization).toBeUndefined();
   });
 
-  it('is dropped on a cross-host redirect and stays dropped', async () => {
-    const { fn, calls } = mockFetch((call) => {
-      if (call.url === 'https://api.github.com/user') {
-        return new Response(null, {
-          status: 302,
-          headers: { location: 'https://elsewhere.example/user' },
-        });
-      }
-      if (call.url === 'https://elsewhere.example/user') {
-        return new Response(null, {
-          status: 307,
-          headers: { location: 'https://api.github.com/user2' },
-        });
-      }
-      return ok();
-    });
+  it('never follows a redirect, which would carry it along', async () => {
+    const { fn, calls } = mockFetch(() => ok());
     await new GitHubClient({ token: TOKEN, fetch: fn }).getAuthenticatedUser();
-    expect(calls.map((c) => [c.url, c.headers.Authorization])).toEqual([
-      ['https://api.github.com/user', `Bearer ${TOKEN}`],
-      ['https://elsewhere.example/user', undefined],
-      ['https://api.github.com/user2', undefined],
-    ]);
-  });
-
-  it('is kept on a same-origin redirect', async () => {
-    const { fn, calls } = mockFetch((call) =>
-      call.url.endsWith('/user')
-        ? new Response(null, { status: 301, headers: { location: '/user-moved' } })
-        : ok(),
-    );
-    await new GitHubClient({ token: TOKEN, fetch: fn }).getAuthenticatedUser();
-    expect(calls[1]).toMatchObject({
-      url: 'https://api.github.com/user-moved',
-      headers: { Authorization: `Bearer ${TOKEN}` },
-    });
-  });
-
-  it('gives up after too many redirects', async () => {
-    const { fn } = mockFetch(
-      () => new Response(null, { status: 302, headers: { location: '/loop' } }),
-    );
-    await expect(
-      new GitHubClient({ token: TOKEN, fetch: fn }).getAuthenticatedUser(),
-    ).rejects.toMatchObject({ code: ErrorCode.network });
+    expect(calls[0]!.redirect).toBe('error');
   });
 });
 

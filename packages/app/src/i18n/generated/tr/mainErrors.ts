@@ -29,7 +29,6 @@ export default {
   "github-response-detail": "GitHub, HTTP {{status}} ile yanıt verdi: {{detail}}",
   "timeout": "GitHub zamanında yanıt vermedi.",
   "unreachable": "GitHub'a ulaşılamadı. İnternet bağlantınızı denetleyin.",
-  "too-many-redirects": "GitHub isteği çok fazla kez yönlendirdi.",
   "unexpected-response": "GitHub, okunamayan bir yanıt gönderdi.",
   "too-many-files": "Bir gist en fazla {{max}} dosya içerebilir.",
   "file-too-large": "“{{name}}”, gist dosyaları için izin verilen en büyük boyuttan ({{maxMb}} MB) büyük."

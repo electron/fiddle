@@ -331,7 +331,6 @@
   "mainErrors:template-unreachable": "9c322939b6f9",
   "mainErrors:timeout": "54387ec942f0",
   "mainErrors:too-many-files": "d6d02cd43fe0",
-  "mainErrors:too-many-redirects": "de62e5204cea",
   "mainErrors:unexpected-response": "0ddb99100145",
   "mainErrors:unreachable": "e774e9279948",
   "mainErrors:unsupported-extension": "94d07fb07733",

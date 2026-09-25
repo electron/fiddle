@@ -29,7 +29,6 @@ export default {
   "github-response-detail": "GitHub 응답: HTTP {{status}}: {{detail}}",
   "timeout": "GitHub의 응답 시간이 초과되었습니다.",
   "unreachable": "GitHub에 연결할 수 없습니다. 인터넷 연결을 확인하세요.",
-  "too-many-redirects": "GitHub에서 요청을 너무 많이 리디렉션했습니다.",
   "unexpected-response": "GitHub에서 읽을 수 없는 응답을 보냈습니다.",
   "too-many-files": "Gist에는 파일을 최대 {{max}}개까지 넣을 수 있습니다.",
   "file-too-large": "“{{name}}” 파일이 Gist 파일의 최대 크기인 {{maxMb}}MB보다 큽니다."

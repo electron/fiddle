@@ -28,7 +28,6 @@
   "github-response-detail": "GitHub 返回了 HTTP {{status}}：{{detail}}",
   "timeout": "GitHub 未在规定时间内响应。",
   "unreachable": "无法连接到 GitHub。请检查网络连接。",
-  "too-many-redirects": "GitHub 对该请求的重定向次数过多。",
   "unexpected-response": "GitHub 返回的响应无法读取。",
   "too-many-files": "一个 gist 最多只能包含 {{max}} 个文件。",
   "file-too-large": "“{{name}}”大于 {{maxMb}} MB，超出了 gist 文件的大小上限。"

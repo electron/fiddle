@@ -29,7 +29,6 @@ export default {
   "github-response-detail": "GitHub ответил HTTP {{status}}: {{detail}}",
   "timeout": "GitHub не ответил вовремя.",
   "unreachable": "Не удалось подключиться к GitHub. Проверьте подключение к интернету.",
-  "too-many-redirects": "GitHub слишком много раз перенаправил запрос.",
   "unexpected-response": "GitHub прислал ответ, который не удалось прочитать.",
   "too-many-files": "Максимальное число файлов в gist: {{max}}.",
   "file-too-large": "Файл «{{name}}» больше {{maxMb}} МБ — предельного размера файла в gist."

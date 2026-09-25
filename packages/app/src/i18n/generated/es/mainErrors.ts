@@ -29,7 +29,6 @@ export default {
   "github-response-detail": "GitHub respondió con HTTP {{status}}: {{detail}}",
   "timeout": "GitHub no respondió a tiempo.",
   "unreachable": "No se pudo conectar con GitHub. Comprueba tu conexión a Internet.",
-  "too-many-redirects": "GitHub redirigió la solicitud demasiadas veces.",
   "unexpected-response": "GitHub envió una respuesta que no se pudo leer.",
   "too-many-files": "Un gist puede tener como máximo {{max}} archivos.",
   "file-too-large": "“{{name}}” supera los {{maxMb}} MB, el máximo que puede contener un archivo de un gist."
