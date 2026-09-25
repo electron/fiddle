@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, type ReactNode } from 'react';
+import { createContext, useContext, useEffect, useState, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import {
@@ -8,6 +8,7 @@ import {
   type Settings,
 } from '../../../shared/settings';
 import { Button, IconButton, Switch, TextField } from '../../../ui';
+import { useLatest } from '../../hooks';
 import styles from './SettingsPage.module.css';
 import { useSettings } from './use-settings';
 
@@ -114,6 +115,12 @@ export interface TextRowProps {
   mono?: boolean;
 }
 
+/** A field commits on blur or Enter, and when the page closes under it (Escape, the shortcut), which blurs nothing. */
+function useCommitOnUnmount(commit: () => void): void {
+  const latest = useLatest(commit);
+  useEffect(() => () => latest.current(), [latest]);
+}
+
 export function TextRow({ setting, invalidMessage, placeholder, mono }: TextRowProps) {
   const { settings, set } = useSettings();
   const { title } = useSettingText(setting);
@@ -139,6 +146,7 @@ export function TextRow({ setting, invalidMessage, placeholder, mono }: TextRowP
     setInvalid(false);
     if (text !== stored) set(setting, value as never);
   };
+  useCommitOnUnmount(commit);
 
   return (
     <Row setting={setting}>
@@ -193,6 +201,7 @@ export function ListRow({ setting, invalidMessage }: ListRowProps) {
     const values = next.map((row) => row.trim()).filter(Boolean);
     if (JSON.stringify(values) !== storedKey) set(setting, values);
   };
+  useCommitOnUnmount(() => commit(rows));
 
   return (
     <Row setting={setting}>

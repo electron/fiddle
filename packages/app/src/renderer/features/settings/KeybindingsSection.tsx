@@ -58,11 +58,15 @@ export function KeybindingsSection() {
 
   const save = (id: CommandId, accelerator: string | null | undefined) => {
     const next = { ...overrides };
-    if (
-      accelerator === undefined ||
-      accelerator === (acceleratorFor(id, platform) ?? null)
-    )
-      delete next[id];
+    const preset = acceleratorFor(id, platform) ?? null;
+    // The default again, in whatever modifier order it was recorded, is no override.
+    const same =
+      accelerator === preset ||
+      (!!accelerator &&
+        !!preset &&
+        normalizeAccelerator(accelerator, platform) ===
+          normalizeAccelerator(preset, platform));
+    if (accelerator === undefined || same) delete next[id];
     else next[id] = accelerator;
     set('keybindings', next);
   };

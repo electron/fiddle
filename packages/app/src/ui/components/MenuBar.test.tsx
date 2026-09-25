@@ -285,6 +285,16 @@ describe('MenuBar', () => {
     expect(focused()).toBe(title('File'));
   });
 
+  it('leaves Alt and a mnemonic to whatever has focus when that handles it', () => {
+    const { editor } = setup();
+    // The editor's find widget toggles options with Alt+letters.
+    editor.addEventListener('keydown', (event) => event.preventDefault(), { once: true });
+    press('e', { altKey: true });
+    expect(openMenus()).toEqual([]);
+    press('e', { altKey: true });
+    expect(openMenus()).toEqual(['Edit']);
+  });
+
   it('underlines nothing and opens nothing by Alt for a title in Chinese', () => {
     setup({
       menus: [

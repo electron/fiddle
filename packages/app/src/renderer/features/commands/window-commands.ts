@@ -1,12 +1,11 @@
 import { runApi } from '../../../ipc/renderer';
+import { targetEditor } from '../../editor/editor-state';
 import { formatText, PRETTIER_PARSERS, type FormatLanguage } from '../../editor/format';
 import { monaco } from '../../editor/monaco';
 import { createStore, useStore } from '../../store';
 import { toastError } from '../../toast-error';
 import { useCommand } from '../../hooks';
 import { focusContextOf } from './keybindings';
-
-type Editor = monaco.editor.ICodeEditor;
 
 /** Monaco action or `trigger` handler IDs behind forwarded commands. */
 const EDITOR_ACTIONS: Readonly<Record<string, string>> = {
@@ -25,19 +24,12 @@ const NATIVE_EDIT: Readonly<Record<string, string>> = {
   'edit.selectAll': 'selectAll',
 };
 
-let lastEditor: Editor | null = null;
 const tabFocus = createStore(false);
 
 monaco.editor.onDidCreateEditor((editor) => {
   // After the constructor has applied the editor's own options.
   queueMicrotask(() => {
     if (tabFocus.get()) editor.updateOptions({ tabFocusMode: true });
-  });
-  editor.onDidFocusEditorWidget(() => {
-    lastEditor = editor;
-  });
-  editor.onDidDispose(() => {
-    if (lastEditor === editor) lastEditor = null;
   });
   // Monaco's own menu moves the cursor to a right-click outside the selection; so does the native one.
   editor.onContextMenu(({ target }) => {
@@ -106,7 +98,7 @@ function editorAction(id: string, action: string): void {
     document.execCommand(native);
     return;
   }
-  const editor = lastEditor;
+  const editor = targetEditor();
   if (!editor) return;
   editor.focus();
   editor.trigger('fiddle', action, null);

@@ -538,11 +538,14 @@ export function MenuBar({
     } else activate(node);
   };
 
-  // Alt, F10 and Alt+letter, wherever focus is: capture phase, after the keybinding
+  const inert = (event: Event) =>
+    event.target instanceof Element && event.target.closest(INERT_TARGETS) !== null;
+  const noOtherModifier = (event: KeyboardEvent) =>
+    !event.ctrlKey && !event.metaKey && !event.shiftKey;
+  // Alt and F10, wherever focus is: capture phase, after the keybinding
   // dispatcher (installed first), whose keys arrive `defaultPrevented`.
   const onGlobalKeyDown = useEffectEvent((event: KeyboardEvent) => {
-    const target = event.target instanceof Element ? event.target : null;
-    if (target?.closest(INERT_TARGETS)) return;
+    if (inert(event)) return;
     if (event.key === 'Alt') {
       if (!event.repeat) {
         alt.current = {
@@ -558,18 +561,23 @@ export function MenuBar({
     // Any other key while Alt is down makes it a chord, not a tap. AltGr arrives as `AltGraph`.
     if (alt.current.down) alt.current.alone = false;
     if (event.defaultPrevented || event.isComposing) return;
-    const plain = !event.ctrlKey && !event.metaKey && !event.shiftKey;
-    if (event.key === 'F10' && plain && !event.altKey) {
+    if (event.key === 'F10' && !event.altKey && noOtherModifier(event)) {
       event.preventDefault();
       event.stopPropagation();
       toggleBar();
-    } else if (
+    }
+  });
+  // Alt+letter opens a menu only when what has focus didn't take the key (the editor's
+  // find widget toggles options with Alt+letters): bubble phase.
+  const onMnemonicKeyDown = useEffectEvent((event: KeyboardEvent) => {
+    if (inert(event) || event.defaultPrevented || event.isComposing) return;
+    if (
       event.altKey &&
-      plain &&
+      noOtherModifier(event) &&
       event.key.length === 1 &&
-      !withinBar(event.target)
+      !withinBar(event.target) &&
+      openByMnemonic(event.key)
     ) {
-      if (!openByMnemonic(event.key)) return;
       event.preventDefault();
       event.stopPropagation();
     }
@@ -606,6 +614,9 @@ export function MenuBar({
     const listeners = new AbortController();
     const capture = { capture: true, signal: listeners.signal };
     window.addEventListener('keydown', (event) => onGlobalKeyDown(event), capture);
+    window.addEventListener('keydown', (event) => onMnemonicKeyDown(event), {
+      signal: listeners.signal,
+    });
     window.addEventListener('keyup', (event) => onGlobalKeyUp(event), capture);
     window.addEventListener('mousedown', (event) => onGlobalPointer(event), capture);
     window.addEventListener('wheel', (event) => onGlobalPointer(event), {

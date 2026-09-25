@@ -8,10 +8,11 @@ import { Icon } from '../../ui';
 import { useLatest } from '../hooks';
 import { useAppState } from '../state';
 import {
-  clearFocusedEditor,
+  addEditor,
   getViewState,
   saveViewState,
   setCursor,
+  removeEditor,
   setFocusedEditor,
   useEditorViewState,
 } from './editor-state';
@@ -116,10 +117,11 @@ export function EditorPane({ file, primary = false, onFocus }: EditorPaneProps) 
       }),
     ];
     fitGutter();
+    addEditor(instance);
     setEditor(instance);
     return () => {
       for (const subscription of subscriptions) subscription.dispose();
-      clearFocusedEditor(instance);
+      removeEditor(instance);
       instance.dispose();
     };
   }, [latest]);
