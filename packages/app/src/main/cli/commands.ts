@@ -167,7 +167,7 @@ function report(ctx: Ctx, loaded: LoadedFiddle): LoadedFiddle {
 
 async function newContext(ctx: Ctx): Promise<LoadContext> {
   const rows = await cachedReleases(ctx);
-  return { version: { kind: 'release', version: defaultVersion(rows) }, modules: {} };
+  return { version: { kind: 'release', version: defaultVersion(rows) } };
 }
 
 async function requireFolder(dir: string): Promise<string> {

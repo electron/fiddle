@@ -225,14 +225,14 @@ describe('loadGistIn', () => {
     expect(loadGist).not.toHaveBeenCalled();
   });
 
-  it('warns about a package.json it cannot read and keeps the window’s modules', async () => {
+  it('warns about a package.json it cannot read and drops the window’s modules', async () => {
     const { documents, loadGist } = await setup();
     documents.setFiddleModules(W, { lodash: '^4.17.0' });
     loadGist.mockResolvedValue(gistResult({ 'main.js': 'm', 'package.json': '{nope' }));
 
     await documents.loadGistIn(W, ID);
 
-    expect(documents.getFiddle(W).modules).toEqual({ lodash: '^4.17.0' });
+    expect(documents.getFiddle(W).modules).toEqual({});
     expect(messageBox).toHaveBeenCalledWith(
       W,
       expect.objectContaining({ message: 'loadWarnings', detail: 'warnPackageJson' }),

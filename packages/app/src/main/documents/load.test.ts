@@ -17,10 +17,7 @@ import {
   saveToFolder,
 } from './load';
 
-const current = {
-  version: { kind: 'release', version: '30.0.0' } as const,
-  modules: { lodash: '^4.0.0' },
-};
+const current = { version: { kind: 'release', version: '30.0.0' } as const };
 
 function gist(files: Record<string, string>): GistLoadResult {
   return {
@@ -138,7 +135,7 @@ describe('fiddleFromGist', () => {
     ]);
   });
 
-  it('warns about an invalid package.json and keeps the previous modules', async () => {
+  it('warns about an invalid package.json and takes no modules from it', async () => {
     const loaded = await fiddleFromGist(
       gist({ 'main.js': '', 'package.json': '{nope' }),
       {
@@ -147,7 +144,7 @@ describe('fiddleFromGist', () => {
       },
     );
     expect(loaded.warnings).toEqual([{ kind: 'invalid-package-json' }]);
-    expect(loaded.fiddle.modules).toEqual(current.modules);
+    expect(loaded.fiddle.modules).toEqual({});
   });
 });
 
@@ -182,7 +179,7 @@ describe('folders', () => {
     expect(loaded.fiddle.source).toEqual({ localPath: dir });
     expect(loaded.name).toBe(path.basename(dir));
     expect(loaded.warnings).toEqual([{ kind: 'invalid-package-json' }]);
-    expect(loaded.fiddle.modules).toEqual(current.modules);
+    expect(loaded.fiddle.modules).toEqual({});
     expect(loaded.fiddle.version).toEqual(current.version);
   });
 
