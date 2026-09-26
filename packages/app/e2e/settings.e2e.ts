@@ -52,7 +52,7 @@ describe('settings', () => {
       gistPublishAsRevision: true,
       gistVisibility: 'secret',
       gistShowHistory: true,
-      sessionRestore: true,
+      sessionRestore: false,
     });
     await open('Execution');
     expect(await states(role('switch', 'Clear the console on every run'))).not.toContain(
