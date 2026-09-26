@@ -66,6 +66,15 @@ describe('formatEntry', () => {
       self: '[circular]',
     });
   });
+
+  it('takes a message that is not a string', () => {
+    const error = new Error(`EROFS at ${home}/x`);
+    expect(
+      JSON.parse(formatEntry('info', error as unknown as string, [])).msg,
+    ).toMatchObject({
+      message: 'EROFS at ~/x',
+    });
+  });
 });
 
 describe('formatEntry errors and shared objects', () => {

@@ -101,6 +101,28 @@ describe('startUpdates', () => {
     expect(mocks.quitAndInstall).toHaveBeenCalledOnce();
   });
 
+  it('logs everything the updater passes, errors included', async () => {
+    const { log } = await import('../log');
+    setPlatform('darwin');
+    startUpdates();
+    await vi.advanceTimersByTimeAsync(10_000);
+    const [{ logger }] = mocks.updateElectronApp.mock.lastCall as [
+      { logger: { log: (...details: unknown[]) => void } },
+    ];
+    const error = new Error('Cannot update while running on a read-only volume');
+    logger.log(error);
+    logger.log(
+      'feedURL',
+      'https://update.electronjs.org/electron/fiddle/darwin-arm64/1.2.3',
+    );
+    expect(log.info).toHaveBeenCalledWith('updater', error);
+    expect(log.info).toHaveBeenLastCalledWith(
+      'updater',
+      'feedURL',
+      'https://update.electronjs.org/electron/fiddle/darwin-arm64/1.2.3',
+    );
+  });
+
   describe('Linux', () => {
     beforeEach(() => setPlatform('linux'));
 
