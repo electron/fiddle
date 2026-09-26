@@ -276,6 +276,25 @@ describe('workspace', () => {
     await app().query(role('tab', 'renderer.js', { timeout: 10_000 }));
   });
 
+  it('shows hover annotations in the editor', async () => {
+    await app().click(role('tab', /^main\.js\b/));
+    await app().query(role('tabpanel', 'main.js'));
+    await app().click(role('code'));
+    // Onto `BrowserWindow` in line 2, `const { app, BrowserWindow } = ...`, with keys that
+    // move the same on every platform, then Monaco's "Show hover" chord.
+    for (const key of [
+      'PageUp',
+      'ArrowDown',
+      'Home',
+      ...Array<string>(14).fill('ArrowRight'),
+    ])
+      await app().press(key);
+    await app().press('CmdOrCtrl+K');
+    await app().press('CmdOrCtrl+I');
+    await app().query(role('tooltip', /BrowserWindow/, { timeout: 10_000 }));
+    await app().press('Escape');
+  });
+
   it('focuses the window that already has a folder open', async () => {
     const dir = makeFolder(app(), 'shared', { 'main.js': '// shared\n' });
     await app().queueDialog('open', { filePaths: [dir] });

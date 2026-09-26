@@ -14,6 +14,8 @@ const trustedTypesPolicies: readonly string[] = [
   'standaloneColorizer',
   'stickyScrollViewLayer',
   'tokenizeToString',
+  // Monaco's bundled DOMPurify, which renders hover and suggestion markdown.
+  'dompurify',
   // Creates Monaco's workers from bundled URLs.
   'fiddleMonacoWorker',
 ];
