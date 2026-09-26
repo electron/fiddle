@@ -6,7 +6,6 @@ import { documentsApi } from '../../../ipc/renderer';
 import {
   Button,
   confirmDialog,
-  IconButton,
   Menu,
   MenuItem,
   MenuPopover,
@@ -19,12 +18,6 @@ import { useBadges } from '../../editor/diagnostics';
 import { renameFile as renameFileInEditor } from '../../editor/editor-state';
 import { toastError } from '../../toast-error';
 import { PackagesSection } from '../packages/PackagesSection';
-import {
-  groupByProcess,
-  PROCESS_ORDER,
-  suggestFileName,
-  type FileProcess,
-} from '../../shell/processes';
 import styles from './Sidebar.module.css';
 
 /** Past this many files the sidebar offers a filter field. */
@@ -59,24 +52,20 @@ export function Sidebar({
   const [filter, setFilter] = useState('');
   const [menu, setMenu] = useState<MenuState | null>(null);
   const anchor = useRef<HTMLSpanElement>(null);
-  const names = files.map((file) => file.name);
   // The filter field is there only past the threshold, so a leftover filter mustn't keep hiding files.
   const query = files.length > FILTER_THRESHOLD ? filter.trim().toLowerCase() : '';
   const shown = query
     ? files.filter((file) => file.name.toLowerCase().includes(query))
     : files;
-  const groups = groupByProcess(shown);
 
   const fail = (error: unknown) => toastError(error, t('fileChangeFailed'));
 
-  // From a group head the prompt starts with a free name for the group; the name typed still decides the group.
-  const addFile = async (group?: FileProcess) => {
+  const addFile = async () => {
     const name = (
       await promptDialog({
         title: t('addFileTitle'),
-        message: group ? t(`groupHint.${group}`) : t('fileNameHint'),
+        message: t('fileNameHint'),
         label: t('fileName'),
-        defaultValue: group ? suggestFileName(group, names) : undefined,
         confirmLabel: t('create'),
         cancelLabel: t('cancel'),
       })
@@ -142,6 +131,7 @@ export function Sidebar({
       onContextMenu={onContextMenu}
       data-tour="sidebar"
     >
+      <h2 className={styles.head}>{t('files')}</h2>
       {files.length > FILTER_THRESHOLD && (
         <TextField
           className={styles.search}
@@ -154,48 +144,25 @@ export function Sidebar({
           onChange={setFilter}
         />
       )}
-      {PROCESS_ORDER.map((process) => {
-        const group = groups[process];
-        // Main, Preload and Renderer always show, so a file can be added to an
-        // empty one; Other only lists what it has, and a filter hides empty groups.
-        if (group.length === 0 && (process === 'other' || query)) return null;
-        const label = t(`process.${process}`);
-        const addLabel = t(`addFileIn.${process}`);
-        return (
-          <section key={process} className={styles.section}>
-            <div className={styles.header}>
-              <h2 className={styles.head}>{label}</h2>
-              <IconButton
-                icon="plus"
-                size="sm"
-                label={addLabel}
-                tooltip
-                className={styles.groupAdd}
-                onPress={() => void addFile(process)}
-              />
-            </div>
-            {group.length > 0 && (
-              <Tree
-                aria-label={label}
-                value={group.some((file) => file.name === activeFile) ? activeFile : null}
-                onChange={onOpen}
-              >
-                {group.map((file) => (
-                  <TreeRow
-                    key={file.name}
-                    id={file.name}
-                    label={file.name}
-                    labelDir="ltr"
-                    pill={badge(file.name)?.label}
-                    pillTone={badge(file.name)?.tone}
-                    unsaved={dirtyFiles.includes(file.name) ? t('unsaved') : undefined}
-                  />
-                ))}
-              </Tree>
-            )}
-          </section>
-        );
-      })}
+      {shown.length > 0 && (
+        <Tree
+          aria-label={t('files')}
+          value={shown.some((file) => file.name === activeFile) ? activeFile : null}
+          onChange={onOpen}
+        >
+          {shown.map((file) => (
+            <TreeRow
+              key={file.name}
+              id={file.name}
+              label={file.name}
+              labelDir="ltr"
+              pill={badge(file.name)?.label}
+              pillTone={badge(file.name)?.tone}
+              unsaved={dirtyFiles.includes(file.name) ? t('unsaved') : undefined}
+            />
+          ))}
+        </Tree>
+      )}
       <Button
         className={styles.add}
         variant="ghost"

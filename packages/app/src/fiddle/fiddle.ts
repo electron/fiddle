@@ -31,7 +31,7 @@ export interface FiddleSource {
 
 export interface Fiddle {
   /**
-   * The key order is the display order (tabs, and the sidebar within a process):
+   * The key order is the display order (tabs and the sidebar):
    * `sortFileNames` order when created, then as the user arranges the tabs (`moveFile`).
    */
   files: FileMap;
