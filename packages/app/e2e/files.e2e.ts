@@ -95,57 +95,20 @@ describe('files', () => {
       .map(([line]) => line);
   };
 
-  it('groups files by name under Main, Preload and Renderer, and shows Other only when it has files', async () => {
-    await app().query(role('heading', 'Main'));
-    await app().query(role('heading', 'Preload'));
-    await app().query(role('heading', 'Renderer'));
-    // Only template files are left, and none of them is an Other file.
-    await app().waitForAbsent(role('heading', 'Other'));
-
-    // A JSON file belongs to no process: it opens the Other group.
+  it('lists files in one flat list, in fiddle order', async () => {
+    await app().query(role('heading', 'Files'));
     await addFile('data.json');
     await app().press('Enter');
-    await app().query(role('heading', 'Other'));
     await app().query(role('row', 'data.json'));
     const expected = [
-      'heading "Main"',
+      'heading "Files"',
       'row "main.js"',
-      'heading "Preload"',
-      'row "preload.js"',
-      'heading "Renderer"',
+      'row "renderer.js"',
       'row "index.html"',
-      'heading "Other"',
+      'row "preload.js"',
       'row "data.json"',
       'button "Add file"',
     ];
     expect(await snapshotOrder(expected)).toEqual(expected);
-  });
-
-  it('adds a file from a group head, starting from a free name for the group', async () => {
-    // preload.js exists, so the Preload prompt suggests preload-2.js; Enter takes it.
-    await app().click(role('button', 'Add preload file'));
-    await app().query(role('dialog', 'New file'));
-    await app().press('Enter');
-    await app().waitForAbsent(role('dialog', 'New file'));
-    await app().query(role('tab', /^preload-2\.js\b/));
-    expect(await files()).toContainEqual({ name: 'preload-2.js', visible: true });
-    const preload = [
-      'heading "Preload"',
-      'row "preload.js"',
-      'row "preload-2.js"',
-      'heading "Renderer"',
-    ];
-    expect(await snapshotOrder(preload)).toEqual(preload);
-
-    // The typed name decides the group: a page added from Main's head lands under Renderer.
-    await app().click(role('button', 'Add main file'));
-    await app().query(role('dialog', 'New file'));
-    await app().press('CmdOrCtrl+A', role('textbox', 'File name'));
-    await app().type('about.html');
-    await app().press('Enter');
-    await expect.poll(names).toContain('about.html');
-    await app().query(role('row', 'about.html'));
-    const renderer = ['heading "Renderer"', 'row "about.html"', 'heading "Other"'];
-    expect(await snapshotOrder(renderer)).toEqual(renderer);
   });
 });

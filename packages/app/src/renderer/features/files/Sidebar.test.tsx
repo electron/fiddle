@@ -38,9 +38,7 @@ function renderSidebar(names: readonly string[] = TEMPLATE) {
   return onOpen;
 }
 
-const headings = () =>
-  screen.getAllByRole('heading').map((heading) => heading.textContent);
-const group = (key: string) => screen.getByRole('treegrid', { name: key });
+const list = () => screen.getByRole('treegrid', { name: 'files' });
 const nameField = async () =>
   (await screen.findByRole('textbox', { name: 'fileName' })) as HTMLInputElement;
 
@@ -48,45 +46,27 @@ beforeEach(() => {
   vi.clearAllMocks();
 });
 
-describe('Sidebar groups', () => {
-  it('always shows Main, Preload and Renderer, and Other only when it has files', () => {
-    renderSidebar(['main.js']);
-    expect(headings()).toEqual(['process.main', 'process.preload', 'process.renderer']);
-    // An empty group is its head and add button, without an empty tree.
-    expect(screen.queryByRole('treegrid', { name: 'process.preload' })).toBeNull();
-    expect(screen.getByRole('button', { name: 'addFileIn.preload' })).toBeTruthy();
-  });
-
-  it('lists helpers, pages and everything else under their groups', () => {
-    renderSidebar([...TEMPLATE, 'main-menu.js', 'styles.css', 'data.json', 'utils.js']);
-    expect(headings()).toEqual([
-      'process.main',
-      'process.preload',
-      'process.renderer',
-      'process.other',
+describe('Sidebar list', () => {
+  it('lists every file in one flat list, in fiddle order', () => {
+    renderSidebar([...TEMPLATE, 'main-menu.js', 'styles.css', 'data.json']);
+    expect(screen.getAllByRole('heading').map((heading) => heading.textContent)).toEqual([
+      'files',
     ]);
     expect(
-      within(group('process.main')).getByRole('row', { name: /main-menu\.js/ }),
-    ).toBeTruthy();
-    expect(
-      within(group('process.renderer')).getByRole('row', { name: /styles\.css/ }),
-    ).toBeTruthy();
-    const other = group('process.other');
-    expect(within(other).getByRole('row', { name: /data\.json/ })).toBeTruthy();
-    expect(within(other).getByRole('row', { name: /utils\.js/ })).toBeTruthy();
+      within(list())
+        .getAllByRole('row')
+        .map((row) => row.dataset.key),
+    ).toEqual([...TEMPLATE, 'main-menu.js', 'styles.css', 'data.json']);
   });
 });
 
 describe('Sidebar context menu', () => {
   it('opens for the row under the pointer and acts on its file', async () => {
     renderSidebar();
-    fireEvent.contextMenu(
-      within(group('process.renderer')).getByRole('row', { name: /index\.html/ }),
-      {
-        clientX: 40,
-        clientY: 60,
-      },
-    );
+    fireEvent.contextMenu(within(list()).getByRole('row', { name: /index\.html/ }), {
+      clientX: 40,
+      clientY: 60,
+    });
     fireEvent.click(await screen.findByRole('menuitem', { name: 'rename' }));
     expect((await nameField()).value).toBe('index.html');
     fireEvent.click(screen.getByRole('button', { name: 'cancel' }));
@@ -182,48 +162,30 @@ describe('Sidebar filter', () => {
     // A smaller fiddle has no filter field, so nothing may stay hidden by the old text.
     rerender(sidebar(TEMPLATE));
     expect(screen.queryByRole('textbox', { name: 'filterFiles' })).toBeNull();
-    expect(headings()).toEqual(['process.main', 'process.preload', 'process.renderer']);
     expect(screen.getByRole('row', { name: /renderer\.js/ })).toBeTruthy();
     expect(screen.getByRole('row', { name: /main\.js/ })).toBeTruthy();
   });
 });
 
-describe('Sidebar add in group', () => {
-  it("opens the prompt with the group's hint and a free name, and adds it", async () => {
+describe('Sidebar add file', () => {
+  it('adds the trimmed name and opens it', async () => {
     const onOpen = renderSidebar();
-    fireEvent.click(screen.getByRole('button', { name: 'addFileIn.preload' }));
-    expect((await nameField()).value).toBe('preload-2.js');
-    expect(screen.getByText('groupHint.preload')).toBeTruthy();
-    fireEvent.click(screen.getByRole('button', { name: 'create' }));
-    await waitFor(() =>
-      expect(mocks.documentsApi.AddFile).toHaveBeenCalledWith('preload-2.js'),
-    );
-    await waitFor(() => expect(onOpen).toHaveBeenCalledWith('preload-2.js'));
-  });
-
-  it('suggests a helper name for Main and takes a typed name from another group', async () => {
-    renderSidebar();
-    fireEvent.click(screen.getByRole('button', { name: 'addFileIn.main' }));
+    fireEvent.click(screen.getByRole('button', { name: 'addFile' }));
     const input = await nameField();
-    expect(input.value).toBe('main-2.js');
-    fireEvent.change(input, { target: { value: 'about.html' } });
+    expect(input.value).toBe('');
+    expect(screen.getByText('fileNameHint')).toBeTruthy();
+    fireEvent.change(input, { target: { value: ' about.html ' } });
     fireEvent.click(screen.getByRole('button', { name: 'create' }));
     await waitFor(() =>
       expect(mocks.documentsApi.AddFile).toHaveBeenCalledWith('about.html'),
     );
+    await waitFor(() => expect(onOpen).toHaveBeenCalledWith('about.html'));
   });
 
-  it('starts empty for Other, and the generic Add file keeps the extension hint', async () => {
-    renderSidebar([...TEMPLATE, 'data.json']);
-    fireEvent.click(screen.getByRole('button', { name: 'addFileIn.other' }));
-    expect((await nameField()).value).toBe('');
-    expect(screen.getByText('groupHint.other')).toBeTruthy();
-    fireEvent.click(screen.getByRole('button', { name: 'cancel' }));
-    await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull());
-
+  it('adds nothing when cancelled', async () => {
+    renderSidebar();
     fireEvent.click(screen.getByRole('button', { name: 'addFile' }));
-    expect((await nameField()).value).toBe('');
-    expect(screen.getByText('fileNameHint')).toBeTruthy();
+    await nameField();
     // The prompt outlives the component (one DialogHost per window), so close it.
     fireEvent.click(screen.getByRole('button', { name: 'cancel' }));
     await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull());
@@ -234,10 +196,8 @@ describe('Sidebar add in group', () => {
     const refusal = new Error('Zweite Hauptdatei');
     mocks.documentsApi.AddFile.mockRejectedValueOnce(refusal);
     const onOpen = renderSidebar();
-    fireEvent.click(screen.getByRole('button', { name: 'addFileIn.renderer' }));
-    const input = await nameField();
-    expect(input.value).toBe('renderer-2.js');
-    fireEvent.change(input, { target: { value: 'main.mjs' } });
+    fireEvent.click(screen.getByRole('button', { name: 'addFile' }));
+    fireEvent.change(await nameField(), { target: { value: 'main.mjs' } });
     fireEvent.click(screen.getByRole('button', { name: 'create' }));
     await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull());
     expect(mocks.documentsApi.AddFile).toHaveBeenCalledWith('main.mjs');

@@ -1,13 +1,4 @@
-import { assertCanAddFile } from '../../fiddle/files';
-
 export type FileProcess = 'main' | 'preload' | 'renderer' | 'other';
-
-export const PROCESS_ORDER: readonly FileProcess[] = [
-  'main',
-  'preload',
-  'renderer',
-  'other',
-];
 
 /** The groups a script's name can claim, in matching order. */
 const NAMED_GROUPS = ['main', 'preload', 'renderer'] as const;
@@ -26,45 +17,6 @@ export function processOf(name: string): FileProcess {
   const stem = SCRIPT_RE.exec(lower)?.[1];
   if (stem === undefined) return 'other';
   return NAMED_GROUPS.find((group) => claims(stem, group)) ?? 'other';
-}
-
-/** Groups files by process, keeping their order. Every process is present, possibly empty. */
-export function groupByProcess<T extends { name: string }>(
-  files: readonly T[],
-): Record<FileProcess, T[]> {
-  const groups: Record<FileProcess, T[]> = {
-    main: [],
-    preload: [],
-    renderer: [],
-    other: [],
-  };
-  for (const file of files) groups[processOf(file.name)].push(file);
-  return groups;
-}
-
-function canAdd(existing: readonly string[], name: string): boolean {
-  try {
-    assertCanAddFile(existing, name);
-    return true;
-  } catch {
-    return false;
-  }
-}
-
-/**
- * The name an "add file" prompt starts with: the group's own (`preload.js`), or the first free `preload-2.js`,
- * `preload-3.js`, … when the file rules refuse that. `other` has no convention, so its prompt starts empty.
- */
-export function suggestFileName(
-  process: FileProcess,
-  existing: readonly string[],
-): string {
-  if (process === 'other') return '';
-  if (canAdd(existing, `${process}.js`)) return `${process}.js`;
-  for (let n = 2; ; n += 1) {
-    const name = `${process}-${n}.js`;
-    if (canAdd(existing, name)) return name;
-  }
 }
 
 /**

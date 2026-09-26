@@ -31,7 +31,7 @@ d launch                                 # builds the test build (~3 s) and star
 d wait-idle
 d screenshot /tmp/01.png                 # capturePage: vibrancy areas render white
 d snapshot > /tmp/01-a11y.txt            # role "name" tree; use it to find targets
-d click button "Add preload file"        # role + accessible name (regex: "/^Electron [0-9]/")
+d click button "Add file"                # role + accessible name (regex: "/^Electron [0-9]/")
 d eval "JSON.stringify(document.querySelector('input')?.value)"
 d press Escape
 d run-command view.toggleSplit           # any command ID from src/shared/commands.ts
