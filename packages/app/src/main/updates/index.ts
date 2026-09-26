@@ -42,11 +42,12 @@ function startAutoUpdates(): void {
       host: UPDATE_SERVICE,
     },
     updateInterval: '1 hour',
+    // Typed `(message: string)`, but called with several arguments and with an `Error` alone.
     logger: {
-      log: (message) => log.info(message),
-      info: (message) => log.info(message),
-      warn: (message) => log.warn(message),
-      error: (message) => log.error(message),
+      log: (...details: unknown[]) => log.info('updater', ...details),
+      info: (...details: unknown[]) => log.info('updater', ...details),
+      warn: (...details: unknown[]) => log.warn('updater', ...details),
+      error: (...details: unknown[]) => log.error('updater', ...details),
     },
     notifyUser: true,
     onNotifyUser: () => void promptRestart(),

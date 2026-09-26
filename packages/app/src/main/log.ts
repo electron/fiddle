@@ -35,7 +35,8 @@ export function formatEntry(
     t: now.toISOString(),
     level,
     process: source,
-    msg: redact(message),
+    // A JavaScript caller (a library's logger hook) may pass anything: the logger must never throw.
+    msg: typeof message === 'string' ? redact(message) : scrubValue(message, redact),
     ...(details.length
       ? { details: details.map((detail) => scrubValue(detail, redact)) }
       : {}),
