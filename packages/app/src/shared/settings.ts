@@ -96,7 +96,7 @@ export const settingsSchema = z.object({
     .string()
     .regex(/^(system|[a-zA-Z]{2,3}(-[a-zA-Z0-9]{2,8})*)$/)
     .default('system'),
-  sessionRestore: z.boolean().default(true),
+  sessionRestore: z.boolean().default(false),
   notifications: z.boolean().default(true),
 
   // Editor font: empty or null means Lucent's default.

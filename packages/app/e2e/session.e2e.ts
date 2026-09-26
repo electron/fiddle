@@ -13,6 +13,10 @@ describe('session', () => {
     let second: FiddleApp | undefined;
     try {
       first = await launchApp({ fixtures, keepArtifacts: true });
+      // Session restore is off by default.
+      await first.click(role('button', 'Settings'));
+      await first.click(role('switch', 'Restore windows on launch'));
+      await first.click(role('button', 'Close settings'));
       await first.click(role('button', /^Electron 44\.3\.0\b/));
       await first.click(role('option', /^Electron 43\.7\.0\b/));
       await expect

@@ -72,7 +72,7 @@ describe('schema and defaults', () => {
       appearance: 'system',
       theme: 'lucent',
       locale: 'system',
-      sessionRestore: true,
+      sessionRestore: false,
       channels: ['stable', 'beta'],
       showNotDownloaded: true,
       showObsolete: false,
