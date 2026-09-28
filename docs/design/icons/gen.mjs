@@ -172,12 +172,21 @@ const cubic = (p0, p1, p2, p3) => (t) => {
 };
 // The f: top hook, stem and bottom hook as one centreline, swept with a half-width that eases
 // from `hair` at the eyes to `swell` in the stem, plus the two eyes and the two nicks at the waist.
+// Each hook wraps over its eye and meets it along the rim, as on a violin, not through the centre:
+// the line's end sits `hair` inside the rim, travelling along it, so its outer edge is the circle.
 function fHole({ nicks = true, hair = 12, swell = 32, eye = 0 } = {}) {
-  const eyeTop = [538, 207], eyeBot = [205, 690], top = [442, 218], bot = [352, 692];
+  const eyeTop = [538, 207], eyeBot = [205, 690], rTop = 47 + eye, rBot = 54 + eye;
+  const top = [442, 218], bot = [352, 692];
+  // Each hook's end point on its eye, by angle, and its handle along the rim.
+  const rim = ([cx, cy], r, deg) => {
+    const a = (deg * Math.PI) / 180, e = [cx + (r - hair) * Math.cos(a), cy + (r - hair) * Math.sin(a)];
+    return [e, [e[0] + 95 * Math.sin(a), e[1] - 95 * Math.cos(a)]];
+  };
+  const [eTop, hTop] = rim(eyeTop, rTop, -10), [eBot, hBot] = rim(eyeBot, rBot, 170);
   const segs = [
-    cubic(eyeTop, [542, 138], [446, 118], top),
+    cubic(eTop, hTop, [464, 120], top),
     cubic(top, [428, 300], [382, 560], bot),
-    cubic(bot, [336, 768], [228, 790], [197, 696]),
+    cubic(bot, [336, 768], hBot, eBot),
   ];
   const pts = segs.flatMap((f, k) => Array.from({ length: 81 }, (_, i) => ({ p: f(i / 80), t: i / 80, stem: k === 1 })).slice(k ? 1 : 0));
   const cum = [0];
@@ -201,8 +210,8 @@ function fHole({ nicks = true, hair = 12, swell = 32, eye = 0 } = {}) {
   };
   return `<path d="M${L.map(xy).join('L')}L${R.reverse().map(xy).join('L')}Z" fill="url(#ink)"/>
     ${nicks ? `<path d="${nick(1, -26)}${nick(-1, 26)}" fill="url(#ink)"/>` : ''}
-    <circle cx="${eyeTop[0]}" cy="${eyeTop[1]}" r="${47 + eye}" fill="url(#ink)"/>
-    <circle cx="${eyeBot[0]}" cy="${eyeBot[1]}" r="${54 + eye}" fill="url(#ink)"/>`;
+    <circle cx="${eyeTop[0]}" cy="${eyeTop[1]}" r="${rTop}" fill="url(#ink)"/>
+    <circle cx="${eyeBot[0]}" cy="${eyeBot[1]}" r="${rBot}" fill="url(#ink)"/>`;
 }
 // `small` is for 32px and below: no hint dashes or nicks, everything heavier, and the mark a little larger.
 function atomF({ small = false } = {}) {
