@@ -221,9 +221,9 @@ function atomF({ small = false } = {}) {
   const dash = (rot, t0, t1) => (small ? '' : arc(rot, t0, t1));
   const [ex, ey] = arcPoints(28, 0.106, 0.106, 1)[0];
   const art = `
-    ${arc(28, 0.322, 0.631)}${arc(28, 0.681, 0.813)}${arc(28, 0.852, 1.106)}${dash(28, 0.14, 0.156)}
-    ${arc(-32, 0.805, 1.326)}${dash(-32, 0.58, 0.66)}
-    ${arc(90, 0.8, 1.17)}${dash(90, 0.614, 0.64)}
+    ${arc(28, 0.322, 0.631)}${arc(28, 0.705, 0.813)}${arc(28, 0.852, 1.106)}${dash(28, 0.14, 0.156)}
+    ${arc(-32, 0.805, 1.326)}${dash(-32, 0.605, 0.66)}
+    ${arc(90, 0.8, 1.155)}${dash(90, 0.614, 0.64)}
     <circle cx="${ex.toFixed(1)}" cy="${ey.toFixed(1)}" r="${small ? 60 : 52}" fill="url(#ink)"/>
     <circle cx="${NUC[0]}" cy="${NUC[1]}" r="${small ? 48 : 38}" fill="url(#nucleus)"/>
     ${small ? fHole({ nicks: false, hair: 19, swell: 42, eye: 8 }) : fHole()}`;
