@@ -154,7 +154,7 @@ const Cdir = {
 
 // --- Direction F: the original orange disc, Electron's atom, and a violin f-hole as one of its arcs ---
 // Three orbits on one ellipse (348 by 127 about the nucleus) at 28°, -32° and 90°, each drawn
-// only in part, as open arcs. The f is one swept line, hairline at its eyes and heavy through the
+// only in part, as open arcs that stop short of the f. The f is one swept line, hairline at its eyes and heavy through the
 // stem; its top eye is the upright orbit's electron and its bottom eye the -32° orbit's.
 const NUC = [512, 522];
 function arcPoints(rot, t0, t1, n = 120) {
