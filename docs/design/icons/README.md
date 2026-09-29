@@ -8,7 +8,7 @@ Each icon is drawn per platform:
 - **Windows:** F keeps the original's round disc, edge to edge. C and A have no backplate: the object is the icon.
 - **Linux:** a GNOME-style tile with a darker base edge.
 
-At 32px and below, F and C use a simpler drawing (`*-small.svg`): F drops its hint dashes and nicks and draws everything heavier and a little larger, C keeps two thick code lines and a bigger Run capsule.
+At 32px and below, F and C use a simpler drawing (`*-small.svg`): F drops the short arc over the bottom eye and the nicks and draws everything heavier and a little larger, C keeps two thick code lines and a bigger Run capsule.
 
 ## Rebuild
 

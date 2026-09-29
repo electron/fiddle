@@ -215,17 +215,17 @@ function fHole({ nicks = true, hair = 12, swell = 32, eye = 0 } = {}) {
     <circle cx="${eyeTop[0]}" cy="${eyeTop[1]}" r="${rTop}" fill="url(#ink)"/>
     <circle cx="${eyeBot[0]}" cy="${eyeBot[1]}" r="${rBot}" fill="url(#ink)"/>`;
 }
-// `small` is for 32px and below: no hint dashes or nicks, everything heavier, and the mark a little larger.
+// `small` is for 32px and below: no short arc over the bottom eye and no nicks, everything heavier, and the mark a little larger.
 function atomF({ small = false } = {}) {
   const w = small ? 46 : 28;
   const arc = (rot, t0, t1) =>
     `<path d="M${arcPoints(rot, t0, t1).map(xy).join('L')}" fill="none" stroke="url(#ink)" stroke-width="${w}" stroke-linecap="round"/>`;
   const dash = (rot, t0, t1) => (small ? '' : arc(rot, t0, t1));
-  const [ex, ey] = arcPoints(28, 0.06, 0.06, 1)[0];
+  const [ex, ey] = arcPoints(28, 0.106, 0.106, 1)[0];
   const art = `
-    ${arc(28, 0.3277, 0.636)}${arc(28, 0.7045, 0.8151)}${arc(28, 0.8663, 1.06)}${dash(28, 0.1234, 0.1368)}
+    ${arc(28, 0.3277, 0.636)}${arc(28, 0.7045, 0.8151)}${arc(28, 0.8663, 1.106)}
     ${arc(-32, 0.8128, 1.3187)}${dash(-32, 0.6008, 0.6337)}
-    ${arc(90, 0.8122, 1.1533)}${dash(90, 0.6163, 0.6304)}
+    ${arc(90, 0.8122, 1.1533)}
     <circle cx="${ex.toFixed(1)}" cy="${ey.toFixed(1)}" r="${small ? 60 : 52}" fill="url(#ink)"/>
     <circle cx="${NUC[0]}" cy="${NUC[1]}" r="${small ? 48 : 38}" fill="url(#nucleus)"/>
     ${small ? fHole({ nicks: false, hair: 19, swell: 42, eye: 8 }) : fHole()}`;
