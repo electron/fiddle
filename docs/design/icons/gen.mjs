@@ -154,11 +154,12 @@ const Cdir = {
 
 // --- Direction F: the original orange disc, Electron's atom, and a violin f-hole as one of its arcs ---
 // Three orbits on one ellipse (348 by 127 about the nucleus) at 28°, -32° and 90°, each drawn
-// only in part, as open arcs that stop short of the f. The f is one swept line, hairline at its
-// eyes and heavy through the stem; its top eye is the upright orbit's electron and its bottom eye
-// the -32° orbit's.
+// only in part, as open arcs. Wherever an arc stops (for the f, an eye, the electron, or an arc it
+// passes under) it leaves the same 20 units of air, edge to edge; the t values below are solved
+// for that. The f is one swept line, hairline at its eyes and heavy through the stem; its top eye
+// is the upright orbit's electron and its bottom eye the -32° orbit's.
 const NUC = [512, 522];
-function arcPoints(rot, t0, t1, n = 120) {
+function arcPoints(rot, t0, t1, n = Math.max(8, Math.round(Math.abs(t1 - t0) * 400))) {
   const r = (rot * Math.PI) / 180, cs = Math.cos(r), sn = Math.sin(r);
   return Array.from({ length: n + 1 }, (_, i) => {
     const t = (t0 + ((t1 - t0) * i) / n) * 2 * Math.PI;
@@ -220,11 +221,11 @@ function atomF({ small = false } = {}) {
   const arc = (rot, t0, t1) =>
     `<path d="M${arcPoints(rot, t0, t1).map(xy).join('L')}" fill="none" stroke="url(#ink)" stroke-width="${w}" stroke-linecap="round"/>`;
   const dash = (rot, t0, t1) => (small ? '' : arc(rot, t0, t1));
-  const [ex, ey] = arcPoints(28, 0.106, 0.106, 1)[0];
+  const [ex, ey] = arcPoints(28, 0.06, 0.06, 1)[0];
   const art = `
-    ${arc(28, 0.33, 0.631)}${arc(28, 0.705, 0.813)}${arc(28, 0.852, 1.106)}${dash(28, 0.14, 0.156)}
-    ${arc(-32, 0.805, 1.326)}${dash(-32, 0.605, 0.66)}
-    ${arc(90, 0.8, 1.15)}${dash(90, 0.622, 0.645)}
+    ${arc(28, 0.3277, 0.636)}${arc(28, 0.7045, 0.8151)}${arc(28, 0.8663, 1.06)}${dash(28, 0.1234, 0.1368)}
+    ${arc(-32, 0.8128, 1.3187)}${dash(-32, 0.6008, 0.6337)}
+    ${arc(90, 0.8122, 1.1533)}${dash(90, 0.6163, 0.6304)}
     <circle cx="${ex.toFixed(1)}" cy="${ey.toFixed(1)}" r="${small ? 60 : 52}" fill="url(#ink)"/>
     <circle cx="${NUC[0]}" cy="${NUC[1]}" r="${small ? 48 : 38}" fill="url(#nucleus)"/>
     ${small ? fHole({ nicks: false, hair: 19, swell: 42, eye: 8 }) : fHole()}`;
