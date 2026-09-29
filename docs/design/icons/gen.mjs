@@ -154,8 +154,9 @@ const Cdir = {
 
 // --- Direction F: the original orange disc, Electron's atom, and a violin f-hole as one of its arcs ---
 // Three orbits on one ellipse (348 by 127 about the nucleus) at 28°, -32° and 90°, each drawn
-// only in part, as open arcs. The f is one swept line, hairline at its eyes and heavy through the
-// stem; its top eye is the upright orbit's electron and its bottom eye the -32° orbit's.
+// only in part, as open arcs that stop short of the f. The f is one swept line, hairline at its
+// eyes and heavy through the stem; its top eye is the upright orbit's electron and its bottom eye
+// the -32° orbit's.
 const NUC = [512, 522];
 function arcPoints(rot, t0, t1, n = 120) {
   const r = (rot * Math.PI) / 180, cs = Math.cos(r), sn = Math.sin(r);
@@ -172,12 +173,21 @@ const cubic = (p0, p1, p2, p3) => (t) => {
 };
 // The f: top hook, stem and bottom hook as one centreline, swept with a half-width that eases
 // from `hair` at the eyes to `swell` in the stem, plus the two eyes and the two nicks at the waist.
+// Each hook wraps over its eye and meets it along the rim, as on a violin, not through the centre:
+// the line's end sits `hair` inside the rim, travelling along it, so its outer edge is the circle.
 function fHole({ nicks = true, hair = 12, swell = 32, eye = 0 } = {}) {
-  const eyeTop = [538, 207], eyeBot = [205, 690], top = [442, 218], bot = [352, 692];
+  const eyeTop = [538, 207], eyeBot = [205, 690], rTop = 47 + eye, rBot = 54 + eye;
+  const top = [442, 218], bot = [352, 692];
+  // Each hook's end point on its eye, by angle, and its handle along the rim.
+  const rim = ([cx, cy], r, deg) => {
+    const a = (deg * Math.PI) / 180, e = [cx + (r - hair) * Math.cos(a), cy + (r - hair) * Math.sin(a)];
+    return [e, [e[0] + 95 * Math.sin(a), e[1] - 95 * Math.cos(a)]];
+  };
+  const [eTop, hTop] = rim(eyeTop, rTop, -10), [eBot, hBot] = rim(eyeBot, rBot, 170);
   const segs = [
-    cubic(eyeTop, [542, 138], [446, 118], top),
+    cubic(eTop, hTop, [464, 120], top),
     cubic(top, [428, 300], [382, 560], bot),
-    cubic(bot, [336, 768], [228, 790], [197, 696]),
+    cubic(bot, [336, 768], hBot, eBot),
   ];
   const pts = segs.flatMap((f, k) => Array.from({ length: 81 }, (_, i) => ({ p: f(i / 80), t: i / 80, stem: k === 1 })).slice(k ? 1 : 0));
   const cum = [0];
@@ -201,8 +211,8 @@ function fHole({ nicks = true, hair = 12, swell = 32, eye = 0 } = {}) {
   };
   return `<path d="M${L.map(xy).join('L')}L${R.reverse().map(xy).join('L')}Z" fill="url(#ink)"/>
     ${nicks ? `<path d="${nick(1, -26)}${nick(-1, 26)}" fill="url(#ink)"/>` : ''}
-    <circle cx="${eyeTop[0]}" cy="${eyeTop[1]}" r="${47 + eye}" fill="url(#ink)"/>
-    <circle cx="${eyeBot[0]}" cy="${eyeBot[1]}" r="${54 + eye}" fill="url(#ink)"/>`;
+    <circle cx="${eyeTop[0]}" cy="${eyeTop[1]}" r="${rTop}" fill="url(#ink)"/>
+    <circle cx="${eyeBot[0]}" cy="${eyeBot[1]}" r="${rBot}" fill="url(#ink)"/>`;
 }
 // `small` is for 32px and below: no hint dashes or nicks, everything heavier, and the mark a little larger.
 function atomF({ small = false } = {}) {
@@ -212,9 +222,9 @@ function atomF({ small = false } = {}) {
   const dash = (rot, t0, t1) => (small ? '' : arc(rot, t0, t1));
   const [ex, ey] = arcPoints(28, 0.106, 0.106, 1)[0];
   const art = `
-    ${arc(28, 0.322, 0.631)}${arc(28, 0.681, 0.813)}${arc(28, 0.852, 1.106)}${dash(28, 0.14, 0.156)}
-    ${arc(-32, 0.805, 1.326)}${dash(-32, 0.58, 0.66)}
-    ${arc(90, 0.8, 1.17)}${dash(90, 0.614, 0.64)}
+    ${arc(28, 0.33, 0.631)}${arc(28, 0.705, 0.813)}${arc(28, 0.852, 1.106)}${dash(28, 0.14, 0.156)}
+    ${arc(-32, 0.805, 1.326)}${dash(-32, 0.605, 0.66)}
+    ${arc(90, 0.8, 1.15)}${dash(90, 0.622, 0.645)}
     <circle cx="${ex.toFixed(1)}" cy="${ey.toFixed(1)}" r="${small ? 60 : 52}" fill="url(#ink)"/>
     <circle cx="${NUC[0]}" cy="${NUC[1]}" r="${small ? 48 : 38}" fill="url(#nucleus)"/>
     ${small ? fHole({ nicks: false, hair: 19, swell: 42, eye: 8 }) : fHole()}`;
