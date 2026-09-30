@@ -101,7 +101,7 @@
     "@vitest/coverage-v8": "5.0.1",
     "copy-webpack-plugin": "^14.0.0",
     "css-loader": "^6.7.1",
-    "electron": "^42.3.3",
+    "electron": "^42.10.0",
     "electron-devtools-installer": "^4.0.0",
     "fork-ts-checker-webpack-plugin": "^8.0.0",
     "husky": "^9.0.11",

@@ -638,7 +638,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@electron-internal/extract-zip@npm:^1.0.5":
+"@electron-internal/extract-zip@npm:^1.0.1, @electron-internal/extract-zip@npm:^1.0.5":
   version: 1.0.5
   resolution: "@electron-internal/extract-zip@npm:1.0.5"
   checksum: 10c0/d3341937dcb37097fd4927b7e5dfb7cb6b1ba56a42b00d62a55a7a9bbd093545dd8c6711ab39b321b2696d968b2cc32c29ed9d60a1fa6aa1665588e03e60d4e1
@@ -4944,7 +4944,7 @@ __metadata:
     classnames: "npm:^2.2.6"
     copy-webpack-plugin: "npm:^14.0.0"
     css-loader: "npm:^6.7.1"
-    electron: "npm:^42.3.3"
+    electron: "npm:^42.10.0"
     electron-devtools-installer: "npm:^4.0.0"
     electron-squirrel-startup: "npm:^1.0.0"
     fork-ts-checker-webpack-plugin: "npm:^8.0.0"
@@ -5114,17 +5114,17 @@ __metadata:
   languageName: node
   linkType: hard
 
-"electron@npm:^42.3.3":
-  version: 42.3.3
-  resolution: "electron@npm:42.3.3"
+"electron@npm:^42.10.0":
+  version: 42.10.0
+  resolution: "electron@npm:42.10.0"
   dependencies:
+    "@electron-internal/extract-zip": "npm:^1.0.1"
     "@electron/get": "npm:^5.0.0"
     "@types/node": "npm:^24.9.0"
-    extract-zip: "npm:^2.0.1"
   bin:
     electron: cli.js
     install-electron: install.js
-  checksum: 10c0/9fdb34c23097986e4ed9f328ec36356d78481133a17fdba78312be6dddb5e513f91e727a7802f91ff7302d86f794998085ef6fbc2c2b8ae9bc2d5f8b38711759
+  checksum: 10c0/b4d409556855f79b217541d0b348357f5f9bfce20c872aea382b537056882fb83553a6a66050ddcfa47ddd75469614f0a76033acc14e6d1d9e99c955458e2569
   languageName: node
   linkType: hard
 
