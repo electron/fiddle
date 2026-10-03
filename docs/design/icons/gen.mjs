@@ -152,95 +152,45 @@ const Cdir = {
   winSmall: `${smallSheet(40, 110, 944, 640, 'url(#navy)', 0.3)}${bigCapsule(480, 610)}`,
 };
 
-// --- Direction F: the original orange disc, Electron's atom, and a violin f-hole as one of its arcs ---
-// Three orbits on one ellipse (348 by 127 about the nucleus) at 28°, -32° and 90°, each drawn
-// only in part, as open arcs. Wherever an arc stops (for the f, an eye, the electron, or an arc it
-// passes under) it leaves the same 20 units of air, edge to edge; the t values below are solved
-// for that. The f is one swept line, hairline at its eyes and heavy through the stem; its top eye
-// is the upright orbit's electron and its bottom eye the -32° orbit's.
-const NUC = [512, 522];
-function arcPoints(rot, t0, t1, n = Math.max(8, Math.round(Math.abs(t1 - t0) * 400))) {
-  const r = (rot * Math.PI) / 180, cs = Math.cos(r), sn = Math.sin(r);
-  return Array.from({ length: n + 1 }, (_, i) => {
-    const t = (t0 + ((t1 - t0) * i) / n) * 2 * Math.PI;
-    const x = 348 * Math.cos(t), y = 127 * Math.sin(t);
-    return [NUC[0] + x * cs - y * sn, NUC[1] + x * sn + y * cs];
-  });
-}
+// --- Direction F: the f-hole atom: the original orange disc and nucleus, Electron's three orbits
+// as open white arcs, and a violin f-hole standing in for one of them, its eyes two of the electrons.
+// The white drawing is Felix's original (f-original.png), traced by trace-f.py into f-trace.json in
+// the drawing's own pixel space: the f as an outline, the eyes, electron and nucleus as circles, and
+// each arc as a centreline with its stroke width. Here the drawing's disc is mapped onto each
+// platform's body, so the mark sits in the squircle, tile and disc exactly as it sat in the original.
+const T = JSON.parse(fs.readFileSync(new URL('./f-trace.json', import.meta.url), 'utf8'));
 const xy = ([x, y]) => `${x.toFixed(1)},${y.toFixed(1)}`;
-const cubic = (p0, p1, p2, p3) => (t) => {
-  const m = 1 - t;
-  return [0, 1].map((i) => m * m * m * p0[i] + 3 * m * m * t * p1[i] + 3 * m * t * t * p2[i] + t * t * t * p3[i]);
-};
-// The f: top hook, stem and bottom hook as one centreline, swept with a half-width that eases
-// from `hair` at the eyes to `swell` in the stem, plus the two eyes and the two nicks at the waist.
-// Each hook wraps over its eye and meets it along the rim, as on a violin, not through the centre:
-// the line's end sits `hair` inside the rim, travelling along it, so its outer edge is the circle.
-function fHole({ nicks = true, hair = 12, swell = 32, eye = 0 } = {}) {
-  const eyeTop = [538, 207], eyeBot = [205, 690], rTop = 47 + eye, rBot = 54 + eye;
-  const top = [442, 218], bot = [352, 692];
-  // Each hook's end point on its eye, by angle, and its handle along the rim.
-  const rim = ([cx, cy], r, deg) => {
-    const a = (deg * Math.PI) / 180, e = [cx + (r - hair) * Math.cos(a), cy + (r - hair) * Math.sin(a)];
-    return [e, [e[0] + 95 * Math.sin(a), e[1] - 95 * Math.cos(a)]];
+// `half` is the radius the original's disc maps to. `small` is the cut for 32px and below: the two
+// hint dashes go, strokes are 1.6x, the eyes and electron 12% larger, the f a little bolder, and the
+// whole mark 8% larger.
+function atomF({ half, small = false }) {
+  const [dcx, dcy, dr] = T.disc, s = (half / dr) * (small ? 1.08 : 1);
+  const map = ([x, y]) => [512 + (x - dcx) * s, 512 + (y - dcy) * s];
+  const line = (pts) => pts.map((p) => xy(map(p))).join('L');
+  const sw = (w) => (w * s * (small ? 1.6 : 1)).toFixed(1);
+  const circle = ([cx, cy, r], fill, grow = small ? 1.12 : 1) => {
+    const [x, y] = map([cx, cy]);
+    return `<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="${(r * s * grow).toFixed(1)}" fill="${fill}"/>`;
   };
-  const [eTop, hTop] = rim(eyeTop, rTop, -10), [eBot, hBot] = rim(eyeBot, rBot, 170);
-  const segs = [
-    cubic(eTop, hTop, [464, 120], top),
-    cubic(top, [428, 300], [382, 560], bot),
-    cubic(bot, [336, 768], hBot, eBot),
-  ];
-  const pts = segs.flatMap((f, k) => Array.from({ length: 81 }, (_, i) => ({ p: f(i / 80), t: i / 80, stem: k === 1 })).slice(k ? 1 : 0));
-  const cum = [0];
-  for (let i = 1; i < pts.length; i++) cum.push(cum[i - 1] + Math.hypot(pts[i].p[0] - pts[i - 1].p[0], pts[i].p[1] - pts[i - 1].p[1]));
-  const ease = (x) => (x <= 0 ? 0 : x >= 1 ? 1 : x * x * (3 - 2 * x));
-  const L = [], R = [];
-  let waist = { d: 1 };
-  pts.forEach(({ p, t, stem }, i) => {
-    const u = cum[i] / cum[cum.length - 1];
-    const half = hair + (swell - hair) * Math.min(ease((u - 0.06) / 0.26), ease((0.94 - u) / 0.28));
-    const a = pts[Math.max(0, i - 1)].p, b = pts[Math.min(pts.length - 1, i + 1)].p;
-    const l = Math.hypot(b[0] - a[0], b[1] - a[1]) || 1, tx = (b[0] - a[0]) / l, ty = (b[1] - a[1]) / l;
-    L.push([p[0] - ty * half, p[1] + tx * half]);
-    R.push([p[0] + ty * half, p[1] - tx * half]);
-    if (stem && Math.abs(t - 0.525) < waist.d) waist = { p, tx, ty, d: Math.abs(t - 0.525) };
-  });
-  const nick = (side, along) => {
-    const { p, tx, ty } = waist, c = [p[0] + tx * along, p[1] + ty * along];
-    const q = (u, v) => xy([c[0] - ty * u + tx * v, c[1] + tx * u + ty * v]);
-    return `M${q(side * (swell - 6), -16)}L${q(side * (swell + 22), side * 6)}L${q(side * (swell - 6), 16)}Z`;
-  };
-  return `<path d="M${L.map(xy).join('L')}L${R.reverse().map(xy).join('L')}Z" fill="url(#ink)"/>
-    ${nicks ? `<path d="${nick(1, -26)}${nick(-1, 26)}" fill="url(#ink)"/>` : ''}
-    <circle cx="${eyeTop[0]}" cy="${eyeTop[1]}" r="${rTop}" fill="url(#ink)"/>
-    <circle cx="${eyeBot[0]}" cy="${eyeBot[1]}" r="${rBot}" fill="url(#ink)"/>`;
+  const arcs = T.arcs
+    .filter((a) => !small || a.len > 100)
+    .map((a) => `<path d="M${line(a.pts)}" fill="none" stroke="url(#ink)" stroke-width="${sw(a.w)}" stroke-linecap="round" stroke-linejoin="round"/>`)
+    .join('');
+  const bold = small ? ` stroke="url(#ink)" stroke-width="${sw(5)}" stroke-linejoin="round"` : '';
+  const shape = (polys) => polys.map((p) => `M${line(p)}Z`).join('');
+  const f = `<path d="${shape(T.f)}" fill="url(#ink)" fill-rule="evenodd"${bold}/><path d="${shape(T.nicks)}" fill="url(#ink)"/>`;
+  return `<rect width="1024" height="1024" fill="url(#sheen)"/>
+    ${arcs}${circle(T.electron, 'url(#ink)')}${circle(T.nucleus, 'url(#nucleus)', 1)}
+    ${f}${circle(T.eyeTop, 'url(#ink)')}${circle(T.eyeBot, 'url(#ink)')}`;
 }
-// `small` is for 32px and below: no short arc over the bottom eye and no nicks, everything heavier, and the mark a little larger.
-function atomF({ small = false } = {}) {
-  const w = small ? 46 : 28;
-  const arc = (rot, t0, t1) =>
-    `<path d="M${arcPoints(rot, t0, t1).map(xy).join('L')}" fill="none" stroke="url(#ink)" stroke-width="${w}" stroke-linecap="round"/>`;
-  const dash = (rot, t0, t1) => (small ? '' : arc(rot, t0, t1));
-  const [ex, ey] = arcPoints(28, 0.106, 0.106, 1)[0];
-  const art = `
-    ${arc(28, 0.3277, 0.636)}${arc(28, 0.7045, 0.8151)}${arc(28, 0.8663, 1.106)}
-    ${arc(-32, 0.8128, 1.3187)}${dash(-32, 0.6008, 0.6337)}
-    ${arc(90, 0.8122, 1.1533)}
-    <circle cx="${ex.toFixed(1)}" cy="${ey.toFixed(1)}" r="${small ? 60 : 52}" fill="url(#ink)"/>
-    <circle cx="${NUC[0]}" cy="${NUC[1]}" r="${small ? 48 : 38}" fill="url(#nucleus)"/>
-    ${small ? fHole({ nicks: false, hair: 19, swell: 42, eye: 8 }) : fHole()}`;
-  // The mark sits at 80%, about the padding Apple's template and Electron's own icon use.
-  const k = small ? 0.88 : 0.8;
-  return `<rect width="1024" height="1024" fill="url(#sheen)"/><g transform="translate(512 512) scale(${k}) translate(-512 -512)">${art}</g>`;
-}
-const F_ART = atomF(), F_SMALL = atomF({ small: true });
+// macOS and Linux: the disc maps onto a circle just inside the 824px body. Windows: onto the disc itself.
 const Fdir = {
   fill: 'url(#orange)',
   lip: '#9c4a10',
-  art: F_ART,
-  small: F_SMALL,
-  win: containers.disc(F_ART, 'url(#orange)'),
-  winSmall: containers.disc(F_SMALL, 'url(#orange)'),
+  art: atomF({ half: 400 }),
+  small: atomF({ half: 400, small: true }),
+  win: containers.disc(atomF({ half: 466 }), 'url(#orange)'),
+  winSmall: containers.disc(atomF({ half: 466, small: true }), 'url(#orange)'),
 };
 
 const directions = { a: A, c: Cdir, f: Fdir };

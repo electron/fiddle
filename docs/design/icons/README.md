@@ -1,20 +1,21 @@
 # App icon
 
-The shipped icon is **F, the f-hole atom**: the original orange disc and nucleus, Electron's three orbits as open white arcs, and a violin f-hole standing in for one of them, its two eyes doubling as electrons. **C, code and Run** (a code sheet in Electron navy with Lucent's cyan Run capsule) and **A, the Fiddle F** stay in `gen.mjs` as alternatives; A is also built, in `a-fiddle-f/`.
+The shipped icon is **F, the f-hole atom**: the original orange disc and nucleus, Electron's three orbits as open white arcs, and a violin f-hole standing in for one of them, its two eyes doubling as electrons. The white drawing is the original, `f-original.png`, traced rather than redrawn: `trace-f.py` turns it into `f-trace.json` (the f as an outline with its two nicks, the eyes, electron, nucleus and disc as fitted circles, each arc as a centreline with its stroke width), and `gen.mjs` maps the drawing's disc onto each platform's body. **C, code and Run** (a code sheet in Electron navy with Lucent's cyan Run capsule) and **A, the Fiddle F** stay in `gen.mjs` as alternatives; A is also built, in `a-fiddle-f/`.
 
 Each icon is drawn per platform:
 
-- **macOS:** an 824px continuous-corner squircle on the 1024 grid, with a drop shadow.
-- **Windows:** F keeps the original's round disc, edge to edge. C and A have no backplate: the object is the icon.
+- **macOS:** an 824px continuous-corner squircle on the 1024 grid, with a drop shadow. F's disc maps onto a circle just inside it.
+- **Windows:** F keeps the original's round disc, edge to edge, so it is the original drawing. C and A have no backplate: the object is the icon.
 - **Linux:** a GNOME-style tile with a darker base edge.
 
-At 32px and below, F and C use a simpler drawing (`*-small.svg`): F drops the short arc over the bottom eye and the nicks and draws everything heavier and a little larger, C keeps two thick code lines and a bigger Run capsule.
+At 32px and below, F and C use a simpler drawing (`*-small.svg`): F drops its two hint dashes, draws its strokes 1.6x heavier, its eyes and electron 12% larger and the f a little bolder, and sits 8% larger; C keeps two thick code lines and a bigger Run capsule.
 
 ## Rebuild
 
-Needs Node, Chromium and ImageMagick. Run from this folder:
+Needs Node, Chromium and ImageMagick; re-tracing the drawing also needs Python with numpy, scipy, scikit-image, networkx and Pillow. Run from this folder:
 
 ```sh
+python3 trace-f.py                  # f-trace.json, only if f-original.png changed
 node gen.mjs                        # svg/: the drawings
 CHROME=/path/to/chrome ./render.sh  # png/: 1024px renders
 node make-set.mjs f ../../../packages/app/assets/icons
