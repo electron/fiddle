@@ -1,9 +1,8 @@
-# Electron Fiddle (rewrite)
+# Electron Fiddle
 
 - **Design:** "Lucent", in `docs/design/`:
   - `lucent-handover.html` is the design system reference: principles, materials, layout, components and specimens.
-  - `lucent-tokens.css` and `lucent-tokens.json` hold the tokens, verbatim.
-  - `fonts/` has the fonts.
+  - `lucent-tokens.css` holds the tokens, verbatim.
 
 ## Rules
 
