@@ -8,7 +8,7 @@ around. Then save your fiddle as a GitHub Gist or to a local folder, so anyone c
 
 ## Documentation
 
-- [`docs/design/`](docs/design/) holds the "Lucent" design system reference: the handover page, tokens and fonts.
+- [`docs/design/`](docs/design/) holds the "Lucent" design system reference: the handover page and the tokens.
 
 ## Packages
 
