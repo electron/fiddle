@@ -154,10 +154,9 @@ const Cdir = {
 
 // --- Direction F: the f-hole atom: the original orange disc and nucleus, Electron's three orbits
 // as open white arcs, and a violin f-hole standing in for one of them, its eyes two of the electrons.
-// The white drawing is Felix's original (f-original.png), traced by trace-f.py into f-trace.json in
-// the drawing's own pixel space: the f as an outline, the eyes, electron and nucleus as circles, and
-// each arc as a centreline with its stroke width. Here the drawing's disc is mapped onto each
-// platform's body, so the mark sits in the squircle, tile and disc exactly as it sat in the original.
+// The white drawing is the original hand drawing, traced into f-trace.json in the drawing's own
+// pixel space: the f as an outline, the eyes, electron and nucleus as circles, and each arc as a
+// centreline with its stroke width. Here the drawing's disc is mapped onto each platform's body.
 const T = JSON.parse(fs.readFileSync(new URL('./f-trace.json', import.meta.url), 'utf8'));
 const xy = ([x, y]) => `${x.toFixed(1)},${y.toFixed(1)}`;
 // `half` is the radius the original's disc maps to. `small` is the cut for 32px and below: the two
@@ -183,12 +182,13 @@ function atomF({ half, small = false }) {
     ${arcs}${circle(T.electron, 'url(#ink)')}${circle(T.nucleus, 'url(#nucleus)', 1)}
     ${f}${circle(T.eyeTop, 'url(#ink)')}${circle(T.eyeBot, 'url(#ink)')}`;
 }
-// macOS and Linux: the disc maps onto a circle just inside the 824px body. Windows: onto the disc itself.
+// macOS and Linux: the disc maps onto a 720px circle inside the 824px body, so the mark fills about
+// two thirds of it, the padding Apple's template and Electron's own icon use. Windows: onto the disc itself.
 const Fdir = {
   fill: 'url(#orange)',
   lip: '#9c4a10',
-  art: atomF({ half: 400 }),
-  small: atomF({ half: 400, small: true }),
+  art: atomF({ half: 360 }),
+  small: atomF({ half: 360, small: true }),
   win: containers.disc(atomF({ half: 466 }), 'url(#orange)'),
   winSmall: containers.disc(atomF({ half: 466, small: true }), 'url(#orange)'),
 };
