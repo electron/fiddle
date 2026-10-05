@@ -1,14 +1,14 @@
 # App icon
 
-The shipped icon is **F, the f-hole atom**: the original orange disc and nucleus, Electron's three orbits as open white arcs, and a violin f-hole standing in for one of them, its two eyes doubling as electrons. The white drawing is the original hand drawing, traced rather than redrawn. The trace is `f-trace.json` (the f as an outline with its two nicks, the eyes, electron, nucleus and disc as fitted circles, each arc as a centreline with its stroke width), and `gen.mjs` maps the drawing's disc onto each platform's body. **C, code and Run** (a code sheet in Electron navy with Lucent's cyan Run capsule) and **A, the Fiddle F** stay in `gen.mjs` as alternatives; A is also built, in `a-fiddle-f/`.
+The shipped icon is **F, the f-hole atom**: the original orange disc and nucleus, Electron's three orbits as open white arcs, and a violin f-hole standing in for one of them, its two eyes doubling as electrons. **C, code and Run** (a code sheet in Electron navy with Lucent's cyan Run capsule) and **A, the Fiddle F** stay in `gen.mjs` as alternatives; A is also built, in `a-fiddle-f/`.
 
 Each icon is drawn per platform:
 
-- **macOS:** an 824px continuous-corner squircle on the 1024 grid, with a drop shadow. F's disc maps onto a 720px circle inside it, so the mark fills about two thirds of the body.
-- **Windows:** F keeps the original's round disc, edge to edge, so it is the original drawing. C and A have no backplate: the object is the icon.
+- **macOS:** an 824px continuous-corner squircle on the 1024 grid, with a drop shadow.
+- **Windows:** F keeps the original's round disc, edge to edge. C and A have no backplate: the object is the icon.
 - **Linux:** a GNOME-style tile with a darker base edge.
 
-At 32px and below, F and C use a simpler drawing (`*-small.svg`): F drops its two hint dashes, draws its strokes 1.6x heavier, its eyes and electron 12% larger and the f a little bolder, and sits 8% larger; C keeps two thick code lines and a bigger Run capsule.
+At 32px and below, F and C use a simpler drawing (`*-small.svg`): F drops its hint dashes and nicks and draws everything heavier and a little larger, C keeps two thick code lines and a bigger Run capsule.
 
 ## Rebuild
 
