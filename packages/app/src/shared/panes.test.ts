@@ -7,6 +7,7 @@ import {
   MAX_PANES,
   neighbourOf,
   shownPanes,
+  splitTarget,
   storedPanes,
 } from './panes';
 
@@ -154,5 +155,19 @@ describe('closePane, neighbourOf and storedPanes', () => {
     expect(storedPanes(['main.js'])).toEqual([]);
     expect(storedPanes([])).toEqual([]);
     expect(storedPanes(['main.js', 'renderer.js'])).toEqual(['main.js', 'renderer.js']);
+  });
+});
+
+describe('splitTarget', () => {
+  const names = ['main.js', 'preload.js', 'renderer.js', 'index.html'];
+  it('opens renderer.js, or main.js when renderer.js is current', () => {
+    expect(splitTarget('main.js', names)).toBe('renderer.js');
+    expect(splitTarget('index.html', names)).toBe('renderer.js');
+    expect(splitTarget('renderer.js', names)).toBe('main.js');
+  });
+  it('falls back to another file', () => {
+    expect(splitTarget('main.js', ['main.js', 'index.html'])).toBe('index.html');
+    expect(splitTarget('main.js', ['main.js'])).toBeNull();
+    expect(splitTarget(null, [])).toBeNull();
   });
 });

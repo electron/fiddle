@@ -21,7 +21,6 @@ import { ConsolePane } from '../features/run/ConsolePane';
 import { SettingsPage } from '../features/settings/SettingsPage';
 import { useShortcut } from '../hooks';
 import type { PaneActions } from './pane-actions';
-import { processOf } from './processes';
 import styles from './Sheet.module.css';
 import { isTabDrag, TAB_DRAG_TYPE, useTabDrag } from './tab-drag';
 import { useDraft } from './use-draft';
@@ -284,9 +283,6 @@ function EditorArea({
               ))}
             </TabList>
           </div>
-          {!split && (
-            <span className={styles.process}>{t(`process.${processOf(active)}`)}</span>
-          )}
           <IconButton
             icon="columns"
             size="sm"
@@ -426,7 +422,6 @@ function PaneHeader({ name, badge, onMaximize, onClose }: PaneHeaderProps) {
         <span dir="ltr">{name}</span>
         {badge && <span className={styles.paneErrors}>{badge.label}</span>}
       </span>
-      <span className={styles.paneProcess}>{t(`process.${processOf(name)}`)}</span>
       <span className={styles.paneActions}>
         <IconButton
           icon="maximize"

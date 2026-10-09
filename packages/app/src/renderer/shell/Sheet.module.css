@@ -45,13 +45,6 @@
   scrollbar-width: none;
 }
 
-.process {
-  flex: none;
-  color: var(--lu-ink-faint);
-  font: var(--lu-type-status);
-  white-space: nowrap;
-}
-
 .panes {
   position: relative;
   flex: 1;
@@ -159,13 +152,8 @@
   font-weight: 500;
 }
 
-.paneProcess {
-  margin-inline-start: auto;
-  color: var(--lu-ink-faint);
-  font: var(--lu-type-status);
-}
-
 .paneActions {
+  margin-inline-start: auto;
   display: flex;
   align-items: center;
   gap: 2px;

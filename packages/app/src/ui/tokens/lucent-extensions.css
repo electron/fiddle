@@ -55,7 +55,7 @@
   --lu-type-window-title-tracking: -0.01em;
   --lu-type-tab: 500 12.5px/16px var(--lu-font-sans); /* tabs */
   --lu-type-console-title: 600 12.5px/16px var(--lu-font-sans); /* "Console" in its bar */
-  --lu-type-status: 500 11.5px/14px var(--lu-font-sans); /* status bar, process labels */
+  --lu-type-status: 500 11.5px/14px var(--lu-font-sans); /* status bar */
   --lu-type-hint: 400 12px/16px var(--lu-font-sans); /* "Edited", key-cap hints */
   --lu-type-lens: 400 12.5px/18px var(--lu-font-sans); /* the error lens */
   --lu-type-console: 400 12px/18px var(--lu-font-mono); /* console rows */

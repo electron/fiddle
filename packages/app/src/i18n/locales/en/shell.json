@@ -42,26 +42,6 @@
     "description": "Head of the file list in the sidebar, and its accessible name.",
     "maxLength": 24
   },
-  "process.main": {
-    "message": "Main",
-    "description": "Editor label for files that run in Electron's main process: the main entry (main.js) and helper scripts named main-….",
-    "maxLength": 24
-  },
-  "process.preload": {
-    "message": "Preload",
-    "description": "Editor label for preload scripts.",
-    "maxLength": 24
-  },
-  "process.renderer": {
-    "message": "Renderer",
-    "description": "Editor label for files that run in the renderer (web page).",
-    "maxLength": 24
-  },
-  "process.other": {
-    "message": "Other",
-    "description": "Editor label for files whose name doesn't say which process they belong to, such as JSON files and helper scripts like utils.js.",
-    "maxLength": 24
-  },
   "errorCount_one": {
     "message": "{{count}} error",
     "description": "Pill on a sidebar file row and in an editor pane header: how many runtime errors the file has. {{count}} is the number. Singular.",
