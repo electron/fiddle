@@ -9,11 +9,11 @@ import {
   MAX_PANES,
   neighbourOf,
   shownPanes,
+  splitTarget,
   storedPanes,
   type PaneDropPosition,
 } from '../../shared/panes';
 import { DEFAULT_LAYOUT, type WindowLayout, type WindowState } from '../../shared/stores';
-import { splitTarget } from './processes';
 import {
   moveFile,
   setActiveFile,

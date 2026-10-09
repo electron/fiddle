@@ -217,12 +217,8 @@ describe('Sheet tab row', () => {
     expect(on.openFile).not.toHaveBeenCalled();
   });
 
-  it('names the process of the open file, and marks unsaved files and files with problems', () => {
-    setup({
-      active: 'index.html',
-      state: windowState({ dirtyFiles: ['renderer.js'] }),
-    });
-    screen.getByText('process.renderer');
+  it('marks unsaved files and files with problems', () => {
+    setup({ state: windowState({ dirtyFiles: ['renderer.js'] }) });
     expect(tab('renderer.js').textContent).toContain('unsaved');
     expect(tab('main.js').textContent).not.toContain('unsaved');
 
@@ -253,8 +249,6 @@ describe('Sheet tab row', () => {
     );
     const close = screen.getByRole('button', { name: 'closeSplit' });
     expect(close.getAttribute('aria-pressed')).toBe('true');
-    // Split, the panes' headers name the processes instead of the row.
-    expect(screen.queryByText('process.main')?.closest('[data-pane-index]')).toBeTruthy();
     fireEvent.click(close);
     expect(on.toggleSplit).toHaveBeenCalledTimes(2);
   });
@@ -277,7 +271,6 @@ describe('Sheet panes', () => {
     const { on } = setup({ panes: ['main.js', 'renderer.js'] });
     const second = within(pane(1));
     expect(second.getByText('renderer.js')).toBeTruthy();
-    expect(second.getByText('process.renderer')).toBeTruthy();
     fireEvent.click(second.getByRole('button', { name: 'maximize' }));
     expect(on.maximize).toHaveBeenCalledWith('renderer.js');
     fireEvent.click(within(pane(0)).getByRole('button', { name: 'closePane' }));

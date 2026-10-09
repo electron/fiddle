@@ -105,3 +105,16 @@ export function neighbourOf(panes: readonly string[], name: string): string | nu
   if (index === -1) return null;
   return panes[index + 1] ?? panes[index - 1] ?? null;
 }
+
+/**
+ * The file a new split pane shows: renderer.js, or main.js when renderer.js is
+ * current. Falls back to the first other file, and null when there is none.
+ */
+export function splitTarget(
+  current: string | null,
+  names: readonly string[],
+): string | null {
+  const preferred = current === 'renderer.js' ? 'main.js' : 'renderer.js';
+  if (preferred !== current && names.includes(preferred)) return preferred;
+  return names.find((name) => name !== current) ?? null;
+}
