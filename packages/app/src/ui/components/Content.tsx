@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react';
-import { ListBox, ListBoxItem } from 'react-aria-components';
+import { ListBox, ListBoxItem, type PressEvent } from 'react-aria-components';
 import { cx } from '../cx';
 import { Icon, type IconName } from '../icons/Icon';
 import styles from './Content.module.css';
@@ -10,6 +10,13 @@ export const singleSelection =
     const [key] = keys === 'all' ? [] : [...keys];
     if (key != null) onChange(String(key));
   };
+
+/** Adapts react-aria's press to one from a mouse, pen or finger: the keyboard and screen readers don't count. */
+export const pointerPress = (onPress?: () => void) =>
+  onPress &&
+  ((event: PressEvent) => {
+    if (event.pointerType !== 'keyboard' && event.pointerType !== 'virtual') onPress();
+  });
 
 export interface ListProps {
   'aria-label': string;

@@ -51,13 +51,21 @@ describe('files', () => {
   });
 
   it('renames, closes, opens and deletes a file from its context menu', async () => {
+    /** From the keyboard: a click on the row would put the focus in the file's editor. */
+    const openMenu = async (file: string) => {
+      await app().query(role('row', file));
+      await app().evaluate(
+        `document.querySelector('[role="row"][data-key=${JSON.stringify(file)}]').focus()`,
+      );
+      await app().press('Shift+F10');
+    };
     const fromMenu = async (file: string, item: string) => {
-      await app().press('Shift+F10', role('row', file));
+      await openMenu(file);
       await app().click(role('menuitem', item));
     };
 
     // Escape closes the menu and leaves the window intact.
-    await app().press('Shift+F10', role('row', 'extra.js'));
+    await openMenu('extra.js');
     await app().query(role('menu', 'File actions'));
     await app().press('Escape');
     await app().waitForAbsent(role('menu', 'File actions'));

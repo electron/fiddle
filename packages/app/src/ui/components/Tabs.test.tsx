@@ -36,6 +36,32 @@ describe('Tabs', () => {
     expect(screen.getByRole('tabpanel').textContent).toBe('CSS panel');
   });
 
+  it('reports a press with the mouse, not one from the keyboard', () => {
+    const onPointerPress = vi.fn();
+    render(
+      <Tabs defaultValue="main">
+        <TabList aria-label="Open files">
+          <Tab id="main">main.js</Tab>
+          <Tab
+            id="css"
+            onPointerPress={onPointerPress}
+            drag={{ type: 'text/x-tab', data: 'css' }}
+          >
+            styles.css
+          </Tab>
+        </TabList>
+      </Tabs>,
+    );
+    const tab = screen.getByRole('tab', { name: 'styles.css' });
+    fireEvent.keyDown(tab, { key: 'Enter' });
+    fireEvent.keyUp(tab, { key: 'Enter' });
+    expect(onPointerPress).not.toHaveBeenCalled();
+    fireEvent.pointerDown(tab, { pointerType: 'mouse', button: 0 });
+    fireEvent.pointerUp(tab, { pointerType: 'mouse', button: 0 });
+    fireEvent.click(tab, { detail: 1 });
+    expect(onPointerPress).toHaveBeenCalledOnce();
+  });
+
   it('speaks the error count and unsaved state', () => {
     render(<Example />);
     const tab = screen.getByRole('tab', {

@@ -16,6 +16,7 @@ import {
 } from '../../../ui';
 import { useBadges } from '../../editor/diagnostics';
 import { renameFile as renameFileInEditor } from '../../editor/editor-state';
+import { revealLocation } from '../../editor/runtime-errors';
 import { toastError } from '../../toast-error';
 import { PackagesSection } from '../packages/PackagesSection';
 import styles from './Sidebar.module.css';
@@ -159,6 +160,8 @@ export function Sidebar({
               pill={badge(file.name)?.label}
               pillTone={badge(file.name)?.tone}
               unsaved={dirtyFiles.includes(file.name) ? t('unsaved') : undefined}
+              // A click means to work in that file; arrow keys along the list keep the focus here.
+              onPointerPress={() => revealLocation(file.name)}
             />
           ))}
         </Tree>

@@ -6,7 +6,8 @@ export type RuntimeError = RuntimeErrorValue;
 
 export interface RevealRequest {
   file: string;
-  line: number;
+  /** Left out, the cursor stays where it was. */
+  line?: number;
   column: number;
   /** Increases with every request, so asking twice for one place reveals it twice. */
   seq: number;
@@ -40,7 +41,8 @@ export const getRuntimeErrors = errors.get;
 
 export const useRuntimeErrors = (): readonly RuntimeError[] => useStore(errors);
 
-export function revealLocation(file: string, line: number, column: number): void {
+/** Shows `file` and gives its editor the keyboard focus, with the cursor at `line` if there is one. */
+export function revealLocation(file: string, line?: number, column = 1): void {
   reveal.set({ file, line, column, seq: (reveal.get()?.seq ?? 0) + 1 });
 }
 

@@ -16,4 +16,21 @@ describe('Tree', () => {
     fireEvent.click(row(/renderer\.js/));
     expect(onChange).toHaveBeenLastCalledWith('renderer');
   });
+
+  it('reports a press with the mouse, not one from the keyboard', () => {
+    const onPointerPress = vi.fn();
+    render(
+      <Tree aria-label="Files" value="html" onChange={() => {}}>
+        <TreeRow id="html" label="index.html" onPointerPress={onPointerPress} />
+      </Tree>,
+    );
+    const row = screen.getByRole('row', { name: /index\.html/ });
+    fireEvent.keyDown(row, { key: 'Enter' });
+    fireEvent.keyUp(row, { key: 'Enter' });
+    expect(onPointerPress).not.toHaveBeenCalled();
+    fireEvent.pointerDown(row, { pointerType: 'mouse', button: 0 });
+    fireEvent.pointerUp(row, { pointerType: 'mouse', button: 0 });
+    fireEvent.click(row, { detail: 1 });
+    expect(onPointerPress).toHaveBeenCalledOnce();
+  });
 });

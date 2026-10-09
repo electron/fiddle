@@ -103,10 +103,46 @@ describe('workspace', () => {
       return zones;
     })()`);
 
+  it('puts the keyboard focus in the editor of a clicked tab or file, and leaves it on the tabs for arrow keys', async () => {
+    /** The pane whose editor has the keyboard focus, or the role of what has it instead. */
+    const focus = () =>
+      app().evaluate(`(() => {
+        const element = document.activeElement;
+        return element?.closest('.monaco-editor')
+          ? Number(element.closest('[data-pane-index]').dataset.paneIndex)
+          : element?.getAttribute('role');
+      })()`);
+
+    await app().click(role('tab', /^renderer\.js\b/));
+    await expect.poll(focus).toBe(0);
+    await expect.poll(activeFile).toBe('renderer.js');
+    await app().click(role('row', 'index.html'));
+    await expect.poll(activeFile).toBe('index.html');
+    await expect.poll(focus).toBe(0);
+
+    // Arrow keys browse the tabs without leaving them.
+    await app().evaluate(`${tabNamed('index.html')}.focus()`);
+    await app().press('ArrowLeft');
+    await expect.poll(activeFile).toBe('renderer.js');
+    expect(await focus()).toBe('tab');
+
+    // In a split, clicking the other pane's tab or file moves the focus into that pane.
+    await app().click(role('button', 'Split editor'));
+    await expect.poll(panes).toEqual(['renderer.js', 'main.js']);
+    await app().click(role('tab', /^main\.js\b/));
+    await expect.poll(focus).toBe(1);
+    await app().click(role('row', 'renderer.js'));
+    await expect.poll(focus).toBe(0);
+    await app().click(role('button', 'Close split', { nth: 0 }));
+    await expect.poll(panes).toEqual([]);
+    await app().click(role('tab', /^main\.js\b/));
+    await expect.poll(activeFile).toBe('main.js');
+  });
+
   it('closes tabs and opens a dragged tab in a pane or beside it', async () => {
     // Delete closes the focused tab. The file stays in the sidebar, and clicking it there reopens the tab.
-    await app().click(role('tab', /^main\.js\b/));
-    await app().press('Delete', role('tab', /^main\.js\b/));
+    await app().evaluate(`${tabNamed('main.js')}.focus()`);
+    await app().press('Delete');
     await expect.poll(visibleTabs).not.toContain('main.js');
     await app().waitForAbsent(role('tab', /^main\.js\b/));
     await app().click(role('row', 'main.js'));
