@@ -72,6 +72,35 @@ describe('Sidebar context menu', () => {
     fireEvent.click(screen.getByRole('button', { name: 'cancel' }));
     await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull());
   });
+
+  it('moves to another row on a right-click while open, and closes on one elsewhere', async () => {
+    renderSidebar();
+    const index = within(list()).getByRole('row', { name: /index\.html/ });
+    const preload = within(list()).getByRole('row', { name: /preload\.js/ });
+    // jsdom has no layout. The last row is scrolled out of the sidebar, its box over the rest of the window.
+    screen.getByRole('navigation').getBoundingClientRect = () =>
+      new DOMRect(0, 0, 200, 80);
+    preload.getBoundingClientRect = () => new DOMRect(0, 20, 200, 20);
+    index.getBoundingClientRect = () => new DOMRect(0, 290, 200, 20);
+    // The open menu makes the rows inert, so a right-click on one lands on the body. False: no native menu.
+    const rightClickAt = (y: number) =>
+      fireEvent.contextMenu(document.body, { clientX: 40, clientY: y });
+
+    fireEvent.contextMenu(index, { clientX: 40, clientY: 60 });
+    await screen.findByRole('menu');
+    expect(rightClickAt(30)).toBe(false);
+    expect(fireEvent.contextMenu(await screen.findByRole('menu'))).toBe(false);
+    fireEvent.click(await screen.findByRole('menuitem', { name: 'rename' }));
+    expect((await nameField()).value).toBe('preload.js');
+    fireEvent.click(screen.getByRole('button', { name: 'cancel' }));
+    await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull());
+
+    fireEvent.contextMenu(preload, { clientX: 40, clientY: 30 });
+    await screen.findByRole('menu');
+    expect(rightClickAt(300)).toBe(false);
+    await waitFor(() => expect(screen.queryByRole('menu')).toBeNull());
+    expect(rightClickAt(300)).toBe(true);
+  });
 });
 
 describe('Sidebar context menu actions', () => {
