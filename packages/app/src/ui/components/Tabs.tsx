@@ -7,6 +7,7 @@ import {
   VisuallyHidden,
 } from 'react-aria-components';
 import { cx } from '../cx';
+import { pointerPress } from './Content';
 import { Icon, type IconName } from '../icons/Icon';
 import styles from './Tabs.module.css';
 
@@ -65,6 +66,8 @@ export interface TabProps {
    * while it has focus.
    */
   onClose?: () => void;
+  /** The tab was pressed with a mouse, pen or finger, not from the keyboard or a screen reader. */
+  onPointerPress?: () => void;
   /** Makes the tab draggable, carrying `data` under the `type` media type. */
   drag?: { type: string; data: string };
   /** While another tab is dragged over the row: an insertion bar before or after this tab. */
@@ -86,6 +89,7 @@ export function Tab({
   unsaved,
   icon,
   onClose,
+  onPointerPress,
   drag,
   dropIndicator,
   isDisabled,
@@ -134,6 +138,7 @@ export function Tab({
       id={id}
       {...(drag ? SELECT_ON_PRESS_UP : undefined)}
       isDisabled={isDisabled}
+      onPress={pointerPress(onPointerPress)}
       className={cx(styles.tab, className)}
       data-closable={closable || undefined}
       data-drop-indicator={dropIndicator}

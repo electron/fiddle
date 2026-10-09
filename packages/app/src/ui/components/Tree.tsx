@@ -6,7 +6,7 @@ import {
   VisuallyHidden,
 } from 'react-aria-components';
 import { Icon } from '../icons/Icon';
-import { singleSelection } from './Content';
+import { pointerPress, singleSelection } from './Content';
 import styles from './Tree.module.css';
 
 export interface TreeProps {
@@ -45,11 +45,27 @@ export interface TreeRowProps {
   unsaved?: string;
   /** Text direction of the label, e.g. `ltr` for file names in a mirrored locale. */
   labelDir?: 'ltr' | 'rtl' | 'auto';
+  /** The row was pressed with a mouse, pen or finger, not from the keyboard or a screen reader. */
+  onPointerPress?: () => void;
 }
 
-export function TreeRow({ id, label, pill, pillTone, unsaved, labelDir }: TreeRowProps) {
+export function TreeRow({
+  id,
+  label,
+  pill,
+  pillTone,
+  unsaved,
+  labelDir,
+  onPointerPress,
+}: TreeRowProps) {
   return (
-    <TreeItem id={id} data-key={id} textValue={label} className={styles.row}>
+    <TreeItem
+      id={id}
+      data-key={id}
+      textValue={label}
+      className={styles.row}
+      onPress={pointerPress(onPointerPress)}
+    >
       <TreeItemContent>
         <Icon name="file" className={styles.icon} />
         <span className={styles.label} dir={labelDir}>

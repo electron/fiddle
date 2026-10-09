@@ -16,6 +16,7 @@ import {
 } from '../../ui';
 import { useBadges, type Badge } from '../editor/diagnostics';
 import { EditorPane } from '../editor/EditorPane';
+import { revealLocation } from '../editor/runtime-errors';
 import { ConsolePane } from '../features/run/ConsolePane';
 import { SettingsPage } from '../features/settings/SettingsPage';
 import { useShortcut } from '../hooks';
@@ -269,6 +270,8 @@ function EditorArea({
                       : undefined
                   }
                   onClose={() => actions.closeFile(file.name)}
+                  // A click means to work in that file; arrow keys along the row keep the focus here.
+                  onPointerPress={() => revealLocation(file.name)}
                   drag={{ type: TAB_DRAG_TYPE, data: file.name }}
                   dropIndicator={indicatorFor(file.name, index === visible.length - 1)}
                   error={badge(file.name)}

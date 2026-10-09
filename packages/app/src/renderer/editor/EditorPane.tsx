@@ -167,8 +167,10 @@ export function EditorPane({ file, primary = false, onFocus }: EditorPaneProps) 
     )
       return;
     if (!claimReveal(reveal.seq)) return;
-    editor.setPosition({ lineNumber: reveal.line, column: reveal.column });
-    editor.revealLineInCenterIfOutsideViewport(reveal.line);
+    if (reveal.line !== undefined) {
+      editor.setPosition({ lineNumber: reveal.line, column: reveal.column });
+      editor.revealLineInCenterIfOutsideViewport(reveal.line);
+    }
     editor.focus();
   }, [editor, model, reveal, file]);
 
