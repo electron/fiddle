@@ -1,4 +1,4 @@
-import { useRef, useState, type MouseEvent } from 'react';
+import { useEffect, useRef, useState, type MouseEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { isMainEntry } from '../../../fiddle/files';
@@ -41,6 +41,20 @@ interface MenuState {
   open: boolean;
 }
 
+/** The menu for a right-click at a point on a row, or for the context-menu key on a focused row. */
+function menuFor(row: HTMLElement | null | undefined, x: number, y: number) {
+  const name = row?.dataset.key;
+  if (!row || !name) return null;
+  const rect = row.getBoundingClientRect();
+  const fromKeyboard = x === 0 && y === 0;
+  return {
+    name,
+    x: fromKeyboard ? rect.left + 16 : x,
+    y: fromKeyboard ? rect.bottom : y,
+    open: true,
+  };
+}
+
 export function Sidebar({
   files,
   dirtyFiles,
@@ -53,6 +67,7 @@ export function Sidebar({
   const [filter, setFilter] = useState('');
   const [menu, setMenu] = useState<MenuState | null>(null);
   const anchor = useRef<HTMLSpanElement>(null);
+  const sidebar = useRef<HTMLElement>(null);
   // The filter field is there only past the threshold, so a leftover filter mustn't keep hiding files.
   const query = files.length > FILTER_THRESHOLD ? filter.trim().toLowerCase() : '';
   const shown = query
@@ -105,28 +120,50 @@ export function Sidebar({
     await documentsApi.RemoveFile(name).catch(fail);
   };
 
-  // Right-click, or the context-menu key on a focused row.
   const onContextMenu = (event: MouseEvent<HTMLElement>) => {
     const row = (event.target as HTMLElement).closest<HTMLElement>('[role="row"]');
-    const name = row?.dataset.key;
-    if (!row || !name) return;
+    const next = menuFor(row, event.clientX, event.clientY);
+    if (!next) return;
     event.preventDefault();
-    const rect = row.getBoundingClientRect();
-    const fromKeyboard = event.clientX === 0 && event.clientY === 0;
-    setMenu({
-      name,
-      x: fromKeyboard ? rect.left + 16 : event.clientX,
-      y: fromKeyboard ? rect.bottom : event.clientY,
-      open: true,
-    });
+    setMenu(next);
   };
 
   const closeMenu = () => setMenu((current) => current && { ...current, open: false });
+
+  // The open menu makes the rest of the window inert, so a right-click on another row never reaches
+  // that row. Find the row by its place, and move the menu there instead of showing the native one.
+  const menuOpen = menu?.open ?? false;
+  useEffect(() => {
+    if (!menuOpen) return;
+    const onContextMenuOutside = (event: globalThis.MouseEvent) => {
+      // The right-click that opened the menu gets here too.
+      if (event.defaultPrevented) return;
+      event.preventDefault();
+      if (event.target instanceof Element && event.target.closest('[role="menu"]'))
+        return;
+      const { clientX: x, clientY: y } = event;
+      const under = (element: Element) => {
+        const rect = element.getBoundingClientRect();
+        return x >= rect.left && x < rect.right && y >= rect.top && y < rect.bottom;
+      };
+      // A row scrolled out of the sidebar isn't under the pointer, wherever its box is.
+      const rows =
+        sidebar.current && under(sidebar.current)
+          ? sidebar.current.querySelectorAll<HTMLElement>('[role="row"]')
+          : [];
+      const next = menuFor([...rows].find(under), x, y);
+      setMenu((current) => next ?? (current && { ...current, open: false }));
+    };
+    document.addEventListener('contextmenu', onContextMenuOutside);
+    return () => document.removeEventListener('contextmenu', onContextMenuOutside);
+  }, [menuOpen]);
+
   const menuFileVisible =
     (menu ? files.find((file) => file.name === menu.name) : undefined)?.visible ?? true;
 
   return (
     <nav
+      ref={sidebar}
       className={styles.sidebar}
       aria-label={t('files')}
       onContextMenu={onContextMenu}
@@ -183,8 +220,10 @@ export function Sidebar({
         style={menu ? { left: menu.x, top: menu.y } : undefined}
       />
       <MenuPopover
+        // A menu that moves is a new popover: an open one doesn't follow its anchor.
+        key={menu && `${menu.x},${menu.y}`}
         triggerRef={anchor}
-        isOpen={menu?.open ?? false}
+        isOpen={menuOpen}
         onOpenChange={(open) => {
           if (!open) closeMenu();
         }}
