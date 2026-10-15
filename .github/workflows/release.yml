@@ -67,11 +67,11 @@ jobs:
       - name: Build (Linux)
         if: ${{ startsWith(matrix.os, 'ubuntu-') }}
         run: yarn run publish --arch=${{ matrix.arch }} --dry-run # zizmor: ignore[use-trusted-publishing]
-      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: build-artifacts-${{ matrix.os }}-${{ matrix.arch }}
           path: out
-      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         if: ${{ startsWith(matrix.os, 'ubuntu-') && matrix.arch == 'x64' }}
         with:
           name: webpack-source-maps
@@ -144,7 +144,7 @@ jobs:
           AZURE_CODE_SIGNING_ACCOUNT_NAME: OpenJS-CodeSigning
           AZURE_CODE_SIGNING_CERTIFICATE_PROFILE_NAME: Electron
         run: yarn run publish --arch=${{ matrix.arch }} --dry-run # zizmor: ignore[use-trusted-publishing]
-      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: build-artifacts-windows-latest-${{ matrix.arch }}
           path: out
