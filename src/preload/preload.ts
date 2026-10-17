@@ -52,6 +52,7 @@ const channelMapping: Record<FiddleEvent, IpcEvents> = {
   'undo-in-editor': IpcEvents.UNDO_IN_EDITOR,
   'version-download-progress': IpcEvents.VERSION_DOWNLOAD_PROGRESS,
   'version-state-changed': IpcEvents.VERSION_STATE_CHANGED,
+  'process-metrics-update': IpcEvents.PROCESS_METRICS_UPDATE,
 } as const;
 
 function addEventListener(

@@ -156,6 +156,14 @@ const config: ForgeConfig = {
               js: path.join(root, './src/isolated-run-button.ts'),
               name: 'isolated_run_button',
             },
+            {
+              html: path.join(root, './static/process-monitor.html'),
+              js: path.join(root, './src/renderer/process-monitor-entry.tsx'),
+              name: 'process_monitor_window',
+              preload: {
+                js: path.join(root, 'src/preload/preload.ts'),
+              },
+            },
           ],
         },
       },

@@ -193,7 +193,8 @@ export type FiddleEvent =
   | 'toggle-monaco-option'
   | 'undo-in-editor'
   | 'version-download-progress'
-  | 'version-state-changed';
+  | 'version-state-changed'
+  | 'process-metrics-update';
 
 export interface MessageOptions {
   message: string;
@@ -284,6 +285,7 @@ export enum GlobalSetting {
   localVersion = 'local-electron-versions',
   packageAuthor = 'packageAuthor',
   isShowingGistHistory = 'isShowingGistHistory',
+  isProcessMonitorEnabled = 'isProcessMonitorEnabled',
   packageManager = 'packageManager',
   showObsoleteVersions = 'showObsoleteVersions',
   showUndownloadedVersions = 'showUndownloadedVersions',
@@ -332,8 +334,16 @@ export interface StartFiddleOptions {
   packageManager: IPackageManager;
   useSocketFirewall: boolean;
   isKeepingUserDataDirs: boolean;
+  isProcessMonitorEnabled: boolean;
 }
 
 export interface DownloadVersionParams {
   mirror: Mirrors;
+}
+export interface ProcessMetric {
+  pid: number;
+  name?: string;
+  type?: string;
+  cpu: number;
+  memory: number;
 }

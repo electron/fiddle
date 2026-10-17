@@ -82,6 +82,7 @@ function makeOptions(
     env: {},
     executionFlags: [],
     isKeepingUserDataDirs: false,
+    isProcessMonitorEnabled: false,
     modules: [],
     packageManager: 'npm',
     useSocketFirewall: false,

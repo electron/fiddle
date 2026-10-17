@@ -59,6 +59,8 @@ export const ExecutionSettings = observer(
         this.handleElectronLoggingChange.bind(this);
       this.handleSocketFirewallChange =
         this.handleSocketFirewallChange.bind(this);
+      this.handleProcessMonitorChange =
+        this.handleProcessMonitorChange.bind(this);
 
       this.handleSettingsItemChange = this.handleSettingsItemChange.bind(this);
       this.addNewSettingsItem = this.addNewSettingsItem.bind(this);
@@ -103,6 +105,16 @@ export const ExecutionSettings = observer(
     ) {
       const { checked } = event.currentTarget;
       this.props.appState.isUsingSocketFirewall = checked;
+    }
+
+    /**
+     * Handles a change on whether to enable the process monitor
+     */
+    public handleProcessMonitorChange(
+      event: React.FormEvent<HTMLInputElement>,
+    ) {
+      const { checked } = event.currentTarget;
+      this.props.appState.isProcessMonitorEnabled = checked;
     }
 
     /**
@@ -383,6 +395,21 @@ export const ExecutionSettings = observer(
                 checked={isUsingSocketFirewall}
                 label="Use Socket Firewall for package installation."
                 onChange={this.handleSocketFirewallChange}
+              />
+            </FormGroup>
+          </Callout>
+          <br />
+          <Callout>
+            <FormGroup>
+              <p>
+                The Process Monitor allows you to view the system processes
+                spawned by your Fiddle, including their live CPU and memory
+                usage.
+              </p>
+              <Checkbox
+                checked={this.props.appState.isProcessMonitorEnabled}
+                label="Enable Process Monitor."
+                onChange={this.handleProcessMonitorChange}
               />
             </FormGroup>
           </Callout>

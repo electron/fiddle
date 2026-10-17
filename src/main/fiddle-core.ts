@@ -1,6 +1,9 @@
 import { ChildProcess } from 'node:child_process';
 import * as fs from 'node:fs';
 
+import pidusage from 'pidusage';
+import pidtree from 'pidtree';
+
 import { ElectronVersions, Installer, Runner } from '@electron/fiddle-core';
 import {
   BrowserWindow,
@@ -15,6 +18,10 @@ import { ELECTRON_DOWNLOAD_PATH, ELECTRON_INSTALL_PATH } from './constants';
 import { cleanupDirectory, deleteUserData, saveFilesToTemp } from './files';
 import { ipcMainManager } from './ipc';
 import {
+  closeProcessMonitorWindow,
+  createProcessMonitorWindow,
+} from './process-monitor-window';
+import {
   ISOLATED_ACTIONS_SCHEME,
   getIsolatedRunButtonFrame,
 } from './isolated-actions';
@@ -27,6 +34,7 @@ import {
   DownloadVersionParams,
   PACKAGE_NAME,
   PMOperationOptions,
+  ProcessMetric,
   ProgressObject,
   RunResult,
   StartFiddleOptions,
@@ -165,6 +173,7 @@ async function startFiddleImpl(webContents: WebContents): Promise<RunResult> {
     env: rendererEnv,
     executionFlags,
     isKeepingUserDataDirs,
+    isProcessMonitorEnabled,
     modules,
     packageManager,
     useSocketFirewall,
@@ -303,8 +312,51 @@ async function startFiddleImpl(webContents: WebContents): Promise<RunResult> {
   child.stdout?.on('data', (data) => pushOutput(webContents, data.toString()));
   child.stderr?.on('data', (data) => pushOutput(webContents, data.toString()));
 
+  // --- Process Monitor polling ---
+  let metricsInterval: ReturnType<typeof setInterval> | null = null;
+
+  if (isProcessMonitorEnabled && child.pid) {
+    const rootPid = child.pid;
+
+    const monitorWindow = createProcessMonitorWindow();
+
+    metricsInterval = setInterval(async () => {
+      try {
+        // Get all descendant PIDs
+        const children = await pidtree(rootPid, { root: true });
+        const pids = [rootPid, ...children];
+
+        // Get CPU + memory for each PID
+        const stats = await pidusage(pids);
+        const metrics: ProcessMetric[] = pids
+          .filter((pid) => stats[pid])
+          .map((pid, idx) => ({
+            pid,
+            type: idx === 0 ? 'Main' : `Renderer/Helper ${idx}`,
+            cpu: stats[pid].cpu,
+            // pidusage returns memory in bytes; convert to KB for display
+            memory: Math.round(stats[pid].memory / 1024),
+          }));
+
+        if (!monitorWindow.isDestroyed()) {
+          monitorWindow.webContents.send(
+            IpcEvents.PROCESS_METRICS_UPDATE,
+            metrics,
+          );
+        }
+      } catch {
+        // Process may have already exited; ignore errors.
+      }
+    }, 1500);
+  }
+
   return new Promise<RunResult>((resolve) => {
     child.on('close', async (code, signal) => {
+      if (metricsInterval) {
+        clearInterval(metricsInterval);
+        metricsInterval = null;
+        closeProcessMonitorWindow();
+      }
       fiddleProcesses.delete(webContents);
       await cleanup();
 
