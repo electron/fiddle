@@ -132,8 +132,6 @@ function computeMode(): ButtonMode {
       return 'downloading';
     case 'installing':
       return 'unzipping';
-    case 'missing':
-      return 'checking';
     case 'downloaded':
     case 'installed':
     default:
