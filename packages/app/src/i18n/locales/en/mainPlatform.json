@@ -1,0 +1,70 @@
+{
+  "updateReadyTitle": {
+    "message": "Update ready",
+    "description": "Title of the dialog shown when a new version of the app has been downloaded.",
+    "maxLength": 40
+  },
+  "updateReadyDetail": {
+    "message": "A new version of Electron Fiddle has been downloaded. Restart the app to use it.",
+    "description": "Body of the dialog shown when a new version of the app has been downloaded."
+  },
+  "restart": {
+    "message": "Restart",
+    "description": "Button in the update dialog that restarts the app to install the update.",
+    "maxLength": 20
+  },
+  "later": {
+    "message": "Later",
+    "description": "Button in the update dialog that closes it; the update installs on the next launch.",
+    "maxLength": 20
+  },
+  "moveMessage": {
+    "message": "Move Electron Fiddle to the Applications folder?",
+    "description": "macOS first-run question, shown when the app runs from outside /Applications."
+  },
+  "moveDetail": {
+    "message": "Updates install reliably only when the app is in the Applications folder.",
+    "description": "macOS first-run explanation under the move-to-Applications question."
+  },
+  "moveButton": {
+    "message": "Move to Applications",
+    "description": "Button that moves the app into /Applications and relaunches it.",
+    "maxLength": 30
+  },
+  "dontMove": {
+    "message": "Don't move",
+    "description": "Button that keeps the app where it is.",
+    "maxLength": 20
+  },
+  "aboutVersion": {
+    "message": "{{version}} (Electron {{electron}})",
+    "description": "Version line in the About panel on Windows and Linux. {{version}} is the app version, {{electron}} the Electron version, e.g. 1.0.0 (Electron 44.3.0)."
+  },
+  "aboutCopyright": {
+    "message": "© Electron authors",
+    "description": "Copyright line in the About panel. Keep the © sign."
+  },
+  "resetPrivacyMessage": {
+    "message": "Reset all privacy permissions?",
+    "description": "Confirmation before resetting the macOS privacy permissions given to the app.",
+    "maxLength": 100
+  },
+  "resetPrivacyDetail": {
+    "message": "Electron Fiddle and the fiddles it runs lose access to the camera, microphone, contacts and other protected data. Fiddles run as the standard Electron app, so other apps running on a plain Electron download lose access too. macOS asks again the next time they need it.",
+    "description": "Detail of the reset privacy permissions confirmation.",
+    "maxLength": 300
+  },
+  "resetPrivacyButton": {
+    "message": "Reset",
+    "description": "Button that confirms resetting the privacy permissions.",
+    "maxLength": 20
+  },
+  "resetPrivacyFailed": {
+    "message": "The privacy permissions couldn't be reset.",
+    "description": "Error when macOS's tccutil command fails."
+  },
+  "resetPrivacyUnavailable": {
+    "message": "Privacy permissions can only be reset on macOS.",
+    "description": "Error when resetting the privacy permissions is attempted on a system other than macOS."
+  }
+}

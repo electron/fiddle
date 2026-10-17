@@ -1,0 +1,88 @@
+.tree {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  color: var(--lu-ink);
+  font: var(--lu-type-body);
+  letter-spacing: var(--lu-type-body-tracking);
+  outline: none;
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  height: var(--lu-size-row);
+  padding: 0 8px;
+  border-radius: var(--lu-radius-item);
+  corner-shape: squircle;
+  user-select: none;
+  cursor: default;
+  outline: none;
+  -webkit-app-region: no-drag;
+  transition:
+    background-color var(--lu-dur-fast) var(--lu-ease),
+    box-shadow var(--lu-dur-fast) var(--lu-ease);
+}
+
+.row[data-hovered] {
+  background: var(--lu-capsule);
+}
+
+.row[data-selected] {
+  background: var(--lu-chip);
+  box-shadow: var(--lu-shadow-lift);
+  font-weight: 500;
+}
+
+.row[data-selected] .icon {
+  color: var(--lu-accent);
+}
+
+.row[data-focus-visible] {
+  outline: var(--lu-focus-outline);
+  outline-offset: -3px;
+}
+
+.icon {
+  color: var(--lu-ink-muted);
+}
+
+.label {
+  composes: lu-truncate from global;
+  flex: 1;
+}
+
+.pill {
+  flex: none;
+  padding: 0 6px;
+  border-radius: var(--lu-radius-capsule);
+  background: var(--lu-spark-soft);
+  color: var(--lu-spark);
+  font: var(--lu-type-pill);
+}
+.pill[data-tone='warning'] {
+  background: color-mix(in srgb, var(--lu-warning) 16%, transparent);
+  color: var(--lu-warning);
+}
+
+.dot {
+  flex: none;
+  width: 6px;
+  height: 6px;
+  border-radius: var(--lu-radius-round);
+  background: var(--lu-ink-muted);
+}
+
+/* Forced colors drops the fill that marks the selected row. */
+@media (forced-colors: active) {
+  .row[data-selected] {
+    outline: 2px solid var(--lu-ink);
+    outline-offset: -2px;
+  }
+
+  .row[data-selected][data-focus-visible] {
+    outline: 3px solid var(--lu-focus-ring);
+    outline-offset: -3px;
+  }
+}

@@ -1,0 +1,9 @@
+{
+  "updateAvailableTitle": "アップデートがあります",
+  "updateAvailableDescription": "Electron Fiddle {{version}} をダウンロードできます。",
+  "download": "ダウンロード",
+  "crashNoticeTitle": "クラッシュレポートが有効です",
+  "crashNoticeDescription": "Electron Fiddle がクラッシュすると、バグを修正するためにレポートが送信されます。レポートにコードが含まれることはありません。送信は設定でオフにできます。",
+  "crashNoticeAction": "プライバシー設定",
+  "openSettingsFailed": "設定を開けませんでした"
+}

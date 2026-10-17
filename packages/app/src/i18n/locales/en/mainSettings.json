@@ -1,0 +1,99 @@
+{
+  "importSettingsTitle": {
+    "message": "Import settings",
+    "description": "Title of the file dialog that imports a settings file.",
+    "maxLength": 40
+  },
+  "exportSettingsTitle": {
+    "message": "Export settings",
+    "description": "Title of the save dialog that exports the settings to a file.",
+    "maxLength": 40
+  },
+  "importThemeTitle": {
+    "message": "Import a Monaco theme",
+    "description": "Title of the file dialog that imports a Monaco editor theme.",
+    "maxLength": 40
+  },
+  "jsonFiles": {
+    "message": "JSON files",
+    "description": "File type filter in open and save dialogs.",
+    "maxLength": 30
+  },
+  "notJson": {
+    "message": "{{file}} isn't valid JSON.",
+    "description": "Error when an imported file can't be parsed. {{file}} is the file name."
+  },
+  "notSettings": {
+    "message": "{{file}} doesn't contain settings.",
+    "description": "Error when an imported settings file isn't a JSON object. {{file}} is the file name."
+  },
+  "notTheme": {
+    "message": "{{file}} isn't a Monaco theme. A theme needs “base” or “rules”, with colors as hex values.",
+    "description": "Error when an imported theme file isn't a valid Monaco theme. {{file}} is the file name. Keep “base” and “rules” untranslated."
+  },
+  "unknownSetting": {
+    "message": "There's no setting named “{{key}}”.",
+    "description": "Error when a setting that doesn't exist is changed or reset. {{key}} is the setting's ID, such as electronFlags; keep it as it is."
+  },
+  "invalidValue": {
+    "message": "The value for “{{setting}}” isn't valid.",
+    "description": "Error when a setting is set to a value it doesn't accept. {{setting}} is the setting's title, such as Font size."
+  },
+  "themeNeedsValues": {
+    "message": "A built-in theme can't be copied without its current values.",
+    "description": "Error when a copy of a built-in theme is requested without the values the theme has on screen."
+  },
+  "openFailed": {
+    "message": "Couldn't open {{path}}: {{reason}}",
+    "description": "Error when the OS can't open a file or folder. {{path}} is the path, {{reason}} the OS message."
+  },
+  "themeCopyName": {
+    "message": "{{name}} copy",
+    "description": "Name of a new theme created from the current one. {{name}} is the current theme's name.",
+    "maxLength": 100
+  },
+  "lucentDark": {
+    "message": "Lucent dark",
+    "description": "Name of the built-in dark theme. Lucent is the design system's name; keep it as is.",
+    "maxLength": 40
+  },
+  "lucentLight": {
+    "message": "Lucent light",
+    "description": "Name of the built-in light theme. Lucent is the design system's name; keep it as is.",
+    "maxLength": 40
+  },
+  "lucentHcDark": {
+    "message": "Lucent high contrast dark",
+    "description": "Name of the built-in high-contrast dark theme, in the name of a theme copied from it. Lucent is the design system's name; keep it as is.",
+    "maxLength": 40
+  },
+  "lucentHcLight": {
+    "message": "Lucent high contrast light",
+    "description": "Name of the built-in high-contrast light theme, in the name of a theme copied from it. Lucent is the design system's name; keep it as is.",
+    "maxLength": 40
+  },
+  "importExecutionMessage": {
+    "message": "Import settings that change how fiddles run?",
+    "description": "Confirmation when an imported settings file changes Electron flags, environment variables, download mirrors, the package manager or Socket Firewall.",
+    "maxLength": 100
+  },
+  "importExecutionDetail": {
+    "message": "These settings control where Electron is downloaded from and what every run starts with. Only import settings from a source you trust.",
+    "description": "Detail of the import confirmation, above the list of changed settings.",
+    "maxLength": 300
+  },
+  "importEmpty": {
+    "message": "none",
+    "description": "Shown in the import confirmation for a setting that the import clears.",
+    "maxLength": 20
+  },
+  "importSettingLine": {
+    "message": "{{setting}}: {{value}}",
+    "description": "One line of the import confirmation: a setting and its new value. {{setting}} is the setting's title, such as Electron flags; {{value}} is the new value, or the word for an empty value."
+  },
+  "importButton": {
+    "message": "Import",
+    "description": "Button that confirms importing the settings.",
+    "maxLength": 20
+  }
+}

@@ -1,0 +1,7 @@
+{
+  "searchVersions": "Buscar versiones",
+  "noMatches": "Ninguna versión coincide",
+  "copyVersion": "Copiar número de versión",
+  "copied": "Copiado: {{version}}",
+  "versionChangeFailed": "No se pudo cambiar la versión de Electron"
+}

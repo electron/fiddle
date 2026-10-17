@@ -1,0 +1,28 @@
+.ringWrap {
+  display: inline-flex;
+  flex: none;
+}
+
+.ring {
+  display: block;
+  flex: none;
+}
+
+.ringTrack {
+  stroke: color-mix(in srgb, currentColor 22%, transparent);
+}
+
+.ringBar {
+  stroke: currentColor;
+  transition: stroke-dashoffset var(--lu-dur-base) var(--lu-ease);
+}
+
+.spin {
+  animation: spin var(--lu-dur-spin) linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}

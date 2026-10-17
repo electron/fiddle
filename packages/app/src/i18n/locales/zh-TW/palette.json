@@ -1,0 +1,12 @@
+{
+  "label": "命令選擇區",
+  "placeholder": "搜尋命令、檔案、版本與範例",
+  "empty": "沒有相符項目",
+  "kindCommand": "命令",
+  "kindEditor": "編輯器",
+  "kindFile": "檔案",
+  "kindVersion": "版本",
+  "kindExample": "範例",
+  "runFailed": "無法執行 {{label}}",
+  "electronVersion": "Electron {{version}}"
+}

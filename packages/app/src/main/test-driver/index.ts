@@ -1,0 +1,462 @@
+// Keep this module free of top-level side effects so release builds drop it.
+import fs from 'node:fs';
+import http from 'node:http';
+import https from 'node:https';
+import os from 'node:os';
+import path from 'node:path';
+import { format } from 'node:util';
+
+import {
+  app,
+  BrowserWindow,
+  clipboard,
+  dialog,
+  Menu,
+  net,
+  Notification,
+  powerSaveBlocker,
+  session,
+  shell,
+  type Session,
+  type WebContents,
+} from 'electron';
+
+import type { CommandRegistry } from '../commands';
+import type { StateHub } from '../state-hub';
+import { configurePages, pageFor } from './page';
+import type { DialogKind, DialogResponse } from './protocol';
+import { startDriverServer } from './server';
+import { createTestState, type TestState } from './state';
+
+export interface TestHarness {
+  /** Starts the driver once main has its StateHub and command registry. */
+  attach(context: { hub: StateHub; registry: CommandRegistry }): void;
+}
+
+/** Durations go to zero rather than `none`, so transitionend and animationend still fire. */
+const NO_ANIMATION_CSS = `*, *::before, *::after {
+  transition-duration: 0s !important; transition-delay: 0s !important;
+  animation-duration: 0s !important; animation-delay: 0s !important;
+  scroll-behavior: auto !important;
+}`;
+
+const LOOPBACK = new Set(['localhost', '127.0.0.1', '[::1]', '::1']);
+const NETWORK_PROTOCOLS = new Set(['http:', 'https:', 'ws:', 'wss:']);
+
+function isNetworkUrl(url: string): boolean {
+  try {
+    return NETWORK_PROTOCOLS.has(new URL(url).protocol);
+  } catch {
+    return false;
+  }
+}
+
+function isBlocked(url: string): boolean {
+  try {
+    const parsed = new URL(url);
+    return NETWORK_PROTOCOLS.has(parsed.protocol) && !LOOPBACK.has(parsed.hostname);
+  } catch {
+    return false;
+  }
+}
+
+export function installTestHarness(): TestHarness {
+  const testDir =
+    process.env.FIDDLE_TEST_DIR ?? fs.mkdtempSync(path.join(os.tmpdir(), 'fiddle-test-'));
+  process.env.FIDDLE_TEST_DIR = testDir;
+  for (const dir of ['appData', 'userData', 'cache', 'logs', 'artifacts', 'crashDumps']) {
+    fs.mkdirSync(path.join(testDir, dir), { recursive: true });
+  }
+  // appData too, so nothing (the legacy data import, for one) reads this machine's real data.
+  app.setPath('appData', path.join(testDir, 'appData'));
+  app.setPath('userData', path.join(testDir, 'userData'));
+  app.setPath('sessionData', path.join(testDir, 'userData'));
+  app.setPath('logs', path.join(testDir, 'logs'));
+  app.setPath('crashDumps', path.join(testDir, 'crashDumps'));
+
+  const state = createTestState(testDir);
+  const locale = process.env.FIDDLE_TEST_LOCALE ?? 'en-US';
+
+  captureMainLog(state);
+  applySwitches(locale);
+  fixLocaleAndTime(locale);
+  guardNodeNetwork(state);
+  stubOsSideEffects(state);
+  scriptDialogs(state);
+  if (process.platform === 'darwin') stayInBackground(state);
+  configurePages({ locale, timezone: 'UTC' });
+
+  app.on('session-created', (ses) => guardSession(ses, state));
+  app.on('web-contents-created', (_event, contents) =>
+    prepareWebContents(contents, state),
+  );
+  void app.whenReady().then(() => guardSession(session.defaultSession, state));
+
+  return {
+    attach({ hub, registry }) {
+      const socketPath = process.env.ELECTRON_FIDDLE_DRIVER_SOCKET;
+      if (socketPath) startDriverServer(socketPath, { hub, registry, state });
+    },
+  };
+}
+
+function captureMainLog(state: TestState): void {
+  for (const level of ['log', 'info', 'warn', 'error', 'debug'] as const) {
+    const original = console[level].bind(console);
+    console[level] = (...args: unknown[]) => {
+      state.mainLog.push(`[${level}] ${format(...args)}`);
+      original(...args);
+    };
+  }
+  // An unexpected quit is hard to trace from a test, so log who asked for it.
+  const caller = () =>
+    new Error().stack
+      ?.split('\n')
+      .slice(3, 7)
+      .map((line) => line.trim())
+      .join(' <- ');
+  const quit = app.quit.bind(app);
+  const exit = app.exit.bind(app);
+  app.quit = () => {
+    console.log('[fiddle-test] app.quit() from', caller());
+    quit();
+  };
+  app.exit = (code?: number) => {
+    console.log(`[fiddle-test] app.exit(${code ?? 0}) from`, caller());
+    exit(code);
+  };
+  app.on('will-quit', () => console.log('[fiddle-test] will-quit'));
+}
+
+function applySwitches(locale: string): void {
+  const { commandLine } = app;
+  commandLine.appendSwitch('disable-background-timer-throttling');
+  commandLine.appendSwitch('disable-renderer-backgrounding');
+  commandLine.appendSwitch('disable-backgrounding-occluded-windows');
+  commandLine.appendSwitch('force-prefers-reduced-motion');
+  commandLine.appendSwitch('force-device-scale-factor', '1');
+  commandLine.appendSwitch('lang', locale);
+  if (process.platform === 'linux') commandLine.appendSwitch('password-store', 'basic');
+}
+
+function fixLocaleAndTime(locale: string): void {
+  // The launcher sets TZ for every process; this covers main's own Node.
+  process.env.TZ = 'UTC';
+  app.getPreferredSystemLanguages = () => [locale];
+  app.getLocale = () => locale;
+  app.getSystemLocale = () => locale;
+}
+
+function guardSession(ses: Session, state: TestState): void {
+  ses.webRequest.onBeforeRequest((details, callback) => {
+    if (isBlocked(details.url)) {
+      state.violation(
+        `non-loopback request (Chromium): ${details.method} ${details.url}`,
+      );
+      callback({ cancel: true });
+      return;
+    }
+    if (isNetworkUrl(details.url)) state.inflight.add(`web:${details.id}`);
+    callback({});
+  });
+  const done = (details: { id: number }) => state.inflight.delete(`web:${details.id}`);
+  ses.webRequest.onCompleted(done);
+  ses.webRequest.onErrorOccurred(done);
+}
+
+function requestUrl(input: unknown): string {
+  if (typeof input === 'string') return input;
+  if (input instanceof URL) return input.href;
+  return String((input as { url?: unknown }).url ?? '');
+}
+
+function guardNodeNetwork(state: TestState): void {
+  let seq = 0;
+  type AnyFetch = (input: never, init?: never) => Promise<Response>;
+  const guardFetch =
+    (source: string, original: AnyFetch) =>
+    async (input: never, init?: never): Promise<Response> => {
+      const url = requestUrl(input);
+      if (isBlocked(url)) {
+        state.violation(`non-loopback request (${source}): ${url}`);
+        throw new TypeError(`${source}: ${url} is blocked in test mode`);
+      }
+      const key = `${source}:${++seq}`;
+      state.inflight.add(key);
+      try {
+        return await original(input, init);
+      } finally {
+        state.inflight.delete(key);
+      }
+    };
+
+  globalThis.fetch = guardFetch(
+    'fetch',
+    globalThis.fetch.bind(globalThis),
+  ) as typeof fetch;
+  net.fetch = guardFetch('net.fetch', net.fetch.bind(net)) as typeof net.fetch;
+
+  for (const [protocol, mod] of [
+    ['http', http],
+    ['https', https],
+  ] as const) {
+    for (const name of ['request', 'get'] as const) {
+      const original = mod[name] as (...args: unknown[]) => http.ClientRequest;
+      (mod as unknown as Record<string, unknown>)[name] = function (
+        this: unknown,
+        ...args: unknown[]
+      ) {
+        const request = original.apply(this, args);
+        const url = `${protocol}://${request.host}${request.path}`;
+        if (isBlocked(url)) {
+          state.violation(`non-loopback request (node:${protocol}): ${url}`);
+          request.destroy(new Error(`${url} is blocked in test mode`));
+        }
+        return request;
+      };
+    }
+  }
+}
+
+function stubOsSideEffects(state: TestState): void {
+  const record = (kind: string, ...args: unknown[]) => {
+    state.sideEffects.push({ kind, args });
+    state.mainLog.push(`[test] stubbed ${kind} ${JSON.stringify(args)}`);
+  };
+  Object.assign(shell, {
+    openExternal: async (url: string) => record('shell.openExternal', url),
+    openPath: async (file: string) => {
+      record('shell.openPath', file);
+      return '';
+    },
+    showItemInFolder: (file: string) => record('shell.showItemInFolder', file),
+  });
+  for (const [method, result] of [
+    ['setAsDefaultProtocolClient', true],
+    ['removeAsDefaultProtocolClient', true],
+    ['addRecentDocument', undefined],
+    ['clearRecentDocuments', undefined],
+    ['moveToApplicationsFolder', false],
+    ['setJumpList', 'ok'],
+  ] as const) {
+    Object.assign(app, {
+      [method]: (...args: unknown[]) => {
+        record(`app.${method}`, ...args);
+        return result;
+      },
+    });
+  }
+  // The real clipboard is shared with every other app, including other e2e apps and the developer's.
+  let clipboardText = '';
+  Object.assign(clipboard, {
+    readText: () => clipboardText,
+    writeText: (text: string) => {
+      clipboardText = text;
+    },
+  });
+  Notification.prototype.show = function (this: Notification) {
+    record('notification.show', { title: this.title, body: this.body });
+  };
+  // A native context menu can't be driven, and on macOS it tracks the mouse in
+  // a modal loop over someone's desktop until dismissed. Record its items instead.
+  Menu.prototype.popup = function (this: Menu) {
+    record(
+      'menu.popup',
+      this.items.map((item) => (item.type === 'separator' ? '-' : item.label)),
+    );
+  };
+}
+
+/**
+ * macOS has no Xvfb, so the app shares the desktop with whoever runs the tests: no Dock icon,
+ * windows shown inactive (one level down unless FIDDLE_TEST_FOREGROUND=1), focus emulated.
+ */
+function stayInBackground(state: TestState): void {
+  const foreground = process.env.FIDDLE_TEST_FOREGROUND === '1';
+  const note = (message: string) => state.mainLog.push(`[test] ${message}`);
+  const accessory = () => {
+    try {
+      app.setActivationPolicy('accessory');
+    } catch (error) {
+      note(`setActivationPolicy failed: ${String(error)}`);
+    }
+  };
+  accessory();
+  void app.whenReady().then(() => {
+    accessory();
+    // App Nap would throttle an app nobody can see.
+    powerSaveBlocker.start('prevent-app-suspension');
+  });
+  app.focus = () => note('app.focus() skipped');
+
+  let focused: BrowserWindow | undefined;
+  /** Most recently focused last. */
+  const history: BrowserWindow[] = [];
+  const forget = (win: BrowserWindow) => {
+    const index = history.indexOf(win);
+    if (index !== -1) history.splice(index, 1);
+  };
+  const event = { preventDefault: () => undefined };
+  /** Makes `win` the focused window: `blur` for the old one, `focus` for the new (unless the OS just sent it). */
+  const setFocused = (win: BrowserWindow | undefined, announce = true) => {
+    if (win === focused) return;
+    const previous = focused;
+    focused = win;
+    if (win) {
+      forget(win);
+      history.push(win);
+    }
+    if (previous && !previous.isDestroyed()) previous.emit('blur', event);
+    if (announce && win && !win.isDestroyed()) win.emit('focus', event);
+  };
+  const refocus = () =>
+    setFocused(
+      [...history].reverse().find((win) => !win.isDestroyed() && win.isVisible()),
+    );
+
+  app.on('browser-window-created', (_event, win) => {
+    if (!foreground) win.setAlwaysOnTop(true, 'normal', -1);
+    const showInactive = win.showInactive.bind(win);
+    Object.assign(win, {
+      show: () => {
+        showInactive();
+        setFocused(win);
+      },
+      focus: () => {
+        if (win.isVisible()) setFocused(win);
+      },
+      isFocused: () => focused === win && !win.isDestroyed(),
+    });
+    // Someone clicked it, and the OS said so: follow, so the driver's default window is the one they look at.
+    win.on('focus', () => {
+      if (!win.isDestroyed()) setFocused(win, false);
+    });
+    win.on('hide', () => {
+      if (focused === win) refocus();
+    });
+    win.on('closed', () => {
+      forget(win);
+      if (focused === win) refocus();
+    });
+  });
+}
+
+/** Only what's useful in assertions; options can hold windows and functions. */
+function summarize(options: Record<string, unknown>): Record<string, unknown> {
+  const keys =
+    'type title message detail buttons checkboxLabel defaultPath filters properties cancelId defaultId';
+  return Object.fromEntries(
+    keys
+      .split(' ')
+      .filter((key) => key in options)
+      .map((key) => [key, options[key]]),
+  );
+}
+
+function scriptDialogs(state: TestState): void {
+  // dialog.showX(options) or dialog.showX(window, options).
+  const optionsOf = (args: unknown[]) =>
+    ((args.length > 1 ? args[1] : args[0]) ?? {}) as Record<string, unknown>;
+
+  const respond = (kind: DialogKind, options: Record<string, unknown>) => {
+    const queued = state.dialogQueue[kind].shift();
+    const summary = summarize(options);
+    if (!queued) {
+      state.violation(`unexpected ${kind} dialog: ${JSON.stringify(summary)}`);
+    }
+    const response = resolveDialog(kind, queued, options, state);
+    state.dialogs.push({
+      kind,
+      options: summary,
+      response,
+      scripted: queued !== undefined,
+    });
+    return response;
+  };
+
+  type MessageBox = Electron.MessageBoxReturnValue;
+  type Open = Electron.OpenDialogReturnValue;
+  type Save = Electron.SaveDialogReturnValue;
+  Object.assign(dialog, {
+    showMessageBox: async (...args: unknown[]) =>
+      respond('messageBox', optionsOf(args)) as MessageBox,
+    showOpenDialog: async (...args: unknown[]) =>
+      respond('open', optionsOf(args)) as Open,
+    showSaveDialog: async (...args: unknown[]) =>
+      respond('save', optionsOf(args)) as Save,
+    showErrorBox: (title: string, content: string) => {
+      state.dialogs.push({
+        kind: 'errorBox',
+        options: { title, content },
+        response: null,
+        scripted: false,
+      });
+      state.mainLog.push(`[test] error box: ${title}: ${content}`);
+    },
+  });
+}
+
+function resolveDialog(
+  kind: DialogKind,
+  queued: DialogResponse | undefined,
+  options: Record<string, unknown>,
+  state: TestState,
+): unknown {
+  // No answer, `canceled` or an answer for another kind of dialog: cancelled.
+  const given = (queued && !('canceled' in queued) ? queued : {}) as Partial<
+    { filePaths: string[]; filePath: string } & Electron.MessageBoxReturnValue & {
+        button: string;
+      }
+  >;
+  if (kind === 'open')
+    return { canceled: !given.filePaths, filePaths: given.filePaths ?? [] };
+  if (kind === 'save')
+    return { canceled: given.filePath === undefined, filePath: given.filePath ?? '' };
+  let response =
+    given.response ?? (typeof options.cancelId === 'number' ? options.cancelId : 0);
+  if (given.button !== undefined) {
+    const buttons = Array.isArray(options.buttons) ? (options.buttons as string[]) : [];
+    const index = buttons.indexOf(given.button);
+    if (index !== -1) response = index;
+    else
+      state.violation(
+        `queued button ${JSON.stringify(given.button)} is not in ${JSON.stringify(buttons)}`,
+      );
+  }
+  return { response, checkboxChecked: given.checkboxChecked ?? false };
+}
+
+function prepareWebContents(contents: WebContents, state: TestState): void {
+  if (contents.getType() !== 'window') return;
+  contents.setBackgroundThrottling(false);
+
+  // Count IPC invocations in flight, for waitForIdle. EIPC binds with contents.ipc.handle.
+  const ipc = contents.ipc;
+  const handle = ipc.handle.bind(ipc);
+  ipc.handle = (channel, listener) =>
+    handle(channel, async (...args) => {
+      state.pendingIpc++;
+      try {
+        return await listener(...args);
+      } finally {
+        state.pendingIpc--;
+      }
+    });
+
+  contents.on('console-message', (event) => {
+    state.rendererLog.push(
+      `[${contents.id}:${event.level}] ${event.message} (${event.sourceId}:${event.lineNumber})`,
+    );
+  });
+  contents.on('render-process-gone', (_event, details) => {
+    state.violation(`renderer ${contents.id} gone: ${details.reason}`);
+  });
+  contents.on('dom-ready', () => {
+    contents.insertCSS(NO_ANIMATION_CSS).catch(() => undefined);
+  });
+  pageFor(contents)
+    .attach()
+    .catch((error: unknown) => {
+      state.mainLog.push(`[test] debugger attach deferred: ${String(error)}`);
+    });
+}
