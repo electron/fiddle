@@ -1,0 +1,9 @@
+{
+  "updateAvailableTitle": "有可用的更新",
+  "updateAvailableDescription": "Electron Fiddle {{version}} 已可下載。",
+  "download": "下載",
+  "crashNoticeTitle": "已開啟當機報告",
+  "crashNoticeDescription": "若 Electron Fiddle 當機，它會傳送報告以便修正錯誤。報告絕不包含您的程式碼。您可以在「設定」中將其關閉。",
+  "crashNoticeAction": "隱私權設定",
+  "openSettingsFailed": "無法開啟設定"
+}

@@ -1,0 +1,31 @@
+{
+  "package": {
+    "name": "electron-fiddle",
+    "productName": "Electron Fiddle"
+  },
+  "packager": {
+    "name": "Electron Fiddle",
+    "executableName": "electron-fiddle",
+    "appBundleId": "com.electron.fiddle",
+    "appCategoryType": "public.app-category.developer-tools",
+    "protocols": ["electron-fiddle"],
+    "companyName": "Electron Community"
+  },
+  "squirrel": {
+    "name": "electron-fiddle",
+    "exe": "electron-fiddle.exe",
+    "setupExe": "electron-fiddle-<version>-win32-x64-setup.exe",
+    "noMsi": true
+  },
+  "msix": {
+    "packageIdentity": "ElectronCommunity.ElectronFiddle",
+    "publisher": "CN=OpenJS Foundation, O=OpenJS Foundation, L=San Francisco, S=California, C=US"
+  },
+  "linux": {
+    "deb": "electron-fiddle",
+    "rpm": "electron-fiddle",
+    "appImage": "Electron Fiddle",
+    "bin": "electron-fiddle",
+    "mimeType": ["x-scheme-handler/electron-fiddle"]
+  }
+}

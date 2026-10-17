@@ -1,0 +1,1 @@
+// minimal-repro fixture renderer

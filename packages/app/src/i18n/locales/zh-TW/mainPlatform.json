@@ -1,0 +1,17 @@
+{
+  "updateReadyTitle": "更新已就緒",
+  "updateReadyDetail": "已下載新版的 Electron Fiddle。請重新啟動應用程式以使用新版。",
+  "restart": "重新啟動",
+  "later": "稍後",
+  "moveMessage": "要將 Electron Fiddle 移至「應用程式」資料夾嗎？",
+  "moveDetail": "只有在「應用程式」資料夾中，更新才能穩定安裝。",
+  "moveButton": "移至「應用程式」",
+  "dontMove": "不移動",
+  "aboutVersion": "{{version}} (Electron {{electron}})",
+  "aboutCopyright": "© Electron 作者",
+  "resetPrivacyMessage": "要重設所有隱私權限嗎？",
+  "resetPrivacyDetail": "Electron Fiddle 與它所執行的 fiddle 將失去對相機、麥克風、聯絡人及其他受保護資料的存取權。fiddle 是以標準的 Electron 應用程式執行，因此其他在純 Electron 下載版上執行的應用程式也會失去存取權。macOS 會在它們下次需要時再次詢問。",
+  "resetPrivacyButton": "重設",
+  "resetPrivacyFailed": "無法重設隱私權限。",
+  "resetPrivacyUnavailable": "只有在 macOS 上才能重設隱私權限。"
+}

@@ -1,0 +1,41 @@
+.popover {
+  composes: lu-overlay-glass from global;
+  z-index: var(--lu-z-popover);
+  min-width: 200px;
+  padding: 14px 16px;
+  border-radius: var(--lu-radius-panel);
+}
+
+.popover[data-entering] {
+  animation: pop-in var(--lu-dur-base) var(--lu-ease);
+}
+
+@keyframes pop-in {
+  from {
+    opacity: 0;
+    transform: scale(0.97);
+  }
+}
+
+.dialog {
+  outline: none;
+}
+
+.arrow svg {
+  display: block;
+  fill: var(--lu-material-overlay);
+  stroke: var(--lu-button-edge);
+  stroke-width: var(--lu-size-hairline);
+}
+
+.arrow[data-placement='bottom'] svg {
+  transform: rotate(180deg);
+}
+
+.arrow[data-placement='left'] svg {
+  transform: rotate(-90deg);
+}
+
+.arrow[data-placement='right'] svg {
+  transform: rotate(90deg);
+}
