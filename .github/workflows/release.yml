@@ -152,7 +152,7 @@ jobs:
   test:
     permissions:
       contents: read
-    uses: ./.github/workflows/test.yml
+    uses: $/.github/workflows/test.yml
 
   release:
     name: Release
