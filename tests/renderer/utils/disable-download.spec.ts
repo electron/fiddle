@@ -34,6 +34,28 @@ describe('disableDownload', () => {
     expect(disableDownload('8.0.0')).toBe(false);
   });
 
+  it('returns true for Electron 44 and higher on 32-bit Windows', () => {
+    overrideRendererPlatform('win32');
+    overrideRendererArch('ia32');
+
+    expect(disableDownload('43.0.0')).toBe(false);
+    expect(disableDownload('44.0.0-alpha.3')).toBe(false);
+    expect(disableDownload('44.0.0-alpha.4')).toBe(true);
+    expect(disableDownload('44.0.0')).toBe(true);
+    expect(disableDownload('44.5.1')).toBe(true);
+    expect(disableDownload('46.0.0-nightly.20261021')).toBe(true);
+  });
+
+  it('returns true for Electron 44 and higher on 32-bit ARM Linux', () => {
+    overrideRendererPlatform('linux');
+    overrideRendererArch('arm');
+
+    expect(disableDownload('43.0.0')).toBe(false);
+    expect(disableDownload('44.0.0-alpha.3')).toBe(false);
+    expect(disableDownload('44.0.0-alpha.4')).toBe(true);
+    expect(disableDownload('44.5.1')).toBe(true);
+  });
+
   it('always return false when the system is linux', () => {
     overrideRendererPlatform('linux');
 
