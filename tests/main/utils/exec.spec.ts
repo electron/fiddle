@@ -6,9 +6,10 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { exec } from '../../../src/main/utils/exec';
 import { overridePlatform, resetPlatform } from '../../utils';
 
-vi.mock('node:child_process', () => ({
-  default: { exec: vi.fn() },
-}));
+vi.mock('node:child_process', () => {
+  const exec = vi.fn();
+  return { default: { exec }, exec };
+});
 
 vi.mock('shell-env');
 
