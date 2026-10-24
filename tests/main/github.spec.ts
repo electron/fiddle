@@ -123,7 +123,7 @@ describe('github', () => {
     app.setPath('userData', userDataPath);
     // Confirm that the folder we just created will hold the credentials file
     expect(getCredentialsPath().startsWith(userDataPath)).toBe(true);
-    expect(loadToken()).toBeNull();
+    await expect(loadToken()).resolves.toBeNull();
   });
 
   afterEach(async () => {
@@ -134,14 +134,14 @@ describe('github', () => {
   describe('handleTokenSignIn()', () => {
     it('saves encrypted tokens to a permission-protected userData file', async () => {
       mockOctokitInstance();
-      expect(loadToken()).toBeNull();
+      await expect(loadToken()).resolves.toBeNull();
 
       for (const token of [VALID_GHP_TOKEN, VALID_PAT_TOKEN]) {
         const result = await handleTokenSignIn(MOCK_EVENT, token);
         expect(result).toEqual({ success: true, login: MOCK_LOGIN });
 
-        const encrypted = safeStorage.encryptString(token);
-        expect(loadToken()).toBe(token);
+        const encrypted = await safeStorage.encryptStringAsync(token);
+        await expect(loadToken()).resolves.toBe(token);
         expect(fs.readFileSync(getCredentialsPath())).toEqual(encrypted);
         // POSIX permission bits aren't meaningful on Windows
         if (process.platform !== 'win32')
@@ -172,7 +172,9 @@ describe('github', () => {
     });
 
     it('rejects when encryption is unavailable', async () => {
-      vi.mocked(safeStorage.isEncryptionAvailable).mockReturnValue(false);
+      vi.mocked(safeStorage.isAsyncEncryptionAvailable).mockResolvedValue(
+        false,
+      );
       const result = await handleTokenSignIn(MOCK_EVENT, VALID_GHP_TOKEN);
       expect(result.success).toBe(false);
       expect(result.error).toContain('Encryption is not available');
@@ -211,25 +213,80 @@ describe('github', () => {
   describe('handleTokenSignOut()', () => {
     it('deletes the stored token', async () => {
       // setup: set a token & confirm it loads
-      saveToken(VALID_GHP_TOKEN);
-      expect(loadToken()).toBe(VALID_GHP_TOKEN);
+      await saveToken(VALID_GHP_TOKEN);
+      await expect(loadToken()).resolves.toBe(VALID_GHP_TOKEN);
       await expect(handleTokenSignOut(MOCK_EVENT)).resolves.toBeUndefined();
-      expect(loadToken()).toBeNull();
+      await expect(loadToken()).resolves.toBeNull();
     });
   });
 
   describe('handleTokenCheckAuth()', () => {
     it('returns null when decryption fails', async () => {
-      saveToken(VALID_GHP_TOKEN);
-      vi.mocked(safeStorage.decryptString).mockImplementationOnce(() => {
-        throw new Error('corrupt');
-      });
+      await saveToken(VALID_GHP_TOKEN);
+      vi.mocked(safeStorage.decryptStringAsync).mockRejectedValueOnce(
+        new Error('corrupt'),
+      );
       const result = await handleTokenCheckAuth(MOCK_EVENT);
       expect(result).toEqual({ login: null, hasToken: false });
     });
 
+    it('re-encrypts the stored token when the key has changed', async () => {
+      fs.writeFileSync(getCredentialsPath(), 'stale-encrypted-token');
+      vi.mocked(safeStorage.decryptStringAsync).mockResolvedValueOnce({
+        shouldReEncrypt: true,
+        result: VALID_GHP_TOKEN,
+      });
+      mockOctokitInstance();
+      const result = await handleTokenCheckAuth(MOCK_EVENT);
+      expect(result).toEqual({ login: MOCK_LOGIN, hasToken: true });
+      expect(fs.readFileSync(getCredentialsPath())).toEqual(
+        await safeStorage.encryptStringAsync(VALID_GHP_TOKEN),
+      );
+    });
+
+    it('keeps a valid token when re-encrypting it fails', async () => {
+      await saveToken(VALID_GHP_TOKEN);
+      vi.mocked(safeStorage.decryptStringAsync).mockResolvedValueOnce({
+        shouldReEncrypt: true,
+        result: VALID_GHP_TOKEN,
+      });
+      vi.mocked(safeStorage.encryptStringAsync).mockRejectedValueOnce(
+        new Error('keychain locked'),
+      );
+      mockOctokitInstance();
+      const result = await handleTokenCheckAuth(MOCK_EVENT);
+      expect(result).toEqual({ login: MOCK_LOGIN, hasToken: true });
+    });
+
+    it('does not restore auth when signing out during decryption', async () => {
+      await saveToken(VALID_GHP_TOKEN);
+      mockOctokitInstance();
+      let resolveDecrypt!: (
+        value: Electron.DecryptStringAsyncReturnValue,
+      ) => void;
+      vi.mocked(safeStorage.decryptStringAsync).mockReturnValueOnce(
+        new Promise((resolve) => {
+          resolveDecrypt = resolve;
+        }),
+      );
+
+      const check = handleTokenCheckAuth(MOCK_EVENT);
+      await handleTokenSignOut(MOCK_EVENT);
+      resolveDecrypt({ shouldReEncrypt: true, result: VALID_GHP_TOKEN });
+
+      await expect(check).resolves.toEqual({ login: null, hasToken: true });
+      expect(fs.existsSync(getCredentialsPath())).toBe(false);
+      await expect(
+        handleGistCreate(MOCK_EVENT, {
+          description: 'Test',
+          files: VALID_FILES,
+          isPublic: false,
+        }),
+      ).rejects.toThrow('Not authenticated');
+    });
+
     it('returns login when a valid token is stored', async () => {
-      saveToken(VALID_GHP_TOKEN);
+      await saveToken(VALID_GHP_TOKEN);
       mockOctokitInstance();
       const result = await handleTokenCheckAuth(MOCK_EVENT);
       expect(result).toEqual({ login: MOCK_LOGIN, hasToken: true });
@@ -237,14 +294,14 @@ describe('github', () => {
 
     it('returns null when no token is stored', async () => {
       // setup: confirm there's no token
-      expect(loadToken()).toBeNull();
+      await expect(loadToken()).resolves.toBeNull();
 
       const result = await handleTokenCheckAuth(MOCK_EVENT);
       expect(result).toEqual({ login: null, hasToken: false });
     });
 
     it('cleans up and returns null for expired tokens', async () => {
-      saveToken(VALID_GHP_TOKEN);
+      await saveToken(VALID_GHP_TOKEN);
       mockOctokitInstance({
         users: {
           getAuthenticated: vi
@@ -257,11 +314,11 @@ describe('github', () => {
 
       const result = await handleTokenCheckAuth(MOCK_EVENT);
       expect(result).toEqual({ login: null, hasToken: false });
-      expect(loadToken()).toBeNull();
+      await expect(loadToken()).resolves.toBeNull();
     });
 
     it('preserves the token and reports hasToken for transient failures', async () => {
-      saveToken(VALID_GHP_TOKEN);
+      await saveToken(VALID_GHP_TOKEN);
       mockOctokitInstance({
         users: {
           getAuthenticated: vi.fn().mockRejectedValue(new Error('offline')),
@@ -271,11 +328,11 @@ describe('github', () => {
       const result = await handleTokenCheckAuth(MOCK_EVENT);
 
       expect(result).toEqual({ login: null, hasToken: true });
-      expect(loadToken()).toBe(VALID_GHP_TOKEN);
+      await expect(loadToken()).resolves.toBe(VALID_GHP_TOKEN);
     });
 
     it('keeps octokit_ usable after a transient failure', async () => {
-      saveToken(VALID_GHP_TOKEN);
+      await saveToken(VALID_GHP_TOKEN);
       mockOctokitInstance({
         users: {
           getAuthenticated: vi.fn().mockRejectedValue(new Error('offline')),

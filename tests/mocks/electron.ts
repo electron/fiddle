@@ -189,11 +189,18 @@ const systemPreferences = {
 };
 
 const safeStorage = {
-  isEncryptionAvailable: vi.fn(() => true),
-  encryptString: vi.fn((text: string) => Buffer.from(`encrypted:${text}`)),
-  decryptString: vi.fn((buffer: Buffer) => {
+  isAsyncEncryptionAvailable: vi.fn(async () => true),
+  encryptStringAsync: vi.fn(async (text: string) =>
+    Buffer.from(`encrypted:${text}`),
+  ),
+  decryptStringAsync: vi.fn(async (buffer: Buffer) => {
     const str = buffer.toString();
-    return str.startsWith('encrypted:') ? str.slice('encrypted:'.length) : str;
+    return {
+      shouldReEncrypt: false,
+      result: str.startsWith('encrypted:')
+        ? str.slice('encrypted:'.length)
+        : str,
+    };
   }),
 };
 

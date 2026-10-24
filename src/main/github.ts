@@ -90,19 +90,41 @@ function getCredentialsPath(): string {
   return pathJoin(app.getPath('userData'), CREDENTIALS_FILE);
 }
 
-function saveToken(token: string): void {
-  const encrypted = safeStorage.encryptString(token);
+// Bumped on every sign-in and sign-out, so work that awaited the async
+// safeStorage API can tell that the stored credentials changed meanwhile.
+let authGeneration_ = 0;
+
+function writeCredentials(encrypted: Buffer): void {
   fs.writeFileSync(getCredentialsPath(), encrypted, { mode: 0o600 });
 }
 
-function loadToken(): string | null {
-  const credPath = getCredentialsPath();
+async function saveToken(token: string): Promise<void> {
+  writeCredentials(await safeStorage.encryptStringAsync(token));
+}
+
+async function loadToken(): Promise<string | null> {
+  const generation = authGeneration_;
+  let decrypted: Electron.DecryptStringAsyncReturnValue;
   try {
-    const encrypted = fs.readFileSync(credPath);
-    return safeStorage.decryptString(encrypted);
+    const encrypted = fs.readFileSync(getCredentialsPath());
+    decrypted = await safeStorage.decryptStringAsync(encrypted);
   } catch {
     return null;
   }
+
+  // The encryption key was rotated or upgraded, so store the token with the
+  // new key. This is best-effort, since the decrypted token is still valid,
+  // and it must not recreate credentials that a sign-out has just deleted.
+  if (decrypted.shouldReEncrypt) {
+    try {
+      const encrypted = await safeStorage.encryptStringAsync(decrypted.result);
+      if (generation === authGeneration_) writeCredentials(encrypted);
+    } catch (error) {
+      console.warn('Failed to re-encrypt the stored GitHub token', error);
+    }
+  }
+
+  return decrypted.result;
 }
 
 function deleteToken(): void {
@@ -134,7 +156,7 @@ async function handleTokenSignIn(
   if (!isValidToken(token))
     return { success: false, error: 'Invalid token format.' };
 
-  if (!safeStorage.isEncryptionAvailable()) {
+  if (!(await safeStorage.isAsyncEncryptionAvailable())) {
     return {
       success: false,
       error:
@@ -154,7 +176,8 @@ async function handleTokenSignIn(
           'Token is missing the "gist" scope. Please generate a new token with gist permissions.',
       };
 
-    saveToken(token);
+    authGeneration_++;
+    await saveToken(token);
     octokit_ = testOctokit;
 
     return { success: true, login: response.data.login };
@@ -168,6 +191,7 @@ async function handleTokenSignIn(
 }
 
 async function handleTokenSignOut(_event: IpcMainInvokeEvent): Promise<void> {
+  authGeneration_++;
   deleteToken();
   octokit_ = null;
 }
@@ -175,7 +199,13 @@ async function handleTokenSignOut(_event: IpcMainInvokeEvent): Promise<void> {
 async function handleTokenCheckAuth(
   _event: IpcMainInvokeEvent,
 ): Promise<GitHubCheckAuthResult> {
-  const token = loadToken();
+  const generation = authGeneration_;
+  const token = await loadToken();
+
+  // A sign-in or sign-out finished while the token was being decrypted, so
+  // this result is stale. Report it like an offline check, which the renderer
+  // ignores, instead of overwriting the newer auth state.
+  if (generation !== authGeneration_) return { login: null, hasToken: true };
   if (!token) return { login: null, hasToken: false };
 
   try {

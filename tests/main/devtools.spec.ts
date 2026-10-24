@@ -1,14 +1,16 @@
 /**
  * @vitest-environment node
  */
-import { type Mock, beforeAll, describe, expect, it, vi } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 
 import { setupDevTools } from '../../src/main/devtools';
 import { isDevMode } from '../../src/main/utils/devmode';
 
 vi.mock('../../src/main/utils/devmode');
 
-const installExtensionPromise = vi.hoisted(async () => {
+// Await the hoisted factory so its dynamic import finishes before the module
+// imports below are evaluated, otherwise the devmode mock can lose the race.
+const installExtension = await vi.hoisted(async () => {
   const { mockRequire } = await import('../utils.js');
   const installExtension = vi.fn();
 
@@ -22,12 +24,6 @@ const installExtensionPromise = vi.hoisted(async () => {
 });
 
 describe('devtools', () => {
-  let installExtension: Mock;
-
-  beforeAll(async () => {
-    installExtension = await installExtensionPromise;
-  });
-
   it('does not set up developer tools if not in dev mode', async () => {
     vi.mocked(isDevMode).mockReturnValue(false);
     await setupDevTools();
