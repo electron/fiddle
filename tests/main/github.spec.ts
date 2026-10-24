@@ -244,6 +244,47 @@ describe('github', () => {
       );
     });
 
+    it('keeps a valid token when re-encrypting it fails', async () => {
+      await saveToken(VALID_GHP_TOKEN);
+      vi.mocked(safeStorage.decryptStringAsync).mockResolvedValueOnce({
+        shouldReEncrypt: true,
+        result: VALID_GHP_TOKEN,
+      });
+      vi.mocked(safeStorage.encryptStringAsync).mockRejectedValueOnce(
+        new Error('keychain locked'),
+      );
+      mockOctokitInstance();
+      const result = await handleTokenCheckAuth(MOCK_EVENT);
+      expect(result).toEqual({ login: MOCK_LOGIN, hasToken: true });
+    });
+
+    it('does not restore auth when signing out during decryption', async () => {
+      await saveToken(VALID_GHP_TOKEN);
+      mockOctokitInstance();
+      let resolveDecrypt!: (
+        value: Electron.DecryptStringAsyncReturnValue,
+      ) => void;
+      vi.mocked(safeStorage.decryptStringAsync).mockReturnValueOnce(
+        new Promise((resolve) => {
+          resolveDecrypt = resolve;
+        }),
+      );
+
+      const check = handleTokenCheckAuth(MOCK_EVENT);
+      await handleTokenSignOut(MOCK_EVENT);
+      resolveDecrypt({ shouldReEncrypt: true, result: VALID_GHP_TOKEN });
+
+      await expect(check).resolves.toEqual({ login: null, hasToken: true });
+      expect(fs.existsSync(getCredentialsPath())).toBe(false);
+      await expect(
+        handleGistCreate(MOCK_EVENT, {
+          description: 'Test',
+          files: VALID_FILES,
+          isPublic: false,
+        }),
+      ).rejects.toThrow('Not authenticated');
+    });
+
     it('returns login when a valid token is stored', async () => {
       await saveToken(VALID_GHP_TOKEN);
       mockOctokitInstance();
