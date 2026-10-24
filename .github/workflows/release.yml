@@ -25,8 +25,6 @@ jobs:
           - os: macos-latest-xlarge
             arch: arm64
           - os: ubuntu-24.04-arm
-            arch: armv7l
-          - os: ubuntu-24.04-arm
             arch: arm64
     runs-on: "${{ matrix.os }}"
     permissions:
@@ -85,7 +83,6 @@ jobs:
       matrix:
         arch:
           - x64
-          - ia32
     runs-on: windows-latest
     permissions:
       actions: write

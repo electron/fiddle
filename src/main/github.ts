@@ -90,16 +90,20 @@ function getCredentialsPath(): string {
   return pathJoin(app.getPath('userData'), CREDENTIALS_FILE);
 }
 
-function saveToken(token: string): void {
-  const encrypted = safeStorage.encryptString(token);
+async function saveToken(token: string): Promise<void> {
+  const encrypted = await safeStorage.encryptStringAsync(token);
   fs.writeFileSync(getCredentialsPath(), encrypted, { mode: 0o600 });
 }
 
-function loadToken(): string | null {
+async function loadToken(): Promise<string | null> {
   const credPath = getCredentialsPath();
   try {
     const encrypted = fs.readFileSync(credPath);
-    return safeStorage.decryptString(encrypted);
+    const { result, shouldReEncrypt } =
+      await safeStorage.decryptStringAsync(encrypted);
+    // The encryption key was rotated or upgraded, so store it with the new key
+    if (shouldReEncrypt) await saveToken(result);
+    return result;
   } catch {
     return null;
   }
@@ -134,7 +138,7 @@ async function handleTokenSignIn(
   if (!isValidToken(token))
     return { success: false, error: 'Invalid token format.' };
 
-  if (!safeStorage.isEncryptionAvailable()) {
+  if (!(await safeStorage.isAsyncEncryptionAvailable())) {
     return {
       success: false,
       error:
@@ -154,7 +158,7 @@ async function handleTokenSignIn(
           'Token is missing the "gist" scope. Please generate a new token with gist permissions.',
       };
 
-    saveToken(token);
+    await saveToken(token);
     octokit_ = testOctokit;
 
     return { success: true, login: response.data.login };
@@ -175,7 +179,7 @@ async function handleTokenSignOut(_event: IpcMainInvokeEvent): Promise<void> {
 async function handleTokenCheckAuth(
   _event: IpcMainInvokeEvent,
 ): Promise<GitHubCheckAuthResult> {
-  const token = loadToken();
+  const token = await loadToken();
   if (!token) return { login: null, hasToken: false };
 
   try {
