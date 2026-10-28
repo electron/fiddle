@@ -2545,7 +2545,7 @@ __metadata:
     "@types/react-dom": "npm:^19.2.7"
     "@types/semver": "npm:^7.8.0"
     "@vitejs/plugin-react": "npm:^6.1.1"
-    electron: "npm:^44.3.0"
+    electron: "npm:^45.1.0"
     i18next: "npm:^26.4.2"
     monaco-editor: "npm:^0.56.0"
     prettier: "npm:^3.9.6"
@@ -2670,9 +2670,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"electron@npm:^44.3.0":
-  version: 44.3.0
-  resolution: "electron@npm:44.3.0"
+"electron@npm:^45.1.0":
+  version: 45.1.0
+  resolution: "electron@npm:45.1.0"
   dependencies:
     "@electron-internal/extract-zip": "npm:^1.0.1"
     "@electron/get": "npm:^5.0.0"
@@ -2680,7 +2680,7 @@ __metadata:
   bin:
     electron: cli.js
     install-electron: install.js
-  checksum: 10c0/de84b047e0227802628107a4b23be2a53df8b3a50ba9db139684ef2be2246f4dfb4c7a672a6e910581906761648b03cb47718f8c8f7bf6cb87ce4324c821617a
+  checksum: 10c0/ac5b2ee3eb40c20b989be2aab6f1201515440088c7cf418ff15baf6b3a3a53f4a09d560dc023c31233a107b8b3a34083d8c17a41a77a703db0c380d7008f33ca
   languageName: node
   linkType: hard
 
