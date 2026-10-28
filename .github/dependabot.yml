@@ -1,8 +1,16 @@
 version: 2
 updates:
-  - package-ecosystem: "github-actions"
-    directory: "/"
+  - package-ecosystem: 'github-actions'
+    directory: '/'
     schedule:
-      interval: "daily"
+      interval: 'daily'
+    cooldown:
+      default-days: 7
+  # Matches `npmMinimalAgeGate` in .yarnrc.yml. Forge, its plugins and Vite are
+  # pinned exactly, so each upgrade arrives as its own PR.
+  - package-ecosystem: 'npm'
+    directory: '/'
+    schedule:
+      interval: 'weekly'
     cooldown:
       default-days: 7

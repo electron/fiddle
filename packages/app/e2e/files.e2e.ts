@@ -1,0 +1,122 @@
+// The file list: add files, the validation errors for names the fiddle can't
+// take, and the row's context menu (rename, close tab, open and delete).
+import { describe, expect, it } from 'vitest';
+
+import { role, useApp, windowState } from './harness.ts';
+
+const FAILED = "Couldn't change the file";
+
+describe('files', () => {
+  const app = useApp();
+  const files = async () => (await windowState(app())).fiddle.files;
+  const names = async () => (await files()).map((file) => file.name);
+  const failures = async () => (await app().snapshot(0)).split(FAILED).length - 1;
+
+  const addFile = async (name: string) => {
+    await app().click(role('button', 'Add file'));
+    await app().query(role('dialog', 'New file'));
+    await app().type(name, role('textbox', 'File name'));
+  };
+
+  it('adds a file, confirming its name with Enter', async () => {
+    await addFile('extra.js');
+    await app().press('Enter');
+    await app().waitForAbsent(role('dialog', 'New file'));
+    // A new file is unsaved, and its tab says so.
+    await app().query(role('tab', /^extra\.js\b/));
+    expect(await files()).toContainEqual({ name: 'extra.js', visible: true });
+    expect((await windowState(app())).fiddle.activeFile).toBe('extra.js');
+  });
+
+  it('cancels a new file with Escape', async () => {
+    await addFile('cancelled.js');
+    await app().press('Escape');
+    await app().waitForAbsent(role('dialog', 'New file'));
+    expect(await names()).not.toContain('cancelled.js');
+  });
+
+  it.each([
+    ['an unsupported extension', 'notes.md'],
+    ['a path separator', 'lib/util.js'],
+    ['a duplicate name', 'extra.js'],
+    ['a reserved name', 'package.json'],
+    ['a second main entry', 'main.mjs'],
+  ])('refuses %s', async (_what, name) => {
+    const before = await files();
+    const shown = await failures();
+    await addFile(name);
+    await app().press('Enter');
+    await expect.poll(failures).toBeGreaterThan(shown);
+    expect(await files()).toEqual(before);
+  });
+
+  it('renames, closes, opens and deletes a file from its context menu', async () => {
+    /** From the keyboard: a click on the row would put the focus in the file's editor. */
+    const openMenu = async (file: string) => {
+      await app().query(role('row', file));
+      await app().evaluate(
+        `document.querySelector('[role="row"][data-key=${JSON.stringify(file)}]').focus()`,
+      );
+      await app().press('Shift+F10');
+    };
+    const fromMenu = async (file: string, item: string) => {
+      await openMenu(file);
+      await app().click(role('menuitem', item));
+    };
+
+    // Escape closes the menu and leaves the window intact.
+    await openMenu('extra.js');
+    await app().query(role('menu', 'File actions'));
+    await app().press('Escape');
+    await app().waitForAbsent(role('menu', 'File actions'));
+
+    await fromMenu('extra.js', 'Rename…');
+    await app().query(role('dialog', 'Rename extra.js'));
+    await app().press('CmdOrCtrl+A', role('textbox', 'File name'));
+    await app().type('renamed.js');
+    await app().press('Enter');
+    await expect.poll(names).toContain('renamed.js');
+    expect(await names()).not.toContain('extra.js');
+
+    await fromMenu('renamed.js', 'Close tab');
+    await expect.poll(files).toContainEqual({ name: 'renamed.js', visible: false });
+    // A click on the row would reopen the file, so open the menu from the keyboard once focus is back on it.
+    await app().waitForAbsent(role('menu', 'File actions'));
+    await app().waitForIdle();
+    await app().press('Shift+F10');
+    await app().click(role('menuitem', 'Open'));
+    await expect.poll(files).toContainEqual({ name: 'renamed.js', visible: true });
+
+    await fromMenu('renamed.js', 'Delete…');
+    await app().query(role('alertdialog', 'Delete renamed.js?'));
+    await app().click(role('button', 'Delete'));
+    await expect.poll(names).not.toContain('renamed.js');
+  });
+
+  /** The given snapshot lines in the order the accessibility snapshot has them, leaving out the ones it lacks. */
+  const snapshotOrder = async (lines: string[]) => {
+    const snapshot = await app().snapshot();
+    return lines
+      .map((line) => [line, snapshot.indexOf(line)] as const)
+      .filter(([, at]) => at !== -1)
+      .sort(([, a], [, b]) => a - b)
+      .map(([line]) => line);
+  };
+
+  it('lists files in one flat list, in fiddle order', async () => {
+    await app().query(role('heading', 'Files'));
+    await addFile('data.json');
+    await app().press('Enter');
+    await app().query(role('row', 'data.json'));
+    const expected = [
+      'heading "Files"',
+      'row "main.js"',
+      'row "renderer.js"',
+      'row "index.html"',
+      'row "preload.js"',
+      'row "data.json"',
+      'button "Add file"',
+    ];
+    expect(await snapshotOrder(expected)).toEqual(expected);
+  });
+});

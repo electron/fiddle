@@ -1,0 +1,25 @@
+{
+  "hits": [
+    {
+      "objectID": "left-pad",
+      "name": "left-pad",
+      "version": "1.1.0",
+      "description": "String left pad",
+      "owner": { "name": "fixture" },
+      "humanDownloadsLast30Days": "1m"
+    },
+    {
+      "objectID": "lodash",
+      "name": "lodash",
+      "version": "1.1.0",
+      "description": "Lodash modular utilities.",
+      "owner": { "name": "fixture" },
+      "humanDownloadsLast30Days": "200m"
+    }
+  ],
+  "nbHits": 2,
+  "page": 0,
+  "nbPages": 1,
+  "hitsPerPage": 20,
+  "query": "fixture"
+}

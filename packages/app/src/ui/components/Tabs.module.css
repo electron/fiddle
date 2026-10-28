@@ -1,0 +1,160 @@
+.tabs {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.list {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  min-width: 0;
+}
+
+.tab {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  flex: none;
+  height: var(--lu-size-row);
+  padding: 0 11px;
+  border-radius: var(--lu-radius-item);
+  corner-shape: squircle;
+  color: var(--lu-ink-muted);
+  font: var(--lu-type-tab);
+  letter-spacing: var(--lu-type-label-tracking);
+  white-space: nowrap;
+  user-select: none;
+  cursor: default;
+  outline: none;
+  -webkit-app-region: no-drag;
+  transition:
+    background-color var(--lu-dur-fast) var(--lu-ease),
+    color var(--lu-dur-fast) var(--lu-ease);
+}
+
+.tab[data-hovered]:not([data-selected]) {
+  background: color-mix(in srgb, var(--lu-hover) 55%, transparent);
+}
+
+.tab[data-selected] {
+  background: var(--lu-hover);
+  color: var(--lu-ink);
+}
+
+.tab[data-disabled] {
+  opacity: var(--lu-disabled-opacity);
+}
+
+.tab[data-focus-visible] {
+  outline: var(--lu-focus-outline);
+  outline-offset: -3px;
+}
+
+.icon {
+  color: var(--lu-ink-muted);
+}
+
+.label {
+  composes: lu-truncate from global;
+}
+
+.errors {
+  flex: none;
+  min-width: 17px;
+  height: 16px;
+  padding: 0 4px;
+  border-radius: var(--lu-radius-capsule);
+  background: var(--lu-spark-soft);
+  color: var(--lu-spark);
+  font: var(--lu-type-count);
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+.errors[data-tone='warning'] {
+  background: color-mix(in srgb, var(--lu-warning) 16%, transparent);
+  color: var(--lu-warning);
+}
+
+.dot {
+  flex: none;
+  width: 6px;
+  height: 6px;
+  border-radius: var(--lu-radius-round);
+  background: var(--lu-ink-faint);
+}
+
+/* A closable tab ends in a 16px close glyph, shown on the selected, hovered
+   or focused tab. It keeps its space, so tabs don't shift on hover. */
+.tab[data-closable] {
+  padding-inline-end: 6px;
+}
+
+.close {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 16px;
+  height: 16px;
+  border-radius: var(--lu-radius-round);
+  color: var(--lu-ink-faint);
+  opacity: 0;
+  transition:
+    opacity var(--lu-dur-fast) var(--lu-ease),
+    background-color var(--lu-dur-fast) var(--lu-ease),
+    color var(--lu-dur-fast) var(--lu-ease);
+}
+
+.tab[data-selected] .close,
+.tab[data-hovered] .close,
+.tab[data-focus-visible] .close {
+  opacity: 1;
+}
+
+.close:hover {
+  background: var(--lu-hover);
+  color: var(--lu-ink);
+}
+
+/* Reordering: a 2px accent bar on the edge of the tab the dragged one would
+   land next to (inside the tab, so a scrolling tab row never clips it). */
+.tab[data-drop-indicator]::before {
+  content: '';
+  position: absolute;
+  top: 4px;
+  bottom: 4px;
+  inset-inline-start: 0;
+  width: 2px;
+  border-radius: var(--lu-radius-round);
+  background: var(--lu-accent);
+  pointer-events: none;
+}
+
+.tab[data-drop-indicator='after']::before {
+  inset-inline-start: auto;
+  inset-inline-end: 0;
+}
+
+.panel {
+  outline: none;
+  min-height: 0;
+}
+
+.panel[data-focus-visible] {
+  outline: var(--lu-focus-outline);
+  outline-offset: -3px;
+}
+
+/* Forced colors drops the fill that marks the selected tab. */
+@media (forced-colors: active) {
+  .tab[data-selected] {
+    outline: 2px solid var(--lu-ink);
+    outline-offset: -2px;
+  }
+
+  .tab[data-selected][data-focus-visible] {
+    outline: 3px solid var(--lu-focus-ring);
+    outline-offset: -3px;
+  }
+}

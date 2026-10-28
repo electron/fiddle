@@ -1,0 +1,42 @@
+/* The width never jumps between Run, Checking, Unzipping, Starting and Stop;
+   downloading and installing modules get the wider size for their long labels.
+   Outside macOS the hint reads "Ctrl+R", which is wider than "⌘R", so the floor
+   is higher. */
+.run {
+  min-width: 108px;
+  padding-inline: 12px 14px;
+}
+:root:not([data-platform='darwin']) .run {
+  min-width: 124px;
+}
+
+.wide {
+  min-width: 150px;
+  padding-inline: 12px 14px;
+}
+
+/* The narrowest title bar (Windows at 600): no key hint and no floor, so the capsule fits. */
+.runCompact {
+  flex: none;
+  min-width: 0;
+  padding-inline: 10px 12px;
+}
+
+.status {
+  display: inline-flex;
+  align-items: center;
+  gap: 18px;
+  min-width: 0;
+}
+
+/* The "Running" pill is pulled toward the start so its text lines up with "Ready". */
+.runningPill {
+  margin-inline-start: -9px;
+}
+
+.bisect {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--lu-ink);
+}

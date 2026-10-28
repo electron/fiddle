@@ -1,0 +1,12 @@
+{
+  "bisectDone": "二分查找已完成",
+  "bisectFailed": "二分查找失败",
+  "packageDone": "打包已完成",
+  "packageFailed": "打包失败",
+  "downloadsDone": "下载已完成",
+  "downloadsFailed": "下载失败",
+  "runDone": "fiddle 已退出",
+  "runFailed": "fiddle 因错误而退出",
+  "notificationBody": "{{name}}",
+  "recent": "最近"
+}

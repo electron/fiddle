@@ -1,0 +1,75 @@
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.head {
+  margin: 0;
+  padding: 14px 8px 5px;
+  font: var(--lu-type-caption);
+  letter-spacing: var(--lu-type-caption-tracking);
+  color: var(--lu-ink-muted);
+}
+
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin: 4px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* Rows match tree rows; the right padding is smaller for the remove button. */
+.row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  height: var(--lu-size-row);
+  padding: 0 2px 0 8px;
+  border-radius: var(--lu-radius-item);
+  corner-shape: squircle;
+  color: var(--lu-ink);
+  font: var(--lu-type-body);
+  letter-spacing: var(--lu-type-body-tracking);
+  transition: background-color var(--lu-dur-fast) var(--lu-ease);
+}
+
+.row:hover,
+.row:focus-within {
+  background: var(--lu-capsule);
+}
+
+.icon {
+  flex: none;
+  color: var(--lu-ink-muted);
+}
+
+.name {
+  composes: lu-truncate from global;
+  flex: 1;
+}
+
+.version {
+  flex: none;
+  max-width: 96px;
+  font-family: var(--lu-font-mono);
+}
+
+.result {
+  min-width: 0;
+}
+
+.match {
+  background: none;
+  color: var(--lu-accent);
+  font-weight: 600;
+}
+
+.empty {
+  padding: 5px 10px;
+  font: var(--lu-type-body);
+  color: var(--lu-ink-muted);
+}

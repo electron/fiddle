@@ -1,0 +1,23 @@
+{
+  "importSettingsTitle": "설정 가져오기",
+  "exportSettingsTitle": "설정 내보내기",
+  "importThemeTitle": "Monaco 테마 가져오기",
+  "jsonFiles": "JSON 파일",
+  "notJson": "{{file}} 파일이 올바른 JSON이 아닙니다.",
+  "notSettings": "{{file}} 파일에 설정이 없습니다.",
+  "notTheme": "{{file}} 파일은 Monaco 테마가 아닙니다. 테마에는 “base” 또는 “rules”가 필요하며 색은 16진수 값이어야 합니다.",
+  "unknownSetting": "“{{key}}” 설정이 없습니다.",
+  "invalidValue": "“{{setting}}”의 값이 올바르지 않습니다.",
+  "themeNeedsValues": "현재 값 없이는 기본 제공 테마를 복사할 수 없습니다.",
+  "openFailed": "{{path}} 열기 실패: {{reason}}",
+  "themeCopyName": "{{name}} 복사본",
+  "lucentDark": "Lucent 어두움",
+  "lucentLight": "Lucent 밝음",
+  "lucentHcDark": "Lucent 고대비 어두움",
+  "lucentHcLight": "Lucent 고대비 밝음",
+  "importExecutionMessage": "Fiddle 실행 방식을 바꾸는 설정을 가져오시겠습니까?",
+  "importExecutionDetail": "이 설정은 Electron을 다운로드하는 위치와 모든 실행의 시작 방식을 제어합니다. 신뢰하는 출처의 설정만 가져오세요.",
+  "importEmpty": "없음",
+  "importSettingLine": "{{setting}}: {{value}}",
+  "importButton": "가져오기"
+}

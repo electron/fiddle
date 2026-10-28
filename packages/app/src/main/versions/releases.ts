@@ -1,0 +1,223 @@
+import semver from 'semver';
+
+import {
+  getOldestSupportedMajor,
+  getReleaseChannel,
+  isObsolete,
+  isSupportedOnPlatform,
+  sortVersions,
+} from '../../fiddle/versions';
+import type { Settings } from '../../shared/settings';
+import type {
+  LocalBuild,
+  ReleaseRow,
+  VersionRefValue,
+  VersionsState,
+} from '../../shared/stores';
+
+export type VersionFilterSettings = Pick<
+  Settings,
+  'channels' | 'showObsolete' | 'showNotDownloaded'
+>;
+
+/** Runnable here, in a chosen channel, not obsolete unless asked, and downloaded unless "not downloaded" ones are shown. `keep` always stays. */
+export function visibleVersions(
+  rows: readonly ReleaseRow[],
+  settings: VersionFilterSettings,
+  isInstalled: (version: string) => boolean,
+  keep: readonly string[] = [],
+): string[] {
+  return rows
+    .filter(
+      (row) =>
+        keep.includes(row.version) ||
+        (row.supported &&
+          settings.channels.includes(getReleaseChannel(row.version)) &&
+          (settings.showObsolete || !row.obsolete) &&
+          (settings.showNotDownloaded || isInstalled(row.version))),
+    )
+    .map((row) => row.version);
+}
+
+interface RawRelease {
+  version: string;
+  date?: unknown;
+  node?: unknown;
+  modules?: unknown;
+}
+
+function isRawRelease(value: unknown): value is RawRelease {
+  return (
+    typeof value === 'object' &&
+    value !== null &&
+    typeof (value as RawRelease).version === 'string'
+  );
+}
+
+/** A non-empty array of `{ version }`. */
+export function isReleaseList(data: unknown): data is RawRelease[] {
+  return Array.isArray(data) && data.length > 0 && data.every(isRawRelease);
+}
+
+interface RowOptions {
+  platform: string;
+  arch: string;
+  /** `NUM_STABLE_BRANCHES`, if set. */
+  numStableBranches?: string;
+}
+
+export function toReleaseRows(
+  data: readonly RawRelease[],
+  options: RowOptions,
+): ReleaseRow[] {
+  const entries = data
+    .map((entry) => ({ ...entry, version: entry.version.replace(/^v/, '') }))
+    // The 0.2x releases (atom-shell) can't be downloaded.
+    .filter((entry) => !entry.version.startsWith('0.2'));
+  const stableMajors = new Set<number>();
+  for (const { version } of entries) {
+    const parsed = semver.parse(version);
+    if (parsed?.prerelease.length === 0) stableMajors.add(parsed.major);
+  }
+  const oldest = getOldestSupportedMajor(
+    [...stableMajors].sort((a, b) => a - b),
+    options.numStableBranches,
+  );
+  const rows = entries.map((entry) => ({
+    version: entry.version,
+    date: typeof entry.date === 'string' ? entry.date : '',
+    node: typeof entry.node === 'string' ? entry.node : '',
+    ...(typeof entry.modules === 'string' ? { modules: entry.modules } : {}),
+    obsolete: oldest !== undefined && isObsolete(entry.version, oldest),
+    supported: isSupportedOnPlatform(entry.version, options.platform, options.arch),
+  }));
+  return sortVersions(rows);
+}
+
+/** A version's install state in the picker, or why it can't be picked. */
+export type PickerState =
+  | 'missing'
+  | 'downloading'
+  | 'downloaded'
+  | 'installing'
+  | 'installed'
+  | 'unsupported'
+  | 'local'
+  | 'localMissing';
+
+export interface PickerEntry {
+  /** `r:<version>` or `l:<build id>`. */
+  id: string;
+  kind: 'release' | 'local';
+  /** The release number, or the local build's name. */
+  label: string;
+  state: PickerState;
+  /** 0–100 while downloading. */
+  percent?: number;
+  /** Shown right-aligned next to the label. */
+  hint?: 'latest' | 'beta' | 'nightly';
+  /** Releases this computer can't run, and local builds whose binary is gone. */
+  disabled: boolean;
+}
+
+export interface PickerGroup {
+  /** `results` is the one flat list shown while searching. */
+  key: 'local' | 'stable' | 'prerelease' | 'results';
+  entries: PickerEntry[];
+}
+
+export interface PickerInput {
+  rows: readonly ReleaseRow[];
+  settings: VersionFilterSettings;
+  installs: VersionsState['installs'];
+  localBuilds: readonly LocalBuild[];
+  /** The window's version: always listed. */
+  current?: VersionRefValue | undefined;
+  query?: string;
+}
+
+const isStable = (version: string) => !version.includes('-');
+
+/** A release search as typed: case-insensitive, and "Electron 43" or "v43" find 43.x. */
+export function normalizeVersionQuery(query: string): string {
+  return query
+    .trim()
+    .toLowerCase()
+    .replace(/^electron\s*/, '')
+    .replace(/^v(?=\d)/, '');
+}
+
+function releaseEntry(
+  row: ReleaseRow,
+  install: VersionsState['installs'][string] | undefined,
+  latest: string | undefined,
+): PickerEntry {
+  const channel = getReleaseChannel(row.version);
+  const hint =
+    row.version === latest ? 'latest' : channel === 'stable' ? undefined : channel;
+  return {
+    id: `r:${row.version}`,
+    kind: 'release',
+    label: row.version,
+    state: row.supported ? (install?.state ?? 'missing') : 'unsupported',
+    ...(row.supported && install?.state === 'downloading'
+      ? { percent: install.percent ?? 0 }
+      : {}),
+    ...(hint ? { hint } : {}),
+    disabled: !row.supported,
+  };
+}
+
+function localEntry(build: LocalBuild): PickerEntry {
+  return {
+    id: `l:${build.id}`,
+    kind: 'local',
+    label: build.name,
+    state: build.available ? 'local' : 'localMissing',
+    disabled: !build.available,
+  };
+}
+
+/**
+ * Local builds first, then releases newest first, following the version
+ * settings, except that releases this computer can't run stay listed, disabled.
+ * A search replaces the groups with one flat list, so the newest match is on top.
+ */
+export function pickerGroups({
+  rows,
+  settings,
+  installs,
+  localBuilds,
+  current,
+  query = '',
+}: PickerInput): PickerGroup[] {
+  const keep = current?.kind === 'release' ? current.version : undefined;
+  const typed = query.trim().toLowerCase();
+  const needle = normalizeVersionQuery(query);
+  const latest = rows.find((row) => row.supported && isStable(row.version))?.version;
+  const releases = rows
+    .filter(
+      (row) =>
+        row.version === keep ||
+        (settings.channels.includes(getReleaseChannel(row.version)) &&
+          (settings.showObsolete || !row.obsolete) &&
+          (settings.showNotDownloaded || installs[row.version]?.state === 'installed')),
+    )
+    .filter((row) => row.version.toLowerCase().includes(needle))
+    .map((row) => releaseEntry(row, installs[row.version], latest));
+  const local = localBuilds
+    .filter((build) => build.name.toLowerCase().includes(typed))
+    .map(localEntry);
+
+  const groups: PickerGroup[] = typed
+    ? [{ key: 'results', entries: [...local, ...releases] }]
+    : [
+        { key: 'local', entries: local },
+        { key: 'stable', entries: releases.filter((entry) => isStable(entry.label)) },
+        {
+          key: 'prerelease',
+          entries: releases.filter((entry) => !isStable(entry.label)),
+        },
+      ];
+  return groups.filter((group) => group.entries.length > 0);
+}

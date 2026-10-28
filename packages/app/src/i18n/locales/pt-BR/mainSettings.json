@@ -1,0 +1,23 @@
+{
+  "importSettingsTitle": "Importar configurações",
+  "exportSettingsTitle": "Exportar configurações",
+  "importThemeTitle": "Importar um tema do Monaco",
+  "jsonFiles": "Arquivos JSON",
+  "notJson": "{{file}} não é um JSON válido.",
+  "notSettings": "{{file}} não contém configurações.",
+  "notTheme": "{{file}} não é um tema do Monaco. Um tema precisa de “base” ou “rules”, com cores em valores hexadecimais.",
+  "unknownSetting": "Não existe uma configuração chamada “{{key}}”.",
+  "invalidValue": "O valor de “{{setting}}” não é válido.",
+  "themeNeedsValues": "Um tema integrado não pode ser copiado sem os valores atuais dele.",
+  "openFailed": "Não foi possível abrir {{path}}: {{reason}}",
+  "themeCopyName": "Cópia de {{name}}",
+  "lucentDark": "Lucent escuro",
+  "lucentLight": "Lucent claro",
+  "lucentHcDark": "Lucent escuro (alto contraste)",
+  "lucentHcLight": "Lucent claro (alto contraste)",
+  "importExecutionMessage": "Importar configurações que alteram como os fiddles são executados?",
+  "importExecutionDetail": "Essas configurações controlam de onde o Electron é baixado e com o que cada execução começa. Importe configurações apenas de uma fonte em que você confia.",
+  "importEmpty": "vazio",
+  "importSettingLine": "{{setting}}: {{value}}",
+  "importButton": "Importar"
+}

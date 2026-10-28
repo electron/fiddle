@@ -1,0 +1,17 @@
+{
+  "title": "Пакеты",
+  "addPlaceholder": "Добавить пакет",
+  "addLabel": "Добавить пакет из npm",
+  "searching": "Поиск…",
+  "noResults": "Пакеты не найдены",
+  "searchFailed": "Сейчас не удаётся подключиться к npm",
+  "latest": "последняя",
+  "version": "Версия {{name}}",
+  "remove": "Удалить {{name}}",
+  "addFailed": "Не удалось добавить {{name}}",
+  "changeFailed": "Не удалось изменить {{name}}",
+  "list": "Пакеты в этом fiddle",
+  "searchVersions": "Поиск версий",
+  "noVersions": "Нет подходящих версий",
+  "moreVersions": "Показано {{shown}} из {{total}}. Введите запрос, чтобы найти остальные."
+}

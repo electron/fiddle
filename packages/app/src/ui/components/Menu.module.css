@@ -1,0 +1,143 @@
+/* Menus and select lists. The radius is radius-item plus the padding, so corners stay concentric.
+   Grows to fit the longest label, between 200 and 360px. */
+.popover {
+  display: flex;
+  outline: none;
+}
+
+/* The title bar's menu bar (MenuBar.tsx) draws its menus on the same surface. */
+.popover[data-entering],
+.surface[data-entering] {
+  animation: menu-in var(--lu-dur-base) var(--lu-ease);
+}
+
+@keyframes menu-in {
+  from {
+    opacity: 0;
+    transform: translateY(-4px) scale(0.98);
+  }
+}
+
+.surface {
+  composes: lu-overlay-glass from global;
+  box-sizing: border-box;
+  width: max-content;
+  min-width: max(200px, var(--trigger-width, 0px));
+  max-width: 360px;
+  max-height: inherit;
+  overflow: auto;
+  padding: 5px;
+  border-radius: var(--lu-radius-menu);
+}
+
+.section {
+  display: block;
+}
+
+.item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  height: var(--lu-size-row);
+  padding: 0 10px 0 6px;
+  border-radius: var(--lu-radius-item);
+  corner-shape: squircle;
+  cursor: default;
+  user-select: none;
+  outline: none;
+  transition: background-color var(--lu-dur-instant) var(--lu-ease);
+}
+
+.item[data-hovered],
+.item[data-focused],
+.item[data-open],
+.item:focus {
+  background: var(--lu-fill-strong);
+}
+
+.item[data-focus-visible] {
+  outline: none;
+}
+
+.item[data-selected] {
+  font-weight: 500;
+}
+
+.item[data-disabled] {
+  opacity: var(--lu-disabled-opacity);
+}
+
+.item[data-danger] {
+  color: var(--lu-spark);
+}
+
+.lead {
+  display: inline-flex;
+  flex: none;
+  width: 16px;
+  color: var(--lu-ink-muted);
+}
+
+.item[data-selected] .lead {
+  color: var(--lu-accent);
+}
+
+.item[data-danger] .lead {
+  color: inherit;
+}
+
+.label {
+  composes: lu-truncate from global;
+  flex: 1;
+}
+
+.hint {
+  flex: none;
+  margin-left: var(--lu-space-3);
+  font: 500 11px/14px var(--lu-font-sans);
+  color: var(--lu-ink-muted);
+}
+
+.kbd {
+  flex: none;
+  margin-left: var(--lu-space-3);
+  font: 400 12px/14px var(--lu-font-sans);
+  letter-spacing: 0.04em;
+  color: var(--lu-ink-muted);
+}
+
+/* A submenu's chevron, after the label or key; mirrored in right-to-left layouts. */
+.chevron {
+  flex: none;
+  margin-inline: var(--lu-space-2) -4px;
+  color: var(--lu-ink-muted);
+}
+
+.chevron:dir(rtl) {
+  transform: scaleX(-1);
+}
+
+.header {
+  padding: 8px 10px 4px 28px;
+  font: var(--lu-type-caption);
+  letter-spacing: var(--lu-type-caption-tracking);
+  color: var(--lu-ink-muted);
+}
+
+.separator {
+  height: var(--lu-size-hairline);
+  margin: 5px 10px;
+  border: 0;
+  background: var(--lu-line);
+}
+
+/* Forced colors drops the translucent fill that marks the focused item. */
+@media (forced-colors: active) {
+  .item[data-hovered],
+  .item[data-focused],
+  .item[data-open],
+  .item:focus {
+    outline: 2px solid var(--lu-focus-ring);
+    outline-offset: -2px;
+  }
+}
