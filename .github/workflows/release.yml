@@ -255,7 +255,7 @@ jobs:
         run: echo "version=$(node -p "require('./packages/app/package.json').version")" >> "$GITHUB_OUTPUT"
       # Frame URLs: the renderer is served from app://main/, so its maps match
       # `~/assets/...`; main and preload frames read app:///.vite/build/....
-      - uses: getsentry/action-release@ff07929a6537bac57790c3451cf4d364aca38528 # v3.7.0
+      - uses: getsentry/action-release@e6703d0b00208e0b3687ba660d18ab5af7892821 # v3.7.2
         env:
           SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
           SENTRY_ORG: electronjs
@@ -264,7 +264,7 @@ jobs:
           release: Electron-Fiddle@${{ steps.version.outputs.version }}
           sourcemaps: ./packages/app/.vite/renderer/main_window
           url_prefix: '~/'
-      - uses: getsentry/action-release@ff07929a6537bac57790c3451cf4d364aca38528 # v3.7.0
+      - uses: getsentry/action-release@e6703d0b00208e0b3687ba660d18ab5af7892821 # v3.7.2
         env:
           SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
           SENTRY_ORG: electronjs
