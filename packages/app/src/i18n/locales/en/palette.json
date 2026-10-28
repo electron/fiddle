@@ -1,0 +1,50 @@
+{
+  "label": {
+    "message": "Command palette",
+    "description": "Accessible name of the command palette, a searchable list of commands, files, versions and examples."
+  },
+  "placeholder": {
+    "message": "Search commands, files, versions and examples",
+    "description": "Placeholder of the command palette's search field.",
+    "maxLength": 60
+  },
+  "empty": {
+    "message": "No matches",
+    "description": "Shown in the command palette when nothing matches the search.",
+    "maxLength": 30
+  },
+  "kindCommand": {
+    "message": "Command",
+    "description": "Right-aligned hint on a command palette row that runs an app command.",
+    "maxLength": 16
+  },
+  "kindEditor": {
+    "message": "Editor",
+    "description": "Right-aligned hint on a command palette row that runs a code editor action, such as Go to line.",
+    "maxLength": 16
+  },
+  "kindFile": {
+    "message": "File",
+    "description": "Right-aligned hint on a command palette row that reveals one of the fiddle's files in the editor.",
+    "maxLength": 16
+  },
+  "kindVersion": {
+    "message": "Version",
+    "description": "Right-aligned hint on a command palette row that switches the fiddle to an Electron version.",
+    "maxLength": 16
+  },
+  "kindExample": {
+    "message": "Example",
+    "description": "Right-aligned hint on a command palette row that loads a built-in Show Me example.",
+    "maxLength": 16
+  },
+  "runFailed": {
+    "message": "Couldn't run {{label}}",
+    "description": "Toast title when a command palette item fails. {{label}} is the item's name, such as a command or file name.",
+    "maxLength": 60
+  },
+  "electronVersion": {
+    "message": "Electron {{version}}",
+    "description": "Command palette row that switches to an Electron version. {{version}} is a version number such as 44.0.0."
+  }
+}

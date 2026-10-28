@@ -1,95 +1,87 @@
 # Contributing to Electron Fiddle
 
 Electron Fiddle is a community-driven project, overseen by the [Electron Ecosystem Working
-Group](https://github.com/electron/governance/tree/main/wg-ecosystem#readme). As such, we welcome
-and encourage all sorts of contributions. They include, but are not limited to:
+Group](https://github.com/electron/governance/tree/main/wg-ecosystem#readme). We welcome all
+sorts of contributions, including constructive feedback, bug reports, documentation changes,
+feature requests and [pull requests](#filing-pull-requests).
 
-- Constructive feedback
-- Bug reports / technical issues
-- Documentation changes
-- Feature requests
-- [Pull requests](#filing-pull-requests)
+Before filing an issue, please search the existing issues to see if someone has already filed it.
 
-We strongly suggest that before filing an issue, you search through the existing issues to see
-if it has already been filed by someone else.
+All contributions follow [Electron's code of conduct](https://github.com/electron/electron/blob/main/CODE_OF_CONDUCT.md).
 
-This project is a part of the Electron ecosystem. As such, all contributions to this project follow
-[Electron's code of conduct](https://github.com/electron/electron/blob/main/CODE_OF_CONDUCT.md)
-where appropriate.
+## Filing pull requests
 
-## Contribution Suggestions
+- GitHub Actions checks every commit: lint, typecheck, unit and end-to-end tests, a package
+  smoke test on macOS, Windows and Linux, and that generated source is up to date.
+- Please write tests for your changes unless it's impractical.
+- Use [conventional commits](https://www.conventionalcommits.org/en/v1.0.0/) for commit messages
+  and pull request titles.
+- Please **don't** bump the version number. The maintainers do that. You're welcome to say
+  whether a change needs a major, minor or patch bump under [semantic versioning](https://semver.org/).
 
-We use the label [`good first issue`](https://github.com/electron/fiddle/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22) in the issue tracker to denote fairly-well-scoped-out bugs or feature requests that the community can pick up and work on. If any of those labeled issues do not have enough information, please feel free to ask constructive questions. (This applies to any open issue.)
+## Running Fiddle from source
 
-## Filing Pull Requests
-
-Here are some things to keep in mind as you file pull requests to fix bugs, add new features, etc.:
-
-- If you're unfamiliar with forking, branching, and pull requests, please see [GitHub's extensive
-  documentation](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests).
-- GitHub Actions is used to make sure that any new or changed code meets the project's
-  style guidelines, and that the project's test suite passes for each new commit.
-- Unless it's impractical, please write tests for your changes. This will help us so that we can
-  spot regressions much easier.
-- When creating commit messages and pull request titles, please adhere to the [conventional
-  commits](https://www.conventionalcommits.org/en/v1.0.0/) standard.
-- Please **do not** bump the version number in your pull requests, the maintainers will do that.
-  Feel free to indicate whether the changes require a major, minor, or patch version bump, as
-  prescribed by the [semantic versioning specification](https://semver.org/).
-
-### Running Fiddle From Source
-
-1. Clone the Electron Fiddle repository locally.
-
-    ```sh
-    git clone https://github.com/electron/fiddle.git
-    ```
-
-2. Change directory to where Fiddle has been cloned.
-
-    ```sh
-    cd fiddle
-    ```
-
-3. Install dependencies.
-
-    ```sh
-    yarn
-    ```
-
-4. Start Fiddle and explore!
-
-    ```sh
-    yarn start
-    ```
-
-### Running Tests
+You need the Node.js version in `.nvmrc`. Yarn is vendored in `.yarn/releases`, so any `yarn`
+(for example via `corepack enable`) runs the right version.
 
 ```sh
-yarn test
+git clone https://github.com/electron/fiddle.git
+cd fiddle
+yarn
+yarn start
 ```
 
-Note that console calls, e.g. console.log(), are mocked out during tests
-to avoid noise in the test reports. If you want this verbosity, e.g. if
-you're debugging or writing new tests, it can be enabled by setting the
-environment variable `FIDDLE_VERBOSE_TESTS` when running.
+Useful commands, all run from the repository root:
 
-## Release Process
+| Command                       | What it does                                                        |
+| ----------------------------- | ------------------------------------------------------------------- |
+| `yarn start`                  | Development run with hot reload.                                    |
+| `yarn test`                   | Unit and component tests (Vitest).                                  |
+| `yarn test:e2e`               | End-to-end tests against a real build.                              |
+| `yarn lint`, `yarn typecheck` | ESLint and `tsc -b`.                                                |
+| `yarn generate`               | Regenerates the EIPC bindings and i18n catalogs. Commit the output. |
+| `yarn package`, `yarn make`   | Package the app or build installers into `packages/app/out/`.       |
 
-> **Note:** Releasing is only available to contributors who have write
-> access to the `electron/fiddle` repository.
+### Install scripts
 
-First, create a new branch for your release.
+`.yarnrc.yml` sets `enableScripts: false`, so dependencies can't run install scripts. Workspace
+scripts still run: the app's `postinstall` runs Electron's `install-electron` to download its
+binary. If a new dependency genuinely needs its install script, allow it with `dependenciesMeta`
+in the root `package.json` and explain why in the pull request.
 
-Then, run the [`yarn version`](https://yarnpkg.com/cli/version)
-command with the corresponding `major`, `minor`, or `patch` positional argument.
+## Release process
 
-After running the command, you should have a commit updating the `version` field in
-the `package.json` file. Create a new tag corresponding to this new value with the `git tag` command.
+> **Note:** Releasing is only available to contributors who have write access to the
+> `electron/fiddle` repository.
 
-Then, you'll want to commit the version bump change onto the main branch. Push
-your commit upstream and open a new pull request.
+1. On a new branch, bump the version with `yarn workspace electron-fiddle version <major|minor|patch>`,
+   then open a pull request and merge it.
+2. Tag the merge commit with the new version, prefixed with `v` (for example `v1.2.3`), and push
+   the tag with `git push origin <tag_name>`.
+3. The `Release` workflow tests, builds, signs and notarizes every platform, attests the build
+   provenance, and drafts a GitHub release with generated notes.
+4. Check that all the expected files are present and that the installers work, then publish the
+   release.
 
-Finally, push your tag to the GitHub repository with `git push origin <tag_name>`.
-CI will automatically draft a new release. Check that all the expected files are present,
-that installers work, and then publish the release.
+### Signed local builds
+
+`yarn make` signs the macOS app when `APPLE_SIGNING_IDENTITY` names a Developer ID Application
+certificate in your keychain, and notarizes it when one of three sets of credentials is also set.
+Without the identity the build is unsigned, as in CI.
+
+```sh
+export APPLE_SIGNING_IDENTITY="Developer ID Application: Your Name (TEAMID)"
+
+# One of: an Apple ID with an app-specific password,
+export APPLE_ID="you@example.com" APPLE_ID_PASSWORD="xxxx-xxxx-xxxx-xxxx"
+# an App Store Connect API key (APPLE_API_ISSUER only for a team key),
+export APPLE_API_KEY="$HOME/AuthKey_ABC123DEF4.p8" APPLE_API_KEY_ID="ABC123DEF4" APPLE_API_ISSUER="<issuer uuid>"
+# or a profile saved with `xcrun notarytool store-credentials fiddle`.
+export APPLE_KEYCHAIN_PROFILE="fiddle"
+
+yarn make   # or `yarn package` for just the .app
+spctl --assess -vv "packages/app/out/Electron Fiddle-darwin-arm64/Electron Fiddle.app"
+```
+
+On Windows, `yarn make` signs the installers through Azure Trusted Signing when the
+`AZURE_CODE_SIGNING_*` and `WINDOWS_SIGNTOOL_PATH` variables read in `forge.config.ts` are set.

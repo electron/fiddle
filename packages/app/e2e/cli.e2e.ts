@@ -1,0 +1,131 @@
+// The headless CLI of the test build, in test mode against the fixture server.
+import fs from 'node:fs';
+import os from 'node:os';
+import path from 'node:path';
+
+import { afterAll, beforeAll, describe, expect, it } from 'vitest';
+
+import { electronArgs, removeTestDir, spawnTestBuild } from './driver.ts';
+import { startFixtureServer, type FixtureServer } from './fixtures/server.ts';
+
+interface CliRun {
+  code: number | null;
+  stdout: string;
+  stderr: string;
+  /** The `--json` lines; the last one is the result. */
+  lines: Record<string, unknown>[];
+}
+
+describe('headless CLI', () => {
+  let fixtures: FixtureServer;
+  let dir: string;
+
+  beforeAll(async () => {
+    fixtures = await startFixtureServer();
+    dir = fs.mkdtempSync(path.join(os.tmpdir(), 'fiddle-e2e-cli-'));
+  });
+
+  afterAll(async () => {
+    await fixtures?.close();
+    if (dir) removeTestDir(dir);
+  });
+
+  /** Runs the CLI, killing it after `timeout` ms so a hung run doesn't outlive the test. */
+  const cli = (timeout: number, ...args: string[]) =>
+    new Promise<CliRun>((resolve, reject) => {
+      const env = { FIDDLE_TEST_DIR: dir, FIDDLE_TEST_FIXTURE_URL: fixtures.url };
+      const child = spawnTestBuild(['--log-level=3', '--headless', ...args], env, {
+        cwd: dir,
+        timeout,
+        killSignal: 'SIGKILL',
+      });
+      let stdout = '';
+      let stderr = '';
+      child.stdout!.on('data', (chunk: Buffer) => (stdout += chunk.toString()));
+      child.stderr!.on('data', (chunk: Buffer) => (stderr += chunk.toString()));
+      child.once('error', reject);
+      child.once('exit', (code, signal) => {
+        if (signal === 'SIGKILL') {
+          reject(new Error(`the CLI didn't exit within ${timeout} ms\n${stderr}`));
+          return;
+        }
+        resolve({
+          code,
+          stdout,
+          stderr,
+          lines: stdout
+            .split('\n')
+            .filter((line) => line.startsWith('{'))
+            .map((line) => JSON.parse(line) as Record<string, unknown>),
+        });
+      });
+    });
+
+  const fiddle = (name: string, main: string) => {
+    const folder = path.join(dir, name);
+    fs.mkdirSync(folder, { recursive: true });
+    fs.writeFileSync(path.join(folder, 'main.js'), main);
+    return folder;
+  };
+  // The fiddle's own Electron: no display (Chromium's headless Ozone backend), and no sandbox where the app's has none.
+  const fiddleFlags = () => [
+    '--flag=--ozone-platform=headless',
+    ...electronArgs()
+      .filter((arg) => arg === '--no-sandbox')
+      .map((arg) => `--flag=${arg}`),
+  ];
+
+  it('lists versions as JSON, with the stable and beta channels by default', async () => {
+    const run = await cli(50_000, 'versions', 'list', '--json');
+    expect(run.code, run.stderr).toBe(0);
+    const result = run.lines.at(-1) as {
+      ok: boolean;
+      data: { versions: { version: string; channel: string }[] };
+    };
+    expect(result.ok).toBe(true);
+    const listed = result.data.versions.map((v) => `${v.version} ${v.channel}`);
+    expect(listed).toEqual(
+      expect.arrayContaining(['44.3.0 stable', '43.7.0 stable', '45.0.0-alpha.6 beta']),
+    );
+  }, 60_000);
+
+  it("exits with the fiddle's exit code", async () => {
+    const run = await cli(
+      170_000,
+      'run',
+      fiddle('fails', 'process.exit(3);\n'),
+      '--json',
+      ...fiddleFlags(),
+    );
+    expect(run.code, run.stderr).toBe(3);
+    expect(run.lines.at(-1)).toMatchObject({
+      ok: true,
+      data: { result: 'failure', exitCode: 3 },
+    });
+  }, 180_000);
+
+  it('succeeds with exit code 0 and never passes blocked variables', async () => {
+    const main =
+      "console.log('LD_PRELOAD=' + (process.env.LD_PRELOAD ?? 'unset'));\nprocess.exit(0);\n";
+    const run = await cli(
+      110_000,
+      'run',
+      fiddle('passes', main),
+      '--json',
+      ...fiddleFlags(),
+      '--env=LD_PRELOAD=/tmp/evil.so',
+    );
+    expect(run.code, run.stderr).toBe(0);
+    expect(run.stdout).toContain('LD_PRELOAD=unset');
+    expect(run.lines.at(-1)).toMatchObject({
+      ok: true,
+      data: { result: 'success', exitCode: 0 },
+    });
+  }, 120_000);
+
+  it('exits with 64 for an unknown command', async () => {
+    const run = await cli(50_000, 'nope', '--json');
+    expect(run.code).toBe(64);
+    expect(run.lines.at(-1)).toMatchObject({ ok: false });
+  }, 60_000);
+});

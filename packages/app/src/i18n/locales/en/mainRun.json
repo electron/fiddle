@@ -1,0 +1,152 @@
+{
+  "consoleReady": {
+    "message": "Ready. Press Run to start Electron {{version}}.",
+    "description": "First console line in a new window. {{version}} is the selected Electron version."
+  },
+  "started": {
+    "message": "Electron {{version}} started as \"{{name}}\"",
+    "description": "Console line when the fiddle starts. {{version}} is e.g. v43.0.0 or a local build's name; {{name}} is the app name from the fiddle's package.json."
+  },
+  "inspector": {
+    "message": "Inspector listening on 127.0.0.1:{{port}}",
+    "description": "Console line with the Node inspector port of the running fiddle."
+  },
+  "exitedCode": {
+    "message": "Electron exited with code {{code}}",
+    "description": "Console line when the fiddle exits. {{code}} is the exit code."
+  },
+  "exitedSignal": {
+    "message": "Electron was stopped by {{signal}}",
+    "description": "Console line when the fiddle is killed by a signal, e.g. SIGTERM."
+  },
+  "spawnFailed": {
+    "message": "Couldn't start Electron: {{message}}",
+    "description": "Console line when Electron can't be started. {{message}} is the system's error."
+  },
+  "runFailed": {
+    "message": "Couldn't run the fiddle: {{message}}",
+    "description": "Console line when a run fails for a reason other than a refused check or a failed install, for example a full disk. {{message}} is the system's error."
+  },
+  "privacyHelperMissing": {
+    "message": "The privacy helper ({{path}}) is missing or can't run, so fiddles can't start: they would share Electron Fiddle's camera, microphone and other permissions. Reinstall Electron Fiddle.",
+    "description": "Console error in a packaged macOS build when the helper that starts fiddles without Electron Fiddle's privacy permissions is missing. {{path}} is where it should be."
+  },
+  "downloading": {
+    "message": "Downloading Electron {{version}}…",
+    "description": "Console line before a run downloads its Electron version."
+  },
+  "installingModules": {
+    "message": "Installing packages with {{pm}}…",
+    "description": "Console line before npm or yarn installs the fiddle's packages. {{pm}} is npm or yarn."
+  },
+  "installingModulesNoScripts": {
+    "message": "Installing packages with {{pm}}. Install scripts are off because this fiddle isn't trusted.",
+    "description": "Console line before packages install for an untrusted fiddle. {{pm}} is npm or yarn."
+  },
+  "modulesFailed": {
+    "message": "Installing packages failed: {{message}}",
+    "description": "Console line when the package install fails. {{message}} is the error."
+  },
+  "pmMissing": {
+    "message": "{{pm}} wasn't found. Install it to use packages: {{url}}",
+    "description": "Console error when the package manager is missing. {{pm}} is npm or yarn, {{url}} explains how to install it."
+  },
+  "esmNeeds28": {
+    "message": "main.mjs needs Electron 28 or later.",
+    "description": "Console error from the pre-run checks: ES module entry points need Electron 28."
+  },
+  "envInvalid": {
+    "message": "Skipped environment entries that couldn't be read: {{entries}}",
+    "description": "Console warning about the environment variables setting. {{entries}} is a comma-separated list of the entries."
+  },
+  "envBlocked": {
+    "message": "Skipped environment variables that fiddles can't set, because they load code into Electron or change how it starts: {{keys}}",
+    "description": "Console warning: LD_*, DYLD_*, NODE_OPTIONS and ELECTRON_RUN_AS_NODE can't be set. {{keys}} is a comma-separated list."
+  },
+  "addLocalBuildTitle": {
+    "message": "Choose the folder with your Electron build",
+    "description": "Title of the folder dialog for adding a local build."
+  },
+  "addLocalBuildButton": {
+    "message": "Add build",
+    "description": "Confirm button of the folder dialog for adding a local build.",
+    "maxLength": 20
+  },
+  "noBinaryTitle": {
+    "message": "There's no Electron build in this folder",
+    "description": "Error dialog title when a local build folder has no Electron binary."
+  },
+  "noBinaryDetail": {
+    "message": "Electron Fiddle looked for {{file}} in {{path}}.",
+    "description": "Error dialog detail with the expected binary. {{file}} is the file name of the Electron executable, {{path}} the folder that was searched."
+  },
+  "cannotRemoveActive": {
+    "message": "Electron {{version}} is in use, so it can't be removed.",
+    "description": "Error when removing a version a window uses."
+  },
+  "packaging": {
+    "message": "Packaging with Electron Forge in {{path}}…",
+    "description": "Console line when packaging starts. {{path}} is the temporary project folder."
+  },
+  "making": {
+    "message": "Making installers with Electron Forge in {{path}}…",
+    "description": "Console line when making installers starts. {{path}} is the temporary project folder."
+  },
+  "packageDone": {
+    "message": "Done. The output is in {{path}}",
+    "description": "Console line when packaging finishes. {{path}} is the folder with the result."
+  },
+  "commandFailed": {
+    "message": "{{command}} failed with code {{code}}",
+    "description": "Console error when an npm or yarn command fails. {{command}} is the command line, such as npm install; {{code}} is its exit code."
+  },
+  "untrusted": {
+    "message": "This fiddle isn't trusted, so it can't run here.",
+    "description": "Console error when the user declines to trust a fiddle."
+  },
+  "scriptsRequired": {
+    "message": "Building needs the install scripts of {{packages}}, but they aren't allowed for this fiddle. Try again and allow install scripts when Electron Fiddle asks.",
+    "description": "Console error when package or make is refused because an untrusted fiddle's packages need install scripts. {{packages}} is a comma-separated list."
+  },
+  "bisectStep": {
+    "message": "Bisect: testing Electron {{version}}",
+    "description": "Console line for each bisect step. {{version}} is the Electron version being tested."
+  },
+  "bisectVerdictGood": {
+    "message": "Bisect: Electron {{version}} is good",
+    "description": "Console line after a bisect step. {{version}} is the Electron version that was tested."
+  },
+  "bisectVerdictBad": {
+    "message": "Bisect: Electron {{version}} is bad",
+    "description": "Console line after a bisect step. {{version}} is the Electron version that was tested."
+  },
+  "bisectDone": {
+    "message": "Bisect done: the change is between Electron {{good}} and {{bad}}. {{url}}",
+    "description": "Console line with the bisect result and the GitHub comparison URL. {{good}} is the last good version, {{bad}} the first bad one, {{url}} the comparison URL."
+  },
+  "bisectVerifyFailed": {
+    "message": "Bisect stopped: Electron {{version}} didn't give the expected result, so the range can't be trusted.",
+    "description": "Console error when the good or bad end fails re-verification. {{version}} is the Electron version that didn't give the expected result."
+  },
+  "bisectInvalid": {
+    "message": "Bisect stopped because a run didn't start.",
+    "description": "Console error when an automatic bisect step is invalid."
+  },
+  "bisectTooFew": {
+    "message": "Bisect needs at least two versions between the good and bad ones.",
+    "description": "Error when the bisect range is too small."
+  },
+  "bisectGoodNotOlder": {
+    "message": "The good version must be older than the bad one.",
+    "description": "Error when a bisect starts with a good version that isn't older than the bad one."
+  },
+  "openCompareMessage": {
+    "message": "Open the comparison on GitHub?",
+    "description": "Confirmation before opening the bisect comparison in the browser."
+  },
+  "openCompareButton": {
+    "message": "Open",
+    "description": "Button that opens the comparison in the browser.",
+    "maxLength": 16
+  }
+}

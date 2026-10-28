@@ -1,0 +1,108 @@
+.bar {
+  position: relative;
+  display: flex;
+  align-items: center;
+  flex: none;
+  min-width: 0;
+  -webkit-app-region: no-drag;
+  user-select: none;
+}
+
+.title {
+  display: inline-flex;
+  align-items: center;
+  flex: none;
+  height: var(--lu-size-row);
+  padding: 0 8px;
+  border-radius: var(--lu-radius-control);
+  corner-shape: squircle;
+  color: var(--lu-ink);
+  font: var(--lu-type-label);
+  letter-spacing: var(--lu-type-label-tracking);
+  white-space: nowrap;
+  cursor: default;
+  outline: none;
+  transition: background-color var(--lu-dur-fast) var(--lu-ease);
+}
+
+.title:hover,
+.bar[data-engaged] .title:focus {
+  background: var(--lu-fill);
+}
+
+.title[data-open],
+.bar[data-engaged] .title[data-open] {
+  background: var(--lu-fill-strong);
+}
+
+.title:focus-visible {
+  outline: var(--lu-focus-outline);
+  outline-offset: -2px;
+}
+
+.bar[data-engaged] .title:focus-visible {
+  outline: none;
+}
+
+.title[aria-disabled='true'] {
+  opacity: var(--lu-disabled-opacity);
+}
+
+.more {
+  justify-content: center;
+  width: var(--lu-size-row);
+  padding: 0;
+}
+
+/* Mnemonics are underlined only while Alt is down or the bar was reached from the keyboard. */
+.mnemonic {
+  text-decoration: none;
+}
+
+.bar[data-mnemonics] .mnemonic {
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+/* The titles once more at their natural width, unseen, to know when they stop fitting. */
+.measure {
+  position: absolute;
+  top: 0;
+  inset-inline-start: 0;
+  display: flex;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+/* Covers the window with no-drag, painting nothing and taking no events. */
+.noDrag {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  -webkit-app-region: no-drag;
+}
+
+/* Open menus sit in a layer on <body>. */
+.layer {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: var(--lu-z-popover);
+}
+
+/* A menu may overlap the title bar, a drag region: it must still take the clicks. */
+.panel {
+  position: fixed;
+  -webkit-app-region: no-drag;
+}
+
+/* Forced colors drops the translucent fills that mark the hovered, open and focused title. */
+@media (forced-colors: active) {
+  .title:hover,
+  .title[data-open],
+  .bar[data-engaged] .title:focus,
+  .bar[data-engaged] .title:focus-visible {
+    outline: 2px solid var(--lu-focus-ring);
+    outline-offset: -2px;
+  }
+}

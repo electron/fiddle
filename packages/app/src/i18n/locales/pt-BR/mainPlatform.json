@@ -1,0 +1,17 @@
+{
+  "updateReadyTitle": "Atualização pronta",
+  "updateReadyDetail": "Uma nova versão do Electron Fiddle foi baixada. Reinicie o app para usá-la.",
+  "restart": "Reiniciar",
+  "later": "Mais tarde",
+  "moveMessage": "Mover o Electron Fiddle para a pasta Aplicativos?",
+  "moveDetail": "As atualizações só são instaladas de forma confiável quando o app está na pasta Aplicativos.",
+  "moveButton": "Mover para Aplicativos",
+  "dontMove": "Não mover",
+  "aboutVersion": "{{version}} (Electron {{electron}})",
+  "aboutCopyright": "© Autores do Electron",
+  "resetPrivacyMessage": "Redefinir todas as permissões de privacidade?",
+  "resetPrivacyDetail": "O Electron Fiddle e os fiddles que ele executa perdem o acesso à câmera, ao microfone, aos contatos e a outros dados protegidos. Como os fiddles usam o app Electron padrão, outros apps executados em um Electron simples também perdem o acesso. O macOS pergunta de novo quando eles precisarem.",
+  "resetPrivacyButton": "Redefinir",
+  "resetPrivacyFailed": "Não foi possível redefinir as permissões de privacidade.",
+  "resetPrivacyUnavailable": "As permissões de privacidade só podem ser redefinidas no macOS."
+}

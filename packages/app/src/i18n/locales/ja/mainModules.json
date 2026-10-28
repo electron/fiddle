@@ -1,0 +1,8 @@
+{
+  "invalidPackageName": "「{{name}}」は有効なパッケージ名ではありません。",
+  "notOnNpm": "{{name}} は npm にありません。",
+  "noPublishedVersions": "{{name}} には公開されているバージョンがありません。",
+  "registryUnreachable": "{{host}} に接続できませんでした。",
+  "registryStatus": "{{host}} が HTTP {{status}} を返しました。",
+  "registryInvalidResponse": "{{host}} から読み取れない応答が返されました。"
+}
