@@ -12,8 +12,9 @@ cache-mode: none
 
 # Each platform runs `publish --dry-run`; `release` runs `--from-dry-run`.
 # Jobs with secrets install with `--mode=skip-build`, so no dependency scripts
-# run there. Only `build-windows` (Azure) and `attest` (Sigstore) can request
-# OIDC tokens; `attest` runs no repository or dependency code.
+# run there. Only `build-windows` (Azure), `attest` (Sigstore) and `release`
+# (the releaser app's token) can request OIDC tokens; `attest` runs no
+# repository or dependency code.
 
 jobs:
   test:
@@ -201,8 +202,9 @@ jobs:
       - attest
     environment: release
     permissions:
-      # Creates the draft release with the job's own token.
-      contents: write
+      contents: read
+      # For the releaser app's token, which creates the draft release.
+      id-token: write
     steps:
       - run: git config --global core.autocrlf input
       - name: Checkout
@@ -222,9 +224,12 @@ jobs:
           path: packages/app/out
           pattern: build-artifacts-*
           merge-multiple: true
+      - name: Get GitHub app token
+        id: secret-service
+        uses: electron/secret-service-action@3476425e8b30555aac15b1b7096938e254b0e155 # v1.0.0
       - name: Publish to GitHub
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ fromJSON(steps.secret-service.outputs.secrets).GITHUB_TOKEN }}
         run: yarn workspace electron-fiddle run publish --from-dry-run # zizmor: ignore[use-trusted-publishing]
 
   notify-sentry-deploy:
