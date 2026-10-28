@@ -1,0 +1,24 @@
+{
+  // Renderer, design system and preload. DOM, no Node.
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "module": "preserve",
+    "moduleResolution": "bundler",
+    "customConditions": ["fiddle-source"],
+    "lib": ["esnext", "dom", "dom.iterable"],
+    "jsx": "react-jsx",
+    "types": ["vite/client"],
+    "noEmit": true,
+    "tsBuildInfoFile": "../../node_modules/.tmp/tsc/app-web.tsbuildinfo"
+  },
+  "include": [
+    "src/renderer",
+    "src/ui",
+    "src/preload",
+    "src/shared",
+    "src/i18n",
+    "src/ipc/renderer.ts",
+    "vitest.jsdom.setup.ts"
+  ],
+  "exclude": ["src/**/*.test.ts"]
+}

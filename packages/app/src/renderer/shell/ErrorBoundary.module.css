@@ -1,0 +1,14 @@
+.error {
+  display: grid;
+  place-items: center;
+  min-width: 0;
+  height: 100%;
+  padding: 16px;
+}
+
+.error[data-fill] {
+  position: fixed;
+  inset: 0;
+  background: var(--lu-material-chrome);
+  color: var(--lu-ink);
+}

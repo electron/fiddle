@@ -1,0 +1,8 @@
+{
+  "invalidPackageName": "“{{name}}” geçerli bir paket adı değil.",
+  "notOnNpm": "{{name}} npm'de yok.",
+  "noPublishedVersions": "{{name}} paketinin yayımlanmış sürümü yok.",
+  "registryUnreachable": "{{host}} adresine ulaşılamadı.",
+  "registryStatus": "{{host}}, HTTP {{status}} ile yanıt verdi.",
+  "registryInvalidResponse": "{{host}}, okunamayan bir yanıt gönderdi."
+}

@@ -1,0 +1,114 @@
+import * as semver from 'semver';
+
+import { isGistId, isRevisionSha } from './gist-id';
+
+export const DEEP_LINK_SCHEME = 'electron-fiddle';
+
+export type DeepLink =
+  | { kind: 'gist'; id: string; owner?: string; revision?: string }
+  | { kind: 'electron'; tag: string; version: string; path: string };
+
+export type DeepLinkResult =
+  | { ok: true; url: string; link: DeepLink }
+  /** Malformed link: show an error that names `url`. */
+  | { ok: false; url: string; error: 'invalid' }
+  /** A host this version doesn't know: "This link needs a newer version of Electron Fiddle". */
+  | { ok: false; url: string; error: 'unknown-host'; host: string };
+
+const PREFIX = `${DEEP_LINK_SCHEME}://`;
+const LOGIN_RE = /^[a-z\d](?:[a-z\d]|-(?=[a-z\d])){0,38}$/i;
+const BAD_CHARS_RE =
+  // eslint-disable-next-line no-control-regex
+  /[\s\u0000-\u001f\u007f-\u009f\u200e\u200f\u202a-\u202e\u2066-\u2069]/;
+
+/** True for any `electron-fiddle:` argument, which is never treated as anything else. */
+export function isDeepLink(arg: string): boolean {
+  return arg.toLowerCase().startsWith(`${DEEP_LINK_SCHEME}:`);
+}
+
+export function findDeepLinkInArgv(argv: readonly string[]): string | undefined {
+  return argv.find(isDeepLink);
+}
+
+/** Decodes a path segment; null for empty, `.`, `..`, bad escapes and (encoded) separators or control characters. */
+function decodeSegment(raw: string): string | null {
+  let decoded: string;
+  try {
+    decoded = decodeURIComponent(raw);
+  } catch {
+    return null;
+  }
+  if (
+    decoded === '' ||
+    decoded === '.' ||
+    decoded === '..' ||
+    /[/\\]/.test(decoded) ||
+    BAD_CHARS_RE.test(decoded)
+  )
+    return null;
+  return decoded;
+}
+
+/** The semver version for an optional-`v` tag, or null. Strict: no `=`, no loose forms. */
+export function versionFromTag(tag: string): string | null {
+  const version = tag.startsWith('v') ? tag.slice(1) : tag;
+  return semver.valid(version) === version ? version : null;
+}
+
+/** Parses an `electron-fiddle://` link. Never throws. */
+export function parseDeepLink(url: string): DeepLinkResult {
+  const invalid: DeepLinkResult = { ok: false, url, error: 'invalid' };
+  if (!url.toLowerCase().startsWith(PREFIX) || BAD_CHARS_RE.test(url)) return invalid;
+
+  let rest = url.slice(PREFIX.length);
+  const hash = rest.indexOf('#');
+  if (hash >= 0) rest = rest.slice(0, hash);
+  let query = '';
+  const q = rest.indexOf('?');
+  if (q >= 0) {
+    query = rest.slice(q + 1);
+    rest = rest.slice(0, q);
+  }
+  if (rest.endsWith('/')) rest = rest.slice(0, -1);
+
+  const [rawHost = '', ...rawSegments] = rest.split('/');
+  const host = rawHost.toLowerCase();
+  if (host === '') return invalid;
+
+  const segments: string[] = [];
+  for (const raw of rawSegments) {
+    const segment = decodeSegment(raw);
+    if (segment === null) return invalid;
+    segments.push(segment);
+  }
+
+  switch (host) {
+    case 'gist': {
+      if (segments.length < 1 || segments.length > 2) return invalid;
+      const id = segments.at(-1)!;
+      const owner = segments.length === 2 ? segments[0]! : undefined;
+      if (!isGistId(id)) return invalid;
+      if (owner !== undefined && !LOGIN_RE.test(owner)) return invalid;
+      const params = new URLSearchParams(query);
+      const revision = params.get('revision');
+      if (revision !== null && !isRevisionSha(revision)) return invalid;
+      const link: DeepLink = { kind: 'gist', id: id.toLowerCase() };
+      if (owner !== undefined) link.owner = owner;
+      if (revision !== null) link.revision = revision.toLowerCase();
+      return { ok: true, url, link };
+    }
+    case 'electron': {
+      if (segments.length < 2) return invalid;
+      const tag = segments[0]!;
+      const version = versionFromTag(tag);
+      if (!version) return invalid;
+      return {
+        ok: true,
+        url,
+        link: { kind: 'electron', tag, version, path: segments.slice(1).join('/') },
+      };
+    }
+    default:
+      return { ok: false, url, error: 'unknown-host', host };
+  }
+}

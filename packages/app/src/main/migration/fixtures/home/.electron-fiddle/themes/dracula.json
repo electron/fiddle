@@ -1,0 +1,22 @@
+{
+  "name": "Dracula",
+  "isDark": true,
+  "common": {
+    "foreground-1": "#f8f8f2",
+    "background-1": "#282a36",
+    "border": "1px solid var(--border-color-1)",
+    "fonts-common": "Fira Sans, sans-serif"
+  },
+  "editor": {
+    "base": "vs-dark",
+    "inherit": true,
+    "rules": [
+      { "token": "comment", "foreground": "6272a4" },
+      { "token": "keyword", "foreground": "ff79c6", "fontStyle": "bold" }
+    ],
+    "colors": {
+      "editor.background": "#282a36",
+      "editor.foreground": "#f8f8f2"
+    }
+  }
+}
