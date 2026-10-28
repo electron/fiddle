@@ -2511,7 +2511,7 @@ __metadata:
     eslint-plugin-react-hooks: "npm:^7.1.1"
     jiti: "npm:^2.4.2"
     jsdom: "npm:^30.0.1"
-    prettier: "npm:^3.9.6"
+    prettier: "npm:^3.9.10"
     typescript: "npm:~6.0.3"
     typescript-eslint: "npm:^8.69.0"
     vite: "npm:8.2.2"
@@ -2548,7 +2548,7 @@ __metadata:
     electron: "npm:^45.1.0"
     i18next: "npm:^26.4.2"
     monaco-editor: "npm:^0.56.0"
-    prettier: "npm:^3.9.6"
+    prettier: "npm:^3.9.10"
     react: "npm:^19.2.8"
     react-aria-components: "npm:^1.21.1"
     react-dom: "npm:^19.2.8"
@@ -4107,12 +4107,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"prettier@npm:^3.9.6":
-  version: 3.9.6
-  resolution: "prettier@npm:3.9.6"
+"prettier@npm:^3.9.10":
+  version: 3.9.10
+  resolution: "prettier@npm:3.9.10"
   bin:
     prettier: bin/prettier.cjs
-  checksum: 10c0/9f7ddae234035868f3daab3dc34e6de7e54622185afb017378029f0c09a9c023248ccf6f34def0b17a0538e18c47aa1b3188bab72965d1bf735919baa0747e99
+  checksum: 10c0/0b3531593aa6fb36ac6baf629cb058bda472c59a6938774f931fe55283a07c62e6f56e621b043a82d8a3e21fc284c08c34f9e539fc70072635f79b7bae1a1067
   languageName: node
   linkType: hard
 
