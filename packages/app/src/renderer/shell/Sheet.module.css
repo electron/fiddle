@@ -1,0 +1,211 @@
+/* It clips its content, so the console follows the bottom corners. The corners
+   stay round: a squircle clip over the editor's composited layers makes the
+   compositor draw every frame through a mask, which costs ~10x per keystroke. */
+.sheet {
+  position: relative;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+  background: var(--lu-surface);
+  border-radius: var(--lu-radius-sheet);
+  box-shadow: var(--lu-shadow-sheet);
+  overflow: hidden;
+}
+
+/* The tabs' root wraps the tab row and the panes, and fills what the console leaves. */
+.tabsRoot {
+  flex: 1;
+  min-height: 0;
+}
+
+.tabpanel {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+/* The hairline is an inset shadow, like the console's: a border under 1px snaps
+   to a whole pixel. */
+.tabrow {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  height: calc(var(--lu-size-tabrow) + var(--lu-size-hairline));
+  padding-inline: 9px 8px;
+  box-shadow: inset 0 calc(-1 * var(--lu-size-hairline)) 0 var(--lu-line);
+}
+
+.tabs {
+  flex: 1;
+  min-width: 0;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.panes {
+  position: relative;
+  flex: 1;
+  display: flex;
+  min-height: 0;
+}
+
+.pane {
+  position: relative;
+  flex: 1 1 0;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+/* While a tab is dragged, each pane is a drop target: its middle shows the
+   file in that pane, and each edge (a quarter of the pane) opens it in a new
+   pane on that side. The hint draws what the drop would fill: the whole pane,
+   or its half on that side. */
+.dropZones {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  display: flex;
+}
+
+.dropZone {
+  flex: 1 1 0;
+}
+
+.dropZone[data-drop-zone='before'],
+.dropZone[data-drop-zone='after'] {
+  flex: 0 0 25%;
+}
+
+.dropHint {
+  position: absolute;
+  top: var(--lu-space-2);
+  bottom: var(--lu-space-2);
+  inset-inline: var(--lu-space-2);
+  border-radius: var(--lu-radius-control);
+  corner-shape: squircle;
+  background: color-mix(in srgb, var(--lu-accent-soft) 70%, transparent);
+  box-shadow: inset 0 0 0 2px var(--lu-accent);
+  opacity: 0;
+  pointer-events: none;
+  transition:
+    opacity var(--lu-dur-fast) var(--lu-ease),
+    inset-inline-start var(--lu-dur-fast) var(--lu-ease),
+    inset-inline-end var(--lu-dur-fast) var(--lu-ease);
+}
+
+.dropZones[data-over] .dropHint {
+  opacity: 1;
+}
+
+.dropZones[data-over='before'] .dropHint {
+  inset-inline-end: 50%;
+}
+
+.dropZones[data-over='after'] .dropHint {
+  inset-inline-start: 50%;
+}
+
+/* Split panes are separated by a 0.5px line, drawn on the resize handle
+   (whose own 2px accent line shows on hover, drag and focus). */
+.divider::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: calc(50% - var(--lu-size-hairline) / 2);
+  width: var(--lu-size-hairline);
+  background: var(--lu-line);
+}
+
+.paneHeader {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: var(--lu-size-toolbar);
+  padding-inline: 10px 8px;
+  box-shadow: inset 0 calc(-1 * var(--lu-size-hairline)) 0 var(--lu-line);
+  font: var(--lu-type-label);
+  white-space: nowrap;
+}
+
+.grip {
+  flex: none;
+  color: var(--lu-ink-faint);
+}
+
+.paneName {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.paneErrors {
+  color: var(--lu-spark);
+  font-weight: 500;
+}
+
+.paneActions {
+  margin-inline-start: auto;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.console {
+  flex: none;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  background: var(--lu-surface-sunken);
+  box-shadow: inset 0 var(--lu-size-hairline) 0 var(--lu-line);
+  overflow: hidden;
+}
+
+.empty {
+  flex: 1;
+  display: grid;
+  place-items: center;
+  min-height: 0;
+  padding: var(--lu-space-8);
+}
+
+.drop {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  display: grid;
+  place-items: center;
+  border-radius: inherit;
+  background: color-mix(in srgb, var(--lu-surface) 88%, transparent);
+  box-shadow: inset 0 0 0 2px var(--lu-accent);
+  pointer-events: none;
+}
+
+/* Holds the tab row, panes and console. */
+.editor {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+}
+
+.editor[data-covered] {
+  display: none;
+}
+
+.settings {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  overflow: auto;
+}

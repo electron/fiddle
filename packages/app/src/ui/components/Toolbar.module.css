@@ -1,0 +1,12 @@
+.capsule {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  flex: none;
+  height: var(--lu-size-toolbar);
+  padding: 3px;
+  border-radius: var(--lu-radius-capsule);
+  background: var(--lu-capsule);
+  box-shadow: var(--lu-shadow-capsule);
+  -webkit-app-region: no-drag;
+}

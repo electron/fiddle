@@ -1,0 +1,17 @@
+{
+  "updateReadyTitle": "Обновление готово",
+  "updateReadyDetail": "Новая версия Electron Fiddle скачана. Перезапустите приложение, чтобы начать её использовать.",
+  "restart": "Перезапустить",
+  "later": "Позже",
+  "moveMessage": "Переместить Electron Fiddle в папку «Программы»?",
+  "moveDetail": "Обновления устанавливаются надёжно, только если приложение находится в папке «Программы».",
+  "moveButton": "Переместить в «Программы»",
+  "dontMove": "Не перемещать",
+  "aboutVersion": "{{version}} (Electron {{electron}})",
+  "aboutCopyright": "© Авторы Electron",
+  "resetPrivacyMessage": "Сбросить все разрешения конфиденциальности?",
+  "resetPrivacyDetail": "Electron Fiddle и его fiddle потеряют доступ к камере, микрофону, контактам и другим защищённым данным. Все fiddle запускаются как стандартное приложение Electron, поэтому доступ потеряют и другие приложения на обычном Electron. macOS запросит его снова, когда он понадобится.",
+  "resetPrivacyButton": "Сбросить",
+  "resetPrivacyFailed": "Не удалось сбросить разрешения конфиденциальности.",
+  "resetPrivacyUnavailable": "Разрешения конфиденциальности можно сбросить только в macOS."
+}

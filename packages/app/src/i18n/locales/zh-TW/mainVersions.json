@@ -1,0 +1,20 @@
+{
+  "cannotChange": "請先停止 fiddle，再變更 Electron 版本。",
+  "versionUnknown": "Electron {{version}} 不是已知的版本。",
+  "versionUnsupported": "Electron {{version}} 無法在此電腦上執行。",
+  "localBuildUnknown": "該本機組建已從清單中移除。",
+  "localBuildMissing": "本機組建「{{name}}」缺少 Electron 二進位檔。",
+  "downloadFailed": "無法下載 Electron {{version}}（{{message}}）。",
+  "fallback": "{{problem}}此 fiddle 現在改用 {{fallback}}。",
+  "electronVersion": "Electron {{version}}",
+  "showStableTitle": "要顯示穩定版嗎？",
+  "showBetaTitle": "要顯示 Beta 版嗎？",
+  "showNightlyTitle": "要顯示 Nightly 版嗎？",
+  "showChannelDetail": "此範例使用 Electron {{version}}，但版本清單隱藏了這類版本。要顯示它們，以便日後再次選擇此版本嗎？",
+  "showChannelOk": "顯示",
+  "switchToBuild": "要切換到 {{name}} 嗎？",
+  "switchToBuildDetail": "此資料夾已加入為本機組建。",
+  "switchButton": "切換",
+  "refreshFailed": "無法重新整理 Electron 發行版本的清單。請檢查您的連線後再試一次。",
+  "removeFailed": "無法移除 Electron {{version}}。可能有檔案正在使用中。"
+}

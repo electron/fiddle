@@ -1,0 +1,17 @@
+{
+  "title": "Packages",
+  "addPlaceholder": "Ajouter un package",
+  "addLabel": "Ajouter un package depuis npm",
+  "searching": "Recherche en cours…",
+  "noResults": "Aucun package trouvé",
+  "searchFailed": "npm est inaccessible pour le moment",
+  "latest": "dernière",
+  "version": "Version de {{name}}",
+  "remove": "Supprimer {{name}}",
+  "addFailed": "Impossible d’ajouter {{name}}",
+  "changeFailed": "Impossible de modifier {{name}}",
+  "list": "Packages de ce fiddle",
+  "searchVersions": "Rechercher des versions",
+  "noVersions": "Aucune version correspondante",
+  "moreVersions": "{{shown}} affichées sur {{total}}. Saisissez du texte pour trouver les autres."
+}

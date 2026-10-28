@@ -1,0 +1,179 @@
+.shell {
+  position: fixed;
+  inset: 0;
+  display: grid;
+  grid-template-rows: var(--lu-size-titlebar) minmax(0, 1fr) var(--lu-size-statusbar);
+  grid-template-columns: auto minmax(0, 1fr);
+  grid-template-areas:
+    'title title'
+    'side sheet'
+    'status status';
+  background: var(--lu-material-chrome);
+  color: var(--lu-ink);
+  overflow: hidden;
+}
+
+/* Three parts in a row: the start group, the capsule, the end group. The groups
+   flex equally (basis 0) but never below their content, so the capsule is
+   centred in the window while both have room and pushed aside, never overlapped,
+   when one hasn't (TitleBar.tsx folds the menus and hides the name before it
+   comes to that). Every control in the bar is no-drag. */
+.titlebar {
+  grid-area: title;
+  display: flex;
+  align-items: center;
+  min-width: 0;
+  padding: 0 12px;
+  -webkit-app-region: drag;
+  user-select: none;
+}
+
+.barStart,
+.barEnd {
+  display: flex;
+  align-items: center;
+  flex: 1 1 0;
+}
+
+.barStart {
+  gap: 12px;
+  padding-inline-end: 12px;
+}
+
+.barEnd {
+  justify-content: flex-end;
+  gap: 8px;
+  padding-inline-start: 12px;
+}
+
+/* The sidebar button starts 20px in; on macOS 98px in, clear of the traffic lights
+   (drawn by the OS at x 20), which stay on the left in right-to-left layouts too. */
+.start {
+  flex: none;
+  margin-inline-start: 8px;
+  -webkit-app-region: no-drag;
+}
+
+.shell[data-platform='darwin'] .barStart:dir(ltr)::before,
+.shell[data-platform='darwin'] .barEnd:dir(rtl)::after {
+  content: '';
+  flex: none;
+  width: 66px;
+}
+
+/* Windows: 140px clear at the end for the caption buttons the OS draws over the bar. */
+.shell[data-platform='win32'] .barEnd::after {
+  content: '';
+  flex: none;
+  width: 132px;
+}
+
+/* The name takes what the start group has left and truncates; it adds nothing to
+   the group's least width, so a long name never pushes the capsule. */
+.title {
+  display: flex;
+  align-items: baseline;
+  flex: 1 1 0;
+  gap: 8px;
+  min-width: 0;
+  contain: inline-size;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.title[data-hidden] {
+  visibility: hidden;
+}
+
+.name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font: var(--lu-type-window-title);
+  letter-spacing: var(--lu-type-window-title-tracking);
+}
+
+.edited {
+  flex: none;
+  color: var(--lu-ink-muted);
+  font: var(--lu-type-hint);
+}
+
+/* The toolbar capsule: whole while the groups leave it room, then its picker narrows. */
+.titlebar .capsule {
+  flex: 0 1 auto;
+  /* Let it be squeezed below its content (the picker then narrows); a flex
+     item's automatic minimum would otherwise pin it at the picker's 180px. */
+  min-width: 0;
+}
+
+.capsule .picker {
+  /* A definite 180px sizes the capsule; it only shrinks, down to 112px, once the
+     groups have nothing left to give. */
+  flex: 0 1 180px;
+  width: 180px;
+  min-width: 112px;
+}
+
+/* Windows and Linux: the menu bar, right after the sidebar button. */
+.menus {
+  display: flex;
+  flex: none;
+  margin-inline-start: -4px;
+  -webkit-app-region: no-drag;
+}
+
+/* A 16px hairline between the menus and the fiddle name, which then reads muted:
+   in the titles' type, a name like "Menu" passed for one more menu. */
+.menusDivider {
+  flex: none;
+  width: var(--lu-size-hairline);
+  height: 16px;
+  background: var(--lu-line-strong);
+}
+
+.title[data-after-menus] .name {
+  color: var(--lu-ink-muted);
+}
+
+.side {
+  grid-area: side;
+  position: relative;
+  display: flex;
+  min-height: 0;
+}
+
+.sideInner {
+  flex: 1;
+  min-width: 0;
+}
+
+.sheetArea {
+  grid-area: sheet;
+  display: flex;
+  min-width: 0;
+  min-height: 0;
+  padding-inline-end: var(--lu-size-sheet-inset);
+}
+
+.shell[data-sidebar='false'] .sheetArea {
+  padding-inline-start: var(--lu-size-sheet-inset);
+}
+
+.statusbar {
+  grid-area: status;
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  min-width: 0;
+  padding-inline: 22px 20px;
+  color: var(--lu-ink-muted);
+  font: var(--lu-type-status);
+  white-space: nowrap;
+}
+
+.statusEnd {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  margin-inline-start: auto;
+}
