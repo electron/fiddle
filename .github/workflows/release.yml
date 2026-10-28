@@ -7,6 +7,9 @@ on:
 
 permissions: {}
 
+# Release paths never touch the Actions cache; enforced regardless of per-step settings.
+cache-mode: none
+
 # Each platform runs `publish --dry-run`; `release` runs `--from-dry-run`.
 # Jobs with secrets install with `--mode=skip-build`, so no dependency scripts
 # run there. Only `build-windows` (Azure) and `attest` (Sigstore) can request
