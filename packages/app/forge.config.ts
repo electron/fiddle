@@ -234,6 +234,25 @@ function stageStatic(): string {
   return path.join(staged, 'static');
 }
 
+// Squirrel zips with `vendor/7z.exe`, which electron-winstaller's install script
+// copies from the host arch's build. The release jobs install with
+// `--mode=skip-build`, so no install script runs and this does the same copy.
+function selectSquirrel7z() {
+  const makerRequire = createRequire(
+    createRequire(import.meta.url).resolve('@electron-forge/maker-squirrel'),
+  );
+  const vendor = path.join(
+    path.dirname(makerRequire.resolve('electron-winstaller/package.json')),
+    'vendor',
+  );
+  for (const ext of ['exe', 'dll']) {
+    fs.copyFileSync(
+      path.join(vendor, `7z-${os.arch()}.${ext}`),
+      path.join(vendor, `7z.${ext}`),
+    );
+  }
+}
+
 // The macOS helper that starts fiddles without the app's privacy grants ships at
 // `<resources>/fiddle-disclaim`, on darwin targets only.
 const DISCLAIM_HELPER = 'fiddle-disclaim';
@@ -260,6 +279,9 @@ const config: ForgeConfig = {
         extraResource.push(path.join(disclaimDir, 'build', DISCLAIM_HELPER));
       }
       (forgeConfig.packagerConfig ??= {}).extraResource = extraResource;
+    },
+    preMake: async () => {
+      if (process.platform === 'win32') selectSquirrel7z();
     },
     // Source maps are about three quarters of the asar and nothing at runtime
     // reads them. The release workflow uploads them from `.vite/`.
