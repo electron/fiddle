@@ -129,8 +129,18 @@ jobs:
     needs:
       - test
       - identity
-    if: always() && !contains(needs.*.result, 'failure') && !contains(needs.*.result, 'cancelled')
+    if: ${{ always() }}
     timeout-minutes: 5
     permissions: {}
     steps:
+      - name: Fail if any required job failed or was cancelled
+        if: ${{ contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled') }}
+        env:
+          TEST_RESULT: ${{ needs.test.result }}
+          IDENTITY_RESULT: ${{ needs.identity.result }}
+        run: |
+          echo "One or more required jobs did not succeed:"
+          echo "  test: $TEST_RESULT"
+          echo "  identity: $IDENTITY_RESULT"
+          exit 1
       - run: echo "All GitHub Actions jobs are done"
