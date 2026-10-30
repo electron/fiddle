@@ -37,7 +37,7 @@ jobs:
         with:
           persist-credentials: false
       - name: Setup Node.js
-        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version-file: .nvmrc
           cache: yarn
@@ -112,7 +112,7 @@ jobs:
         with:
           persist-credentials: false
       - name: Setup Node.js
-        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version-file: .nvmrc
           cache: yarn
@@ -129,8 +129,18 @@ jobs:
     needs:
       - test
       - identity
-    if: always() && !contains(needs.*.result, 'failure') && !contains(needs.*.result, 'cancelled')
+    if: ${{ always() }}
     timeout-minutes: 5
     permissions: {}
     steps:
+      - name: Fail if any required job failed or was cancelled
+        if: ${{ contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled') }}
+        env:
+          TEST_RESULT: ${{ needs.test.result }}
+          IDENTITY_RESULT: ${{ needs.identity.result }}
+        run: |
+          echo "One or more required jobs did not succeed:"
+          echo "  test: $TEST_RESULT"
+          echo "  identity: $IDENTITY_RESULT"
+          exit 1
       - run: echo "All GitHub Actions jobs are done"

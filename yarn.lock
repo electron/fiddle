@@ -2511,7 +2511,7 @@ __metadata:
     eslint-plugin-react-hooks: "npm:^7.1.1"
     jiti: "npm:^2.4.2"
     jsdom: "npm:^30.0.1"
-    prettier: "npm:^3.9.6"
+    prettier: "npm:^3.9.10"
     typescript: "npm:~6.0.3"
     typescript-eslint: "npm:^8.69.0"
     vite: "npm:8.2.2"
@@ -2545,10 +2545,10 @@ __metadata:
     "@types/react-dom": "npm:^19.2.7"
     "@types/semver": "npm:^7.8.0"
     "@vitejs/plugin-react": "npm:^6.1.1"
-    electron: "npm:^44.3.0"
-    i18next: "npm:^26.4.2"
+    electron: "npm:^45.1.0"
+    i18next: "npm:^26.5.4"
     monaco-editor: "npm:^0.56.0"
-    prettier: "npm:^3.9.6"
+    prettier: "npm:^3.9.10"
     react: "npm:^19.2.8"
     react-aria-components: "npm:^1.21.1"
     react-dom: "npm:^19.2.8"
@@ -2670,9 +2670,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"electron@npm:^44.3.0":
-  version: 44.3.0
-  resolution: "electron@npm:44.3.0"
+"electron@npm:^45.1.0":
+  version: 45.1.0
+  resolution: "electron@npm:45.1.0"
   dependencies:
     "@electron-internal/extract-zip": "npm:^1.0.1"
     "@electron/get": "npm:^5.0.0"
@@ -2680,7 +2680,7 @@ __metadata:
   bin:
     electron: cli.js
     install-electron: install.js
-  checksum: 10c0/de84b047e0227802628107a4b23be2a53df8b3a50ba9db139684ef2be2246f4dfb4c7a672a6e910581906761648b03cb47718f8c8f7bf6cb87ce4324c821617a
+  checksum: 10c0/ac5b2ee3eb40c20b989be2aab6f1201515440088c7cf418ff15baf6b3a3a53f4a09d560dc023c31233a107b8b3a34083d8c17a41a77a703db0c380d7008f33ca
   languageName: node
   linkType: hard
 
@@ -3225,15 +3225,15 @@ __metadata:
   languageName: node
   linkType: hard
 
-"i18next@npm:^26.4.2":
-  version: 26.4.2
-  resolution: "i18next@npm:26.4.2"
+"i18next@npm:^26.5.4":
+  version: 26.5.4
+  resolution: "i18next@npm:26.5.4"
   peerDependencies:
     typescript: ^5 || ^6 || ^7
   peerDependenciesMeta:
     typescript:
       optional: true
-  checksum: 10c0/f2c9613e03e09e56a84aee939d8fbe3442a58622915e11f97e47f9ab358dfa65be783230b37a21483152711f786fccfe697d7f5ea9269c54f16179dc59960e4b
+  checksum: 10c0/b2ee46803cf19c565d3b80f9a8542ca4fcc92d96434202926f09e032d08e20188d6640434cd3f7987b7a1144cd3c2e034d27f51129a31ca18db8b8cea475c11f
   languageName: node
   linkType: hard
 
@@ -4107,12 +4107,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"prettier@npm:^3.9.6":
-  version: 3.9.6
-  resolution: "prettier@npm:3.9.6"
+"prettier@npm:^3.9.10":
+  version: 3.9.10
+  resolution: "prettier@npm:3.9.10"
   bin:
     prettier: bin/prettier.cjs
-  checksum: 10c0/9f7ddae234035868f3daab3dc34e6de7e54622185afb017378029f0c09a9c023248ccf6f34def0b17a0538e18c47aa1b3188bab72965d1bf735919baa0747e99
+  checksum: 10c0/0b3531593aa6fb36ac6baf629cb058bda472c59a6938774f931fe55283a07c62e6f56e621b043a82d8a3e21fc284c08c34f9e539fc70072635f79b7bae1a1067
   languageName: node
   linkType: hard
 
@@ -4807,9 +4807,9 @@ __metadata:
   linkType: hard
 
 "undici@npm:^6.25.0":
-  version: 6.28.1
-  resolution: "undici@npm:6.28.1"
-  checksum: 10c0/9c7c277da83972f4f506d564b1d627e3e78aadf866915eab768d96fc70daeae8ff7d87d0cdb32403ae1afdf3aef0f11715e0847d66910fda62822c33c5a7e674
+  version: 6.29.1
+  resolution: "undici@npm:6.29.1"
+  checksum: 10c0/2d6970289fcbaca69a484e968fbb5e6fdadf7d9bff30bb5476f71b619d143ec76df1c75a309ac3cb3b3d78238793c613dcaad47dc9d92b63f9e8e73b86ffec23
   languageName: node
   linkType: hard
 

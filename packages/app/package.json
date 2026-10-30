@@ -28,9 +28,9 @@
     "@electron-internal/extract-zip": "^1.0.1",
     "@electron/fiddle-core": "workspace:*",
     "@sentry/electron": "^7.18.0",
-    "i18next": "^26.4.2",
+    "i18next": "^26.5.4",
     "monaco-editor": "^0.56.0",
-    "prettier": "^3.9.6",
+    "prettier": "^3.9.10",
     "react": "^19.2.8",
     "react-aria-components": "^1.21.1",
     "react-dom": "^19.2.8",
@@ -60,7 +60,7 @@
     "@types/react-dom": "^19.2.7",
     "@types/semver": "^7.8.0",
     "@vitejs/plugin-react": "^6.1.1",
-    "electron": "^44.3.0",
+    "electron": "^45.1.0",
     "vite": "8.2.2"
   }
 }
