@@ -2546,7 +2546,7 @@ __metadata:
     "@types/semver": "npm:^7.8.0"
     "@vitejs/plugin-react": "npm:^6.1.1"
     electron: "npm:^45.1.0"
-    i18next: "npm:^26.4.2"
+    i18next: "npm:^26.5.4"
     monaco-editor: "npm:^0.56.0"
     prettier: "npm:^3.9.6"
     react: "npm:^19.2.8"
@@ -3225,15 +3225,15 @@ __metadata:
   languageName: node
   linkType: hard
 
-"i18next@npm:^26.4.2":
-  version: 26.4.2
-  resolution: "i18next@npm:26.4.2"
+"i18next@npm:^26.5.4":
+  version: 26.5.4
+  resolution: "i18next@npm:26.5.4"
   peerDependencies:
     typescript: ^5 || ^6 || ^7
   peerDependenciesMeta:
     typescript:
       optional: true
-  checksum: 10c0/f2c9613e03e09e56a84aee939d8fbe3442a58622915e11f97e47f9ab358dfa65be783230b37a21483152711f786fccfe697d7f5ea9269c54f16179dc59960e4b
+  checksum: 10c0/b2ee46803cf19c565d3b80f9a8542ca4fcc92d96434202926f09e032d08e20188d6640434cd3f7987b7a1144cd3c2e034d27f51129a31ca18db8b8cea475c11f
   languageName: node
   linkType: hard
 
