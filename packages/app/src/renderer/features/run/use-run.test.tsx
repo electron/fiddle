@@ -1,0 +1,172 @@
+import { act, render } from '@testing-library/react';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+
+import type { AppState, OutputLine, ReleaseRow, RunState } from '../../../shared/stores';
+
+const mocks = vi.hoisted(() => ({
+  clearedSeq: 0,
+  push: undefined as ((batch: OutputLine[]) => void) | undefined,
+  backlog: undefined as ((lines: OutputLine[]) => void) | undefined,
+  toastError: vi.fn(),
+  releasesRev: 0,
+  GetReleases: vi.fn<() => Promise<ReleaseRow[]>>(),
+  runApi: {
+    onOutput: vi.fn((handler: (batch: OutputLine[]) => void) => {
+      mocks.push = handler;
+      return () => undefined;
+    }),
+    GetOutput: vi.fn(
+      () => new Promise<OutputLine[]>((resolve) => (mocks.backlog = resolve)),
+    ),
+  },
+}));
+
+vi.mock('../../../ipc/renderer', () => ({
+  runApi: mocks.runApi,
+  versionsApi: { GetReleases: mocks.GetReleases },
+}));
+vi.mock('../../toast-error', () => ({ toastError: mocks.toastError }));
+vi.mock('../../state', () => ({
+  useAppState: () => ({ versions: { releasesRev: mocks.releasesRev } }),
+  useWindowState: () => ({ run: { clearedSeq: mocks.clearedSeq } as RunState }),
+}));
+
+import { useConsoleLines, useReleases, versionLabel } from './use-run';
+
+const line = (seq: number, text = `line ${seq}`): OutputLine => ({
+  seq,
+  time: 0,
+  process: 'fiddle',
+  kind: 'log',
+  text,
+});
+
+const seen: OutputLine[][] = [];
+function Probe() {
+  seen.push(useConsoleLines());
+  return null;
+}
+const texts = () => (seen.at(-1) ?? []).map((l) => l.text);
+
+beforeEach(() => {
+  vi.clearAllMocks();
+  mocks.clearedSeq = 0;
+  mocks.releasesRev = 0;
+});
+afterEach(() => {
+  seen.length = 0;
+});
+
+describe('useConsoleLines', () => {
+  it('holds batches that arrive before the backlog and drops lines it already has', async () => {
+    render(<Probe />);
+    act(() => mocks.push?.([line(3), line(4)]));
+    expect(texts()).toEqual([]);
+    await act(async () => mocks.backlog?.([line(1), line(2), line(3)]));
+    expect(texts()).toEqual(['line 1', 'line 2', 'line 3', 'line 4']);
+    act(() => mocks.push?.([line(4), line(5)]));
+    expect(texts()).toEqual(['line 1', 'line 2', 'line 3', 'line 4', 'line 5']);
+  });
+
+  it('keeps showing live output when the backlog cannot be loaded', async () => {
+    mocks.runApi.GetOutput.mockImplementationOnce(() =>
+      Promise.reject(new Error('gone')),
+    );
+    render(<Probe />);
+    act(() => mocks.push?.([line(1)]));
+    await act(async () => undefined);
+    expect(texts()).toEqual(['line 1']);
+    act(() => mocks.push?.([line(2)]));
+    expect(texts()).toEqual(['line 1', 'line 2']);
+    expect(mocks.toastError).toHaveBeenCalledTimes(1);
+  });
+
+  it('leaves out lines the run has cleared', async () => {
+    const view = render(<Probe />);
+    await act(async () => mocks.backlog?.([line(1), line(2), line(3)]));
+    mocks.clearedSeq = 2;
+    view.rerender(<Probe />);
+    expect(texts()).toEqual(['line 3']);
+  });
+
+  it('shows a fiddle that writes colours as plain text', async () => {
+    render(<Probe />);
+    await act(async () =>
+      mocks.backlog?.([
+        line(1, '\u001b[31mred\u001b[0m and \u001b[1;4mbold\u001b[0m'),
+        line(2, 'progress\u001b[2K\r'),
+      ]),
+    );
+    expect(texts()).toEqual(['red and bold', 'progress\r']);
+  });
+});
+
+describe('useReleases', () => {
+  const release = (version: string): ReleaseRow => ({
+    version,
+    date: '',
+    node: '',
+    obsolete: false,
+    supported: true,
+  });
+  const versions: string[][] = [];
+  function Releases() {
+    versions.push(useReleases().map((row) => row.version));
+    return null;
+  }
+  afterEach(() => {
+    versions.length = 0;
+    vi.restoreAllMocks();
+  });
+
+  // These share the module-level releasesCache, so each test uses its own revisions.
+  it('waits for the first release list, then shares one request between components per revision', async () => {
+    mocks.GetReleases.mockResolvedValue([release('44.0.0')]);
+    const view = render(<Releases />);
+    await act(async () => undefined);
+    expect(mocks.GetReleases).not.toHaveBeenCalled();
+    expect(versions.at(-1)).toEqual([]);
+
+    mocks.releasesRev = 1;
+    view.rerender(<Releases />);
+    render(<Releases />);
+    await act(async () => undefined);
+    expect(mocks.GetReleases).toHaveBeenCalledTimes(1);
+    expect(versions.at(-1)).toEqual(['44.0.0']);
+
+    mocks.GetReleases.mockResolvedValue([release('45.0.0'), release('44.0.0')]);
+    mocks.releasesRev = 2;
+    view.rerender(<Releases />);
+    await act(async () => undefined);
+    expect(mocks.GetReleases).toHaveBeenCalledTimes(2);
+    expect(versions.at(-1)).toEqual(['45.0.0', '44.0.0']);
+  });
+
+  it('asks again after a request failed, instead of keeping the failure', async () => {
+    vi.spyOn(console, 'error').mockImplementation(() => undefined);
+    mocks.releasesRev = 3;
+    mocks.GetReleases.mockRejectedValueOnce(new Error('offline'));
+    const view = render(<Releases />);
+    await act(async () => undefined);
+    expect(versions.at(-1)).toEqual([]);
+    view.unmount();
+
+    mocks.GetReleases.mockResolvedValue([release('44.0.0')]);
+    render(<Releases />);
+    await act(async () => undefined);
+    expect(mocks.GetReleases).toHaveBeenCalledTimes(2);
+    expect(versions.at(-1)).toEqual(['44.0.0']);
+  });
+});
+
+describe('versionLabel', () => {
+  it('names a release by its number and a local build by its name', () => {
+    const app = {
+      versions: { localBuilds: [{ id: 'b1', name: 'My build', path: '' }] },
+    } as unknown as AppState;
+    expect(versionLabel({ kind: 'release', version: '44.0.0' }, app)).toBe('44.0.0');
+    expect(versionLabel({ kind: 'local', id: 'b1' }, app)).toBe('My build');
+    expect(versionLabel({ kind: 'local', id: 'gone' }, app)).toBeUndefined();
+    expect(versionLabel(undefined, app)).toBeUndefined();
+  });
+});

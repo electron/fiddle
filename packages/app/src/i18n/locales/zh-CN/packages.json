@@ -1,0 +1,17 @@
+{
+  "title": "包",
+  "addPlaceholder": "添加包",
+  "addLabel": "从 npm 添加包",
+  "searching": "正在搜索…",
+  "noResults": "未找到包",
+  "searchFailed": "目前无法连接到 npm",
+  "latest": "最新",
+  "version": "{{name}} 的版本",
+  "remove": "移除 {{name}}",
+  "addFailed": "无法添加 {{name}}",
+  "changeFailed": "无法更改 {{name}}",
+  "list": "此 fiddle 中的包",
+  "searchVersions": "搜索版本",
+  "noVersions": "没有匹配的版本",
+  "moreVersions": "显示 {{shown}} 个，共 {{total}} 个。输入内容可查找其余版本。"
+}

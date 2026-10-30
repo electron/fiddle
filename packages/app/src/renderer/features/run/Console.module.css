@@ -1,0 +1,107 @@
+.pane {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+}
+
+.bar {
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: 10px;
+  height: var(--lu-size-console-bar);
+  padding-inline: 16px 10px;
+}
+
+.title {
+  margin: 0;
+  margin-inline-end: 4px;
+  font: var(--lu-type-console-title);
+  color: var(--lu-ink);
+}
+
+.filter {
+  width: 180px;
+}
+
+.spacer {
+  flex: 1;
+}
+
+.rows {
+  /* Output is for reading and copying. */
+  user-select: text;
+  cursor: text;
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  padding: 0 0 6px;
+  margin: 0;
+  list-style: none;
+}
+
+.row {
+  display: grid;
+  grid-template-columns: 60px 70px minmax(0, 1fr);
+  column-gap: 12px;
+  margin: 0 8px;
+  padding: 2px 8px;
+  border-radius: var(--lu-radius-item);
+  corner-shape: squircle;
+  font: var(--lu-type-console);
+  color: var(--lu-ink);
+  /* A full console has a thousand rows: only the ones on screen are laid out. */
+  content-visibility: auto;
+  contain-intrinsic-size: auto 20px;
+}
+
+.time {
+  color: var(--lu-ink-faint);
+  font-variant-numeric: tabular-nums;
+}
+
+.process {
+  font: var(--lu-type-console-process);
+  color: var(--lu-ink-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.message {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.row[data-kind='system'] .message,
+.row[data-kind='system'] .process {
+  color: var(--lu-ink-faint);
+}
+
+.row[data-kind='warn'] .message {
+  color: var(--lu-warning);
+}
+
+.row[data-kind='error'] {
+  background: var(--lu-spark-soft);
+}
+.row[data-kind='error'] .time,
+.row[data-kind='error'] .process,
+.row[data-kind='error'] .message {
+  color: var(--lu-spark);
+}
+.row[data-kind='error'] .process {
+  font-weight: 600;
+}
+
+.link {
+  color: var(--lu-accent);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  border-radius: var(--lu-radius-code);
+}
+.link:focus-visible {
+  outline: var(--lu-focus-outline);
+  outline-offset: 1px;
+}

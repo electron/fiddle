@@ -1,0 +1,12 @@
+{
+  "bisectDone": "Bisect abgeschlossen",
+  "bisectFailed": "Bisect fehlgeschlagen",
+  "packageDone": "Paketieren abgeschlossen",
+  "packageFailed": "Paketieren fehlgeschlagen",
+  "downloadsDone": "Downloads abgeschlossen",
+  "downloadsFailed": "Ein Download ist fehlgeschlagen",
+  "runDone": "Fiddle beendet",
+  "runFailed": "Fiddle mit Fehler beendet",
+  "notificationBody": "{{name}}",
+  "recent": "Zuletzt verwendet"
+}

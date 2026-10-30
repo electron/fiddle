@@ -5,25 +5,142 @@ on:
   push:
     branches:
       - main
+  # Called from release.yml, so tests gate every release.
+  workflow_call:
 
-permissions:
-  contents: read
+permissions: {}
+
+# A new push cancels the pull request run it supersedes. Runs on main and on
+# release tags are never cancelled.
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.event_name == 'pull_request' && github.ref || github.sha }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
   test:
+    name: Test (${{ matrix.os }})
+    timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      matrix:
+        os:
+          - ubuntu-latest
+          - macos-latest
+          - windows-latest
+    runs-on: ${{ matrix.os }}
     permissions:
       contents: read
-    uses: ./.github/workflows/test.yml
-  build:
+    steps:
+      - run: git config --global core.autocrlf input
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Setup Node.js
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .nvmrc
+          cache: yarn
+      # The app's postinstall and `yarn package` download the same Electron zip.
+      - name: Cache the Electron download
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: |
+            ~/.cache/electron
+            ~/Library/Caches/electron
+            ~/AppData/Local/electron/Cache
+          key: electron-${{ runner.os }}-${{ hashFiles('yarn.lock') }}
+          restore-keys: electron-${{ runner.os }}-
+      # The e2e tests need the Electron binary that the app's postinstall downloads.
+      - name: Install dependencies
+        run: yarn install --immutable
+      # `git add -N` makes a generated file that was never committed show up in
+      # the diff.
+      - name: Generated source is up to date
+        shell: bash
+        run: |
+          yarn generate
+          git add --intent-to-add .
+          git diff --exit-code
+      # Missing or unused keys, placeholder, tag and plural mismatches, and the
+      # translate script's own tests.
+      - name: i18n catalogs
+        shell: bash
+        run: |
+          yarn i18n:check
+          yarn i18n:test
+      - name: Format
+        run: yarn format:check
+      - name: Lint
+        run: yarn lint
+      - name: Typecheck
+        run: yarn typecheck
+      - name: Unit tests
+        run: yarn test
+      # Fiddles start through this helper on macOS. The self-check proves it
+      # disclaims responsibility on this macOS version.
+      - name: Privacy helper self-check (macOS)
+        if: runner.os == 'macOS'
+        run: |
+          packages/app/native/disclaim/build.sh
+          packages/app/native/disclaim/build/selfcheck packages/app/native/disclaim/build/fiddle-disclaim
+      # On Linux the e2e driver starts its own Xvfb display per app.
+      - name: End-to-end tests
+        run: yarn test:e2e
+      # Unsigned: no signing variables are set here.
+      - name: Package smoke test
+        run: yarn package
+      # Also checks that the e2e test build (out/test-build) still has every test-only marker.
+      - name: Test-only code stays out of the package and in the test build
+        run: node tools/release-check-asar.mjs packages/app/out --test-build
+      - name: Check the privacy helper in the package (macOS)
+        if: runner.os == 'macOS'
+        run: |
+          for app in packages/app/out/*/"Electron Fiddle.app"; do
+            packages/app/native/disclaim/check-packaged.sh "$app"
+          done
+
+  identity:
+    name: App identity
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
     permissions:
       contents: read
-    uses: ./.github/workflows/build.yml
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Setup Node.js
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .nvmrc
+          cache: yarn
+      - name: Install dependencies
+        run: yarn install --immutable --mode=skip-build
+      # The identity must match the previous release, or its settings,
+      # credentials and installs aren't found.
+      - name: Check app identity
+        run: node tools/release-identity.mjs
+
   gha-done:
     name: GitHub Actions Completed
     runs-on: ubuntu-latest
-    needs: [test, build]
-    if: always() && !contains(needs.*.result, 'failure')
+    needs:
+      - test
+      - identity
+    if: ${{ always() }}
+    timeout-minutes: 5
+    permissions: {}
     steps:
-      - name: GitHub Actions Jobs Done
+      - name: Fail if any required job failed or was cancelled
+        if: ${{ contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled') }}
+        env:
+          TEST_RESULT: ${{ needs.test.result }}
+          IDENTITY_RESULT: ${{ needs.identity.result }}
         run: |
-          echo "All GitHub Actions Jobs are done"
+          echo "One or more required jobs did not succeed:"
+          echo "  test: $TEST_RESULT"
+          echo "  identity: $IDENTITY_RESULT"
+          exit 1
+      - run: echo "All GitHub Actions jobs are done"

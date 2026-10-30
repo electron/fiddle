@@ -1,0 +1,17 @@
+{
+  "title": "Paquetes",
+  "addPlaceholder": "Agregar un paquete",
+  "addLabel": "Agregar un paquete desde npm",
+  "searching": "Buscando…",
+  "noResults": "No se encontraron paquetes",
+  "searchFailed": "No se puede conectar con npm ahora",
+  "latest": "última",
+  "version": "Versión de {{name}}",
+  "remove": "Quitar {{name}}",
+  "addFailed": "No se pudo agregar {{name}}",
+  "changeFailed": "No se pudo cambiar {{name}}",
+  "list": "Paquetes de este fiddle",
+  "searchVersions": "Buscar versiones",
+  "noVersions": "Ninguna versión coincide",
+  "moreVersions": "Se muestran {{shown}} de {{total}}. Escribe para encontrar las demás."
+}
