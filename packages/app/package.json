@@ -27,7 +27,7 @@
   "dependencies": {
     "@electron-internal/extract-zip": "^1.0.1",
     "@electron/fiddle-core": "workspace:*",
-    "@sentry/electron": "^7.18.0",
+    "@sentry/electron": "^8.3.0",
     "i18next": "^26.5.4",
     "monaco-editor": "^0.56.0",
     "prettier": "^3.9.10",

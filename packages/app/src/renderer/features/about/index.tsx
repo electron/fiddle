@@ -18,7 +18,16 @@ async function initRendererCrashReporting(enabled?: boolean): Promise<void> {
   // Events go to main, whose `beforeSend` scrubs them. The integrations are an allowlist:
   // no breadcrumbs, so no console, DOM or network breadcrumbs.
   Sentry.init({
-    sendDefaultPii: false,
+    // Replaces `sendDefaultPii: false`: no user info (so no IP inference), HTTP data, gen AI or DB query data.
+    dataCollection: {
+      userInfo: false,
+      cookies: false,
+      httpHeaders: false,
+      httpBodies: [],
+      urlQueryParams: false,
+      genAI: { inputs: false, outputs: false },
+      databaseQueryData: false,
+    },
     defaultIntegrations: false,
     integrations: [
       Sentry.globalHandlersIntegration(),
