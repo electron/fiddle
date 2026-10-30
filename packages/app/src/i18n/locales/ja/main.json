@@ -56,6 +56,7 @@
   "help": "ヘルプ",
   "runMenu": "実行",
   "runToggle": "実行／停止",
+  "runFromAsar": "ASAR から実行",
   "run": "実行",
   "stop": "停止",
   "packageFiddle": "パッケージ化",

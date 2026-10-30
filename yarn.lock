@@ -2546,6 +2546,7 @@ __metadata:
     "@electron-forge/publisher-github": "npm:8.0.0-alpha.10"
     "@electron-forge/shared-types": "npm:8.0.0-alpha.10"
     "@electron-internal/extract-zip": "npm:^1.0.1"
+    "@electron/asar": "npm:^4.0.1"
     "@electron/fiddle-core": "workspace:*"
     "@electron/fuses": "npm:^2.1.3"
     "@marshallofsound/ipc": "npm:^2.7.1"

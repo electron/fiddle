@@ -57,6 +57,7 @@ export default {
   "help": "Справка",
   "runMenu": "Запуск",
   "runToggle": "Запустить или остановить",
+  "runFromAsar": "Запустить из ASAR",
   "run": "Запустить",
   "stop": "Остановить",
   "packageFiddle": "Упаковать",

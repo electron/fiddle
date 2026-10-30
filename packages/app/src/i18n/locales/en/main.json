@@ -283,6 +283,11 @@
     "description": "Command that runs the fiddle in Electron, or stops it when it is running, as the command palette and the keyboard settings list it. The Run menu says Run or Stop instead.",
     "maxLength": 30
   },
+  "runFromAsar": {
+    "message": "Run from ASAR",
+    "description": "Command that packs the fiddle into an ASAR archive, the format packaged Electron apps ship their code in, and runs it from there. ASAR is a file format name; keep it as is. In the Run menu, the command palette and the keyboard settings.",
+    "maxLength": 30
+  },
   "run": {
     "message": "Run",
     "description": "Run menu item, while the fiddle isn't running, that runs it in Electron.",

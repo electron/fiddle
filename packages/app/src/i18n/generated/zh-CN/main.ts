@@ -57,6 +57,7 @@ export default {
   "help": "帮助",
   "runMenu": "运行",
   "runToggle": "运行或停止",
+  "runFromAsar": "从 ASAR 运行",
   "run": "运行",
   "stop": "停止",
   "packageFiddle": "打包",
