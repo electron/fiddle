@@ -30,7 +30,7 @@
     "@sentry/electron": "^7.18.0",
     "i18next": "^26.5.4",
     "monaco-editor": "^0.56.0",
-    "prettier": "^3.9.6",
+    "prettier": "^3.9.10",
     "react": "^19.2.8",
     "react-aria-components": "^1.21.1",
     "react-dom": "^19.2.8",
