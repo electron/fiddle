@@ -2,6 +2,7 @@
 import { EventEmitter } from 'node:events';
 import fs from 'node:fs';
 import fsp from 'node:fs/promises';
+import os from 'node:os';
 import path from 'node:path';
 import { PassThrough } from 'node:stream';
 import { pathToFileURL } from 'node:url';
@@ -225,6 +226,44 @@ describe('RunService.run', () => {
     await runs.shutdown();
     expect(fs.existsSync(runDirs[0]!)).toBe(false);
   });
+
+  // macOS's tmpdir is under /var, a symlink to /private/var, and Electron names the archive by its real path.
+  it.skipIf(process.platform === 'win32')(
+    'maps errors from an ASAR run whose temp dir is behind a symlink to the fiddle files',
+    async () => {
+      const real = fs.mkdtempSync(path.join(os.tmpdir(), 'fiddle-real-'));
+      const link = `${real}-link`;
+      fs.symlinkSync(real, link);
+      vi.stubEnv('TMPDIR', link);
+      try {
+        const child = fakeChild();
+        spawnReturns(child);
+        const { runs, state } = setup();
+        const result = runs.run('w', { asar: true });
+        await running(state);
+        const { runDir } = spawnElectron.mock.calls[0]![0] as { runDir: string };
+        expect(runDir.startsWith(link)).toBe(true);
+        const source = pathToFileURL(
+          path.join(fs.realpathSync(runDir), 'app.asar', 'main.js'),
+        ).href;
+        child.stderr.write(
+          `[1:0913/1.2:INFO:CONSOLE:4] "Uncaught Error: boom", source: ${source} (4)\n`,
+        );
+        await vi.waitFor(() =>
+          expect(state().errors).toEqual([
+            expect.objectContaining({ file: 'main.js', line: 4, message: 'boom' }),
+          ]),
+        );
+        child.exit(0);
+        await result;
+        await runs.shutdown();
+      } finally {
+        vi.unstubAllEnvs();
+        fs.rmSync(link, { force: true });
+        fs.rmSync(real, { recursive: true, force: true });
+      }
+    },
+  );
 
   it('runs the app folder itself by default', async () => {
     const child = fakeChild();

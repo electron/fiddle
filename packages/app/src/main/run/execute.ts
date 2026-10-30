@@ -1,4 +1,5 @@
 import fsp from 'node:fs/promises';
+import path from 'node:path';
 
 import { parseEnvEntries } from '../../fiddle/env';
 import { findMainEntry, type FileMap } from '../../fiddle/files';
@@ -129,8 +130,17 @@ export async function executeRun(job: RunJob, on: RunSink): Promise<RunOutcome> 
   const parser =
     on.parsed &&
     new OutputParser({
-      // A stack in an ASAR run names files inside the archive.
-      roots: [...new Set([appDir, realAppDir, ...(asarPath ? [asarPath] : [])])],
+      // A stack in an ASAR run names files inside the archive, by its real path too
+      // (Electron realpaths the archive itself, so /var becomes /private/var on macOS).
+      roots: [
+        ...new Set([
+          appDir,
+          realAppDir,
+          ...(asarPath
+            ? [asarPath, path.join(path.dirname(realAppDir), path.basename(asarPath))]
+            : []),
+        ]),
+      ],
       files: Object.keys(files),
       chromiumLogs: settings.electronLogging,
     });

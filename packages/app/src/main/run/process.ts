@@ -116,9 +116,12 @@ export async function packAppAsar(dir: string, appDir: string): Promise<string> 
 
 interface SpawnElectronOptions {
   exec: string;
-  /** The working directory, and what Electron loads unless `app` is set. */
+  /** What Electron loads, and its working directory, unless `app` is set. */
   appDir: string;
-  /** An ASAR archive of `appDir` for Electron to load instead (Run from ASAR). */
+  /**
+   * An ASAR archive of `appDir` for Electron to load instead (Run from ASAR). The working
+   * directory is then `runDir`, so a cwd-relative read misses the loose files as it would packaged.
+   */
   app?: string | undefined;
   /** The fiddle's userData goes in `<runDir>/user-data`, unless `keepUserDataDirs`. */
   runDir: string;
@@ -154,7 +157,7 @@ export function spawnElectron(options: SpawnElectronOptions): ChildProcess {
     options.app ?? options.appDir,
   ];
   return spawn(launcher ?? options.exec, args, {
-    cwd: options.appDir,
+    cwd: options.app ? options.runDir : options.appDir,
     // Leads its own process group, so `killTree` reaches what the fiddle spawned.
     detached: process.platform !== 'win32',
     stdio: ['ignore', 'pipe', 'pipe'],
