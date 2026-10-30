@@ -87,6 +87,24 @@ jobs:
       # On Linux the e2e driver starts its own Xvfb display per app.
       - name: End-to-end tests
         run: yarn test:e2e
+      # A failed spec keeps its app's temp dir (os.tmpdir()/fiddle-e2e-*): screenshots in
+      # artifacts/, the app's output and its logs.
+      - name: Find the e2e temp dirs
+        id: e2e-tmp
+        if: failure()
+        shell: bash
+        run: echo "dir=$(node -p "require('os').tmpdir().replaceAll('\\\\', '/')")" >> "$GITHUB_OUTPUT"
+      - name: Upload e2e failure artifacts
+        if: failure() && steps.e2e-tmp.outputs.dir
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: e2e-failures-${{ matrix.os }}
+          path: |
+            ${{ steps.e2e-tmp.outputs.dir }}/fiddle-e2e-*/artifacts/
+            ${{ steps.e2e-tmp.outputs.dir }}/fiddle-e2e-*/app-output.log
+            ${{ steps.e2e-tmp.outputs.dir }}/fiddle-e2e-*/logs/
+          if-no-files-found: ignore
+          retention-days: 14
       # Unsigned: no signing variables are set here.
       - name: Package smoke test
         run: yarn package
