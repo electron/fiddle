@@ -186,10 +186,11 @@ describe('createAppWindow', () => {
   });
 
   describe('a page that loads but never reports ready', () => {
-    it('is shown after a wait, so its failure is visible', async () => {
+    it('is shown after a wait, so its failure is visible, even if its load never finishes', async () => {
       await createAppWindow(args);
       const win = lastWindow();
-      win.webContents.emit('did-finish-load');
+      // No `did-finish-load`: a subresource that hangs must not keep the window hidden.
+      win.webContents.emit('dom-ready');
       await vi.advanceTimersByTimeAsync(4999);
       expect(win.show).not.toHaveBeenCalled();
       await vi.advanceTimersByTimeAsync(1);
@@ -203,7 +204,7 @@ describe('createAppWindow', () => {
     it('is left alone when it reports ready in time', async () => {
       await createAppWindow(args);
       const win = lastWindow();
-      win.webContents.emit('did-finish-load');
+      win.webContents.emit('dom-ready');
       reportReady();
       await vi.advanceTimersByTimeAsync(10_000);
       expect(win.show).toHaveBeenCalledOnce();
