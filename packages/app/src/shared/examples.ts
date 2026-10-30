@@ -19,6 +19,7 @@ export const SHOW_ME_EXAMPLES = [
   'Notification',
   'PowerMonitor',
   'PowerSaveBlocker',
+  'Protocol',
   'Screen',
   'Session',
   'Shell',
