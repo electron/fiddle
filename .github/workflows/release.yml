@@ -175,7 +175,7 @@ jobs:
       attestations: write
     steps:
       - name: Download all artifacts
-        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
         with:
           path: out
           pattern: build-artifacts-*
@@ -219,7 +219,7 @@ jobs:
       - name: Install dependencies
         run: yarn install --immutable --mode=skip-build
       - name: Download all artifacts
-        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
         with:
           path: packages/app/out
           pattern: build-artifacts-*
@@ -245,7 +245,7 @@ jobs:
           fetch-depth: 0
           persist-credentials: false
       - name: Download source maps artifact
-        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
         with:
           name: vite-source-maps
           path: packages/app/.vite
