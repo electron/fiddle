@@ -38,7 +38,7 @@
   "devDependencies": {
     "@eslint/js": "^10.0.0",
     "@types/node": "^24.19.2",
-    "@vitest/coverage-v8": "^5.0.0",
+    "@vitest/coverage-v8": "5.0.5",
     "eslint": "^10.10.0",
     "eslint-plugin-i18next": "^6.1.5",
     "eslint-plugin-react-hooks": "^7.1.1",
@@ -48,6 +48,6 @@
     "typescript": "~6.0.3",
     "typescript-eslint": "^8.69.0",
     "vite": "8.2.2",
-    "vitest": "^5.0.0"
+    "vitest": "^5.0.5"
   }
 }
