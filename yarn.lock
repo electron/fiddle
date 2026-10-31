@@ -384,6 +384,20 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@electron-forge/core-utils@npm:8.0.1":
+  version: 8.0.1
+  resolution: "@electron-forge/core-utils@npm:8.0.1"
+  dependencies:
+    "@electron-forge/shared-types": "npm:8.0.1"
+    "@electron/rebuild": "npm:^4.2.0"
+    "@malept/cross-spawn-promise": "npm:^2.0.0"
+    debug: "npm:^4.3.1"
+    graceful-fs: "npm:^4.2.11"
+    semver: "npm:^7.2.1"
+  checksum: 10c0/b24600949704edebdc753eb595f5bc803d3772e741b01c431252cf8fcb4802e72397bb8e27d975e2ac7f594d75005f18e3de5295f85a4d129c7612de63153cd6
+  languageName: node
+  linkType: hard
+
 "@electron-forge/core@npm:8.0.0-alpha.10":
   version: 8.0.0-alpha.10
   resolution: "@electron-forge/core@npm:8.0.0-alpha.10"
@@ -454,18 +468,18 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@electron-forge/maker-squirrel@npm:8.0.0-alpha.10":
-  version: 8.0.0-alpha.10
-  resolution: "@electron-forge/maker-squirrel@npm:8.0.0-alpha.10"
+"@electron-forge/maker-squirrel@npm:8.0.1":
+  version: 8.0.1
+  resolution: "@electron-forge/maker-squirrel@npm:8.0.1"
   dependencies:
-    "@electron-forge/core-utils": "npm:8.0.0-alpha.10"
-    "@electron-forge/maker-base": "npm:8.0.0-alpha.10"
-    "@electron-forge/shared-types": "npm:8.0.0-alpha.10"
+    "@electron-forge/core-utils": "npm:8.0.1"
+    "@electron-forge/maker-base": "npm:8.0.1"
+    "@electron-forge/shared-types": "npm:8.0.1"
     electron-winstaller: "npm:^5.3.0"
   dependenciesMeta:
     electron-winstaller:
       optional: true
-  checksum: 10c0/af3fb1906af7a7c148940a4442cf961122693c9e7458f17039b0cd4ffec308eea8f5819fbc3ede0020f5cb6504613ffb5a1251e466921cb94ea6b88605613011
+  checksum: 10c0/342715d22a659256f7997598adab3c6cefb1689a5f41e9554ef3df62af37431a095f2a1553179c00f3ba231036642179ff0ed98e8e8d07b72ce62566566b3f64
   languageName: node
   linkType: hard
 
@@ -710,6 +724,25 @@ __metadata:
   bin:
     electron-rebuild: lib/cli.js
   checksum: 10c0/6d5ed8a860b70d4760de299b4e07560cf95c81974788240aea28fdfe376ca4ec3f99bfa19d1a28cac40fa747142cc32368f1f28ad555670b59355e58d05724ae
+  languageName: node
+  linkType: hard
+
+"@electron/rebuild@npm:^4.2.0":
+  version: 4.2.1
+  resolution: "@electron/rebuild@npm:4.2.1"
+  dependencies:
+    "@malept/cross-spawn-promise": "npm:^2.0.0"
+    debug: "npm:^4.1.1"
+    node-abi: "npm:^4.2.0"
+    node-api-version: "npm:^0.2.1"
+    node-gyp: "npm:^12.2.0"
+    read-binary-file-arch: "npm:^1.0.6"
+  dependenciesMeta:
+    electron:
+      built: true
+  bin:
+    electron-rebuild: lib/cli.js
+  checksum: 10c0/7e5a21d3325f3ca2f980eaaff9e0db89001fd9e6334c1a08e687f40a0224cf2c2c77736d96b7cc622d67633164956544e4840d9c05644d7254589bb7204ec08b
   languageName: node
   linkType: hard
 
@@ -2539,7 +2572,7 @@ __metadata:
     "@electron-forge/maker-deb": "npm:8.0.0-alpha.10"
     "@electron-forge/maker-msix": "npm:8.0.0-alpha.10"
     "@electron-forge/maker-rpm": "npm:8.0.0-alpha.10"
-    "@electron-forge/maker-squirrel": "npm:8.0.0-alpha.10"
+    "@electron-forge/maker-squirrel": "npm:8.0.1"
     "@electron-forge/maker-zip": "npm:8.0.0-alpha.10"
     "@electron-forge/plugin-fuses": "npm:8.0.0-alpha.10"
     "@electron-forge/plugin-vite": "npm:8.0.0-alpha.10"
