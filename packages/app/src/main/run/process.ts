@@ -2,6 +2,7 @@ import { spawn, type ChildProcess } from 'node:child_process';
 import fsp from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
+import { createPackageWithOptions } from '@electron/asar';
 import { app } from 'electron';
 
 import { cleanFlags, fiddleProcessEnv, packageManagerEnv } from '../../fiddle/env';
@@ -18,6 +19,12 @@ const STALE_DIR_MS = 24 * 60 * 60 * 1000;
 const CLOSE_GRACE_MS = 500;
 /** What `makeRunDir` makes: run dirs, and package and make projects (group 1). */
 const TEMP_DIR_RE = /^electron-fiddle-((?:package|make)-)?[A-Za-z0-9]{6}$/;
+
+// Electron's `fs` treats an `.asar` file as a folder, so it can't delete the
+// archive a Run from ASAR leaves in a run dir. `original-fs` sees a plain file.
+const rawFsp: typeof fsp =
+  (process.getBuiltinModule('original-fs') as { promises: typeof fsp } | undefined)
+    ?.promises ?? fsp;
 
 let shellPath: Promise<string | undefined> | undefined;
 
@@ -46,7 +53,7 @@ export function makeRunDir(prefix = 'electron-fiddle-'): Promise<string> {
 
 /** Deletes a run dir or build project. A failure is only logged. */
 export function removeDir(dir: string): Promise<void> {
-  return fsp
+  return rawFsp
     .rm(dir, { recursive: true, force: true, maxRetries: 5, retryDelay: 200 })
     .catch((error: unknown) => log.warn('cleanup failed', dir, error));
 }
@@ -64,7 +71,7 @@ export async function sweepStaleDirs(root = os.tmpdir()): Promise<void> {
       if (match[1] && (await fsp.stat(path.join(dir, 'out')).catch(() => undefined)))
         continue;
       if (Date.now() - (await fsp.stat(dir)).mtimeMs > STALE_DIR_MS)
-        await fsp.rm(dir, { recursive: true, force: true, maxRetries: 3 });
+        await rawFsp.rm(dir, { recursive: true, force: true, maxRetries: 3 });
     } catch (error) {
       // One locked or vanished dir must not stop the sweep.
       log.debug(`sweeping ${dir} failed`, error);
@@ -96,9 +103,26 @@ export function writeRunPackageJson(
   return fsp.writeFile(path.join(appDir, PACKAGE_JSON), generatePackageJson(packageJson));
 }
 
+/**
+ * Packs `appDir` into `<dir>/app.asar` and returns its path. Native addons go
+ * to `app.asar.unpacked`, as Forge's auto-unpack-natives plugin puts them,
+ * because Electron can't load a `.node` file from inside an archive.
+ */
+export async function packAppAsar(dir: string, appDir: string): Promise<string> {
+  const archive = path.join(dir, 'app.asar');
+  await createPackageWithOptions(appDir, archive, { unpack: '*.node' });
+  return archive;
+}
+
 interface SpawnElectronOptions {
   exec: string;
+  /** What Electron loads, and its working directory, unless `app` is set. */
   appDir: string;
+  /**
+   * An ASAR archive of `appDir` for Electron to load instead (Run from ASAR). The working
+   * directory is then `runDir`, so a cwd-relative read misses the loose files as it would packaged.
+   */
+  app?: string | undefined;
   /** The fiddle's userData goes in `<runDir>/user-data`, unless `keepUserDataDirs`. */
   runDir: string;
   flags: readonly string[];
@@ -130,10 +154,10 @@ export function spawnElectron(options: SpawnElectronOptions): ChildProcess {
       : [`--user-data-dir=${path.join(options.runDir, 'user-data')}`]),
     ...cleanFlags(options.flags),
     ...devElectronFlags(),
-    options.appDir,
+    options.app ?? options.appDir,
   ];
   return spawn(launcher ?? options.exec, args, {
-    cwd: options.appDir,
+    cwd: options.app ? options.runDir : options.appDir,
     // Leads its own process group, so `killTree` reaches what the fiddle spawned.
     detached: process.platform !== 'win32',
     stdio: ['ignore', 'pipe', 'pipe'],

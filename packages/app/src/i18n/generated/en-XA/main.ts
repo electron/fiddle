@@ -57,6 +57,7 @@ export default {
   "help": "[Ĥéļþ one]",
   "runMenu": "[Ŕûñ one]",
   "runToggle": "[Ŕûñ öŕ šţöþ one two]",
+  "runFromAsar": "[Ŕûñ ƒŕöɱ ÅŠÅŔ one two]",
   "run": "[Ŕûñ one]",
   "stop": "[Šţöþ one]",
   "packageFiddle": "[Þáçķáĝé one]",

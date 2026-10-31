@@ -57,6 +57,7 @@ export default {
   "help": "Ajuda",
   "runMenu": "Executar",
   "runToggle": "Executar ou parar",
+  "runFromAsar": "Executar a partir do ASAR",
   "run": "Executar",
   "stop": "Parar",
   "packageFiddle": "Empacotar",

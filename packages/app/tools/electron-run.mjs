@@ -68,8 +68,10 @@ if (command === 'xvfb') {
     await buildApp('development', undefined, ['main']);
   // Chromium's own startup noise (D-Bus, GPU) stays out of the CLI's stderr unless verbose.
   const quiet = process.env.FIDDLE_CLI_VERBOSE === '1' ? [] : ['--log-level=3'];
+  // No display needed: without one, Linux's default X11 backend crashes at random under --headless.
+  const headless = ['--ozone-platform=headless'];
   // Yarn runs scripts in the package's folder; relative fiddle paths are the caller's.
-  runElectron([...quiet, appDir, '--headless', ...args], {
+  runElectron([...quiet, ...headless, appDir, '--headless', ...args], {
     cwd: process.env.INIT_CWD || process.cwd(),
   });
 }

@@ -2,10 +2,12 @@
 import { EventEmitter } from 'node:events';
 import fs from 'node:fs';
 import fsp from 'node:fs/promises';
+import os from 'node:os';
 import path from 'node:path';
 import { PassThrough } from 'node:stream';
 import { pathToFileURL } from 'node:url';
 
+import { extractFile, listPackage } from '@electron/asar';
 import { Installer } from '@electron/fiddle-core';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
@@ -200,6 +202,80 @@ describe('RunService.run', () => {
     expect(texts().at(-1)).toContain('exitedCode');
     await runs.shutdown();
     expect(fs.existsSync(runDirs[0]!)).toBe(false);
+  });
+
+  it('runs from an ASAR archive of the app when asked, and removes it with the run directory', async () => {
+    const child = fakeChild();
+    let archive = '';
+    spawnElectron.mockImplementation((options: { runDir: string; app?: string }) => {
+      runDirs.push(options.runDir);
+      archive = options.app ?? '';
+      return child;
+    });
+    const { runs, state, texts } = setup();
+    const result = runs.run('w', { asar: true });
+    await running(state);
+    expect(archive).toBe(path.join(runDirs[0]!, 'app.asar'));
+    expect(listPackage(archive, { isPack: false })).toEqual(
+      expect.arrayContaining([`${path.sep}main.js`, `${path.sep}package.json`]),
+    );
+    expect(extractFile(archive, 'main.js').toString()).toBe('console.log(1)');
+    expect(texts()).toContain(`runningFromAsar:${JSON.stringify({ path: archive })}`);
+    child.exit(0);
+    expect(await result).toMatchObject({ code: 0 });
+    await runs.shutdown();
+    expect(fs.existsSync(runDirs[0]!)).toBe(false);
+  });
+
+  // macOS's tmpdir is under /var, a symlink to /private/var, and Electron names the archive by its real path.
+  it.skipIf(process.platform === 'win32')(
+    'maps errors from an ASAR run whose temp dir is behind a symlink to the fiddle files',
+    async () => {
+      const real = fs.mkdtempSync(path.join(os.tmpdir(), 'fiddle-real-'));
+      const link = `${real}-link`;
+      fs.symlinkSync(real, link);
+      vi.stubEnv('TMPDIR', link);
+      try {
+        const child = fakeChild();
+        spawnReturns(child);
+        const { runs, state } = setup();
+        const result = runs.run('w', { asar: true });
+        await running(state);
+        const { runDir } = spawnElectron.mock.calls[0]![0] as { runDir: string };
+        expect(runDir.startsWith(link)).toBe(true);
+        const source = pathToFileURL(
+          path.join(fs.realpathSync(runDir), 'app.asar', 'main.js'),
+        ).href;
+        child.stderr.write(
+          `[1:0913/1.2:INFO:CONSOLE:4] "Uncaught Error: boom", source: ${source} (4)\n`,
+        );
+        await vi.waitFor(() =>
+          expect(state().errors).toEqual([
+            expect.objectContaining({ file: 'main.js', line: 4, message: 'boom' }),
+          ]),
+        );
+        child.exit(0);
+        await result;
+        await runs.shutdown();
+      } finally {
+        vi.unstubAllEnvs();
+        fs.rmSync(link, { force: true });
+        fs.rmSync(real, { recursive: true, force: true });
+      }
+    },
+  );
+
+  it('runs the app folder itself by default', async () => {
+    const child = fakeChild();
+    spawnReturns(child);
+    const { runs, state } = setup();
+    const result = runs.run('w');
+    await running(state);
+    expect(spawnElectron.mock.calls[0]![0]).toMatchObject({ app: undefined });
+    expect(fs.existsSync(path.join(runDirs[0]!, 'app.asar'))).toBe(false);
+    child.exit(0);
+    await result;
+    await runs.shutdown();
   });
 
   it('ignores a run in a busy window', async () => {

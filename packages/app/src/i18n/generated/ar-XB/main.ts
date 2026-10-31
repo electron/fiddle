@@ -57,6 +57,7 @@ export default {
   "help": "\u200f\u202eHelp\u202c\u200f",
   "runMenu": "\u200f\u202eRun\u202c\u200f",
   "runToggle": "\u200f\u202eRun\u202c\u200f \u200f\u202eor\u202c\u200f \u200f\u202estop\u202c\u200f",
+  "runFromAsar": "\u200f\u202eRun\u202c\u200f \u200f\u202efrom\u202c\u200f \u200f\u202eASAR\u202c\u200f",
   "run": "\u200f\u202eRun\u202c\u200f",
   "stop": "\u200f\u202eStop\u202c\u200f",
   "packageFiddle": "\u200f\u202ePackage\u202c\u200f",

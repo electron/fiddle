@@ -1,6 +1,7 @@
 {
   "consoleReady": "就緒。按下「執行」以啟動 Electron {{version}}。",
   "started": "Electron {{version}} 已以「{{name}}」啟動",
+  "runningFromAsar": "正在從 ASAR 封存檔 {{path}} 執行",
   "inspector": "檢查器正在 127.0.0.1:{{port}} 上接聽",
   "exitedCode": "Electron 已結束，結束代碼為 {{code}}",
   "exitedSignal": "Electron 已被 {{signal}} 停止",

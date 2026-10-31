@@ -334,7 +334,7 @@ describe('application menu', () => {
   });
 
   it('uses sentence case, and an ellipsis only at the end of a label', () => {
-    const properNouns = new Set(['Electron', 'Fiddle', 'GitHub', 'Forge', 'Tab']);
+    const properNouns = new Set(['Electron', 'Fiddle', 'GitHub', 'Forge', 'Tab', 'ASAR']);
     for (const platform of PLATFORMS) {
       walk(build({ platform, dev: true }), (each) => {
         const label = each.label;

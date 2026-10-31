@@ -55,6 +55,15 @@ describe('run', () => {
     await app().query(role('button', 'Run', { timeout: 15_000 }));
   }, 90_000);
 
+  it('runs from an ASAR archive with Run from ASAR', async () => {
+    await app().runCommand('run.fromAsar');
+    await app().query(text(/^Running from the ASAR archive .+app\.asar$/));
+    await app().query(role('button', 'Stop', { timeout: 60_000 }));
+    await app().query(text(/^Inspector listening on /, { timeout: 60_000 }));
+    await app().click(role('button', 'Stop'));
+    await app().query(role('button', 'Run', { timeout: 15_000 }));
+  }, 90_000);
+
   it('clears the console from its button', async () => {
     await app().query(text(/^Electron v\d+\.\d+\.\d+ started as/));
     await app().click(role('button', 'Clear console'));
