@@ -490,15 +490,24 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@electron-forge/plugin-fuses@npm:8.0.0-alpha.10":
-  version: 8.0.0-alpha.10
-  resolution: "@electron-forge/plugin-fuses@npm:8.0.0-alpha.10"
+"@electron-forge/plugin-base@npm:8.0.1":
+  version: 8.0.1
+  resolution: "@electron-forge/plugin-base@npm:8.0.1"
   dependencies:
-    "@electron-forge/plugin-base": "npm:8.0.0-alpha.10"
-    "@electron-forge/shared-types": "npm:8.0.0-alpha.10"
+    "@electron-forge/shared-types": "npm:8.0.1"
+  checksum: 10c0/cfe24903cbc9eb5d311bfbbf863c94bdac790d7882a92013f4948cbcf07d6bffa862f03729133de799a62244c012eeeae3b69423463dbd603b1dfefe3cdb5a52
+  languageName: node
+  linkType: hard
+
+"@electron-forge/plugin-fuses@npm:8.0.1":
+  version: 8.0.1
+  resolution: "@electron-forge/plugin-fuses@npm:8.0.1"
+  dependencies:
+    "@electron-forge/plugin-base": "npm:8.0.1"
+    "@electron-forge/shared-types": "npm:8.0.1"
   peerDependencies:
-    "@electron/fuses": ^2.0.0
-  checksum: 10c0/c1953937c288783db043ee30fc8ec3ffaeb00bdaee2e264262e9a05814a60c065bc8658ef2e7ca087663e278aed2216cfdd2e4e93d7079913516d2a0c727ca1e
+    "@electron/fuses": ^2.1.3
+  checksum: 10c0/8c112a283f779a286260c12c33e0eb288e403104aa2b8267e6dc0f78e6fc96a08546a673485e1ed9e4b5cf9064c153675c476b84c7f951b21a4eb48c159f556b
   languageName: node
   linkType: hard
 
@@ -2541,7 +2550,7 @@ __metadata:
     "@electron-forge/maker-rpm": "npm:8.0.0-alpha.10"
     "@electron-forge/maker-squirrel": "npm:8.0.0-alpha.10"
     "@electron-forge/maker-zip": "npm:8.0.0-alpha.10"
-    "@electron-forge/plugin-fuses": "npm:8.0.0-alpha.10"
+    "@electron-forge/plugin-fuses": "npm:8.0.1"
     "@electron-forge/plugin-vite": "npm:8.0.0-alpha.10"
     "@electron-forge/publisher-github": "npm:8.0.0-alpha.10"
     "@electron-forge/shared-types": "npm:8.0.0-alpha.10"
@@ -2559,7 +2568,7 @@ __metadata:
     "@types/semver": "npm:^7.8.0"
     "@vitejs/plugin-react": "npm:^6.1.1"
     electron: "npm:^45.1.0"
-    i18next: "npm:^26.5.4"
+    i18next: "npm:^26.5.7"
     monaco-editor: "npm:^0.56.0"
     prettier: "npm:^3.9.10"
     react: "npm:^19.2.8"
@@ -3238,15 +3247,15 @@ __metadata:
   languageName: node
   linkType: hard
 
-"i18next@npm:^26.5.4":
-  version: 26.5.4
-  resolution: "i18next@npm:26.5.4"
+"i18next@npm:^26.5.7":
+  version: 26.5.7
+  resolution: "i18next@npm:26.5.7"
   peerDependencies:
     typescript: ^5 || ^6 || ^7
   peerDependenciesMeta:
     typescript:
       optional: true
-  checksum: 10c0/b2ee46803cf19c565d3b80f9a8542ca4fcc92d96434202926f09e032d08e20188d6640434cd3f7987b7a1144cd3c2e034d27f51129a31ca18db8b8cea475c11f
+  checksum: 10c0/c5da205990515dfc0a963682d98506927ed51b5232d87e95b447bbae574d089be551c1c14ccc80ca25fb97665fc321a489009745082b626f665a8be68ea0e8af
   languageName: node
   linkType: hard
 
