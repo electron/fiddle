@@ -25,7 +25,7 @@ import { trackWindow, untrackWindow } from './windows';
 const RENDERER_NAME = 'main_window';
 // The title bar height and `--lu-ink` must match the Lucent CSS: the OS draws the caption buttons.
 const TITLE_BAR_HEIGHT = 56;
-/** How long a loaded page may take to report ready before the window is shown anyway. */
+/** How long a page whose DOM is ready may take to report ready before the window is shown anyway. */
 const READY_TIMEOUT_MS = 5000;
 /** A crashed renderer is reloaded at most this many times per `CRASH_RELOAD_WINDOW_MS`; a page that crashes on load would loop. */
 const MAX_CRASH_RELOADS = 3;
@@ -168,7 +168,8 @@ export async function createAppWindow({
     bindWindowIpc({ contents, windowId, services }, init, show);
 
     // A page that loads but never reports ready (its script failed) would stay hidden for good.
-    contents.on('did-finish-load', () => {
+    // Counted from `dom-ready`, not `did-finish-load`: a subresource that never finishes must not hold the window back.
+    contents.on('dom-ready', () => {
       if (shown) return;
       readyTimer ??= setTimeout(() => {
         log.error('the page did not report ready; showing the window anyway', windowId);

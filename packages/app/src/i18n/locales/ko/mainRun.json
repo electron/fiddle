@@ -1,6 +1,7 @@
 {
   "consoleReady": "준비되었습니다. 실행을 누르면 Electron {{version}} 실행이 시작됩니다.",
   "started": "Electron {{version}} 시작됨: \"{{name}}\"",
+  "runningFromAsar": "ASAR 아카이브에서 실행 중: {{path}}",
   "inspector": "인스펙터가 127.0.0.1:{{port}}에서 수신 대기 중",
   "exitedCode": "Electron 종료됨(종료 코드 {{code}})",
   "exitedSignal": "Electron이 {{signal}} 신호로 중지됨",

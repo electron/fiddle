@@ -2,6 +2,7 @@
 export default {
   "consoleReady": "Pronto. Clique em Executar para iniciar o Electron {{version}}.",
   "started": "Electron {{version}} iniciado como “{{name}}”",
+  "runningFromAsar": "Executando a partir do arquivo ASAR {{path}}",
   "inspector": "Inspetor escutando em 127.0.0.1:{{port}}",
   "exitedCode": "O Electron foi encerrado com o código {{code}}",
   "exitedSignal": "O Electron foi interrompido por {{signal}}",

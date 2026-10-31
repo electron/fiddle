@@ -124,6 +124,12 @@ export function registerCommands(registry: CommandRegistry, services: Services):
   registry.register('run.toggle', ({ windowId }) => {
     if (windowId) runs.toggle(windowId);
   });
+  registry.register('run.fromAsar', ({ windowId }) => {
+    if (windowId)
+      runs
+        .run(windowId, { asar: true })
+        .catch((error: unknown) => log.error('run failed', error));
+  });
   for (const task of ['package', 'make'] as const) {
     registry.register(`run.${task}`, async ({ windowId }) => {
       if (windowId) await runs.track(packageFiddle(windowId, task, services));

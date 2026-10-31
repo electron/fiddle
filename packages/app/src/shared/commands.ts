@@ -32,6 +32,9 @@ export interface CommandDefinition {
 }
 
 const hasWindow: Enablement = (_app, win) => win !== undefined;
+/** The window has nothing running: no run, package or make. */
+const runIdle: Enablement = (_app, win) =>
+  win !== undefined && (win.run?.status ?? 'ready') === 'ready';
 /** The tab row has at least two tabs (visible files). */
 const hasTabs: Enablement = (_app, win) =>
   (win?.fiddle.files.filter((file) => file.visible).length ?? 0) > 1;
@@ -156,13 +159,18 @@ export const commands = {
     accelerator: ['CmdOrCtrl+R', 'F5'],
     enabled: hasWindow,
   },
+  // Packs the fiddle into an ASAR archive and runs that, as a packaged app would load it.
+  'run.fromAsar': {
+    label: 'runFromAsar',
+    enabled: runIdle,
+  },
   'run.package': {
     label: 'packageFiddle',
-    enabled: (_app, win) => win !== undefined && (win.run?.status ?? 'ready') === 'ready',
+    enabled: runIdle,
   },
   'run.make': {
     label: 'makeFiddle',
-    enabled: (_app, win) => win !== undefined && (win.run?.status ?? 'ready') === 'ready',
+    enabled: runIdle,
   },
   // Stops a running bisect; otherwise the window shows the range dialog.
   'bisect.toggle': {

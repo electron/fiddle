@@ -14,3 +14,8 @@ updates:
       interval: 'weekly'
     cooldown:
       default-days: 7
+    ignore:
+      # @types/node tracks the Node major bundled with the `electron` dependency.
+      # Bump its major by hand when Electron moves to a newer Node.
+      - dependency-name: '@types/node'
+        update-types: ['version-update:semver-major']
