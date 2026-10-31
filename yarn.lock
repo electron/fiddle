@@ -490,15 +490,24 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@electron-forge/plugin-fuses@npm:8.0.0-alpha.10":
-  version: 8.0.0-alpha.10
-  resolution: "@electron-forge/plugin-fuses@npm:8.0.0-alpha.10"
+"@electron-forge/plugin-base@npm:8.0.1":
+  version: 8.0.1
+  resolution: "@electron-forge/plugin-base@npm:8.0.1"
   dependencies:
-    "@electron-forge/plugin-base": "npm:8.0.0-alpha.10"
-    "@electron-forge/shared-types": "npm:8.0.0-alpha.10"
+    "@electron-forge/shared-types": "npm:8.0.1"
+  checksum: 10c0/cfe24903cbc9eb5d311bfbbf863c94bdac790d7882a92013f4948cbcf07d6bffa862f03729133de799a62244c012eeeae3b69423463dbd603b1dfefe3cdb5a52
+  languageName: node
+  linkType: hard
+
+"@electron-forge/plugin-fuses@npm:8.0.1":
+  version: 8.0.1
+  resolution: "@electron-forge/plugin-fuses@npm:8.0.1"
+  dependencies:
+    "@electron-forge/plugin-base": "npm:8.0.1"
+    "@electron-forge/shared-types": "npm:8.0.1"
   peerDependencies:
-    "@electron/fuses": ^2.0.0
-  checksum: 10c0/c1953937c288783db043ee30fc8ec3ffaeb00bdaee2e264262e9a05814a60c065bc8658ef2e7ca087663e278aed2216cfdd2e4e93d7079913516d2a0c727ca1e
+    "@electron/fuses": ^2.1.3
+  checksum: 10c0/8c112a283f779a286260c12c33e0eb288e403104aa2b8267e6dc0f78e6fc96a08546a673485e1ed9e4b5cf9064c153675c476b84c7f951b21a4eb48c159f556b
   languageName: node
   linkType: hard
 
@@ -2541,7 +2550,7 @@ __metadata:
     "@electron-forge/maker-rpm": "npm:8.0.0-alpha.10"
     "@electron-forge/maker-squirrel": "npm:8.0.0-alpha.10"
     "@electron-forge/maker-zip": "npm:8.0.0-alpha.10"
-    "@electron-forge/plugin-fuses": "npm:8.0.0-alpha.10"
+    "@electron-forge/plugin-fuses": "npm:8.0.1"
     "@electron-forge/plugin-vite": "npm:8.0.0-alpha.10"
     "@electron-forge/publisher-github": "npm:8.0.0-alpha.10"
     "@electron-forge/shared-types": "npm:8.0.0-alpha.10"
