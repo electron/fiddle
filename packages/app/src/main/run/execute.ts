@@ -1,4 +1,5 @@
 import fsp from 'node:fs/promises';
+import path from 'node:path';
 
 import { parseEnvEntries } from '../../fiddle/env';
 import { findMainEntry, type FileMap } from '../../fiddle/files';
@@ -16,6 +17,7 @@ import { sfwPathFor } from '../platform/sfw';
 import { esmNeedsNewerElectron, type RunOutcome } from './logic';
 import { OutputParser, type ParseResult } from './output-parser';
 import {
+  packAppAsar,
   spawnElectron,
   toolEnv,
   waitForExit,
@@ -38,6 +40,8 @@ export interface RunJob {
   allowScripts: boolean;
   /** The Execution settings: package manager and author, Socket Firewall, environment, flags and logging. */
   settings: Settings;
+  /** Pack the app, modules included, into `<dir>/app.asar` and run that instead of the folder. */
+  asar?: boolean | undefined;
   signal: AbortSignal;
 }
 
@@ -115,6 +119,8 @@ export async function executeRun(job: RunJob, on: RunSink): Promise<RunOutcome> 
   }
 
   on.status?.('starting');
+  const asarPath = job.asar ? await packAppAsar(job.dir, appDir) : undefined;
+  if (asarPath) on.log(t('runningFromAsar', { path: asarPath }));
   const userEnv = parseEnvEntries(settings.environmentVariables);
   if (userEnv.invalid.length > 0)
     on.log(t('envInvalid', { entries: userEnv.invalid.join(', ') }), 'warn');
@@ -124,7 +130,17 @@ export async function executeRun(job: RunJob, on: RunSink): Promise<RunOutcome> 
   const parser =
     on.parsed &&
     new OutputParser({
-      roots: [...new Set([appDir, realAppDir])],
+      // A stack in an ASAR run names files inside the archive, by its real path too
+      // (Electron realpaths the archive itself, so /var becomes /private/var on macOS).
+      roots: [
+        ...new Set([
+          appDir,
+          realAppDir,
+          ...(asarPath
+            ? [asarPath, path.join(path.dirname(realAppDir), path.basename(asarPath))]
+            : []),
+        ]),
+      ],
       files: Object.keys(files),
       chromiumLogs: settings.electronLogging,
     });
@@ -132,6 +148,7 @@ export async function executeRun(job: RunJob, on: RunSink): Promise<RunOutcome> 
   const child = spawnElectron({
     exec: electron.exec,
     appDir,
+    app: asarPath,
     runDir: job.dir,
     flags: settings.electronFlags,
     keepUserDataDirs: settings.keepUserDataDirs,

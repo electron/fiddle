@@ -12,7 +12,7 @@ const staticDir = fileURLToPath(new URL('../../static', import.meta.url));
 
 describe('Show Me examples', () => {
   it('lists the names in order', () => {
-    expect(SHOW_ME_EXAMPLES).toHaveLength(29);
+    expect(SHOW_ME_EXAMPLES).toHaveLength(30);
     expect(SHOW_ME_EXAMPLES[0]).toBe('App');
     expect(SHOW_ME_EXAMPLES.at(-1)).toBe('WebFrame');
     expect(SHOW_ME_EXAMPLES).toContain('utilityProcess');

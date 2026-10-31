@@ -269,6 +269,7 @@ export function buildMenuTemplate(
       label: t('runMenu'),
       submenu: [
         command('run.toggle', busy ? 'stop' : 'run'),
+        command('run.fromAsar'),
         separator,
         command('bisect.toggle', bisecting ? 'stopBisect' : undefined),
         separator,

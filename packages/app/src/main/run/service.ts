@@ -47,6 +47,8 @@ interface RunOptions {
   banner?: string;
   /** False keeps the console whatever the setting says (a later bisect step, so the verdicts so far stay). */
   clear?: boolean;
+  /** Pack the fiddle into an ASAR archive and run that (Run from ASAR). */
+  asar?: boolean;
 }
 
 type ConsoleKind = OutputLine['kind'];
@@ -359,6 +361,7 @@ export class RunService {
         electron,
         allowScripts: trust.allowScripts,
         settings: this.#hub.app.settings,
+        asar: options.asar,
         signal,
       },
       {

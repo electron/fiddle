@@ -2,6 +2,7 @@
 export default {
   "consoleReady": "[Ŕéáðý. Þŕéšš Ŕûñ ţö šţáŕţ Éļéçţŕöñ {{version}}. one two three four]",
   "started": "[Éļéçţŕöñ {{version}} šţáŕţéð áš \"{{name}}\" one two three]",
+  "runningFromAsar": "[Ŕûññîñĝ ƒŕöɱ ţĥé ÅŠÅŔ áŕçĥîṽé {{path}} one two three]",
   "inspector": "[Îñšþéçţöŕ ļîšţéñîñĝ öñ 127.0.0.1:{{port}} one two three four]",
   "exitedCode": "[Éļéçţŕöñ éẋîţéð ŵîţĥ çöðé {{code}} one two three]",
   "exitedSignal": "[Éļéçţŕöñ ŵáš šţöþþéð ƀý {{signal}} one two three]",

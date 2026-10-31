@@ -172,7 +172,7 @@ describe('corruption', () => {
     await writeFile(file, JSON.stringify({ schemaVersion: 2, name: 'disk', count: 1 }));
     const real = fs.readFileSync;
     let busy = 2;
-    const spy = vi.spyOn(fs, 'readFileSync').mockImplementation(((...args) => {
+    const spy = vi.spyOn(fs, 'readFileSync').mockImplementation(((...args: unknown[]) => {
       if (args[0] === file && busy-- > 0)
         throw Object.assign(new Error('busy'), { code: 'EBUSY' });
       return Reflect.apply(real, fs, args);

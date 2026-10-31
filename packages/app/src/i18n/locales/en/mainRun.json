@@ -7,6 +7,10 @@
     "message": "Electron {{version}} started as \"{{name}}\"",
     "description": "Console line when the fiddle starts. {{version}} is e.g. v43.0.0 or a local build's name; {{name}} is the app name from the fiddle's package.json."
   },
+  "runningFromAsar": {
+    "message": "Running from the ASAR archive {{path}}",
+    "description": "Console line before Electron starts when the user chose Run from ASAR. ASAR is a file format name; keep it as is. {{path}} is the full path of the app.asar file the fiddle was packed into."
+  },
   "inspector": {
     "message": "Inspector listening on 127.0.0.1:{{port}}",
     "description": "Console line with the Node inspector port of the running fiddle."

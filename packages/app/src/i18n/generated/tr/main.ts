@@ -57,6 +57,7 @@ export default {
   "help": "Yardım",
   "runMenu": "Çalıştır",
   "runToggle": "Çalıştır veya durdur",
+  "runFromAsar": "ASAR'dan çalıştır",
   "run": "Çalıştır",
   "stop": "Durdur",
   "packageFiddle": "Paketle",

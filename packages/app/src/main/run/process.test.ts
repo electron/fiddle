@@ -148,6 +148,37 @@ describe('spawnElectron', () => {
     }
   });
 
+  it('starts in the app folder, or in the run dir when it loads an archive instead', async () => {
+    const dir = await makeRunDir('fiddle-test-');
+    dirs.push(dir);
+    await writeRunApp(
+      dir,
+      { 'main.js': 'console.log(process.cwd())' },
+      { name: 'demo', main: 'main.js', author: 'me', modules: {} },
+    );
+    // Node stands in for Electron, so a script stands in for the archive.
+    fs.writeFileSync(path.join(dir, 'archive.js'), 'console.log(process.cwd())');
+    const cwdOf = async (app?: string) => {
+      const child = spawnElectron({
+        exec: process.execPath,
+        appDir: path.join(dir, 'app'),
+        app,
+        runDir: dir,
+        flags: [],
+        keepUserDataDirs: true,
+        env: {},
+        advancedLogging: false,
+        inspect: false,
+      });
+      let out = '';
+      child.stdout?.on('data', (chunk) => (out += String(chunk)));
+      await waitForExit(child);
+      return fs.realpathSync(out.trim());
+    };
+    expect(await cwdOf()).toBe(fs.realpathSync(path.join(dir, 'app')));
+    expect(await cwdOf(path.join(dir, 'archive.js'))).toBe(fs.realpathSync(dir));
+  });
+
   it.skipIf(process.platform === 'win32')(
     'starts the launcher with Electron, the flags and the fiddle as its arguments',
     async () => {

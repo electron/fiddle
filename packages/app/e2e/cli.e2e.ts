@@ -30,11 +30,16 @@ describe('headless CLI', () => {
     if (dir) removeTestDir(dir);
   });
 
-  /** Runs the CLI, killing it after `timeout` ms so a hung run doesn't outlive the test. */
+  /**
+   * Runs the CLI, killing it after `timeout` ms so a hung run doesn't outlive the test.
+   * Chromium's headless Ozone backend, because there is no display: on Linux the default X11
+   * backend then crashes at random in its cursor loader (SIGSEGV, so a null exit code).
+   */
   const cli = (timeout: number, ...args: string[]) =>
     new Promise<CliRun>((resolve, reject) => {
       const env = { FIDDLE_TEST_DIR: dir, FIDDLE_TEST_FIXTURE_URL: fixtures.url };
-      const child = spawnTestBuild(['--log-level=3', '--headless', ...args], env, {
+      const argv = ['--log-level=3', '--ozone-platform=headless', '--headless', ...args];
+      const child = spawnTestBuild(argv, env, {
         cwd: dir,
         timeout,
         killSignal: 'SIGKILL',
