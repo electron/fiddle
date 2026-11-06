@@ -2602,7 +2602,7 @@ __metadata:
     "@vitejs/plugin-react": "npm:^6.1.1"
     electron: "npm:^45.1.0"
     i18next: "npm:^26.5.7"
-    monaco-editor: "npm:^0.56.0"
+    monaco-editor: "npm:^0.57.0"
     prettier: "npm:^3.9.10"
     react: "npm:^19.2.8"
     react-aria-components: "npm:^1.21.1"
@@ -3881,13 +3881,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"monaco-editor@npm:^0.56.0":
-  version: 0.56.0
-  resolution: "monaco-editor@npm:0.56.0"
+"monaco-editor@npm:^0.57.0":
+  version: 0.57.0
+  resolution: "monaco-editor@npm:0.57.0"
   dependencies:
-    dompurify: "npm:3.4.8"
+    dompurify: "npm:3.4.15"
     marked: "npm:14.0.0"
-  checksum: 10c0/8ed728880042c5a1f42040f955e017b798fc1602fc59ef7a1f0e4da8f354e928b32cc0dba93ff677c538a37a542be3898210f9d1801f339e3c0f65f9ad3dc73e
+  checksum: 10c0/21a088dbd49cfdd27538d1c4af37bd26832866348ee673d2b43924cdf58d3e89daaafff19e94731758fa2cc81a00402f81968062867cbc5a98e010f1a84460d2
   languageName: node
   linkType: hard
 
