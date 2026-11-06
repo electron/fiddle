@@ -1,11 +1,12 @@
 /**
  * Where a fiddle's code came from. Serialized as
  * `local`, `example`, `gist:<owner>/<id>@<sha>` or `electron:<tag>/<path>`.
+ * A gist's `byOwner` says the code is its owner's: the gist is no fork and `sha` is in its own history.
  */
 export type FiddleOrigin =
   | { kind: 'local' }
   | { kind: 'example' }
-  | { kind: 'gist'; owner: string; id: string; sha: string }
+  | { kind: 'gist'; owner: string; id: string; sha: string; byOwner?: true }
   | { kind: 'electron'; tag: string; path: string };
 
 /** The owner shown for anonymous gists, which have none. */
@@ -23,12 +24,18 @@ export function formatOrigin(origin: FiddleOrigin): string {
   }
 }
 
-export function gistOrigin(id: string, sha: string, owner: string | null): FiddleOrigin {
+export function gistOrigin(
+  id: string,
+  sha: string,
+  owner: string | null,
+  byOwner = false,
+): FiddleOrigin {
   return {
     kind: 'gist',
     owner: owner ?? ANONYMOUS_GIST_OWNER,
     id: id.toLowerCase(),
     sha: sha.toLowerCase(),
+    ...(byOwner ? { byOwner: true } : {}),
   };
 }
 
@@ -38,15 +45,13 @@ export function isUntrustedOrigin(origin: FiddleOrigin): boolean {
 }
 
 /**
- * True if a gist's `owner` is the signed-in GitHub user (`login`), so its code is the user's own.
- * GitHub logins ignore case. Anonymous gists belong to no one.
+ * True if `origin` is code the signed-in GitHub user (`login`) wrote: a gist of theirs with
+ * `byOwner`. GitHub logins ignore case. Anonymous gists belong to no one.
  */
-export function isOwnGist(
-  owner: string | null | undefined,
-  login: string | undefined,
-): boolean {
-  if (!owner || !login || owner === ANONYMOUS_GIST_OWNER) return false;
-  return owner.toLowerCase() === login.toLowerCase();
+export function isOwnGist(origin: FiddleOrigin, login: string | undefined): boolean {
+  if (origin.kind !== 'gist' || !origin.byOwner || !login) return false;
+  if (origin.owner === ANONYMOUS_GIST_OWNER) return false;
+  return origin.owner.toLowerCase() === login.toLowerCase();
 }
 
 /**

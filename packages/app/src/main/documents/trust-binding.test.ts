@@ -46,7 +46,7 @@ function gistFiddle(
     hidden: [],
     version: { kind: 'release', version: '30.0.0' },
     modules,
-    origin: gistOrigin(ID, 'a'.repeat(40), owner),
+    origin: gistOrigin(ID, 'a'.repeat(40), owner, true),
     source: {},
   };
 }
@@ -155,6 +155,17 @@ describe('ensureTrusted', () => {
     });
     expect(lookup).not.toHaveBeenCalled();
     expect(showMessageBox).not.toHaveBeenCalled();
+  });
+
+  it("still asks for the user's gist when its owner may not have written the code, e.g. a fork", async () => {
+    const { documents } = await setup({ githubLogin: 'octocat' });
+    documents.updateDoc(W, (doc) => ({
+      ...doc,
+      fiddle: { ...doc.fiddle, origin: gistOrigin(ID, 'a'.repeat(40), 'octocat') },
+    }));
+    showMessageBox.mockResolvedValue({ response: 1, checkboxChecked: false });
+    expect(await documents.ensureTrusted(W, 'run')).toMatchObject({ approved: false });
+    expect(showMessageBox).toHaveBeenCalledOnce();
   });
 
   it("still asks for someone else's gist when signed in", async () => {
