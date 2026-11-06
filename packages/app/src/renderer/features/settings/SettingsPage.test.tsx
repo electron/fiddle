@@ -230,7 +230,14 @@ describe('General settings', () => {
     fireEvent.click(screen.getByRole('button', { name: /^(?!reset).*locale\.title/ }));
     const names = screen.getAllByRole('option').map((option) => option.textContent);
     expect(names).toEqual(
-      expect.arrayContaining(['locale.system', 'English', 'Deutsch', '日本語']),
+      expect.arrayContaining([
+        'locale.system',
+        'English',
+        'Deutsch',
+        '日本語',
+        '简体中文',
+        '繁體中文',
+      ]),
     );
     expect(names.some((name) => /Pseudo|XA|XB/.test(name ?? ''))).toBe(false);
   });
