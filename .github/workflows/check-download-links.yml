@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Install dependencies
-        run: npm install hast-util-from-html@^2.0.1 hast-util-select@^6.0.2
+        run: npm install hast-util-from-html@^2.0.1 hast-util-select@^6.0.2 # zizmor: ignore[adhoc-packages]
       - name: Check website download links
         uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3
         with:
