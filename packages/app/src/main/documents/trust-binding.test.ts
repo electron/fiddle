@@ -55,12 +55,17 @@ async function setup(
   options: {
     packument?: (name: string, signal?: AbortSignal) => Promise<unknown>;
     modules?: Record<string, string>;
+    /** The signed-in GitHub user. */
+    githubLogin?: string;
   } = {},
 ) {
   const documents = await import('./service');
   const { createDoc } = await import('./model');
   initFakeDocuments(documents, {
     npm: options.packument && { packument: options.packument },
+    hub: {
+      app: { settings: { sessionRestore: false }, githubLogin: options.githubLogin },
+    },
   });
   const approved = gistFiddle('octocat', 'approved()', options.modules);
   await documents.openFiddleWindow({
@@ -132,6 +137,41 @@ describe('ensureTrusted', () => {
       fiddle: { files: { 'main.js': 'approved()' } },
     });
     expect(showMessageBox).not.toHaveBeenCalled();
+  });
+
+  it("runs the signed-in user's own gist without asking", async () => {
+    const lookup = vi.fn();
+    const { documents } = await setup({
+      githubLogin: 'OctoCat',
+      packument: lookup,
+      modules,
+    });
+    expect(
+      await documents.ensureTrusted(W, 'package', { requireScripts: true }),
+    ).toMatchObject({
+      approved: true,
+      allowScripts: true,
+      fiddle: { files: { 'main.js': 'approved()' } },
+    });
+    expect(lookup).not.toHaveBeenCalled();
+    expect(showMessageBox).not.toHaveBeenCalled();
+  });
+
+  it("still asks for someone else's gist when signed in", async () => {
+    const { documents } = await setup({ githubLogin: 'mallory' });
+    showMessageBox.mockResolvedValue({ response: 1, checkboxChecked: false });
+    expect(await documents.ensureTrusted(W, 'run')).toEqual({
+      approved: false,
+      allowScripts: false,
+    });
+    expect(showMessageBox).toHaveBeenCalledOnce();
+  });
+
+  it('still asks for a gist when signed out', async () => {
+    const { documents } = await setup();
+    showMessageBox.mockResolvedValue({ response: 1, checkboxChecked: false });
+    expect(await documents.ensureTrusted(W, 'run')).toMatchObject({ approved: false });
+    expect(showMessageBox).toHaveBeenCalledOnce();
   });
 
   it('lists where the code comes from, its files and its dependencies in the prompt', async () => {

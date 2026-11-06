@@ -293,6 +293,31 @@ describe('a gist link', () => {
     expect(documents.getFiddle(W).files['main.js']).toBe('mine');
   });
 
+  it("loads the signed-in user's own gist without asking", async () => {
+    const { documents, openLink } = await setup({
+      hub: { app: { settings: { sessionRestore: false }, githubLogin: 'OctoCat' } },
+    });
+
+    await openLink(gistLink);
+
+    expect(confirm).not.toHaveBeenCalled();
+    expect(documents.getFiddle(W).files['main.js']).toBe('from the gist');
+  });
+
+  it("still asks before loading someone else's gist when signed in", async () => {
+    const { documents, openLink } = await setup({
+      hub: { app: { settings: { sessionRestore: false }, githubLogin: 'me' } },
+    });
+
+    await openLink(gistLink);
+
+    expect(confirm).toHaveBeenCalledWith(
+      W,
+      expect.objectContaining({ message: 'linkGistMessage' }),
+    );
+    expect(documents.getFiddle(W).files['main.js']).toBe('from the gist');
+  });
+
   it('does not offer to sign in for a missing gist when already signed in', async () => {
     const { client, failure, openLink } = await setup({
       hub: { app: { settings: { sessionRestore: false }, githubLogin: 'me' } },

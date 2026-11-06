@@ -38,6 +38,18 @@ export function isUntrustedOrigin(origin: FiddleOrigin): boolean {
 }
 
 /**
+ * True if a gist's `owner` is the signed-in GitHub user (`login`), so its code is the user's own.
+ * GitHub logins ignore case. Anonymous gists belong to no one.
+ */
+export function isOwnGist(
+  owner: string | null | undefined,
+  login: string | undefined,
+): boolean {
+  if (!owner || !login || owner === ANONYMOUS_GIST_OWNER) return false;
+  return owner.toLowerCase() === login.toLowerCase();
+}
+
+/**
  * True if a code-executing operation (run, module install, auto-bisect,
  * package, make) needs the user's approval first. `approvedOrigin` is the
  * `formatOrigin` string the user last approved for this fiddle.

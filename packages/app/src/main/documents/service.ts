@@ -26,6 +26,7 @@ import {
 } from '../../fiddle/templates';
 import {
   formatOrigin,
+  isOwnGist,
   isUntrustedOrigin,
   needsApproval,
   restoredOrigin,
@@ -846,6 +847,9 @@ export async function ensureTrusted(
   const trusted = (allowScripts: boolean, fiddle = doc.fiddle, scripted: string[] = []) =>
     ({ approved: true, allowScripts, fiddle, scripted }) as const;
   if (!isUntrustedOrigin(origin)) return trusted(true);
+  // The signed-in user's own gist is their own code, like a local fiddle.
+  if (origin.kind === 'gist' && isOwnGist(origin.owner, deps.hub.app.githubLogin))
+    return trusted(true);
   log.info('trust check', operation, formatOrigin(origin));
   const approved = !needsApproval(origin, doc.approvedOrigin);
   if (approved && (doc.approvedScripts || !requireScripts))
@@ -1262,11 +1266,12 @@ async function handleDeepLink(url: string): Promise<void> {
     let loaded: LoadedFiddle;
     if (link.kind === 'gist') {
       const gist = await deps.github.client().loadGist(link.id, link.revision);
-      const detail = gistLinkDetail(link, gist, gistDependencies(gist), td);
+      // The signed-in user's own gist loads without asking.
       if (
+        !isOwnGist(gist.owner, deps.hub.app.githubLogin) &&
         !(await confirm(target, {
           message: td('linkGistMessage'),
-          detail,
+          detail: gistLinkDetail(link, gist, gistDependencies(gist), td),
           ok: td('load'),
         }))
       )

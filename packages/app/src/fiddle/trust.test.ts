@@ -5,6 +5,7 @@ import {
   type FiddleOrigin,
   formatOrigin,
   gistOrigin,
+  isOwnGist,
   isUntrustedOrigin,
   needsApproval,
   restoredOrigin,
@@ -77,6 +78,20 @@ describe('needsApproval', () => {
   it('never asks for local fiddles and examples', () => {
     expect(needsApproval({ kind: 'local' })).toBe(false);
     expect(needsApproval({ kind: 'example' }, 'something-else')).toBe(false);
+  });
+});
+
+describe('isOwnGist', () => {
+  it("is true for the signed-in user's gist, ignoring case", () => {
+    expect(isOwnGist('octocat', 'octocat')).toBe(true);
+    expect(isOwnGist('OctoCat', 'octocat')).toBe(true);
+  });
+
+  it("is false for someone else's gist, when signed out and for anonymous gists", () => {
+    expect(isOwnGist('mallory', 'octocat')).toBe(false);
+    expect(isOwnGist('octocat', undefined)).toBe(false);
+    expect(isOwnGist(null, 'octocat')).toBe(false);
+    expect(isOwnGist(ANONYMOUS_GIST_OWNER, ANONYMOUS_GIST_OWNER)).toBe(false);
   });
 });
 
