@@ -215,11 +215,15 @@ export function SettingsPage() {
   );
 }
 
+/** Chinese is named by script, not region: 简体中文 and 繁體中文. */
+const DISPLAY_TAGS: Record<string, string> = { 'zh-CN': 'zh-Hans', 'zh-TW': 'zh-Hant' };
+
 /** A language by its own name, so it can be found from any UI language. A tag that isn't well formed (a hand-edited settings.json can hold one) shows as it is. */
 function languageName(code: string): string {
   try {
-    const name = new Intl.DisplayNames([code], { type: 'language' }).of(code) ?? code;
-    return name.charAt(0).toLocaleUpperCase(code) + name.slice(1);
+    const tag = DISPLAY_TAGS[code] ?? code;
+    const name = new Intl.DisplayNames([tag], { type: 'language' }).of(tag) ?? code;
+    return name.charAt(0).toLocaleUpperCase(tag) + name.slice(1);
   } catch {
     return code;
   }
