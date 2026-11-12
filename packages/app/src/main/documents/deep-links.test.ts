@@ -69,7 +69,7 @@ function gistResult(files: Record<string, string> = { 'main.js': 'from the gist'
     url: `https://gist.github.com/octocat/${ID}`,
     revision: SHA,
     files,
-    origin: { kind: 'gist', owner: 'octocat', id: ID, sha: SHA },
+    origin: { kind: 'gist', owner: 'octocat', id: ID, sha: SHA, byOwner: true },
   };
 }
 
@@ -291,6 +291,52 @@ describe('a gist link', () => {
       }),
     );
     expect(documents.getFiddle(W).files['main.js']).toBe('mine');
+  });
+
+  it("loads the signed-in user's own gist without asking", async () => {
+    const { documents, openLink } = await setup({
+      hub: { app: { settings: { sessionRestore: false }, githubLogin: 'OctoCat' } },
+    });
+
+    await openLink(gistLink);
+
+    expect(confirm).not.toHaveBeenCalled();
+    expect(documents.getFiddle(W).files['main.js']).toBe('from the gist');
+  });
+
+  it("still asks before loading the user's gist at a revision that isn't its own", async () => {
+    const { client, openLink } = await setup({
+      hub: { app: { settings: { sessionRestore: false }, githubLogin: 'octocat' } },
+    });
+    const foreign = 'f'.repeat(40);
+    // The client leaves `byOwner` out for a revision outside the gist's history, or a fork.
+    client.loadGist.mockResolvedValueOnce({
+      ...gistResult(),
+      revision: foreign,
+      origin: { kind: 'gist', owner: 'octocat', id: ID, sha: foreign },
+    });
+
+    await openLink(`${gistLink}?revision=${foreign}`);
+
+    expect(client.loadGist).toHaveBeenCalledWith(ID, foreign);
+    expect(confirm).toHaveBeenCalledWith(
+      W,
+      expect.objectContaining({ message: 'linkGistMessage' }),
+    );
+  });
+
+  it("still asks before loading someone else's gist when signed in", async () => {
+    const { documents, openLink } = await setup({
+      hub: { app: { settings: { sessionRestore: false }, githubLogin: 'me' } },
+    });
+
+    await openLink(gistLink);
+
+    expect(confirm).toHaveBeenCalledWith(
+      W,
+      expect.objectContaining({ message: 'linkGistMessage' }),
+    );
+    expect(documents.getFiddle(W).files['main.js']).toBe('from the gist');
   });
 
   it('does not offer to sign in for a missing gist when already signed in', async () => {

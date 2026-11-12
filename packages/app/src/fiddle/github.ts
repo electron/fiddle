@@ -95,6 +95,8 @@ const GistSchema = z.object({
   public: z.boolean().optional(),
   owner: z.object({ login: z.string() }).nullable().optional(),
   history: z.array(z.object({ version: z.string() })).optional(),
+  /** Set on a fork: its code came from another gist. */
+  fork_of: z.unknown().optional(),
   files: z.record(z.string(), GistFileSchema).optional(),
 });
 
@@ -439,6 +441,11 @@ export class GitHubClient {
       ),
     );
 
+    // The owner wrote the code only if it's no fork and the revision is the gist's own: GitHub may
+    // serve another gist's commit (a fork's, say) under this ID.
+    const byOwner =
+      gist.fork_of == null &&
+      (gist.history ?? []).some((h) => h.version.toLowerCase() === sha);
     return {
       id: gist.id,
       owner: gist.owner?.login ?? null,
@@ -447,7 +454,7 @@ export class GitHubClient {
       url: gist.html_url ?? gistUrl(id),
       revision: sha,
       files: Object.fromEntries(files),
-      origin: gistOrigin(id, sha, gist.owner?.login ?? null),
+      origin: gistOrigin(id, sha, gist.owner?.login ?? null, byOwner),
     };
   }
 
