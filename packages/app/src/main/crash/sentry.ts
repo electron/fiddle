@@ -50,7 +50,16 @@ export function initCrashReporting(): boolean {
     release: releaseName(app.getName(), app.getVersion()),
     // Renderers reach Sentry through the app's own preload: the one exception to EIPC-only IPC.
     ipcMode: Sentry.IPCMode.Classic,
-    sendDefaultPii: false,
+    // Replaces `sendDefaultPii: false`: no user info (so no IP inference), HTTP data, gen AI or DB query data.
+    dataCollection: {
+      userInfo: false,
+      cookies: false,
+      httpHeaders: false,
+      httpBodies: [],
+      urlQueryParams: false,
+      genAI: { inputs: false, outputs: false },
+      databaseQueryData: false,
+    },
     // An explicit allowlist: no console, network or local-variable integrations, so those never collect anything.
     defaultIntegrations: false,
     integrations: [

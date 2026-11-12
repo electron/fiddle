@@ -86,7 +86,7 @@ describe('initCrashReporting', () => {
     expect(initCrashReporting()).toBe(true);
     expect(mocks.init).toHaveBeenCalledOnce();
     expect(mocks.init.mock.calls[0]![0]).toMatchObject({
-      sendDefaultPii: false,
+      dataCollection: { userInfo: false, httpBodies: [] },
       defaultIntegrations: false,
     });
   });
