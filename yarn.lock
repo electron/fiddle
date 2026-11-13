@@ -1766,12 +1766,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/react@npm:^19.2.18":
-  version: 19.2.18
-  resolution: "@types/react@npm:19.2.18"
+"@types/react@npm:^19.3.0":
+  version: 19.3.0
+  resolution: "@types/react@npm:19.3.0"
   dependencies:
     csstype: "npm:^3.2.2"
-  checksum: 10c0/d04216172b4b4362b310017c210dfbe019fb4f4e7dffd0313e70b3acb3051d5c3e76e7e84e3cf4c6a3c824993ffadfe3949e589a6398a09d4200e7670e2962de
+  checksum: 10c0/fbcabf303f935ca9f36ed2dcf81751cf84744098c5a683c8a62a0fa7edd31714b48d5c46b12fd0014f7f2dfe4d9ec6de428a850748eec719a70294e51029551b
   languageName: node
   linkType: hard
 
@@ -2596,7 +2596,7 @@ __metadata:
     "@sentry/electron": "npm:^7.18.0"
     "@testing-library/dom": "npm:^10.4.1"
     "@testing-library/react": "npm:^16.3.3"
-    "@types/react": "npm:^19.2.18"
+    "@types/react": "npm:^19.3.0"
     "@types/react-dom": "npm:^19.2.7"
     "@types/semver": "npm:^7.8.0"
     "@vitejs/plugin-react": "npm:^6.1.1"
@@ -2604,7 +2604,7 @@ __metadata:
     i18next: "npm:^26.5.7"
     monaco-editor: "npm:^0.57.0"
     prettier: "npm:^3.9.10"
-    react: "npm:^19.2.8"
+    react: "npm:^19.3.1"
     react-aria-components: "npm:^1.21.1"
     react-dom: "npm:^19.2.8"
     react-i18next: "npm:^17.0.13"
@@ -4340,10 +4340,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react@npm:^19.2.8":
-  version: 19.2.8
-  resolution: "react@npm:19.2.8"
-  checksum: 10c0/5f86bdb56426652fd6d989d30a6f2e603c057272c47c9ca3a3fbe190a3a39ee9ccce937d63cfc039717abed1b8891d6a499134bc35311acc07eafdacd86537cd
+"react@npm:^19.3.1":
+  version: 19.3.1
+  resolution: "react@npm:19.3.1"
+  checksum: 10c0/f0ed036d1223562c09c8347858ca712733ea6e27a30db709ee9c3f3f176d3e9e767afce735d59956addf3d030102e256bba82dea635fc1bdb0e01107e98fef10
   languageName: node
   linkType: hard
 
