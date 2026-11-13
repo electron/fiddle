@@ -293,6 +293,50 @@ export const runStateSchema = z.object({
 });
 export type RunState = z.infer<typeof runStateSchema>;
 
+const consoleValueTypes = [
+  'string',
+  'number',
+  'bigint',
+  'boolean',
+  'undefined',
+  'null',
+  'symbol',
+  'function',
+  'object',
+  'array',
+  'map',
+  'set',
+  'error',
+  'date',
+  'regexp',
+  'node',
+  'accessor',
+  'circular',
+] as const;
+
+/**
+ * A renderer console argument, serialized in the page by the run's console hook
+ * (`src/main/run/console-hook.cjs`). `description` is the value's text, or for
+ * an object its class and size, such as `Array(3)`.
+ */
+export interface ConsoleValue {
+  type: (typeof consoleValueTypes)[number];
+  description: string;
+  /** Properties or entries, as `[key, value]`. Absent when the object was too deep to serialize. */
+  props?: [string, ConsoleValue][] | undefined;
+  /** How many more properties there were. */
+  more?: number | undefined;
+}
+
+export const consoleValueSchema: z.ZodType<ConsoleValue> = z.lazy(() =>
+  z.object({
+    type: z.enum(consoleValueTypes),
+    description: z.string(),
+    props: z.array(z.tuple([z.string(), consoleValueSchema])).optional(),
+    more: z.number().int().positive().optional(),
+  }),
+);
+
 export const outputLineSchema = z.object({
   /** Increases by one per line in a window, never reused. */
   seq: z.number().int().nonnegative(),
@@ -302,6 +346,8 @@ export const outputLineSchema = z.object({
   kind: z.enum(['log', 'system', 'warn', 'error']),
   text: z.string(),
   location: sourceLocationSchema.optional(),
+  /** A renderer console call's arguments, when one is an object. `text` is then their preview. */
+  values: z.array(consoleValueSchema).optional(),
 });
 export type OutputLine = z.infer<typeof outputLineSchema>;
 export const outputLinesSchema = z.array(outputLineSchema);

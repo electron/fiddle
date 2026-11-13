@@ -148,6 +148,34 @@ describe('spawnElectron', () => {
     }
   });
 
+  it('loads a preload script first, from a path with a space in it', async () => {
+    const dir = await makeRunDir('fiddle-test-');
+    dirs.push(dir);
+    await writeRunApp(
+      dir,
+      { 'main.js': 'console.log("main")' },
+      { name: 'demo', main: 'main.js', author: 'me', modules: {} },
+    );
+    const preload = path.join(dir, 'a b', 'hook.cjs');
+    fs.mkdirSync(path.dirname(preload));
+    fs.writeFileSync(preload, 'console.log("preload")');
+    const child = spawnElectron({
+      exec: process.execPath,
+      appDir: path.join(dir, 'app'),
+      runDir: dir,
+      flags: [],
+      keepUserDataDirs: true,
+      env: {},
+      advancedLogging: false,
+      inspect: false,
+      preload,
+    });
+    let text = '';
+    child.stdout?.on('data', (chunk) => (text += String(chunk)));
+    await waitForExit(child);
+    expect(text.split(/\r?\n/)).toEqual(['preload', 'main', '']);
+  });
+
   it('starts in the app folder, or in the run dir when it loads an archive instead', async () => {
     const dir = await makeRunDir('fiddle-test-');
     dirs.push(dir);

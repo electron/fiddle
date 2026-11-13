@@ -215,4 +215,75 @@ describe('OutputParser', () => {
       { process: 'main', kind: 'log', text: 'no newline' },
     ]);
   });
+
+  describe('console hook records', () => {
+    const record = (text: string, values: unknown[], line = 3) =>
+      `\u001efiddle-console ${JSON.stringify({ source: fileUrl('renderer.js'), line, text, values })}\n`;
+    const consoleLine = (text: string, line = 3) =>
+      `[9:0913/1.2:INFO:CONSOLE:${line}] "${text}", source: ${fileUrl('renderer.js')} (${line})\n`;
+    const listeners = {
+      type: 'object',
+      description: 'Object',
+      props: [
+        ['listener1', { type: 'function', description: 'ƒ listener1()' }],
+        ['listener2', { type: 'function', description: 'ƒ listener2()' }],
+      ],
+    };
+
+    it('fills in the values of the line they belong to', () => {
+      const p = parser();
+      const { lines } = p.push('stderr', consoleLine('[object Object]'));
+      expect(lines[0]?.text).toBe('[object Object]');
+      const result = p.push('stderr', record('[object Object]', [listeners]));
+      expect(result.lines).toEqual([]);
+      expect(result.updates).toEqual([
+        {
+          line: lines[0],
+          values: [listeners],
+          text: '{listener1: ƒ, listener2: ƒ}',
+        },
+      ]);
+      // A record is used once.
+      expect(p.push('stderr', record('[object Object]', [listeners])).updates).toEqual(
+        [],
+      );
+    });
+
+    it('pairs repeated calls from one line in order', () => {
+      const p = parser();
+      const { lines } = p.push(
+        'stderr',
+        consoleLine('[object Object]') + consoleLine('[object Object]'),
+      );
+      expect(
+        p.push('stderr', record('[object Object]', [listeners])).updates[0]?.line,
+      ).toBe(lines[0]);
+      expect(
+        p.push('stderr', record('[object Object]', [listeners])).updates[0]?.line,
+      ).toBe(lines[1]);
+    });
+
+    it('ignores records that match no line, are malformed or are cut off', () => {
+      const p = parser();
+      p.push('stderr', consoleLine('[object Object]'));
+      expect(p.push('stderr', record('other text', [listeners])).updates).toEqual([]);
+      expect(p.push('stderr', record('[object Object]', [listeners], 4)).updates).toEqual(
+        [],
+      );
+      const bad = p.push(
+        'stderr',
+        '\u001efiddle-console {"source": 1}\n\u001efiddle-console {\n',
+      );
+      expect(bad).toMatchObject({ lines: [], updates: [] });
+    });
+
+    it('reads a record longer than a console line, across chunks', () => {
+      const p = parser();
+      p.push('stderr', consoleLine('[object Object]'));
+      const long = { type: 'string', description: 'x'.repeat(30_000) };
+      const text = record('[object Object]', [{ ...listeners, props: [['long', long]] }]);
+      expect(p.push('stderr', text.slice(0, 20_000)).updates).toEqual([]);
+      expect(p.push('stderr', text.slice(20_000)).updates).toHaveLength(1);
+    });
+  });
 });

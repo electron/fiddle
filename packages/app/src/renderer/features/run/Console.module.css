@@ -95,6 +95,61 @@
   font-weight: 600;
 }
 
+.value {
+  display: inline-block;
+  vertical-align: top;
+  max-width: 100%;
+}
+
+.summary {
+  cursor: default;
+  border-radius: var(--lu-radius-code);
+}
+.summary::marker {
+  color: var(--lu-ink-faint);
+}
+.summary:focus-visible {
+  outline: var(--lu-focus-outline);
+  outline-offset: 1px;
+}
+
+/* A property without a disclosure triangle lines up with the ones that have one. */
+.props {
+  margin: 0;
+  padding-inline-start: 2ch;
+  list-style: none;
+}
+.props > li > span.value {
+  padding-inline-start: 2ch;
+}
+
+.token[data-type='key'] {
+  color: var(--lu-syntax-function);
+}
+.token[data-type='string'] {
+  color: var(--lu-syntax-string);
+}
+.token[data-type='number'],
+.token[data-type='bigint'] {
+  color: var(--lu-syntax-number);
+}
+.token[data-type='boolean'],
+.token[data-type='null'],
+.token[data-type='undefined'],
+.token[data-type='symbol'],
+.token[data-type='regexp'] {
+  color: var(--lu-syntax-keyword);
+}
+.token[data-type='function'] {
+  color: var(--lu-syntax-keyword);
+  font-style: italic;
+}
+.token[data-type='accessor'],
+.token[data-type='circular'],
+.token[data-type='more'] {
+  color: var(--lu-ink-faint);
+}
+
 .link {
   color: var(--lu-accent);
   text-decoration: underline;
