@@ -46,14 +46,14 @@
   grid-template-columns: 60px 70px minmax(0, 1fr);
   column-gap: 12px;
   margin: 0 8px;
-  padding: 2px 8px;
+  padding: var(--lu-space-1) 8px;
   border-radius: var(--lu-radius-item);
   corner-shape: squircle;
   font: var(--lu-type-console);
   color: var(--lu-ink);
   /* A full console has a thousand rows: only the ones on screen are laid out. */
   content-visibility: auto;
-  contain-intrinsic-size: auto 20px;
+  contain-intrinsic-size: auto 26px;
 }
 
 /* A hairline between entries, as between table rows; none after the last.
@@ -65,7 +65,9 @@
   content: '';
   position: absolute;
   inset: 0 0 auto;
-  border-top: var(--lu-size-hairline) solid var(--lu-line);
+  /* Fainter than a table's rule: a console has many short entries. */
+  border-top: var(--lu-size-hairline) solid
+    color-mix(in srgb, var(--lu-line) 55%, transparent);
 }
 
 .time {
