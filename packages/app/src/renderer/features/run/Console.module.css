@@ -56,6 +56,18 @@
   contain-intrinsic-size: auto 20px;
 }
 
+/* A hairline between entries, as between table rows; none after the last.
+   Drawn straight across, not as a border that would follow the row's rounded corners. */
+.row + .row {
+  position: relative;
+}
+.row + .row::before {
+  content: '';
+  position: absolute;
+  inset: 0 0 auto;
+  border-top: var(--lu-size-hairline) solid var(--lu-line);
+}
+
 .time {
   color: var(--lu-ink-faint);
   font-variant-numeric: tabular-nums;
