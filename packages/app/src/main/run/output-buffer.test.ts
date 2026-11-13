@@ -48,4 +48,22 @@ describe('OutputBuffer', () => {
     expect(buffer.push(line('b')).seq).toBe(2);
     buffer.dispose();
   });
+
+  it('sends an updated line again with its sequence number', () => {
+    const batches: OutputLine[][] = [];
+    const buffer = new OutputBuffer(
+      (lines) => batches.push(lines),
+      () => 42,
+    );
+    buffer.push(line('a'));
+    buffer.update(1, { text: 'a2' });
+    vi.advanceTimersByTime(OUTPUT_BATCH_MS);
+    // Not sent yet: the first batch carries the new text once.
+    expect(batches).toEqual([[{ ...line('a2'), seq: 1, time: 42 }]]);
+    buffer.update(1, { text: 'a3' });
+    buffer.update(99, { text: 'gone' });
+    vi.advanceTimersByTime(OUTPUT_BATCH_MS);
+    expect(batches[1]).toEqual([{ ...line('a3'), seq: 1, time: 42 }]);
+    expect(buffer.lines).toEqual([{ ...line('a3'), seq: 1, time: 42 }]);
+  });
 });

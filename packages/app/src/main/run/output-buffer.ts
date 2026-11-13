@@ -30,6 +30,18 @@ export class OutputBuffer {
     return full;
   }
 
+  /** Changes a line that's still in the backlog, and sends it again with the same `seq`. */
+  update(seq: number, patch: Partial<Omit<OutputLine, 'seq' | 'time'>>): void {
+    const index = this.#lines.findLastIndex((line) => line.seq === seq);
+    if (index === -1) return;
+    const updated = { ...this.#lines[index]!, ...patch };
+    this.#lines[index] = updated;
+    const pending = this.#pending.findLastIndex((line) => line.seq === seq);
+    if (pending === -1) this.#pending.push(updated);
+    else this.#pending[pending] = updated;
+    this.#timer ??= setTimeout(() => this.flush(), OUTPUT_BATCH_MS);
+  }
+
   flush(): void {
     if (this.#timer) clearTimeout(this.#timer);
     this.#timer = undefined;

@@ -14,6 +14,7 @@ import { ErrorCode, FiddleError } from '../../shared/errors';
 import type { Settings } from '../../shared/settings';
 import { tm } from '../i18n';
 import { sfwPathFor } from '../platform/sfw';
+import consoleHook from './console-hook.cjs?raw';
 import { esmNeedsNewerElectron, type RunOutcome } from './logic';
 import { OutputParser, type ParseResult } from './output-parser';
 import {
@@ -144,6 +145,9 @@ export async function executeRun(job: RunJob, on: RunSink): Promise<RunOutcome> 
       files: Object.keys(files),
       chromiumLogs: settings.electronLogging,
     });
+  // Lets the console show a renderer's objects; see console-hook.cjs.
+  const preload = parser && path.join(job.dir, 'console-hook.cjs');
+  if (preload) await fsp.writeFile(preload, consoleHook);
   signal.throwIfAborted();
   const child = spawnElectron({
     exec: electron.exec,
@@ -157,6 +161,7 @@ export async function executeRun(job: RunJob, on: RunSink): Promise<RunOutcome> 
     advancedLogging: settings.electronLogging,
     // The console shows the inspector port; raw output has nowhere to.
     inspect: parser !== undefined,
+    preload,
   });
   // A failed spawn is an `error` event on the next tick, then `close`, so
   // nothing may be awaited between the spawn and these listeners.

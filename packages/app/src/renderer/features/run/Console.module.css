@@ -46,14 +46,28 @@
   grid-template-columns: 60px 70px minmax(0, 1fr);
   column-gap: 12px;
   margin: 0 8px;
-  padding: 2px 8px;
+  padding: var(--lu-space-1) 8px;
   border-radius: var(--lu-radius-item);
   corner-shape: squircle;
   font: var(--lu-type-console);
   color: var(--lu-ink);
   /* A full console has a thousand rows: only the ones on screen are laid out. */
   content-visibility: auto;
-  contain-intrinsic-size: auto 20px;
+  contain-intrinsic-size: auto 26px;
+}
+
+/* A hairline between entries, as between table rows; none after the last.
+   Drawn straight across, not as a border that would follow the row's rounded corners. */
+.row + .row {
+  position: relative;
+}
+.row + .row::before {
+  content: '';
+  position: absolute;
+  inset: 0 0 auto;
+  /* Fainter than a table's rule: a console has many short entries. */
+  border-top: var(--lu-size-hairline) solid
+    color-mix(in srgb, var(--lu-line) 55%, transparent);
 }
 
 .time {
@@ -93,6 +107,61 @@
 }
 .row[data-kind='error'] .process {
   font-weight: 600;
+}
+
+.value {
+  display: inline-block;
+  vertical-align: top;
+  max-width: 100%;
+}
+
+.summary {
+  cursor: default;
+  border-radius: var(--lu-radius-code);
+}
+.summary::marker {
+  color: var(--lu-ink-faint);
+}
+.summary:focus-visible {
+  outline: var(--lu-focus-outline);
+  outline-offset: 1px;
+}
+
+/* A property without a disclosure triangle lines up with the ones that have one. */
+.props {
+  margin: 0;
+  padding-inline-start: 2ch;
+  list-style: none;
+}
+.props > li > span.value {
+  padding-inline-start: 2ch;
+}
+
+.token[data-type='key'] {
+  color: var(--lu-syntax-function);
+}
+.token[data-type='string'] {
+  color: var(--lu-syntax-string);
+}
+.token[data-type='number'],
+.token[data-type='bigint'] {
+  color: var(--lu-syntax-number);
+}
+.token[data-type='boolean'],
+.token[data-type='null'],
+.token[data-type='undefined'],
+.token[data-type='symbol'],
+.token[data-type='regexp'] {
+  color: var(--lu-syntax-keyword);
+}
+.token[data-type='function'] {
+  color: var(--lu-syntax-keyword);
+  font-style: italic;
+}
+.token[data-type='accessor'],
+.token[data-type='circular'],
+.token[data-type='more'] {
+  color: var(--lu-ink-faint);
 }
 
 .link {

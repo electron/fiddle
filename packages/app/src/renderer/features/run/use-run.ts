@@ -51,7 +51,10 @@ export function versionLabel(
   return app?.versions?.localBuilds.find((b) => b.id === ref.id)?.name;
 }
 
-/** The backlog from `Run.GetOutput`, then `Run.Output` batches, without lines already seen or at or below `clearedSeq`. */
+/**
+ * The backlog from `Run.GetOutput`, then `Run.Output` batches, without lines at or below `clearedSeq`.
+ * A line that comes again replaces the one with its `seq`, as when a renderer's console values arrive.
+ */
 export function useConsoleLines(): OutputLine[] {
   const [lines, setLines] = useState<OutputLine[]>([]);
   const clearedSeq = useRunState().clearedSeq;
@@ -61,11 +64,18 @@ export function useConsoleLines(): OutputLine[] {
     let live = true;
     let pending: OutputLine[] | null = [];
     const add = (batch: readonly OutputLine[]) => {
-      const fresh = batch.filter((line) => line.seq > last).map(withoutEscapes);
-      if (!live || fresh.length === 0) return;
-      last = fresh[fresh.length - 1]!.seq;
+      if (!live || batch.length === 0) return;
+      const fresh: OutputLine[] = [];
+      const updates = new Map<number, OutputLine>();
+      for (const line of batch.map(withoutEscapes)) {
+        if (line.seq > last) {
+          fresh.push(line);
+          last = line.seq;
+        } else updates.set(line.seq, line);
+      }
       setLines((prev) => {
-        const next = prev.concat(fresh);
+        let next = prev.concat(fresh);
+        if (updates.size > 0) next = next.map((line) => updates.get(line.seq) ?? line);
         return next.length > CONSOLE_LIMIT
           ? next.slice(next.length - CONSOLE_LIMIT)
           : next;

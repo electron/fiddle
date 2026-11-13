@@ -94,4 +94,53 @@ describe('ConsolePane', () => {
     fireEvent.click(screen.getByRole('button', { name: 'revealLocation renderer.js:4' }));
     expect(mocks.revealLocation).toHaveBeenLastCalledWith('renderer.js', 4, 1);
   });
+
+  it('shows console values as a preview that opens to their properties', () => {
+    const fn = (name: string) => ({
+      type: 'function' as const,
+      description: `ƒ ${name}()`,
+    });
+    mocks.lines = [
+      {
+        ...line(1, '{listener1: ƒ, nested: {…}}', 'renderer'),
+        values: [
+          { type: 'string', description: 'events' },
+          {
+            type: 'object',
+            description: 'Object',
+            props: [
+              ['listener1', fn('listener1')],
+              [
+                'nested',
+                {
+                  type: 'object',
+                  description: 'Object',
+                  props: [
+                    ['list', { type: 'array', description: 'Array(0)', props: [] }],
+                  ],
+                },
+              ],
+            ],
+          },
+        ],
+      },
+    ];
+    render(<ConsolePane />);
+    const row = screen.getByRole('list', { name: 'consoleOutput' }).firstElementChild!;
+    const [outer, inner] = row.querySelectorAll('details');
+    expect(outer!.open).toBe(false);
+    expect(outer!.querySelector('summary')!.textContent).toBe(
+      '{listener1: ƒ, nested: {…}}',
+    );
+    expect(row.textContent).toMatch(/^12:00:00processRendererevents \{listener1/);
+    fireEvent.click(outer!.querySelector('summary')!);
+    expect(outer!.open).toBe(true);
+    const props = [...outer!.querySelectorAll(':scope > ul > li')].map(
+      (li) => li.querySelector('details > summary, span')!.textContent,
+    );
+    expect(props).toEqual(['listener1: ƒ listener1()', 'nested: {list: Array(0)}']);
+    expect(inner!.querySelector('summary')!.textContent).toBe('nested: {list: Array(0)}');
+    // An empty array has nothing to open.
+    expect(inner!.querySelectorAll('details')).toHaveLength(0);
+  });
 });
