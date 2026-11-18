@@ -355,6 +355,9 @@ const config: ForgeConfig = {
         appDisplayName: 'Electron Fiddle',
         packageDescription: packageJson.description,
       },
+      // Without this the package ships the library's placeholder logos.
+      packageAssets: path.join(appDir, 'assets', 'msix'),
+      logLevel: 'warn',
       windowsSignOptions,
     }),
     new MakerZIP({}, ['darwin']),
