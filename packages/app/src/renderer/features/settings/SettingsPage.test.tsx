@@ -66,6 +66,7 @@ vi.mock('../../shell/theme-snapshot', () => ({
   currentThemeSnapshot: () => ({ snapshot: true }),
 }));
 
+import { toastQueue } from '../../../ui';
 import { openSettingsSection } from './sections';
 import { SettingsPage } from './SettingsPage';
 
@@ -274,6 +275,23 @@ describe('General settings', () => {
 
     act(() => mocks.i18n.switchTo('en'));
     expect(mocks.showToast).toHaveBeenCalledTimes(1);
+  });
+
+  it('replaces the language toast instead of stacking another', async () => {
+    const close = vi.spyOn(toastQueue, 'close');
+    mocks.showToast.mockReturnValueOnce('de-toast').mockReturnValueOnce('en-toast');
+    render(<SettingsPage />);
+    pickLanguage();
+    await act(async () => {});
+    act(() => mocks.i18n.switchTo('de'));
+    fireEvent.click(screen.getByRole('button', { name: /^(?!reset).*locale\.title/ }));
+    fireEvent.click(screen.getByRole('option', { name: 'English' }));
+    await act(async () => {});
+    act(() => mocks.i18n.switchTo('en'));
+    expect(mocks.showToast).toHaveBeenCalledTimes(2);
+    expect(close).toHaveBeenCalledWith('de-toast');
+    expect(close).not.toHaveBeenCalledWith('en-toast');
+    close.mockRestore();
   });
 
   it('does not offer the relaunch when main rejects the language', async () => {

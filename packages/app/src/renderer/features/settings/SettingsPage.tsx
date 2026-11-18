@@ -26,6 +26,7 @@ import {
   showToast,
   SideNav,
   TextField,
+  toastQueue,
   type IconName,
   type SelectOption,
 } from '../../../ui';
@@ -231,6 +232,8 @@ function languageName(code: string): string {
 
 /** The listener of the last language change that is waiting for its toast, so a choice that switches nothing can't leave one behind. */
 let stopWaitingForLanguage: (() => void) | undefined;
+/** The language toast showing, so the next language change replaces it instead of stacking another. */
+let languageToast: string | undefined;
 
 function GeneralSection() {
   const { t, i18n } = useTranslation('settings');
@@ -258,7 +261,8 @@ function GeneralSection() {
       stop();
       // The editor's own strings and Chromium's follow after a relaunch.
       const tNew = i18n.getFixedT(language, 'settings');
-      showToast({
+      if (languageToast) toastQueue.close(languageToast);
+      languageToast = showToast({
         title: tNew('locale.relaunchTitle'),
         description: tNew('locale.relaunchDescription'),
         actionLabel: tNew('locale.relaunch'),
