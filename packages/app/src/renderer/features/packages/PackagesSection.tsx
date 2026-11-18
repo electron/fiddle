@@ -1,6 +1,6 @@
 import { memo, useEffect, useId, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ComboBox, Input, ListBox, ListBoxItem } from 'react-aria-components';
+import { ComboBox, Group, Input, ListBox, ListBoxItem } from 'react-aria-components';
 
 import { modulesApi } from '../../../ipc/renderer';
 import type { PackageSearchResults, PackageVersions } from '../../../shared/stores';
@@ -118,7 +118,8 @@ function PackageSearch() {
         allowsEmptyCollection={query.trim() !== ''}
         allowsCustomValue
       >
-        <div className={field.field}>
+        {/* A Group, so the suggestions line up with the field's edge rather than the text after the icon. */}
+        <Group className={field.field}>
           <Icon name="search" size={14} className={field.icon} />
           <Input
             className={field.input}
@@ -135,7 +136,7 @@ function PackageSearch() {
                 add(typed);
             }}
           />
-        </div>
+        </Group>
         <MenuPopover>
           <ListBox<PackageSearchResults[number]>
             className={menu.surface}
