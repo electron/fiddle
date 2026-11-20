@@ -16,7 +16,7 @@
     "test": "vitest run"
   },
   "dependencies": {
-    "@electron-internal/extract-zip": "^1.0.1",
+    "@electron-internal/extract-zip": "^1.0.8",
     "@electron/get": "^5.0.0",
     "debug": "^4.4.3",
     "semver": "^7.5.4"

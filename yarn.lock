@@ -592,6 +592,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@electron-internal/extract-zip@npm:^1.0.8":
+  version: 1.0.8
+  resolution: "@electron-internal/extract-zip@npm:1.0.8"
+  checksum: 10c0/e215b95841ff26517d8df54255f6da8af8032f8170d69a23e7d4331e5deb642630f643ae79d9852f7981df446fe6ca0c6216ccbf40086c3105828920e7187f8b
+  languageName: node
+  linkType: hard
+
 "@electron/asar@npm:^3.2.1, @electron/asar@npm:^3.2.5":
   version: 3.4.1
   resolution: "@electron/asar@npm:3.4.1"
@@ -624,7 +631,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@electron/fiddle-core@workspace:packages/core"
   dependencies:
-    "@electron-internal/extract-zip": "npm:^1.0.1"
+    "@electron-internal/extract-zip": "npm:^1.0.8"
     "@electron/get": "npm:^5.0.0"
     "@types/debug": "npm:^4.1.12"
     "@types/node": "npm:^24.19.2"
@@ -2615,7 +2622,7 @@ __metadata:
     "@electron-forge/plugin-vite": "npm:8.0.1"
     "@electron-forge/publisher-github": "npm:8.0.0-alpha.10"
     "@electron-forge/shared-types": "npm:8.0.0-alpha.10"
-    "@electron-internal/extract-zip": "npm:^1.0.1"
+    "@electron-internal/extract-zip": "npm:^1.0.8"
     "@electron/asar": "npm:^4.0.1"
     "@electron/fiddle-core": "workspace:*"
     "@electron/fuses": "npm:^2.1.3"
