@@ -21,7 +21,7 @@ jobs:
     name: Test
     permissions:
       contents: read
-    uses: ./.github/workflows/ci.yml
+    uses: $/.github/workflows/ci.yml
 
   build:
     name: Build (${{ matrix.os }}, ${{ matrix.arch }})
