@@ -25,7 +25,7 @@
     "driver:build": "node tools/generate.mjs && node --disable-warning=ExperimentalWarning --disable-warning=MODULE_TYPELESS_PACKAGE_JSON tools/driver-build.ts"
   },
   "dependencies": {
-    "@electron-internal/extract-zip": "^1.0.1",
+    "@electron-internal/extract-zip": "^1.0.8",
     "@electron/asar": "^4.0.1",
     "@electron/fiddle-core": "workspace:*",
     "@sentry/electron": "^7.18.0",
