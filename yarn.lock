@@ -564,15 +564,15 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@electron-forge/shared-types@npm:8.0.0-alpha.10":
-  version: 8.0.0-alpha.10
-  resolution: "@electron-forge/shared-types@npm:8.0.0-alpha.10"
+"@electron-forge/shared-types@npm:8.0.1":
+  version: 8.0.1
+  resolution: "@electron-forge/shared-types@npm:8.0.1"
   dependencies:
-    "@electron-forge/tracer": "npm:8.0.0-alpha.10"
-    "@electron/packager": "npm:^20.0.1"
-    "@electron/rebuild": "npm:^4.0.1"
-    listr2: "npm:^7.0.2"
-  checksum: 10c0/458221fe0a4df475811f4a973648af5e20bc689bef79d14e7246984112cc2774a7cdcad0fba425fc22c0375c81de2b5efc3d8e2e7d5c4dd741bb2ce3e63e76b2
+    "@electron-forge/tracer": "npm:8.0.1"
+    "@electron/packager": "npm:^20.3.0"
+    "@electron/rebuild": "npm:^4.2.0"
+    listr2: "npm:^11.1.0"
+  checksum: 10c0/756a9633b66fe6a7ccc75fd3958aebc398518b2ae34279f15abbf9475b0a3851b5f6e329fe7f1ff85864e2de61ad993717f3115ac62306491be53383140f29b2
   languageName: node
   linkType: hard
 
@@ -582,6 +582,15 @@ __metadata:
   dependencies:
     chrome-trace-event: "npm:^1.0.3"
   checksum: 10c0/32c43453c1df3f8e162c4a52f631bdc1f2c0f66591a234719e3c512c649e0aee2685470888bef6df5a2b5728c6f2bbdd198ccfce70339b4aff788ba457ac4b47
+  languageName: node
+  linkType: hard
+
+"@electron-forge/tracer@npm:8.0.1":
+  version: 8.0.1
+  resolution: "@electron-forge/tracer@npm:8.0.1"
+  dependencies:
+    chrome-trace-event: "npm:^1.0.3"
+  checksum: 10c0/22c340c95b886806e35c8f257461d1c95522000e458c01775db0022818603a8013c82a3987708d9c8cec0ae184ea5d17499a727cd35a0f0aa861bbd03ad816bf
   languageName: node
   linkType: hard
 
@@ -697,7 +706,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@electron/packager@npm:^20.0.1":
+"@electron/packager@npm:^20.0.1, @electron/packager@npm:^20.3.0":
   version: 20.3.0
   resolution: "@electron/packager@npm:20.3.0"
   dependencies:
@@ -2621,7 +2630,7 @@ __metadata:
     "@electron-forge/plugin-fuses": "npm:8.0.1"
     "@electron-forge/plugin-vite": "npm:8.0.1"
     "@electron-forge/publisher-github": "npm:8.0.0-alpha.10"
-    "@electron-forge/shared-types": "npm:8.0.0-alpha.10"
+    "@electron-forge/shared-types": "npm:8.0.1"
     "@electron-internal/extract-zip": "npm:^1.0.8"
     "@electron/asar": "npm:^4.0.1"
     "@electron/fiddle-core": "workspace:*"
