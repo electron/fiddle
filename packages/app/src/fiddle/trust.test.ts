@@ -5,6 +5,7 @@ import {
   type FiddleOrigin,
   formatOrigin,
   gistOrigin,
+  isOwnGist,
   isUntrustedOrigin,
   needsApproval,
   restoredOrigin,
@@ -77,6 +78,26 @@ describe('needsApproval', () => {
   it('never asks for local fiddles and examples', () => {
     expect(needsApproval({ kind: 'local' })).toBe(false);
     expect(needsApproval({ kind: 'example' }, 'something-else')).toBe(false);
+  });
+});
+
+describe('isOwnGist', () => {
+  const own = (owner: string | null) => gistOrigin(id, sha, owner, true);
+
+  it("is true for the signed-in user's gist, ignoring case", () => {
+    expect(isOwnGist(own('octocat'), 'octocat')).toBe(true);
+    expect(isOwnGist(own('OctoCat'), 'octocat')).toBe(true);
+  });
+
+  it("is false for someone else's gist, when signed out and for anonymous gists", () => {
+    expect(isOwnGist(own('mallory'), 'octocat')).toBe(false);
+    expect(isOwnGist(own('octocat'), undefined)).toBe(false);
+    expect(isOwnGist(own(null), ANONYMOUS_GIST_OWNER)).toBe(false);
+    expect(isOwnGist({ kind: 'local' }, 'octocat')).toBe(false);
+  });
+
+  it("is false without `byOwner`, which a fork or another gist's revision lacks", () => {
+    expect(isOwnGist(gistOrigin(id, sha, 'octocat'), 'octocat')).toBe(false);
   });
 });
 

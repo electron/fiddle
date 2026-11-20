@@ -20,6 +20,7 @@ const originSchema = z.discriminatedUnion('kind', [
     owner: z.string(),
     id: z.string(),
     sha: z.string(),
+    byOwner: z.literal(true).optional(),
   }),
   z.object({ kind: z.literal('electron'), tag: z.string(), path: z.string() }),
 ]);

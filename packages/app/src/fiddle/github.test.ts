@@ -274,7 +274,7 @@ describe('loadGist', () => {
       url: `https://gist.github.com/${ID}`,
       revision: SHA,
       files: { 'main.js': 'main()', 'big.js': 'FULL CONTENT' },
-      origin: { kind: 'gist', owner: 'octocat', id: ID, sha: SHA },
+      origin: { kind: 'gist', owner: 'octocat', id: ID, sha: SHA, byOwner: true },
     });
     expect(calls[0]!.url).toBe(`https://api.github.com/gists/${ID}`);
     expect(calls.every((c) => c.headers.Authorization === undefined)).toBe(true);
@@ -306,6 +306,23 @@ describe('loadGist', () => {
     expect(result.files).toEqual({ 'main.js': 'old' });
   });
 
+  it("marks the code as the owner's only for a revision in the gist's own history, and never for a fork", async () => {
+    const other = 'f'.repeat(40);
+    const load = async (revision: string | undefined, extra = {}) => {
+      const body = gist({ 'main.js': { content: 'x' } }, extra);
+      const { fn } = mockFetch(() => json(body));
+      return (await new GitHubClient({ fetch: fn }).loadGist(ID, revision)).origin;
+    };
+    const history = { history: [{ version: other }, { version: SHA }] };
+    expect(await load(undefined)).toMatchObject({ byOwner: true });
+    expect(await load(other.toUpperCase(), history)).toMatchObject({ byOwner: true });
+    // GitHub could serve a fork's commit under this ID.
+    expect(await load(other)).not.toHaveProperty('byOwner');
+    expect(await load(undefined, { fork_of: { id: '0'.repeat(32) } })).not.toHaveProperty(
+      'byOwner',
+    );
+  });
+
   it('gives anonymous gists a placeholder owner in the origin', async () => {
     const { fn } = mockFetch(() =>
       json(gist({ 'main.js': { content: 'x' } }, { owner: null })),
@@ -317,6 +334,7 @@ describe('loadGist', () => {
       owner: ANONYMOUS_GIST_OWNER,
       id: ID,
       sha: SHA,
+      byOwner: true,
     });
   });
 

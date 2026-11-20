@@ -103,12 +103,24 @@ async function setup(
     loadGist?: (id: string) => Promise<unknown>;
     /** More members of the GitHub client, next to `loadGist`. */
     client?: object;
+    /** The signed-in GitHub user. */
+    githubLogin?: string;
   } = {},
 ) {
   const documents = await import('./service');
   const model = await import('./model');
   const windows = initFakeDocuments(documents, {
     sessionRestore: options.sessionRestore,
+    ...(options.githubLogin
+      ? {
+          hub: {
+            app: {
+              settings: { sessionRestore: options.sessionRestore ?? false },
+              githubLogin: options.githubLogin,
+            },
+          },
+        }
+      : {}),
     ...(options.platform ? { platform: options.platform } : {}),
     versions: {
       releases: () => [{ version: '30.0.0', supported: true }],
@@ -819,6 +831,56 @@ describe('session restore', () => {
     expect(doc.fiddle.source).toEqual({ gistId: ID });
     expect(model.isDirty(doc)).toBe(true);
     expect(doc.gistOwner).toBe('octocat');
+  });
+
+  describe("the signed-in user's gist", () => {
+    const own = { ...gistResult.origin, byOwner: true };
+    const loadGist = async () => ({ ...gistResult, origin: own });
+
+    it('still runs without asking once reloaded', async () => {
+      const { documents } = await setup({
+        sessionRestore: true,
+        loadGist,
+        githubLogin: 'octocat',
+      });
+      seed(documents, [entry('a', { fiddle: { ...entry('a').fiddle, origin: own } })]);
+
+      await documents.startDocuments();
+
+      expect(await documents.ensureTrusted(wid('a'), 'run')).toMatchObject({
+        approved: true,
+      });
+      expect(messageBox).not.toHaveBeenCalled();
+    });
+
+    it("asks before running a published copy of someone else's gist that was never approved", async () => {
+      const { documents } = await setup({
+        sessionRestore: true,
+        loadGist,
+        githubLogin: 'octocat',
+      });
+      // Publishing linked the gist but kept the fiddle's origin.
+      const mallory = {
+        kind: 'gist',
+        owner: 'mallory',
+        id: 'f'.repeat(32),
+        sha: 'c'.repeat(40),
+      };
+      seed(documents, [
+        entry('a', { fiddle: { ...entry('a').fiddle, origin: mallory } }),
+      ]);
+
+      await documents.startDocuments();
+
+      expect(documents.getDoc(wid('a')).fiddle.origin).toEqual(mallory);
+      expect(await documents.ensureTrusted(wid('a'), 'run')).toMatchObject({
+        approved: false,
+      });
+      expect(messageBox).toHaveBeenCalledWith(
+        wid('a'),
+        expect.objectContaining({ message: 'trustMessage' }),
+      );
+    });
   });
 
   it('offers a draft whose window is no longer in the session, and reopens it if asked', async () => {
