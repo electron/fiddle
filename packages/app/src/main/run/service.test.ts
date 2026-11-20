@@ -561,6 +561,38 @@ describe('RunService.run', () => {
     await runs.shutdown();
   });
 
+  it("loads the console hook into the fiddle, and fills a renderer line's values in from it", async () => {
+    const child = fakeChild();
+    spawnReturns(child);
+    const { runs, state, texts } = setup();
+    const result = runs.run('w');
+    await running(state);
+    const { preload } = spawnElectron.mock.calls[0]![0] as { preload: string };
+    expect(path.dirname(preload)).toBe(runDirs[0]);
+    expect(fs.readFileSync(preload, 'utf8')).toContain('function serializeArgs(');
+    const { appDir } = spawnElectron.mock.calls[0]![0] as { appDir: string };
+    const source = pathToFileURL(path.join(appDir, 'renderer.js')).href;
+    child.stderr.write(
+      `[1:0913/1.2:INFO:CONSOLE:3] "[object Object]", source: ${source} (3)\n`,
+    );
+    await vi.waitFor(() => expect(texts()).toContain('[object Object]'));
+    const values = [
+      {
+        type: 'object',
+        description: 'Object',
+        props: [['listener1', { type: 'function', description: 'ƒ listener1()' }]],
+      },
+    ];
+    child.stderr.write(
+      `\u001efiddle-console ${JSON.stringify({ source, line: 3, text: '[object Object]', values })}\n`,
+    );
+    await vi.waitFor(() => expect(texts()).toContain('{listener1: ƒ}'));
+    expect(runs.output('w').find((line) => line.values)?.values).toEqual(values);
+    child.exit(0);
+    await result;
+    await runs.shutdown();
+  });
+
   it('tells the user where the inspector listens', async () => {
     const child = fakeChild();
     spawnReturns(child);

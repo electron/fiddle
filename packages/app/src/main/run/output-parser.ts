@@ -1,9 +1,18 @@
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-import type { OutputLine, RuntimeErrorValue, SourceLocation } from '../../shared/stores';
+import { z } from 'zod';
 
-type ParsedLine = Omit<OutputLine, 'seq' | 'time'>;
+import { previewText } from '../../shared/console-preview';
+import {
+  consoleValueSchema,
+  type ConsoleValue,
+  type OutputLine,
+  type RuntimeErrorValue,
+  type SourceLocation,
+} from '../../shared/stores';
+
+export type ParsedLine = Omit<OutputLine, 'seq' | 'time'>;
 
 interface ParserOptions {
   /** The run directory, plus its real path if that differs (macOS /var → /private/var). */
@@ -14,8 +23,17 @@ interface ParserOptions {
   chromiumLogs: boolean;
 }
 
+/** The arguments of an earlier line's console call, which arrived after it. */
+export interface LineUpdate {
+  line: ParsedLine;
+  values: ConsoleValue[];
+  text: string;
+}
+
 export interface ParseResult {
   lines: ParsedLine[];
+  /** Values for lines returned earlier. */
+  updates: LineUpdate[];
   errors: RuntimeErrorValue[];
   /** Set when the inspector banner announced its address: `port/id`, the id being what authorises an attach. */
   inspectorAddress?: string;
@@ -25,6 +43,17 @@ const MAX_LINE = 10_000;
 /** A runtime error's message lives in the Window store, so it is kept much shorter than a console line. */
 const MAX_MESSAGE = 1000;
 const MAX_CONTINUATION = 200;
+/** How many renderer console lines wait for their values. */
+const MAX_AWAITING = 100;
+/** A record from the console hook (`console-hook.cjs`), whose prefix is the same. */
+export const RECORD_PREFIX = '\u001efiddle-console ';
+const MAX_RECORD = 512 * 1024;
+const recordSchema = z.object({
+  source: z.string(),
+  line: z.number(),
+  text: z.string(),
+  values: z.array(consoleValueSchema),
+});
 
 const INSPECTOR_LISTENING = /^Debugger listening on ws:\/\/[^:\s]+:(\d+\/\S+)/;
 const INSPECTOR_NOISE = [
@@ -108,13 +137,19 @@ interface PendingMainError {
   located: boolean;
 }
 
+/** What matches a console hook record to Chromium's line for the same call. */
+const consoleKey = (source: string, line: string | number, text: string) =>
+  `${source}\n${line}\n${truncate(text)}`;
+
 export class OutputParser {
   readonly #options: ParserOptions;
   readonly #partial = { stdout: '', stderr: '' };
   #console: PendingConsole | undefined;
   #mainError: PendingMainError | undefined;
+  /** Recent renderer console lines, oldest first, that a hook record can still fill in. */
+  #awaiting: { key: string; line: ParsedLine }[] = [];
   /** What the current `push` or `flush` returns. */
-  #result: ParseResult = { lines: [], errors: [] };
+  #result: ParseResult = { lines: [], updates: [], errors: [] };
 
   constructor(options: ParserOptions) {
     this.#options = options;
@@ -126,8 +161,9 @@ export class OutputParser {
     const partial = parts.pop() ?? '';
     // Only the first MAX_LINE characters of an unfinished line are ever shown,
     // so a huge line without a newline doesn't pile up or get re-scanned.
-    this.#partial[stream] =
-      partial.length > MAX_LINE ? partial.slice(0, MAX_LINE + 1) : partial;
+    // A hook record is read whole, up to its own limit.
+    const max = partial.startsWith(RECORD_PREFIX) ? MAX_RECORD : MAX_LINE;
+    this.#partial[stream] = partial.length > max ? partial.slice(0, max + 1) : partial;
     return this.#collect(() => parts.forEach((line) => this.#parseLine(stream, line)));
   }
 
@@ -144,12 +180,16 @@ export class OutputParser {
   }
 
   #collect(parse: () => void): ParseResult {
-    this.#result = { lines: [], errors: [] };
+    this.#result = { lines: [], updates: [], errors: [] };
     parse();
     return this.#result;
   }
 
   #parseLine(stream: 'stdout' | 'stderr', line: string): void {
+    if (stream === 'stderr' && line.startsWith(RECORD_PREFIX)) {
+      this.#record(line.slice(RECORD_PREFIX.length));
+      return;
+    }
     // A renderer console message that spans several lines.
     if (this.#console && stream === 'stderr') {
       const end = CONSOLE_END.exec(line);
@@ -241,6 +281,13 @@ export class OutputParser {
           ? 'warn'
           : 'log';
     const parsed: ParsedLine = { process: 'renderer', kind, text: truncate(message) };
+    if (end) {
+      this.#awaiting.push({
+        key: consoleKey(end.source, end.line, message),
+        line: parsed,
+      });
+      if (this.#awaiting.length > MAX_AWAITING) this.#awaiting.shift();
+    }
 
     if (kind !== 'log') {
       const location = this.#locate(message, end);
@@ -257,6 +304,28 @@ export class OutputParser {
       }
     }
     this.#result.lines.push(parsed);
+  }
+
+  /**
+   * A console hook record: the values of a renderer console call. It always comes after Chromium's
+   * line for the call, since the hook serializes the values with a round trip to the page.
+   */
+  #record(json: string): void {
+    let record;
+    try {
+      record = recordSchema.parse(JSON.parse(json));
+    } catch {
+      return;
+    }
+    const key = consoleKey(record.source, record.line, record.text);
+    const index = this.#awaiting.findIndex((entry) => entry.key === key);
+    if (index === -1) return;
+    const { line } = this.#awaiting.splice(index, 1)[0]!;
+    this.#result.updates.push({
+      line,
+      values: record.values,
+      text: previewText(record.values),
+    });
   }
 
   /** A stack frame inside the run directory wins (it has a column); otherwise the `source`. */

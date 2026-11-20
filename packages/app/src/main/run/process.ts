@@ -136,6 +136,8 @@ interface SpawnElectronOptions {
    * `/json/list`, so a process that cannot read the child's output cannot attach.
    */
   inspect: boolean;
+  /** A script the fiddle's main process loads first, through `NODE_OPTIONS`. */
+  preload?: string | undefined;
 }
 
 /**
@@ -161,10 +163,16 @@ export function spawnElectron(options: SpawnElectronOptions): ChildProcess {
     // Leads its own process group, so `killTree` reaches what the fiddle spawned.
     detached: process.platform !== 'win32',
     stdio: ['ignore', 'pipe', 'pipe'],
-    env: fiddleProcessEnv({
-      userEnv: options.env,
-      advancedLogging: options.advancedLogging,
-    }),
+    env: {
+      ...fiddleProcessEnv({
+        userEnv: options.env,
+        advancedLogging: options.advancedLogging,
+      }),
+      // Quoted as JSON: Node unescapes a backslash in a quoted NODE_OPTIONS value.
+      ...(options.preload && {
+        NODE_OPTIONS: `--require ${JSON.stringify(options.preload)}`,
+      }),
+    },
   });
 }
 

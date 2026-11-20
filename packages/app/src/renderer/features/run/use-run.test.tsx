@@ -89,6 +89,13 @@ describe('useConsoleLines', () => {
     expect(texts()).toEqual(['line 3']);
   });
 
+  it('replaces a line that comes again, as when its console values arrive', async () => {
+    render(<Probe />);
+    await act(async () => mocks.backlog?.([line(1), line(2)]));
+    act(() => mocks.push?.([line(3), line(1, '{a: 1}')]));
+    expect(texts()).toEqual(['{a: 1}', 'line 2', 'line 3']);
+  });
+
   it('shows a fiddle that writes colours as plain text', async () => {
     render(<Probe />);
     await act(async () =>

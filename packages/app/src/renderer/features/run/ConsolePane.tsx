@@ -8,6 +8,7 @@ import { Button, IconButton, SegmentedControl, StatusPill, TextField } from '../
 import { revealLocation } from '../../editor/runtime-errors';
 import { toastError } from '../../toast-error';
 import styles from './Console.module.css';
+import { ConsoleValueView } from './ConsoleValue';
 import { linkify } from './linkify';
 import { useConsoleLines, useRunState } from './use-run';
 
@@ -134,7 +135,20 @@ const ConsoleRow = memo(function ConsoleRow({
       <span className={styles.time}>{formatDate(line.time, TIME)}</span>
       <span className={styles.process}>{processLabel}</span>
       <span className={styles.message}>
-        <LinkedText text={line.text} />
+        {line.values ? (
+          line.values.map((value, index) => (
+            <Fragment key={index}>
+              {index > 0 && ' '}
+              {value.type === 'string' ? (
+                <LinkedText text={value.description} />
+              ) : (
+                <ConsoleValueView value={value} />
+              )}
+            </Fragment>
+          ))
+        ) : (
+          <LinkedText text={line.text} />
+        )}
         {line.location && <Location location={line.location} />}
       </span>
     </li>

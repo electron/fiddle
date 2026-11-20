@@ -13,7 +13,7 @@ import type { VersionsService } from '../versions/service';
 import { executeRun, RunRefused } from './execute';
 import { classifyRun, installRunStatus, type RunOutcome } from './logic';
 import { OutputBuffer } from './output-buffer';
-import type { ParseResult } from './output-parser';
+import type { ParsedLine, ParseResult } from './output-parser';
 import { makeRunDir, removeDir, sweepStaleDirs } from './process';
 
 const MAX_ERRORS = 50;
@@ -31,6 +31,8 @@ export const IDLE_RUN: RunState = {
 
 interface WindowRun {
   buffer: OutputBuffer;
+  /** The `seq` of each parsed line, for the values the parser adds later. */
+  seqs: WeakMap<ParsedLine, number>;
   abort?: AbortController;
   /** The version the current run uses. */
   version?: VersionRefValue;
@@ -289,6 +291,7 @@ export class RunService {
     if (existing) return existing;
     const entry: WindowRun = {
       buffer: new OutputBuffer((lines) => this.#send(windowId, lines)),
+      seqs: new WeakMap(),
     };
     // The last lines of a window that has gone have nowhere to show; don't keep a buffer for it.
     if (this.#hub.getWindow(windowId)) {
@@ -421,7 +424,11 @@ export class RunService {
 
   #consume(windowId: string, result: ParseResult): void {
     const entry = this.#entry(windowId);
-    for (const line of result.lines) entry.buffer.push(line);
+    for (const line of result.lines) entry.seqs.set(line, entry.buffer.push(line).seq);
+    for (const { line, values, text } of result.updates) {
+      const seq = entry.seqs.get(line);
+      if (seq !== undefined) entry.buffer.update(seq, { values, text });
+    }
     if (result.inspectorAddress !== undefined) {
       // The catalog line reads `127.0.0.1:{{port}}`; the id after the port is what authorises an attach.
       this.log(windowId, tm('mainRun')('inspector', { port: result.inspectorAddress }));
