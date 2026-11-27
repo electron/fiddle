@@ -454,17 +454,17 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@electron-forge/maker-rpm@npm:8.0.0-alpha.10":
-  version: 8.0.0-alpha.10
-  resolution: "@electron-forge/maker-rpm@npm:8.0.0-alpha.10"
+"@electron-forge/maker-rpm@npm:8.0.1":
+  version: 8.0.1
+  resolution: "@electron-forge/maker-rpm@npm:8.0.1"
   dependencies:
-    "@electron-forge/maker-base": "npm:8.0.0-alpha.10"
-    "@electron-forge/shared-types": "npm:8.0.0-alpha.10"
-    electron-installer-redhat: "npm:^3.2.0"
+    "@electron-forge/maker-base": "npm:8.0.1"
+    "@electron-forge/shared-types": "npm:8.0.1"
+    electron-installer-redhat: "npm:^4.0.0"
   dependenciesMeta:
     electron-installer-redhat:
       optional: true
-  checksum: 10c0/9e912b77c74f281b37a6a43fe2813a231f974fe2d64b63054f96317fa4afff98664d9e549b169be385cb424b480010d6a4673a0dc4a34e4424969cccc539d38e
+  checksum: 10c0/bab2d598bafdfee2605fa9abab8f5b164661af3bd3c16f70fa7147ca788b6a4e2ad7a9fbb46343cb86c832841d6bb3e92de14f57862ee806061896147d2a206d
   languageName: node
   linkType: hard
 
@@ -2183,7 +2183,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"ansi-styles@npm:^6.0.0, ansi-styles@npm:^6.1.0, ansi-styles@npm:^6.2.3":
+"ansi-styles@npm:^6.0.0, ansi-styles@npm:^6.1.0, ansi-styles@npm:^6.2.1, ansi-styles@npm:^6.2.3":
   version: 6.2.3
   resolution: "ansi-styles@npm:6.2.3"
   checksum: 10c0/23b8a4ce14e18fb854693b95351e286b771d23d8844057ed2e7d083cd3e708376c3323707ec6a24365f7d7eda3ca00327fe04092e29e551499ec4c8b7bfac868
@@ -2458,6 +2458,17 @@ __metadata:
   languageName: node
   linkType: hard
 
+"cliui@npm:^9.0.1":
+  version: 9.0.1
+  resolution: "cliui@npm:9.0.1"
+  dependencies:
+    string-width: "npm:^7.2.0"
+    strip-ansi: "npm:^7.1.0"
+    wrap-ansi: "npm:^9.0.0"
+  checksum: 10c0/13441832e9efe7c7a76bd2b8e683555c478d461a9f249dc5db9b17fe8d4b47fa9277b503914b90bd00e4a151abb6b9b02b2288972ffe2e5e3ca40bcb1c2330d3
+  languageName: node
+  linkType: hard
+
 "clsx@npm:^2.0.0":
   version: 2.1.1
   resolution: "clsx@npm:2.1.1"
@@ -2682,7 +2693,7 @@ __metadata:
     "@electron-forge/cli": "npm:8.0.0-alpha.10"
     "@electron-forge/maker-deb": "npm:8.0.0-alpha.10"
     "@electron-forge/maker-msix": "npm:8.0.0-alpha.10"
-    "@electron-forge/maker-rpm": "npm:8.0.0-alpha.10"
+    "@electron-forge/maker-rpm": "npm:8.0.1"
     "@electron-forge/maker-squirrel": "npm:8.0.1"
     "@electron-forge/maker-zip": "npm:8.0.0-alpha.10"
     "@electron-forge/plugin-fuses": "npm:8.0.1"
@@ -2718,7 +2729,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"electron-installer-common@npm:^0.10.2":
+"electron-installer-common@npm:^0.10.2, electron-installer-common@npm:^0.10.3":
   version: 0.10.4
   resolution: "electron-installer-common@npm:0.10.4"
   dependencies:
@@ -2757,17 +2768,16 @@ __metadata:
   languageName: node
   linkType: hard
 
-"electron-installer-redhat@npm:^3.2.0":
-  version: 3.4.0
-  resolution: "electron-installer-redhat@npm:3.4.0"
+"electron-installer-redhat@npm:^4.0.0":
+  version: 4.0.0
+  resolution: "electron-installer-redhat@npm:4.0.0"
   dependencies:
-    "@malept/cross-spawn-promise": "npm:^1.0.0"
+    "@malept/cross-spawn-promise": "npm:^2.0.0"
     debug: "npm:^4.1.1"
-    electron-installer-common: "npm:^0.10.2"
-    fs-extra: "npm:^9.0.0"
-    lodash: "npm:^4.17.15"
-    word-wrap: "npm:^1.2.3"
-    yargs: "npm:^16.0.2"
+    electron-installer-common: "npm:^0.10.3"
+    which: "npm:^5.0.0"
+    word-wrap: "npm:^1.2.4"
+    yargs: "npm:^18.0.0"
   bin:
     electron-installer-redhat: src/cli.js
   conditions: (os=darwin | os=linux)
@@ -2838,6 +2848,13 @@ __metadata:
     electron: cli.js
     install-electron: install.js
   checksum: 10c0/ac5b2ee3eb40c20b989be2aab6f1201515440088c7cf418ff15baf6b3a3a53f4a09d560dc023c31233a107b8b3a34083d8c17a41a77a703db0c380d7008f33ca
+  languageName: node
+  linkType: hard
+
+"emoji-regex@npm:^10.3.0":
+  version: 10.6.0
+  resolution: "emoji-regex@npm:10.6.0"
+  checksum: 10c0/1e4aa097bb007301c3b4b1913879ae27327fdc48e93eeefefe3b87e495eb33c5af155300be951b4349ff6ac084f4403dc9eff970acba7c1c572d89396a9a32d7
   languageName: node
   linkType: hard
 
@@ -3265,7 +3282,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"get-east-asian-width@npm:^1.3.1, get-east-asian-width@npm:^1.5.0":
+"get-east-asian-width@npm:^1.0.0, get-east-asian-width@npm:^1.3.1, get-east-asian-width@npm:^1.5.0":
   version: 1.7.0
   resolution: "get-east-asian-width@npm:1.7.0"
   checksum: 10c0/680a5f611a186e4a065291f31821f7e4ad7742625be814e05b8ab5535c6fa53562bc0333a83138fca5f2e1030ed960a561b2fd4629e0cff0dc68b19cf46d7c53
@@ -3510,6 +3527,13 @@ __metadata:
   version: 2.0.0
   resolution: "isexe@npm:2.0.0"
   checksum: 10c0/228cfa503fadc2c31596ab06ed6aa82c9976eec2bfd83397e7eaf06d0ccf42cd1dfd6743bf9aeb01aebd4156d009994c5f76ea898d2832c1fe342da923ca457d
+  languageName: node
+  linkType: hard
+
+"isexe@npm:^3.1.1":
+  version: 3.1.5
+  resolution: "isexe@npm:3.1.5"
+  checksum: 10c0/8be2973a09f2f804ea1f34bfccfd5ea219ef48083bdb12107fe5bcf96b3e36b85084409e1b09ddaf2fae8927fdd9f6d70d90baadb78caa1ca7c530935706c8a4
   languageName: node
   linkType: hard
 
@@ -4857,7 +4881,18 @@ __metadata:
   languageName: node
   linkType: hard
 
-"string-width@npm:^8.2.0":
+"string-width@npm:^7.0.0, string-width@npm:^7.2.0":
+  version: 7.2.0
+  resolution: "string-width@npm:7.2.0"
+  dependencies:
+    emoji-regex: "npm:^10.3.0"
+    get-east-asian-width: "npm:^1.0.0"
+    strip-ansi: "npm:^7.1.0"
+  checksum: 10c0/eb0430dd43f3199c7a46dcbf7a0b34539c76fe3aa62763d0b0655acdcbdf360b3f66f3d58ca25ba0205f42ea3491fa00f09426d3b7d3040e506878fc7664c9b9
+  languageName: node
+  linkType: hard
+
+"string-width@npm:^8.2.0, string-width@npm:^8.2.1":
   version: 8.3.0
   resolution: "string-width@npm:8.3.0"
   dependencies:
@@ -4876,7 +4911,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"strip-ansi@npm:^7.0.1, strip-ansi@npm:^7.1.2, strip-ansi@npm:^7.2.0":
+"strip-ansi@npm:^7.0.1, strip-ansi@npm:^7.1.0, strip-ansi@npm:^7.1.2, strip-ansi@npm:^7.2.0":
   version: 7.2.0
   resolution: "strip-ansi@npm:7.2.0"
   dependencies:
@@ -5447,6 +5482,17 @@ __metadata:
   languageName: node
   linkType: hard
 
+"which@npm:^5.0.0":
+  version: 5.0.0
+  resolution: "which@npm:5.0.0"
+  dependencies:
+    isexe: "npm:^3.1.1"
+  bin:
+    node-which: bin/which.js
+  checksum: 10c0/e556e4cd8b7dbf5df52408c9a9dd5ac6518c8c5267c8953f5b0564073c66ed5bf9503b14d876d0e9c7844d4db9725fb0dcf45d6e911e17e26ab363dc3965ae7b
+  languageName: node
+  linkType: hard
+
 "which@npm:^6.0.0":
   version: 6.0.1
   resolution: "which@npm:6.0.1"
@@ -5478,7 +5524,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"word-wrap@npm:^1.2.3, word-wrap@npm:^1.2.5":
+"word-wrap@npm:^1.2.3, word-wrap@npm:^1.2.4, word-wrap@npm:^1.2.5":
   version: 1.2.5
   resolution: "word-wrap@npm:1.2.5"
   checksum: 10c0/e0e4a1ca27599c92a6ca4c32260e8a92e8a44f4ef6ef93f803f8ed823f486e0889fc0b93be4db59c8d51b3064951d25e43d434e95dc8c960cc3a63d65d00ba20
@@ -5514,6 +5560,17 @@ __metadata:
     string-width: "npm:^5.0.1"
     strip-ansi: "npm:^7.0.1"
   checksum: 10c0/138ff58a41d2f877eae87e3282c0630fc2789012fc1af4d6bd626eeb9a2f9a65ca92005e6e69a75c7b85a68479fe7443c7dbe1eb8fbaa681a4491364b7c55c60
+  languageName: node
+  linkType: hard
+
+"wrap-ansi@npm:^9.0.0":
+  version: 9.0.2
+  resolution: "wrap-ansi@npm:9.0.2"
+  dependencies:
+    ansi-styles: "npm:^6.2.1"
+    string-width: "npm:^7.0.0"
+    strip-ansi: "npm:^7.1.0"
+  checksum: 10c0/3305839b9a0d6fb930cb63a52f34d3936013d8b0682ff3ec133c9826512620f213800ffa19ea22904876d5b7e9a3c1f40682f03597d986a4ca881fa7b033688c
   languageName: node
   linkType: hard
 
@@ -5599,6 +5656,20 @@ __metadata:
     y18n: "npm:^5.0.5"
     yargs-parser: "npm:^20.2.2"
   checksum: 10c0/1ca2152581ee7c9c9fb4174767ff7294b1c272d2d0a1f6eb13c39ce177fded85eb9c96711e00cd7913c0a9b88b6e763713ee11cae81b9b62fd97bdd0b03d5549
+  languageName: node
+  linkType: hard
+
+"yargs@npm:^18.0.0":
+  version: 18.2.0
+  resolution: "yargs@npm:18.2.0"
+  dependencies:
+    cliui: "npm:^9.0.1"
+    escalade: "npm:^3.1.1"
+    get-caller-file: "npm:^2.0.5"
+    string-width: "npm:^8.2.1"
+    y18n: "npm:^5.0.5"
+    yargs-parser: "npm:^22.0.0"
+  checksum: 10c0/7419338c3c00f9143ec6b6ab168335061c6f5342d161642aec23ff119e28cac1c417e0eca1d7dc82fd084f07207cc5d34c7d8315f605c0e3dbf12c350e405f3f
   languageName: node
   linkType: hard
 
