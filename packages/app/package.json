@@ -29,7 +29,7 @@
     "@electron/asar": "^4.0.1",
     "@electron/fiddle-core": "workspace:*",
     "@sentry/electron": "^8.3.0",
-    "i18next": "^26.5.7",
+    "i18next": "^27.2.2",
     "monaco-editor": "^0.57.0",
     "prettier": "^3.9.10",
     "react": "^19.2.8",
